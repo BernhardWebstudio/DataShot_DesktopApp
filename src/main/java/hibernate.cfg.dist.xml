@@ -11,17 +11,19 @@
         <!-- local environment -->
 		<!--  property name="hibernate.connection.url">jdbc:mysql://localhost:3306/lepidoptera</property>
 		<property name="hibernate.connection.username">datashot</property>
-		<property name="hibernate.connection.password">pass</property -->
+		<property name="hibernate.connection.password">pass</property-->
 		
 		<!-- production -->
 		<!--  property name="hibernate.connection.url">jdbc:mysql://entocoll.ethz.ch:3306/lepidoptera</property>
 		<property name="hibernate.connection.username">ecdb</property>
-		<property name="hibernate.connection.password">REMOVED</property-->	
+		<property name="hibernate.connection.password">i1l-17zy</property -->	
 		
 		<!-- test db -->
 		<property name="hibernate.connection.url">jdbc:mysql://entocoll.ethz.ch:3306/lepidoptera2</property>
 		<property name="hibernate.connection.username">ecdb</property>
-		<property name="hibernate.connection.password">REMOVED</property>	
+		<property name="hibernate.connection.password">i1l-17zy</property>			
+        
+        	
 		
 		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
         <property name="connection.pool_size">1</property>
@@ -42,7 +44,5 @@
         <mapping resource="edu/harvard/mcz/imagecapture/data/MCZbaseGeogAuthRec.hbm.xml" /> 
         <mapping resource="edu/harvard/mcz/imagecapture/data/MCZbaseAuthAgentName.hbm.xml" /> 
         <mapping resource="edu/harvard/mcz/imagecapture/data/LatLong.hbm.xml" />
-        <mapping resource="edu/harvard/mcz/imagecapture/data/AllowedVersion.hbm.xml" />
-        <mapping resource="edu/harvard/mcz/imagecapture/data/ExternalHistory.hbm.xml" />
     </session-factory>
 </hibernate-configuration>

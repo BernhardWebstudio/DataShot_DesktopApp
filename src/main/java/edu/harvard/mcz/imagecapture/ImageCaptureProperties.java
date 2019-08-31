@@ -164,6 +164,11 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 	 */
 	public static final String KEY_REDUNDANT_COMMENT_BARCODE = "images.metadatacontainsbarcode";
 	
+	//allieadd
+	public static final String DISPLAY_COLLECTION = "display.collection";
+	//allieadd
+	public static final String DEFAULT_TEMPLATES = "template.default2";
+	
 	/**
 	 *  Value for KEY_DETAILS_SCROLL that will cause the specimen details view pane to
 	 *  have scroll bars forced to be turned on.
@@ -190,7 +195,7 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 		propertiesFilePath = new StringBuffer(System.getProperty("user.dir"));
 		propertiesFilePath.append(System.getProperty("file.separator"));
 		propertiesFilePath.append(propertiesFilename);
-		System.out.println("Opening properties file: " + propertiesFilePath.toString());
+		log.debug("Opening properties file: " + propertiesFilePath.toString());
 		try {
 			loadProperties();
 		} catch (Exception e) {
@@ -423,11 +428,12 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 		if (!properties.containsKey(KEY_SPECIFIC_COLLECTION))  {
 			// location in collection to use, if not default provided from KEY_COLLECTION
 			// in LocationInCollection.
-			properties.setProperty(KEY_SPECIFIC_COLLECTION,"");	
+			// default to ETHZ; maybe '""' would be a better choice? ;)
+			properties.setProperty(KEY_SPECIFIC_COLLECTION,"ETHZ-ENT");	
 		} 
 		if (!properties.containsKey(KEY_COLLECTION))  {
 			// Root of the path of the place where all image files should be stored.
-			properties.setProperty(KEY_COLLECTION,ImageCaptureProperties.COLLECTION_MCZENT);	
+			properties.setProperty(KEY_COLLECTION,ImageCaptureProperties.COLLECTION_MCZENT);
 		} else { 
 			switch (properties.get(KEY_COLLECTION).toString().trim()) { 
 			case (ImageCaptureProperties.COLLECTION_ETHZENT):
@@ -443,9 +449,12 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 					ImageCaptureProperties.COLLECTION_ETHZENT);
 			}
 		}
+		log.debug("Forced configuration: ETHZ-ENT");
 		if (!properties.containsKey(KEY_IMAGEBASE))  {
 			// Root of the path of the place where all image files should be stored.
-			properties.setProperty(KEY_IMAGEBASE,"/mount/lepidopteraimages");	
+			//properties.setProperty(KEY_IMAGEBASE,"/mount/lepidopteraimages");
+			properties.setProperty(KEY_IMAGEBASE,"C:\\Users\\Digitizing\\Desktop\\images-test\\");				
+			//properties.setProperty(KEY_IMAGEBASE,"/Users/altheaparker/Desktop/entomology-builds/TestImages");
 		}
 		if (!properties.containsKey(KEY_IMAGEBASEURI))  {
 			// URI to the root of the path of the place where all image files should be stored.

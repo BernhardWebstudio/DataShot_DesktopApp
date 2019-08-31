@@ -24,8 +24,6 @@ package edu.harvard.mcz.imagecapture;
 
 import java.awt.Cursor;
 
-
-
 import java.util.Iterator;
 import java.util.List;
 
@@ -54,6 +52,7 @@ import org.hibernate.HibernateException;
 
 import edu.harvard.mcz.imagecapture.data.AllowedVersion;
 import edu.harvard.mcz.imagecapture.data.AllowedVersionLifeCycle;
+import edu.harvard.mcz.imagecapture.data.Specimen;
 import edu.harvard.mcz.imagecapture.data.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.exceptions.ConnectionException;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
@@ -92,7 +91,8 @@ public class ImageCaptureApp {
     public static final String APP_CONTRIBUTORS = "Design: Brendan Haley, Linda Ford, Rodney Eastwood, Paul J. Morris.  Code: Paul J. Morris";
     public static final String APP_LIBRARIES = "Hibernate, Tesseract, ZXing, Log4J, drew.metadata.exif, iText, event_date_qc";
     public static final String APP_REV = "$Rev$";  // ImageCapture.jar file built before commit will be one revision behind latest commit with changes to this file. 
-    
+    public static Specimen lastEditedSpecimenCache=null;
+
     /** 
      * Use MCZEntBarcode class instead.
      *  
@@ -114,7 +114,8 @@ public class ImageCaptureApp {
      * 
      * @see edu.harvard.mcz.imagecapture.ImageCaptureProperties.KEY_IMAGEREGEX
      */
-    public static final String REGEX_IMAGEFILE = "^IMG_[0-9]{6}\\.JPG$";
+   // public static final String REGEX_IMAGEFILE = "^IMG_[0-9]{6}\\.JPG$";
+    public static final String REGEX_IMAGEFILE = "^ETHZ_ENT[0-9]{2}_[0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{6}\\.JPG$";
     
     // ^([12][0-9]{3}((/[01][0-9]){1}(/[0-3][0-9])?)?)?\-?([12][0-9]{3}((/[01][0-9]){1}(/[0-3][0-9])?)?)??$
     

@@ -8,8 +8,10 @@ package edu.harvard.mcz.imagecapture.data;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -129,7 +131,9 @@ public class SpecimenLifeCycle {
 			}
 		}
 		Iterator<Number> in = instance.getNumbers().iterator();
+		log.debug("in attachDirty - start iterating numbers!");		
 		while (in.hasNext()) { 
+			log.debug("iterating numbers 1");
 			Number num = in.next();
 			if ( (num.getNumber()==null || num.getNumber().trim().length()==0 ) && 
 				 (num.getNumberType()==null || num.getNumberType().length()==0)
@@ -314,6 +318,32 @@ public class SpecimenLifeCycle {
 			throw re;
 		}
 	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public List<Specimen> findByBarcode(String barcode) {
+		log.debug("findByBarcode start");
+		try {
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			List<Specimen> results = null;
+			try { 
+				Query query  =  session.createQuery("From Specimen as s where s.barcode = ?");
+				query.setParameter(0, barcode);
+				results = (List<Specimen>) query.list();				
+			    log.debug("find query successful, result size: " + results.size());
+			    session.getTransaction().commit();			    
+		    } catch (HibernateException e) {
+		    	session.getTransaction().rollback();
+		    	log.error("findByBarcode failed", e);	
+		    }
+		    try { session.close(); } catch (SessionException e) { }
+			return results;
+		} catch (RuntimeException re) {
+			log.error("findByBarcode failed.  ", re);
+			throw re;
+		}
+	}
 
 	@SuppressWarnings("unchecked")
 	public List<Specimen> findAll() {
@@ -364,6 +394,78 @@ public class SpecimenLifeCycle {
 			throw re;
 		}
 	}	
+	
+	
+	//Select distinct path from ICImage im where im.path is not null order by im.path
+	@SuppressWarnings("unchecked")
+	public List<ICImage> findImagesByPath(String path) {
+		log.debug("finding images by path " + path);
+		try {
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			List<ICImage> results = null;
+			try { 
+				
+				
+				//System.out.println("path is " + path);
+				//this works
+				String sql = "";
+				if(path.contains("\\")){
+					sql = "From ICImage im where im.path='"+path+"\\\' order by imageId";
+				}else{
+					sql = "From ICImage im where im.path='"+path+"' order by imageId";
+				}
+				
+				//String sql = "From ICImage im where im.path='"+path+"\\\' order by imageId";
+				Query query = session.createQuery(sql);
+			    results = (List<ICImage>) query.list();
+			    //log.debug("found images, result size: " + results.size());
+			    session.getTransaction().commit();
+		    } catch (HibernateException e) {
+		    	session.getTransaction().rollback();
+		    	log.error("find images failed", e);	
+		    }
+		    try { session.close(); } catch (SessionException e) { }
+			return results;
+		} catch (RuntimeException re) {
+			log.error("Find images failed. ", re);
+			throw re;
+		}
+	}
+	
+	//get all image paths (folder name / date imaged) available
+	@SuppressWarnings("unchecked")
+	public String[] getDistinctPaths() { 
+		ArrayList<String> collections = new ArrayList<String>();
+		collections.add("");    // put blank at top of list.
+		try {
+			String sql = "Select distinct im.path from ICImage im order by im.imageId";
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			try { 
+				session.beginTransaction();
+				Query q = session.createQuery(sql);
+				Iterator i = q.iterate();
+				while (i.hasNext()) { 
+					String value = (String)i.next();
+					// add, only if value isn't the "" put at top of list above.
+					if (!value.equals("")) {  
+					    collections.add(value.trim());
+					} 
+				}
+				session.getTransaction().commit();
+			} catch (HibernateException e) { 
+				session.getTransaction().rollback();
+				log.error(e.getMessage());
+			}
+			try { session.close(); } catch (SessionException e) { }
+			String[] result = (String[]) collections.toArray(new String[]{});
+			return result;
+		} catch (RuntimeException re) {
+			log.error(re);
+			return new String[]{};
+		}
+	}
+	
 
 	/** Find specimens with values matching those found in an example specimen instance, including links out 
 	 * to related entities.  Like matching is enabled, so strings containing '%' will generate like where 
@@ -415,7 +517,9 @@ public class SpecimenLifeCycle {
 for (int i=0; i<results.size(); i++) { 		    
    try {
       log.debug("Parts: " + results.get(i).getSpecimenParts().size());
+      log.debug("crashes here? 7");
       log.debug("Parts: " + ((SpecimenPart)results.get(i).getSpecimenParts().toArray()[0]).getPartAttributeValuesConcat());
+      log.debug("crashes here? 8");
       log.debug("Part Attribute: " + ((SpecimenPartAttribute)((SpecimenPart)results.get(i).getSpecimenParts().toArray()[0]).getAttributeCollection().toArray()[0]).getSpecimenPartAttributeId());
    } catch (Exception e) {
 	   log.debug(e.getMessage());
@@ -750,6 +854,66 @@ for (int i=0; i<results.size(); i++) {
 		}
 	}
 	
+	public int deleteSpecimenByBarcode(String barcode){
+		log.debug("Deleting record with barcode " + barcode);
+		List<Specimen> specimens = findByBarcode(barcode);
+		if(specimens.size() == 0){
+			return 0; //specimen not found
+		}
+		else if(specimens.size() >= 1){
+			Specimen specimen = specimens.get(0);
+			
+			//this does not work - need to do it manually as below!!
+			//this.delete(specimen);
+			
+			long specimenId = specimen.getSpecimenId();
+			try {
+				Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+				session.beginTransaction();
+				try { 
+					Query query = session.createSQLQuery("delete from Tracking where SpecimenId=?");
+					query.setParameter(0, specimenId);
+					query.executeUpdate();	
+					
+					query = session.createSQLQuery("delete from LAT_LONG where specimenid=?");
+					query.setParameter(0, specimenId);
+					query.executeUpdate();
+					
+					query = session.createSQLQuery("delete from Image where SpecimenId=?");
+					query.setParameter(0, specimenId);
+					query.executeUpdate();
+					
+					query = session.createSQLQuery("delete from Specimen_Part where SpecimenId=?");
+					query.setParameter(0, specimenId);
+					query.executeUpdate();			
+					
+					query = session.createSQLQuery("delete from Specimen where SpecimenId=?");
+					query.setParameter(0, specimenId);
+					query.executeUpdate();	
+					
+				    session.getTransaction().commit();			    
+			    } catch (HibernateException e) {
+			    	session.getTransaction().rollback();
+			    	log.error("findByBarcode failed Hibernate Exception", e);	
+			    }
+				catch (Exception e) {
+			    	session.getTransaction().rollback();
+			    	log.error("findByBarcode failed general Exception", e);	
+			    }
+			    try { session.close(); } catch (SessionException e) { }
+			} catch (RuntimeException re) {
+				log.error("findByBarcode failed.  ", re);
+				throw re;
+			}	
+		}
+		List<Specimen> specimensAfterDelete = findByBarcode(barcode);
+		if(specimensAfterDelete.size() == 0){
+			return 1; //success
+		}
+		return 2; //delete failed for unknown reason
+			
+	}
+	
 	@SuppressWarnings("unchecked")
 	public String[] getDistinctCollections() { 
 		ArrayList<String> collections = new ArrayList<String>();
@@ -780,8 +944,78 @@ for (int i=0; i<results.size(); i++) {
 			log.error(re);
 			return new String[]{};
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	public String[] getDistinctDeterminers() { 
+		ArrayList<String> collections = new ArrayList<String>();
+		collections.add("");    // put blank at top of list.
+		try {
+			String sql = "Select distinct identifiedBy from Specimen spe where spe.identifiedBy is not null order by spe.identifiedBy  ";
+			//String sql = "Select distinct identifiedby from Specimen";
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			try { 
+				session.beginTransaction();
+				Query q = session.createQuery(sql);
+				Iterator i = q.iterate();
+				while (i.hasNext()) { 
+					String value = (String)i.next();
+					// add, only if value isn't the "" put at top of list above.
+					if (!value.equals("")) {  
+					    collections.add(value.trim());
+					} 
+				}
+				session.getTransaction().commit();
+			} catch (HibernateException e) { 
+				e.printStackTrace();
+				session.getTransaction().rollback();
+				log.error(e.getMessage());
+			}
+			try { session.close(); } catch (SessionException e) { }
+			String[] result = (String[]) collections.toArray(new String[]{});
+			return result;
+		} catch (RuntimeException re) {
+			log.error(re);
+			return new String[]{};
+		}
+	}
+		
+	
+	@SuppressWarnings("unchecked")
+	public String[] getDistinctPrimaryDivisions() { 
+		ArrayList<String> collections = new ArrayList<String>();
+		collections.add("");    // put blank at top of list.
+		try {
+			String sql = "Select distinct primaryDivison from Specimen spe where spe.primaryDivison is not null order by spe.primaryDivison  ";
+			//String sql = "Select distinct identifiedby from Specimen";
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			try { 
+				session.beginTransaction();
+				Query q = session.createQuery(sql);
+				Iterator i = q.iterate();
+				while (i.hasNext()) { 
+					String value = (String)i.next();
+					// add, only if value isn't the "" put at top of list above.
+					if (!value.equals("")) {  
+					    collections.add(value.trim());
+					} 
+				}
+				session.getTransaction().commit();
+			} catch (HibernateException e) { 
+				e.printStackTrace();
+				session.getTransaction().rollback();
+				log.error(e.getMessage());
+			}
+			try { session.close(); } catch (SessionException e) { }
+			String[] result = (String[]) collections.toArray(new String[]{});
+			return result;
+		} catch (RuntimeException re) {
+			log.error(re);
+			return new String[]{};
+		}
 	}	
-
+	
+	
 	@SuppressWarnings("unchecked")
 	public String[] getDistinctQuestions() { 
 		ArrayList<String> collections = new ArrayList<String>();

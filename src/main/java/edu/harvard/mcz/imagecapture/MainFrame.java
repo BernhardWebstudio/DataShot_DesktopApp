@@ -20,11 +20,14 @@
 package edu.harvard.mcz.imagecapture;
 
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 import java.awt.BorderLayout;
@@ -74,6 +77,7 @@ import edu.harvard.mcz.imagecapture.loader.JobVerbatimFieldLoad;
 import java.awt.GridBagConstraints;
 import java.io.File;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -112,6 +116,8 @@ public class MainFrame extends JFrame implements RunnerListener {
 	private JMenu jMenuHelp = null;
 	private JMenuItem jMenuItemAbout = null;
 	private JMenuItem jMenuItemPreprocess = null;
+	private JMenuItem jMenuItemDelete = null;
+	private JMenuItem jMenuItemFindMissingImages = null;
 	private JMenuItem jMenuItemLoadData = null;
 	private JMenuItem jMenuItemVersion = null;
 	private JMenuItem jMenuItemScanOneBarcode = null;
@@ -243,6 +249,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuAction.setEnabled(false);
 			jMenuItemUsers.setEnabled(false);
 			jMenuItemPreprocess.setEnabled(false);
+			jMenuItemDelete.setEnabled(false);
 			jMenuItemLoadData.setEnabled(false);
 			jMenuItemPreprocessOneDir.setEnabled(false);
 			jMenuItemCreateLabels.setEnabled(true);
@@ -276,6 +283,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 					jMenuAction.setEnabled(true);
 					jMenuItemPreprocessOneDir.setEnabled(true);
 					jMenuConfig.setEnabled(true);
+					jMenuItemDelete.setEnabled(true);
 					jMenuItemPreferences.setEnabled(true);
 					jMenuQualityControl.setEnabled(true);
 					jMenuItemQCBarcodes.setEnabled(true);
@@ -427,6 +435,8 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuAction.add(getJMenuItemScanOneBarcodeSave());
 			jMenuAction.add(getJMenuItemPreprocess());
 			jMenuAction.add(getJMenuItemPreprocessOne());
+			jMenuAction.add(getJMenuItemDelete());
+			jMenuAction.add(getJMenuItemFindMissingImages());
 			jMenuAction.add(getJMenuItemRedoOCROne());
 			jMenuAction.add(getJMenuItemRepeatOCR());
 			jMenuAction.add(getJMenuItemRecheckTemplates());
@@ -510,6 +520,46 @@ public class MainFrame extends JFrame implements RunnerListener {
 		}
 		return jMenuItemPreprocess;
 	}
+	
+	
+	private JMenuItem getJMenuItemDelete() {
+		if (jMenuItemDelete == null) {
+			jMenuItemDelete = new JMenuItem();
+			jMenuItemDelete.setText("Delete a specimen record");
+			jMenuItemDelete.setEnabled(true);
+			try { 
+				jMenuItemDelete.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/red-warning-icon.png")));
+			} catch (Exception e) { 
+				log.error("Can't open icon file for jMenuItemScanOneBarcode.");
+				log.error(e.getLocalizedMessage());
+			}			
+			jMenuItemDelete.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent e) {
+					JTextField barcode = new JTextField();
+					final JComponent[] inputs = new JComponent[] {
+					        new JLabel("<html>WARNING: ACTION IRREVERSIBLE!<br/><br/>Is there only one image associated with this record?<br/>Have you recorded the image file number/s and date imaged?<br/>Have you recorded the genus and species name?<br/><br/>Please enter the barcode of the specimen record you would like to delete:<br/>"),
+					        barcode
+					};
+					int result = JOptionPane.showConfirmDialog(null, inputs, "Delete a specimen record", JOptionPane.CANCEL_OPTION);
+					if (result==JOptionPane.YES_OPTION) { 
+						String barcodeEntered = barcode.getText();
+						SpecimenLifeCycle sls = new SpecimenLifeCycle();
+						int delete_result = sls.deleteSpecimenByBarcode(barcodeEntered);
+						if(delete_result == 0){
+							JOptionPane.showConfirmDialog(null, "Error: specimen record not found.", "Delete specimen record", JOptionPane.PLAIN_MESSAGE);
+						}
+						else if(delete_result == 1){
+							JOptionPane.showConfirmDialog(null, "Specimen has been deleted successfully.", "Delete specimen record", JOptionPane.PLAIN_MESSAGE);
+						}else{
+							JOptionPane.showConfirmDialog(null, "Error: delete failed.", "Delete specimen record", JOptionPane.PLAIN_MESSAGE);
+						}
+					}
+				}
+			});
+		}
+		return jMenuItemDelete;
+	}
+	
 	
 	private JMenuItem getJMenuItemLoadData() {
 		if (jMenuItemLoadData == null) {
@@ -813,7 +863,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 	 * @param aMessage the message to display on the status bar.
 	 */
 	public void setStatusMessage(String aMessage) { 
-		int maxLength = 60;
+		int maxLength = 100;
 		if (aMessage.length()<maxLength) { maxLength = aMessage.length(); } 
 		jLabelStatus.setText("Status: " + aMessage.substring(0, maxLength));
 	}
@@ -1214,6 +1264,101 @@ public class MainFrame extends JFrame implements RunnerListener {
 		return jMenuItemSearch;
 	}
 
+	private JMenuItem getJMenuItemFindMissingImages() {
+		if (jMenuItemFindMissingImages == null) {
+			jMenuItemFindMissingImages = new JMenuItem();
+			jMenuItemFindMissingImages.setText("Find Missing Images");
+			jMenuItemFindMissingImages.setEnabled(true);
+			/*try { 
+				jMenuItemFindMissingImages.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/red-warning-icon.png")));
+			} catch (Exception e) { 
+				log.error("Can't open icon file for jMenuItemScanOneBarcode.");
+				log.error(e.getLocalizedMessage());
+			}*/			
+			jMenuItemFindMissingImages.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent e) {
+					//JTextField dateimaged = new JTextField();
+					SpecimenLifeCycle sls2 = new SpecimenLifeCycle();
+					String[] paths = sls2.getDistinctPaths();
+					//log.debug("num paths" + paths.length);
+					JComboBox<String> pathCombo = new JComboBox<String>(paths);
+					pathCombo.setEditable(true);
+					final JComponent[] inputs = new JComponent[] {
+					        new JLabel("<html>Find missing images<br/><br/>Please select the date imaged:<br/>"),
+					        pathCombo
+					};
+					int result = JOptionPane.showConfirmDialog(null, inputs, "Find missing images", JOptionPane.CANCEL_OPTION);
+					//
+					if (result==JOptionPane.YES_OPTION) { 
+						//String dateEntered = dateimaged.getText();
+						String dateEntered = pathCombo.getSelectedItem().toString();
+						//dateEntered = dateEntered.replaceAll("\\", "\\\\");
+						//System.out.println("BEFORE DATE ENTERED IS " + dateEntered);
+						//dateEntered = dateEntered.replaceAll("\\", "\\\\");
+						System.out.println("DATE ENTERED IS " + dateEntered);
+						SpecimenLifeCycle sls = new SpecimenLifeCycle();
+						List<ICImage> results = sls.findImagesByPath(dateEntered);
+					    ArrayList<Integer> seqvals = new ArrayList();
+					    ArrayList<Integer> missingvals = new ArrayList();
+					    String img_prefix = "";
+					    for(ICImage im : results){
+					    	int last_underscore = im.getFilename().lastIndexOf("_");
+					    	img_prefix = im.getFilename().substring(0,last_underscore);
+					    	int dot = im.getFilename().indexOf(".");
+					    	String seqnum = im.getFilename().substring(last_underscore+1,dot);
+					    	//log.debug("seqnum: " + seqnum);
+					    	try{
+					    		Integer seqint = Integer.parseInt(seqnum);
+					    		seqvals.add(seqint);
+					    		//log.debug("seqint: " +seqint);
+					    	}catch (Exception e1){}	
+					    }
+				    	for(int i=0; i<seqvals.size(); i++){
+				    		Integer current = seqvals.get(i);
+				    		if(i+1 < seqvals.size()){
+				    			Integer next = seqvals.get(i+1);
+				    			if(next - current != 1){
+				    				int gap = next - current;
+				    				for(int j=1; j<gap; j++){
+				    					missingvals.add(new Integer(current+j));
+				    				}
+				    			}
+				    			current = next;
+				    		}
+				    	}
+						StringBuilder sb = new StringBuilder();
+						/*for(Integer cint : missingvals){
+							if(cint < 10000){
+								sb.append("ETHZ_ENT01_2017_03_15_00");
+							}else if(cint < 100000){
+								sb.append("ETHZ_ENT01_2017_03_15_0");
+							}else if(cint < 1000000){
+								sb.append("ETHZ_ENT01_2017_03_15_");
+							}
+							sb.append(cint);
+							sb.append(".JPG");
+							sb.append("\n");
+						}*/
+						for(Integer cint : missingvals){
+							sb.append(img_prefix);
+							sb.append(cint);
+							sb.append(".JPG");
+							sb.append("\n");
+						}
+						
+						
+						/*for(ICImage im : results){
+							sb.append(im.getFilename());
+							sb.append("\n");
+						}*/
+						JOptionPane.showConfirmDialog(null, "Found " + results.size() + " images in the database for the date " + dateEntered + ".\n\nPossible missing images:\n" + sb.toString(), "Find missing images", JOptionPane.PLAIN_MESSAGE);
+					}
+				}
+			});
+		}
+		return jMenuItemFindMissingImages;
+	}	
+	
 	/**
 	 * This method initializes jMenuItemChangePassword	
 	 * 	

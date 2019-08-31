@@ -27,8 +27,10 @@ import javax.swing.JPanel;
 
 import edu.harvard.mcz.imagecapture.data.AgentNameComboBoxModel;
 import edu.harvard.mcz.imagecapture.data.Collector;
+import edu.harvard.mcz.imagecapture.data.CollectorLifeCycle;
 import edu.harvard.mcz.imagecapture.data.CollectorTableModel;
 import edu.harvard.mcz.imagecapture.data.Determination;
+import edu.harvard.mcz.imagecapture.data.DeterminationTableModel;
 import edu.harvard.mcz.imagecapture.data.Features;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.data.HigherGeographyComboBoxModel;
@@ -48,6 +50,7 @@ import edu.harvard.mcz.imagecapture.data.Sex;
 import edu.harvard.mcz.imagecapture.data.Specimen;
 import edu.harvard.mcz.imagecapture.data.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.data.SpecimenPart;
+import edu.harvard.mcz.imagecapture.data.SpecimenPartAttribute;
 import edu.harvard.mcz.imagecapture.data.SpecimenPartLifeCycle;
 import edu.harvard.mcz.imagecapture.data.SpecimenPartsAttrTableModel;
 import edu.harvard.mcz.imagecapture.data.SpecimenPartsTableModel;
@@ -62,6 +65,7 @@ import edu.harvard.mcz.imagecapture.ui.FilteringAgentJComboBox;
 import edu.harvard.mcz.imagecapture.ui.FilteringGeogJComboBox;
 import edu.harvard.mcz.imagecapture.ui.PicklistTableCellEditor;
 import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor;
+import edu.harvard.mcz.imagecapture.data.Number;
 
 import java.awt.Dimension;
 
@@ -78,9 +82,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultCellEditor;
@@ -188,8 +195,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private FilteringGeogJComboBox comboBoxHigherGeog;
 	private StringBuffer higherGeogNotFoundWarning = new StringBuffer();
 	private JButton jButtonGeoreference = null;
-	private JTextField jTextFieldCountry = null;
-	private JTextField jTextFieldPrimaryDivision = null;
+	//private JTextField jTextFieldCountry = null;
+	private JComboBox<String> jComboBoxCountry = null;
+	//allie change
+	//private JTextField jTextFieldPrimaryDivision = null;
+	private JComboBox jComboBoxPrimaryDivision = null;
 	private JLabel jLabel16 = null;
 	private JLabel jLabel17 = null;
 	private JLabel jLabelTribe;
@@ -247,6 +257,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JLabel jLabel43 = null;
 	private JTextField jTextFieldInferences = null;
 	private JButton jButtonGetHistory = null;
+	private JButton jButtonCopyPrev = null;
+	private JButton jButtonCopyPrevTaxon = null;
 	private JButton jButtonNext = null;
 	private SpecimenDetailsViewPane thisPane = null;
     private JButton jButtonPrevious = null;
@@ -256,6 +268,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JLabel jLabel31 = null;
 	private JTextField jTextFieldCitedInPub = null;
 	private JScrollPane jScrollPaneNotes = null;
+	//private JTextField jScrollPaneNotes = null;
 	private JLabel jLabel44 = null;
 	private JButton jButton1 = null;
 	private JButton jButton2 = null;
@@ -268,13 +281,19 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JComboBox<String> jComboBoxNatureOfId;
 	private JLabel lblIdDate;
 	private JTextField jTextFieldDateDetermined;
-	private FilteringAgentJComboBox jCBDeterminer;
+	
+	//allie change
+	//private JTextField jCBDeterminer;
+	//private FilteringAgentJComboBox jCBDeterminer;
+	private JComboBox<String> jCBDeterminer = null;
+	
 	private JLabel lblIdRemarks;
 	private JTextField jTextFieldIdRemarks;
 	private JLabel lblTypestatus;
 	private JComboBox<String> cbTypeStatus;
 
-	
+	//allie add
+	Specimen previousSpecimen = null;
 	
 	/**
 	 * Construct an instance of a SpecimenDetailsViewPane showing the data present
@@ -397,6 +416,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		    jTableSpecimenParts.getCellEditor().stopCellEditing();
 		}		
 		if (jTableNumbers.isEditing()) { 
+			log.debug("jTableNumbers IS editing!!!");
 		    jTableNumbers.getCellEditor().stopCellEditing();
 		}
 		
@@ -405,8 +425,13 @@ public class SpecimenDetailsViewPane extends JPanel {
 	    } else { 
 	    	specimen.setTypeStatus((String)cbTypeStatus.getSelectedItem());
 	    }
+		specimen.setMicrohabitat(textFieldMicrohabitat.getText());
 		
-		specimen.setLocationInCollection(jComboBoxLocationInCollection.getSelectedItem().toString());
+		if(jComboBoxLocationInCollection.getSelectedItem() != null){
+			specimen.setLocationInCollection(jComboBoxLocationInCollection.getSelectedItem().toString());
+		}
+		
+		
 		specimen.setDrawerNumber(jTextFieldDrawerNumber.getText());
 	    if (jComboBoxFamily.getSelectedIndex()==-1 && jComboBoxFamily.getSelectedItem()==null) { 
 	    	specimen.setFamily("");
@@ -425,31 +450,45 @@ public class SpecimenDetailsViewPane extends JPanel {
 	    specimen.setInfraspecificEpithet(jTextFieldInfraspecificEpithet.getText());
 	    specimen.setInfraspecificRank(jTextFieldInfraspecificRank.getText());
 	    specimen.setAuthorship(jTextFieldAuthorship.getText());
-	    
-	    if (jCBDeterminer.getSelectedIndex()==-1 && jCBDeterminer.getSelectedItem()==null) { 
-	        specimen.setIdentifiedBy("");
-	    } else { 
-	    	specimen.setIdentifiedBy(((MCZbaseAuthAgentName)jCBDeterminer.getSelectedItem()).getAgent_name());
+	    //TODO: handle the collectors set!
+
+	    //this returns TRUE for the copied item!!
+	    log.debug("in save(). specimen numbers size: " + specimen.getNumbers().size());
+		log.debug("okok in save(), specimenid is " + specimen.getSpecimenId());
+
+	    if(previousSpecimen != null && previousSpecimen.getNumbers() != null){
+	    	log.debug("in save(). prev specimen numbers size: " + previousSpecimen.getNumbers().size());
+	    	//specimen.setNumbers(previousSpecimen.getNumbers()); - this gives hibernate exceptions here too!
+	    	log.debug("okok in save(), prev specimenid is " + previousSpecimen.getSpecimenId());
 	    }
+
+	    //allie change
+	    //log.debug("THE jCBDeterminer TEXT IS " + jCBDeterminer.getText());
+	    //specimen.setIdentifiedBy(jCBDeterminer.getText());
+	    specimen.setIdentifiedBy((String)jCBDeterminer.getSelectedItem());
+	    
 	    specimen.setDateIdentified(jTextFieldDateDetermined.getText());
 	    specimen.setIdentificationRemarks(jTextFieldIdRemarks.getText());
 	    if (jComboBoxNatureOfId.getSelectedIndex()==-1 && jComboBoxNatureOfId.getSelectedItem()==null) { 
-	    	specimen.setNatureOfId(NatureOfId.LEGACY);
+	    	//specimen.setNatureOfId(NatureOfId.LEGACY);
+	    	specimen.setNatureOfId(NatureOfId.EXPERT_ID);
 	    } else { 
 	    	specimen.setNatureOfId((String)jComboBoxNatureOfId.getSelectedItem());
 	    }
 	    
 	    specimen.setUnNamedForm(jTextFieldUnnamedForm.getText());
 	    specimen.setVerbatimLocality(jTextFieldVerbatimLocality.getText());
-	    if (comboBoxHigherGeog.getSelectedIndex()==-1 && comboBoxHigherGeog.getSelectedItem()==null) { 
+	    //allieremove
+	    /*if (comboBoxHigherGeog.getSelectedIndex()==-1 && comboBoxHigherGeog.getSelectedItem()==null) { 
 	    	specimen.setHigherGeography("");
 	    } else {
 	    	// combo box contains a geography object, obtain the higher geography string.
 	    	specimen.setHigherGeography(((HigherGeographyComboBoxModel)comboBoxHigherGeog.getModel()).getSelectedItemHigherGeography());
-	    }
-	    specimen.setCountry(jTextFieldCountry.getText());
+	    }*/
+	    //specimen.setCountry(jTextFieldCountry.getText());
+	    specimen.setCountry((String)jComboBoxCountry.getSelectedItem());
 	    specimen.setValidDistributionFlag(jCheckBoxValidDistributionFlag.isSelected());
-	    specimen.setPrimaryDivison(jTextFieldPrimaryDivision.getText());
+	    specimen.setPrimaryDivison((String)jComboBoxPrimaryDivision.getSelectedItem());
 	    specimen.setSpecificLocality(jTextFieldLocality.getText());
 	    
 	    // Elevations
@@ -501,7 +540,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	    if (jComboBoxLifeStage.getSelectedIndex()==-1 && jComboBoxLifeStage.getSelectedItem()==null) { 
 	    	specimen.setLifeStage("");
 	    } else {
-	        specimen.setLifeStage(jComboBoxLifeStage.getSelectedItem().toString());
+	    	specimen.setLifeStage(jComboBoxLifeStage.getSelectedItem().toString());
 	    }
 	    if (jComboBoxSex.getSelectedIndex()==-1 && jComboBoxSex.getSelectedItem()==null) { 
 	    	specimen.setSex("");
@@ -522,6 +561,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 	    specimen.setLastUpdatedBy(Singleton.getSingletonInstance().getUserFullName());
 	    specimen.setDateLastUpdated(new Date());
 	    specimen.setWorkFlowStatus(jComboBoxWorkflowStatus.getSelectedItem().toString());
+
+	    
 	    specimen.setQuestions(jTextFieldQuestions.getText());
 	    try { 
 	    	myControler.save();   // save the record
@@ -531,8 +572,9 @@ public class SpecimenDetailsViewPane extends JPanel {
 	    	setWarnings();
 	    	jTextFieldLastUpdatedBy.setText(specimen.getLastUpdatedBy());
 	    	jTextFieldDateLastUpdated.setText(specimen.getDateLastUpdated().toString());
-	    	
-            storeLastEditedValues();
+	    
+            //allie added this
+            ImageCaptureApp.lastEditedSpecimenCache = specimen;
 	    	
 	    } catch (SaveFailedException e) { 
 	    	setStateToDirty();    // disable the navigation buttons
@@ -550,65 +592,266 @@ public class SpecimenDetailsViewPane extends JPanel {
 		updateDeterminationCount();
 	}
 	
-	private void storeLastEditedValues() { 
-    	if (lastEditedSpecimen==null) { 
-    		lastEditedSpecimen = new Specimen();
-    	}
-    	lastEditedSpecimen.setAssociatedTaxon(specimen.getAssociatedTaxon());
-    	lastEditedSpecimen.setAuthorship(specimen.getAuthorship());
-    	lastEditedSpecimen.setBarcode("");
-    	lastEditedSpecimen.setCitedInPublication(specimen.getCitedInPublication());
-    	lastEditedSpecimen.setCollectingMethod(specimen.getCollectingMethod());
-    	lastEditedSpecimen.setCollection(specimen.getCollection());
-    	lastEditedSpecimen.setCountry(specimen.getCountry());
-    	lastEditedSpecimen.setDateCollected(specimen.getDateCollected());
-    	lastEditedSpecimen.setDateCollectedIndicator(specimen.getDateCollectedIndicator());
-    	lastEditedSpecimen.setDateEmerged(specimen.getDateEmerged());
-        lastEditedSpecimen.setDateEmergedIndicator(specimen.getDateEmergedIndicator());
-        lastEditedSpecimen.setDateNos(specimen.getDateNos());
-        lastEditedSpecimen.setElev_units(specimen.getElev_units());
-        lastEditedSpecimen.setFamily(specimen.getFamily());
-        lastEditedSpecimen.setFeatures(specimen.getFeatures());
-        lastEditedSpecimen.setGenus(specimen.getGenus());
-        lastEditedSpecimen.setHabitat(specimen.getHabitat());
-        lastEditedSpecimen.setHigherGeography(specimen.getHigherGeography());
-        lastEditedSpecimen.setIdentifiedBy(specimen.getIdentifiedBy());
-        lastEditedSpecimen.setInferences(specimen.getInferences());
-        lastEditedSpecimen.setInfraspecificEpithet(specimen.getInfraspecificEpithet());
-        lastEditedSpecimen.setInfraspecificRank(specimen.getInfraspecificRank());
-        lastEditedSpecimen.setIdentificationRemarks(specimen.getIdentificationRemarks());
-        lastEditedSpecimen.setIdentifiedBy(specimen.getIdentifiedBy());
-        lastEditedSpecimen.setDateIdentified(specimen.getDateIdentified());
-        lastEditedSpecimen.setNatureOfId(specimen.getNatureOfId());
-        lastEditedSpecimen.setIsoDate(specimen.getIsoDate());
-        lastEditedSpecimen.setLifeStage(specimen.getLifeStage());
-        lastEditedSpecimen.setLocationInCollection(specimen.getLocationInCollection());
-        lastEditedSpecimen.setMaximum_elevation(specimen.getMaximum_elevation());
-        lastEditedSpecimen.setMinimum_elevation(specimen.getMinimum_elevation());
-        lastEditedSpecimen.setMicrohabitat(specimen.getMicrohabitat());
-        lastEditedSpecimen.setPrimaryDivison(specimen.getPrimaryDivison());
-        lastEditedSpecimen.setQuestions(specimen.getQuestions());
-        lastEditedSpecimen.setSex(specimen.getSex());
-        lastEditedSpecimen.setSpecificEpithet(specimen.getSpecificEpithet());
-        lastEditedSpecimen.setSpecificLocality(specimen.getSpecificLocality());
-        lastEditedSpecimen.setSpecimenNotes(specimen.getSpecimenNotes());
-        lastEditedSpecimen.setSubfamily(specimen.getSubfamily());
-        lastEditedSpecimen.setSubspecificEpithet(specimen.getSubspecificEpithet());
-        lastEditedSpecimen.setTribe(specimen.getTribe());
-        lastEditedSpecimen.setTypeNumber(specimen.getTypeNumber());
-        lastEditedSpecimen.setTypeStatus(specimen.getTypeStatus());
-        lastEditedSpecimen.setUnNamedForm(specimen.getUnNamedForm());
-        lastEditedSpecimen.setValidDistributionFlag(specimen.getValidDistributionFlag());
-        lastEditedSpecimen.setVerbatimLocality(specimen.getVerbatimLocality());
-        
+	private void copyPreviousRecord(){
+		log.debug("calling copyPreviousRecord()");
+		//thisPane.setStateToDirty();
+		jTextFieldDateDetermined.setText(previousSpecimen.getDateIdentified());	
+		jCBDeterminer.setSelectedItem(previousSpecimen.getIdentifiedBy());
+		jTextFieldVerbatimLocality.setText(previousSpecimen.getVerbatimLocality());
+		jComboBoxCountry.setSelectedItem(previousSpecimen.getCountry());
+		jComboBoxPrimaryDivision.setSelectedItem(previousSpecimen.getPrimaryDivison());
+	    // Elevations 
+		try { 
+		    jTextFieldMinElevation.setText(Long.toString(previousSpecimen.getMinimum_elevation()));
+		} catch (Exception e) { 
+		    jTextFieldMinElevation.setText("");
+		}
+		try { 
+		    textFieldMaxElev.setText(Long.toString(previousSpecimen.getMaximum_elevation()));
+		} catch (Exception e) { 
+			textFieldMaxElev.setText("");
+		}
+		if (previousSpecimen.getElev_units()!=null) { 
+		    comboBoxElevUnits.setSelectedItem(previousSpecimen.getElev_units());
+		} else {
+			comboBoxElevUnits.setSelectedItem("");
+		}	
+		jTextFieldLocality.setText(previousSpecimen.getSpecificLocality());
+		jComboBoxCollection.setSelectedItem(previousSpecimen.getCollection());
+		jTableCollectors.setModel(new CollectorTableModel(previousSpecimen.getCollectors()));
+		jTextFieldDateNos.setText(previousSpecimen.getDateNos());
+		jTextFieldISODate.setText(previousSpecimen.getIsoDate());
+		jTextFieldDateEmerged.setText(previousSpecimen.getDateEmerged());
+		jTextFieldDateCollectedIndicator.setText(previousSpecimen.getDateCollectedIndicator());
+		jTextFieldDateEmergedIndicator.setText(previousSpecimen.getDateEmergedIndicator());
+		jTextFieldDateCollected.setText(previousSpecimen.getDateCollected());
+		jComboBoxLifeStage.setSelectedItem(previousSpecimen.getLifeStage());
+		jComboBoxSex.setSelectedItem(previousSpecimen.getSex());
+		jTextFieldAssociatedTaxon.setText(previousSpecimen.getAssociatedTaxon());
+		jTextFieldHabitat.setText(previousSpecimen.getHabitat());
+		textFieldMicrohabitat.setText(previousSpecimen.getMicrohabitat());
+		jTextAreaSpecimenNotes.setText(previousSpecimen.getSpecimenNotes());
+		jTextFieldInferences.setText(previousSpecimen.getInferences());
+				
+		//+numbers 	
+		specimen.getNumbers().clear();
+		Iterator<edu.harvard.mcz.imagecapture.data.Number> iter = previousSpecimen.getNumbers().iterator();
+		while(iter.hasNext()){
+			//specimen.getNumbers().add((edu.harvard.mcz.imagecapture.data.Number)iter.next());
+			Number n = new Number();
+			Number n2 = (edu.harvard.mcz.imagecapture.data.Number)iter.next();
+			n.setNumber(new String(n2.getNumber()));
+			n.setSpecimen(specimen);
+			n.setNumberId(new Long(n2.getNumberId()));
+			n.setNumberType(new String(n2.getNumberType()));
+			specimen.getNumbers().add(n);
+			
+		}
+		jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));
+		
+		//+ verify the georeference data (we do want it all copied)
+		
+		
+		//+ preparation type (the whole table!) = specimen parts
+		/*jTableSpecimenParts.setModel(new SpecimenPartsTableModel(previousSpecimen.getSpecimenParts()));
+		jTableSpecimenParts.getColumnModel().getColumn(0).setPreferredWidth(90);
+		for (int i = 0; i < jTableSpecimenParts.getColumnCount(); i++) {
+		    TableColumn column = jTableSpecimenParts.getColumnModel().getColumn(i);
+		    if (i == 0) {
+		        column.setPreferredWidth(120); 
+		    } else {
+		        column.setPreferredWidth(50);
+		    }
+		}
+		
+		specimen.getSpecimenParts().clear();
+		Iterator<edu.harvard.mcz.imagecapture.data.SpecimenPart> iterp = previousSpecimen.getSpecimenParts().iterator();
+		while(iterp.hasNext()){
+			specimen.getSpecimenParts().add((edu.harvard.mcz.imagecapture.data.SpecimenPart)iterp.next());
+		}
+		jTableSpecimenParts.setModel(new SpecimenPartsTableModel(specimen.getSpecimenParts()));*/
+		
+		specimen.getSpecimenParts().clear();
+		Iterator<edu.harvard.mcz.imagecapture.data.SpecimenPart> iterp = previousSpecimen.getSpecimenParts().iterator();
+		while(iterp.hasNext()){
+			SpecimenPart part = new SpecimenPart();
+			SpecimenPart part2 = (edu.harvard.mcz.imagecapture.data.SpecimenPart)iterp.next();
+			Collection<SpecimenPartAttribute> coll = new ArrayList<SpecimenPartAttribute>();
+			Collection<SpecimenPartAttribute> coll2 = part2.getAttributeCollection();
+			Iterator<SpecimenPartAttribute> iterpa = coll2.iterator();
+			while(iterpa.hasNext()){
+				SpecimenPartAttribute pa2 = iterpa.next();
+				SpecimenPartAttribute pa = new SpecimenPartAttribute();
+				pa.setAttributeDate(pa2.getAttributeDate());
+				pa.setAttributeDeterminer(pa.getAttributeDeterminer());
+				pa.setAttributeRemark(pa2.getAttributeRemark());
+				pa.setAttributeType(pa2.getAttributeType());
+				pa.setAttributeUnits(pa2.getAttributeUnits());
+				pa.setAttributeValue(pa2.getAttributeValue());
+				pa.setSpecimenPartAttributeId(pa2.getSpecimenPartAttributeId());
+				pa.setSpecimenPartId(pa2.getSpecimenPartId());
+				coll.add(pa);
+			}
+			part.setAttributeCollection(coll);
+			part.setLotCount(part2.getLotCount());
+			part.setLotCountModifier(part2.getLotCountModifier());
+			part.setPartName(part2.getPartName());
+			part.setPreserveMethod(part2.getPreserveMethod());
+			part.setSpecimenId(part2.getSpecimenId());
+			part.setSpecimenPartId(part2.getSpecimenPartId());
+			specimen.getSpecimenParts().add(part);
+		}
+		jTableSpecimenParts.setModel(new SpecimenPartsTableModel(specimen.getSpecimenParts()));
+		
+		//collectors - copy
+		/*specimen.getCollectors().clear();
+		Iterator<edu.harvard.mcz.imagecapture.data.Collector> iterc = previousSpecimen.getCollectors().iterator();
+		while(iterc.hasNext()){
+			specimen.getCollectors().add((edu.harvard.mcz.imagecapture.data.Collector)iterc.next());
+		}		
+		jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));*/
+		
+		specimen.getCollectors().clear();
+		Iterator<edu.harvard.mcz.imagecapture.data.Collector> iterc = previousSpecimen.getCollectors().iterator();
+		while(iterc.hasNext()){
+			Collector c = new Collector();
+			Collector c2 = iterc.next();
+			c.setCollectorId(c2.getCollectorId());
+			c.setCollectorName(c2.getCollectorName());
+			c.setSpecimen(specimen);
+			specimen.getCollectors().add(c);
+		}		
+		jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));
+
+		
+	
+		CollectorLifeCycle cls = new CollectorLifeCycle();
+		JComboBox jComboBoxCollector = new JComboBox(cls.getDistinctCollectors());
+		jComboBoxCollector.setEditable(true);
+		//field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
+		jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(jComboBoxCollector));
+		AutoCompleteDecorator.decorate(jComboBoxCollector);		
+		
+		//+determinations 
+		specimen.getDeterminations().clear();
+		Iterator<edu.harvard.mcz.imagecapture.data.Determination> iterd = previousSpecimen.getDeterminations().iterator();
+		while(iterd.hasNext()){
+			Determination prevdet = (edu.harvard.mcz.imagecapture.data.Determination)iterd.next();
+			Determination newdet = new Determination();
+			newdet.setGenus(prevdet.getGenus());
+			newdet.setSpecificEpithet(prevdet.getSpecificEpithet());
+			newdet.setSubspecificEpithet(prevdet.getSubspecificEpithet());
+			newdet.setInfraspecificEpithet(prevdet.getInfraspecificEpithet());
+			newdet.setInfraspecificRank(prevdet.getInfraspecificRank());
+			newdet.setAuthorship(prevdet.getAuthorship());
+			newdet.setUnNamedForm(prevdet.getUnNamedForm());
+			newdet.setIdentifiedBy(prevdet.getIdentifiedBy());
+			newdet.setTypeStatus(prevdet.getTypeStatus());
+			newdet.setSpeciesNumber(prevdet.getSpeciesNumber());
+			newdet.setVerbatimText(prevdet.getVerbatimText());
+			newdet.setNatureOfId(prevdet.getNatureOfId());
+			newdet.setDateIdentified(prevdet.getDateIdentified());
+			newdet.setRemarks(prevdet.getRemarks());				
+			newdet.setSpecimen(specimen);
+			specimen.getDeterminations().add(newdet);
+			
+		}		
+				
+	
+		//+georeference
+		Set<LatLong> georeferences = specimen.getLatLong();
+		LatLong newgeo = georeferences.iterator().next();
+		newgeo.setSpecimenId(specimen);
+		
+		Iterator<edu.harvard.mcz.imagecapture.data.LatLong> iterl = previousSpecimen.getLatLong().iterator();
+		while(iterl.hasNext()){
+			LatLong prevgeo = (edu.harvard.mcz.imagecapture.data.LatLong)iterl.next();
+			newgeo.setAcceptedLatLongFg(prevgeo.getAcceptedLatLongFg());
+			newgeo.setAcceptedLatLongFg(prevgeo.getAcceptedLatLongFg());
+			newgeo.setDatum(prevgeo.getDatum());
+			newgeo.setDecLat(prevgeo.getDecLat());
+			newgeo.setDecLatMin(prevgeo.getDecLatMin());
+			newgeo.setDecLong(prevgeo.getDecLong());
+			newgeo.setDecLongMin(prevgeo.getDecLongMin());
+			newgeo.setDeterminedByAgent(prevgeo.getDeterminedByAgent());
+			newgeo.setDeterminedDate(prevgeo.getDeterminedDate());
+			newgeo.setExtent(prevgeo.getExtent());
+			newgeo.setFieldVerifiedFg(prevgeo.getFieldVerifiedFg());
+			newgeo.setGeorefmethod(prevgeo.getGeorefmethod());
+			newgeo.setGpsaccuracy(prevgeo.getGpsaccuracy());
+			newgeo.setLatDeg(prevgeo.getLatDeg());
+			newgeo.setLatDir(prevgeo.getLatDir());
+			newgeo.setLatLongForNnpFg(prevgeo.getLatLongForNnpFg());
+			newgeo.setLatLongRefSource(prevgeo.getLatLongRefSource());
+			newgeo.setLatLongRemarks(prevgeo.getLatLongRemarks());
+			newgeo.setLatMin(prevgeo.getLatMin());
+			newgeo.setLatSec(prevgeo.getLatSec());
+			newgeo.setLongDeg(prevgeo.getLongDeg());
+			newgeo.setLongDir(prevgeo.getLongDir());
+			newgeo.setLongMin(prevgeo.getLongMin());
+			newgeo.setLongSec(prevgeo.getLongSec());
+			newgeo.setMaxErrorDistance(prevgeo.getMaxErrorDistance());
+			newgeo.setMaxErrorUnits(prevgeo.getMaxErrorUnits());
+			newgeo.setNearestNamedPlace(prevgeo.getNearestNamedPlace());
+			newgeo.setOrigLatLongUnits(prevgeo.getOrigLatLongUnits());
+			newgeo.setUtmEw(prevgeo.getUtmEw());
+			newgeo.setUtmNs(prevgeo.getUtmNs());
+			newgeo.setUtmZone(prevgeo.getUtmZone());
+			newgeo.setVerificationstatus(prevgeo.getVerificationstatus());			
+		}
+
+		
+		//new - verbatim locality
+		jTextFieldVerbatimLocality.setText(previousSpecimen.getVerbatimLocality());
+		//new - publications
+		jTextFieldCitedInPub.setText(previousSpecimen.getCitedInPublication());
+		//new - features
+		jComboBoxFeatures.setSelectedItem(previousSpecimen.getFeatures());
+		//new - collecting method
+		jTextFieldCollectingMethod.setText(previousSpecimen.getCollectingMethod());
+		
+		
+		setSpecimenPartsTableCellEditors();
+		
+		
 	}
 	
+	//do copy: family, subfamily, tribe, genus, species, subspecies, infra name, rank, author, nature of id, id date, id by 
+	private void copyPreviousTaxonRecord(){
+		jComboBoxFamily.setSelectedItem(previousSpecimen.getFamily());
+		jComboBoxSubfamily.setSelectedItem(previousSpecimen.getSubfamily());
+		jTextFieldTribe.setText(previousSpecimen.getTribe());
+		jTextFieldGenus.setText(previousSpecimen.getGenus());
+		jTextFieldSpecies.setText(previousSpecimen.getSpecificEpithet());
+		jTextFieldSubspecies.setText(previousSpecimen.getSubspecificEpithet());
+		jTextFieldInfraspecificEpithet.setText(previousSpecimen.getInfraspecificEpithet());
+		jTextFieldInfraspecificRank.setText(previousSpecimen.getInfraspecificRank());
+		jTextFieldAuthorship.setText(previousSpecimen.getAuthorship());
+    	jCBDeterminer.setSelectedItem(previousSpecimen.getIdentifiedBy());
+		jComboBoxNatureOfId.setSelectedItem(previousSpecimen.getNatureOfId());
+		jTextFieldDateDetermined.setText(previousSpecimen.getDateIdentified());
+	}
+	
+	
 	private void setValues() { 
+		log.debug("okok copyprevious, specimenid is " + specimen.getSpecimenId());
 		log.debug("invoking setValues()");
-		jTextFieldStatus.setText("Loading");
-		
+		jTextFieldStatus.setText("Loading");		
 		jTextFieldBarcode.setText(specimen.getBarcode());
-		jComboBoxLocationInCollection.setSelectedItem(specimen.getLocationInCollection());
+		
+		//alliefix - set to value from properties
+		//jComboBoxLocationInCollection.setSelectedItem(specimen.getLocationInCollection());	
+		String locationInCollectionPropertiesVal = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(
+	    		 ImageCaptureProperties.DISPLAY_COLLECTION);
+		jComboBoxLocationInCollection.setSelectedItem(locationInCollectionPropertiesVal);
+		
+		//allie try
+		/*Set<LatLong> georeferences = specimen.getLatLong();
+		log.debug("setvalues: georeferences size is : + " + georeferences.size());
+		LatLong georeference_pre = georeferences.iterator().next();
+		log.debug("lat is : + " + georeference_pre.getLatDegString());
+		log.debug("long is : + " + georeference_pre.getLongDegString());*/
+		
 		cbTypeStatus.setSelectedItem(specimen.getTypeStatus());
 		jTextFieldDrawerNumber.setText(specimen.getDrawerNumber());
 		jComboBoxFamily.setSelectedItem(specimen.getFamily());
@@ -621,39 +864,56 @@ public class SpecimenDetailsViewPane extends JPanel {
 		jTextFieldInfraspecificRank.setText(specimen.getInfraspecificRank());
 		jTextFieldAuthorship.setText(specimen.getAuthorship());
 		
+		//allie new - bugfix
+		textFieldMicrohabitat.setText(specimen.getMicrohabitat());
+		
 		jTextFieldIdRemarks.setText(specimen.getIdentificationRemarks());
 		jTextFieldDateDetermined.setText(specimen.getDateIdentified());
 		
-        MCZbaseAuthAgentName selection = new MCZbaseAuthAgentName();
-        selection.setAgent_name(specimen.getIdentifiedBy());
-		((AgentNameComboBoxModel)jCBDeterminer.getModel()).setSelectedItem(selection);
-		jCBDeterminer.getEditor().setItem(jCBDeterminer.getModel().getSelectedItem());
+    	//allie change
+    	//log.debug("jComboBoxLifeStage here!!! specimen life stage is " + specimen.getLifeStage());
+    	if(specimen.getLifeStage() == null || specimen.getLifeStage().equals("")){
+    		specimen.setLifeStage("adult");
+    		jComboBoxLifeStage.setSelectedIndex(0);
+    	}
+    	
+		//allie change - removed this 
+        //MCZbaseAuthAgentName selection = new MCZbaseAuthAgentName();
+        //selection.setAgent_name(specimen.getIdentifiedBy());
+        //((AgentNameComboBoxModel)jCBDeterminer.getModel()).setSelectedItem(selection);
+		//jCBDeterminer.getEditor().setItem(jCBDeterminer.getModel().getSelectedItem());
+        
+		//allie change - added this
+        //jCBDeterminer.setText(specimen.getIdentifiedBy());
+    	jCBDeterminer.setSelectedItem(specimen.getIdentifiedBy());
 		
 		jComboBoxNatureOfId.setSelectedItem(specimen.getNatureOfId());
 		
 		jTextFieldUnnamedForm.setText(specimen.getUnNamedForm());
 		jTextFieldVerbatimLocality.setText(specimen.getVerbatimLocality());
 		// Specimen record contains a string, delegate handling of lookup of object to the combo box model.
-		log.debug(specimen.getHigherGeography());
-		((HigherGeographyComboBoxModel)comboBoxHigherGeog.getModel()).setSelectedItem(specimen.getHigherGeography());
-//TODO ? set model not notifying listeners? 	
-		higherGeogNotFoundWarning = new StringBuffer();
-		comboBoxHigherGeog.getEditor().setItem(comboBoxHigherGeog.getModel().getSelectedItem());
-		if (specimen.getHigherGeography()==null) { 
-			comboBoxHigherGeog.setBackground(Color.YELLOW);
-		} else { 
-			if (comboBoxHigherGeog.getModel().getSelectedItem()==null) {
-				comboBoxHigherGeog.setBackground(Color.RED);
-				higherGeogNotFoundWarning.append("Higher Geog: [").append(specimen.getHigherGeography()).append("] not found. Fix before saving.");
-			}
-		}
-		jTextFieldCountry.setText(specimen.getCountry());
+		//allieremove
+// 		log.debug(specimen.getHigherGeography());
+// 		((HigherGeographyComboBoxModel)comboBoxHigherGeog.getModel()).setSelectedItem(specimen.getHigherGeography());
+// //TODO ? set model not notifying listeners? 	
+// 		higherGeogNotFoundWarning = new StringBuffer();
+// 		comboBoxHigherGeog.getEditor().setItem(comboBoxHigherGeog.getModel().getSelectedItem());
+// 		if (specimen.getHigherGeography()==null) { 
+// 			comboBoxHigherGeog.setBackground(Color.YELLOW);
+// 		} else { 
+// 			if (comboBoxHigherGeog.getModel().getSelectedItem()==null) {
+// 				comboBoxHigherGeog.setBackground(Color.RED);
+// 				higherGeogNotFoundWarning.append("Higher Geog: [").append(specimen.getHigherGeography()).append("] not found. Fix before saving.");
+// 			}
+// 		}
+// 		jTextFieldCountry.setText(specimen.getCountry());
+		jComboBoxCountry.setSelectedItem(specimen.getCountry());
 		if (specimen.getValidDistributionFlag()!=null) { 
 		    jCheckBoxValidDistributionFlag.setSelected(specimen.getValidDistributionFlag());
 		} else { 
 			jCheckBoxValidDistributionFlag.setSelected(false);
 		}
-		jTextFieldPrimaryDivision.setText(specimen.getPrimaryDivison());
+		jComboBoxPrimaryDivision.setSelectedItem(specimen.getPrimaryDivison());
 		jTextFieldLocality.setText(specimen.getSpecificLocality());
 		
 	    // Elevations  **********************************************************************
@@ -672,7 +932,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		} else {
 			comboBoxElevUnits.setSelectedItem("");
 		}
-		
+
 		jTextFieldCollectingMethod.setText(specimen.getCollectingMethod());
 		jTextFieldISODate.setText(specimen.getIsoDate());
 		jTextFieldDateNos.setText(specimen.getDateNos());
@@ -707,7 +967,16 @@ public class SpecimenDetailsViewPane extends JPanel {
 		   jTextFieldDateLastUpdated.setText(specimen.getDateLastUpdated().toString());
 		} 
 		
-		jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));
+		//allie change
+    	if(specimen.getNatureOfId() == null || specimen.getNatureOfId().equals("")){
+    		specimen.setLifeStage("expert ID");
+    		jComboBoxNatureOfId.setSelectedIndex(0);
+    	}
+		
+		//without this, it does save the 1st record, and it does not copy the next record!
+    	log.debug("setValues calling jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));");
+    	jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));
+
 		// Setting the model will overwrite the existing cell editor bound 
 		// to the column model, so we need to add it again.
 		JTextField field1 = new JTextField();
@@ -721,16 +990,39 @@ public class SpecimenDetailsViewPane extends JPanel {
 		typeColumn.setCellEditor(new DefaultCellEditor(jComboNumberTypes));
 		
 		jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));
+		
+		
 		// Setting the model will overwrite the existing cell editor bound 
 		// to the column model, so we need to add it again.
-		// JTextField field = new JTextField();
-		FilteringAgentJComboBox field = new FilteringAgentJComboBox();
+		
+		//this line is the original!!!
+		//FilteringAgentJComboBox field = new FilteringAgentJComboBox();
+		
+		//paul's comments
 		//field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
 		//jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new PicklistTableCellEditor(field, true));
-		jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(field));
+		
+		//this line is the original!!!
+		//jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(field));
+		
+		//paul's comments
 		//field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
 		//field.setVerifyInputWhenFocusTarget(true);
-		//jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));
+
+		//allie - change: this is for simple text fields. below it has changed to combo boxes!
+		/*JTextField field = new JTextField();
+		field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
+		jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));*/
+		//end allie change
+		
+		//allie new
+		CollectorLifeCycle cls = new CollectorLifeCycle();
+		JComboBox jComboBoxCollector = new JComboBox(cls.getDistinctCollectors());
+		jComboBoxCollector.setEditable(true);
+		//field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
+		jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(jComboBoxCollector));
+		AutoCompleteDecorator.decorate(jComboBoxCollector);
+		//end allie new
 		
 		jTableSpecimenParts.setModel(new SpecimenPartsTableModel(specimen.getSpecimenParts()));
 		jTableSpecimenParts.getColumnModel().getColumn(0).setPreferredWidth(90);
@@ -826,7 +1118,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gridBagConstraints120.gridy = 25;
 			jLabel44 = new JLabel();
 			jLabel44.setText("yyyy/mm/dd");
-			GridBagConstraints gridBagConstraints49 = new GridBagConstraints();
+			
+			GridBagConstraints gridBagConstraints49 = new GridBagConstraints(); //scroll pane specimen notes here!
 			gridBagConstraints49.insets = new Insets(0, 0, 0, 0);
 			gridBagConstraints49.fill = GridBagConstraints.BOTH;
 			gridBagConstraints49.weighty = 1.0;
@@ -834,6 +1127,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gridBagConstraints49.gridx = 1;
 			gridBagConstraints49.gridwidth = 7;
 			gridBagConstraints49.gridy = 35;
+			//gridBagConstraints49.gridheight = 20; //allie!!
+			
 			GridBagConstraints gridBagConstraints214 = new GridBagConstraints();
 			gridBagConstraints214.gridwidth = 3;
 			gridBagConstraints214.insets = new Insets(0, 0, 0, 5);
@@ -895,12 +1190,9 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gridBagConstraintsMS.gridy = 45;			
 			gridBagConstraintsMS.gridx = 0;
 			
-			GridBagConstraints gridBagConstraints116 = new GridBagConstraints();
-			gridBagConstraints116.gridwidth = 3;
-			gridBagConstraints116.insets = new Insets(0, 0, 0, 5);
-			gridBagConstraints116.gridx = 4;
-			gridBagConstraints116.anchor = GridBagConstraints.EAST;
-			gridBagConstraints116.gridy = 41;
+		
+			
+			
 			GridBagConstraints gridBagConstraintsInfer = new GridBagConstraints();
 			gridBagConstraintsInfer.insets = new Insets(0, 0, 0, 0);
 			gridBagConstraintsInfer.fill = GridBagConstraints.BOTH;
@@ -1279,6 +1571,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gridBagConstraints91.anchor = GridBagConstraints.EAST;
 			gridBagConstraints91.gridy = 18;
 			jLabel14 = new JLabel();
+			//Change this to dropdown
 			jLabel14.setText("Country");
 			GridBagConstraints gridBagConstraints81 = new GridBagConstraints();
 			gridBagConstraints81.insets = new Insets(0, 0, 0, 5);
@@ -1330,6 +1623,30 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gridBagConstraints25.gridheight = 3;
 			gridBagConstraints25.gridwidth = 6;
 			gridBagConstraints25.gridx = 1;
+			
+			//copy prev
+			GridBagConstraints gridBagConstraints116 = new GridBagConstraints();
+			gridBagConstraints116.gridwidth = 3;
+			gridBagConstraints116.insets = new Insets(0, 0, 0, 5);
+			gridBagConstraints116.gridx = 4;
+			gridBagConstraints116.anchor = GridBagConstraints.EAST;
+			gridBagConstraints116.gridy = 41;
+			
+			GridBagConstraints gridBagConstraintsCopyPrev = new GridBagConstraints();
+			gridBagConstraintsCopyPrev.gridwidth = 5;
+			gridBagConstraintsCopyPrev.insets = new Insets(0, 0, 0, 5);
+			gridBagConstraintsCopyPrev.anchor = GridBagConstraints.WEST;
+			gridBagConstraintsCopyPrev.gridy = 1;
+			gridBagConstraintsCopyPrev.gridx = 1;
+			
+			/*GridBagConstraints gridBagConstraintsCopyPrevTaxon = new GridBagConstraints();
+			gridBagConstraintsCopyPrev.gridwidth = 5;
+			gridBagConstraintsCopyPrev.insets = new Insets(0, 0, 0, 5);
+			gridBagConstraintsCopyPrev.anchor = GridBagConstraints.WEST;
+			gridBagConstraintsCopyPrev.gridy = 400;
+			gridBagConstraintsCopyPrev.gridx = 1;*/
+			//end copy prev
+			
 			GridBagConstraints gridBagConstraints15 = new GridBagConstraints();
 			gridBagConstraints15.insets = new Insets(0, 0, 0, 5);
 			gridBagConstraints15.gridx = 0;
@@ -1556,14 +1873,14 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gbc_lblIdBy.gridy = 11;
 			jPanel.add(lblIdBy, gbc_lblIdBy);
 			
-			jCBDeterminer = getJCBDeterminer();
+			//jCBDeterminer = getJCBDeterminer();
 			GridBagConstraints gbc_jTextFieldDeterminer = new GridBagConstraints();
 			gbc_jTextFieldDeterminer.gridwidth = 4;
 			gbc_jTextFieldDeterminer.insets = new Insets(0, 0, 0, 0);
 			gbc_jTextFieldDeterminer.fill = GridBagConstraints.HORIZONTAL;
 			gbc_jTextFieldDeterminer.gridx = 4;
 			gbc_jTextFieldDeterminer.gridy = 11;
-			jPanel.add(jCBDeterminer, gbc_jTextFieldDeterminer);
+			jPanel.add(getJCBDeterminer(), gbc_jTextFieldDeterminer);
 			
 			GridBagConstraints gbc_lblIdRemarks = new GridBagConstraints();
 			gbc_lblIdRemarks.anchor = GridBagConstraints.EAST;
@@ -1595,19 +1912,20 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gbc_cbTypeStatus.gridx = 4;
 			gbc_cbTypeStatus.gridy = 14;
 			jPanel.add(cbTypeStatus, gbc_cbTypeStatus);
-			GridBagConstraints gbc_lblHigherGeography = new GridBagConstraints();
+			//allieremove
+			/*GridBagConstraints gbc_lblHigherGeography = new GridBagConstraints();
 			gbc_lblHigherGeography.anchor = GridBagConstraints.EAST;
 			gbc_lblHigherGeography.insets = new Insets(0, 0, 0, 5);
 			gbc_lblHigherGeography.gridx = 0;
 			gbc_lblHigherGeography.gridy = 17;
-			jPanel.add(getLblHigherGeography(), gbc_lblHigherGeography);
+			//jPanel.add(getLblHigherGeography(), gbc_lblHigherGeography);
 			GridBagConstraints gbc_comboBoxElevUnits = new GridBagConstraints();
 			gbc_comboBoxElevUnits.insets = new Insets(0, 0, 0, 0);
 			gbc_comboBoxElevUnits.gridwidth = 7;
 			gbc_comboBoxElevUnits.fill = GridBagConstraints.HORIZONTAL;
 			gbc_comboBoxElevUnits.gridx = 1;
 			gbc_comboBoxElevUnits.gridy = 17;
-			jPanel.add(getComboBoxHighGeog(), gbc_comboBoxElevUnits);
+			//jPanel.add(getComboBoxHighGeog(), gbc_comboBoxElevUnits);*/
 			GridBagConstraints gbc_lblTo = new GridBagConstraints();
 			gbc_lblTo.insets = new Insets(0, 0, 0, 5);
 			gbc_lblTo.anchor = GridBagConstraints.EAST;
@@ -1688,11 +2006,13 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gridBagConstraintsPR.gridy = 29;	
 			
 			jPanel.add(getJScrollPaneSpecimenParts(),gridBagConstraintsPR);
+			
 			GridBagConstraints gbc_lblMicrohabitat = new GridBagConstraints();
 			gbc_lblMicrohabitat.anchor = GridBagConstraints.EAST;
 			gbc_lblMicrohabitat.insets = new Insets(0, 0, 0, 5);
 			gbc_lblMicrohabitat.gridx = 0;
 			gbc_lblMicrohabitat.gridy = 34;
+			
 			jPanel.add(getLblMicrohabitat(), gbc_lblMicrohabitat);
 			GridBagConstraints gbc_textField = new GridBagConstraints();
 			gbc_textField.insets = new Insets(0, 0, 0, 5);
@@ -1773,6 +2093,15 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jPanel.add(jLabel43, gridBagConstraints56);
 			jPanel.add(getJTextFieldInferences(), gridBagConstraintsInfer);
 			jPanel.add(getJButton1(), gridBagConstraints116);
+			
+			JPanel subPanel = new JPanel();
+			//subPanel.add(getJButtonCopyPrevTaxon());
+		    subPanel.add(getJButtonCopyPrev());
+		    
+			//jPanel.add(getJButtonCopyPrev(), gridBagConstraintsCopyPrev);
+			jPanel.add(subPanel, gridBagConstraintsCopyPrev);
+			//not doing this!
+			//jPanel.add(getJButtonCopyPrevTaxon(), gridBagConstraintsCopyPrev);
 			jPanel.add(getJPanel1(), gridBagConstraints211);
 			jPanel.add(getJTextFieldISODate(), gridBagConstraints117);
 			jPanel.add(getJButtonDets(), gridBagConstraints212);
@@ -1780,7 +2109,12 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jPanel.add(getJTextField9(), gridBagConstraints213);
 			jPanel.add(getJButtonNext(), gridBagConstraints119);
 			jPanel.add(getJButtonPrevious(), gridBagConstraints214);
+			
+			//JPanel subPanel2 = new JPanel();
+			//subPanel2.add(getJScrollPaneNotes(), gridBagConstraints49);
+			//jPanel.add(subPanel2);
 			jPanel.add(getJScrollPaneNotes(), gridBagConstraints49);
+			
 			jPanel.add(jLabel44, gridBagConstraints120);
 			jPanel.add(getJButton13(), gridBagConstraints215);
 			jPanel.add(getJButton2(), gridBagConstraints38);
@@ -1905,6 +2239,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 					
 					save();
 					
+					//this really does nothing!
 					((CollectorTableModel)jTableCollectors.getModel()).fireTableDataChanged();
 					((NumberTableModel)jTableNumbers.getModel()).fireTableDataChanged();
 					
@@ -1927,6 +2262,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 */
 	private JComboBox<String> getJTextFieldCollection() {
 		if (jComboBoxCollection == null) {
+			log.debug("initt jComboBoxCollection");
 			SpecimenLifeCycle sls = new SpecimenLifeCycle();
 			jComboBoxCollection = new JComboBox<String>();
 			jComboBoxCollection.setModel(new DefaultComboBoxModel<String>(sls.getDistinctCollections()));
@@ -1988,12 +2324,25 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jTableCollectors = new JTable(new CollectorTableModel());
 			
 			// Note: When setting the values, the table column editor needs to be reset there, as the model is replaced.
+
+			//the original line!!!
+			//FilteringAgentJComboBox field = new FilteringAgentJComboBox();
+						
+			//the original line!!
+			//jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(field));
 			
-			//JTextField field = new JTextField();
-			FilteringAgentJComboBox field = new FilteringAgentJComboBox();
+			//allie change: this works with text fields only
+			/*JTextField field = new JTextField();
+			field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
+			jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));*/
+			//end allie change
+			
+			//allie new - combo boxes
+			JComboBox field = new JComboBox();
 			//field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
-			//jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new PicklistTableCellEditor(field, true));
 			jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(field));
+			//
+			
 			jTableCollectors.setRowHeight(jTableCollectors.getRowHeight()+4);
 		    jTableCollectors.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
@@ -2051,8 +2400,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 		if (jScrollPaneSpecimenParts == null) {
 			jScrollPaneSpecimenParts = new JScrollPane();
 			jScrollPaneSpecimenParts.setViewportView(getJTableSpecimenParts());
-			jScrollPaneSpecimenParts.setPreferredSize(new Dimension(0, 150));
-			jScrollPaneSpecimenParts.setMinimumSize(new Dimension(0, 100));
+			//jScrollPaneSpecimenParts.setPreferredSize(new Dimension(0, 150));
+			//jScrollPaneSpecimenParts.setMinimumSize(new Dimension(0, 100));
+			jScrollPaneSpecimenParts.setPreferredSize(new Dimension(0, 75));
+			jScrollPaneSpecimenParts.setMinimumSize(new Dimension(0, 75));
 			jScrollPaneSpecimenParts.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
 					thisPane.setStateToDirty();
@@ -2304,12 +2655,30 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JButton getJButtonGeoreference() {
 		if (jButtonGeoreference == null) {
 			jButtonGeoreference = new JButton();
-			jButtonGeoreference.setText("Georeference");
+			//allie add
+			/*try {
+				Set<LatLong> georeferences = specimen.getLatLong();
+				log.debug("getJButtonGeoreference georeferences size is : + " + georeferences.size());
+				LatLong georeference_pre = georeferences.iterator().next();
+				log.debug("lat is : + " + georeference_pre.getLatDegString());
+				log.debug("long is : + " + georeference_pre.getLongDegString());
+				if ((!("").equals(georeference_pre.getLatDegString())) ||
+					(!("").equals(georeference_pre.getLongDegString()))){
+					jButtonGeoreference.setText("1.0 Georeference");
+				}else{
+					jButtonGeoreference.setText("0.0 Georeference");
+				}
+	        } catch (Exception e) { 
+	        	log.error(e.getMessage(), e);
+	        }	*/	
+			
 	        try {  
+	        	jButtonGeoreference.setText("Georeference");
 	        	jButtonGeoreference.addActionListener(new java.awt.event.ActionListener() {
 	        		public void actionPerformed(java.awt.event.ActionEvent e) {
 	        			thisPane.setStateToDirty();
 	        			Set<LatLong> georeferences = specimen.getLatLong();
+	        			//log.debug("the lat long is : " + specimen.getLatLong().);
 	        			LatLong georeference = georeferences.iterator().next();
 	        			georeference.setSpecimenId(specimen);
 	        			GeoreferenceDialog georefDialog = new GeoreferenceDialog(georeference);
@@ -2338,6 +2707,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	        	jButtonCollsAdd.setIcon(new ImageIcon(iconFile));
 	        	jButtonCollsAdd.addActionListener(new java.awt.event.ActionListener() {
 	        		public void actionPerformed(java.awt.event.ActionEvent e) {
+	        			log.debug("adding a new collector........");
 	        			((CollectorTableModel)jTableCollectors.getModel()).addCollector(new Collector(specimen, ""));
 	        			thisPane.setStateToDirty();
 	        		}
@@ -2422,9 +2792,9 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField13() {
-		if (jTextFieldCountry == null) {
-			jTextFieldCountry = new JTextField();
+	private JComboBox getJTextField13() {
+		//if (jTextFieldCountry == null) {
+			/*jTextFieldCountry = new JTextField();
 			jTextFieldCountry.setInputVerifier(
 					MetadataRetriever.getInputVerifier(Specimen.class, "Country", jTextFieldCountry));
 			jTextFieldCountry.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Country"));
@@ -2432,9 +2802,25 @@ public class SpecimenDetailsViewPane extends JPanel {
 				public void keyTyped(java.awt.event.KeyEvent e) {
 					thisPane.setStateToDirty();
 				}
-			});
-		}
-		return jTextFieldCountry;
+			});*/
+			//allie fix
+			if (jComboBoxCountry == null) {
+				log.debug("initt jComboBoxCountry");
+				SpecimenLifeCycle sls = new SpecimenLifeCycle();
+				jComboBoxCountry = new JComboBox<String>();
+				//jComboBoxCountry.setModel(new DefaultComboBoxModel<String>(HigherTaxonLifeCycle.selectDistinctSubfamily("")));
+				jComboBoxCountry.setModel(new DefaultComboBoxModel<String>(sls.getDistinctCountries()));
+				jComboBoxCountry.setEditable(true);
+				jComboBoxCountry.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Country"));
+				jComboBoxCountry.addKeyListener(new java.awt.event.KeyAdapter() {
+					public void keyTyped(java.awt.event.KeyEvent e) {
+						thisPane.setStateToDirty();
+					}
+				});
+				AutoCompleteDecorator.decorate(jComboBoxCountry);
+			}
+		return jComboBoxCountry;
+		//return jTextFieldCountry;
 	}
 
 	/**
@@ -2442,7 +2828,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField23() {
+	/*private JTextField getJTextField23() {
 		if (jTextFieldPrimaryDivision == null) {
 			jTextFieldPrimaryDivision = new JTextField();
 			jTextFieldPrimaryDivision.setInputVerifier(
@@ -2455,6 +2841,24 @@ public class SpecimenDetailsViewPane extends JPanel {
 			});
 		}
 		return jTextFieldPrimaryDivision;
+	}*/
+	//allie change
+	private JComboBox getJTextField23() {
+		if (jComboBoxPrimaryDivision == null) {
+			jComboBoxPrimaryDivision = new JComboBox();
+			jComboBoxPrimaryDivision.setEditable(true);
+			//jComboBoxPrimaryDivision.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "primaryDivison", jTextFieldPrimaryDivision));
+			SpecimenLifeCycle sls = new SpecimenLifeCycle();
+			jComboBoxPrimaryDivision.setModel(new DefaultComboBoxModel<String>(sls.getDistinctPrimaryDivisions()));
+			jComboBoxPrimaryDivision.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "primaryDivison"));
+			jComboBoxPrimaryDivision.addKeyListener(new java.awt.event.KeyAdapter() {
+				public void keyTyped(java.awt.event.KeyEvent e) {
+					thisPane.setStateToDirty();
+				}
+			});
+			AutoCompleteDecorator.decorate(jComboBoxPrimaryDivision);
+		}
+		return jComboBoxPrimaryDivision;
 	}
 
 	/**
@@ -2519,6 +2923,9 @@ public class SpecimenDetailsViewPane extends JPanel {
 		}
 		return jTextFieldTribe;
 	}
+	
+	
+
 
 	/**
 	 * This method initializes jComboBoxSex	
@@ -2575,6 +2982,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 				}
 			});
 			AutoCompleteDecorator.decorate(jComboBoxNatureOfId);
+			jComboBoxNatureOfId.setSelectedItem(NatureOfId.EXPERT_ID);
+			jComboBoxNatureOfId.setSelectedIndex(0);
 		}
 		return jComboBoxNatureOfId;
 	}
@@ -2597,6 +3006,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 				}
 			});
 			AutoCompleteDecorator.decorate(jComboBoxLifeStage);
+			jComboBoxLifeStage.setSelectedItem("adult");
+			jComboBoxLifeStage.setSelectedIndex(0);
 		}
 		return jComboBoxLifeStage;
 	}
@@ -2979,6 +3390,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jComboBoxLocationInCollection.setModel(new DefaultComboBoxModel<String>(LocationInCollection.getLocationInCollectionValues()));
 			jComboBoxLocationInCollection.setEditable(false);
 			jComboBoxLocationInCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "LocationInCollection"));
+			
+			//alliefix - set default from properties file
+			//jComboBoxLocationInCollection.setSelectedIndex(1);
+			
 			jComboBoxLocationInCollection.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
 					thisPane.setStateToDirty();
@@ -3038,11 +3453,54 @@ public class SpecimenDetailsViewPane extends JPanel {
 		return jButtonGetHistory;
 	}
 
+
+	private JButton getJButtonCopyPrev() {
+		log.debug("prev spec:::");
+		if (jButtonCopyPrev == null) {
+			jButtonCopyPrev = new JButton();
+			jButtonCopyPrev.setText("Copy Prev");
+			jButtonCopyPrev.setToolTipText("Copy previous record values into this screen");
+			//TODO what is this for???
+			//jButtonCopyPrev.setMnemonic(KeyEvent.VK_H);
+			jButtonCopyPrev.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent e) {
+					//populate the fields with the data.
+					previousSpecimen = ImageCaptureApp.lastEditedSpecimenCache;
+					copyPreviousRecord();
+				}
+			});
+		}
+		return jButtonCopyPrev;
+	}
+	
+	
+	private JButton getJButtonCopyPrevTaxon() {
+		log.debug("prev taxon:::");
+		if (jButtonCopyPrevTaxon == null) {
+			jButtonCopyPrevTaxon = new JButton();
+			jButtonCopyPrevTaxon.setText("Copy Prev Taxon");
+			jButtonCopyPrevTaxon.setToolTipText("Copy previous taxon values into this screen");
+			//TODO what is this for???
+			//jButtonCopyPrev.setMnemonic(KeyEvent.VK_H);
+			jButtonCopyPrevTaxon.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent e) {
+					//populate the fields with the data.
+					previousSpecimen = ImageCaptureApp.lastEditedSpecimenCache;
+					copyPreviousTaxonRecord();
+				}
+			});
+		}
+		return jButtonCopyPrevTaxon;
+	}	
+	
+	
+	
 	/**
-	 * This method initializes jButton1	
+	 * This method initializes jButtonNext
 	 * 	
 	 * @return javax.swing.JButton	
 	 */
+	//this is not the right arrow button!
 	private JButton getJButtonNext() {
 		if (jButtonNext == null) {
 			jButtonNext = new JButton();
@@ -3056,6 +3514,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jButtonNext.setEnabled(myControler.isInTable());
 			jButtonNext.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
+					//TODO here save the data in memory for "copy prev"
 					try {
 						try { 
 						    thisPane.getParent().getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -3087,6 +3546,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 				}
 			});
 		}
+		log.debug("SpecimenDetailsViewPane.getJButtonNext(): 9");
 		return jButtonNext;
 	}
 
@@ -3267,9 +3727,21 @@ public class SpecimenDetailsViewPane extends JPanel {
 		if (jScrollPaneNotes == null) {
 			jScrollPaneNotes = new JScrollPane();
 			jScrollPaneNotes.setViewportView(getJTextAreaNotes());
+			jScrollPaneNotes.setPreferredSize(new Dimension(0, 30));
+			jScrollPaneNotes.setMinimumSize(new Dimension(0, 30));			
+			//jScrollPaneNotes.add(getJTextAreaNotes()); //allie!!!
 		}
 		return jScrollPaneNotes;
 	}
+	
+	/*private JTextField getJScrollPaneNotes() {
+		if (jScrollPaneNotes == null) {
+			jScrollPaneNotes = new JTextField();
+			//jScrollPaneNotes.setViewportView(getJTextAreaNotes());
+			jScrollPaneNotes.add(getJTextAreaNotes()); //allie!!!
+		}
+		return jScrollPaneNotes;
+	}*/	
 
 	/**
 	 * This method initializes jButton1	
@@ -3369,7 +3841,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		return jTextFieldImageCount;
 	}
 
-	private JLabel getLblHigherGeography() {
+	/*private JLabel getLblHigherGeography() {
 		if (lblHigherGeography == null) {
 			lblHigherGeography = new JLabel("Higher Geography");
 		}
@@ -3399,7 +3871,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			});
 		}
 		return comboBoxHigherGeog;
-	}
+	}*/
 	private JTextField getTextFieldMaxElev() {
 		if (textFieldMaxElev == null) {
 			textFieldMaxElev = new JTextField();
@@ -3478,7 +3950,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return FilteringAgentJComboBox
 	 */
-	private FilteringAgentJComboBox getJCBDeterminer() {
+	//original code
+	/*private FilteringAgentJComboBox getJCBDeterminer() {
 		if (jCBDeterminer == null) {
 			jCBDeterminer = new FilteringAgentJComboBox();
 			jCBDeterminer.setEditable(true);
@@ -3490,7 +3963,43 @@ public class SpecimenDetailsViewPane extends JPanel {
 			});
 		}
 		return jCBDeterminer;
-	}	
+	}	*/
+
+	//allie change 1
+	/*private JTextField getJCBDeterminer() {
+		if (jCBDeterminer == null) {
+			jCBDeterminer = new JTextField();
+			jCBDeterminer.setEditable(true);
+			jCBDeterminer.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "IdentifiedBy"));
+			jCBDeterminer.addKeyListener(new java.awt.event.KeyAdapter() {
+				public void keyTyped(java.awt.event.KeyEvent e) {
+					thisPane.setStateToDirty();
+				}
+			});
+		}
+		return jCBDeterminer;
+	}*/
+	//allie change 2	
+	private JComboBox getJCBDeterminer() {
+		log.debug("calling getJCBDeterminer() ... it is " + jCBDeterminer);
+		if (jCBDeterminer == null) {
+			log.debug("initt jCBDeterminer determiner null, making a new one");
+			SpecimenLifeCycle sls = new SpecimenLifeCycle();
+			jCBDeterminer = new JComboBox<String>();
+			jCBDeterminer.setModel(new DefaultComboBoxModel<String>(sls.getDistinctDeterminers()));
+			jCBDeterminer.setEditable(true);
+			//jComboBoxCollection.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Collection", jComboBoxCollection));
+			//jCBDeterminer.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Collection"));
+			jCBDeterminer.addKeyListener(new java.awt.event.KeyAdapter() {
+				public void keyTyped(java.awt.event.KeyEvent e) {
+					thisPane.setStateToDirty();
+				}
+			});
+			AutoCompleteDecorator.decorate(jCBDeterminer);
+		}
+		return jCBDeterminer;
+	}
+	
 	
 	/**
 	 * This method initializes type status pick list

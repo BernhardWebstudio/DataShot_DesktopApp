@@ -109,7 +109,7 @@ public class Specimen implements java.io.Serializable {
 	public Specimen() {
 		setDefaults();
 	}
-
+	
 	/** Set default values for a new specimen object with no other data.
 	 * 
 	 */
@@ -122,7 +122,11 @@ public class Specimen implements java.io.Serializable {
 		this.flagInMCZbase = false;
 		this.flagAncilaryAlsoInMCZbase = false;
 		//this.preparationType = "Pinned";
-		this.natureOfId = NatureOfId.LEGACY;
+		
+		//allie change
+		//this.natureOfId = NatureOfId.LEGACY;
+		this.natureOfId = NatureOfId.EXPERT_ID;
+		//collectors.add(new Collector(this,"first collector"));
 		/* 
 		if (this.verbatimCollection==null) { this.verbatimCollection = ""; }
 		if (this.verbatimCollector==null) { this.verbatimCollector = ""; }
@@ -237,6 +241,10 @@ public class Specimen implements java.io.Serializable {
 		this.lastUpdatedBy = lastUpdatedBy;
 		this.validDistributionFlag = validDistributionFlag;
 		this.collectors = collectors;
+		//allie new
+		//collectors.add(new Collector(this, "the name"));
+		//
+		
 		this.determinations = determinations;
 		this.trackings = trackings;
 		this.numbers = numbers;

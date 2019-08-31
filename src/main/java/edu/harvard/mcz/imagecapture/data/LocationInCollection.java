@@ -47,7 +47,7 @@ public class LocationInCollection {
 
 		if (configuredcollection==null || configuredcollection.trim().length()==0) { 
 			if (coll.equals(ImageCaptureProperties.COLLECTION_ETHZENT)) { 
-				String [] values = { "Palaearctic Lepidoptera Collection" };
+				String [] values = { "ETH Entomological Collection", "Type Collection" };
 				return values;
 			} else { 
 				String [] values = {GENERAL, GENERALANT, "Type Collection", "Nabokov Collection", "Slide Collection"}; 

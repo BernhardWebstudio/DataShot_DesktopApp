@@ -19,41 +19,30 @@
  */
 package edu.harvard.mcz.imagecapture;
 
+import edu.harvard.mcz.imagecapture.data.LatLong;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-
-import javax.swing.ComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.text.DateFormatter;
-import javax.swing.text.DefaultFormatterFactory;
-import javax.swing.text.MaskFormatter;
-
 import java.awt.GridLayout;
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
-
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.text.MaskFormatter;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.swingx.combobox.ListComboBoxModel;
-
-import edu.harvard.mcz.imagecapture.data.LatLong;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.Format;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.SwingConstants;
-import javax.swing.JFormattedTextField;
 
 /**
  * @author mole
@@ -113,7 +102,16 @@ public class GeoreferenceDialog extends JDialog {
 		lblErrorLabel.setText("");
 		textFieldDecimalLat.setText(georeference.getDecLatString());
 		textFieldDecimalLong.setText(georeference.getDecLongString());
-		cbDatum.setSelectedItem(georeference.getDatum());
+		
+		log.debug("load geo data ... " + georeference.getDecLatString());
+		log.debug("load geo data ... " + georeference.getDecLongString());
+		
+		//here should set the button label
+		
+		//alliefix - should be WGS84
+		//cbDatum.setSelectedItem(georeference.getDatum());
+		cbDatum.setSelectedIndex(2);
+		
 		cbMethod.setSelectedItem(georeference.getGeorefmethod());
 		
 		txtGPSAccuracy.setText(georeference.getGpsaccuracyString());
@@ -374,6 +372,9 @@ public class GeoreferenceDialog extends JDialog {
 		@SuppressWarnings("unchecked")
 		ComboBoxModel<String> datumModel = new ListComboBoxModel<String>(LatLong.getDatumValues());
 		cbDatum = new JComboBox<String>(datumModel);
+		
+		//qllie - default should be WGS84 ?
+		
 		contentPanel.add(cbDatum);
 		
 		JLabel lblMethod = new JLabel("Method");
@@ -382,7 +383,7 @@ public class GeoreferenceDialog extends JDialog {
 		
 		@SuppressWarnings("unchecked")
 		ComboBoxModel<String> methodModel = new ListComboBoxModel<String>(LatLong.getGeorefMethodValues());
-		cbMethod = new JComboBox<String>(new DefaultComboBoxModel<String>(new String[] {"not recorded", "unknown", "GEOLocate", "Google Earth", "Gazeteer", "GPS", "MaNIS/HertNet/ORNIS Georeferencing Guidelines"}));
+		cbMethod = new JComboBox<String>(new DefaultComboBoxModel<String>(new String[] {"not recorded", "unknown", "GEOLocate", "Geoportal", "Google Earth", "Google Maps", "Gazeteer", "GPS", "Label Data", "Wikipedia", "MaNIS/HertNet/ORNIS Georeferencing Guidelines"}));
 		cbMethod.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				setState();

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -91,12 +92,34 @@ public class PositionTemplate {
 	 * @return a list of the identifiers of the currently available templates.
 	 */
 	public static List<String> getTemplateIds() { 
+		log.debug("in getTemplateIds()");
 		String[] templates = { TEMPLATE_TEST_1, TEMPLATE_DEFAULT, TEMPLATE_NO_COMPONENT_PARTS  };
 		
 		List<String> temp = Arrays.asList(templates);
 		ArrayList<String> templateIdList = new ArrayList<String>();
-		for (int i=0; i<temp.size(); i++) { 
-			templateIdList.add(temp.get(i));
+		
+		String defaultTemplatesPropertiesVal = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(
+	    		 ImageCaptureProperties.DEFAULT_TEMPLATES);
+		
+		//allie: here load the props file: leave the default and config the other var.
+		//template.default=Default template 
+		//template.default2=ETHZ_template1
+		//template.default2=ETHZ_template1,ETHZ_template2
+		if(!("").equals(defaultTemplatesPropertiesVal)){
+			StringTokenizer st2 = new StringTokenizer(defaultTemplatesPropertiesVal, ",");
+			while (st2.hasMoreElements()) {
+				//System.out.println(st2.nextElement());
+				String templ = (String)st2.nextElement();
+				log.debug("next template:::" + templ);
+				templateIdList.add(templ);
+			}
+			//templateIdList.add(defaultTemplatesPropertiesVal); //todo string tokenizer
+			log.debug("defaultTemplatesPropertiesVal::::: " + defaultTemplatesPropertiesVal);
+		}else{ //here it cycles through all the templates (if you leave template.default=Default template and template.default2=)
+			log.debug("it will cycle through all templates::::: " + defaultTemplatesPropertiesVal);
+			for (int i=0; i<temp.size(); i++) { 
+				templateIdList.add(temp.get(i));
+			}
 		}
 		TemplateLifeCycle tls = new TemplateLifeCycle();
 		List<Template> persistentTemplates = tls.findAll();

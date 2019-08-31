@@ -11,3 +11,8 @@ temptiff.tif
 imagecapture.properties
 imagecapture.log
 jobreport*csv
+.DS_Store
+.vscode
+.idea
+.factorypath
+

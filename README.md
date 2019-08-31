@@ -76,16 +76,13 @@ insert into Users (username,fullname,role,hash,description) values
 Once you have inserted the first administrator user, you should enter any additional users
 through the user interface in the application (Configuration/Users on the main menu).
 
-2) Create a not_vcs directory in the project root, copy the file
-src/main/java/hibernate.cfg.xml into that directory and edit it to supply 
-connection parameters for your production database (likewise the log4j configuration file if you want to change the logging from the production jar), 
-You should not put a password inside src/main/java/hibernate.cfg.xml...
-```shell script
-$ mkdir not_vcs
-$ cp src/main/java/hibernate.cfg.xml not_vcs/
-$ cp src/main/java/log4j.properties not_vcs/
+1) Create a the configuration properties files for the used profiles. 
+```shell script 
+$ cp profiles/dist/config.properties profiles/dev/config.properties
+$ cp profiles/dist/config.properties profiles/prod/config.properties
+$ cp profiles/dist/config.properties profiles/tes/config.properties 
 ``` 
-then build with:..
+Edit the files to add the configured credentials, then build with:..
 ```shell script
 mvn package -P production 
 ```

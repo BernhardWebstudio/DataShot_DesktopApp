@@ -19,67 +19,28 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableColumn;
-
+import edu.harvard.mcz.imagecapture.data.*;
+import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
+import edu.harvard.mcz.imagecapture.struct.CountValueTableModel;
+import edu.harvard.mcz.imagecapture.struct.VerbatimCount;
+import edu.harvard.mcz.imagecapture.ui.FilteringAgentJComboBox;
+import edu.harvard.mcz.imagecapture.ui.FilteringGeogJComboBox;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.filteredpush.qc.date.DateUtils;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
 
-import edu.harvard.mcz.imagecapture.data.Collector;
-import edu.harvard.mcz.imagecapture.data.CollectorTableModel;
-import edu.harvard.mcz.imagecapture.data.HigherGeographyComboBoxModel;
-import edu.harvard.mcz.imagecapture.data.MCZbaseGeogAuthRec;
-import edu.harvard.mcz.imagecapture.data.MCZbaseGeogAuthRecLifeCycle;
-import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
-import edu.harvard.mcz.imagecapture.data.NumberLifeCycle;
-import edu.harvard.mcz.imagecapture.data.NumberTableModel;
-import edu.harvard.mcz.imagecapture.data.Specimen;
-import edu.harvard.mcz.imagecapture.data.SpecimenLifeCycle;
-import edu.harvard.mcz.imagecapture.data.WorkFlowStatus;
-import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import edu.harvard.mcz.imagecapture.struct.CountValueTableModel;
-import edu.harvard.mcz.imagecapture.struct.VerbatimCount;
-import edu.harvard.mcz.imagecapture.struct.VerbatimCountTableModel;
-import edu.harvard.mcz.imagecapture.ui.FilteringAgentJComboBox;
-import edu.harvard.mcz.imagecapture.ui.FilteringGeogJComboBox;
-
-import java.awt.GridBagLayout;
-
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.RowSpec;
-
-import javax.swing.JLabel;
-
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.net.URL;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumn;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.swing.DefaultCellEditor;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
-import javax.swing.JTextField;
-import javax.swing.JTextArea;
-import javax.swing.JTable;
-import javax.swing.JScrollPane;
-import javax.swing.JComboBox;
-import javax.swing.BoxLayout;
 
 /**
  * @author mole

@@ -429,7 +429,8 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 			// location in collection to use, if not default provided from KEY_COLLECTION
 			// in LocationInCollection.
 			// default to ETHZ; maybe '""' would be a better choice? ;)
-			properties.setProperty(KEY_SPECIFIC_COLLECTION,"ETHZ-ENT");	
+			properties.setProperty(KEY_SPECIFIC_COLLECTION,"ETHZ-ENT");
+			log.debug("Forced configuration: ETHZ-ENT");
 		} 
 		if (!properties.containsKey(KEY_COLLECTION))  {
 			// Root of the path of the place where all image files should be stored.
@@ -449,7 +450,7 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 					ImageCaptureProperties.COLLECTION_ETHZENT);
 			}
 		}
-		log.debug("Forced configuration: ETHZ-ENT");
+
 		if (!properties.containsKey(KEY_IMAGEBASE))  {
 			// Root of the path of the place where all image files should be stored.
 			//properties.setProperty(KEY_IMAGEBASE,"/mount/lepidopteraimages");

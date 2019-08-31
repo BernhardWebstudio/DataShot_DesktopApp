@@ -26,7 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionException;
-import org.hibernate.classic.Session;
+import org.hibernate.Session;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 

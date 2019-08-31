@@ -10,7 +10,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.SQLQuery;
 import org.hibernate.SessionException;
-import org.hibernate.classic.Session;
+import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 
 import edu.harvard.mcz.imagecapture.Singleton;

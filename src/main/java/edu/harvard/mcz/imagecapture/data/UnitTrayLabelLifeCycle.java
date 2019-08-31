@@ -21,15 +21,16 @@ package edu.harvard.mcz.imagecapture.data;
 
 import static org.hibernate.criterion.Example.create;
 
-import java.math.BigDecimal;
 import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.SQLQuery;
+import org.hibernate.Session;
 import org.hibernate.SessionException;
-import org.hibernate.classic.Session;
+
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 
 /** UnitTrayLabelLifeCycle

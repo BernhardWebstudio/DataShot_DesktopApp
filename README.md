@@ -84,7 +84,7 @@ $ cp profiles/dist/config.properties profiles/tes/config.properties
 ``` 
 Edit the files to add the configured credentials, then build with:..
 ```shell script
-mvn package -P production 
+mvn package -P prod
 ```
 An executable jar file will be found in the build/ directory (and in the target/ directory).
 

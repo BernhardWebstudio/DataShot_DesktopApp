@@ -18,3 +18,4 @@ jobreport*csv
 /profiles/dev/config.properties
 /profiles/test/config.properties
 /profiles/prod/config.properties
+dependency-reduced-pom.xml

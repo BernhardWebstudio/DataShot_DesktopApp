@@ -1,5 +1,5 @@
 /**
- * WorkFlowStatus.java 
+ * WorkFlowStatus.java
  *
  * Copyright © 2009 President and Fellows of Harvard College
  *
@@ -11,10 +11,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Author: Paul J. Morris
  */
 package edu.harvard.mcz.imagecapture.data;
@@ -81,8 +81,13 @@ public class WorkFlowStatus {
 	 */
 	public static final String STAGE_DONE = "Moved to MCZbase";
 	
-	private static final String[] CHANGABLE_VALUES = {STAGE_0, STAGE_1,  STAGE_VERBATIM, STAGE_CLASSIFIED, STAGE_2,STAGE_QC_FAIL,STAGE_QC_PASS,STAGE_CLEAN}; 
-	private static final String[] VALUES = {STAGE_0, STAGE_1, STAGE_VERBATIM, STAGE_CLASSIFIED, STAGE_2,STAGE_QC_FAIL,STAGE_QC_PASS,STAGE_CLEAN,STAGE_DONE}; 
+	/**
+	 * Specimen record has to be deleted. 
+	 */
+	public static final String STAGE_DELETE = "Removal Requested";
+	
+	private static final String[] CHANGABLE_VALUES = {STAGE_0, STAGE_1,  STAGE_VERBATIM, STAGE_CLASSIFIED, STAGE_2,STAGE_QC_FAIL,STAGE_QC_PASS,STAGE_CLEAN, STAGE_DELETE}; 
+	private static final String[] VALUES = {STAGE_0, STAGE_1, STAGE_VERBATIM, STAGE_CLASSIFIED, STAGE_2,STAGE_QC_FAIL,STAGE_QC_PASS,STAGE_CLEAN,STAGE_DONE,STAGE_DELETE}; 
 	private static final String[] VERBATIM_VALUES = {STAGE_1, STAGE_VERBATIM};
 	private static final String[] VERBATIM_CLASSIFIED_VALUES = {STAGE_VERBATIM, STAGE_CLASSIFIED};
 	
@@ -107,6 +112,7 @@ public class WorkFlowStatus {
 		String[] result = VERBATIM_VALUES;  
 		return result;
 	}	
+
 	/**
 	 * Obtain the list of all workflow status values that can be used when a record may
 	 * be put into a verbatim classified state.

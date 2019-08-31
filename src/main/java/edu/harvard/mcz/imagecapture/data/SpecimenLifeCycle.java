@@ -4,27 +4,7 @@
  */
 package edu.harvard.mcz.imagecapture.data;
 
-// Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
-import org.hibernate.EntityMode;
-import org.hibernate.FetchMode;
-import org.hibernate.HibernateException;
-import org.hibernate.LockMode;
-import org.hibernate.Query;
-import org.hibernate.SessionException;
-import org.hibernate.classic.Session;
-import org.hibernate.criterion.Example;
-import org.hibernate.metadata.ClassMetadata;
+import static org.hibernate.criterion.Example.create;
 
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.exceptions.ConnectionException;
@@ -34,7 +14,21 @@ import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
 import edu.harvard.mcz.imagecapture.struct.CountValue;
 import edu.harvard.mcz.imagecapture.struct.GenusSpeciesCount;
 import edu.harvard.mcz.imagecapture.struct.VerbatimCount;
-import static org.hibernate.criterion.Example.create;
+// Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.Criteria;
+import org.hibernate.FetchMode;
+import org.hibernate.HibernateException;
+import org.hibernate.LockMode;
+import org.hibernate.query.Query;
+import org.hibernate.Session;
+import org.hibernate.SessionException;
+import org.hibernate.criterion.Example;
 
 /**
  * Home object for domain model class Specimen.
@@ -771,12 +765,12 @@ for (int i=0; i<results.size(); i++) {
 	public int getFieldSize(String fieldName) { 
 		int returnValue = 0; 
 //		Specimen s = new Specimen();
-		ClassMetadata specimenMetadata = HibernateUtil.getSessionFactory().getClassMetadata(Specimen.class);
-		String[] p = specimenMetadata.getPropertyNames();
-		for (int i=0; i < p.length; i++ ) { 
-			System.out.println(p[i]);
-			specimenMetadata.getPropertyValue(p[i], "length", EntityMode.MAP);
-		}
+		// ClassMetadata specimenMetadata = HibernateUtil.getSessionFactory().getClassMetadata(Specimen.class);
+		// String[] p = specimenMetadata.getPropertyNames();
+		// for (int i=0; i < p.length; i++ ) { 
+		// 	System.out.println(p[i]);
+		// 	specimenMetadata.getPropertyValue(p[i], "length", EntityMode.MAP);
+		// }
 		
 //		Object[] propertyValues = specimenMetadata.getPropertyValues(s, EntityMode.POJO);
 //		String[] propertyNames = specimenMetadata.getPropertyNames();

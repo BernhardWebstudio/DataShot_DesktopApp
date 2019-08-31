@@ -54,9 +54,9 @@ public class Singleton {
 	private  String username;
 	private  String userFullName;
 	private  Users user = null;
-	private  BarcodeMatcher barcodeMatchedr = null;
+	private  BarcodeMatcher barcodeMatcher = null;
 	private  BarcodeBuilder barcodeBuilder = null;
-	private  RunnableJobTableModel jobList = null;
+	private  RunnableJobTableModel jobList = new RunnableJobTableModel();
 	private  int characterWidth = 10;
 
 	/** Private constructor to prevent the creation
@@ -198,14 +198,14 @@ public class Singleton {
 	 * @return the barcodeMatchedr
 	 */
 	public BarcodeMatcher getBarcodeMatcher() {
-		return barcodeMatchedr;
+		return barcodeMatcher;
 	}
 
 	/**
 	 * @param barcodeMatcher the barcodeMatchedr to set
 	 */
 	public void setBarcodeMatcher(BarcodeMatcher barcodeMatcher) {
-		this.barcodeMatchedr = barcodeMatcher;
+		this.barcodeMatcher = barcodeMatcher;
 	}
 
 	/**

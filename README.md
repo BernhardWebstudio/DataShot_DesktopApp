@@ -50,55 +50,45 @@ Use maven to build (ant is optionally invoked by maven to build executable jar f
 
 You will need to do some preparation work in order to build.
 
-(1) The Oracle JDBC driver isn't available in a public Maven repository.  
-You will need to download the jar from Oracle and add it locally (to support the build
-even if you aren't using Oracle): 
-
-Download the Oracle 10g release 2 (10.2.0.5) JDBC driver ojdbc14.jar 
-from oracle.  
-
-Add it to your local .m2 
-
-    mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc14 \
-      -Dversion=10.2.0.5.0 -Dpackaging=jar -Dfile=ojdbc14.jar -DgeneratePom=true
-
-(2) Create a test database.  A dump of the schema of a working 
-test database (as of version 1.2.2) is in docs_manual/sql/mysql_ver1.2.2.sql
+1) Create a test database.  A dump of the schema of a working 
+test database (as of version 1.2.2) is in `docs_manual/sql/mysql_ver1.2.2.sql`
 the expected name, user and location of this database are in 
-src/main/java/hibernate.cfg.xml (you will need to create a database lepidoptera).  
-(The default name of the database is lepidoptera, but this can be changed, and one database 
+`src/main/java/hibernate.cfg.xml` (you will need to create a database `lepidoptera`).  
+(The default name of the database is `lepidoptera`, but this can be changed, and one database 
 can be configured for testing and another for production use).
-
-
-    mysql lepidoptera -p < docs_manual/sql/mysql_ver1.2.2.sql
+```shell script
+mysql lepidoptera -p < docs_manual/sql/mysql_ver1.2.2.sql
+```
 
 Once this database has been created, you'll need to create a user that the
-application will use to connect to the database, that is (in the default configuration) a user LEPIDOPTERA 
+application will use to connect to the database, that is (in the default configuration) a user LEPIDOPTERA
 with select/insert/update/delete privileges on the lepidoptera schema on localhost.
+```SQL
+grant select, insert, update, delete on lepidoptera.* to 'LEPIDOPTERA'@'localhost';
+```  
+And then insert a row for a DataShot administrator into the `LEPIDPTERA.Users` table. 
 
-    grant select, insert, update, delete on lepidoptera.* to 'LEPIDOPTERA'@'localhost';     
-
-And then insert a row for a DataShot administrator into the LEPIDPTERA.Users table. 
-
-    insert into Users (username,fullname,role,hash,description) values
+```SQL
+insert into Users (username,fullname,role,hash,description) values
       ('useremail','full name','Administrator',sha1('password'),'the users role in the project');
+```
 
 Once you have inserted the first administrator user, you should enter any additional users
 through the user interface in the application (Configuration/Users on the main menu).
 
-(3) Create a not_vcs directory in the project root, copy the file
+2) Create a not_vcs directory in the project root, copy the file
 src/main/java/hibernate.cfg.xml into that directory and edit it to supply 
 connection parameters for your production database (likewise the log4j configuration file if you want to change the logging from the production jar), 
-You should not put a password inside src/main/java/hibernate.cfg.xml.
-
-     $ mkdir not_vcs
-     $ cp src/main/java/hibernate.cfg.xml not_vcs/
-     $ cp src/main/java/log4j.properties not_vcs/
-
-then build with:
-
-    mvn package -P production 
-
+You should not put a password inside src/main/java/hibernate.cfg.xml...
+```shell script
+$ mkdir not_vcs
+$ cp src/main/java/hibernate.cfg.xml not_vcs/
+$ cp src/main/java/log4j.properties not_vcs/
+``` 
+then build with:..
+```shell script
+mvn package -P production 
+```
 An executable jar file will be found in the build/ directory (and in the target/ directory).
 
 If you are working with an IDE (such as eclipse), you will probably want to use the following somewhat
@@ -107,25 +97,26 @@ and then to clean out the target/ directory so that your IDE will use the config
 from src/main/java rather than not_vcs (in target/classes) (letting your build with the IDE use 
 the default hibernate and log4j configurations, rather than the production ones, which get placed 
 where the IDE will used them by _mvn clean install -P production_).  
-
-    mvn clean install clean compile -P production
-
+```shell script
+mvn clean install clean compile -P production
+```
 You can also run integration tests once you have your local database and a user set up using the integrationTests profile:
-
-    mvn package -P integrationTests
-
+```shell script
+mvn package -P integrationTests
+```
 This will present you with a login dialog to run the tests, populated from the values in your src/main/java/hibernate.cfg.xml file.
 
 The resulting executable jar file will be in build/Datashot{version}-jar-with-dependencies.jar,
 you can run it, for example, with:
-
-    java -jar DataShot-1.2.4-jar-with-dependencies.jar 
-
+```shell script
+java -jar DataShot-1.2.4-jar-with-dependencies.jar 
+```
 
 Builds were previously done with a mix of maven and ant to build the executable jar.  These are still available with
 the profile ant (which will leave executable jars in the build/ directory: 
-
-    mvn package -P ant
+```shell script
+mvn package -P ant
+```
 
 Note: If using maven 2, and you get a build error in the form of dependency problem about jai-image-io-core: 
 
@@ -133,16 +124,16 @@ Note: If using maven 2, and you get a build error in the form of dependency prob
     [INFO] ------------------------------------------------------------------------
     [INFO] Failed to resolve artifact.
     Unable to get dependency information: Unable to read the metadata file for artifact 'com.github.jai-imageio:jai-imageio-core:jar': Invalid JDK version in profile 'java8-and-higher': Unbounded range: [1.8, for project com.github.jai-imageio:jai-imageio-core
-  com.github.jai-imageio:jai-imageio-core:jar:1.3.1
+    com.github.jai-imageio:jai-imageio-core:jar:1.3.1
 
 See http://stackoverflow.com/questions/42155692/why-isnt-zxing-playing-nicely-with-ant-java8-and-the-pom-xml for notes on how 
 to fix a syntax error in the pom in your local repository. You will need to edit ~/.m2/repository/com/github/jai-imageio/jai-imageio-core/1.3.1/jai-imageio-core-1.3.1.pom to change <jdk>[1.8,</jdk> to <jdk>[1.8,)</jdk>.  
  
 The resulting executable jar file will be in build/ImageCapture.jar,
 you can run it with:
-
-    java -jar ImageCapture.jar 
-
+```shell script
+java -jar ImageCapture.jar 
+```
 You should not redistribute this file outside your organization.
 
 There will also be an executable jar built by maven in 
@@ -160,14 +151,14 @@ The ant buildAppJar.xml file is invoked  with maven in the package phase.
 order to build a CandidateImageFile.jar that can examine an image file or
 a directory of image files and produce a list of filenames and barcodes found
 in the files.
-
-    ant -f build_CIF.xml
-
+```shell script
+ant -f build_CIF.xml
+```
 The resulting executable jar file will be in build/CandidateImageFile.jar,
 you can run it with:
-
-    java -jar CandidateImageFile.jar -h
-
+```shell script
+java -jar CandidateImageFile.jar -h
+```
 # Setup 
 
 Setup involves configuring the application, building one or more carriers, 
@@ -185,7 +176,7 @@ Each image is of a single cataloged item.
 
 Each image contains a barcode containing the catalog number of the specimen in the image.  
 
-Catalog numbers barcodes follow a known pattern (e.g. [MCZ-ENT00061419](http://mczbase.mcz.harvard.edu/MediaSet.cfm?media_id=38974).
+Catalog numbers barcodes follow a known pattern (e.g. [MCZ-ENT00061419](http://mczbase.mcz.harvard.edu/MediaSet.cfm?media_id=38974)).
 
 Each image contains a barcode containing the current identification as structured data in a known configuration produced by the PreCapture application.
 

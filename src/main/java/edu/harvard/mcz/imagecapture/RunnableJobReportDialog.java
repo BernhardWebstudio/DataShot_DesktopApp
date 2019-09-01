@@ -19,44 +19,35 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import javax.swing.JPanel;
-
+import edu.harvard.mcz.imagecapture.jobs.RunnableJobError;
+import edu.harvard.mcz.imagecapture.jobs.RunnableJobErrorTableModel;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.BorderLayout;
-import java.awt.Toolkit;
-
-import javax.swing.JDialog;
-import javax.swing.JTable;
-
-import java.awt.GridBagLayout;
-
-import javax.swing.JLabel;
-
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.Toolkit;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.TableModel;
-
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import edu.harvard.mcz.imagecapture.jobs.RunnableJobError;
-import edu.harvard.mcz.imagecapture.jobs.RunnableJobErrorTableModel;
-
-import java.awt.Insets;
-import java.io.IOException;
-import java.io.PrintWriter;
 
 /** RunnableJobReportDialog
  * 
@@ -267,6 +258,9 @@ public class RunnableJobReportDialog extends JDialog {
 		return jTextArea;
 	}
 
+	/**
+	 * Save the report into a csv file
+	 */
 	protected void serializeTableModel() {
 		PrintWriter out = null;
 		CSVPrinter writer = null;
@@ -274,36 +268,14 @@ public class RunnableJobReportDialog extends JDialog {
 			int cols = jTable.getModel().getColumnCount();
 			CSVFormat csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL).withHeaderComments(jTextArea.getText());
 			TableModel model = jTable.getModel();
-			switch (cols) { 
-			case 9:
-				csvFormat =  CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL).
-				     withHeader(model.getColumnName(0), model.getColumnName(1), model.getColumnName(2), model.getColumnName(3),
-				        	model.getColumnName(4), model.getColumnName(5), model.getColumnName(6), model.getColumnName(7),
-				        	model.getColumnName(8)).
-				     withCommentMarker('*').
-				     withHeaderComments(jTextArea.getText());
-				break;
-			case 6: 
-				csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL). 
-					withHeader(model.getColumnName(0), model.getColumnName(1), model.getColumnName(2), model.getColumnName(3),
-							model.getColumnName(4), model.getColumnName(5)). 
-				 	withCommentMarker('*').
-					withHeaderComments(jTextArea.getText());
-				break;
-			case 5: 
-				csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL). 
-					withHeader(model.getColumnName(0), model.getColumnName(1), model.getColumnName(2), model.getColumnName(3),
-							model.getColumnName(4)). 
-				 	withCommentMarker('*').
-					withHeaderComments(jTextArea.getText());
-				break;				
-			case 4: 
-				csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL). 
-				 	withHeader(model.getColumnName(0), model.getColumnName(1), model.getColumnName(2), model.getColumnName(3)). 
-				 	withCommentMarker('*').
-				 	withHeaderComments(jTextArea.getText());
-				break;
+			csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL).withCommentMarker('*').
+			withHeaderComments(jTextArea.getText());
+			ArrayList<String> titles = new ArrayList<String>();
+			for (int i = 0; i < cols; i++) {
+				titles.add(i, model.getColumnName(i));
 			}
+
+			csvFormat = csvFormat.withHeader((String[]) titles.toArray(new String[0]));
 			
 			log.debug(jTextArea.getText());
 			log.debug(csvFormat.getHeaderComments());
@@ -312,7 +284,7 @@ public class RunnableJobReportDialog extends JDialog {
 			Date now = new Date(); 
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyymmdd_HHmmss");
 			String time = dateFormat.format(now);
-			String filename = "jobreport_"+time+".csv"; 
+			String filename = "jobreport_" + time + ".csv";
 			out = new PrintWriter(filename);
  			
 			writer = new CSVPrinter(out, csvFormat);
@@ -329,17 +301,18 @@ public class RunnableJobReportDialog extends JDialog {
 			}
 			writer.flush();
 			writer.close();
-			JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(), "Saved report to file: " + filename , "Report to CSV file", JOptionPane.OK_OPTION);	
+			JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(), "Saved report to file: " + filename , "Report to CSV file", JOptionPane.INFORMATION_MESSAGE);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e);
 		} finally { 
 			try { 
 			   out.close();	
-			} catch (Exception e) {} 
+			} catch (Exception e) {
+				log.error(e);} 
 			try { 
 			   writer.close();	
-			} catch (Exception e) {} 
+			} catch (Exception e) {
+				log.error(e);} 
 			
 		}
 	}

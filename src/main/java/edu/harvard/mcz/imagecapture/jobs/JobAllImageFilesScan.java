@@ -628,7 +628,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 								String path = ImageCaptureProperties.getPathBelowBase(fileToCheck);
 								tryMe.setPath(path);
 								List <ICImage> matches = imageCont.findByExample(tryMe);
-								log.debug(matches.size());
+								log.debug(matches != null ? matches.size() : "no matches found");
 								if (matches!=null && matches.size()==1
 										&& matches.get(0).getRawBarcode()==null
 										&& matches.get(0).getRawExifBarcode()==null
@@ -1055,7 +1055,6 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 										   counter.incrementFilesDatabased();
 										}
 									} catch (SaveFailedException e) {
-										// TODO Auto-generated catch block
 										log.error(e.getMessage(),e);
 										counter.incrementFilesFailed();
 										String failureMessage = "Failed to save image record.  " + e.getMessage();
@@ -1076,7 +1075,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 								} else {
 									if (matches==null) { 
 										counter.incrementFilesFailed();
-										String failureMessage = "Probable bad data in database.  Null match searching for image file.  Notify the database administrator.";
+										String failureMessage = "Probable bad data in database. Null match searching for image file. Notify the database administrator.";
 										RunnableJobError error =  new RunnableJobError(filename, "Bad Data",
 												tryMe.getFilename(), tryMe.getPath(), failureMessage,
 												null, null,

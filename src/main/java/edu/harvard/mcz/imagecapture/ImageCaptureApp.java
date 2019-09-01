@@ -301,6 +301,7 @@ public class ImageCaptureApp {
 		
 		// Setup to store a list of running RunnableJobs.
 		Singleton.getSingletonInstance().setJobList(new RunnableJobTableModel());
+	    log.debug("Set runnable job table.");
 		
 		Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		Singleton.getSingletonInstance().getMainFrame().setState(MainFrame.STATE_RUNNING);

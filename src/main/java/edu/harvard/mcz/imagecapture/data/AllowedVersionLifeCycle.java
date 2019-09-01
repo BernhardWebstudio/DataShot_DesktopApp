@@ -87,7 +87,12 @@ public class AllowedVersionLifeCycle {
 		}
 		return allowed.toString();
 	}
-	
+
+	/**
+	 * Provide a list of all the allowed versions listed in the database.
+	 *
+	 * @return List[AllowedVersion] listing all versions according to database
+	 */
 	public List<AllowedVersion> findAll() {
 		log.debug("finding all AllowedVersions");
 		try {

@@ -76,7 +76,7 @@ import edu.harvard.mcz.imagecapture.interfaces.TaxonNameReturner;
  * a display of the barcode, labels, unit tray label, and specimen parts of the image, and if persistence is requested, 
  * stores the image and specimen data in the database and launches a UI for editing the specimen record. 
  * The image file to scan is selected by the user from a file picker dialog which is launched when starting the job.
- * <BR>
+ * 
  * Usage:
  * <pre>
       JobSingleBarcodeScan s = new JobSingleBarcodeScan(true);

@@ -17,15 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-//package net.aa3sd.SARManager.math;
 package edu.harvard.mcz.imagecapture.utility;
+
 /**
  * @author Paul J. Morris
  *
  */
 public class MathUtility {
-
-
 	/**
 	 * Test for equality of double precision numbers with values near 1
 	 * 

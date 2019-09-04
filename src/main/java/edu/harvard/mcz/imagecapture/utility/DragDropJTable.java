@@ -29,7 +29,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-/** DragDropJTable a JTable that supports drag and drop
+/** 
+ * DragDropJTable: a JTable that supports drag and drop
  * 
  * @author Paul J. Morris
  *

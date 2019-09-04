@@ -49,7 +49,7 @@ public class MetadataRetriever {
 	/**Generates a MaskFormatter for a JFormattedTextField based upon the length (and potentially the type) of the
 	 * underlying text field.  Doesn't work well for normal varchar() fields, as the JTextField appears to be full
 	 * of spaces.   
-	 * <BR>
+	 * 
 	 * Usage:
 	 * <pre>
 	    JFormattedTextField jtext_for_fieldname = new JFormattedTextField(MetadataRetriever(tablename.class,"fieldname"));
@@ -77,7 +77,7 @@ public class MetadataRetriever {
 	
 	/**
 	 * Generates an InputVerifier for a JTextField
-	 * <BR>
+	 * 
 	 * Usage:
 	 * <pre>
 	    JTextField jText_for_fieldname = new JTextField();
@@ -155,7 +155,7 @@ public class MetadataRetriever {
 	
 	/** Determine the length of a field from the class of the proxy object
 	 * for the table and the name of the field.
-	 * <BR>
+	 * 
 	 * Usage:
 	 * <pre>
 	     int genusSize = MetadataRetriever.getFieldLength(Specimen.class, "genus");

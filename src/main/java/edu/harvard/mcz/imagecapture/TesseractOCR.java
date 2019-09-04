@@ -33,7 +33,7 @@ import edu.harvard.mcz.imagecapture.exceptions.OCRReadException;
 import edu.harvard.mcz.imagecapture.interfaces.OCR;
 
 /**Uses a system runtime call to tesseract to obtain OCR text from a TIFF image file.
- * <BR> 
+ *  
  * Usage: 
  * <pre>
    String output = null; 

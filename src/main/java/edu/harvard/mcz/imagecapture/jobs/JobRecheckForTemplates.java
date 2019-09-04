@@ -102,13 +102,13 @@ public class JobRecheckForTemplates implements RunnableJob, Runnable {
 	/**
 	 * Create a recheck for templates job to bring up dialog to pick a specific directory  
 	 * on which to recheck image records for templates.
-	 * <BR>
+	 * 
 	 * Behavior:
-	 * <BR>
+	 * 
 	 * whatToScan=SCAN_ALL, all records having no template and a linked specimen are rechecked.
 	 * whatToScan=SCAN_SELECT, startAt is used as starting point for directory chooser dialog.
 	 * whatToScan=SCAN_SPECIFIC, startAt is used as starting point for repeat (if null falls back to SCAN_SELECT).
-	 * <BR> 
+	 *  
 	 *
 	 * @param whatToScan one of SCAN_SPECIFIC, SCAN_SELECT
 	 * @param startAt null or a directory starting point.

@@ -19,7 +19,8 @@
  */
 package edu.harvard.mcz.imagecapture.interfaces;
 
-/** DataChangeListener
+/** 
+ * DataChangeListener
  * 
  * @author Paul J. Morris
  *

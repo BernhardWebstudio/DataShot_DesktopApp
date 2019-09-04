@@ -93,23 +93,6 @@ public class LabelEncoder {
 		BitMatrix barcode = getQRCodeMatrix();
 		BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(barcode);
 		// ZXing now has MatrixToImageWriter to avoid looping through byte arrays.
-//		byte[][] bca = barcode.getArray();
-//		byte[] data = new byte[200*4*200*4];
-//		int z=0;
-//		for (int x=0; x<200; x++) { 
-//			for (int y=0; y<200; y++)  {
-//				data[z++] = bca[x][y];
-//			}
-//		}
-//		Image image = null;
-//		try {
-//			image = Image.getInstance(200, 200, 1, 8, data);
-//			image.scalePercent(50f);
-//		} catch (BadElementException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} 
-//		data = null;
 		Image image = null;
 		try {
 			image = Image.getInstance(bufferedImage,null);

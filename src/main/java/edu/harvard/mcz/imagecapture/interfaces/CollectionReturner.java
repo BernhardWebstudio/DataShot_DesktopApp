@@ -25,7 +25,8 @@ package edu.harvard.mcz.imagecapture.interfaces;
  */
 public interface CollectionReturner {
 	
-	/** get the Collection from which a collection object came.
+	/** 
+	 * Get the Collection from which a collection object came.
 	 * 
 	 * @return A text string representing the name of the collection.
 	 */

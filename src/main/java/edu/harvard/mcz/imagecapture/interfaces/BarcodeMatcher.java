@@ -19,9 +19,10 @@
  */
 package edu.harvard.mcz.imagecapture.interfaces;
 
-/** BarcodeMatcher, interface for retrieving the numeric part of the text string found in a
+/** 
+ * BarcodeMatcher, interface for retrieving the numeric part of the text string found in a
  * barcode that identifies a specimen, and for checking if a text string matches the pattern
- * for the text that is expected to go in a barcode.  Only concerns the text that is stored
+ * for the text that is expected to go in a barcode. Only concerns the text that is stored
  * in a barcode, not the actual encoding of the barcode.  
  * 
  * @author Paul J. Morris

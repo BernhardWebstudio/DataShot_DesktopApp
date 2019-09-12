@@ -19,8 +19,7 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -39,6 +38,9 @@ import java.util.Iterator;
 
 import javax.imageio.ImageIO;
 
+import com.adobe.internal.xmp.XMPException;
+import com.adobe.internal.xmp.XMPMeta;
+import edu.harvard.mcz.imagecapture.jobs.JobSingleBarcodeScan;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
@@ -48,8 +50,6 @@ import org.apache.commons.cli.PosixParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.adobe.xmp.XMPException;
-import com.adobe.xmp.XMPMeta;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.imaging.jpeg.JpegMetadataReader;
@@ -292,7 +292,7 @@ public class CandidateImageFile {
             public void run() {
             	BulkMediaFrame frame = new BulkMediaFrame();
 				frame.pack();
-				frame.setVisible(true);;
+				frame.setVisible(true);
             }
         });
 	}
@@ -402,7 +402,7 @@ public class CandidateImageFile {
 	/**
 	 * Constructor with no parameters to use to access convenience static methods.
 	 * Must follow with setFile() to use for processing images.
-	 * @see setFile();
+	 * @see this.setFile(...);
 	 */
 	public CandidateImageFile() { 
 	}
@@ -546,7 +546,6 @@ public class CandidateImageFile {
 		TextStatus returnValue = new TextStatus("",RESULT_NOT_CHECKED);
 		BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 
-		
 		if (generateDebugImage) { 
 			try {
 				int h = bitmap.getBlackMatrix().getHeight();
@@ -599,7 +598,7 @@ public class CandidateImageFile {
 			//Probable bug in xzing, reader.decode can throw ArrayIndexOutOfBoundsException
 			//as well as the expected ReaderException.  It looks like there's an assumption 
 			//hidden in the bitmapMatrix that the height and width are the same.
-			result = reader.decode(bitmap,hints);
+			result = reader.decode(bitmap, hints);
 			returnValue.setText(result.getText());
 			returnValue.setStatus(RESULT_BARCODE_SCANNED);
 		} catch (ReaderException e) {
@@ -685,18 +684,18 @@ public class CandidateImageFile {
 					int width =  positionTemplate.getUtBarcodeSize().width; 
 					//*  pixels whose x coordinate is in [left,right)
 					int bottom =  top + positionTemplate.getUtBarcodeSize().height; //* @param bottom likewise, one more than the y coordinate of the bottommost pixels to decode
-					int height =  positionTemplate.getUtBarcodeSize().height; 
-					
+					int height =  positionTemplate.getUtBarcodeSize().height;
+
 					returnValue = readBarcodeFromLocation(image, left, top, width, height, false);
-					if (returnValue.length()>0) { 
+					if (returnValue.length()>0) {
 					   barcodeStatus = RESULT_BARCODE_SCANNED;
-					} else { 
+					} else {
 						returnValue = "Failed to read a barcode from templated location.";
 						barcodeStatus = RESULT_ERROR;
 					}
 					log.debug(returnValue);
 					log.debug("barcodeStatus=" + barcodeStatus);
-					
+
 
 				} else {
 					// image is narrower than templated area.
@@ -1051,17 +1050,17 @@ public class CandidateImageFile {
 					//*  pixels whose x coordinate is in [left,right)
 					int bottom =  top + positionTemplate.getBarcodeSize().height; //* @param bottom likewise, one more than the y coordinate of the bottommost pixels to decode
 					int width =  positionTemplate.getBarcodeSize().width; 
-					int height =  positionTemplate.getBarcodeSize().height; 
+					int height =  positionTemplate.getBarcodeSize().height;
 					returnValue = readBarcodeFromLocation(image, left, top, width, height, false);
-					if (returnValue.length()>0) { 
+					if (returnValue.length()>0) {
 						barcodeStatus = RESULT_BARCODE_SCANNED;
-					} else { 
+					} else {
 						returnValue = "Failed to read a barcode from templated location.";
 						barcodeStatus = RESULT_ERROR;
 					}
 					log.debug(returnValue);
 					log.debug("barcodeStatus=" + barcodeStatus);
-			
+
 
 
 				} else { 
@@ -1110,14 +1109,11 @@ public class CandidateImageFile {
 				result = reader.decode(bitmap,hints);
 				returnValue= result.getText();
 				barcodeStatus = RESULT_BARCODE_SCANNED;
-			} catch (ReaderException e) {
+			} catch (ReaderException | IllegalArgumentException e) {
 				returnValue = e.toString() + " " + e.getMessage();
 				barcodeStatus = RESULT_ERROR;
-			} catch (IllegalArgumentException e1) {
-				// seen in MCZ-ENT00051680
-				returnValue = e1.toString() + " " + e1.getMessage();
-				barcodeStatus = RESULT_ERROR; 
-			} catch (Exception e2) { 
+			} // seen in MCZ-ENT00051680
+			catch (Exception e2) {
 				// Just in case reader.decode throws some other error, 
 				// we should trap it rather than failing.
 				returnValue =  "Unexpected error from  ZXing decoder: " + e2.getMessage();
@@ -1353,88 +1349,49 @@ public class CandidateImageFile {
 						if (checkResult.getStatus()==CandidateImageFile.RESULT_ERROR) { 
 							log.debug("Trying one stop brighter");
 							BufferedImage crop = image.getSubimage(left, top, width, height);
-							BufferedImage cropAdjust = crop;
-							RescaleOp rescaleOp = new RescaleOp(1.2f, 15, null);
-							rescaleOp.filter(crop, cropAdjust);
-							cropSource = new BufferedImageLuminanceSource(cropAdjust);
-							checkResult = temp.checkSourceForBarcode(cropSource, true);
-							if (checkResult.getStatus()!=CandidateImageFile.RESULT_ERROR) { 
-								returnValue = checkResult.getText();
-							} 
-							if (checkResult.getStatus()==CandidateImageFile.RESULT_ERROR) { 
+							returnValue = CandidateImageFile.checkWithConfiguration(crop, 1.2f, 15, null);
+							if (returnValue == null) {
 								log.debug("Trying one stop dimmer");
-								rescaleOp = new RescaleOp(0.80f, -15, null);
-								rescaleOp.filter(crop, cropAdjust);
-								cropSource = new BufferedImageLuminanceSource(cropAdjust);
-								checkResult = temp.checkSourceForBarcode(cropSource, true);
-								if (checkResult.getStatus()!=CandidateImageFile.RESULT_ERROR) { 
-									returnValue = checkResult.getText();
-								} 
-								if (checkResult.getStatus()==CandidateImageFile.RESULT_ERROR) {
+								returnValue = CandidateImageFile.checkWithConfiguration(crop, 0.80f, -15, null);
+							}
+							if (returnValue == null) {
 									log.debug("Trying two stops dimmer");
-									rescaleOp = new RescaleOp(0.60f, -30, null);
-									rescaleOp.filter(crop, cropAdjust);
-									cropSource = new BufferedImageLuminanceSource(cropAdjust);
-									checkResult = temp.checkSourceForBarcode(cropSource, true);
-									if (checkResult.getStatus()!=CandidateImageFile.RESULT_ERROR) { 
-										returnValue = checkResult.getText();
-									} 
-									if (checkResult.getStatus()==CandidateImageFile.RESULT_ERROR) {
+								returnValue = CandidateImageFile.checkWithConfiguration(crop, 0.60f, -30, null);
+								if (returnValue == null) {
 										log.debug("Trying two stops brighter");
-										rescaleOp = new RescaleOp(1.4f, 30, null);
-										rescaleOp.filter(crop, cropAdjust);
-										cropSource = new BufferedImageLuminanceSource(cropAdjust);
-										checkResult = temp.checkSourceForBarcode(cropSource, true);
-										if (checkResult.getStatus()!=CandidateImageFile.RESULT_ERROR) { 
-											returnValue = checkResult.getText();
-										} 
-										if (checkResult.getStatus()==CandidateImageFile.RESULT_ERROR) {
+										returnValue = CandidateImageFile.checkWithConfiguration(crop, 1.4f, 30, null);
+										if (returnValue == null) {
 											log.debug("Trying three stops brighter");
-											rescaleOp = new RescaleOp(1.6f, 45, null);
-											rescaleOp.filter(crop, cropAdjust);
-											cropSource = new BufferedImageLuminanceSource(cropAdjust);
-											checkResult = temp.checkSourceForBarcode(cropSource, true);
-											if (checkResult.getStatus()!=CandidateImageFile.RESULT_ERROR) { 
-												returnValue = checkResult.getText();
-											} 
+											returnValue = CandidateImageFile.checkWithConfiguration(crop, 1.6f, 45, null);
 										}
 									}
 								}
 							}
 						}
-						if (checkResult.getStatus()==RESULT_ERROR) { 
+						if (returnValue == null) {
 							// Try again with some small displacements of window
 							boolean doneLoop = false;
-							for (int shiftLeft=left-3; shiftLeft<=left+3; shiftLeft=shiftLeft+6) { 
-								for (int shiftTop=top-3; shiftTop<=top+3; shiftTop=shiftTop+6) { 
-									if (!doneLoop) { 
-										try { 
+							for (int shiftLeft=left-3; shiftLeft<=left+3; shiftLeft=shiftLeft+6) {
+								for (int shiftTop = top - 3; shiftTop <= top + 3; shiftTop = shiftTop + 6) {
+									if (!doneLoop) {
 										inBounds = false;
-										try { 
+										try {
 											log.debug("Trying displacement of crop: " + shiftLeft + "," + shiftTop);
-											source = new BufferedImageLuminanceSource(image, shiftLeft,  shiftTop,  width, height);
+											source = new BufferedImageLuminanceSource(image, shiftLeft, shiftTop, width, height);
 											inBounds = true;
-										} catch (ArrayIndexOutOfBoundsException e) { 
-											inBounds = false;
-											// shift falls outside image
-										} catch (IllegalArgumentException e) { 
-											inBounds = false;
-											// shift falls outside image
-										} 
-										if (inBounds) { 
+										} catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+											// shift falls outside image, inBounds = false
+										}
+										if (inBounds) {
 											checkResult = temp.checkSourceForBarcode(source, true);
-											if (checkResult.getStatus()!=CandidateImageFile.RESULT_ERROR) { 
+											if (checkResult.getStatus() != CandidateImageFile.RESULT_ERROR) {
 												returnValue = checkResult.getText();
 												doneLoop = true;
-											} 
-										}
-										} catch (Exception e) { 
-											log.error(e.getMessage(),e);
+											}
 										}
 									}
 								}
 							}
-						} 
 						
 					} // not quick check
 				} // in bounds
@@ -1445,6 +1402,23 @@ public class CandidateImageFile {
 			log.error("Image is null");
 		}
 		return returnValue;
-	}		
+	}
+
+	private static String checkWithConfiguration(BufferedImage crop, float scaleFactor, int offset) {
+		return  CandidateImageFile.checkWithConfiguration(crop, scaleFactor, offset, null);
+	}
+
+	private static String checkWithConfiguration(BufferedImage crop, float scaleFactor, int offset, RenderingHints hints) {
+		String returnValue = null;
+		RescaleOp rescaleOp = new RescaleOp(1.6f, 45, null);
+		rescaleOp.filter(crop, crop);
+		BufferedImageLuminanceSource cropSource = new BufferedImageLuminanceSource(crop);
+		CandidateImageFile temp = new CandidateImageFile();
+		TextStatus checkResult = temp.checkSourceForBarcode(cropSource, log.isDebugEnabled());
+		if (checkResult.getStatus() != CandidateImageFile.RESULT_ERROR) {
+			returnValue = checkResult.getText();
+		}
+		return returnValue;
+	}
 	
 }

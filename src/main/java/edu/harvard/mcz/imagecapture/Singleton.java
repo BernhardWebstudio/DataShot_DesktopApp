@@ -32,7 +32,7 @@ import edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcher;
 
 
 /** Thread safe singleton object for imagecapture application.
- * <BR>
+ * 
  * Usage:
  * <pre> 
       Singleton.getSingletonInstance.set{Method}(aRelevantObject) // store single instance to singleton.

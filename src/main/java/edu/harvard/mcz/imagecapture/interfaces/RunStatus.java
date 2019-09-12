@@ -19,7 +19,8 @@
  */
 package edu.harvard.mcz.imagecapture.interfaces;
 
-/** Describes the status of a RunnableJob
+/** 
+ * Describes the status of a RunnableJob
  *  
  * @author Paul J. Morris
  *

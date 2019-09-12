@@ -106,13 +106,13 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
 	 * on which to repeat OCR for specimens in state OCR or to repeat OCR
 	 * for a specific directory specified by startAt, again for specimens in
 	 * state OCR.
-	 * <BR>
+	 * 
 	 * Behavior:
-	 * <BR>
+	 * 
 	 * whatToScan=SCAN_ALL, startAt is ignored, equivalent to default constructor.
 	 * whatToScan=SCAN_SELECT, startAt is used as starting point for directory chooser dialog.
 	 * whatToScan=SCAN_SPECIFIC, startAt is used as starting point for repeat (if null falls back to SCAN_SELECT).
-	 * <BR> 
+	 *  
 	 *
 	 * @param whatToScan one of SCAN_ALL, SCAN_SPECIFIC, SCAN_SELECT
 	 * @param startAt null or a directory starting point.

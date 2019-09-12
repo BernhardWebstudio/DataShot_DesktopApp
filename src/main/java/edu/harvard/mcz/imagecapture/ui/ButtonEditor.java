@@ -55,11 +55,12 @@ import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener;
 import edu.harvard.mcz.imagecapture.struct.GenusSpeciesCount;
 import edu.harvard.mcz.imagecapture.struct.VerbatimCount;
 
-/** ButtonEditor A clickable button in a table cell that brings up a details view for the row 
- * containing the button.  Works with ButtonRenderer and a TableModel that implements isCellEditable().
- * <BR>
+/** 
+ * ButtonEditor A clickable button in a table cell that brings up a details view for the row 
+ * containing the button. Works with ButtonRenderer and a TableModel that implements isCellEditable().
+ * 
  * Note: This implementation is specific to a Specimen identified by its id.
- * <BR>
+ * 
  * Example Usage (assuming that only the ID column is of type Long):
  * <pre>
       SpecimenLifeCycle s = new SpecimenLifeCycle();

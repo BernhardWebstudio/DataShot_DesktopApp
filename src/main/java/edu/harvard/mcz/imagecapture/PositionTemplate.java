@@ -46,10 +46,10 @@ import edu.harvard.mcz.imagecapture.interfaces.PositionTemplateDetector;
  * case template TEMPLATE_NO_COMPONENT_PARTS for handling any size image that isn't templated.  
  * Provides hard coded default template.  Provides methods to get/set coordinates as Dimension 
  * objects as a convenience over Template's get/set of individual heights and widths as integers.
- * <BR>
+ * 
  * DefaultPositionTemplateDetector makes the assumption that a template can be uniquely identified 
  * by the location of the barcode in the image.  
- * <BR>
+ * 
  * Each template must have the barcode in a uniquely different place.
  * 
  * @author Paul J. Morris

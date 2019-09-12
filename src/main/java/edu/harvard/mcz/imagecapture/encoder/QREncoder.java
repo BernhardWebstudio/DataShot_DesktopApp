@@ -31,9 +31,7 @@ public class QREncoder {
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
+	public static void main(String[] args) {		
 		UnitTrayLabel label = new UnitTrayLabel();
 		label.setDrawerNumber("112.5");
 		label.setFamily("Family");

@@ -71,7 +71,8 @@ import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
 import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
 import edu.harvard.mcz.imagecapture.interfaces.TaxonNameReturner;
 
-/** Check all image files either under the image root directory or in a selected directory
+/** 
+ * Check all image files either under the image root directory or in a selected directory
  * and add records for files that aren't yet known to the database that contain barcode
  * information and add corresponding specimen records for new specimens.  
  *   
@@ -121,13 +122,13 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 	/**
 	 * Create a scan job to bring up dialog to pick a specific directory to scan, or
 	 * to scan a specific directory specified by startAt.
-	 * <BR>
+	 * 
 	 * Behavior:
-	 * <BR>
+	 * 
 	 * whatToScan=SCAN_ALL, startAt is ignored, equivalent to default constructor.
 	 * whatToScan=SCAN_SELECT, startAt is used as starting point for directory chooser dialog.
 	 * whatToScan=SCAN_SPECIFIC, startAt is used as starting point for scan (if null falls back to SCAN_SELECT).
-	 * <BR> 
+	 *  
 	 *
 	 * @param whatToScan one of SCAN_ALL, SCAN_SPECIFIC, SCAN_SELECT
 	 * @param startAt null or a directory starting point.
@@ -164,7 +165,6 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 	@Override
 	public boolean cancel() {
 		runStatus = RunStatus.STATUS_TERMINATED;
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -197,7 +197,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 		startPoint = null;
 		// If it isn't null, retrieve the image base directory from properties, and test for read access.
 		if (Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE)==null) {
-			JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(), "Can't start scan.  Don't know where images are stored.  Set imagbase property.", "Can't Scan.", JOptionPane.ERROR_MESSAGE);	
+			JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(), "Can't start scan. Don't know where images are stored. Set imagbase property.", "Can't Scan.", JOptionPane.ERROR_MESSAGE);	
 		} else { 
 			imagebase = new File(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE));
 			if (imagebase!=null) { 
@@ -226,7 +226,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 				int returnValue = fileChooser.showOpenDialog(Singleton.getSingletonInstance().getMainFrame());
 				if (returnValue == JFileChooser.APPROVE_OPTION) {
 					File file = fileChooser.getSelectedFile();
-					log.debug("Selected base directory: " + file.getName() + ".");
+					log.debug("Selected base directory: '" + file.getName() + "'.");
 					startPoint = file;
 				} else {
 					//TODO: handle error condition
@@ -244,7 +244,8 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 						ImageCaptureProperties.KEY_IMAGEBASE);
 				log.error("Tried to scan directory ("+ startPoint.getPath() +") outside of base image directory (" + base + ")");
 				String message = "Can't scan and database files outside of base image directory (" + base + ")";
-				JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(), message, "Can't Scan outside image base directory.", JOptionPane.YES_NO_OPTION);	
+				// TODO: handle YES/NO ?!?
+				JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(), message, "Can't scan outside image base directory.", JOptionPane.YES_NO_OPTION);	
 			} else { 
 
 				// run in separate thread and allow cancellation and status reporting
@@ -254,7 +255,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 				if (!startPoint.canRead()) {
 					JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(), "Can't start scan.  Unable to read selected directory: " + startPoint.getPath(), "Can't Scan.", JOptionPane.YES_NO_OPTION);	
 				} else {
-					Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Scanning " + startPoint.getPath());
+					Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Scanning path: " + startPoint.getPath());
 					Counter counter = new Counter();
 					// count files to scan
 					countFiles(startPoint, counter);
@@ -266,8 +267,8 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 					    checkFiles(startPoint, counter);
 					}
 					// report
-					String report = "Scanned " + counter.getDirectories() + " directories.\n";
-					report += "Created thumbnails in " + thumbnailCounter + " directories";
+					String report = "Scanned '" + counter.getDirectories() + "' directories.\n";
+					report += "Created thumbnails in '" + thumbnailCounter + "' directories";
 					if (thumbnailCounter==0) { 
 					   report += " (May still be in progress)";
 					} 
@@ -312,7 +313,6 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 	@Override
 	public boolean stop() {
 		runStatus = RunStatus.STATUS_TERMINATED;
-		// TODO Auto-generated method stub
 		return false;
 	}
 
@@ -592,6 +592,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 				Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Scanning: " + fileToCheck.getName());
 				log.debug("Scanning: " + fileToCheck.getName());
 				if (fileToCheck.isDirectory()) { 
+					// recursive read for all files: start anew for directories
 					if (fileToCheck.canRead()) {
 						// Skip thumbs directories
 						if (!fileToCheck.getName().equals("thumbs")) { 
@@ -1032,7 +1033,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 									tryMe.setRawOcr(rawOCR);
 									tryMe.setTemplateId(template.getTemplateId());
 									tryMe.setPath(path);
-									// TODO: Create md5hash of image file, persist with image 
+									// Create md5hash of image file, persist with image 
 									if (tryMe.getMd5sum()==null || tryMe.getMd5sum().length()==0) { 
 										try {
 											tryMe.setMd5sum(DigestUtils.md5Hex(new FileInputStream(fileToCheck)));

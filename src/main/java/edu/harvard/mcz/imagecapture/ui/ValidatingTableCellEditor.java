@@ -29,7 +29,8 @@ import javax.swing.JTextField;
 import edu.harvard.mcz.imagecapture.MainFrame;
 
 
-/** ValidatingTableCellEditor provides a JTextField with an inputVerifier as a
+/** 
+ * ValidatingTableCellEditor provides a JTextField with an inputVerifier as a
  * cell editor that can be used as an editor for cells in a JTable.
  * 
  * Example:

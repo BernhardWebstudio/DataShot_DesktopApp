@@ -177,7 +177,7 @@ public class HibernateUtil {
 	
     /**
      * Call this method to obtain a Hibernate Session.
-     * <BR>  
+     *   
      * Usage:
      * <pre>
          Session session = HibernateUtil.getSessionFactory().getCurrentSession();

@@ -19,8 +19,9 @@
  */
 package edu.harvard.mcz.imagecapture.interfaces;
 
-/** BarcodeBuilder, and interface for retrieving the formatted text found in a barcode label given 
- * the numeric part of that barcode text.  Only concerns the text string found in a barcode, not 
+/** 
+ * BarcodeBuilder, an interface for retrieving the formatted text found in a barcode label given 
+ * the numeric part of that barcode text. Only concerns the text string found in a barcode, not 
  * the actual barcode encoding of that text.
  * 
  * @author Paul J. Morris

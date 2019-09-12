@@ -24,14 +24,16 @@ import java.io.File;
 import edu.harvard.mcz.imagecapture.CandidateImageFile;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
 
-/** PositionTemplateDetector interface for detecting PositionTemplates for image files.
+/** 
+ * PositionTemplateDetector interface for detecting PositionTemplates for image files.
  * 
  * @author Paul J. Morris
  *
  */
 public interface PositionTemplateDetector {
 
-	/** Given a file, determine if a PositionTemplate applies to that file and if so
+	/** 
+	 * Given a file, determine if a PositionTemplate applies to that file and if so
 	 * return the identifier for the PositionTemplate.
 	 * 
 	 * @see edu.harvard.mcz.imagecapture.PositionTemplate

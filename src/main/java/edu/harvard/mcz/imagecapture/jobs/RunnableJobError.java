@@ -22,7 +22,8 @@ package edu.harvard.mcz.imagecapture.jobs;
 import edu.harvard.mcz.imagecapture.interfaces.DrawerNameReturner;
 import edu.harvard.mcz.imagecapture.interfaces.TaxonNameReturner;
 
-/** RunnableJobError, a class for logging the details of multiple sorts of problems
+/** 
+ * RunnableJobError, a class for logging the details of multiple sorts of problems
  * that can be found in preproccessing an image.  Allows a report of preprocessing errors to be
  * displayed in a table.  Handles subtypes of errors with the TYPE_ constants.
  * 
@@ -332,5 +333,7 @@ public class RunnableJobError {
 		return lineNumber;
 	}
 	
-
+	public String toString() {
+		return this.asString();
+	}
 }

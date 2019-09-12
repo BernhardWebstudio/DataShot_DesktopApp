@@ -37,7 +37,7 @@ import edu.harvard.mcz.imagecapture.interfaces.OCR;
 /**Takes a buffered image, generates a TIFF file from it with a call
  * out to ImageMagick or GraphicsMagick convert, then passes that tiff
  * file on to TesseractOCR for Tesseract to OCR the tiff tile.
- * <br>
+ * 
  * Usage:
  * <pre>
      ConvertTesseractOCR ocr = new ConvertTesseractOCR(aBufferedImage);

@@ -25,7 +25,7 @@ import edu.harvard.mcz.imagecapture.exceptions.OCRReadException;
  * Interface for a class that can deliver a string from the result
  * of some Optical Character Recognition operation, and may throw an
  * exception as a result of that operation.  
- * <BR>
+ * 
  * This interface doesn't include a defined setOCRSource method, as this might
  * be a method or a constructor providing one of a variety of sources, and is
  * thus left up to the implementation.  Compare how ConvertTesseractOCR is constructed

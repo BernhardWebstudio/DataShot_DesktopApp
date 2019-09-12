@@ -22,7 +22,8 @@ package edu.harvard.mcz.imagecapture.jobs;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Counter
+/** 
+ * Counter
  * 
  * @author Paul J. Morris
  *

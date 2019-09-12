@@ -19,13 +19,10 @@
  */
 package edu.harvard.mcz.imagecapture.data;
 
-import static org.hibernate.criterion.Example.create;
-
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionException;
 import org.hibernate.Session;
@@ -61,35 +58,4 @@ public class MCZbaseAuthAgentNameLifeCycle {
 			throw re;
 		}
 	}
-
-	/**
-	 * @param pattern
-	 * @return
-	 */
-	public List<MCZbaseAuthAgentName> findByExample(MCZbaseAuthAgentName pattern) {
-		log.debug("finding agent names by example");
-		try {
-			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			List<MCZbaseAuthAgentName> results = null;
-			try { 
-				Criteria criteria = session.createCriteria("edu.harvard.mcz.imagecapture.data.MCZbaseAuthAgentName");
-				criteria.add(create(pattern));
-				//criteria.setReadOnly(true);
-			    results = (List<MCZbaseAuthAgentName>) criteria.list();
-			    log.debug("find by example successful, result size: " + results.size());
-			    session.getTransaction().commit();
-		    } catch (HibernateException e) {
-		    	session.getTransaction().rollback();
-		    	log.error("find by example failed", e);	
-		    }
-		    try { session.close(); } catch (SessionException e) { }
-			return results;
-		} catch (RuntimeException re) {
-			log.error("find by example failed", re);
-			throw re;
-		}
-	}
-	
-	
 }

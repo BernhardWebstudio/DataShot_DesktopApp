@@ -13,6 +13,10 @@ import edu.harvard.mcz.imagecapture.LoginDialog;
 import edu.harvard.mcz.imagecapture.MainFrame;
 import edu.harvard.mcz.imagecapture.Singleton;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 /**
  * Singleton class to obtain access to Hibernate sessions, used in the *LifeCycle classes.
  *  
@@ -82,7 +86,7 @@ public class HibernateUtil {
 				loginDialog.setModalityType(ModalityType.APPLICATION_MODAL);
 				loginDialog.setVisible(true);
 				// Check authentication (starting with the database user(schema)/password.
-				String username = "NotAuthenticated";
+				String username;
 				if (loginDialog.getResult()==LoginDialog.RESULT_LOGIN) { 
 					if (Singleton.getSingletonInstance().getMainFrame() != null) { 
 			           Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -108,19 +112,16 @@ public class HibernateUtil {
 						session.close();
 						// If an exception hasn't been thrown, dbuser/dbpassword has 
 						// successfully authenticated against the database.
-						// Now try authenticating the individual user by the email addresss/password that they provided.
+						// Now try authenticating the individual user by the email address/password that they provided.
 						UsersLifeCycle uls = new UsersLifeCycle();
-						Users userToLogin = new Users();
-						userToLogin.setUsername(loginDialog.getUsername());
-						userToLogin.setHash(loginDialog.getUserPasswordHash());
-						List<Users> foundUser = uls.findByExample(userToLogin);
+						List<Users> foundUser = uls.findByCredentials(loginDialog.getUsername(), loginDialog.getUserPasswordHash());
 						if (foundUser.size()==1) {
  						    // There should be one and only one user returned.
 							log.debug(foundUser.get(0).getHash());
-							log.debug(loginDialog.getUserPasswordHash());
+							// log.debug(loginDialog.getUserPasswordHash()); // EEEEHHHH WTF that was a security issue!!! :O
 						    if (foundUser.get(0).getUsername().equals(loginDialog.getUsername()) && foundUser.get(0).getHash().equals(loginDialog.getUserPasswordHash())) {
 							   // and that user must have exactly the username/password hash provided in the dialog. 
-						       Singleton.getSingletonInstance().setCurrentUsername(userToLogin.getUsername());
+						       Singleton.getSingletonInstance().setCurrentUsername(loginDialog.getUsername());
 						       success = true;
 						       try { 
 						           Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Connected as "+ foundUser.get(0).getFullname());

@@ -19,19 +19,16 @@
  */
 package edu.harvard.mcz.imagecapture.data;
 
-import static org.hibernate.criterion.Example.create;
-
-import java.util.List;
-
+import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
-import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
+import org.hibernate.query.Query;
 
-import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
+import java.util.List;
 
 /** UnitTrayLabelLifeCycle
  * 
@@ -175,32 +172,6 @@ private static final Log log = LogFactory.getLog(UnitTrayLabelLifeCycle.class);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public List<UnitTrayLabel> findByExample(UnitTrayLabel instance) {
-		log.debug("finding UnitTrayLabel instance by example");
-		try {
-			List<UnitTrayLabel> results = null;
-			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			try { 
-				results = (List<UnitTrayLabel>) session.createCriteria("edu.harvard.mcz.imagecapture.data.UnitTrayLabel").add(
-						create(instance)).list();
-				session.getTransaction().commit();
-				log.debug("find by example successful, result size: "
-						+ results.size());
-			} catch (HibernateException e) { 
-				session.getTransaction().rollback();
-				log.error(e.getMessage());
-
-			}
-			try { session.close(); } catch (SessionException e) { }
-			return results;
-		} catch (RuntimeException re) {
-			log.error("find by example failed", re);
-			throw re;
-		}
-	}
-
 	/**
 	 * @return
 	 */
@@ -234,17 +205,17 @@ private static final Log log = LogFactory.getLog(UnitTrayLabelLifeCycle.class);
 		Integer result = 0;
 		
 		try {
-
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			try {
-				SQLQuery query = session.createSQLQuery("select max(Ordinal) from UNIT_TRAY_LABEL");
-				List queryresult = query.list();
-				if (!queryresult.isEmpty()) { 
+				String queryString = "select max(ordinal) from UnitTrayLabel";
+				Query query = session.createQuery(queryString);
+				List queryResult = query.list();
+				if (!queryResult.isEmpty()) { 
 					// MySQL returns an integer, Oracle returns a BigDecimal
 					// Need to cast from either in a system independent way.
 					// NOTE: This will fail if maximum value of ordinal exceeds the size of Integer.
-					String temp  = queryresult.get(0).toString();
+					String temp  = queryResult.get(0).toString();
 					result = Integer.valueOf(temp);
 					log.debug(result);
 				}
@@ -254,7 +225,6 @@ private static final Log log = LogFactory.getLog(UnitTrayLabelLifeCycle.class);
 			} finally { 
 			    try { session.close(); } catch (SessionException e) { }
 			}
-
 		} catch (RuntimeException re) {
 			log.error("find max ordinal failed", re);
 			throw re;

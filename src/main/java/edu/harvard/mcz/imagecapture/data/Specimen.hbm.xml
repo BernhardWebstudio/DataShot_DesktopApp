@@ -2,20 +2,17 @@
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA -->
-<hibernate-mapping default-lazy="false" >
-    <class name="edu.harvard.mcz.imagecapture.data.Specimen" table="Specimen" >
+<hibernate-mapping default-lazy="false">
+    <class name="edu.harvard.mcz.imagecapture.data.Specimen" table="Specimen">
         <id name="specimenId" type="java.lang.Long">
             <column name="SpecimenId" />
-            <generator class="native" >
-                <param name="sequence">SEQ_SPECIMENID</param> 
+            <generator class="native">
+                <param name="sequence">SEQ_SPECIMENID</param>
             </generator>
         </id>
-        <timestamp
-        column="DATECREATED"                                    
-        name="dateCreated"                                          
-        source="db" 
-        generated="always" 
-        node="dateCreated"/>
+        <property name="dateCreated" type="timestamp">
+            <column name="DATECREATED" default="CURRENT_TIMESTAMP" />
+        </property>
         <property name="barcode" type="string">
             <column name="Barcode" not-null="true" unique="true" length="20" />
         </property>
@@ -67,20 +64,18 @@
         <property name="identifiedBy" type="string">
             <column name="IdentifiedBy" />
         </property>
-        
         <property name="natureOfId" type="string">
             <column name="NatureOfId" length="255" />
         </property>
         <property name="dateIdentified" type="string">
-            <column name="DateIdentified" length="32"  />
+            <column name="DateIdentified" length="32" />
         </property>
         <property name="identificationRemarks" type="string">
-            <column name="IdentificationRemarks"  length="65535" />
+            <column name="IdentificationRemarks" length="65535" />
         </property>
-        
         <property name="higherGeography" type="string">
             <column name="higher_geography" length="255" />
-        </property>        
+        </property>
         <property name="country" type="string">
             <column name="Country" />
         </property>
@@ -93,17 +88,15 @@
         <property name="verbatimLocality" type="string">
             <column name="VerbatimLocality" length="65535" />
         </property>
-        
         <property name="minimum_elevation" type="java.lang.Long">
             <column name="minimum_elevation" />
-        </property>        
+        </property>
         <property name="maximum_elevation" type="java.lang.Long">
             <column name="maximum_elevation" />
-        </property>        
+        </property>
         <property name="elev_units" type="string">
             <column name="elev_units" length="5" />
         </property>
-        
         <property name="collectingMethod" type="string">
             <column name="CollectingMethod" />
         </property>
@@ -136,13 +129,13 @@
         </property>
         <property name="sex" type="string">
             <column name="Sex" length="50" />
-        </property>        
+        </property>
         <property name="habitat" type="string">
             <column name="Habitat" length="900" />
         </property>
         <property name="microhabitat" type="string">
             <column name="Microhabitat" length="900" />
-        </property>        
+        </property>
         <property name="associatedTaxon" type="string">
             <column name="AssociatedTaxon" length="900" />
         </property>
@@ -178,34 +171,34 @@
         </property>
         <property name="flagAncilaryAlsoInMCZbase" type="java.lang.Boolean">
             <column name="flagAncilaryAlsoInMCZbase" />
-        </property>    
+        </property>
         <property name="creatingPath" type="string">
             <column name="creatingPath" length="900" />
         </property>
         <property name="creatingFilename" type="string">
             <column name="creatingFilename" length="255" />
-        </property>   
+        </property>
         <property name="verbatimCollector" type="string">
             <column name="verbatimCollector" length="2000" />
         </property>
         <property name="verbatimCollection" type="string">
             <column name="verbatimCollection" length="2000" />
-        </property> 
+        </property>
         <property name="verbatimNumbers" type="string">
             <column name="verbatimNumbers" length="2000" />
-        </property> 
+        </property>
         <property name="verbatimUnclassifiedText" type="string">
-            <column name="verbatimUnclassifiedText" length="65535"  />
-        </property> 
+            <column name="verbatimUnclassifiedText" length="65535" />
+        </property>
         <property name="verbatimClusterIdentifier" type="string">
             <column name="verbatimClusterIdentifier" length="255" />
-        </property>        
+        </property>
         <property name="externalWorkflowProcess" type="string">
             <column name="externalWorkflowProcess" length="900" />
-        </property>        
+        </property>
         <property name="externalWorkflowDate" type="java.util.Date">
             <column name="externalWorkflowDate" />
-        </property>        
+        </property>
         <set name="collectors" inverse="true" cascade="save-update" fetch="subselect">
             <key>
                 <column name="SpecimenId" not-null="true" />
@@ -224,7 +217,7 @@
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.data.Tracking" />
         </set>
-        <set name="numbers" inverse="true" cascade="save-update" fetch="subselect" >
+        <set name="numbers" inverse="true" cascade="save-update" fetch="subselect">
             <key>
                 <column name="SpecimenId" not-null="true" />
             </key>
@@ -247,8 +240,8 @@
                 <column name="SpecimenId" />
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.data.LatLong" />
-        </set>       
-       <set name="externalHistory" inverse="true" cascade="save-update" fetch="subselect" >
+        </set>
+        <set name="externalHistory" inverse="true" cascade="save-update" fetch="subselect">
             <key>
                 <column name="SpecimenId" not-null="true" />
             </key>

@@ -130,15 +130,15 @@ public class ImageListBrowser extends JPanel {
 	private JTable getJTable() {
 		if (jTableImages == null) {
 			jTableImages = new JTable();
-			ICImageLifeCycle s = new ICImageLifeCycle();
+			ICImageLifeCycle ilc = new ICImageLifeCycle();
 			ICImageListTableModel model = null;
 			if (showJustMissmatches) { 
 				model = new ICImageListTableModel(ICImageLifeCycle.findMismatchedImages());	
 			} else { 
 				if (searchCriteria==null) { 
-				    model = new ICImageListTableModel(s.findAll());
+				    model = new ICImageListTableModel(ilc.findAll());
 				} else { 
-					model = new ICImageListTableModel(s.findByExample(searchCriteria));
+					model = new ICImageListTableModel(ilc.findByExample(searchCriteria));
 				}
 			}
 			if (model!=null) { 

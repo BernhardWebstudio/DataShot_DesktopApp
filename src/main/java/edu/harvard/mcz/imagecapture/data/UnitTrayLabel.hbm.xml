@@ -2,19 +2,19 @@
 <!DOCTYPE hibernate-mapping PUBLIC
 	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
 	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
-<hibernate-mapping default-lazy="false" >
-  <class name="edu.harvard.mcz.imagecapture.data.UnitTrayLabel" table="UNIT_TRAY_LABEL">
+<hibernate-mapping default-lazy="false">
+    <class name="edu.harvard.mcz.imagecapture.data.UnitTrayLabel" table="UNIT_TRAY_LABEL">
         <id name="id" type="java.lang.Long">
             <column name="id" />
-            <generator class="native" >
-                <param name="sequence">UNIT_TRAY_LABEL_ID_SEQ</param> 
+            <generator class="native">
+                <param name="sequence">UNIT_TRAY_LABEL_ID_SEQ</param>
             </generator>
         </id>
         <property name="family" type="string">
-            <column name="Family" length="40"  />
+            <column name="Family" length="40" />
         </property>
         <property name="subfamily" type="string">
-            <column name="Subfamily" length="40"  />
+            <column name="Subfamily" length="40" />
         </property>
         <property name="tribe" type="string">
             <column name="Tribe" length="40" />
@@ -23,10 +23,10 @@
             <column name="Genus" length="40" />
         </property>
         <property name="specificEpithet" type="string">
-            <column name="SpecificEpithet" length="40"  />
+            <column name="SpecificEpithet" length="40" />
         </property>
         <property name="subspecificEpithet" type="string">
-            <column name="SubspecificEpithet"  />
+            <column name="SubspecificEpithet" />
         </property>
         <property name="infraspecificEpithet" type="string">
             <column name="InfraspecificEpithet" length="40" />
@@ -38,28 +38,28 @@
             <column name="Authorship" />
         </property>
         <property name="unNamedForm" type="string">
-            <column name="UnNamedForm" length="50"  />
+            <column name="UnNamedForm" length="50" />
         </property>
         <property name="drawerNumber" type="string">
-            <column name="DrawerNumber" length="10"  />
+            <column name="DrawerNumber" length="10" />
         </property>
         <property name="printed" type="int">
             <column name="Printed" />
-        </property>       
+        </property>
         <property name="numberToPrint" type="int">
             <column name="NumberToPrint" />
-        </property>  
+        </property>
         <property name="dateCreated" type="timestamp">
-            <column name="DateCreated" length="0" />
-        </property>        
+            <column name="DateCreated" default="CURRENT_TIMESTAMP" />
+        </property>
         <property name="dateLastUpdated" type="date">
-            <column name="DateLastUpdated" length="0" />
+            <column name="DateLastUpdated" not-null="false" />
         </property>
         <property name="collection" type="string">
-            <column name="Collection" length="255"  />
+            <column name="Collection" length="255" />
         </property>
         <property name="ordinal" type="int">
             <column name="Ordinal" />
         </property>
-  </class>
+    </class>
 </hibernate-mapping>

@@ -1,13 +1,7 @@
 package edu.harvard.mcz.imagecapture.data;
 
-import static org.hibernate.criterion.Example.create;
-
 import edu.harvard.mcz.imagecapture.PositionTemplate;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-// Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
@@ -15,6 +9,15 @@ import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
 import org.hibernate.query.Query;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+// Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
 
 /**
  * Home object for domain model class ICImage.
@@ -24,9 +27,13 @@ import org.hibernate.query.Query;
  * @see edu.harvard.mcz.imagecapture.data.ICImage
  * @author Hibernate Tools
  */
-public class ICImageLifeCycle {
+public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
 
   private static final Log log = LogFactory.getLog(ICImageLifeCycle.class);
+
+  public ICImageLifeCycle() {
+    super(ICImage.class, ICImageLifeCycle.log);
+  }
 
   public void persist(ICImage transientInstance) throws SaveFailedException {
     log.debug("persisting ICImage instance");
@@ -185,35 +192,20 @@ public class ICImageLifeCycle {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public List<ICImage> findByExample(ICImage instance) {
-    log.debug("finding ICImage instance by example");
-    try {
-      List<ICImage> results = null;
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      session.beginTransaction();
-      try {
-        results =
-            (List<ICImage>)session
-                .createCriteria("edu.harvard.mcz.imagecapture.data.ICImage")
-                .add(create(instance))
-                .list();
-        log.debug("find by example successful, result size: " + results.size());
-        session.getTransaction().commit();
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        log.error(e.getMessage());
-      } finally {
-        try {
-          session.close();
-        } catch (SessionException e) {
-        }
-      }
-      return results;
-    } catch (RuntimeException re) {
-      log.error("find by example failed", re);
-      throw re;
-    }
+  public ICImage findOneBySpecimen(Specimen specimen) {
+    return super.findOneBy("SPECIMENID", specimen.getSpecimenId());
+  }
+
+  public ICImage findOneByPath(String path) {
+    return super.findOneBy("path", path);
+  }
+
+  public List<ICImage> findBySpecimen(Specimen specimen) {
+    return super.findBy("SPECIMENID", specimen.getSpecimenId());
+  }
+
+  public List<ICImage> findByPath(String path) {
+    return super.findBy("path", path);
   }
 
   /**
@@ -261,7 +253,7 @@ public class ICImageLifeCycle {
       List<ICImage> results = null;
       try {
         results = (List<ICImage>)session
-                      .createQuery("From ICImage i where Path = '" + path +
+                      .createQuery("From ICImage i where path = '" + path +
                                    "' order by i.filename")
                       .list();
         log.debug("find in directory successful, result size: " +
@@ -324,7 +316,7 @@ public class ICImageLifeCycle {
         results =
             (List<ICImage>)session
                 .createQuery(
-                    "From ICImage i where SpecimenId is null and DrawerNumber = '" +
+                    "From ICImage i where specimen is null and drawerNumber = '" +
                     aDrawerNumber.trim() + "' order by i.filename")
                 .list();
         log.debug("find all successful, result size: " + results.size());
@@ -356,7 +348,7 @@ public class ICImageLifeCycle {
         results =
             (List<ICImage>)session
                 .createQuery(
-                    "From ICImage i where SpecimenId is not null and TemplateId = '" +
+                    "From ICImage i where specimen is not null and templateId = '" +
                     PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS.trim() +
                     "' order by i.filename")
                 .list();

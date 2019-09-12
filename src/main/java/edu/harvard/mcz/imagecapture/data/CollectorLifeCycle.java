@@ -1,13 +1,8 @@
 package edu.harvard.mcz.imagecapture.data;
 
-// Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
-
-import static org.hibernate.criterion.Example.create;
-
-import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
@@ -15,6 +10,10 @@ import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
 import org.hibernate.query.Query;
+
+// Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
+
+import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 
 /**
  * Home object for domain model class Collector.
@@ -160,8 +159,7 @@ public class CollectorLifeCycle {
       Session session = HibernateUtil.getSessionFactory().getCurrentSession();
       session.beginTransaction();
       try {
-        instance = (Collector)session.get(
-            "edu.harvard.mcz.imagecapture.data.Collector", id);
+        instance = (Collector) session.get(Collector.class, id);
         session.getTransaction().commit();
         if (instance == null) {
           log.debug("get successful, no instance found");
@@ -179,36 +177,6 @@ public class CollectorLifeCycle {
       return instance;
     } catch (RuntimeException re) {
       log.error("get failed", re);
-      throw re;
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  public List<Collector> findByExample(Collector instance) {
-    log.debug("finding Collector instance by example");
-    try {
-      List<Collector> results = null;
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      session.beginTransaction();
-      try {
-        results =
-            (List<Collector>)session
-                .createCriteria("edu.harvard.mcz.imagecapture.data.Collector")
-                .add(create(instance))
-                .list();
-        session.getTransaction().commit();
-        log.debug("find by example successful, result size: " + results.size());
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        log.error(e.getMessage());
-      }
-      try {
-        session.close();
-      } catch (SessionException e) {
-      }
-      return results;
-    } catch (RuntimeException re) {
-      log.error("find by example failed", re);
       throw re;
     }
   }

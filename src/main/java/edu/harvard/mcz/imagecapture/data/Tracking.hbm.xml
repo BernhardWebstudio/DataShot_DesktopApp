@@ -3,19 +3,16 @@
 "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA -->
 <hibernate-mapping>
-    <class name="edu.harvard.mcz.imagecapture.data.Tracking" table="Tracking" >
+    <class name="edu.harvard.mcz.imagecapture.data.Tracking" table="Tracking">
         <id name="trackingId" type="java.lang.Long">
             <column name="TrackingId" />
-            <generator class="native" >
-                <param name="sequence">SEQ_TRACKINGID</param> 
+            <generator class="native">
+                <param name="sequence">SEQ_TRACKINGID</param>
             </generator>
         </id>
-        <timestamp
-        column="eventDateTime"                                    
-        name="eventDateTime"                                          
-        source="db" 
-        generated="always" 
-        node="eventDateTime"/>
+        <property name="eventDateTime" type="timestamp">
+            <column name="eventDateTime" default="CURRENT_TIMESTAMP" />
+        </property>
         <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.data.Specimen" fetch="select">
             <column name="SpecimenId" not-null="true" />
         </many-to-one>

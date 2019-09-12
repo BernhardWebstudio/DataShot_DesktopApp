@@ -108,6 +108,7 @@ public class Specimen implements java.io.Serializable {
 	
 	public Specimen() {
 		setDefaults();
+		this.dateCreated = new Date();
 	}
 	
 	/** Set default values for a new specimen object with no other data.
@@ -155,7 +156,7 @@ public class Specimen implements java.io.Serializable {
 		this.barcode = barcode;
 		this.typeStatus = typeStatus;
 		if (dateCreated==null) { 
-			this.dateCreated = null;
+			this.dateCreated = new Date();
 		} else { 
 		    this.dateCreated = (Date) dateCreated.clone();
 		}
@@ -229,12 +230,12 @@ public class Specimen implements java.io.Serializable {
 		this.workFlowStatus = workFlowStatus;
 		this.createdBy = createdBy;
 		if (dateCreated==null) { 
-			this.dateCreated = null;
+			this.dateCreated = new Date();
 		} else { 
 		   this.dateCreated = (Date) dateCreated.clone();
 		}
 		if (dateLastUpdated==null) { 
-			this.dateLastUpdated = null;
+			this.dateLastUpdated = new Date();
 		} else {  
 		    this.dateLastUpdated = (Date) dateLastUpdated.clone();
 	    }

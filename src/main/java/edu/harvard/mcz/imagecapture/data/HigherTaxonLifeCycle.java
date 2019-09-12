@@ -1,7 +1,5 @@
 package edu.harvard.mcz.imagecapture.data;
 
-import static org.hibernate.criterion.Example.create;
-
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -173,36 +171,6 @@ public class HigherTaxonLifeCycle {
       return instance;
     } catch (RuntimeException re) {
       log.error("get failed", re);
-      throw re;
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  public List<HigherTaxon> findByExample(HigherTaxon instance) {
-    log.debug("finding ICImage instance by example");
-    try {
-      List<HigherTaxon> results = null;
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      session.beginTransaction();
-      try {
-        results =
-            (List<HigherTaxon>)session
-                .createCriteria("edu.harvard.mcz.imagecapture.data.HigherTaxon")
-                .add(create(instance))
-                .list();
-        log.debug("find by example successful, result size: " + results.size());
-        session.getTransaction().commit();
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        log.error(e.getMessage());
-      }
-      try {
-        session.close();
-      } catch (SessionException e) {
-      }
-      return results;
-    } catch (RuntimeException re) {
-      log.error("find by example failed", re);
       throw re;
     }
   }

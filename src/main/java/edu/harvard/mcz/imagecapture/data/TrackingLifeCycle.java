@@ -1,7 +1,5 @@
 package edu.harvard.mcz.imagecapture.data;
 
-import static org.hibernate.criterion.Example.create;
-
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 // Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
 import java.util.ArrayList;
@@ -9,12 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
-import org.hibernate.criterion.Order;
 import org.hibernate.query.Query;
 
 /**
@@ -182,37 +178,6 @@ public class TrackingLifeCycle {
   }
 
   @SuppressWarnings("unchecked")
-  public List<Tracking> findByExample(Tracking instance) {
-    log.debug("finding Tracking instance by example");
-    try {
-      List<Tracking> results = null;
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      session.beginTransaction();
-      try {
-        results =
-            (List<Tracking>)session
-                .createCriteria("edu.harvard.mcz.imagecapture.data.Tracking")
-                .addOrder(Order.asc("eventDateTime"))
-                .add(create(instance))
-                .list();
-        log.debug("find by example successful, result size: " + results.size());
-        session.getTransaction().commit();
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        System.out.println(e.getMessage());
-      }
-      try {
-        session.close();
-      } catch (SessionException e) {
-      }
-      return results;
-    } catch (RuntimeException re) {
-      log.error("find by example failed", re);
-      throw re;
-    }
-  }
-
-  @SuppressWarnings("unchecked")
   public List<Specimen> findSpecimensByUser(String user) {
     log.debug("finding all Tracking instances");
     try {
@@ -223,7 +188,7 @@ public class TrackingLifeCycle {
         results =
             session
                 .createQuery(
-                    "select Specimen From Tracking t join Specimen where user = " +
+                    "select Specimen From Tracking t join Specimen where Users = " +
                     user + " order by t.eventDateTime ")
                 .list();
         log.debug("find all successful, result size: " + results.size());
@@ -263,7 +228,7 @@ public class TrackingLifeCycle {
       session.beginTransaction();
       try {
         results = session
-                      .createQuery("From Tracking t where SpecimenId = " +
+                      .createQuery("From Tracking t where Specimen = " +
                                    Long.toString(specimenId) +
                                    " order by t.eventDateTime ")
                       .list();
@@ -282,51 +247,6 @@ public class TrackingLifeCycle {
       return results;
     } catch (RuntimeException re) {
       log.error("find all failed", re);
-      throw re;
-    }
-  }
-
-  /**
-   * Find the event tracking records for a specimen.
-   *
-   * Doesn't appear to return result in Oracle.  Mapping problem?  Works in
-   * MySQL.
-   *
-   * @param aSpecimen
-   * @return
-   */
-  @SuppressWarnings("unchecked")
-  public List<Tracking> findBySpecimen(Specimen aSpecimen) {
-    log.debug("finding Tracking instance by example");
-    try {
-      // Find by example won't navigate out into associations.
-      // Need to nest createCriteria for related table.
-      List<Tracking> results = null;
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      session.beginTransaction();
-      try {
-        results =
-            (List<Tracking>)session
-                .createCriteria("edu.harvard.mcz.imagecapture.data.Tracking")
-                .addOrder(Order.asc("eventDateTime"))
-                .createCriteria("specimen")
-                .add(create(aSpecimen))
-                .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-                .list();
-        log.debug("find by specimen successful, result size: " +
-                  results.size());
-        session.getTransaction().commit();
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        System.out.println(e.getMessage());
-      }
-      try {
-        session.close();
-      } catch (SessionException e) {
-      }
-      return results;
-    } catch (RuntimeException re) {
-      log.error("find by example failed", re);
       throw re;
     }
   }

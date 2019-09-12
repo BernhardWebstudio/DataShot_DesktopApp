@@ -37,6 +37,7 @@ import edu.harvard.mcz.imagecapture.data.UsersLifeCycle;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 
 import java.awt.Insets;
+import java.util.List;
 
 /** UserDialog is a user interface for editing metadata about
  * participants in the project.  
@@ -184,8 +185,9 @@ public class UserDialog extends JDialog {
 					// find out if a matching record exists, if it does, update it, if it doesn't add one.
 					Users check = new Users();
 					check.setUsername(userToEdit.getUsername());
-					try { 
-						if (u.findByExample(check).isEmpty()) { 
+					try {
+						List<Users> usersToCheck = u.findByNames(check.getUsername(), check.getFullname());
+						if (usersToCheck.isEmpty()) {
 							u.persist(userToEdit);
 						} else { 
 							u.attachDirty(userToEdit);
@@ -193,7 +195,7 @@ public class UserDialog extends JDialog {
 						wasCancled = false;
 						thisDialog.setVisible(false);
 					} catch (SaveFailedException ex) { 
-						setMessage("Unable to save this record. Name or About may be too long." + ex.getMessage());
+						setMessage("Unable to save this record. Name or About may be too long; " + ex.getMessage());
 				    }
 				}
 			});

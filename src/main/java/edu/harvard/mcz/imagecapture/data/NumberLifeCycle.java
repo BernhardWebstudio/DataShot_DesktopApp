@@ -1,7 +1,5 @@
 package edu.harvard.mcz.imagecapture.data;
 
-import static org.hibernate.criterion.Example.create;
-
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
@@ -180,36 +178,6 @@ public class NumberLifeCycle {
       return instance;
     } catch (RuntimeException re) {
       log.error("get failed", re);
-      throw re;
-    }
-  }
-
-  @SuppressWarnings("unchecked")
-  public List<Number> findByExample(Number instance) {
-    log.debug("finding Number instance by example");
-    try {
-      List<Number> results = null;
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      try {
-        session.beginTransaction();
-        results =
-            (List<Number>)session
-                .createCriteria("edu.harvard.mcz.imagecapture.data.Number")
-                .add(create(instance))
-                .list();
-        log.debug("find by example successful, result size: " + results.size());
-        session.getTransaction().commit();
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        log.error(e.getMessage());
-      }
-      try {
-        session.close();
-      } catch (SessionException e) {
-      }
-      return results;
-    } catch (RuntimeException re) {
-      log.error("find by example failed", re);
       throw re;
     }
   }

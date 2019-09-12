@@ -51,9 +51,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 
@@ -151,7 +149,7 @@ public class ImageDisplayFrame extends JFrame {
 	 * populate the image chooser pick list with a list of all the images.  Call this method to display 
 	 * more than one image in an ImageDisplayFrame.  Single image is displayed with a call to loadImagesFromFileSingle().
 	 *
-	 * @see edu.harvard.mcz.imagecapture.ImageDisplayFrame#loadImagesFromFile(File, PositionTemplate)
+	 * @see edu.harvard.mcz.imagecapture.ImageDisplayFrame#loadImagesFromFiles(File, PositionTemplate, ICImage)
 	 * 
 	 * @param imageFiles
 	 */
@@ -696,24 +694,27 @@ public class ImageDisplayFrame extends JFrame {
 					// If there is no selection, then we shouldn't be doing anything.
 					if (jComboBoxImagePicker.getSelectedItem()==null) { 
 						log.debug("No selected item");
-					} else { 
-						ICImage pattern = new ICImage();
+					} else {
 						try { 
 							boolean hasParameter = false;
-							if (jComboBoxImagePicker.getSelectedItem()!=null) { 
-								pattern.setFilename(jComboBoxImagePicker.getSelectedItem().toString());
-								hasParameter = true;
-								log.debug("Parameter: " + jComboBoxImagePicker.getSelectedItem().toString());
-							}
-							if (targetSpecimen!=null) { 
-								pattern.setSpecimen(targetSpecimen);
-								hasParameter = true;
-								log.debug("Parameter: " + targetSpecimen.getBarcode());
-							}
-							if (hasParameter) { 
+							String filename = jComboBoxImagePicker.getSelectedItem()!=null ? jComboBoxImagePicker.getSelectedItem().toString() : null;
+							if (filename != null && targetSpecimen != null) {
 								// find matching images, set first one as the display image.
 								ICImageLifeCycle ils = new ICImageLifeCycle();
-								List<ICImage> images = ils.findByExample(pattern);
+								List<ICImage> images = null;
+								if (filename == null) {
+									assert (targetSpecimen != null);
+									images = ils.findBySpecimen(targetSpecimen);
+								} else if (targetSpecimen == null) {
+									assert (filename != null);
+									images = ils.findByPath(filename);
+								} else {
+									images = ils.findBy(new HashMap<String, Object>() {{
+											put("path", filename);
+											put("SPECIMENID", targetSpecimen.getSpecimenId());
+										}
+									});
+								}
 								if (images!=null && images.size()>0) { 
 									log.debug("Found: " + images.size());
 									Iterator<ICImage> ii = images.iterator();

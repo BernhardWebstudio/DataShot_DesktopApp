@@ -72,7 +72,7 @@ public class ImageCaptureApp {
 	
 	private static final Log log = LogFactory.getLog(ImageCaptureApp.class);
 	
-	public static final String APP_VERSION = "1.3.3-SNAPSHOT";
+	public static final String APP_VERSION = "1.9.0-SNAPSHOT";
 	public static final String APP_NAME = "DataShot";
 	public static final String APP_DESCRIPTION = "Rapid capture of data from images of pin Labels and pinned insect \nspecimens developed for the MCZ Lepidoptera collection";
 	public static final String APP_COPYRIGHT = "Copyright © 2009-2017 President and Fellows of Harvard College";
@@ -292,10 +292,10 @@ public class ImageCaptureApp {
 	    } else { 
 	    	String allowed = AllowedVersionLifeCycle.listAllowedVersions();
 	    	Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Database does not support version, update needed.");
-			JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(), "The database does not support" + APP_NAME + " version " + APP_VERSION + ".  A software update to " + allowed + " is required.", "Update Required", JOptionPane.OK_OPTION);
+			JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(), "The database does not support" + APP_NAME + " version " + APP_VERSION + ".  A software (or database) update to " + allowed + " is required.", "Update Required", JOptionPane.OK_OPTION);
 			log.error("Database does not allow version " + ImageCaptureApp.APP_VERSION + "  Unable to Start");
 			log.error("Database recognises version(s): " + allowed.toString());
-			ImageCaptureApp.exit(EXIT_ERROR);
+//			ImageCaptureApp.exit(EXIT_ERROR);
 	    }
 		
 		

@@ -2,9 +2,11 @@ package edu.harvard.mcz.imagecapture.data;
 
 // Generated Feb 5, 2009 5:23:55 PM by Hibernate Tools 3.2.2.GA
 
+import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.h2.engine.User;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.SessionException;
@@ -12,8 +14,12 @@ import org.hibernate.Session;
 
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchValueException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
+import org.hibernate.query.Query;
 
-import static org.hibernate.criterion.Example.create;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 /**
  * Home object for domain model class Users.
@@ -223,20 +229,31 @@ public class UsersLifeCycle {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
-	public List<Users> findByExample(Users instance) {
-		log.debug("finding Users instance by example");
+	public List<Users> findByNames(String username, String fullName) {
+		assert (username != null || fullName != null);
+		log.debug("finding Users instance by names");
 		try {
 			List<Users> results = null;
+
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			try { 
-				results = (List<Users>) session.createCriteria("edu.harvard.mcz.imagecapture.data.Users").add(
-						create(instance)).list();
-				session.getTransaction().commit();
-				log.debug("find by example successful, result size: "
+			try {
+				session.beginTransaction();
+				CriteriaBuilder cb = session.getCriteriaBuilder();
+				CriteriaQuery cr = cb.createQuery(Users.class);
+				Root<Users> root = cr.from(Users.class);
+				cr.select(root);
+				List<Predicate> propertyValueRelations = new ArrayList<>();
+				if (username != null) {
+					propertyValueRelations.add(cb.equal(root.get("username"), username));
+				}
+				if (fullName != null) {
+					propertyValueRelations.add(cb.equal(root.get("fullname"), fullName));
+				}
+				cr.where(cb.and(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()])));
+				results = session.createQuery(cr).list();
+				log.debug("find by name successful, result size: "
 						+ results.size());
-			} catch (HibernateException e) { 
+			} catch (HibernateException e) {
 				session.getTransaction().rollback();
 				log.error(e.getMessage());
 
@@ -244,7 +261,39 @@ public class UsersLifeCycle {
 			try { session.close(); } catch (SessionException e) { }
 			return results;
 		} catch (RuntimeException re) {
-			log.error("find by example failed", re);
+			log.error("find users by name failed", re);
+			throw re;
+		}
+	}
+
+	public List<Users> findByCredentials(String username, String password) {
+		try {
+			List<Users> results = null;
+
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			try {
+				session.beginTransaction();
+				CriteriaBuilder builder = session.getCriteriaBuilder();
+				CriteriaQuery query = builder.createQuery(Users.class);
+				Root<Users> root = query.from(Users.class);
+				query = query.select(root);
+				List<Predicate> propertyValueRelations = new ArrayList<Predicate>();
+				propertyValueRelations.add(builder.like(root.get("username"), username));
+				propertyValueRelations.add(builder.like(root.get("hash"), password));
+				Predicate res = builder.and(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()]));
+				query = query.where(res);
+				Query q = session.createQuery(query);
+				results = (List<Users>) q.list();
+				log.debug("find by credentials successful, result size: "
+						+ results.size());
+			} catch (HibernateException e) {
+				session.getTransaction().rollback();
+				log.error(e.getMessage());
+			}
+			try { session.close(); } catch (SessionException e) { }
+			return results;
+		} catch (RuntimeException re) {
+			log.error("find users by credentials failed", re);
 			throw re;
 		}
 	}
@@ -257,8 +306,8 @@ public class UsersLifeCycle {
 		try {
 			List<Users> results = null;
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			try { 
+			try {
+				session.beginTransaction();
 				results = (List<Users>) session.createQuery("from Users u order by u.username ").list();
 				session.getTransaction().commit();
 				log.debug("find by example successful, result size: "

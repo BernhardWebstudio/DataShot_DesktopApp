@@ -12,8 +12,6 @@ import org.hibernate.Session;
 
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 
-import static org.hibernate.criterion.Example.create;
-
 /**
  * Home object for domain model class Determination.
  * @see edu.harvard.mcz.imagecapture.data.Determination
@@ -109,8 +107,8 @@ public class DeterminationLifeCycle {
 		try {
 			Determination result = detachedInstance;
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			try { 
+			try {
+				session.beginTransaction();
 			   result = (Determination) session.merge(detachedInstance);
 			   log.debug("merge successful");
 			} catch (HibernateException e) { 
@@ -131,8 +129,8 @@ public class DeterminationLifeCycle {
 		try {
 			Determination instance = null;
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			try { 
+			try {
+				session.beginTransaction();
 				instance = (Determination) session.get(
 						"edu.harvard.mcz.imagecapture.data.Determination",
 						id);
@@ -149,31 +147,6 @@ public class DeterminationLifeCycle {
 			return instance;
 		} catch (RuntimeException re) {
 			log.error("get failed", re);
-			throw re;
-		}
-	}
-
-	@SuppressWarnings("unchecked")
-	public List<Determination> findByExample(Determination instance) {
-		log.debug("finding Determination instance by example");
-		try {
-			List<Determination> results = null; 
-			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			try { 
-				results = (List<Determination>)session.createCriteria(
-				"edu.harvard.mcz.imagecapture.data.Determination")
-				.add(create(instance)).list();
-				log.debug("find by example successful, result size: "
-						+ results.size());
-			} catch (HibernateException e) { 
-				session.getTransaction().rollback();
-				log.error(e.getMessage());
-			}
-			try { session.close(); } catch (SessionException e) { }
-			return results;
-		} catch (RuntimeException re) {
-			log.error("find by example failed", re);
 			throw re;
 		}
 	}

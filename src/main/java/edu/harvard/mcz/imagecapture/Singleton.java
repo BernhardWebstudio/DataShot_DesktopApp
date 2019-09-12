@@ -119,7 +119,7 @@ public class Singleton {
 			pattern.setFullname(tempUserFullName);
 			pattern.setUsername(currentUsername);
 			try { 
-				ArrayList<Users> matches =  (ArrayList<Users>) u.findByExample(pattern); 
+				ArrayList<Users> matches =  (ArrayList<Users>) u.findByNames(pattern.getUsername(), pattern.getFullname());
 				if (matches.size()==1) { 
 					user = (Users) matches.get(0);
 					userFullName = u.getFullNameForUserName(currentUsername);

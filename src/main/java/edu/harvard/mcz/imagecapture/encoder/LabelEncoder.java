@@ -19,20 +19,6 @@
  */
 package edu.harvard.mcz.imagecapture.encoder;
 
-import java.awt.Color;
-import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
@@ -40,22 +26,28 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import com.lowagie.text.BadElementException;
-import com.lowagie.text.Chunk;
-import com.lowagie.text.Document;
-import com.lowagie.text.DocumentException;
-import com.lowagie.text.Font;
-import com.lowagie.text.Image;
-import com.lowagie.text.PageSize;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
-
+import com.itextpdf.text.*;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import edu.harvard.mcz.imagecapture.data.UnitTrayLabel;
 import edu.harvard.mcz.imagecapture.data.UnitTrayLabelLifeCycle;
 import edu.harvard.mcz.imagecapture.exceptions.PrintFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.List;
 
 /** LabelEncoder
  * 
@@ -168,7 +160,7 @@ public class LabelEncoder {
 					// Generate a text and a barcode cell for each, and add to array for page
 					log.debug("Label " + toPrint + " of " + label.getNumberToPrint() );
 					cell = new PdfPCell();
-					cell.setBorderColor(Color.LIGHT_GRAY);
+					cell.setBorderColor(BaseColor.LIGHT_GRAY);
 					cell.setVerticalAlignment(PdfPCell.ALIGN_TOP);
 					cell.disableBorderSide(PdfPCell.RIGHT);
 					cell.setPaddingLeft(3);
@@ -180,45 +172,45 @@ public class LabelEncoder {
 					    higherNames = label.getFamily() + ": " + label.getSubfamily();
 					} 
 					Paragraph higher = new Paragraph();
-					higher.setFont(new Font(Font.TIMES_ROMAN, 11, Font.NORMAL));
+					higher.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL));
 					higher.add(new Chunk(higherNames));
 					cell.addElement(higher);
 
 					Paragraph name = new Paragraph();
 					Chunk genus = new Chunk(label.getGenus().trim() + " ");
-					genus.setFont(new Font(Font.TIMES_ROMAN, 11, Font.ITALIC));
+					genus.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.ITALIC));
 					Chunk species = new Chunk(label.getSpecificEpithet().trim());
 					Chunk normal = null;  // normal font prefix to preceed specific epithet (nr. <i>epithet</i>)
 					if (label.getSpecificEpithet().contains(".")|| label.getSpecificEpithet().contains("[")) {
 						if (label.getSpecificEpithet().startsWith("nr. ")) { 
 							normal = new Chunk("nr. ");
-							normal.setFont(new Font(Font.TIMES_ROMAN, 11, Font.NORMAL));
+							normal.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL));
 							species = new Chunk(label.getSpecificEpithet().trim().substring(4));
-							species.setFont(new Font(Font.TIMES_ROMAN, 11, Font.ITALIC));	
+							species.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.ITALIC));	
 						} else { 
-						    species.setFont(new Font(Font.TIMES_ROMAN, 11, Font.NORMAL));
+						    species.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL));
 						}
 					} else { 	
-						species.setFont(new Font(Font.TIMES_ROMAN, 11, Font.ITALIC));
+						species.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.ITALIC));
 					} 
 					String s = "";
 					if (label.getSubspecificEpithet().trim().length()>0) { s=" "; } else { s = ""; }
 					Chunk subspecies = new Chunk(s + label.getSubspecificEpithet().trim());
 					if (label.getSubspecificEpithet().contains(".")|| label.getSubspecificEpithet().contains("[")) {
-						subspecies.setFont(new Font(Font.TIMES_ROMAN, 11, Font.NORMAL));
+						subspecies.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL));
 					} else { 	
-						subspecies.setFont(new Font(Font.TIMES_ROMAN, 11, Font.ITALIC));
+						subspecies.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.ITALIC));
 					} 
 					if (label.getInfraspecificRank().trim().length()>0) { s=" "; } else { s = ""; }
 					Chunk infraRank = new Chunk(s + label.getInfraspecificRank().trim());
-					infraRank.setFont(new Font(Font.TIMES_ROMAN, 11, Font.NORMAL));
+					infraRank.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL));
 
 					if (label.getInfraspecificEpithet().trim().length()>0) { s=" "; } else { s = ""; }
 					Chunk infra = new Chunk(s + label.getInfraspecificEpithet().trim());
-					infra.setFont(new Font(Font.TIMES_ROMAN, 11, Font.ITALIC));
+					infra.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.ITALIC));
 					if (label.getUnNamedForm().trim().length()>0) { s=" "; } else { s = ""; }
 					Chunk unNamed = new Chunk(s + label.getUnNamedForm().trim());
-					unNamed.setFont(new Font(Font.TIMES_ROMAN, 11, Font.NORMAL));
+					unNamed.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL));
 
 					name.add(genus);
 					if (normal!=null) { 
@@ -232,7 +224,7 @@ public class LabelEncoder {
 					cell.addElement(name);
 
 					Paragraph authorship = new Paragraph();
-					authorship.setFont(new Font(Font.TIMES_ROMAN, 10, Font.NORMAL));
+					authorship.setFont(new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL));
 					if (label.getAuthorship()!=null && label.getAuthorship().length()>0 ) { 
 						Chunk c_authorship = new Chunk (label.getAuthorship());
 						authorship.add(c_authorship);
@@ -241,14 +233,14 @@ public class LabelEncoder {
 					//cell.addElement(new Paragraph(" "));
 					if (label.getDrawerNumber()!=null && label.getDrawerNumber().length()>0) {
 						Paragraph drawerNumber = new Paragraph();
-						drawerNumber.setFont(new Font(Font.TIMES_ROMAN,10,Font.NORMAL));
+						drawerNumber.setFont(new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL));
 					   Chunk c_drawerNumber = new Chunk(label.getDrawerNumber());
 					   drawerNumber.add(c_drawerNumber);
 					   cell.addElement(drawerNumber);
 					} else { 
 						if (label.getCollection()!=null && label.getCollection().length()>0) {
 							Paragraph collection = new Paragraph();
-							collection.setFont(new Font(Font.TIMES_ROMAN,10,Font.NORMAL));
+							collection.setFont(new Font(Font.FontFamily.TIMES_ROMAN,10,Font.NORMAL));
 						   Chunk c_collection = new Chunk(label.getCollection());
 						   collection.add(c_collection);
 						   cell.addElement(collection);
@@ -256,7 +248,7 @@ public class LabelEncoder {
 					}
 
 					cell_barcode = new PdfPCell();
-					cell_barcode.setBorderColor(Color.LIGHT_GRAY);
+					cell_barcode.setBorderColor(BaseColor.LIGHT_GRAY);
 					cell_barcode.disableBorderSide(PdfPCell.LEFT);
 					cell_barcode.setVerticalAlignment(PdfPCell.ALIGN_TOP);
 

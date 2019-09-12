@@ -8,14 +8,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
-import org.hibernate.SQLQuery;
 import org.hibernate.SessionException;
 import org.hibernate.Session;
-import org.hibernate.criterion.Order;
 
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import static org.hibernate.criterion.Example.create;
+import org.hibernate.query.Query;
 
 /**
  * Home object for domain model class Template.
@@ -33,7 +31,8 @@ public class TemplateLifeCycle {
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			try { 
-				SQLQuery query = session.createSQLQuery("update Template set referenceimage = null");
+				String queryString = "update Template set referenceImage = null";
+				Query query = session.createQuery(queryString);
 				int rows = query.executeUpdate();
 			    session.getTransaction().commit();
 				log.debug("changed " + rows + " rows");
@@ -188,44 +187,6 @@ public class TemplateLifeCycle {
 			throw re;
 		}
 	}
-	
-	/*public Template findById(java.lang.String id) {
-		return null;
-	}*/
-
-	@SuppressWarnings("unchecked")
-	public List<Template> findByExample(Template instance) {
-		log.debug("finding Template instance by example");
-		try {
-			List<Template> results = null;
-			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-			session.beginTransaction();
-			try { 
-				results = (List<Template>) session.createCriteria(
-							"edu.harvard.mcz.imagecapture.data.Template")
-							.addOrder(Order.asc("name"))
-							.add(create(instance)).list();
-			    log.debug("find by example successful, result size: " +  results.size());
-			    session.getTransaction().commit();
-			} catch (HibernateException e) { 
-				session.getTransaction().rollback();
-				System.out.println(e.getMessage());
-			}
-			try { session.close(); } catch (SessionException e) { }
-			return results;
-		} catch (RuntimeException re) {
-			log.error("find by example failed", re);
-			if (Singleton.getSingletonInstance().getMainFrame()!=null) { 
-			     throw re;
-			} else { 
-				// Reasonable excpetion to have been thrown if UI hasn't been started
-				// and DB connnectivity isn't available.
-				// TODO Behavior when UI isn't running? 
-				return  null;
-			}
-		}
-	}
-	
 
 	@SuppressWarnings("unchecked")
 	public List<Template> findAll() {

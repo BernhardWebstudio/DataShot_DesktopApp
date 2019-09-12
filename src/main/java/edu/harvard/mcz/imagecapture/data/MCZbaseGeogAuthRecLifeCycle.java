@@ -19,16 +19,16 @@
  */
 package edu.harvard.mcz.imagecapture.data;
 
-import static org.hibernate.criterion.Example.create;
-
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Criteria;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionException;
 import org.hibernate.Session;
+
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 
 /**
  * @author mole
@@ -73,10 +73,10 @@ public class MCZbaseGeogAuthRecLifeCycle {
 			session.beginTransaction();
 			List<MCZbaseGeogAuthRec> results = null;
 			try { 
-				Criteria criteria = session.createCriteria("edu.harvard.mcz.imagecapture.data.MCZbaseGeogAuthRec");
-				criteria.add(create(pattern));
-				//criteria.setReadOnly(true);
-			    results = (List<MCZbaseGeogAuthRec>) criteria.list();
+				CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+				CriteriaQuery cr = criteriaBuilder.createQuery(MCZbaseGeogAuthRec.class);
+				// TODO: refactor to use reflection
+
 			    log.debug("find by example successful, result size: " + results.size());
 			    session.getTransaction().commit();
 		    } catch (HibernateException e) {

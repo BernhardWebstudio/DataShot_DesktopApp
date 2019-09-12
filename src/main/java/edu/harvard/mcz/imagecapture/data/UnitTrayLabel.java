@@ -78,6 +78,8 @@ public class UnitTrayLabel implements TaxonNameReturner, DrawerNameReturner, Col
 		this.unNamedForm = "";
 		this.collection = "";
 		this.ordinal = 1;
+		this.dateCreated = new Date();
+		this.dateLastUpdated = new Date();
 	}
 
 	/** Constructor with all fields
@@ -90,7 +92,7 @@ public class UnitTrayLabel implements TaxonNameReturner, DrawerNameReturner, Col
 	 * @param specificEpithet
 	 * @param subspecificEpithet
 	 * @param infraspecificEpithet
-	 * @param infraspecifcRank
+	 * @param infraspecificRank
 	 * @param authorship
 	 * @param unnamedForm
 	 * @param printed
@@ -118,6 +120,8 @@ public class UnitTrayLabel implements TaxonNameReturner, DrawerNameReturner, Col
 		this.dateLastUpdated = dateLastUpdated;
 		this.collection = collection;
 		this.ordinal = ordinal;
+		this.dateCreated = new Date();
+		this.dateLastUpdated = new Date();
 	}
 
 	/** Constructor for infraspcific trinomial with explicit rank.
@@ -129,7 +133,7 @@ public class UnitTrayLabel implements TaxonNameReturner, DrawerNameReturner, Col
 	 * @param genus
 	 * @param specificEpithet
 	 * @param infraspecificEpithet
-	 * @param infraspecifcRank
+	 * @param infraspecificRank
 	 * @param authorship
 	 * @param collection
 	 */
@@ -149,6 +153,8 @@ public class UnitTrayLabel implements TaxonNameReturner, DrawerNameReturner, Col
 		this.infraspecificRank = infraspecificRank;
 		this.authorship = authorship;
 		this.collection = collection;
+		this.dateCreated = new Date();
+		this.dateLastUpdated = new Date();
 	}		
 	
 	/** Constructor for species
@@ -176,6 +182,8 @@ public class UnitTrayLabel implements TaxonNameReturner, DrawerNameReturner, Col
 		this.infraspecificRank = "";
 		this.authorship = authorship;
 		this.collection = collection;
+		this.dateCreated = new Date();
+		this.dateLastUpdated = new Date();
 	}	
 
 	/** Constructor for subspecies
@@ -206,6 +214,8 @@ public class UnitTrayLabel implements TaxonNameReturner, DrawerNameReturner, Col
 		this.infraspecificRank = "";
 		this.authorship = authorship;
 		this.collection = collection;
+		this.dateCreated = new Date();
+		this.dateLastUpdated = new Date();
 	}
 
 	

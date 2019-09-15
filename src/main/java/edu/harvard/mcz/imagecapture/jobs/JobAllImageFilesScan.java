@@ -29,11 +29,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -623,12 +619,15 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 							boolean reattach = false;  // image is detached instance and should be reattached instead of persisted denovo.
 							// try {
 								// Check for an existing image record.
-								ICImageLifeCycle imageCont = new ICImageLifeCycle();
+								ICImageLifeCycle imageLifeCycle = new ICImageLifeCycle();
 								ICImage tryMe = new ICImage();
 								tryMe.setFilename(filename);
 								String path = ImageCaptureProperties.getPathBelowBase(fileToCheck);
 								tryMe.setPath(path);
-								List <ICImage> matches = imageCont.findByExample(tryMe);
+								List <ICImage> matches = imageLifeCycle.findBy(new HashMap<String, Object>() {{
+									put("path", path);
+									put("filename", filename);
+								}});
 								log.debug(matches != null ? matches.size() : "no matches found");
 								if (matches!=null && matches.size()==1
 										&& matches.get(0).getRawBarcode()==null
@@ -638,7 +637,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 									// likely case for a failure to read data out of the image file 
 									// try to update the image file record.
 									try {
-										tryMe = imageCont.merge(matches.get(0));
+										tryMe = imageLifeCycle.merge(matches.get(0));
 										matches.remove(0);
 										reattach = true;
 										log.debug(tryMe);
@@ -649,7 +648,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 									// likely case for a failure to create a specimen record in a previous run
 									// try to update the image file record
 									try {
-										tryMe = imageCont.merge(matches.get(0));
+										tryMe = imageLifeCycle.merge(matches.get(0));
 										matches.remove(0);
 										reattach = true;
 										log.debug(tryMe);
@@ -824,7 +823,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 												// report on barcode/comment missmatch as an error condition.
 												try { 
 													RunnableJobError error =  new RunnableJobError(filename, barcode,
-														barcode, exifComment, "Barcode/Comment missmatch.",
+														barcode, exifComment, "Barcode/Comment mismatch.",
 														parser, (DrawerNameReturner) parser,
 														null, RunnableJobError.TYPE_MISMATCH);
 													counter.appendError(error);
@@ -835,14 +834,14 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 											} else {
 												// Just write into debug log
 												// This would normally the case where the image metadata doesn't contain a barcode but the image does, and reporting of this state as an error has been turned off. 
-												log.debug("Barcode/Comment missmatch: ["+barcode+"]!=["+exifComment+"]");
+												log.debug("Barcode/Comment mismatch: ["+barcode+"]!=["+exifComment+"]");
 											}
 										}
 										Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Creating new specimen record.");
 										Specimen s = new Specimen();
 										if ((!Singleton.getSingletonInstance().getBarcodeMatcher().matchesPattern(barcode)) 
 												&& Singleton.getSingletonInstance().getBarcodeMatcher().matchesPattern(exifComment)) {
-											// special case: coudn't read QR code barcode from image, but it was present in exif comment.
+											// special case: couldn't read QR code barcode from image, but it was present in exif comment.
 											s.setBarcode(exifComment);
 											barcode = exifComment;
 										} else { 
@@ -1046,12 +1045,12 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 									try {
 										if (reattach) {
 											// Update image file record
-											imageCont.attachDirty(tryMe);
+											imageLifeCycle.attachDirty(tryMe);
 										    log.debug("Updated " + tryMe.toString());
 										    counter.incrementFilesUpdated();
 										} else { 
 										   // *** Save a database record of the image file.
-										   imageCont.persist(tryMe);
+										   imageLifeCycle.persist(tryMe);
 										   log.debug("Saved " + tryMe.toString());
 										   counter.incrementFilesDatabased();
 										}

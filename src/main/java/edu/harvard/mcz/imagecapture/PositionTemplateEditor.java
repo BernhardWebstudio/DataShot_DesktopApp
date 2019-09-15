@@ -19,35 +19,35 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import javax.imageio.ImageIO;
-import javax.swing.SwingUtilities;
-import java.awt.BorderLayout;
-import javax.swing.JPanel;
-import javax.swing.JFrame;
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
-import javax.swing.JButton;
-import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import java.awt.Insets;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+
+import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import org.apache.commons.logging.Log;
@@ -148,7 +148,7 @@ public class PositionTemplateEditor extends JFrame {
 	public void setBlankBackgroundImage() { 
 		try {
 			// Can't retrieve resource as a file from Jar file, unless giving File to ImageIcon....
-			URL url = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/blank2848x4272.jpg");
+			URL url = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/blank2848x4272.jpg");
 			log.error(url);
 			log.error(url.toExternalForm());
 			setImageFile(url);

@@ -101,7 +101,7 @@ public class LoginDialog extends JDialog {
                       .getProperties()
                       .getProperty(ImageCaptureProperties.KEY_COLLECTION));
     URL iconFile = this.getClass().getResource(
-        "/edu/harvard/mcz/imagecapture/resources/icon.png");
+        "/edu/harvard/mcz/imagecapture/resources/images/icon.png");
     try {
       setIconImage(new ImageIcon(iconFile).getImage());
     } catch (Exception e) {
@@ -185,7 +185,7 @@ public class LoginDialog extends JDialog {
       gridBagConstraints61.gridy = 10;
       jLabel7 = new JLabel();
       URL iconFile = this.getClass().getResource(
-          "/edu/harvard/mcz/imagecapture/resources/key_small.png");
+          "/edu/harvard/mcz/imagecapture/resources/images/key_small.png");
       try {
         // this.setIconImage(new ImageIcon(iconFile).getImage());
         jLabel7.setIcon(new ImageIcon(iconFile));

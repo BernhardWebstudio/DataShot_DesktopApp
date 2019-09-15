@@ -21,19 +21,36 @@ package edu.harvard.mcz.imagecapture;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JPanel;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JTextField;
-import javax.swing.WindowConstants;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.WindowConstants;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import edu.harvard.mcz.imagecapture.data.ICImage;
 import edu.harvard.mcz.imagecapture.data.ICImageLifeCycle;
@@ -42,25 +59,6 @@ import edu.harvard.mcz.imagecapture.data.UsersLifeCycle;
 import edu.harvard.mcz.imagecapture.data.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.BadTemplateException;
 import edu.harvard.mcz.imagecapture.exceptions.ImageLoadException;
-
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.*;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-
-import javax.swing.JComboBox;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.awt.Insets;
 
 /** Display parts of images (and possibly a data entry form) of a specimen and its labels.
  *  
@@ -237,7 +235,7 @@ public class ImageDisplayFrame extends JFrame {
 			// Show the component parts of the image as defined by the position template.
 			if (defaultTemplate.getTemplateId().equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
 				// clear component parts
-				URL url = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/gnome-mime-image.png");
+				URL url = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/gnome-mime-image.png");
 				BufferedImage anImage = ImageIO.read(url);
 				this.setBarcodeImage(anImage);
 				this.setSpecimenImage(anImage);

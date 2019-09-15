@@ -2635,7 +2635,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		if (jButtonNumbersAdd == null) {
 			jButtonNumbersAdd = new JButton();
 			jButtonNumbersAdd.setText("+");
-			URL iconFile = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/b_plus.png");
+			URL iconFile = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/b_plus.png");
 	        try {  
 	        	jButtonNumbersAdd.setText("");
 	        	jButtonNumbersAdd.setIcon(new ImageIcon(iconFile));
@@ -2701,7 +2701,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		if (jButtonCollsAdd == null) {
 			jButtonCollsAdd = new JButton();
 			jButtonCollsAdd.setText("+");
-			URL iconFile = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/b_plus.png");
+			URL iconFile = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/b_plus.png");
 	        try {  
 	        	jButtonCollsAdd.setText("");
 	        	jButtonCollsAdd.setIcon(new ImageIcon(iconFile));
@@ -3504,7 +3504,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JButton getJButtonNext() {
 		if (jButtonNext == null) {
 			jButtonNext = new JButton();
-			URL iconFile = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/next.png");
+			URL iconFile = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/next.png");
 			if (iconFile!=null) { 
 			   jButtonNext.setIcon(new ImageIcon(iconFile));
 			} else { 
@@ -3558,7 +3558,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JButton getJButtonPrevious() {
 		if (jButtonPrevious == null) {
 			jButtonPrevious = new JButton();
-			URL iconFile = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/back.png");
+			URL iconFile = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/back.png");
 			if (iconFile!=null) {
 			   jButtonPrevious.setIcon(new ImageIcon(iconFile));
 			} else { 

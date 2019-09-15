@@ -486,7 +486,7 @@ public class SearchDialog extends JDialog {
 			gridBagConstraints111.anchor = GridBagConstraints.NORTHEAST;
 			gridBagConstraints111.gridy = 3;
 			jLabel8 = new JLabel();
-			jLabel8.setText("Date Imaged");
+			jLabel8.setText("Imaged Date/Path");
 			GridBagConstraints gridBagConstraints10 = new GridBagConstraints();
 			gridBagConstraints10.insets = new Insets(0, 0, 5, 5);
 			gridBagConstraints10.gridx = 0;

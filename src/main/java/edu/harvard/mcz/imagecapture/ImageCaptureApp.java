@@ -147,9 +147,9 @@ public class ImageCaptureApp {
 	    	// check for "Aqua"
 	    	try {
 	    		UIManager.setLookAndFeel(
-	    				// OSX Aqua look and feel uses space on forms much too inefficiently
-	    				// switch to the normal Java look and feel instead.
-	    				UIManager.getCrossPlatformLookAndFeelClassName());
+	    				// Use cross platform if native uses space on forms much too inefficiently
+						// UIManager.getCrossPlatformLookAndFeelClassName());
+						UIManager.getSystemLookAndFeelClassName());
 	    	} 
 	    	catch (UnsupportedLookAndFeelException e) {
 	    		log.error(e);

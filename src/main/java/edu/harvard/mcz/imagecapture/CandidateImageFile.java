@@ -1052,7 +1052,7 @@ public class CandidateImageFile {
 					int width =  positionTemplate.getBarcodeSize().width; 
 					int height =  positionTemplate.getBarcodeSize().height;
 					returnValue = readBarcodeFromLocation(image, left, top, width, height, false);
-					if (returnValue.length()>0) {
+					if (returnValue != null && returnValue.length() > 0) {
 						barcodeStatus = RESULT_BARCODE_SCANNED;
 					} else {
 						returnValue = "Failed to read a barcode from templated location.";
@@ -1060,9 +1060,6 @@ public class CandidateImageFile {
 					}
 					log.debug(returnValue);
 					log.debug("barcodeStatus=" + barcodeStatus);
-
-
-
 				} else { 
 					// image is narrower than templated area.
 					returnValue = "Image is different size from Template.";

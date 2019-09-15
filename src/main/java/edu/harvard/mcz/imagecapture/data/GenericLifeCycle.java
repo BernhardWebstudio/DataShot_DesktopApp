@@ -85,7 +85,7 @@ public abstract class GenericLifeCycle<T> {
     }
 
     public List<T> findBy(Map<String, Object> propertyValueMap) {
-        log.debug("finding " + this.tCLass.toGenericString() + " instance by example");
+        log.debug("finding " + this.tCLass.toGenericString() + " instance by hashmap");
         try {
             List<T> results = null;
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -95,12 +95,13 @@ public abstract class GenericLifeCycle<T> {
                 CriteriaQuery cr = cb.createQuery(this.tCLass);
                 Root<T> root = cr.from(this.tCLass);
                 cr.select(root);
-                List<Predicate> propertyValueRelations = null;
+                List<Predicate> propertyValueRelations = new ArrayList<>();
                 for (Map.Entry<String, Object> entry : propertyValueMap.entrySet()) {
                     propertyValueRelations.add(cb.equal(root.get(entry.getKey()), entry.getValue()));
                 }
                 cr.where(cb.and(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()])));
                 results = session.createQuery(cr).list();
+                session.getTransaction().commit();
                 log.debug("find by example successful, result size: " + results.size());
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
@@ -108,7 +109,7 @@ public abstract class GenericLifeCycle<T> {
             }
             return results;
         } catch (RuntimeException re) {
-            log.error("find by example failed", re);
+            log.error("find by hashmap failed", re);
             throw re;
         }
     }
@@ -153,8 +154,6 @@ public abstract class GenericLifeCycle<T> {
         String[] propertyNames = classMetadata.getPropertyNames();
         return Arrays.asList(propertyNames);
     }
-
-
 
     public List<T> findByExample(T instance) {
         log.debug("finding " + tCLass.toGenericString() + " instance by example");
@@ -208,7 +207,7 @@ public abstract class GenericLifeCycle<T> {
     }
 
     public List<T> findByExampleLike(T instance) {
-        log.debug("finding " + instance.getClass().toGenericString() + " instance by example");
+        log.debug("finding " + instance.getClass().toGenericString() + " instance by example like");
         try {
             List<T> results = null;
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -220,8 +219,9 @@ public abstract class GenericLifeCycle<T> {
                 cr.select(root);
                 // loop properties & find the ones which are not null
                 List<String> persistentAttributes = this.getEntityAttributes(instance, session);
+                log.debug("found entity attributes: " + persistentAttributes.toString());
                 int attributesSize = persistentAttributes.size();
-                List<Predicate> propertyValueRelations = null;
+                List<Predicate> propertyValueRelations = new ArrayList<>();
                 for (int i = 0; i < attributesSize; i++) {
                     String attrName = persistentAttributes.get(i);
                     // check if property is null
@@ -232,7 +232,7 @@ public abstract class GenericLifeCycle<T> {
                         getter = instance.getClass().getMethod("get" + attrName.substring(0, 1).toUpperCase() + attrName.substring(1));
                         propertyValue = getter.invoke(instance);
                     } catch (Exception e) {
-                        log.warn("Failed to get getter method or value of '" + attrName + "' to findByExample: " + e.getMessage());
+                        log.warn("Failed to get getter method or value of '" + attrName + "' to findByExampleLike: " + e.getMessage());
                     }
                     // TODO: handle relations
                     if (propertyValue != null) {
@@ -245,14 +245,14 @@ public abstract class GenericLifeCycle<T> {
                 cr.where(cb.and(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()])));
                 results = session.createQuery(cr).list();
                 session.getTransaction().commit();
-                log.debug("find by example successful, result size: " + results.size());
+                log.debug("find by example like successful, result size: " + results.size());
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
                 log.error(e.getMessage());
             }
             return results;
         } catch (RuntimeException re) {
-            log.error("find by example failed", re);
+            log.error("find by example like failed", re);
             throw re;
         }
     }

@@ -311,7 +311,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 	    this.setLocation((screenSize.width -   this.getWidth()) / 2 , 
 	                     (screenSize.height - this.getHeight()) / 2 );
         //String iconFile = this.getClass().getResource("resources/icon.ico").getFile();
-        URL iconFile = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/icon.png");          
+        URL iconFile = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/icon.png");          
         try {  
         	setIconImage(new ImageIcon(iconFile).getImage());
         } catch (Exception e) { 
@@ -501,7 +501,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemPreprocess.setText("Preprocess All");
 			jMenuItemPreprocess.setEnabled(true);
 			try { 
-				jMenuItemPreprocess.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/barcode_icon_16px.jpg")));
+				jMenuItemPreprocess.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemScanOneBarcode.");
 				log.error(e.getLocalizedMessage());
@@ -528,7 +528,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemDelete.setText("Delete a specimen record");
 			jMenuItemDelete.setEnabled(true);
 			try { 
-				jMenuItemDelete.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/red-warning-icon.png")));
+				jMenuItemDelete.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/red-warning-icon.png")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemScanOneBarcode.");
 				log.error(e.getLocalizedMessage());
@@ -566,7 +566,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemLoadData = new JMenuItem();
 			jMenuItemLoadData.setText("Load Data");
 			try { 
-				jMenuItemLoadData.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/cycle_icon_16px.jpg")));
+				jMenuItemLoadData.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/cycle_icon_16px.jpg")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemRecheckAllTemplates.");
 				log.error(e);
@@ -607,7 +607,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemScanOneBarcode.setText("Scan A File For Barcodes");
 			jMenuItemScanOneBarcode.setMnemonic(KeyEvent.VK_S);
 			try { 
-			    jMenuItemScanOneBarcode.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/barcode_icon_16px.jpg")));
+			    jMenuItemScanOneBarcode.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));
 			} catch (Exception e) { 
 				System.out.println("Can't open icon file for jMenuItemScanOneBarcode.");
 				System.out.println(e.getLocalizedMessage());
@@ -634,7 +634,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemScanOneBarcodeSave.setMnemonic(KeyEvent.VK_D);
 			jMenuItemScanOneBarcodeSave.setText("Database One File");
 			try { 
-			    jMenuItemScanOneBarcodeSave.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/barcode_icon_16px.jpg")));
+			    jMenuItemScanOneBarcodeSave.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemScanOneBarcode.");
 				log.error(e.getLocalizedMessage());
@@ -678,7 +678,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemUsers.setMnemonic(KeyEvent.VK_U);
 			jMenuItemUsers.setEnabled(false);
 			try { 
-				jMenuItemUsers.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/people_icon_16px.png")));
+				jMenuItemUsers.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/people_icon_16px.png")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemUsers.");
 				log.error(e);
@@ -899,7 +899,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemBrowseSpecimens.setText("Browse Specimens");
 			jMenuItemBrowseSpecimens.setMnemonic(KeyEvent.VK_B);
 			try { 
-				jMenuItemBrowseSpecimens.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/butterfly_icon_16px.png")));
+				jMenuItemBrowseSpecimens.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/butterfly_icon_16px.png")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemBrowseImages.");
 				log.error(e);
@@ -990,7 +990,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemBrowseImages.setText("Browse Image Files");
 			jMenuItemBrowseImages.setMnemonic(KeyEvent.VK_I);
 			try { 
-				jMenuItemBrowseImages.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/image_icon_16px.png")));
+				jMenuItemBrowseImages.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/image_icon_16px.png")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemBrowseImages.");
 				log.error(e);
@@ -1047,7 +1047,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemPreprocessOneDir.setMnemonic(KeyEvent.VK_P);
 			jMenuItemPreprocessOneDir.setEnabled(true);
 			try { 
-				jMenuItemPreprocessOneDir.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/barcode_icon_16px.jpg")));
+				jMenuItemPreprocessOneDir.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemScanOneBarcode.");
 				log.error(e.getLocalizedMessage());
@@ -1142,7 +1142,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemCheckForABarcode.setText("Check for Barcodes in Image File");
 			jMenuItemCheckForABarcode.setMnemonic(KeyEvent.VK_C);
 			try { 
-				jMenuItemCheckForABarcode.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/barcode_icon_16px.jpg")));
+				jMenuItemCheckForABarcode.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemCheckForABarcode.");
 				log.error(e);
@@ -1270,7 +1270,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemFindMissingImages.setText("Find Missing Images");
 			jMenuItemFindMissingImages.setEnabled(true);
 			/*try { 
-				jMenuItemFindMissingImages.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/red-warning-icon.png")));
+				jMenuItemFindMissingImages.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/red-warning-icon.png")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemScanOneBarcode.");
 				log.error(e.getLocalizedMessage());
@@ -1370,7 +1370,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemChangePassword.setText("Change My Password");
 			jMenuItemChangePassword.setMnemonic(KeyEvent.VK_M);
 			try { 
-				jMenuItemChangePassword.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/key_icon_16px.png")));
+				jMenuItemChangePassword.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/key_icon_16px.png")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemChangePassword.");
 				log.error(e);
@@ -1440,7 +1440,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemRepeatOCR = new JMenuItem();
 			jMenuItemRepeatOCR.setText("Redo OCR for All");
 			try { 
-				jMenuItemRepeatOCR.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/reload_icon_16px.png")));
+				jMenuItemRepeatOCR.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemRepeatOCR.");
 				log.error(e);
@@ -1466,7 +1466,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemListRunningJobs.setText("List Running Jobs");
 			jMenuItemListRunningJobs.setMnemonic(KeyEvent.VK_L);
 			try { 
-				jMenuItemListRunningJobs.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/tools_icon_16px.png")));
+				jMenuItemListRunningJobs.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/tools_icon_16px.png")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemListRunningJobs.");
 				log.error(e);
@@ -1492,7 +1492,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemRedoOCROne.setText("Redo OCR for A Directory");
 			jMenuItemRedoOCROne.setMnemonic(KeyEvent.VK_R);
 			try { 
-				jMenuItemRedoOCROne.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/reload_icon_16px.png")));
+				jMenuItemRedoOCROne.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemRedoOCROne.");
 				log.error(e);
@@ -1513,7 +1513,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemCleanupDirectory = new JMenuItem();
 			jMenuItemCleanupDirectory.setText("Cleanup Deleted Images");
 			try { 
-				jMenuItemCleanupDirectory.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/bb_trsh_icon_16px.png")));
+				jMenuItemCleanupDirectory.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/bb_trsh_icon_16px.png")));
 			} catch (Exception e) { 
 				System.out.println("Can't open icon file for jMenuItemCleanupDirectory.");
 				System.out.println(e.getLocalizedMessage());
@@ -1537,7 +1537,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemRecheckTemplates.setText("Recheck cases of WholeImageOnly");
 			jMenuItemRecheckTemplates.setMnemonic(KeyEvent.VK_W);
 			try { 
-				jMenuItemRecheckTemplates.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/reload_icon_16px.png")));
+				jMenuItemRecheckTemplates.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemRecheckTemplates.");
 				log.error(e);
@@ -1560,7 +1560,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemRecheckAllTemplates = new JMenuItem();
 			jMenuItemRecheckAllTemplates.setText("Recheck All cases of WholeImageOnly");
 			try { 
-				jMenuItemRecheckAllTemplates.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/reload_icon_16px.png")));
+				jMenuItemRecheckAllTemplates.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png")));
 			} catch (Exception e) { 
 				log.error("Can't open icon file for jMenuItemRecheckAllTemplates.");
 				log.error(e);

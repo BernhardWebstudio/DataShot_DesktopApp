@@ -19,31 +19,11 @@
  */
 package edu.harvard.mcz.imagecapture.jobs;
 
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.*;
-
-import javax.imageio.ImageIO;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import edu.harvard.mcz.imagecapture.CandidateImageFile;
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
-import edu.harvard.mcz.imagecapture.RunnableJobReportDialog;
 import edu.harvard.mcz.imagecapture.PositionTemplate;
+import edu.harvard.mcz.imagecapture.RunnableJobReportDialog;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.UnitTrayLabelParser;
 import edu.harvard.mcz.imagecapture.data.HigherTaxonLifeCycle;
@@ -66,6 +46,28 @@ import edu.harvard.mcz.imagecapture.interfaces.RunStatus;
 import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
 import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
 import edu.harvard.mcz.imagecapture.interfaces.TaxonNameReturner;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /** 
  * Check all image files either under the image root directory or in a selected directory
@@ -263,8 +265,8 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 					    checkFiles(startPoint, counter);
 					}
 					// report
-					String report = "Scanned '" + counter.getDirectories() + "' directories.\n";
-					report += "Created thumbnails in '" + thumbnailCounter + "' directories";
+					String report = "Scanned " + counter.getDirectories() + " directories.\n";
+					report += "Created thumbnails in " + thumbnailCounter + " directories";
 					if (thumbnailCounter==0) { 
 					   report += " (May still be in progress)";
 					} 
@@ -596,6 +598,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 						   counter.incrementDirectories();
 						} 
 					} else { 
+						counter.appendError(new RunnableJobError(fileToCheck.getName(), "", "", "Could not read directory", new UnreadableFileException(), RunnableJobError.TYPE_FILE_READ));
 						counter.incrementDirectoriesFailed();
 					}
 				} else { 
@@ -802,10 +805,15 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 														null, null,
 														null, RunnableJobError.TYPE_NO_TEMPLATE);
 												counter.appendError(error);
-											}
+											} else {
 											// Nothing found.  Need to ask.
-											// TODO: list failures on completion.
+											RunnableJobError error =  new RunnableJobError(filename, barcode,
+														barcode, exifComment, "Image doesn't appear to contain a barcode in a templated position.",
+														null, null,
+														null, RunnableJobError.TYPE_UNKNOWN);
+												counter.appendError(error);
 											counter.incrementFilesFailed();
+										}
 										}
 									}
 
@@ -1095,6 +1103,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 
 						} catch (UnreadableFileException e) {
 							counter.incrementFilesFailed();
+							counter.appendError(new RunnableJobError(fileToCheck.getName(), "", "", "Could not read file", new UnreadableFileException(), RunnableJobError.TYPE_FILE_READ));
 							log.error("Couldn't read file." + e.getMessage());
 							//} catch (OCRReadException e) {
 							//	counter.incrementFilesFailed();

@@ -28,7 +28,7 @@ package edu.harvard.mcz.imagecapture.exceptions;
 public class UnreadableFileException extends Exception {
 
 	private static final long serialVersionUID = -8398415097676132152L;
-
+	
 	/** Exception to throw for any sort of problem reading 
 	 * a file.
 	 */

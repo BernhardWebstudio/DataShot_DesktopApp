@@ -28,6 +28,7 @@ import java.util.Properties;
 
 import javax.swing.table.AbstractTableModel;
 
+import javafx.geometry.Pos;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -96,10 +97,6 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 	 */
 	public static final String KEY_IMAGEZXINGALSOTRYHARDER = "images.zxingalsotryharder";
 	/**
-	 * PostitionTemplate to use by default (to try first).
-	 */
-	public static final String KEY_TEMPLATEDEFAULT = "template.default";
-	/**
 	 * The path and name of the tesseract executable for OCR failover.
 	 */
 	public static final String KEY_TESSERACT_EXECUTABLE = "program.tesseract";
@@ -133,7 +130,7 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 	/**
 	 * The default value for preparation type (e.g. pinned).
 	 * 
-	 * @see edu.harvard.mcz.imagecapture.data.SpecimenPart.preserveMethod
+	 * @see edu.harvard.mcz.imagecapture.data.SpecimenPart#preserveMethod
 	 */
 	public static final String KEY_DEFAULT_PREPARATION = "default.preparation";
 	/**
@@ -209,7 +206,6 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 			properties = new Properties();
 		}
 		checkDefaults();
-		testDefaultTemplate();
 	}
 
 	/** Given a File (which could be a directory path as a File object), return
@@ -409,10 +405,10 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 	 * @return true if template in properties exists, false if no match to key or 
 	 * if template was changed.    
 	 */
-	private boolean testDefaultTemplate() {
+	public boolean testDefaultTemplate() {
 		boolean result = false;
-		if (properties.containsKey(KEY_TEMPLATEDEFAULT)) {
-		    String templateId = properties.getProperty(KEY_TEMPLATEDEFAULT);
+		if (properties.containsKey(KEY_DEFAULT_TEMPLATES)) {
+		    String templateId = properties.getProperty(KEY_DEFAULT_TEMPLATES);
 		    try {
 				PositionTemplate template = new PositionTemplate(templateId);
 				template.getClass();  // added to suppress findbugs DLS_DEAD_LOCAL_STORE
@@ -420,7 +416,7 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 				result = true;
 			} catch (NoSuchTemplateException e) {
 				// Template isn't recognized, set property to default template.
-				properties.setProperty(KEY_TEMPLATEDEFAULT, PositionTemplate.TEMPLATE_DEFAULT);
+				properties.setProperty(KEY_DEFAULT_TEMPLATES, PositionTemplate.TEMPLATE_DEFAULT);
 			} 
 		}
 		return result;
@@ -479,10 +475,6 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 			// Default value for choosing whether or not to also try harder with xzing.
 		    properties.setProperty(KEY_IMAGEZXINGALSOTRYHARDER, "true");
 		}
-		if (!properties.containsKey(KEY_TEMPLATEDEFAULT)) {
-			// PostitionTemplate to use by default
-		    properties.setProperty(KEY_TEMPLATEDEFAULT, PositionTemplate.TEMPLATE_DEFAULT);
-		}
 		if (!properties.containsKey(KEY_TESSERACT_EXECUTABLE)) {
 			// name of the tesseract executable, probably tesseract on unix, tesseract.exe on windows
 		    properties.setProperty(KEY_TESSERACT_EXECUTABLE, "tesseract ");
@@ -540,7 +532,7 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 			properties.setProperty(KEY_LOGIN_SHOW_ADVANCED, "false");
 		}			
 		if (!properties.containsKey(KEY_DEFAULT_TEMPLATES)) {
-			properties.setProperty(KEY_DEFAULT_TEMPLATES, "false");
+			properties.setProperty(KEY_DEFAULT_TEMPLATES, PositionTemplate.TEMPLATE_DEFAULT);
 		}
 		
 	}

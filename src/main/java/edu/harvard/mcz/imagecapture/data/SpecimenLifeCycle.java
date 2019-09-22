@@ -958,7 +958,9 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 		}
 	}
 
-
+    public List<Specimen> findByExampleLike(Specimen instance) {
+	    this.findByExampleLike(instance, 0, 0);
+    }
 
 	/** Find specimens with values matching those found in an example specimen instance, including links out
 	 * to related entities.  Like matching is enabled, so strings containing '%' will generate like where
@@ -967,7 +969,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 	 * @param instance
 	 * @return
 	 */
-	public List<Specimen> findByExampleLike(Specimen instance) {
+	public List<Specimen> findByExampleLike(Specimen instance, int maxResults, int offset) {
 		log.debug("finding Specimen instance by example with trackings, collectors, and images and like criteria");
 		try {
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -998,6 +1000,12 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				if (instance.getCollectors()!=null && instance.getCollectors().size()>0) {
 					criteria.createCriteria("collectors",Criteria.INNER_JOIN).add(Example.create(instance.getCollectors().toArray()[0]).enableLike().ignoreCase());
 				}
+				if (offset != 0) {
+				    criteria.setFirstResult(offset);
+                }
+				if (maxResults != 0) {
+				    criteria.setMaxResults(maxResults);
+                }
 				results = (List<Specimen>) criteria.list();
 				log.debug("find by example successful, result size: " + results.size());
 				session.getTransaction().commit();
@@ -1022,7 +1030,12 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 		}
 	}
 
-	/**
+    public List<Specimen> findByExample(Specimen instance) {
+        this.findByExample(instance, 0, 0);
+    }
+
+
+    /**
 	 * Find Specimen records based on an example specimen, don't use if you are only searching by barcode.
 	 *
 	 * @param instance Specimen instance to use as a pattern for the search
@@ -1030,7 +1043,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 	 *
 	 * @see SpecimenLifeCycle#findByBarcode(String) 
 	 */
-	public List<Specimen> findByExample(Specimen instance) {
+	public List<Specimen> findByExample(Specimen instance, int maxResults, int offset) {
 		log.debug("finding Specimen instance by example");
 		try {
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -1045,6 +1058,12 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				if (instance.getICImages()!=null && instance.getICImages().size()>0) {
 					criteria.createCriteria("ICImages").add(Example.create(instance.getICImages().toArray()[0]));
 				}
+                if (offset != 0) {
+                    criteria.setFirstResult(offset);
+                }
+                if (maxResults != 0) {
+                    criteria.setMaxResults(maxResults);
+                }
 				results = (List<Specimen>) criteria.list();
 				log.debug("find by example successful, result size: " + results.size());
 				session.getTransaction().commit();

@@ -11,10 +11,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Author: Paul J. Morris
  */
 package edu.harvard.mcz.imagecapture.jobs;
@@ -41,6 +41,8 @@ public class RunnableJobError {
 	public static final int TYPE_FAILOVER_TO_OCR = 6;
 	public static final int TYPE_LOAD_FAILED = 7;
 	public static final int TYPE_LOAD_NOCHANGE = 8;
+	public static final int TYPE_FILE_READ = 9;
+	public static final int TYPE_UNKNOWN = 10;
 
 	private String filename;
 	private String barcode;
@@ -309,6 +311,8 @@ public class RunnableJobError {
 		case TYPE_LOAD_NOCHANGE: 
 			result = "Data Not Changed";
 			break;
+		default:
+			result = "Unhandled case";
 		}
 		return result;
 	}

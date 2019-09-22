@@ -868,24 +868,30 @@ public class MainFrame extends JFrame implements RunnerListener {
 		jLabelStatus.setText("Status: " + aMessage.substring(0, maxLength));
 	}
 
-	public void setSpecimenBrowseList(Specimen searchCriteria) { 
+	public void setSpecimenBrowseList(Specimen searchCriteria, int limit, int offset) {
 		Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		slb = new SpecimenBrowser(searchCriteria, true);
-		if (ilb!=null) { jPanelCenter.remove(ilb); }
-		if (ulb!=null) { jPanelCenter.remove(ulb); }
+		slb = new SpecimenBrowser(searchCriteria, true, limit, offset);
+		this.adaptJpanelToSpecimenBrowser(slb);
+		Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+	}
+
+	public void adaptJpanelToSpecimenBrowser(SpecimenBrowser slb) {
 		jPanelCenter.removeAll();
 		jPanelCenter.add(slb, BorderLayout.CENTER);
 		jPanelCenter.revalidate();
 		jPanelCenter.repaint();
-		if (Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_ENABLE_BROWSE).equals("false")) { 
-		    jMenuItemBrowseSpecimens.setEnabled(false);
-		    jMenuItemBrowseImages.setEnabled(false);
-		} else { 
-		    jMenuItemBrowseSpecimens.setEnabled(true);
-		    jMenuItemBrowseImages.setEnabled(true);
+		if (Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_ENABLE_BROWSE).equals("false")) {
+			jMenuItemBrowseSpecimens.setEnabled(false);
+			jMenuItemBrowseImages.setEnabled(false);
+		} else {
+			jMenuItemBrowseSpecimens.setEnabled(true);
+			jMenuItemBrowseImages.setEnabled(true);
 		}
-        setStatusMessage("Found " + slb.getRowCount() + " matching specimens");
-		Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		setStatusMessage("Found " + slb.getRowCount() + " matching specimens");
+	}
+
+	public void setSpecimenBrowseList(Specimen searchCriteria) {
+		this.setSpecimenBrowseList(searchCriteria, 0, 0);
 	}
 	
 	/**
@@ -911,20 +917,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 					//TODO: extend beyond switching between ilb and slb.
 					Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					slb = new SpecimenBrowser();
-					if (ilb!=null) { jPanelCenter.remove(ilb); }
-					if (ulb!=null) { jPanelCenter.remove(ulb); }
-					jPanelCenter.removeAll();
-					jPanelCenter.add(slb, BorderLayout.CENTER);
-					jPanelCenter.revalidate();
-					jPanelCenter.repaint();
-					if (Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_ENABLE_BROWSE).equals("false")) { 
-					    jMenuItemBrowseSpecimens.setEnabled(true);
-					    jMenuItemBrowseImages.setEnabled(true);
-					} else { 
-					    jMenuItemBrowseSpecimens.setEnabled(true);
-					    jMenuItemBrowseImages.setEnabled(true);
-					}
-					setStatusMessage("Found " + slb.getRowCount() + " specimens");
+					adaptJpanelToSpecimenBrowser(slb);
 					Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 					System.gc();
 				}
@@ -1002,16 +995,14 @@ public class MainFrame extends JFrame implements RunnerListener {
 					//TODO: extend beyond switching between ilb and slb.
 					Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					ilb = new ImageListBrowser();
-					if (slb!=null) { jPanelCenter.remove(slb); }
-					if (ulb!=null) { jPanelCenter.remove(ulb); }
 					jPanelCenter.removeAll();
 					jPanelCenter.add(ilb, BorderLayout.CENTER);
 					jPanelCenter.revalidate();
 					jPanelCenter.repaint();
-					if (Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_ENABLE_BROWSE).equals("false")) { 
+					if (Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_ENABLE_BROWSE).equals("false")) {
 					    jMenuItemBrowseSpecimens.setEnabled(false);
 					    jMenuItemBrowseImages.setEnabled(false);
-					} else { 
+					} else {
 					    jMenuItemBrowseSpecimens.setEnabled(true);
 					    jMenuItemBrowseImages.setEnabled(true);
 					}

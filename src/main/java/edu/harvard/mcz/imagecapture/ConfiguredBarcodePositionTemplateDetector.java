@@ -70,7 +70,7 @@ public class ConfiguredBarcodePositionTemplateDetector implements	PositionTempla
 
 		// skip all following intensive, unnecessary computation if possible
 		String defaultTemplate = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_DEFAULT_TEMPLATES);
-		if (defaultTemplate instanceof String && defaultTemplate != "null" && defaultTemplate.length() > 4) {
+		if (Singleton.getSingletonInstance().getProperties().testDefaultTemplate() && defaultTemplate != PositionTemplate.TEMPLATE_DEFAULT) {
 			return defaultTemplate;
 		}
 		

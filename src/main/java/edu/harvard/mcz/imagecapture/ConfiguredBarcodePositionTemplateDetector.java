@@ -43,7 +43,7 @@ import edu.harvard.mcz.imagecapture.interfaces.PositionTemplateDetector;
  * 
  * @author Paul J. Morris
  *
- * @see #edu.harvard.mcz.imagecapture.PositionTemplate
+ * @see edu.harvard.mcz.imagecapture.PositionTemplate
  *
  */
 public class ConfiguredBarcodePositionTemplateDetector implements	PositionTemplateDetector {
@@ -67,6 +67,12 @@ public class ConfiguredBarcodePositionTemplateDetector implements	PositionTempla
 		if (!anImageFile.canRead()) { 
 			throw new UnreadableFileException("Unable to read " + anImageFile.getName());
 		}
+
+		// skip all following intensive, unnecessary computation if possible
+		String defaultTemplate = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_DEFAULT_TEMPLATES);
+		if (defaultTemplate instanceof String && defaultTemplate != "null" && defaultTemplate.length() > 4) {
+			return defaultTemplate;
+		}
 		
 		BufferedImage image = null;
 		try { 
@@ -77,13 +83,9 @@ public class ConfiguredBarcodePositionTemplateDetector implements	PositionTempla
 
 		// iterate through templates and check until the first template where a barcode is found
 		List<String> templates = PositionTemplate.getTemplateIds();
-		
-		//allie
-		for(String t : templates){
-			log.debug("list of templates::: " + t);
-		}
-	
-		
+
+		log.debug("Detecting template for file: " + anImageFile.getAbsolutePath());
+		log.debug("list of templates: " + templates.toString());
 		
 		ListIterator<String> i = templates.listIterator();
 		boolean found = false;

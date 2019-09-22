@@ -40,7 +40,8 @@ import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
 import edu.harvard.mcz.imagecapture.interfaces.PositionTemplateDetector;
 
-/** Description of the coordinates within an image where parts of the image to pass to 
+/** 
+ * Description of the coordinates within an image where parts of the image to pass to 
  * barcode reading software, OCR software, and which parts are to be displayed as containing
  * a specimen image or specimen labels.   Wrapper for persistent Template class.  Provides special
  * case template TEMPLATE_NO_COMPONENT_PARTS for handling any size image that isn't templated.  
@@ -99,7 +100,7 @@ public class PositionTemplate {
 		ArrayList<String> templateIdList = new ArrayList<String>();
 		
 		String defaultTemplatesPropertiesVal = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(
-	    		 ImageCaptureProperties.DEFAULT_TEMPLATES);
+	    		 ImageCaptureProperties.KEY_DEFAULT_TEMPLATES);
 		
 		//allie: here load the props file: leave the default and config the other var.
 		//template.default=Default template 

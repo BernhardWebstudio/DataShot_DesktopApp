@@ -163,12 +163,17 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 	 * Are images expected to contain the barcode number in exif or xmp metadata?
 	 */
 	public static final String KEY_REDUNDANT_COMMENT_BARCODE = "images.metadatacontainsbarcode";
-	
-	//allieadd
-	public static final String DISPLAY_COLLECTION = "display.collection";
-	//allieadd
-	public static final String DEFAULT_TEMPLATES = "template.default2";
-	
+
+	/**
+	 *
+	 */
+	public static final String KEY_DISPLAY_COLLECTION = "display.collection";
+
+	/**
+	 * Set this value to skip the intensive barcode finder check
+	 */
+	public static final String KEY_DEFAULT_TEMPLATES = "template.default";
+
 	/**
 	 *  Value for KEY_DETAILS_SCROLL that will cause the specimen details view pane to
 	 *  have scroll bars forced to be turned on.
@@ -176,6 +181,7 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 	 *  @see #KEY_DETAILS_SCROLL
 	 */
 	public static final String VALUE_DETAILS_SCROLL_FORCE_ON = "on";
+
 	/**
 	 * Show the login dialog with the advanced options open by default (desirable for 
 	 * developers working with development/test/production databases) if true.
@@ -533,7 +539,9 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 			// default value is closed advanced options (server) on login dialog.
 			properties.setProperty(KEY_LOGIN_SHOW_ADVANCED, "false");
 		}			
-		
+		if (!properties.containsKey(KEY_DEFAULT_TEMPLATES)) {
+			properties.setProperty(KEY_DEFAULT_TEMPLATES, "false");
+		}
 		
 	}
 	

@@ -15,6 +15,7 @@ import edu.harvard.mcz.imagecapture.struct.VerbatimCount;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.*;
+import org.hibernate.criterion.Example;
 import org.hibernate.query.Query;
 
 import java.math.BigDecimal;
@@ -955,9 +956,109 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			log.error(re);
 			return new String[]{};
 		}
-	}		
-	
-	
+	}
+
+
+
+	/** Find specimens with values matching those found in an example specimen instance, including links out
+	 * to related entities.  Like matching is enabled, so strings containing '%' will generate like where
+	 * criteria with the % as a wild card.  Matches are case insensitive.
+	 *
+	 * @param instance
+	 * @return
+	 */
+	public List<Specimen> findByExampleLike(Specimen instance) {
+		log.debug("finding Specimen instance by example with trackings, collectors, and images and like criteria");
+		try {
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			List<Specimen> results = null;
+			try {
+				Criteria criteria = session.createCriteria("edu.harvard.mcz.imagecapture.data.Specimen");
+				instance.setFlagAncilaryAlsoInMCZbase(null);
+				instance.setFlagInBulkloader(null);
+				instance.setFlagInMCZbase(null);
+
+				Example example = Example.create(instance).enableLike().ignoreCase();
+				// Note: Criteria in example instance can be excluded here, or by setting their
+				// values to null.  See the invocation of Specimen.clearDefaults in
+				// SearchDialog.getJButtonSearch()'s actionPerformed method.
+				//example.excludeProperty("flagInBulkloader");
+				criteria.add(example);
+
+				criteria.setFetchMode("trackings", FetchMode.SELECT);
+				criteria.setFetchMode("specimenParts", FetchMode.SELECT);
+				criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+				if (instance.getTrackings()!=null && instance.getTrackings().size()>0) {
+					criteria.createCriteria("trackings",Criteria.INNER_JOIN).add(Example.create(instance.getTrackings().toArray()[0]).enableLike());
+				}
+				if (instance.getICImages()!=null && instance.getICImages().size()>0) {
+					criteria.createCriteria("ICImages",Criteria.INNER_JOIN).add(Example.create(instance.getICImages().toArray()[0]).enableLike().ignoreCase());
+				}
+				if (instance.getCollectors()!=null && instance.getCollectors().size()>0) {
+					criteria.createCriteria("collectors",Criteria.INNER_JOIN).add(Example.create(instance.getCollectors().toArray()[0]).enableLike().ignoreCase());
+				}
+				results = (List<Specimen>) criteria.list();
+				log.debug("find by example successful, result size: " + results.size());
+				session.getTransaction().commit();
+			} catch (HibernateException e) {
+				session.getTransaction().rollback();
+				log.error("find by example failed", e);
+			}
+			try { session.close(); } catch (SessionException e) { }
+			for (int i=0; i<results.size(); i++) {
+				try {
+					log.debug("Parts: " + results.get(i).getSpecimenParts().size());
+					log.debug("Parts: " + ((SpecimenPart)results.get(i).getSpecimenParts().toArray()[0]).getPartAttributeValuesConcat());
+					log.debug("Part Attribute: " + ((SpecimenPartAttribute)((SpecimenPart)results.get(i).getSpecimenParts().toArray()[0]).getAttributeCollection().toArray()[0]).getSpecimenPartAttributeId());
+				} catch (Exception e) {
+					log.debug(e.getMessage());
+				}
+			}
+			return results;
+		} catch (RuntimeException re) {
+			log.error("find by example failed", re);
+			throw re;
+		}
+	}
+
+	/**
+	 * Find Specimen records based on an example specimen, don't use if you are only searching by barcode.
+	 *
+	 * @param instance Specimen instance to use as a pattern for the search
+	 * @return list of Specimens matching instance
+	 *
+	 * @see SpecimenLifeCycle#findByBarcode(String) 
+	 */
+	public List<Specimen> findByExample(Specimen instance) {
+		log.debug("finding Specimen instance by example");
+		try {
+			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+			List<Specimen> results = null;
+			try {
+				Criteria criteria = session.createCriteria("edu.harvard.mcz.imagecapture.data.Specimen");
+				criteria.add(Example.create(instance));
+				if (instance.getTrackings()!=null && instance.getTrackings().size()>0) {
+					criteria.createCriteria("trackings").add(Example.create(instance.getTrackings().toArray()[0]));;
+				}
+				if (instance.getICImages()!=null && instance.getICImages().size()>0) {
+					criteria.createCriteria("ICImages").add(Example.create(instance.getICImages().toArray()[0]));
+				}
+				results = (List<Specimen>) criteria.list();
+				log.debug("find by example successful, result size: " + results.size());
+				session.getTransaction().commit();
+			} catch (HibernateException e) {
+				session.getTransaction().rollback();
+				log.error("find by example failed", e);
+			}
+			try { session.close(); } catch (SessionException e) { }
+			return results;
+		} catch (RuntimeException re) {
+			log.error("find by example failed", re);
+			throw re;
+		}
+	}
 	
 	public static void main(String[] args) { 
 		SpecimenLifeCycle s = new SpecimenLifeCycle();

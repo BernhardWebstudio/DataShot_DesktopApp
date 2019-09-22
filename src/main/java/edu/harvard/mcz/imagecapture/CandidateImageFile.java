@@ -847,7 +847,7 @@ public class CandidateImageFile {
 					try {
 						String description = xmpMeta.getArrayItem("http://purl.org/dc/elements/1.1/", "dc:description", 1).getValue();
 						log.debug(description);
-						if (description!=null && description.trim().length()>0) { 
+						if (description != null && description.trim().length()>0) {
 							exifComment = description;
 						}
 					} catch (NullPointerException e1) {
@@ -943,8 +943,6 @@ public class CandidateImageFile {
 					int height = positionTemplate.getBarcodeSize().height;
 					
 					returnValue = readBarcodeFromLocation(image, left, top, width, height, quickCheck);
-					
-
 				}
 			} 
 		}
@@ -1207,24 +1205,10 @@ public class CandidateImageFile {
 							// Second, try rescaling (to a 800 pixel width)
 							log.debug("Trying again with scaled image crop: " +  Double.toString(INITIAL_SCALING_WIDTH) + "px.");
 							Double scale = CandidateImageFile.INITIAL_SCALING_WIDTH / width;
-							int scaledHeight = (int) (height * scale); 
-							int scaledWidth = (int) (width * scale); 
-							BufferedImage cropped = image.getSubimage(left, top, width, height);
-							int initialH = cropped.getHeight();
-							int initialW = cropped.getWidth();
-							BufferedImage scaled = new BufferedImage(scaledWidth, scaledHeight, cropped.getType());
-							AffineTransform rescaleTransform = new AffineTransform();
-							rescaleTransform.scale(scale, scale);
-							AffineTransformOp scaleOp = new AffineTransformOp(rescaleTransform, AffineTransformOp.TYPE_BILINEAR);
-							scaled = scaleOp.filter(cropped, scaled);								
-							cropSource = new BufferedImageLuminanceSource(scaled);
-							checkResult = temp.checkSourceForBarcode(cropSource,true);
-							if (checkResult.getStatus()!=CandidateImageFile.RESULT_ERROR) { 
-								returnValue = checkResult.getText();
-							} 
+							returnValue = CandidateImageFile.checkWithScale(image, left, top, width, height, scale);
 						}			
 
-						if (checkResult.getStatus()==CandidateImageFile.RESULT_ERROR)  {
+						if (returnValue == null)  {
 							// Third, try rescaling to configured scaling widths 
 							String scaling = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGERESCALE);
 							ArrayList<String> scalingBits = new ArrayList<String>(); 
@@ -1402,7 +1386,7 @@ public class CandidateImageFile {
 	}
 
 	private static String checkWithConfiguration(BufferedImage crop, float scaleFactor, int offset) {
-		return  CandidateImageFile.checkWithConfiguration(crop, scaleFactor, offset, null);
+		return CandidateImageFile.checkWithConfiguration(crop, scaleFactor, offset, null);
 	}
 
 	private static String checkWithConfiguration(BufferedImage crop, float scaleFactor, int offset, RenderingHints hints) {
@@ -1413,6 +1397,27 @@ public class CandidateImageFile {
 		CandidateImageFile temp = new CandidateImageFile();
 		TextStatus checkResult = temp.checkSourceForBarcode(cropSource, log.isDebugEnabled());
 		if (checkResult.getStatus() != CandidateImageFile.RESULT_ERROR) {
+			returnValue = checkResult.getText();
+		}
+		return returnValue;
+	}
+
+	private static String checkWithScale(BufferedImage image, int left, int top, int width, int height, double scale) {
+		String returnValue = null;
+		int scaledHeight = (int) (height * scale);
+		int scaledWidth = (int) (width * scale);
+		BufferedImage cropped = image.getSubimage(left, top, width, height);
+		int initialH = cropped.getHeight();
+		int initialW = cropped.getWidth();
+		BufferedImage scaled = new BufferedImage(scaledWidth, scaledHeight, cropped.getType());
+		AffineTransform rescaleTransform = new AffineTransform();
+		rescaleTransform.scale(scale, scale);
+		AffineTransformOp scaleOp = new AffineTransformOp(rescaleTransform, AffineTransformOp.TYPE_BILINEAR);
+		scaled = scaleOp.filter(cropped, scaled);
+		BufferedImageLuminanceSource cropSource = new BufferedImageLuminanceSource(scaled);
+		CandidateImageFile temp = new CandidateImageFile();
+		TextStatus checkResult = temp.checkSourceForBarcode(cropSource, log.isDebugEnabled());
+		if (checkResult.getStatus()!=CandidateImageFile.RESULT_ERROR) {
 			returnValue = checkResult.getText();
 		}
 		return returnValue;

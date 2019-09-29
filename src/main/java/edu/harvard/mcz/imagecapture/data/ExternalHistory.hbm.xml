@@ -10,7 +10,7 @@
                 <param name="sequence">EXTERNAL_HISTORY_SEQ</param> 
             </generator>
         </id>
-        <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.data.Specimen" fetch="join" cascade="save-update">
+        <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.data.Specimen" cascade="save-update">
             <column name="specimenId" not-null="true" />
         </many-to-one>
         <property name="externalWorkflowProcess" type="string">

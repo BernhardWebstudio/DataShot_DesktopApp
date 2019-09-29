@@ -251,9 +251,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
 		
 		// Retrieve a list of all specimens in state OCR
 		SpecimenLifeCycle sls = new SpecimenLifeCycle();
-		Specimen pattern = new Specimen();
-		pattern.setWorkFlowStatus(WorkFlowStatus.STAGE_0);
-		List<Specimen> specimens = sls.findByExample(pattern);
+		List<Specimen> specimens = sls.findBy("workFlowStatus", WorkFlowStatus.STAGE_0);
 		ArrayList<File> files = new ArrayList<File>();
 		for (int i=0; i<specimens.size(); i++) { 
 			Specimen s = specimens.get(i);

@@ -598,7 +598,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 						   counter.incrementDirectories();
 						} 
 					} else { 
-						counter.appendError(new RunnableJobError(fileToCheck.getName(), "", "", "Could not read directory", new UnreadableFileException(), RunnableJobError.TYPE_FILE_READ));
+						counter.appendError(new RunnableJobError(fileToCheck.getName(), "", "Could not read directory", new UnreadableFileException(), RunnableJobError.TYPE_FILE_READ));
 						counter.incrementDirectoriesFailed();
 					}
 				} else { 
@@ -950,6 +950,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 										
 										
 										s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.APP_VERSION);
+										s.setDateCreated(new Date());
 										SpecimenLifeCycle sh = new SpecimenLifeCycle();
 										try { 
 											// *** Save a database record of the specimen.
@@ -1103,7 +1104,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 
 						} catch (UnreadableFileException e) {
 							counter.incrementFilesFailed();
-							counter.appendError(new RunnableJobError(fileToCheck.getName(), "", "", "Could not read file", new UnreadableFileException(), RunnableJobError.TYPE_FILE_READ));
+							counter.appendError(new RunnableJobError(fileToCheck.getName(), "", "Could not read file", new UnreadableFileException(), RunnableJobError.TYPE_FILE_READ));
 							log.error("Couldn't read file." + e.getMessage());
 							//} catch (OCRReadException e) {
 							//	counter.incrementFilesFailed();

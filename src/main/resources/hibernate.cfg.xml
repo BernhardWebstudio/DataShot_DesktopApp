@@ -15,6 +15,10 @@
         <property name="current_session_context_class">thread</property>
         <property name="show_sql">true</property>
         <property name="hbm2ddl.auto">update</property>
+<!--        <property name="cache.use_second_level_cache">true</property>-->
+<!--        <property name="cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</property>-->
+<!--        <property name="cache.use_query_cache">true</property>-->
+        <!-- entities -->
         <mapping resource="edu/harvard/mcz/imagecapture/data/Number.hbm.xml" />
         <mapping resource="edu/harvard/mcz/imagecapture/data/Specimen.hbm.xml" />
         <mapping resource="edu/harvard/mcz/imagecapture/data/SpecimenPart.hbm.xml" />

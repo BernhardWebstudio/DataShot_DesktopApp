@@ -959,7 +959,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 	}
 
     public List<Specimen> findByExampleLike(Specimen instance) {
-	    this.findByExampleLike(instance, 0, 0);
+	    return this.findByExampleLike(instance, 0, 0);
     }
 
 	/** Find specimens with values matching those found in an example specimen instance, including links out
@@ -987,10 +987,10 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				// SearchDialog.getJButtonSearch()'s actionPerformed method.
 				//example.excludeProperty("flagInBulkloader");
 				criteria.add(example);
-
+				// also fetch relations so they are already initialized for use later on
+				criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 				criteria.setFetchMode("trackings", FetchMode.SELECT);
 				criteria.setFetchMode("specimenParts", FetchMode.SELECT);
-				criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 				if (instance.getTrackings()!=null && instance.getTrackings().size()>0) {
 					criteria.createCriteria("trackings",Criteria.INNER_JOIN).add(Example.create(instance.getTrackings().toArray()[0]).enableLike());
 				}
@@ -1007,13 +1007,12 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				    criteria.setMaxResults(maxResults);
                 }
 				results = (List<Specimen>) criteria.list();
-				log.debug("find by example successful, result size: " + results.size());
+				log.debug("find by example like successful, result size: " + results.size());
 				session.getTransaction().commit();
 			} catch (HibernateException e) {
 				session.getTransaction().rollback();
-				log.error("find by example failed", e);
+				log.error("find by example like failed", e);
 			}
-			try { session.close(); } catch (SessionException e) { }
 			for (int i=0; i<results.size(); i++) {
 				try {
 					log.debug("Parts: " + results.get(i).getSpecimenParts().size());
@@ -1025,13 +1024,13 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			}
 			return results;
 		} catch (RuntimeException re) {
-			log.error("find by example failed", re);
+			log.error("find by example like failed", re);
 			throw re;
 		}
 	}
 
     public List<Specimen> findByExample(Specimen instance) {
-        this.findByExample(instance, 0, 0);
+        return this.findByExample(instance, 0, 0);
     }
 
 
@@ -1041,7 +1040,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 	 * @param instance Specimen instance to use as a pattern for the search
 	 * @return list of Specimens matching instance
 	 *
-	 * @see SpecimenLifeCycle#findByBarcode(String) 
+	 * @see SpecimenLifeCycle#findByBarcode(String)
 	 */
 	public List<Specimen> findByExample(Specimen instance, int maxResults, int offset) {
 		log.debug("finding Specimen instance by example");
@@ -1071,7 +1070,6 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				session.getTransaction().rollback();
 				log.error("find by example failed", e);
 			}
-			try { session.close(); } catch (SessionException e) { }
 			return results;
 		} catch (RuntimeException re) {
 			log.error("find by example failed", re);

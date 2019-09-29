@@ -64,13 +64,13 @@ public abstract class GenericLifeCycle<T> {
         return this.findBy(propertyValueMap, 0, 0, false);
     }
 
-    public List<T> findBy(Map<String, Object> propertyValueMap, int offset, int maxResults, boolean like) {
+    public List<T> findBy(Map<String, Object> propertyValueMap, int maxResults, int offset, boolean like) {
         log.debug("finding " + this.tCLass.toGenericString() + " instance by hashmap: " + propertyValueMap.toString());
         try {
             List<T> results = null;
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
-                // TODO: handle paths/relationships (?)
+                // TODO: handle paths/relationships
                 session.beginTransaction();
                 CriteriaBuilder cb = session.getCriteriaBuilder();
                 CriteriaQuery cr = cb.createQuery(this.tCLass);
@@ -78,13 +78,21 @@ public abstract class GenericLifeCycle<T> {
                 cr.select(root);
                 List<Predicate> propertyValueRelations = new ArrayList<>();
                 for (Map.Entry<String, Object> entry : propertyValueMap.entrySet()) {
-                    Predicate p;
+                    Predicate p = null;
                     if (like && entry.getValue() instanceof String) {
                         p = cb.like(root.get(entry.getKey()), (String) entry.getValue());
                     } else {
-                        p = cb.equal(root.get(entry.getKey()), entry.getValue());
+                        Object value = entry.getValue();
+                        if (value instanceof String || value instanceof Date) {
+                            p = cb.equal(root.get(entry.getKey()), entry.getValue());
+                        } else {
+                            // TODO: handle paths/relationships
+                            log.warn("Will not handle property: " + entry.getKey() + " with value type " + " " + value.getClass().toGenericString());
+                        }
                     }
-                    propertyValueRelations.add(p);
+                    if (p != null) {
+                        propertyValueRelations.add(p);
+                    }
                 }
                 cr.where(cb.and(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()])));
                 Query q = session.createQuery(cr);
@@ -149,7 +157,7 @@ public abstract class GenericLifeCycle<T> {
         return Arrays.asList(propertyNames);
     }
 
-    public List<T> findByExample(T instance) {
+    public List<T> findByExample(T instance, int maxResults, int offset) {
         log.debug("finding " + tCLass.toGenericString() + " instance by example");
         try {
             List<T> results = null;
@@ -171,19 +179,43 @@ public abstract class GenericLifeCycle<T> {
                     log.warn("Failed to get getter method or value of '" + attrName + "' to findByExample: " + e.getMessage());
                 }
                 // TODO: handle relations
-                if (propertyValue != null && propertyValue != "") {
+                if (propertyValue != null && propertyValue != "" && !(propertyValue instanceof List && ((List) propertyValue).isEmpty())) {
                     // if not, add a where
                     // TODO: correct for property vs. column name
                     propertyValueRelations.put(attrName, propertyValue);
                 }
             }
 
-            results = this.findBy(propertyValueRelations);
+            results = this.findBy(propertyValueRelations, maxResults, offset, true);
             log.debug("find by example successful, result size: " + results.size());
             return results;
         } catch (RuntimeException re) {
             log.error("find by example failed", re);
             throw re;
         }
+    }
+
+    public List<T> findByExample(T instance) {
+        return this.findByExample(instance, 0, 0);
+    }
+
+    /**
+     *
+     * @param instance
+     * @return
+     * @deprecated {use findByExample instead}
+     */
+    public List<T> findByExampleLike(T instance) {
+        return this.findByExample(instance);
+    }
+
+    /**
+     *
+     * @param instance
+     * @return
+     * @deprecated {use findByExample instead}
+     */
+    public List<T> findByExampleLike(T instance, int maxResults, int offset) {
+        return this.findByExample(instance, maxResults, offset);
     }
 }

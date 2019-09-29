@@ -162,7 +162,7 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 	public static final String KEY_REDUNDANT_COMMENT_BARCODE = "images.metadatacontainsbarcode";
 
 	/**
-	 *
+	 * The display name of the collection
 	 */
 	public static final String KEY_DISPLAY_COLLECTION = "display.collection";
 

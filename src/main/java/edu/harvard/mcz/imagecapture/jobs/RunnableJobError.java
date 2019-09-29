@@ -55,6 +55,9 @@ public class RunnableJobError {
 	private int failureType;
 	private String previous;
 	private String previousPath;
+	/**
+	 * The line number: used for failure of the VerbatimFieldLoad Job to know which field/line it failed on
+	 */
 	private String lineNumber;
 	
 	/**
@@ -142,6 +145,30 @@ public class RunnableJobError {
 		this.failureType = failureType;
 		this.setPrevious("");		
 		this.lineNumber = lineNumber;
+	}
+
+	/**
+	 * Constructor for errors in the expected form for data loading errors.
+	 *
+	 * @param filename
+	 * @param barcode
+	 * @param errorMessage
+	 * @param exception
+	 * @param failureType
+	 */
+	public RunnableJobError(String filename, String barcode, String errorMessage,
+							Exception exception, int failureType) {
+		this.filename = filename;
+		this.barcode = barcode;
+		this.qrBarcode = "";
+		this.commentBarcode = "";
+		this.errorMessage = errorMessage;
+		this.taxonParser = null;
+		this.drawerParser = null;
+		this.exception = exception;
+		this.failureType = failureType;
+		this.setPrevious("");
+		this.lineNumber = "";
 	}
 	
 	public String asString() {
@@ -311,6 +338,9 @@ public class RunnableJobError {
 		case TYPE_LOAD_NOCHANGE: 
 			result = "Data Not Changed";
 			break;
+			case TYPE_FILE_READ:
+				result = "Data not read";
+				break;
 		default:
 			result = "Unhandled case";
 		}

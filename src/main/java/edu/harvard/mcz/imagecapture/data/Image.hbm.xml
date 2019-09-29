@@ -10,7 +10,7 @@
                 <param name="sequence">SEQ_IMAGEID</param> 
             </generator>
         </id>
-        <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.data.Specimen" fetch="join" >
+        <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.data.Specimen">
             <column name="SPECIMENID" />
         </many-to-one>
         <property name="rawBarcode" type="string">

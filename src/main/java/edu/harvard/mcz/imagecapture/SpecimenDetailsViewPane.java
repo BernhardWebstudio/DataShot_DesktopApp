@@ -842,7 +842,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		//alliefix - set to value from properties
 		//jComboBoxLocationInCollection.setSelectedItem(specimen.getLocationInCollection());	
 		String locationInCollectionPropertiesVal = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(
-	    		 ImageCaptureProperties.DISPLAY_COLLECTION);
+	    		 ImageCaptureProperties.KEY_DISPLAY_COLLECTION);
 		jComboBoxLocationInCollection.setSelectedItem(locationInCollectionPropertiesVal);
 		
 		//allie try

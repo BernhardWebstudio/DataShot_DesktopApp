@@ -229,7 +229,7 @@
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.data.ICImage" />
         </set>
-        <set name="specimenParts" inverse="true" cascade="all" fetch="subselect" lazy="false">
+        <set name="specimenParts" inverse="true" cascade="all" fetch="subselect">
             <key>
                 <column name="SpecimenId" />
             </key>

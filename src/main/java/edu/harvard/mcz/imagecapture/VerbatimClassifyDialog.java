@@ -11,10 +11,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * Author: Paul J. Morris
  */
 package edu.harvard.mcz.imagecapture;
@@ -25,22 +25,22 @@ import edu.harvard.mcz.imagecapture.struct.CountValueTableModel;
 import edu.harvard.mcz.imagecapture.struct.VerbatimCount;
 import edu.harvard.mcz.imagecapture.ui.FilteringAgentJComboBox;
 import edu.harvard.mcz.imagecapture.ui.FilteringGeogJComboBox;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumn;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.filteredpush.qc.date.DateUtils;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableColumn;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author mole
@@ -790,7 +790,8 @@ public class VerbatimClassifyDialog extends JDialog {
 	
 	private void storeLastEditedValues(Specimen lastSpecimen) { 
     	if (lastEditedSpecimen==null) { 
-    		lastEditedSpecimen = new Specimen();
+				lastEditedSpecimen = new Specimen();
+				lastEditedSpecimen.setDateCreated(new Date());
     	}
     	lastEditedSpecimen.setSpecificLocality(lastSpecimen.getSpecificLocality());
     	lastEditedSpecimen.setHigherGeography(lastSpecimen.getHigherGeography());

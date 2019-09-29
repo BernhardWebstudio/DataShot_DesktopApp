@@ -79,6 +79,10 @@ public class Counter {
 	public void incrementFilesSeen() { 
 		filesSeen++;
 	}
+
+	/**
+	 * TODO: automatically increment upon addition of an error, filter by filename if necessary for the number of failed files
+	 */
 	public void incrementFilesFailed() { 
 		filesFailed++;
 	}

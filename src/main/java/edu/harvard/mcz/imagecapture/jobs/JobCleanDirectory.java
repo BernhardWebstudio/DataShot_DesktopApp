@@ -277,7 +277,9 @@ public class JobCleanDirectory implements RunnableJob, Runnable {
 				log.debug(image.getPath());
 				log.debug(image.getFilename());
 				try {
+					RunnableJobError error = new RunnableJobError(image.getPath(), image.getRawBarcode(), "Deleted while cleaning up.", new Exception(), RunnableJobError.TYPE_UNKNOWN);
 					ils.delete(image);
+					counter.appendError(error);
 					counter.incrementFilesFailed();
 				} catch (SaveFailedException e) {
 					log.error(e.getMessage(),e);

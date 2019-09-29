@@ -108,7 +108,6 @@ public class Specimen implements java.io.Serializable {
 	
 	public Specimen() {
 		setDefaults();
-		this.dateCreated = new Date();
 	}
 	
 	/** Set default values for a new specimen object with no other data.
@@ -135,6 +134,7 @@ public class Specimen implements java.io.Serializable {
 		if (this.verbatimNumbers==null) { this.verbatimNumbers = ""; }
 		if (this.verbatimUnclassifiedText==null) { this.verbatimUnclassifiedText = ""; }
 		*/
+		// this.dateCreated = new Date();
 	}
 	
 	/** Clear the default values for a new specimen object, as in one that
@@ -229,16 +229,12 @@ public class Specimen implements java.io.Serializable {
 		this.locationInCollection = locationInCollection;
 		this.workFlowStatus = workFlowStatus;
 		this.createdBy = createdBy;
-		if (dateCreated==null) { 
-			this.dateCreated = new Date();
-		} else { 
+		if (dateCreated!=null) {
 		   this.dateCreated = (Date) dateCreated.clone();
 		}
-		if (dateLastUpdated==null) { 
-			this.dateLastUpdated = new Date();
-		} else {  
+		if (dateLastUpdated!=null) { 
 		    this.dateLastUpdated = (Date) dateLastUpdated.clone();
-	    }
+	  }
 		this.lastUpdatedBy = lastUpdatedBy;
 		this.validDistributionFlag = validDistributionFlag;
 		this.collectors = collectors;
@@ -891,6 +887,9 @@ public class Specimen implements java.io.Serializable {
 			this.dateCreated = null;
 		} else { 
 		    this.dateCreated = (Date) dateCreated.clone();
+				if (this.dateLastUpdated == null) {
+					this.dateLastUpdated = (Date) this.dateCreated.clone();
+				}
 		}
 	}
 

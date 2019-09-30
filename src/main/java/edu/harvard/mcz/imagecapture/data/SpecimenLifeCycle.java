@@ -16,6 +16,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.*;
 import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
 import java.math.BigDecimal;
@@ -976,7 +978,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			session.beginTransaction();
 			List<Specimen> results = null;
 			try {
-				Criteria criteria = session.createCriteria("edu.harvard.mcz.imagecapture.data.Specimen");
+				Criteria criteria = session.createCriteria(Specimen.class);
 				instance.setFlagAncilaryAlsoInMCZbase(null);
 				instance.setFlagInBulkloader(null);
 				instance.setFlagInMCZbase(null);
@@ -987,10 +989,6 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				// SearchDialog.getJButtonSearch()'s actionPerformed method.
 				//example.excludeProperty("flagInBulkloader");
 				criteria.add(example);
-				// also fetch relations so they are already initialized for use later on
-				criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-				criteria.setFetchMode("trackings", FetchMode.SELECT);
-				criteria.setFetchMode("specimenParts", FetchMode.SELECT);
 				if (instance.getTrackings()!=null && instance.getTrackings().size()>0) {
 					criteria.createCriteria("trackings",Criteria.INNER_JOIN).add(Example.create(instance.getTrackings().toArray()[0]).enableLike());
 				}
@@ -1006,6 +1004,17 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				if (maxResults != 0) {
 				    criteria.setMaxResults(maxResults);
                 }
+				criteria.setProjection(Projections.id());
+				List<?> ids = criteria.list();
+				criteria = session.createCriteria(Specimen.class)
+						.add(Restrictions.in("id", ids))
+						.setFetchMode("trackings", FetchMode.JOIN)
+						.setFetchMode("ICImages", FetchMode.JOIN)
+						.setFetchMode("collectors", FetchMode.JOIN)
+						.setFetchMode("LatLong", FetchMode.JOIN)
+						.setFetchMode("numbers", FetchMode.JOIN)
+						.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+
 				results = (List<Specimen>) criteria.list();
 				log.debug("find by example like successful, result size: " + results.size());
 				session.getTransaction().commit();

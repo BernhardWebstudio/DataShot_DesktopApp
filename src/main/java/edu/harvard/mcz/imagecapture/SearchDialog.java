@@ -28,7 +28,7 @@ import edu.harvard.mcz.imagecapture.data.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.data.Tracking;
 import edu.harvard.mcz.imagecapture.data.TrackingLifeCycle;
 import edu.harvard.mcz.imagecapture.data.WorkFlowStatus;
-import edu.harvard.mcz.imagecapture.ui.JNumberField;
+import edu.harvard.mcz.imagecapture.ui.JIntegerField;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -77,8 +77,8 @@ public class SearchDialog extends JDialog {
     private JTextField jTextFieldVerbatimLocality = null;
     private JComboBox jComboBoxCountry = null;
 		private JComboBox jComboBoxQuestions = null;
-		private JNumberField jOffsetNumberField = null;
-		private JNumberField jLimitNumberField = null;
+		private JIntegerField jOffsetNumberField = null;
+		private JIntegerField jLimitNumberField = null;
     private JTextField jTextFieldTribe = null;
     //private JTextField jTextFieldPrimaryDivision = null;
     private JComboBox<String> jComboBoxPrimaryDivision = null;
@@ -341,13 +341,13 @@ public class SearchDialog extends JDialog {
                     this.getQuestionJComboBox(),
                     this.getUsersJComboBox(),
 										this.getIdentifiedByComboBox(),
-										this.getLimitJNumberField(),
-										this.getOffsetJNumberField()
+										this.getLimitJIntegerField(),
+										this.getOffsetJIntegerField()
             };
 
             assert (fields.length == labels.length);
             for (int i = 0; i < labels.length; i++) {
-                GridBagConstraints labelConstraint = this.initializeBasicGridBag(0, i + 1, GridBagConstraints.NORTHEAST);
+                GridBagConstraints labelConstraint = this.initializeBasicGridBag(0, i + 1, GridBagConstraints.EAST);
                 JLabel label = new JLabel();
                 label.setText(labels[i]);
                 jPanel1.add(label, labelConstraint);
@@ -703,17 +703,17 @@ public class SearchDialog extends JDialog {
         return jTextFieldTribe;
 		}
 		
-		private JNumberField getOffsetJNumberField() {
+		private JIntegerField getOffsetJIntegerField() {
 			if (jOffsetNumberField == null) {
-				jOffsetNumberField = new JNumberField();
+				jOffsetNumberField = new JIntegerField();
 				jOffsetNumberField.setValue(0);
 			}
 			return jOffsetNumberField;
 		}
 		
-		private JNumberField getLimitJNumberField() {
+		private JIntegerField getLimitJIntegerField() {
 			if (jLimitNumberField == null) {
-				jLimitNumberField = new JNumberField();
+				jLimitNumberField = new JIntegerField();
 				jLimitNumberField.setValue(100);
 			}
 			return jLimitNumberField;

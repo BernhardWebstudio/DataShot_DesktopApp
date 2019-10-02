@@ -123,7 +123,7 @@ public class TestOfPositionTemplate extends TestCase {
 
 	public void testDefaultPositionTemplateInSingleton() {
 		try {
-			PositionTemplate defaultTemplate = new PositionTemplate(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_TEMPLATEDEFAULT));
+			PositionTemplate defaultTemplate = new PositionTemplate(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_DEFAULT_TEMPLATES));
 			defaultTemplate.getClass();  // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
 		} catch (NoSuchTemplateException e) {
 			fail("Default Position Template returned from Singelton Doesn't exist. " + e.getMessage());

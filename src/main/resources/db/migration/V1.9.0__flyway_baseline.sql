@@ -13,3 +13,8 @@ CREATE TABLE `flyway_schema_history` (
                                          PRIMARY KEY (`installed_rank`),
                                          KEY `flyway_schema_history_s_idx` (`success`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO flyway_schema_history (installed_rank, version, description, type, script, installed_by, execution_time, success)
+    VALUE (
+           3, "1.9.0", "flyway_baseline", "SQL", "V1.9.0__flyway_baseline.sql", "root", 0, 1
+    );

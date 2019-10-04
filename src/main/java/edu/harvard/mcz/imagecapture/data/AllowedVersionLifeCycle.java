@@ -136,9 +136,10 @@ public class AllowedVersionLifeCycle {
 		// Load the Configuration from hibernate.cfg.xml
 		SessionFactoryImpl sessionFactory = (SessionFactoryImpl) HibernateUtil.getSessionFactory();
 		Map<String, Object> properties = ((SessionFactoryImpl) sessionFactory).getProperties();
-		String url = (String) properties.get("hibernate.connection.url");
-		String username = (String) properties.get("hibernate.connection.username");
-		String password = (String) properties.get("hibernate.connection.password");
+		String url = (String) properties.get("connection.url");
+		String username = (String) properties.get("connection.username");
+		String password = (String) properties.get("connection.password");
+		log.debug("Found connection details: " + url + ", " + username +  ", " + password);
 		// Create the Flyway instance and point it to the database
 		Flyway flyway = Flyway.configure().dataSource(url, username, password).load();
 

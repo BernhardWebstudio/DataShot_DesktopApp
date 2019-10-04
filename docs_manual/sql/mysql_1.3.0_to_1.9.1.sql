@@ -13,7 +13,7 @@ CREATE TABLE `flyway_schema_history` (
                                          KEY `flyway_schema_history_s_idx` (`success`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-INSERT INTO `lepidoptera`.`flyway_schema_history`
+INSERT INTO `flyway_schema_history`
 (`installed_rank`,
  `version`,
  `description`,
@@ -27,4 +27,7 @@ INSERT INTO `lepidoptera`.`flyway_schema_history`
 VALUES
 ('1', '1', '<< Flyway Baseline >>', 'BASELINE', '<< Flyway Baseline >>', NULL, 'root', '2019-09-01 18:32:57', '0', '1');
 
-
+INSERT INTO `flyway_schema_history` (installed_rank, version, description, type, script, installed_by, execution_time, success)
+    VALUE (
+           3, "1.9.0", "flyway baseline", "SQL", "V1.9.0__flyway_baseline.sql", "root", 0, 1
+    );

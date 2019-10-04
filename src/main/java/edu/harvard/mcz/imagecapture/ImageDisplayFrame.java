@@ -117,7 +117,7 @@ public class ImageDisplayFrame extends JFrame {
 	private JPanel jPanelImagesPanel = null;
 	
 	private Specimen targetSpecimen = null;
-	private SpecimenControler targetSpecimenController = null;
+	private SpecimenController targetSpecimenController = null;
 	private ICImage selectedImage = null;
 	
 	private JButton templatePicker = null;
@@ -127,7 +127,7 @@ public class ImageDisplayFrame extends JFrame {
 	 * This is the default constructor
 	 * @param specimen 
 	 */
-	public ImageDisplayFrame(Specimen specimen, SpecimenControler specimenController) {
+	public ImageDisplayFrame(Specimen specimen, SpecimenController specimenController) {
 		super();
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		targetSpecimen = specimen;

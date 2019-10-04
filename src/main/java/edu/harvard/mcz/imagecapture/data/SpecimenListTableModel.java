@@ -25,8 +25,6 @@ import javax.swing.table.AbstractTableModel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.harvard.mcz.imagecapture.SpecimenControler;
-
 /** SpecimenListTableModel
  * 
  * @author Paul J. Morris

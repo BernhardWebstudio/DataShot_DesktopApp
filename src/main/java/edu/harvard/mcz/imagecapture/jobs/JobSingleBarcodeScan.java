@@ -44,7 +44,7 @@ import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.ImageDisplayFrame;
 import edu.harvard.mcz.imagecapture.PositionTemplate;
 import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.SpecimenControler;
+import edu.harvard.mcz.imagecapture.SpecimenController;
 import edu.harvard.mcz.imagecapture.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.UnitTrayLabelParser;
 import edu.harvard.mcz.imagecapture.WhatsThisImageDialog;
@@ -619,9 +619,9 @@ public class JobSingleBarcodeScan implements RunnableJob, Runnable {
 
 						setPercentComplete(80);
 						if (isSpecimenImage) {
-							SpecimenControler controler = null;
+							SpecimenController controler = null;
 							try {
-								controler = new SpecimenControler(tryMe.getSpecimen());
+								controler = new SpecimenController(tryMe.getSpecimen());
 								controler.setTargetFrame(resultFrame);
 							} catch (NoSuchRecordException e) {
 								// TODO Auto-generated catch block
@@ -666,9 +666,9 @@ public class JobSingleBarcodeScan implements RunnableJob, Runnable {
 							e.printStackTrace();
 						}
 						if (isSpecimenImage) { 
-							SpecimenControler controler = null;
+							SpecimenController controler = null;
 							try {
-								controler = new SpecimenControler(existing.getSpecimen());
+								controler = new SpecimenController(existing.getSpecimen());
 								controler.setTargetFrame(resultFrame);
 								System.out.println(existing.getSpecimen().getBarcode());
 							} catch (NullPointerException e1) { 

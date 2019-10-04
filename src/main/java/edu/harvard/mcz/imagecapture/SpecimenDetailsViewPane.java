@@ -25,23 +25,17 @@ import java.awt.Cursor;
 
 import javax.swing.JPanel;
 
-import edu.harvard.mcz.imagecapture.data.AgentNameComboBoxModel;
 import edu.harvard.mcz.imagecapture.data.Collector;
 import edu.harvard.mcz.imagecapture.data.CollectorLifeCycle;
 import edu.harvard.mcz.imagecapture.data.CollectorTableModel;
 import edu.harvard.mcz.imagecapture.data.Determination;
-import edu.harvard.mcz.imagecapture.data.DeterminationTableModel;
 import edu.harvard.mcz.imagecapture.data.Features;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
-import edu.harvard.mcz.imagecapture.data.HigherGeographyComboBoxModel;
 import edu.harvard.mcz.imagecapture.data.HigherTaxonLifeCycle;
 import edu.harvard.mcz.imagecapture.data.ICImage;
 import edu.harvard.mcz.imagecapture.data.LatLong;
 import edu.harvard.mcz.imagecapture.data.LifeStage;
 import edu.harvard.mcz.imagecapture.data.LocationInCollection;
-import edu.harvard.mcz.imagecapture.data.MCZbaseAuthAgentName;
-import edu.harvard.mcz.imagecapture.data.MCZbaseGeogAuthRec;
-import edu.harvard.mcz.imagecapture.data.MCZbaseGeogAuthRecLifeCycle;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.data.NatureOfId;
 import edu.harvard.mcz.imagecapture.data.NumberLifeCycle;
@@ -52,7 +46,6 @@ import edu.harvard.mcz.imagecapture.data.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.data.SpecimenPart;
 import edu.harvard.mcz.imagecapture.data.SpecimenPartAttribute;
 import edu.harvard.mcz.imagecapture.data.SpecimenPartLifeCycle;
-import edu.harvard.mcz.imagecapture.data.SpecimenPartsAttrTableModel;
 import edu.harvard.mcz.imagecapture.data.SpecimenPartsTableModel;
 import edu.harvard.mcz.imagecapture.data.Tracking;
 import edu.harvard.mcz.imagecapture.data.TrackingLifeCycle;
@@ -61,9 +54,7 @@ import edu.harvard.mcz.imagecapture.data.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
-import edu.harvard.mcz.imagecapture.ui.FilteringAgentJComboBox;
 import edu.harvard.mcz.imagecapture.ui.FilteringGeogJComboBox;
-import edu.harvard.mcz.imagecapture.ui.PicklistTableCellEditor;
 import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor;
 import edu.harvard.mcz.imagecapture.data.Number;
 
@@ -84,12 +75,9 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.TreeSet;
 
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -113,7 +101,6 @@ import javax.swing.table.TableColumn;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.HibernateException;
 import org.hibernate.SessionException;
 import org.hibernate.TransactionException;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
@@ -140,7 +127,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private Specimen specimen;  //  @jve:decl-index=0:
 	private Specimen lastEditedSpecimen = null;
 	
-	private SpecimenControler myControler = null;
+	private SpecimenController specimenController = null;
 	private int state;   // dirty if data in controls has been changed and not saved to specimen.
 	
 	private JTextField jTextFieldStatus = null;
@@ -301,7 +288,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 
 	 * @param aSpecimenInstance the Specimen instance to display for editing.
 	 */
-	public SpecimenDetailsViewPane(Specimen aSpecimenInstance, SpecimenControler aControler) { 
+	public SpecimenDetailsViewPane(Specimen aSpecimenInstance, SpecimenController aControler) {
 		specimen = aSpecimenInstance;
 		SpecimenLifeCycle s = new SpecimenLifeCycle();
 		setStateToClean();
@@ -323,7 +310,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 //		}
 		try {
 			s.attachClean(specimen);
-			myControler = aControler;
+			specimenController = aControler;
 			initialize();
 			setValues();	
 			thisPane = this;
@@ -565,7 +552,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	    
 	    specimen.setQuestions(jTextFieldQuestions.getText());
 	    try { 
-	    	myControler.save();   // save the record
+	    	specimenController.save();   // save the record
             setStateToClean();    // enable the navigation buttons
 	    	jTextFieldStatus.setText("Saved");  // inform the user
 	    	jTextFieldStatus.setForeground(Color.BLACK);
@@ -1828,9 +1815,9 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gbl_jPanel.columnWeights = new double[]{0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 1.0};
 			jPanel.setLayout(gbl_jPanel);
 			jPanel.add(jLabel, gridBagConstraints);
-			jPanel.add(getJTextFieldBarcode(), gridBagConstraints1);
+			jPanel.add(getBarcodeJTextField(), gridBagConstraints1);
 			jPanel.add(jLabel2, gridBagConstraints2);
-			jPanel.add(getJTextField1(), gridBagConstraints3);
+			jPanel.add(getGenusJTextField(), gridBagConstraints3);
 			GridBagConstraints gbc_lblNatureofid = new GridBagConstraints();
 			gbc_lblNatureofid.anchor = GridBagConstraints.EAST;
 			gbc_lblNatureofid.insets = new Insets(0, 0, 0, 5);
@@ -1846,7 +1833,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gbc_jTextFieldNatureOfID.gridx = 4;
 			gbc_jTextFieldNatureOfID.gridy = 9;
 			jPanel.add(jComboBoxNatureOfId, gbc_jTextFieldNatureOfID);
-			jPanel.add(getJTextField12(), gridBagConstraints4);
+			jPanel.add(getSpecificEpithetJTextField(), gridBagConstraints4);
 			GridBagConstraints gbc_lblIdDate = new GridBagConstraints();
 			gbc_lblIdDate.anchor = GridBagConstraints.EAST;
 			gbc_lblIdDate.insets = new Insets(0, 0, 0, 5);
@@ -1863,7 +1850,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gbc_jTextFieldDateDetermined.gridy = 10;
 			jPanel.add(jTextFieldDateDetermined, gbc_jTextFieldDateDetermined);
 			jTextFieldDateDetermined.setColumns(10);
-			jPanel.add(getJTextField2(), gridBagConstraints5);
+			jPanel.add(getSubspecifcEpithetJTextField(), gridBagConstraints5);
 			
 			JLabel lblIdBy = new JLabel("Id By");
 			GridBagConstraints gbc_lblIdBy = new GridBagConstraints();
@@ -1944,7 +1931,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gbc_comboBoxMaxElev.gridx = 7;
 			gbc_comboBoxMaxElev.gridy = 19;
 			jPanel.add(getComboBoxElevUnits(), gbc_comboBoxMaxElev);
-			jPanel.add(getJTextField3(), gridBagConstraints7);
+			jPanel.add(getSpecificLocalityJTextField(), gridBagConstraints7);
 			jPanel.add(jLabel3, gridBagConstraints8);
 			jPanel.add(jLabel4, gridBagConstraints9);
 			GridBagConstraints gridBagConstraints28 = new GridBagConstraints();
@@ -2020,36 +2007,36 @@ public class SpecimenDetailsViewPane extends JPanel {
 			gbc_textField.gridx = 1;
 			gbc_textField.gridy = 34;
 			jPanel.add(getTextFieldMicrohabitat(), gbc_textField);
-			jPanel.add(getJButton(), gridBagConstraints10);
+			jPanel.add(getSaveJButton(), gridBagConstraints10);
 			jPanel.add(jLabel5, gridBagConstraints21);
 			jPanel.add(getJTextFieldCollection(), gridBagConstraints31);
 			jPanel.add(jLabel6, gridBagConstraints41);
-			jPanel.add(getJTextField14(), gridBagConstraints12);
+			jPanel.add(getLastUpdatedByJTextField(), gridBagConstraints12);
 			jPanel.add(getJScrollPaneCollectors(), gridBagConstraints51);
 			jPanel.add(jLabel7, gridBagConstraints22);
 			jPanel.add(jLabel8, gridBagConstraints13);
 			jPanel.add(getJTextFieldDateUpdated(), gridBagConstraints23);
-			jPanel.add(getJTextField22(), gridBagConstraints14);
+			jPanel.add(getCreatorJTextField(), gridBagConstraints14);
 			jPanel.add(jLabel9, gridBagConstraints24);
-			jPanel.add(getJTextField32(), gridBagConstraints32);
+			jPanel.add(getDateCreatedJTextField(), gridBagConstraints32);
 			jPanel.add(jLabel10, gridBagConstraints42);
 			jPanel.add(jLabel11, gridBagConstraints15);
-			jPanel.add(getJScrollPaneNumbers(), gridBagConstraints25);
+			jPanel.add(getNumbersJScrollPane(), gridBagConstraints25);
 			jPanel.add(getJButtonNumbersAdd(), gridBagConstraints33);
 			jPanel.add(getJButtonCollsAdd(), gridBagConstraints43);
-			jPanel.add(getJScrollPaneWarn(), gridBagConstraints52);
+			jPanel.add(getWarnJScrollPane(), gridBagConstraints52);
 			jPanel.add(jLabel12, gridBagConstraints61);
-			jPanel.add(getJTextField(), gridBagConstraints71);
+			jPanel.add(getDrawerNumberJTextField(), gridBagConstraints71);
 			jPanel.add(jLabel13, gridBagConstraints81);
 			jPanel.add(jLabel14, gridBagConstraints91);
 			jPanel.add(jLabel15, gridBagConstraints101);
-			jPanel.add(getJTextField4(), gridBagConstraints111);
-			jPanel.add(getJTextField13(), gridBagConstraints121);
-			jPanel.add(getJTextField23(), gridBagConstraints131);
+			jPanel.add(getVerbatimLocalityJTextField(), gridBagConstraints111);
+			jPanel.add(getCountryJTextField(), gridBagConstraints121);
+			jPanel.add(getPrimaryDivisionJTextField(), gridBagConstraints131);
 			jPanel.add(jLabel16, gridBagConstraints16);
 			jPanel.add(jLabel17, gridBagConstraints26);
 			jPanel.add(jLabelTribe, gbc_jLabelTribe);
-			jPanel.add(getJTextField5(), gridBagConstraints44);
+			jPanel.add(getFamilyJTextField(), gridBagConstraints44);
 			jPanel.add(getJTextFieldSubfamily(), gridBagConstraints53);
 			jPanel.add(getJTextFieldTribe(), gridBagConstraints62);
 			jPanel.add(jLabel20, gridBagConstraints82);
@@ -2073,26 +2060,26 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jPanel.add(getJTextFieldDateEmerged(), gridBagConstraints141);
 			jPanel.add(getJTextFieldDateCollected(), gridBagConstraints151);
 			jPanel.add(jLabelElevation, gbc_jLabelElevation);
-			jPanel.add(getJTextField11(), gridBagConstraints18);
+			jPanel.add(getVerbatimElevationJTextField(), gridBagConstraints18);
 			jPanel.add(getJTextFieldCollectingMethod(), gridBagConstraints19);	
             jPanel.add(getJButtonGeoreference(), gbc_georef);		
 			jPanel.add(jLabel34, gridBagConstraints47);
 			jPanel.add(jLabel35, gridBagConstraints65);
-			jPanel.add(getJCheckBox(), gridBagConstraints83);
+			jPanel.add(getValidDistributionJCheckBox(), gridBagConstraints83);
 			jPanel.add(jLabel36, gridBagConstraints94);
 			jPanel.add(jLabel38, gridBagConstraints114);
 			jPanel.add(jLabel39, gridBagConstraints123);
 			jPanel.add(jLabel40, gridBagConstraints133);
-			jPanel.add(getJTextField20(), gridBagConstraints142);
-			jPanel.add(getJTextField26(), gridBagConstraints162);
+			jPanel.add(getQuestionsJTextField(), gridBagConstraints142);
+			jPanel.add(getAssociatedTaxonJTextField(), gridBagConstraints162);
 			jPanel.add(getJTextFieldHabitat(), gridBagConstraints172);
 			jPanel.add(jLabel41, gridBagConstraints115);
 			jPanel.add(getJComboBoxWorkflowStatus(), gridBagConstraints29);
 			jPanel.add(jLabel42, gridBagConstraints37);
-			jPanel.add(getJComboBox2(), gridBagConstraints48);
+			jPanel.add(getLocationInCollectionJComboBox(), gridBagConstraints48);
 			jPanel.add(jLabel43, gridBagConstraints56);
 			jPanel.add(getJTextFieldInferences(), gridBagConstraintsInfer);
-			jPanel.add(getJButton1(), gridBagConstraints116);
+			jPanel.add(getHistoryJButton(), gridBagConstraints116);
 			
 			JPanel subPanel = new JPanel();
 			//subPanel.add(getJButtonCopyPrevTaxon());
@@ -2104,9 +2091,9 @@ public class SpecimenDetailsViewPane extends JPanel {
 			//jPanel.add(getJButtonCopyPrevTaxon(), gridBagConstraintsCopyPrev);
 			jPanel.add(getJPanel1(), gridBagConstraints211);
 			jPanel.add(getJTextFieldISODate(), gridBagConstraints117);
-			jPanel.add(getJButtonDets(), gridBagConstraints212);
+			jPanel.add(getDetsJButton(), gridBagConstraints212);
 			jPanel.add(jLabel31, gridBagConstraints118);
-			jPanel.add(getJTextField9(), gridBagConstraints213);
+			jPanel.add(getCitedInPublicationJTextField(), gridBagConstraints213);
 			jPanel.add(getJButtonNext(), gridBagConstraints119);
 			jPanel.add(getJButtonPrevious(), gridBagConstraints214);
 			
@@ -2116,8 +2103,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jPanel.add(getJScrollPaneNotes(), gridBagConstraints49);
 			
 			jPanel.add(jLabel44, gridBagConstraints120);
-			jPanel.add(getJButton13(), gridBagConstraints215);
-			jPanel.add(getJButton2(), gridBagConstraints38);
+			jPanel.add(getDateEmergedJButton(), gridBagConstraints215);
+			jPanel.add(getDateCollectedJButton(), gridBagConstraints38);
 			jPanel.add(getJButtonSpecificLocality(), gridBagConstraints124);
 			jPanel.add(getJTextFieldImgCount(), gridBagConstraintsImgCount);
 			jPanel.add(getJLabelMigrationStatus(),gridBagConstraintsMS);
@@ -2130,7 +2117,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextFieldBarcode() {
+	private JTextField getBarcodeJTextField() {
 		if (jTextFieldBarcode == null) {
 			jTextFieldBarcode = new JTextField(11);
 			jTextFieldBarcode.setEditable(false);
@@ -2144,7 +2131,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField1() {
+	private JTextField getGenusJTextField() {
 		if (jTextFieldGenus == null) {
 			jTextFieldGenus = new JTextField();
 			jTextFieldGenus.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Genus", jTextFieldGenus));
@@ -2163,7 +2150,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField12() {
+	private JTextField getSpecificEpithetJTextField() {
 		if (jTextFieldSpecies == null) {
 			jTextFieldSpecies = new JTextField();
 			jTextFieldSpecies.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "SpecificEpithet", jTextFieldSpecies));
@@ -2182,7 +2169,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField2() {
+	private JTextField getSubspecifcEpithetJTextField() {
 		if (jTextFieldSubspecies == null) {
 			jTextFieldSubspecies = new JTextField();
 			jTextFieldSubspecies.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "SubspecificEpithet", jTextFieldSubspecies));
@@ -2201,7 +2188,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField3() {
+	private JTextField getSpecificLocalityJTextField() {
 		if (jTextFieldLocality == null) {
 			jTextFieldLocality = new JTextField();
 			jTextFieldLocality.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "SpecificLocality", jTextFieldLocality));
@@ -2220,7 +2207,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JButton	
 	 */
-	private JButton getJButton() {
+	private JButton getSaveJButton() {
 		if (jButton == null) {
 			jButton = new JButton("Save");
 			if (specimen.isStateDone()) { 
@@ -2284,7 +2271,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField14() {
+	private JTextField getLastUpdatedByJTextField() {
 		if (jTextFieldLastUpdatedBy == null) {
 			jTextFieldLastUpdatedBy = new JTextField();
 			jTextFieldLastUpdatedBy.setEditable(false);
@@ -2368,8 +2355,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 			});
 		    
 		    jPopupCollectors = new JPopupMenu();
-			JMenuItem mntmDeleteRow = new JMenuItem("Delete Row");
-			mntmDeleteRow.addActionListener(new ActionListener() {
+			JMenuItem menuItemDeleteRow = new JMenuItem("Delete Row");
+			menuItemDeleteRow.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) { 
 					try { 
 						log.debug(clickedOnCollsRow);
@@ -2391,7 +2378,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 					}
 				}
 			});	
-			jPopupCollectors.add(mntmDeleteRow);	
+			jPopupCollectors.add(menuItemDeleteRow);
 		}
 		return jTableCollectors;
 	}
@@ -2510,7 +2497,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField22() {
+	private JTextField getCreatorJTextField() {
 		if (jTextFieldCreator == null) {
 			jTextFieldCreator = new JTextField();
 			jTextFieldCreator.setEditable(false);
@@ -2526,7 +2513,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField32() {
+	private JTextField getDateCreatedJTextField() {
 		if (jTextFieldDateCreated == null) {
 			jTextFieldDateCreated = new JTextField();
 			jTextFieldDateCreated.setEditable(false);
@@ -2541,10 +2528,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JScrollPane	
 	 */
-	private JScrollPane getJScrollPaneNumbers() {
+	private JScrollPane getNumbersJScrollPane() {
 		if (jScrollPaneNumbers == null) {
 			jScrollPaneNumbers = new JScrollPane();
-			jScrollPaneNumbers.setViewportView(getJTable());
+			jScrollPaneNumbers.setViewportView(getNumberJTable());
 			jScrollPaneNumbers.setPreferredSize(new Dimension(jScrollPaneNumbers.getWidth(),jTextFieldBarcode.getFontMetrics(jTextFieldBarcode.getFont()).getHeight()*6));
 			jScrollPaneNumbers.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
@@ -2560,7 +2547,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTable	
 	 */
-	private JTable getJTable() {
+	private JTable getNumberJTable() {
 		if (jTableNumbers == null) {
 			jTableNumbers = new JTable(new NumberTableModel());
 			JComboBox<String> jComboNumberTypes = new JComboBox<String>();
@@ -2725,10 +2712,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JScrollPane	
 	 */
-	private JScrollPane getJScrollPaneWarn() {
+	private JScrollPane getWarnJScrollPane() {
 		if (jScrollPane == null) {
 			jScrollPane = new JScrollPane();
-			jScrollPane.setViewportView(getJTextPaneWarn());
+			jScrollPane.setViewportView(getWarnJTextPane());
 		}
 		return jScrollPane;
 	}
@@ -2738,7 +2725,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextPane	
 	 */
-	private JTextPane getJTextPaneWarn() {
+	private JTextPane getWarnJTextPane() {
 		if (jTextPaneWarnings == null) {
 			jTextPaneWarnings = new JTextPane();
 			jTextPaneWarnings.setEditable(false);
@@ -2752,7 +2739,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField() {
+	private JTextField getDrawerNumberJTextField() {
 		if (jTextFieldDrawerNumber == null) {
 			jTextFieldDrawerNumber = new JTextField();
 			jTextFieldDrawerNumber.setInputVerifier(
@@ -2772,7 +2759,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField4() {
+	private JTextField getVerbatimLocalityJTextField() {
 		if (jTextFieldVerbatimLocality == null) {
 			jTextFieldVerbatimLocality = new JTextField();
 			jTextFieldVerbatimLocality.setInputVerifier(
@@ -2792,7 +2779,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JComboBox getJTextField13() {
+	private JComboBox getCountryJTextField() {
 		//if (jTextFieldCountry == null) {
 			/*jTextFieldCountry = new JTextField();
 			jTextFieldCountry.setInputVerifier(
@@ -2805,7 +2792,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			});*/
 			//allie fix
 			if (jComboBoxCountry == null) {
-				log.debug("initt jComboBoxCountry");
+				log.debug("init jComboBoxCountry");
 				SpecimenLifeCycle sls = new SpecimenLifeCycle();
 				jComboBoxCountry = new JComboBox<String>();
 				//jComboBoxCountry.setModel(new DefaultComboBoxModel<String>(HigherTaxonLifeCycle.selectDistinctSubfamily("")));
@@ -2843,7 +2830,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		return jTextFieldPrimaryDivision;
 	}*/
 	//allie change
-	private JComboBox getJTextField23() {
+	private JComboBox getPrimaryDivisionJTextField() {
 		if (jComboBoxPrimaryDivision == null) {
 			jComboBoxPrimaryDivision = new JComboBox();
 			jComboBoxPrimaryDivision.setEditable(true);
@@ -2866,7 +2853,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JComboBox getJTextField5() {
+	private JComboBox getFamilyJTextField() {
 		if (jComboBoxFamily == null) {
 			jComboBoxFamily = new JComboBox<String>();
 			jComboBoxFamily.setModel(new DefaultComboBoxModel<String>(HigherTaxonLifeCycle.selectDistinctFamily()));
@@ -2923,9 +2910,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 		}
 		return jTextFieldTribe;
 	}
-	
-	
-
 
 	/**
 	 * This method initializes jComboBoxSex	
@@ -3031,8 +3015,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 		}
 		return jTextFieldDateNos;
 	}
-
-
 
 	/**
 	 * This method initializes jTextField1	
@@ -3196,7 +3178,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField11() {
+	private JTextField getVerbatimElevationJTextField() {
 		if (jTextFieldMinElevation == null) {
 			jTextFieldMinElevation = new JTextField();
 			jTextFieldMinElevation.setInputVerifier(
@@ -3255,7 +3237,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JCheckBox	
 	 */
-	private JCheckBox getJCheckBox() {
+	private JCheckBox getValidDistributionJCheckBox() {
 		if (jCheckBoxValidDistributionFlag == null) {
 			jCheckBoxValidDistributionFlag = new JCheckBox();
 			//jCheckBoxValidDistributionFlag.setToolTipText("Check if locality represents natural biological range.  Uncheck for Specimens that came from a captive breeding program");
@@ -3274,7 +3256,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField20() {
+	private JTextField getQuestionsJTextField() {
 		if (jTextFieldQuestions == null) {
 			jTextFieldQuestions = new JTextField();
 			jTextFieldQuestions.setBackground(MainFrame.BG_COLOR_QC_FIELD);
@@ -3328,7 +3310,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField26() {
+	private JTextField getAssociatedTaxonJTextField() {
 		if (jTextFieldAssociatedTaxon == null) {
 			jTextFieldAssociatedTaxon = new JTextField();
 			jTextFieldAssociatedTaxon.setInputVerifier(
@@ -3384,7 +3366,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JComboBox	
 	 */
-	private JComboBox getJComboBox2() {
+	private JComboBox getLocationInCollectionJComboBox() {
 		if (jComboBoxLocationInCollection == null) {
 			jComboBoxLocationInCollection = new JComboBox<String>();
 			jComboBoxLocationInCollection.setModel(new DefaultComboBoxModel<String>(LocationInCollection.getLocationInCollectionValues()));
@@ -3429,7 +3411,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JButton	
 	 */
-	private JButton getJButton1() {
+	private JButton getHistoryJButton() {
 		if (jButtonGetHistory == null) {
 			jButtonGetHistory = new JButton();
 			jButtonGetHistory.setText("History");
@@ -3511,7 +3493,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 				jButtonNext.setText("N");
 			}
 			jButtonNext.setMnemonic(KeyEvent.VK_N);
-			jButtonNext.setEnabled(myControler.isInTable());
+			jButtonNext.setEnabled(specimenController.isInTable());
 			jButtonNext.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					//TODO here save the data in memory for "copy prev"
@@ -3522,10 +3504,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 							log.error(ex);
 						}
 						// try to move to the next specimen in the table.
-						if (thisPane.myControler.nextSpecimenInTable()) { 
+						if (thisPane.specimenController.nextSpecimenInTable()) {
 						   //thisPane.myControler.setSpecimen(thisPane.specimen.getSpecimenId() + 1);
 						   thisPane.setVisible(false);
-						   thisPane.myControler.displayInEditor();
+						   thisPane.specimenController.displayInEditor();
 						   thisPane.invalidate();
 						}
 						try { 
@@ -3566,7 +3548,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			}
 			jButtonPrevious.setMnemonic(KeyEvent.VK_P);
 			jButtonPrevious.setToolTipText("Move to Previous Specimen");
-			jButtonPrevious.setEnabled(myControler.isInTable());
+			jButtonPrevious.setEnabled(specimenController.isInTable());
 			jButtonPrevious.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					try {
@@ -3576,9 +3558,9 @@ public class SpecimenDetailsViewPane extends JPanel {
 							log.error(ex);
 						}
 						// try to move to the previous specimen in the table.
-						if (thisPane.myControler.previousSpecimenInTable()) {
+						if (thisPane.specimenController.previousSpecimenInTable()) {
 						   thisPane.setVisible(false);
-						   thisPane.myControler.displayInEditor();
+						   thisPane.specimenController.displayInEditor();
 						   thisPane.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 						   thisPane.invalidate();
 						}
@@ -3619,9 +3601,9 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private void setStateToClean() { 
 		state = STATE_CLEAN;
 		// if this is a record that is part of a navigatable set, enable the navigation buttons
-		if (myControler!=null){
+		if (specimenController !=null){
 			log.debug("Has controler");
-			if (myControler.isInTable()) { 
+			if (specimenController.isInTable()) {
 				log.debug("controler is in table");
 				// test to make sure the buttons have been created before trying to enable them.
 				if (jButtonNext!=null) { 
@@ -3682,7 +3664,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JButton	
 	 */
-	private JButton getJButtonDets() {
+	private JButton getDetsJButton() {
 		if (jButtonDeterminations == null) {
 			jButtonDeterminations = new JButton();
 			jButtonDeterminations.setText("Dets.");
@@ -3703,7 +3685,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JTextField getJTextField9() {
+	private JTextField getCitedInPublicationJTextField() {
 		if (jTextFieldCitedInPub == null) {
 			jTextFieldCitedInPub = new JTextField();
 			jTextFieldCitedInPub.setInputVerifier(
@@ -3727,8 +3709,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 		if (jScrollPaneNotes == null) {
 			jScrollPaneNotes = new JScrollPane();
 			jScrollPaneNotes.setViewportView(getJTextAreaNotes());
-			jScrollPaneNotes.setPreferredSize(new Dimension(0, 30));
-			jScrollPaneNotes.setMinimumSize(new Dimension(0, 30));			
+			jScrollPaneNotes.setPreferredSize(new Dimension(0, 50));
+			jScrollPaneNotes.setMinimumSize(new Dimension(0, 50));
 			//jScrollPaneNotes.add(getJTextAreaNotes()); //allie!!!
 		}
 		return jScrollPaneNotes;
@@ -3748,7 +3730,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JButton	
 	 */
-	private JButton getJButton13() {
+	private JButton getDateEmergedJButton() {
 		if (jButton1 == null) {
 			jButton1 = new JButton();
 			jButton1.setText("Date Emerged");
@@ -3770,7 +3752,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JButton	
 	 */
-	private JButton getJButton2() {
+	private JButton getDateCollectedJButton() {
 		if (jButton2 == null) {
 			jButton2 = new JButton();
 			jButton2.setText("Date Collected");

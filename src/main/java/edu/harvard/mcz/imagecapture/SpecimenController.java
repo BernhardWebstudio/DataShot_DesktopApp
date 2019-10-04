@@ -48,9 +48,9 @@ import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener;
  * @author Paul J. Morris
  *
  */
-public class SpecimenControler {
+public class SpecimenController {
 	
-	private static final Log log = LogFactory.getLog(SpecimenControler.class);
+	private static final Log log = LogFactory.getLog(SpecimenController.class);
 	
 	private Specimen specimen = null;
 	private JTable table = null;
@@ -61,7 +61,7 @@ public class SpecimenControler {
 	
 	private ImageDisplayFrame resultFrame = null;
 	
-	public SpecimenControler(Specimen aSpecimen) throws NoSuchRecordException {
+	public SpecimenController(Specimen aSpecimen) throws NoSuchRecordException {
 		if(aSpecimen==null) { 
 			throw new NoSuchRecordException("Can't create a specimen controller with a null specimen");
 		}
@@ -79,7 +79,7 @@ public class SpecimenControler {
 	 * @param theCurrentRow the row of the specimen in the view of the table.
 	 * @throws NoSuchRecordException 
 	 */
-	public SpecimenControler(Specimen aSpecimen, SpecimenListTableModel aModel, JTable aTable, int theCurrentRow) throws NoSuchRecordException {
+	public SpecimenController(Specimen aSpecimen, SpecimenListTableModel aModel, JTable aTable, int theCurrentRow) throws NoSuchRecordException {
 		if(aSpecimen==null) { 
 			throw new NoSuchRecordException("Can't create a specimen controller with a null specimen");
 		}
@@ -93,7 +93,7 @@ public class SpecimenControler {
 		}
 	}	
 	
-	public SpecimenControler(Long aSpecimenID) throws NoSuchRecordException { 
+	public SpecimenController(Long aSpecimenID) throws NoSuchRecordException {
 		SpecimenLifeCycle sls = new SpecimenLifeCycle();
 		specimen = sls.findById(aSpecimenID);
 		if (specimen==null) { 

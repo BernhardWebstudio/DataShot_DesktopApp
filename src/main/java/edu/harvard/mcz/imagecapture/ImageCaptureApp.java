@@ -104,7 +104,7 @@ public class ImageCaptureApp {
      * used to set default value of property ImageCaptureProperties.KEY_REGEX_DRAWERNUMBER, use 
      * that property instead of this hard coded constant.
      * 
-     * @see edu.harvard.mec.imagecapture.ImageCaptureProperties.KEY_REGEX_DRAWERNUMBER 
+     * @see edu.harvard.mcz.imagecapture.ImageCaptureProperties#KEY_REGEX_DRAWERNUMBER
      */
     public static final String REGEX_DRAWERNUMBER = "[0-9]{3}\\Q.\\E[0-9]+";
     /**
@@ -112,7 +112,7 @@ public class ImageCaptureApp {
      * Used to set the default value of property ImageCaptureProperties.KEY_IMAGEREGEX, use that 
      * property instead of this hard coded constant.
      * 
-     * @see edu.harvard.mcz.imagecapture.ImageCaptureProperties.KEY_IMAGEREGEX
+     * @see edu.harvard.mcz.imagecapture.ImageCaptureProperties#KEY_IMAGEREGEX
      */
    // public static final String REGEX_IMAGEFILE = "^IMG_[0-9]{6}\\.JPG$";
     public static final String REGEX_IMAGEFILE = "^ETHZ_ENT[0-9]{2}_[0-9]{4}_[0-9]{2}_[0-9]{2}_[0-9]{6}\\.JPG$";

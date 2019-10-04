@@ -271,9 +271,9 @@ public class EditUserPanel extends JPanel {
 		this.add(getJTextFieldFullName(), gridBagConstraints8);
 		this.add(getJTextFieldAbout(), gridBagConstraints9);
 		this.add(jLabel5, gridBagConstraints10);
-		this.add(getJComboBox(), gridBagConstraints11);
-		this.add(getJButton(), gridBagConstraints12);
-		this.add(getJButton1(), gridBagConstraints13);
+		this.add(getRoleJComboBox(), gridBagConstraints11);
+		this.add(getSaveJButton(), gridBagConstraints12);
+		this.add(getPasswordChangeJButton(), gridBagConstraints13);
 	}
 
 	/**
@@ -341,7 +341,7 @@ public class EditUserPanel extends JPanel {
 	 * 	
 	 * @return javax.swing.JComboBox	
 	 */
-	private JComboBox getJComboBox() {
+	private JComboBox getRoleJComboBox() {
 		if (jComboBox == null) {
 			jComboBox = new JComboBox(Users.ROLES);
 		}
@@ -353,7 +353,7 @@ public class EditUserPanel extends JPanel {
 	 * 	
 	 * @return javax.swing.JButton	
 	 */
-	private JButton getJButton() {
+	private JButton getSaveJButton() {
 		if (jButton == null) {
 			jButton = new JButton();
 			jButton.setEnabled(false);
@@ -372,7 +372,7 @@ public class EditUserPanel extends JPanel {
 	 * 	
 	 * @return javax.swing.JButton	
 	 */
-	private JButton getJButton1() {
+	private JButton getPasswordChangeJButton() {
 		if (jButtonSetPassword == null) {
 			jButtonSetPassword = new JButton();
 			jButtonSetPassword.setEnabled(false);

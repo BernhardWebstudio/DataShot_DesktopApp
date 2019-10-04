@@ -38,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import edu.harvard.mcz.imagecapture.PositionTemplateEditor;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.SpecimenBrowser;
-import edu.harvard.mcz.imagecapture.SpecimenControler;
+import edu.harvard.mcz.imagecapture.SpecimenController;
 import edu.harvard.mcz.imagecapture.SpecimenPartAttributeDialog;
 import edu.harvard.mcz.imagecapture.UserListBrowser;
 import edu.harvard.mcz.imagecapture.VerbatimCaptureDialog;
@@ -199,7 +199,7 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor,
 								if (table!=null) {
 									// Pass the specimen object for the row, the table model, and the row number on to the specimen controler.
 									try { 
-										SpecimenControler sc = new SpecimenControler((Specimen)targetId, (SpecimenListTableModel)table.getModel(), table, row);
+										SpecimenController sc = new SpecimenController((Specimen)targetId, (SpecimenListTableModel)table.getModel(), table, row);
 										if (table.getParent().getParent().getParent().getParent().getClass()==SpecimenBrowser.class) { 
 											sc.addListener((DataChangeListener)table.getParent());                            		   
 										} else {
@@ -218,7 +218,7 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor,
 									} catch (java.lang.ClassCastException eNotSp) {
 										// Request isn't coming from a SpecimenListTableModel
 										// View just the specimen record.
-										SpecimenControler sc = new SpecimenControler((Specimen)targetId);
+										SpecimenController sc = new SpecimenController((Specimen)targetId);
 										sc.displayInEditor();
 									}
 								} else {
@@ -266,9 +266,9 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor,
 				SpecimenListTableModel stm =  new SpecimenListTableModel(toTranscribe);
 				JTable stable = new JTable();
 				stable.setModel(stm);
-				SpecimenControler verbCont;
+				SpecimenController verbCont;
 				try {
-					verbCont = new SpecimenControler(toTranscribe.get(0),stm,stable,0);
+					verbCont = new SpecimenController(toTranscribe.get(0),stm,stable,0);
 					VerbatimCaptureDialog dialog = new VerbatimCaptureDialog(toTranscribe.get(0), verbCont);
 					dialog.setVisible(true);
 				} catch (NoSuchRecordException e1) {

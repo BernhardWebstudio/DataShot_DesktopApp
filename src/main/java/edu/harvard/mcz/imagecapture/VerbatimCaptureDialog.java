@@ -58,8 +58,6 @@ import java.util.Iterator;
 import javax.swing.JComboBox;
 import javax.swing.JTextArea;
 
-import java.awt.GridLayout;
-
 /**
  * @author mole
  *
@@ -71,7 +69,7 @@ public class VerbatimCaptureDialog extends JDialog implements DataChangeListener
 	private static final Log log = LogFactory.getLog(VerbatimCaptureDialog.class);
 	
 	private Specimen specimen = null;
-	private SpecimenControler specimenControler = null;
+	private SpecimenController specimenController = null;
 	
 	private final JPanel contentPanel = new JPanel();
 	
@@ -104,10 +102,10 @@ public class VerbatimCaptureDialog extends JDialog implements DataChangeListener
 	 * 
 	 * @param targetSpecimen
 	 */
-	public VerbatimCaptureDialog(Specimen targetSpecimen, SpecimenControler targetSpecimenControler) { 
+	public VerbatimCaptureDialog(Specimen targetSpecimen, SpecimenController targetSpecimenController) {
 		specimen = targetSpecimen;
-		specimenControler = targetSpecimenControler;
-		specimenControler.addListener(this);
+		specimenController = targetSpecimenController;
+		specimenController.addListener(this);
 		init();
 		if (specimen!=null) { 
 		   setValues();
@@ -157,9 +155,9 @@ public class VerbatimCaptureDialog extends JDialog implements DataChangeListener
 			System.out.println(e.getMessage());	
 		}	
 		
-		if (specimenControler!=null) { 
-			btnNext.setEnabled(specimenControler.hasNextSpecimenInTable());
-		    btnPrevious.setEnabled(specimenControler.hasPreviousSpecimenInTable());
+		if (specimenController !=null) {
+			btnNext.setEnabled(specimenController.hasNextSpecimenInTable());
+		    btnPrevious.setEnabled(specimenController.hasPreviousSpecimenInTable());
 		} else {
 			btnNext.setEnabled(false);
 			btnPrevious.setEnabled(false);
@@ -472,7 +470,7 @@ public class VerbatimCaptureDialog extends JDialog implements DataChangeListener
 			
 			btnPrevious = new JButton("Previous");
 			btnPrevious.setEnabled(false);
-			if (specimenControler!=null && specimenControler.isInTable()) {
+			if (specimenController !=null && specimenController.isInTable()) {
 				btnPrevious.setEnabled(true);
 			}
 			btnPrevious.addActionListener(new ActionListener() {
@@ -480,8 +478,8 @@ public class VerbatimCaptureDialog extends JDialog implements DataChangeListener
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					save();
-					if (specimenControler.previousSpecimenInTable()) { 
-					   specimen = specimenControler.getSpecimen();
+					if (specimenController.previousSpecimenInTable()) {
+					   specimen = specimenController.getSpecimen();
 					   setValues();
 					}
 				} });
@@ -489,7 +487,7 @@ public class VerbatimCaptureDialog extends JDialog implements DataChangeListener
 			
 			btnNext = new JButton("Next");
 			btnNext.setEnabled(false);
-			if (specimenControler!=null && specimenControler.isInTable()) { 
+			if (specimenController !=null && specimenController.isInTable()) {
 				btnNext.setEnabled(true);
 			}
 			btnNext.addActionListener(new ActionListener() {
@@ -497,8 +495,8 @@ public class VerbatimCaptureDialog extends JDialog implements DataChangeListener
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					save();
-					if (specimenControler.nextSpecimenInTable()) { 
-					   specimen = specimenControler.getSpecimen();
+					if (specimenController.nextSpecimenInTable()) {
+					   specimen = specimenController.getSpecimen();
 					   setValues();
 					}
 				} });
@@ -576,7 +574,7 @@ public class VerbatimCaptureDialog extends JDialog implements DataChangeListener
 			String workflowstatus = (String) comboBoxWorkflowStatus.getSelectedItem();
 			specimen.setWorkFlowStatus(workflowstatus);
 			specimen.setQuestions(questions.toString());
-			specimenControler.save();
+			specimenController.save();
 			result = true;
 		} catch (SaveFailedException e) {
 			log.error(e.getMessage(), e);

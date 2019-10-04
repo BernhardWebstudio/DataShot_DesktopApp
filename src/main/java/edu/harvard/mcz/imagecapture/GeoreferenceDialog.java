@@ -368,20 +368,16 @@ public class GeoreferenceDialog extends JDialog {
 			lblDatum.setHorizontalAlignment(SwingConstants.RIGHT);
 			contentPanel.add(lblDatum);
 		}
-		
-		@SuppressWarnings("unchecked")
+
 		ComboBoxModel<String> datumModel = new ListComboBoxModel<String>(LatLong.getDatumValues());
 		cbDatum = new JComboBox<String>(datumModel);
-		
-		//qllie - default should be WGS84 ?
 		
 		contentPanel.add(cbDatum);
 		
 		JLabel lblMethod = new JLabel("Method");
 		lblMethod.setHorizontalAlignment(SwingConstants.RIGHT);
 		contentPanel.add(lblMethod);
-		
-		@SuppressWarnings("unchecked")
+
 		ComboBoxModel<String> methodModel = new ListComboBoxModel<String>(LatLong.getGeorefMethodValues());
 		cbMethod = new JComboBox<String>(new DefaultComboBoxModel<String>(new String[] {"not recorded", "unknown", "GEOLocate", "Geoportal", "Google Earth", "Google Maps", "Gazeteer", "GPS", "Label Data", "Wikipedia", "MaNIS/HertNet/ORNIS Georeferencing Guidelines"}));
 		cbMethod.addActionListener(new ActionListener() {
@@ -585,4 +581,5 @@ public class GeoreferenceDialog extends JDialog {
 			}
 		}
 	}
+
 }

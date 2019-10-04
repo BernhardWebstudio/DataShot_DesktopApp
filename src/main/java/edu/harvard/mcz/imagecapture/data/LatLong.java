@@ -113,6 +113,10 @@ public class LatLong implements Serializable {
 	public LatLong() {
 	}
 
+	public boolean isEmpty() {
+    	return this.equals(new LatLong());
+	}
+
 	public Long getLatLongId() {
 		return this.latLongId;
 	}
@@ -503,4 +507,30 @@ public class LatLong implements Serializable {
 		}
 	}
 
+	/**
+	 * Check whether this object has the same properties as a similar object
+	 *
+	 * @param coord
+	 * @return whether these few properties are equal
+	 */
+	public boolean equals(LatLong coord) {
+		return coord.acceptedLatLongFg == this.acceptedLatLongFg &&
+				coord.fieldVerifiedFg == this.fieldVerifiedFg &&
+				coord.latLongForNnpFg == this.latLongForNnpFg &&
+				coord.decLat == this.decLat &&
+				coord.decLatMin == this.decLatMin &&
+				coord.acceptedLatLongFg == this.acceptedLatLongFg &&
+				coord.decLong == this.decLong &&
+				coord.decLongMin == this.decLongMin &&
+				coord.determinedByAgent == this.determinedByAgent &&
+				coord.extent == this.extent &&
+				coord.latDeg == this.latDeg &&
+				coord.latDir == this.latDir &&
+				coord.latMin == this.latMin &&
+				coord.latSec == this.latSec &&
+				coord.gpsaccuracy == this.gpsaccuracy &&
+				coord.maxErrorDistance == this.maxErrorDistance &&
+				coord.maxErrorUnits == this.maxErrorUnits &&
+				coord.georefmethod == this.georefmethod;
+	}
 }

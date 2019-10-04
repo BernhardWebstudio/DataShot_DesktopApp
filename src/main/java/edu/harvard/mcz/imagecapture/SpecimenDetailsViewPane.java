@@ -67,11 +67,7 @@ import java.awt.GridBagLayout;
 import javax.swing.JLabel;
 
 import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -328,7 +324,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 	}
 
 	
-    /** initializes the specimen details view pane.
+    /**
+	 * Initializes the specimen details view pane.
 	 *  Note, contains comments indicating how to enable visual designer with this class. 
 	 */
 	private void initialize() {
@@ -336,8 +333,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 		borderLayout.setHgap(0);
 		borderLayout.setVgap(0);
 		this.setLayout(borderLayout);
-		this.setSize(new Dimension(594, 1000));
-		//this.setPreferredSize(new Dimension(490, 917));
+		//this.setSize(new Dimension(594, 1000));
+		this.setPreferredSize(new Dimension(600, 1080));
 	    this.add(getJTextFieldStatus(), BorderLayout.SOUTH);
 	    
 	    // Un-comment this line to use design tool.
@@ -1041,17 +1038,17 @@ public class SpecimenDetailsViewPane extends JPanel {
 	}
 
 	private void updateDeterminationCount() {
-		if (specimen.getDeterminations()==null) { 
-			jButtonDeterminations.setText("0 Dets.");
-		} else { 
-		    if (specimen.getDeterminations().size()==1) { 
-		    	jButtonDeterminations.setText(Integer.toString(specimen.getDeterminations().size()) + " Det.");
-		    } else {
-			    jButtonDeterminations.setText(Integer.toString(specimen.getDeterminations().size()) + " Dets.");
-		    }
+		if (specimen.getDeterminations()==null) {
+			this.setDeterminationCount(0);
+		} else {
+			this.setDeterminationCount(specimen.getDeterminations().size());
 		}
 	}
-	
+
+	private void setDeterminationCount(int count) {
+		String detSuffix = count == 1 ? "s" : "";
+		jButtonDeterminations.setText(Integer.toString(count) + " Det" + detSuffix + ".");
+	}
 
 	/**
 	 * This method initializes jTextField	
@@ -2660,7 +2657,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	        }	*/	
 			
 	        try {  
-	        	jButtonGeoreference.setText("Georeference");
+	        	updateJButtonGeoreference();
 	        	jButtonGeoreference.addActionListener(new java.awt.event.ActionListener() {
 	        		public void actionPerformed(java.awt.event.ActionEvent e) {
 	        			thisPane.setStateToDirty();
@@ -2670,6 +2667,13 @@ public class SpecimenDetailsViewPane extends JPanel {
 	        			georeference.setSpecimenId(specimen);
 	        			GeoreferenceDialog georefDialog = new GeoreferenceDialog(georeference);
 	        			georefDialog.setVisible(true);
+						georefDialog.addComponentListener(new ComponentAdapter() {
+							@Override
+							public void componentHidden(ComponentEvent e) {
+								updateJButtonGeoreference();
+								super.componentHidden(e);
+							}
+						});
 	        		}
 	        	});
 	        } catch (Exception e) { 
@@ -2677,7 +2681,15 @@ public class SpecimenDetailsViewPane extends JPanel {
 	        }
 		}
 		return jButtonGeoreference;
-	}	
+	}
+
+	private void updateJButtonGeoreference() {
+		if (specimen.getLatLong() != null && !specimen.getLatLong().isEmpty()) {
+			jButtonGeoreference.setText("✅ Georeference (1)");
+		} else {
+			jButtonGeoreference.setText("❔ Georeference (0)");
+		}
+	}
 
 	/**
 	 * This method initializes jButtonCollsAdd	
@@ -3673,6 +3685,14 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jButtonDeterminations.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					DeterminationFrame dets = new DeterminationFrame(specimen);
+					// update the text of the dets as soon as the component is closed
+					dets.addComponentListener(new ComponentAdapter() {
+						@Override
+						public void componentHidden(ComponentEvent e) {
+							updateDeterminationCount();
+							super.componentHidden(e);
+						}
+					});
 					dets.setVisible(true);
 				}
 			});

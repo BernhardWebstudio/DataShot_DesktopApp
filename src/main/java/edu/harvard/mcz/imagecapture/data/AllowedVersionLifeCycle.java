@@ -19,16 +19,27 @@
  */
 package edu.harvard.mcz.imagecapture.data;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
+import edu.harvard.mcz.imagecapture.Singleton;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.flywaydb.core.Flyway;
 import org.hibernate.HibernateException;
 import org.hibernate.SessionException;
 import org.hibernate.Session;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
+import org.hibernate.cfg.AvailableSettings;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl;
+import org.hibernate.internal.SessionFactoryImpl;
+
+import javax.sql.DataSource;
 
 /**
  * @author mole
@@ -117,6 +128,22 @@ public class AllowedVersionLifeCycle {
 			throw re;
 		}
 	}
-	
+
+	/**
+	 * Execute a migration, powered by FlyWay (https://flywaydb.org/)
+	 */
+	public static void upgrade() {
+		// Load the Configuration from hibernate.cfg.xml
+		SessionFactoryImpl sessionFactory = (SessionFactoryImpl) HibernateUtil.getSessionFactory();
+		Map<String, Object> properties = ((SessionFactoryImpl) sessionFactory).getProperties();
+		String url = (String) properties.get("hibernate.connection.url");
+		String username = (String) properties.get("hibernate.connection.username");
+		String password = (String) properties.get("hibernate.connection.password");
+		// Create the Flyway instance and point it to the database
+		Flyway flyway = Flyway.configure().dataSource(url, username, password).load();
+
+		// Start the migration
+		flyway.migrate();
+	}
 	
 }

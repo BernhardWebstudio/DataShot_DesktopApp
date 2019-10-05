@@ -38,17 +38,9 @@ import java.util.List;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 
+import net.miginfocom.swing.MigLayout;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -60,7 +52,8 @@ import edu.harvard.mcz.imagecapture.data.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.BadTemplateException;
 import edu.harvard.mcz.imagecapture.exceptions.ImageLoadException;
 
-/** Display parts of images (and possibly a data entry form) of a specimen and its labels.
+/**
+ * Display parts of images (and possibly a data entry form) of a specimen and its labels.
  *  
  * @author Paul J. Morris
  */
@@ -147,7 +140,7 @@ public class ImageDisplayFrame extends JFrame {
 	 * populate the image chooser pick list with a list of all the images.  Call this method to display 
 	 * more than one image in an ImageDisplayFrame.  Single image is displayed with a call to loadImagesFromFileSingle().
 	 *
-	 * @see edu.harvard.mcz.imagecapture.ImageDisplayFrame#loadImagesFromFiles(File, PositionTemplate, ICImage)
+	 * @see edu.harvard.mcz.imagecapture.ImageDisplayFrame#loadImagesFromFile(File, PositionTemplate, ICImage)
 	 * 
 	 * @param imageFiles
 	 */
@@ -221,7 +214,7 @@ public class ImageDisplayFrame extends JFrame {
 		log.debug(anImageFile.getName());
 		boolean templateProblem = false;
 		selectedImage = image;
-		//TODO: template detection
+		//TODO: template detection?
 		
 		try {
 			//allie fix
@@ -330,7 +323,7 @@ public class ImageDisplayFrame extends JFrame {
 	 * 
 	 */
 	private void initialize() {
-		this.setSize(755, 353);
+//		this.setSize(755, 353);
 		this.setPreferredSize(new Dimension(1350,1000));
 		this.setContentPane(getJContentPane());
 		this.setTitle("Image File and Barcode Value");
@@ -344,7 +337,7 @@ public class ImageDisplayFrame extends JFrame {
 
 	/**
 	 * This method initializes jContentPane
-	 * 
+	 *
 	 * @return javax.swing.JPanel
 	 */
 	private JPanel getJContentPane() {
@@ -365,13 +358,10 @@ public class ImageDisplayFrame extends JFrame {
 	}
 	
 	public void addWest(JPanel panel) {
-//		JScrollPane scroll = new JScrollPane(panel);
-//		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-//		scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-//		jContentPane.add(scroll,BorderLayout.WEST);
-		jContentPane.add(panel,BorderLayout.WEST);
-		panel.setPreferredSize(new Dimension(594,panel.getHeight()));
-//		scroll.setPreferredSize(new Dimension(594,panel.getHeight()));
+		jContentPane.removeAll();
+		jContentPane.setLayout(new MigLayout("wrap 2, fill", "[grow]", "[grow]"));
+		jContentPane.add(panel, "grow"); // west
+		jContentPane.add(this.getJPanelImagesPanel(), "grow"); // east, already there
 		this.pack();
 	}
 

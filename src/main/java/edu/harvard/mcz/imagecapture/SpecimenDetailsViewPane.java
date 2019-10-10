@@ -1171,7 +1171,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jPanel.add(this.getJButtonCopyPrev());
 			jPanel.add(this.getHistoryJButton());
 			jPanel.add(this.getNextPrevButtonGroup());
-			jPanel.add(this.getSaveJButton());
+			jPanel.add(this.getSaveJButton(), "tag apply");
 		}
 		return jPanel;
 	}
@@ -1184,8 +1184,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 
 	private JPanel getNextPrevButtonGroup() {
 		JPanel group = new JPanel(new MigLayout());
-		group.add(this.getJButtonPrevious());
-		group.add(this.getJButtonNext());
+		group.add(this.getJButtonPrevious(), "tag back");
+		group.add(this.getJButtonNext(), "tag next");
 		return group;
 	}
 

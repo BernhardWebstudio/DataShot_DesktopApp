@@ -20,11 +20,8 @@
 package edu.harvard.mcz.imagecapture;
 
 import edu.harvard.mcz.imagecapture.utility.HashUtility;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.Toolkit;
+
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.net.URL;
 import javax.swing.ImageIcon;
@@ -34,6 +31,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+
+import net.miginfocom.swing.MigLayout;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -55,29 +54,19 @@ public class LoginDialog extends JDialog {
   private JDialog self = null;
   private int result = RESULT_LOGIN;
   private JPanel jPanel = null;
-  private JLabel jLabel = null;
   private JTextField jTextFieldUsername = null;
-  private JLabel jLabel1 = null;
   private JPasswordField jPasswordFieldDB = null;
-  private JLabel jLabel2 = null;
   private JTextField jTextFieldDriver = null;
-  private JLabel jLabel3 = null;
   private JTextField jTextFieldConnection = null;
-  private JLabel jLabel4 = null;
   private JTextField jTextFieldDialect = null;
   private JButton jButtonLogin = null;
-  private JLabel jLabel5 = null;
   private JButton jButtonCancel = null;
-  private JLabel jLabel7 = null;
 
-  private JPanel jPanel1 = null;
   private JTextField jTextFieldEmail = null;
-  private JLabel jLabel8 = null;
-  private JLabel jLabel9 = null;
   private JPasswordField jPasswordFieldUser = null;
   private JButton jButton2 = null;
   private JPanel jPanelAdvanced = null;
-  private JLabel jLabel6 = null;
+  private JLabel jLabelStatus = null;
 
   /**
    * Default constructor.  Produces a login dialog.
@@ -113,10 +102,10 @@ public class LoginDialog extends JDialog {
             .getProperty(ImageCaptureProperties.KEY_LOGIN_SHOW_ADVANCED)
             .equalsIgnoreCase("false")) {
       jPanelAdvanced.setVisible(false);
-      this.setSize(new Dimension(698, 190));
+      this.setSize(new Dimension(650, 225));
     } else {
       jPanelAdvanced.setVisible(true);
-      this.setSize(new Dimension(698, 290));
+      this.setSize(new Dimension(650, 355));
     }
     this.getRootPane().setDefaultButton(jButtonLogin);
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -131,101 +120,47 @@ public class LoginDialog extends JDialog {
    */
   private JPanel getJPanel() {
     if (jPanel == null) {
-      GridBagConstraints gridBagConstraints17 = new GridBagConstraints();
-      gridBagConstraints17.gridx = 1;
-      gridBagConstraints17.anchor = GridBagConstraints.WEST;
-      gridBagConstraints17.fill = GridBagConstraints.HORIZONTAL;
-      gridBagConstraints17.gridy = 16;
-      jLabel6 = new JLabel();
-      jLabel6.setText("");
-      GridBagConstraints gridBagConstraints62 = new GridBagConstraints();
-      gridBagConstraints62.gridx = 0;
-      gridBagConstraints62.gridwidth = 2;
-      gridBagConstraints62.fill = GridBagConstraints.HORIZONTAL;
-      gridBagConstraints62.anchor = GridBagConstraints.WEST;
-      gridBagConstraints62.gridy = 6;
-      GridBagConstraints gridBagConstraints51 = new GridBagConstraints();
-      gridBagConstraints51.gridx = 0;
-      gridBagConstraints51.gridy = 4;
-      GridBagConstraints gridBagConstraints41 = new GridBagConstraints();
-      gridBagConstraints41.fill = GridBagConstraints.BOTH;
-      gridBagConstraints41.gridy = 3;
-      gridBagConstraints41.weightx = 1.0;
-      gridBagConstraints41.anchor = GridBagConstraints.WEST;
-      gridBagConstraints41.gridx = 1;
-      GridBagConstraints gridBagConstraints31 = new GridBagConstraints();
-      gridBagConstraints31.gridx = 0;
-      gridBagConstraints31.anchor = GridBagConstraints.EAST;
-      gridBagConstraints31.gridy = 3;
-      jLabel9 = new JLabel();
-      jLabel9.setText("Password");
-      GridBagConstraints gridBagConstraints21 = new GridBagConstraints();
-      gridBagConstraints21.gridx = 0;
-      gridBagConstraints21.anchor = GridBagConstraints.EAST;
-      gridBagConstraints21.gridy = 2;
-      jLabel8 = new JLabel();
-      jLabel8.setText("email");
-      GridBagConstraints gridBagConstraints16 = new GridBagConstraints();
-      gridBagConstraints16.fill = GridBagConstraints.BOTH;
-      gridBagConstraints16.gridy = 2;
-      gridBagConstraints16.weightx = 1.0;
-      gridBagConstraints16.anchor = GridBagConstraints.WEST;
-      gridBagConstraints16.gridx = 1;
-      GridBagConstraints gridBagConstraints15 = new GridBagConstraints();
-      gridBagConstraints15.gridx = 1;
-      gridBagConstraints15.gridy = 12;
-      GridBagConstraints gridBagConstraints61 = new GridBagConstraints();
-      gridBagConstraints61.gridx = 0;
-      gridBagConstraints61.gridwidth = 1;
-      gridBagConstraints61.anchor = GridBagConstraints.NORTHEAST;
-      gridBagConstraints61.gridheight = 4;
-      gridBagConstraints61.fill = GridBagConstraints.NONE;
-      gridBagConstraints61.weighty = 1.0;
-      gridBagConstraints61.insets = new Insets(0, 0, 0, 0);
-      gridBagConstraints61.gridy = 10;
-      jLabel7 = new JLabel();
+      jPanel = new JPanel();
+      jPanel.setLayout(new MigLayout("wrap 2"));
+
+
+      JLabel keyImageLabel = new JLabel();
       URL iconFile = this.getClass().getResource(
-          "/edu/harvard/mcz/imagecapture/resources/images/key_small.png");
+              "/edu/harvard/mcz/imagecapture/resources/images/key_small.png");
       try {
         // this.setIconImage(new ImageIcon(iconFile).getImage());
-        jLabel7.setIcon(new ImageIcon(iconFile));
+        keyImageLabel.setIcon(new ImageIcon(iconFile));
       } catch (Exception e) {
         System.out.println("Can't open icon file: " + iconFile);
       }
-      jLabel7.setText(" ");
-      GridBagConstraints gridBagConstraints12 = new GridBagConstraints();
-      gridBagConstraints12.gridx = 1;
-      gridBagConstraints12.anchor = GridBagConstraints.NORTH;
-      gridBagConstraints12.fill = GridBagConstraints.NONE;
-      gridBagConstraints12.gridy = 1;
-      jLabel5 = new JLabel();
-      jLabel5.setText("Connect to Database");
-      jLabel4 = new JLabel();
-      jLabel4.setText("Dialect");
-      jLabel3 = new JLabel();
-      jLabel3.setText("Connection");
-      jLabel2 = new JLabel();
-      jLabel2.setText("Driver");
-      GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-      gridBagConstraints2.gridx = 0;
-      gridBagConstraints2.gridy = 2;
-      jLabel1 = new JLabel();
-      jLabel1.setText("DBPassword");
-      jLabel = new JLabel();
-      jLabel.setText("Schema");
-      jPanel = new JPanel();
-
-      jPanel.setLayout(new GridBagLayout());
-      jPanel.add(jLabel5, gridBagConstraints12);
-      jPanel.add(jLabel7, gridBagConstraints61);
-      jPanel.add(getJPanel1(), gridBagConstraints15);
-      jPanel.add(getJTextFieldEmail(), gridBagConstraints16);
-      jPanel.add(jLabel8, gridBagConstraints21);
-      jPanel.add(jLabel9, gridBagConstraints31);
-      jPanel.add(getJPasswordFieldUser(), gridBagConstraints41);
-      jPanel.add(getJButton2(), gridBagConstraints51);
-      jPanel.add(getJPanelAdvanced(), gridBagConstraints62);
-      jPanel.add(jLabel6, gridBagConstraints17);
+      // row
+      jPanel.add(keyImageLabel);
+      JLabel loginPrompt = new JLabel("Login & connect to database");
+       Font f = loginPrompt.getFont();
+       // bold
+       loginPrompt.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
+      jPanel.add(loginPrompt);
+      // row
+      JLabel emailLabel = new JLabel("E-Mail/Username");
+      jPanel.add(emailLabel, "cell 0 1");
+      System.out.println(this.getJTextFieldEmail());
+      jPanel.add(this.getJTextFieldEmail(), "grow, cell 1 1");
+      // row
+      JLabel passwordLabel = new JLabel("Password");
+      jPanel.add(passwordLabel, "cell 0 2");
+      jPanel.add(this.getJPasswordFieldUser(), "grow, cell 1 2");
+      // row
+      this.jLabelStatus = new JLabel();
+      jPanel.add(this.jLabelStatus, "span 2, wrap");
+      // row
+      JLabel dbLabel = new JLabel("Database");
+      jPanel.add(dbLabel);
+      jPanel.add(this.getAdvancedSettingsJButton(), "wrap");
+      // row
+      jPanel.add(this.getJButtonCancel(), "tag cancel");
+      jPanel.add(this.getJButtonLogin(), "tag ok, align right");
+      // row
+      jPanel.add(this.getJPanelAdvanced(), "grow, span 2, wrap");
     }
     return jPanel;
   }
@@ -237,7 +172,7 @@ public class LoginDialog extends JDialog {
    */
   private JTextField getJTextFieldUsername() {
     if (jTextFieldUsername == null) {
-      jTextFieldUsername = new JTextField(30);
+      jTextFieldUsername = new JTextField();
     }
     return jTextFieldUsername;
   }
@@ -249,7 +184,7 @@ public class LoginDialog extends JDialog {
    */
   private JPasswordField getJPasswordFieldDB() {
     if (jPasswordFieldDB == null) {
-      jPasswordFieldDB = new JPasswordField(30);
+      jPasswordFieldDB = new JPasswordField();
     }
     return jPasswordFieldDB;
   }
@@ -374,7 +309,7 @@ public class LoginDialog extends JDialog {
 
   public String getDialect() { return jTextFieldDialect.getText(); }
 
-  public void setStatus(String aStatus) { jLabel6.setText(aStatus); }
+  public void setStatus(String aStatus) { jLabelStatus.setText(aStatus); }
 
   /**
    * @param textFieldDriver the jTextFieldDriver to set
@@ -398,30 +333,6 @@ public class LoginDialog extends JDialog {
   }
 
   public int getResult() { return result; }
-
-  /**
-   * This method initializes jPanel1
-   *
-   * @return javax.swing.JPanel
-   */
-  private JPanel getJPanel1() {
-    if (jPanel1 == null) {
-      GridBagConstraints gridBagConstraints13 = new GridBagConstraints();
-      gridBagConstraints13.ipady = 3;
-      GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
-      gridBagConstraints11.anchor = GridBagConstraints.EAST;
-      gridBagConstraints11.insets = new Insets(0, 0, 0, 0);
-      gridBagConstraints11.gridx = 1;
-      gridBagConstraints11.gridy = 0;
-      gridBagConstraints11.ipady = 3;
-      gridBagConstraints11.fill = GridBagConstraints.NONE;
-      jPanel1 = new JPanel();
-      jPanel1.setLayout(new GridBagLayout());
-      jPanel1.add(getJButtonCancel(), gridBagConstraints13);
-      jPanel1.add(getJButtonLogin(), gridBagConstraints11);
-    }
-    return jPanel1;
-  }
 
   /**
    * This method initializes jTextFieldEmail
@@ -452,7 +363,7 @@ public class LoginDialog extends JDialog {
    *
    * @return javax.swing.JButton
    */
-  private JButton getJButton2() {
+  private JButton getAdvancedSettingsJButton() {
     if (jButton2 == null) {
       jButton2 = new JButton();
       jButton2.setText("Advanced");
@@ -468,10 +379,10 @@ public class LoginDialog extends JDialog {
 
   public void toggleAdvanced() {
     if (jPanelAdvanced.isVisible()) {
-      this.setSize(new Dimension(698, 190));
+      this.setSize(new Dimension(650, 225));
       jPanelAdvanced.setVisible(false);
     } else {
-      this.setSize(new Dimension(698, 290));
+      this.setSize(new Dimension(650, 355));
       jPanelAdvanced.setVisible(true);
     }
   }
@@ -483,6 +394,16 @@ public class LoginDialog extends JDialog {
    */
   private JPanel getJPanelAdvanced() {
     if (jPanelAdvanced == null) {
+      JLabel jLabel4 = new JLabel();
+      jLabel4.setText("Dialect");
+      JLabel jLabel3 = new JLabel();
+      jLabel3.setText("Connection");
+      JLabel jLabel2 = new JLabel();
+      jLabel2.setText("Driver");
+      JLabel jLabel1 = new JLabel();
+      jLabel1.setText("DBPassword");
+      JLabel jLabel = new JLabel();
+      jLabel.setText("Schema");
       GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
       gridBagConstraints3.anchor = GridBagConstraints.WEST;
       gridBagConstraints3.gridx = 1;

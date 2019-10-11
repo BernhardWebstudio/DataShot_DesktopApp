@@ -54,7 +54,7 @@ public class LoginDialog extends JDialog {
   private JDialog self = null;
   private int result = RESULT_LOGIN;
   private JPanel jPanel = null;
-  private JTextField jTextFieldUsername = null;
+  private JTextField jTextFieldDBUsername = null;
   private JPasswordField jPasswordFieldDB = null;
   private JTextField jTextFieldDriver = null;
   private JTextField jTextFieldConnection = null;
@@ -121,7 +121,7 @@ public class LoginDialog extends JDialog {
   private JPanel getJPanel() {
     if (jPanel == null) {
       jPanel = new JPanel();
-      jPanel.setLayout(new MigLayout("wrap 2"));
+      jPanel.setLayout(new MigLayout("wrap 2, fill"));
 
 
       JLabel keyImageLabel = new JLabel();
@@ -142,13 +142,13 @@ public class LoginDialog extends JDialog {
       jPanel.add(loginPrompt);
       // row
       JLabel emailLabel = new JLabel("E-Mail/Username");
-      jPanel.add(emailLabel, "cell 0 1");
+      jPanel.add(emailLabel);
       System.out.println(this.getJTextFieldEmail());
-      jPanel.add(this.getJTextFieldEmail(), "grow, cell 1 1");
+      jPanel.add(this.getJTextFieldEmail(), "growx");
       // row
       JLabel passwordLabel = new JLabel("Password");
-      jPanel.add(passwordLabel, "cell 0 2");
-      jPanel.add(this.getJPasswordFieldUser(), "grow, cell 1 2");
+      jPanel.add(passwordLabel);
+      jPanel.add(this.getJPasswordFieldUser(), "growx");
       // row
       this.jLabelStatus = new JLabel();
       jPanel.add(this.jLabelStatus, "span 2, wrap");
@@ -157,7 +157,7 @@ public class LoginDialog extends JDialog {
       jPanel.add(dbLabel);
       jPanel.add(this.getAdvancedSettingsJButton(), "wrap");
       // row
-      jPanel.add(this.getJButtonCancel(), "tag cancel");
+      jPanel.add(this.getJButtonCancel(), "tag cancel, align left");
       jPanel.add(this.getJButtonLogin(), "tag ok, align right");
       // row
       jPanel.add(this.getJPanelAdvanced(), "grow, span 2, wrap");
@@ -166,15 +166,15 @@ public class LoginDialog extends JDialog {
   }
 
   /**
-   * This method initializes jTextFieldUsername
+   * This method initializes jTextFieldSchemaName if necessary
    *
    * @return javax.swing.JTextField
    */
-  private JTextField getJTextFieldUsername() {
-    if (jTextFieldUsername == null) {
-      jTextFieldUsername = new JTextField();
+  private JTextField getJTextFieldSchemaName() {
+    if (jTextFieldDBUsername == null) {
+      jTextFieldDBUsername = new JTextField();
     }
-    return jTextFieldUsername;
+    return jTextFieldDBUsername;
   }
 
   /**
@@ -285,10 +285,10 @@ public class LoginDialog extends JDialog {
 
   public String getUsername() { return jTextFieldEmail.getText(); }
 
-  public String getSchemaName() { return jTextFieldUsername.getText(); }
+  public String getDBUserName() { return jTextFieldDBUsername.getText(); }
 
-  public void setSchemaName(String aDBSchemaName) {
-    jTextFieldUsername.setText(aDBSchemaName);
+  public void setDBUserName(String aDBSchemaName) {
+    jTextFieldDBUsername.setText(aDBSchemaName);
   }
 
   public String getDBPassword() {
@@ -309,7 +309,7 @@ public class LoginDialog extends JDialog {
 
   public String getDialect() { return jTextFieldDialect.getText(); }
 
-  public void setStatus(String aStatus) { jLabelStatus.setText(aStatus); }
+  public void setStatus(String aStatus) { this.jLabelStatus.setText(aStatus); this.jLabelStatus.updateUI(); }
 
   /**
    * @param textFieldDriver the jTextFieldDriver to set
@@ -470,7 +470,7 @@ public class LoginDialog extends JDialog {
       jPanelAdvanced.add(jLabel4, gridBagConstraints9);
       jPanelAdvanced.add(getJTextFieldDialect(), gridBagConstraints10);
       jPanelAdvanced.add(jLabel, gridBagConstraints);
-      jPanelAdvanced.add(getJTextFieldUsername(), gridBagConstraints1);
+      jPanelAdvanced.add(getJTextFieldSchemaName(), gridBagConstraints1);
       jPanelAdvanced.add(jLabel1, gridBagConstraints4);
       jPanelAdvanced.add(getJPasswordFieldDB(), gridBagConstraints3);
     }

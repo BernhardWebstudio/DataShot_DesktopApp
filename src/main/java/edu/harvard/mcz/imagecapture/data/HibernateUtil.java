@@ -1,21 +1,24 @@
 package edu.harvard.mcz.imagecapture.data;
 
+import com.mysql.cj.jdbc.exceptions.CommunicationsException;
+import edu.harvard.mcz.imagecapture.LoginDialog;
+
 import java.awt.Cursor;
 import java.awt.Dialog.ModalityType;
+import java.net.ConnectException;
 import java.util.List;
+import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.*;
-import org.hibernate.cfg.*;
-
-import edu.harvard.mcz.imagecapture.LoginDialog;
 import edu.harvard.mcz.imagecapture.MainFrame;
 import edu.harvard.mcz.imagecapture.Singleton;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import edu.harvard.mcz.imagecapture.exceptions.ConnectionException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.exception.JDBCConnectionException;
+import org.hibernate.service.spi.ServiceException;
 
 /**
  * Singleton class to obtain access to Hibernate sessions, used in the *LifeCycle classes.
@@ -67,43 +70,39 @@ public class HibernateUtil {
 			Configuration config = new Configuration().configure();
 			// Add authentication properties obtained from the user
 			boolean success = false;
-			LoginDialog loginDialog = new LoginDialog();
+			// retrieve the connection parameters from hibernate.cfg.xml and load into the LoginDialog
+			LoginDialog loginDialog = HibernateUtil.getLoginDialog(config, null);
 			while (!success && loginDialog.getResult()!=LoginDialog.RESULT_CANCEL) {
-				// retrieve the connection parameters from hibernate.cfg.xml and load into the LoginDialog
-				loginDialog.setConnection(config.getProperty("hibernate.connection.url"));
-				loginDialog.setDialect(config.getProperty("hibernate.dialect"));
-				loginDialog.setDriver(config.getProperty("hibernate.connection.driver_class"));
-				// If the database username(schema) and password are present load them as well.
-				String un = config.getProperty("hibernate.connection.username");
-				if (un!=null) { 
-					loginDialog.setSchemaName(config.getProperty("hibernate.connection.username"));
-				}
-				String pw = config.getProperty("hibernate.connection.password"); 
-				if (pw!=null) { 
-					loginDialog.setDBPassword(config.getProperty("hibernate.connection.password"));
-				}					
-	            // Display the LoginDialog as a modal dialog 
-				loginDialog.setModalityType(ModalityType.APPLICATION_MODAL);
-				loginDialog.setVisible(true);
 				// Check authentication (starting with the database user(schema)/password.
 				String username;
 				if (loginDialog.getResult()==LoginDialog.RESULT_LOGIN) { 
-					if (Singleton.getSingletonInstance().getMainFrame() != null) { 
+					if (Singleton.getSingletonInstance().getMainFrame() != null) {
 			           Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					   Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Connecting to database");
 					} 
 					config.setProperty("hibernate.connection.password", loginDialog.getDBPassword());
-					username = loginDialog.getSchemaName();
+					username = loginDialog.getDBUserName();
 					config.setProperty("hibernate.connection.username", username);
 					config.setProperty("hibernate.connection.url", loginDialog.getConnection());
 					// Now create the SessionFactory from this configuration
 					log.debug(config.getProperty("hibernate.connection.url"));
-					try { 
+					try {
 						sessionFactory = config.buildSessionFactory();
+					} catch (JDBCConnectionException| ServiceException ex) {
+						loginDialog = HibernateUtil.getLoginDialog(config, "Initial SessionFactory creation failed. Database not connectable: " + ex.getMessage());
+						success = false;
+						sessionFactory = null;
+						try {
+							Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Database connection failed.");
+						} catch (NullPointerException e) {
+							// expected if we haven't instantiated a main frame.
+						}
+						System.out.println("Initial SessionFactory creation failed." + ex);
 					} catch (Throwable ex) {
 						// Make sure you log the exception, as it might be swallowed
 						System.out.println("Initial SessionFactory creation failed." + ex);
-						throw new ExceptionInInitializerError(ex);
+						throw ex;
+						//throw new ExceptionInInitializerError(ex);
 					}
 					try { 
 						// Check database authentication by beginning a transaction.
@@ -132,8 +131,7 @@ public class HibernateUtil {
 						   } 
 						} 
 						if (!success) { 
-							loginDialog = new LoginDialog();
-							loginDialog.setStatus("Login failed: Incorrect Email and/or Password.");
+							loginDialog = HibernateUtil.getLoginDialog(config, "Login failed: Incorrect Email and/or Password.");
 							success = false;
 							if (loginDialog.getUsername()!=null) { 
 						        log.debug("Login failed for " + loginDialog.getUsername());
@@ -150,9 +148,7 @@ public class HibernateUtil {
 						log.error(e.getMessage());
 						log.trace(e.getMessage(),e);
 						System.out.println("Initial SessionFactory creation failed." + e.getMessage());
-						// TODO: don't reference UI if not running one...
-						loginDialog = new LoginDialog();
-						loginDialog.setStatus("Login failed: " + e.getCause());
+						loginDialog = HibernateUtil.getLoginDialog(config, "Login failed: " + e.getCause());
 						success = false;
 						sessionFactory.close();
 						sessionFactory = null;
@@ -171,6 +167,49 @@ public class HibernateUtil {
 			System.out.println("Initial SessionFactory creation failed." + ex);
 			System.out.println("Cause" + ex.getCause().getMessage());
 			throw new ExceptionInInitializerError(ex);
+		}
+	}
+
+	/**
+	 * Get the login dialog, initialized with properties for the advanced, database (DB) configuration
+	 *
+	 * @param config the Hibernate configuration to use as a base
+	 * @param status the login status to display
+	 * @return
+	 */
+	private static LoginDialog getLoginDialog(Configuration config, String status) {
+		LoginDialog loginDialog = new LoginDialog();
+		Properties settings = Singleton.getSingletonInstance().getProperties().getProperties();
+		// detect usage of placeholders, replace with settings if available
+		loginDialog.setConnection(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.url", "${hibernate.url}"));
+		loginDialog.setDialect(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.dialect", "${hibernate.dialect}"));
+		loginDialog.setDriver(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.driver_class", "${hibernate.driver_class}"));
+		// If the database username(schema) and password are present load them as well.
+		loginDialog.setDBUserName(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.username", "${hibernate.user}"));
+		loginDialog.setDBPassword(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.password", "${hibernate.password}"));
+		// Display the LoginDialog as a modal dialog 
+		loginDialog.setModalityType(ModalityType.APPLICATION_MODAL);
+		loginDialog.setVisible(true);
+		if (status != null) {
+			loginDialog.setStatus(status);
+		}
+		return loginDialog;
+	}
+
+	/**
+	 * Get a value from settings by key if it has the value in config, else from config
+	 *
+	 * @param config
+	 * @param settings
+	 * @param key
+	 * @param value
+	 * @return the value of the property
+	 */
+	private static String getConfigOrSettingsValue(Configuration config, Properties settings, String key, String value) {
+		if (config.getProperty(key).equals(value)){
+			return settings.getProperty(key, value);
+		} else {
+			return config.getProperty(key);
 		}
 	}
 	

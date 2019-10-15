@@ -46,7 +46,8 @@ public class MetadataRetriever {
 		return result.toString();
 	}
 	
-	/**Generates a MaskFormatter for a JFormattedTextField based upon the length (and potentially the type) of the
+	/**
+	 * Generates a MaskFormatter for a JFormattedTextField based upon the length (and potentially the type) of the
 	 * underlying text field.  Doesn't work well for normal varchar() fields, as the JTextField appears to be full
 	 * of spaces.   
 	 * 

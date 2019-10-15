@@ -70,11 +70,6 @@ public class PropertiesEditor extends JFrame {
 		super();
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		properties = new ImageCaptureProperties();
-		try {
-			properties.loadProperties();
-		} catch (Exception e) {
-			System.out.println("Unable to load properties file.");
-		}
 		thisEditor = this; // make this visible to anonymous methods of button action events.
 		initialize();
 		jScrollPane.setPreferredSize(new Dimension(669, 347));

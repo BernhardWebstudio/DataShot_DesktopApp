@@ -116,14 +116,11 @@ public class HibernateUtil {
 						List<Users> foundUser = uls.findByCredentials(loginDialog.getUsername(), loginDialog.getUserPasswordHash());
 						if (foundUser.size()==1) {
  						    // There should be one and only one user returned.
-							log.debug(foundUser.get(0).getHash());
-							// log.debug(loginDialog.getUserPasswordHash()); // EEEEHHHH WTF that was a security issue!!! :O
 						    if (foundUser.get(0).getUsername().equals(loginDialog.getUsername()) && foundUser.get(0).getHash().equals(loginDialog.getUserPasswordHash())) {
 							   // and that user must have exactly the username/password hash provided in the dialog. 
-						       Singleton.getSingletonInstance().setCurrentUsername(loginDialog.getUsername());
+						       Singleton.getSingletonInstance().setCurrentUser(foundUser.get(0));
 						       success = true;
-						       try { 
-						           Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Connected as "+ foundUser.get(0).getFullname());
+						       try {
 						           Singleton.getSingletonInstance().getMainFrame().setState(MainFrame.STATE_RUNNING);
 						       } catch (NullPointerException ex) { 
 								   // expected if we haven't instantiated a main frame.

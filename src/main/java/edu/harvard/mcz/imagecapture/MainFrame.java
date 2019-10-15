@@ -168,8 +168,6 @@ public class MainFrame extends JFrame implements RunnerListener {
 		setState(STATE_INIT);
 		this.pack();
 		this.setVisible(true);
-		// Set a reasonable font width for a relatively wide character
-		Singleton.getSingletonInstance().setCharacterWidth(this.getFontMetrics(this.getFont()).getWidths()[109]);
     }
 	
 	public void setState(int aState) { 

@@ -19,20 +19,17 @@
  */
 package edu.harvard.mcz.imagecapture;
 
+import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import javax.swing.table.AbstractTableModel;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Enumeration;
 import java.util.Properties;
-
-import javax.swing.table.AbstractTableModel;
-
-import javafx.geometry.Pos;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 
 /** Filesystem persistence and retrieval of properties for ImageCapture Application.
  * Includes constants for key names to use in properties file, and definition of default

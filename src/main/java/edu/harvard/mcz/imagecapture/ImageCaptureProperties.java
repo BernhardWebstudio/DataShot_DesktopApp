@@ -198,12 +198,12 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 		propertiesFilePath = new StringBuffer(System.getProperty("user.dir"));
 		propertiesFilePath.append(System.getProperty("file.separator"));
 		propertiesFilePath.append(propertiesFilename);
-		log.debug("Opening properties file: " + propertiesFilePath.toString());
 		try {
 			loadProperties();
 		} catch (Exception e) {
 			// thrown if properties can't be loaded, create default properties.
 			properties = new Properties();
+			System.out.println("Failed loading properties. Error message: " + e.getMessage());
 		}
 		checkDefaults();
 	}
@@ -548,24 +548,29 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 	}
 	
 	protected void loadProperties() throws Exception {
-		properties = new Properties();
-		FileInputStream propertiesStream = null;
-		try { 
-		    propertiesStream = new FileInputStream(propertiesFilePath.toString());
-		    properties.load(propertiesStream);
-	     	// Test to see if all properties are set in the loaded file
-		    checkDefaults();
-		} catch (FileNotFoundException e)  {
-			System.out.println("Error: Properties file not found.");
-			throw e;
-		} catch (Exception ex) { 
-			System.out.println("Error loading properties.");
-			System.out.println(ex.getMessage());
-			throw ex;
-		} finally { 
-			if (propertiesStream!=null) { 
-			    propertiesStream.close();
-			} 
+		if (properties == null) {
+			properties = new Properties();
+			FileInputStream propertiesStream = null;
+			log.debug("Opening properties file: " + propertiesFilePath.toString());
+			try {
+				propertiesStream = new FileInputStream(propertiesFilePath.toString());
+				properties.load(propertiesStream);
+				// Test to see if all properties are set in the loaded file
+				checkDefaults();
+			} catch (FileNotFoundException e)  {
+				System.out.println("Error: Properties file not found.");
+				throw e;
+			} catch (Exception ex) {
+				System.out.println("Error loading properties.");
+				System.out.println(ex.getMessage());
+				throw ex;
+			} finally {
+				if (propertiesStream!=null) {
+					propertiesStream.close();
+				}
+			}
+		} else {
+			System.out.println("Skipping properties loading as they are already loaded");
 		}
 	}
 	

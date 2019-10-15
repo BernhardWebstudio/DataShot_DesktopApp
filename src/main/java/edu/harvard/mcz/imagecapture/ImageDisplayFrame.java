@@ -324,7 +324,7 @@ public class ImageDisplayFrame extends JFrame {
 	 */
 	private void initialize() {
 //		this.setSize(755, 353);
-		this.setPreferredSize(new Dimension(1350,1000));
+		this.setPreferredSize(new Dimension(1600,1250));
 		this.setContentPane(getJContentPane());
 		this.setTitle("Image File and Barcode Value");
 	}

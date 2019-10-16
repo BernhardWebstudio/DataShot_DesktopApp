@@ -1305,7 +1305,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 */
 	private JComboBox<String> getJTextFieldCollection() {
 		if (jComboBoxCollection == null) {
-			log.debug("initt jComboBoxCollection");
+			log.debug("init jComboBoxCollection");
 			SpecimenLifeCycle sls = new SpecimenLifeCycle();
 			jComboBoxCollection = new JComboBox<String>();
 			jComboBoxCollection.setModel(new DefaultComboBoxModel<String>(sls.getDistinctCollections()));

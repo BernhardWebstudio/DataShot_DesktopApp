@@ -30,7 +30,8 @@ import javax.swing.text.MaskFormatter;
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.MainFrame;
 
-/** MetadataRetriever produces metadata (field lengths, tooltip texts, input masks, input verifiers)
+/**
+ * MetadataRetriever produces metadata (field lengths, tooltip texts, input masks, input verifiers)
  * for fields in tables in database.  
  * 
  * @author Paul J. Morris
@@ -179,17 +180,8 @@ public class MetadataRetriever {
             if (fieldname.equalsIgnoreCase("Family")) { length=40; }
             if (fieldname.equalsIgnoreCase("Subfamily")) { length=40; }
             if (fieldname.equalsIgnoreCase("Tribe")) { length=40; }
-            if (fieldname.equalsIgnoreCase("Genus")) { length=40; }
-            if (fieldname.equalsIgnoreCase("SpecificEpithet")) { length=40; }
-            if (fieldname.equalsIgnoreCase("SubspecificEpithet")) { length=255; }
-            if (fieldname.equalsIgnoreCase("InfraspecificEpithet")) { length=40; }
-            if (fieldname.equalsIgnoreCase("InfraspecificRank")) { length=40; }
-            if (fieldname.equalsIgnoreCase("Authorship")) { length=255; }
-            if (fieldname.equalsIgnoreCase("UnNamedForm")) { length=50; }
-            if (fieldname.equalsIgnoreCase("IdentificationQualifier")) { length=50; }
-            if (fieldname.equalsIgnoreCase("IdentifiedBy")) { length=255; }
-            if (fieldname.equalsIgnoreCase("DateIdentified")) { length=21; }
-            if (fieldname.equalsIgnoreCase("NatureOfID")) { length=255; }
+			length = getDetFieldLength(fieldname, length);
+			if (fieldname.equalsIgnoreCase("NatureOfID")) { length=255; }
             if (fieldname.equalsIgnoreCase("Country")) { length=255; }
             if (fieldname.equalsIgnoreCase("PrimaryDivison")) { length=255; }
             if (fieldname.equalsIgnoreCase("SpecificLocality")) { length=65535; }
@@ -225,18 +217,9 @@ public class MetadataRetriever {
 		if (aTableClass==Collector.class) { 
 			if (fieldname.equalsIgnoreCase("CollectorName")) { length=255; }	
 		}
-		if (aTableClass==Determination.class) { 
-            if (fieldname.equalsIgnoreCase("Genus")) { length=40; }
-            if (fieldname.equalsIgnoreCase("SpecificEpithet")) { length=40; }
-            if (fieldname.equalsIgnoreCase("SubspecificEpithet")) { length=255; }
-            if (fieldname.equalsIgnoreCase("InfraspecificEpithet")) { length=40; }
-            if (fieldname.equalsIgnoreCase("InfraspecificRank")) { length=40; }
-            if (fieldname.equalsIgnoreCase("Authorship")) { length=255; }
-            if (fieldname.equalsIgnoreCase("UnNamedForm")) { length=50; }
-            if (fieldname.equalsIgnoreCase("IdentificationQualifier")) { length=50; }
-            if (fieldname.equalsIgnoreCase("IdentifiedBy")) { length=255; }		
-            if (fieldname.equalsIgnoreCase("DateIdentified")) { length=21; }
-            if (fieldname.equalsIgnoreCase("TypeStatus")) { length=50; }
+		if (aTableClass==Determination.class) {
+			length = getDetFieldLength(fieldname, length);
+			if (fieldname.equalsIgnoreCase("TypeStatus")) { length=50; }
             if (fieldname.equalsIgnoreCase("NatureOfID")) { length=255; }
 		}
 		if (aTableClass==Users.class) { 
@@ -259,7 +242,28 @@ public class MetadataRetriever {
 		
 		return length;
 	}
-    
+
+	/**
+	 * Extracted from above: field lengths for both Specimen & Determination
+	 *
+	 * @param fieldname
+	 * @param length
+	 * @return
+	 */
+	private static int getDetFieldLength(String fieldname, int length) {
+		if (fieldname.equalsIgnoreCase("Genus")) { length=40; }
+		if (fieldname.equalsIgnoreCase("SpecificEpithet")) { length=40; }
+		if (fieldname.equalsIgnoreCase("SubspecificEpithet")) { length=255; }
+		if (fieldname.equalsIgnoreCase("InfraspecificEpithet")) { length=40; }
+		if (fieldname.equalsIgnoreCase("InfraspecificRank")) { length=40; }
+		if (fieldname.equalsIgnoreCase("Authorship")) { length=255; }
+		if (fieldname.equalsIgnoreCase("UnNamedForm")) { length=50; }
+		if (fieldname.equalsIgnoreCase("IdentificationQualifier")) { length=50; }
+		if (fieldname.equalsIgnoreCase("IdentifiedBy")) { length=255; }
+		if (fieldname.equalsIgnoreCase("DateIdentified")) { length=21; }
+		return length;
+	}
+
 	/**
 	 * Given a proxy class for a table and the name of a field return a help text for that field.
 	 *  

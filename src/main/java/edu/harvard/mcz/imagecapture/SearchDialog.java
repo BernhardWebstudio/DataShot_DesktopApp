@@ -19,33 +19,17 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import edu.harvard.mcz.imagecapture.data.Collector;
-import edu.harvard.mcz.imagecapture.data.CollectorLifeCycle;
-import edu.harvard.mcz.imagecapture.data.ICImage;
-import edu.harvard.mcz.imagecapture.data.ICImageLifeCycle;
-import edu.harvard.mcz.imagecapture.data.Specimen;
-import edu.harvard.mcz.imagecapture.data.SpecimenLifeCycle;
-import edu.harvard.mcz.imagecapture.data.Tracking;
-import edu.harvard.mcz.imagecapture.data.TrackingLifeCycle;
-import edu.harvard.mcz.imagecapture.data.WorkFlowStatus;
+import edu.harvard.mcz.imagecapture.data.*;
 import edu.harvard.mcz.imagecapture.ui.JIntegerField;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import net.miginfocom.swing.MigLayout;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 /**
  * SearchDialog
@@ -100,10 +84,10 @@ public class SearchDialog extends JDialog {
      * @return void
      */
     private void initialize() {
-        this.setSize(500, 750);
+//        this.setSize(500, 750);
         this.setTitle("Search For Specimens");
         this.setContentPane(getJContentPane());
-        this.setPreferredSize(new Dimension(500, 750));
+//        this.setPreferredSize(new Dimension(500, 750));
         this.pack();
     }
 
@@ -280,19 +264,12 @@ public class SearchDialog extends JDialog {
         if (jPanel1 == null) {
             // set titles etc.
 
-            jPanel1 = new JPanel();
-            GridBagLayout gbl_jPanel1 = new GridBagLayout();
-            gbl_jPanel1.columnWeights = new double[]{0.0, 1.0};
-            jPanel1.setLayout(gbl_jPanel1);
-
-            GridBagConstraints gridBagConstraints71 = this.initializeBasicGridBag(0, 1);
-            gridBagConstraints71.gridwidth = 2;
-            JLabel jLabel17 = new JLabel();
-            jLabel17.setText("Use %_% in a field to find all records with a value in that field.");
-            GridBagConstraints gridBagConstraints61 = this.initializeBasicGridBag(1, 0);
-            JLabel jLabel13 = new JLabel();
-            jLabel13.setText("Search for specimens. Use % as a wildcard.");
-            jPanel1.add(jLabel13, gridBagConstraints61);
+            jPanel1 = new JPanel(new MigLayout("wrap 2"));
+            JLabel jLabelInstructions = new JLabel("Search for specimens. Use % as a wildcard.");
+            Font f = jLabelInstructions.getFont();
+            // bold
+            jLabelInstructions.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
+            jPanel1.add(jLabelInstructions, "span 2");
 
             // set fields
             String[] labels = {
@@ -347,13 +324,10 @@ public class SearchDialog extends JDialog {
 
             assert (fields.length == labels.length);
             for (int i = 0; i < labels.length; i++) {
-                GridBagConstraints labelConstraint = this.initializeBasicGridBag(0, i + 1, GridBagConstraints.EAST);
                 JLabel label = new JLabel();
                 label.setText(labels[i]);
-                jPanel1.add(label, labelConstraint);
-                GridBagConstraints fieldConstraint = this.initializeBasicResizableGridBag(1, i + 1);
-                fieldConstraint.weightx = 1.0;
-                jPanel1.add(fields[i], fieldConstraint);
+                jPanel1.add(label, "align label");
+                jPanel1.add(fields[i], "grow");
             }
 						/*
 						GridBagConstraints gbc_lblHigherGeography = new GridBagConstraints();
@@ -472,8 +446,11 @@ public class SearchDialog extends JDialog {
     private JComboBox getCollectionJComboBox() {
         if (jComboBoxCollection == null) {
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
-            jComboBoxCollection = new JComboBox(sls.getDistinctCollections());
+            jComboBoxCollection = new JComboBox<String>();
+            jComboBoxCollection.setModel(new DefaultComboBoxModel<String>(sls.getDistinctCollections()));
             jComboBoxCollection.setEditable(true);
+            jComboBoxCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Collection"));
+            AutoCompleteDecorator.decorate(jComboBoxCollection);
         }
         return jComboBoxCollection;
     }
@@ -534,6 +511,7 @@ public class SearchDialog extends JDialog {
             TrackingLifeCycle tls = new TrackingLifeCycle();
             jComboBoxEntryBy = new JComboBox(tls.getDistinctUsers());
             jComboBoxEntryBy.setEditable(true);
+            AutoCompleteDecorator.decorate(jComboBoxEntryBy);
         }
         return jComboBoxEntryBy;
     }
@@ -548,6 +526,7 @@ public class SearchDialog extends JDialog {
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
             jComboBoxIdentifiedBy = new JComboBox(sls.getDistinctDeterminers());
             jComboBoxIdentifiedBy.setEditable(true);
+            AutoCompleteDecorator.decorate(jComboBoxIdentifiedBy);
         }
         return jComboBoxIdentifiedBy;
     }
@@ -612,6 +591,7 @@ public class SearchDialog extends JDialog {
             CollectorLifeCycle cls = new CollectorLifeCycle();
             jComboBoxCollector = new JComboBox(cls.getDistinctCollectors());
             jComboBoxCollector.setEditable(true);
+            AutoCompleteDecorator.decorate(jComboBoxCollector);
         }
         return jComboBoxCollector;
     }
@@ -645,6 +625,7 @@ public class SearchDialog extends JDialog {
             }
             jComboBoxCountry = new JComboBox(values.toArray());
             jComboBoxCountry.setEditable(true);
+            AutoCompleteDecorator.decorate(jComboBoxCountry);
         }
         return jComboBoxCountry;
     }
@@ -666,6 +647,7 @@ public class SearchDialog extends JDialog {
             }
             jComboBoxPrimaryDivision = new JComboBox(values.toArray());
             jComboBoxPrimaryDivision.setEditable(true);
+            AutoCompleteDecorator.decorate(jComboBoxPrimaryDivision);
         }
         return jComboBoxPrimaryDivision;
     }
@@ -687,6 +669,7 @@ public class SearchDialog extends JDialog {
             }
             jComboBoxQuestions = new JComboBox(values.toArray());
             jComboBoxQuestions.setEditable(true);
+            AutoCompleteDecorator.decorate(jComboBoxQuestions);
         }
         return jComboBoxQuestions;
     }

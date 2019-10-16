@@ -136,9 +136,9 @@ public class LoginDialog extends JDialog {
       // row
       jPanel.add(keyImageLabel);
       JLabel loginPrompt = new JLabel("Login & connect to database");
-       Font f = loginPrompt.getFont();
-       // bold
-       loginPrompt.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
+      Font f = loginPrompt.getFont();
+      // bold
+      loginPrompt.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
       jPanel.add(loginPrompt);
       // row
       JLabel emailLabel = new JLabel("E-Mail/Username");

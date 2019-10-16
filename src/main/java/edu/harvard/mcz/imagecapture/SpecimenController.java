@@ -116,7 +116,8 @@ public class SpecimenController {
 		displayInEditor();
 	}
 	
-	/** If the specimen for this controller is in a table model, switches out for next specimen in model.
+	/**
+	 * If the specimen for this controller is in a table model, switches out for next specimen in model.
 	 * If the specimen isn't in a table model, does nothing.  If at last position in table model, does nothing.
 	 * 
 	 * @return true if specimen was changed, false if not, false if isInTable() is false.
@@ -138,7 +139,8 @@ public class SpecimenController {
 		return result;
 	}
 	
-	/** If the specimen for this controller is in a table model, switches out for previous specimen in model.
+	/**
+	 * If the specimen for this controller is in a table model, switches out for previous specimen in model.
 	 * If the specimen isn't in a table model, does nothing.  If at first position in table model, does nothing.
 	 * 
 	 * @return true if specimen was changed, false in not, false if isInTable() is false.
@@ -177,8 +179,15 @@ public class SpecimenController {
 				log.debug(e);
 			}
 		}
-		return result;	
+		return result;
 	}
+//		public boolean hasNextSpecimenInTable() {
+//			boolean result = false;
+//			if (inTable && model!=null && currentRow > -1) {
+//				result = model.getRowCount() > currentRow;
+//			}
+//			return result;
+//		}
 	
 	/**
 	 * Is there a previous specimen in the table model? 

@@ -1072,7 +1072,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jPanel.add(this.getJScrollPaneCollectors(), "span 2 2, grow");
 			this.addBasicJLabel(jPanel, "Collecting Method");
 			jPanel.add(this.getJButtonCollectorAdd());
-			jPanel.add(this.getJTextFieldCollectingMethod(), "growx");
+			jPanel.add(this.getJTextFieldCollectingMethod(), "growx, align top");
 			// row
 			this.addBasicJLabel(jPanel, "Verbatim date");
 			jPanel.add(this.getJTextFieldVerbatimDate(), "grow");
@@ -2548,10 +2548,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 			if (iconFile!=null) { 
 			   jButtonNext.setIcon(new ImageIcon(iconFile));
 			} else { 
-				jButtonNext.setText("N");
+				jButtonNext.setText("Next");
 			}
 			jButtonNext.setMnemonic(KeyEvent.VK_N);
-			jButtonNext.setEnabled(specimenController.isInTable());
+			jButtonNext.setEnabled(specimenController.hasNextSpecimenInTable());
 			jButtonNext.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					//TODO here save the data in memory for "copy prev"
@@ -2602,11 +2602,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 			if (iconFile!=null) {
 			   jButtonPrevious.setIcon(new ImageIcon(iconFile));
 			} else { 
-				jButtonPrevious.setText("P");				
+				jButtonPrevious.setText("Previous");
 			}
 			jButtonPrevious.setMnemonic(KeyEvent.VK_P);
 			jButtonPrevious.setToolTipText("Move to Previous Specimen");
-			jButtonPrevious.setEnabled(specimenController.isInTable());
+			jButtonPrevious.setEnabled(specimenController.hasPreviousSpecimenInTable());
 			jButtonPrevious.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					try {

@@ -403,7 +403,7 @@ public class LoginDialog extends JDialog {
       JLabel jLabel1 = new JLabel();
       jLabel1.setText("DBPassword");
       JLabel jLabel = new JLabel();
-      jLabel.setText("Schema");
+      jLabel.setText("Username");
       GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
       gridBagConstraints3.anchor = GridBagConstraints.WEST;
       gridBagConstraints3.gridx = 1;

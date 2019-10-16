@@ -32,7 +32,8 @@ import org.apache.commons.logging.LogFactory;
 import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
 import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
 
-/** JobTableModel
+/** 
+ * JobTableModel
  * 
  * @author Paul J. Morris
  *
@@ -64,7 +65,6 @@ public class RunnableJobTableModel extends AbstractTableModel implements RunnerL
 	 * Must be implemented for ButtonEditor to work.  Needs to return Integer for 
 	 * row number column that is to contain button to work with ButtonEditor.
 	 */
-	@SuppressWarnings("unchecked")
 	public Class getColumnClass(int columnIndex) {
 		 // Given current implementation of button in SpecimenBrowser,  
 		 // needs to return Long for ID column that is to contain button 
@@ -87,7 +87,8 @@ public class RunnableJobTableModel extends AbstractTableModel implements RunnerL
         return result; 
     }
 
-	/* (non-Javadoc)
+	/* 
+	(non-Javadoc)
 	 * @see javax.swing.table.TableModel#getRowCount()
 	 */
 	@Override
@@ -114,7 +115,8 @@ public class RunnableJobTableModel extends AbstractTableModel implements RunnerL
 		return returnvalue;
 	}
 	
-	/* (non-Javadoc)
+	/* 
+	(non-Javadoc)
 	 * @see javax.swing.table.TableModel#getValueAt(int, int)
 	 */
 	@Override

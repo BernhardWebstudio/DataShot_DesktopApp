@@ -28,6 +28,8 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +38,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -323,10 +327,56 @@ public class ImageDisplayFrame extends JFrame {
 	 * 
 	 */
 	private void initialize() {
-//		this.setSize(755, 353);
-		this.setPreferredSize(new Dimension(1600,1250));
+		this.setWindowLocationSize();
+		ImageDisplayFrame self = this;
+		this.addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				super.componentResized(e);
+				self.saveWindowSize();
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				super.componentMoved(e);
+				self.saveWindowLocation();
+			}
+		});
 		this.setContentPane(getJContentPane());
 		this.setTitle("Image File and Barcode Value");
+	}
+
+	private void setWindowLocationSize() {
+		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
+		Dimension screenSize =  Toolkit.getDefaultToolkit().getScreenSize();
+		// set size of window
+		int sizeDimensionWidth = prefs.getInt("SizeDimensionWidth", Math.min(1600, screenSize.width));
+		int sizeDimensionHeight = prefs.getInt("SizeDimensionHeight", Math.min(1250, screenSize.height));
+		log.debug("Setting width = " + sizeDimensionWidth + ", height = " + sizeDimensionHeight);
+		this.setPreferredSize(new Dimension(sizeDimensionWidth, sizeDimensionHeight));
+		// set location of window
+		int locationX = prefs.getInt("LocationX", (screenSize.width - this.getWidth()) / 2);
+		int locationY = prefs.getInt("LocationY", (screenSize.height - this.getHeight()) / 2);
+		this.setLocation(locationX, locationY);
+	}
+
+	private void saveWindowLocation() {
+		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
+
+		prefs.putInt("LocationX", this.getLocation().x);
+		prefs.putInt("LocationY", this.getLocation().y);
+	}
+
+	private void saveWindowSize() {
+		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
+		prefs.putInt("SizeDimensionWidth", this.getWidth());
+		prefs.putInt("SizeDimensionHeight", this.getHeight());
+		log.debug("Stored width = " + this.getWidth() + ", height = " + this.getHeight());
+		try {
+			prefs.sync();
+		} catch (BackingStoreException|IllegalStateException e) {
+			log.error(e);
+		}
 	}
 	
 	public void center() { 
@@ -401,7 +451,7 @@ public class ImageDisplayFrame extends JFrame {
 		imagePanelSpecimen.zoomToFit();
 		if (imagePanelSpecimen.getPreferredSize().height>500 || imagePanelSpecimen.getPreferredSize().width>500) { 
 			imagePanelSpecimen.setPreferredSize(new Dimension(1000,900));
-   	    } 
+   	    }
 	}
 	
 	/**
@@ -451,7 +501,7 @@ public class ImageDisplayFrame extends JFrame {
 		imagePanelBarcode.setIcon(new ImageIcon(anImage));
 		this.pack();
 		if (imagePanelBarcode.getPreferredSize().height>500 || imagePanelBarcode.getPreferredSize().width>500) { 
-		    jScrollPane.setPreferredSize(new Dimension(500,500));
+		    imagePanelBarcode.setPreferredSize(new Dimension(500,500));
 		} 
 		imagePanelBarcode.setMaximumSize(new Dimension(500,500));
 	}
@@ -555,7 +605,7 @@ public class ImageDisplayFrame extends JFrame {
     private void setFullImage() { 
     	if (imagefile!=null) { 
     	    getPanelFullImage().setImage(imagefile);
-    	    // We need to make sure the container hieriarchy holding the image knows what 
+    	    // We need to make sure the container hierarchy holding the image knows what
     	    // size the image pane is before zoom to fit will work.f
     	    this.pack();  
     	    imagePaneFullImage.zoomToFit();

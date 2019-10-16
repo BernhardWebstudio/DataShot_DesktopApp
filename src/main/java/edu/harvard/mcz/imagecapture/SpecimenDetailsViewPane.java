@@ -87,6 +87,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 
 import java.net.URL;
+import java.util.prefs.Preferences;
 
 import javax.swing.JTextArea;
 import javax.swing.JCheckBox;
@@ -282,8 +283,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 		borderLayout.setHgap(0);
 		borderLayout.setVgap(0);
 		this.setLayout(borderLayout);
-		//this.setSize(new Dimension(594, 1000));
-		this.setPreferredSize(new Dimension(1000, 1080));
 	    this.add(getJTextFieldStatus(), BorderLayout.SOUTH);
 	    
 	    // Un-comment this line to use design tool.
@@ -298,12 +297,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 	    		JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 	    		JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 	    this.add(scrollPane, BorderLayout.CENTER);
-	    } else { 
-	    	this.add(getJPanel(), BorderLayout.CENTER);
-	    }
-	    //**	    
-	      
-	}	
+	    } else {
+			this.add(getJPanel(), BorderLayout.CENTER);
+		}
+	}
 	
 	public void setWarning(String warning) { 
 		jTextPaneWarnings.setText(warning);
@@ -1072,7 +1069,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jPanel.add(this.getJScrollPaneCollectors(), "span 2 2, grow");
 			this.addBasicJLabel(jPanel, "Collecting Method");
 			jPanel.add(this.getJButtonCollectorAdd());
-			jPanel.add(this.getJTextFieldCollectingMethod(), "growx, align top");
+			jPanel.add(this.getJTextFieldCollectingMethod(), "growx, top");
 			// row
 			this.addBasicJLabel(jPanel, "Verbatim date");
 			jPanel.add(this.getJTextFieldVerbatimDate(), "grow");

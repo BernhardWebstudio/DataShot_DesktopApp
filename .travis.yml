@@ -5,7 +5,7 @@ install: true
 
 cache:
   directories:
-  - $HOME/.m2
+    - $HOME/.m2
 
 script:
   - "mvn package -P prod"

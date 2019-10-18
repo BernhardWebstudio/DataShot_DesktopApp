@@ -83,7 +83,7 @@ public abstract class GenericLifeCycle<T> {
                         p = cb.like(root.get(entry.getKey()), (String) entry.getValue());
                     } else {
                         Object value = entry.getValue();
-                        if (value instanceof String || value instanceof Date) {
+                        if (value instanceof String || value instanceof Date || value instanceof java.lang.Number) {
                             p = cb.equal(root.get(entry.getKey()), entry.getValue());
                         } else {
                             // TODO: handle paths/relationships

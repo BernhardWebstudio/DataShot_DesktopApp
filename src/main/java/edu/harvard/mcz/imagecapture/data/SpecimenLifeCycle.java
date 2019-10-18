@@ -1022,6 +1022,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				session.getTransaction().rollback();
 				log.error("find by example like failed", e);
 			}
+			if (results != null){
 			for (int i=0; i<results.size(); i++) {
 				try {
 					log.debug("Parts: " + results.get(i).getSpecimenParts().size());
@@ -1030,6 +1031,8 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				} catch (Exception e) {
 					log.debug(e.getMessage());
 				}
+			}} else {
+				results = new ArrayList<>();
 			}
 			return results;
 		} catch (RuntimeException re) {

@@ -19,13 +19,7 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Image;
-import java.awt.Insets;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -34,10 +28,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -75,6 +67,9 @@ public class ImageDisplayFrame extends JFrame {
 	public static final int TAB_UNITTRAYLABELS = 3;
 	public static final int TAB_FULLIMAGE = 0;
 
+	// Preferences to save the window location etc.
+	Preferences prefs = null;
+
 	// The displayed image read from a file.
 	// Set of image files managed by loading one at a time and
 	// displaying its components in a set of tabs.
@@ -105,11 +100,11 @@ public class ImageDisplayFrame extends JFrame {
 
 	private JPanel jPanelImagePicker = null;
 
-	private JLabel jLabel = null;
+	private JLabel jLabelImageCountTxt = null;
 
 	private JComboBox jComboBoxImagePicker = null;
 
-	private JLabel jLabel1 = null;
+	private JLabel jLabelImageCountNr = null;
 
 	private JPanel jPanelImagesPanel = null;
 	
@@ -125,11 +120,9 @@ public class ImageDisplayFrame extends JFrame {
 	 * @param specimen 
 	 */
 	public ImageDisplayFrame(Specimen specimen, SpecimenController specimenController) {
-		super();
-		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this();
 		targetSpecimen = specimen;
 		targetSpecimenController = specimenController;
-		initialize();
 		//this.center();
 	}
 	
@@ -138,6 +131,7 @@ public class ImageDisplayFrame extends JFrame {
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		targetSpecimen = null;
 		initialize();
+		prefs = Preferences.userRoot().node(this.getClass().getName());
 	}
 
 	/** Given a set of ICImages, display one of them in the tabs of the ImageDisplayFrame, and
@@ -166,7 +160,10 @@ public class ImageDisplayFrame extends JFrame {
 		if (path == null) { path = ""; } 
 		//File fileToCheck = new File(startPointName + path + image.getFilename());
 		File fileToCheck = new File(ImageCaptureProperties.assemblePathWithBase(path, image.getFilename()));
-		jLabel1.setText("(" + fileCount + ")");
+		jLabelImageCountNr.setText("(" + fileCount + ")");
+		if (fileCount > 1) {
+			jLabelImageCountNr.setForeground(Color.RED);
+		}
 		jComboBoxImagePicker.setEnabled(true);
 		jComboBoxImagePicker.setSelectedItem(image.getFilename());
 		try {
@@ -194,7 +191,7 @@ public class ImageDisplayFrame extends JFrame {
 	public void loadImagesFromFile(File anImageFile, PositionTemplate template, ICImage image) throws ImageLoadException, BadTemplateException {
 		log.debug(anImageFile.getName());
 		loadImagesFromFileSingle(anImageFile, template, image);
-        jLabel1.setText("(1)");
+        jLabelImageCountNr.setText("(1)");
         log.debug(1);
         if (jComboBoxImagePicker.getModel().getSize()>0) { 
             jComboBoxImagePicker.removeAllItems();
@@ -327,6 +324,8 @@ public class ImageDisplayFrame extends JFrame {
 	 * 
 	 */
 	private void initialize() {
+		this.setContentPane(getJContentPane());
+		this.setTitle("Image File and Barcode Value");
 		this.setWindowLocationSize();
 		ImageDisplayFrame self = this;
 		this.addComponentListener(new ComponentAdapter() {
@@ -342,15 +341,12 @@ public class ImageDisplayFrame extends JFrame {
 				self.saveWindowLocation();
 			}
 		});
-		this.setContentPane(getJContentPane());
-		this.setTitle("Image File and Barcode Value");
 	}
 
 	private void setWindowLocationSize() {
-		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
 		Dimension screenSize =  Toolkit.getDefaultToolkit().getScreenSize();
 		// set size of window
-		int sizeDimensionWidth = prefs.getInt("SizeDimensionWidth", Math.min(1600, screenSize.width));
+		int sizeDimensionWidth = getPreferences().getInt("SizeDimensionWidth", Math.min(1600, screenSize.width));
 		int sizeDimensionHeight = prefs.getInt("SizeDimensionHeight", Math.min(1250, screenSize.height));
 		log.debug("Setting width = " + sizeDimensionWidth + ", height = " + sizeDimensionHeight);
 		this.setPreferredSize(new Dimension(sizeDimensionWidth, sizeDimensionHeight));
@@ -361,14 +357,11 @@ public class ImageDisplayFrame extends JFrame {
 	}
 
 	private void saveWindowLocation() {
-		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
-
 		prefs.putInt("LocationX", this.getLocation().x);
 		prefs.putInt("LocationY", this.getLocation().y);
 	}
 
 	private void saveWindowSize() {
-		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
 		prefs.putInt("SizeDimensionWidth", this.getWidth());
 		prefs.putInt("SizeDimensionHeight", this.getHeight());
 		log.debug("Stored width = " + this.getWidth() + ", height = " + this.getHeight());
@@ -377,6 +370,13 @@ public class ImageDisplayFrame extends JFrame {
 		} catch (BackingStoreException|IllegalStateException e) {
 			log.error(e);
 		}
+	}
+
+	private Preferences getPreferences() {
+		if (prefs == null) {
+			prefs = Preferences.userRoot().node(this.getClass().getName());
+		}
+		return prefs;
 	}
 	
 	public void center() { 
@@ -412,6 +412,7 @@ public class ImageDisplayFrame extends JFrame {
 		jContentPane.setLayout(new MigLayout("wrap 2, fill", "[grow]", "[grow]"));
 		jContentPane.add(panel, "grow"); // west
 		jContentPane.add(this.getJPanelImagesPanel(), "grow"); // east, already there
+		this.setWindowLocationSize();
 		this.pack();
 	}
 
@@ -678,16 +679,16 @@ public class ImageDisplayFrame extends JFrame {
 			gridBagConstraints1.insets = new Insets(0, 0, 5, 5);
 			gridBagConstraints1.gridx = 2;
 			gridBagConstraints1.gridy = 0;
-			jLabel1 = new JLabel();
-			jLabel1.setText("(0)");
+			jLabelImageCountNr = new JLabel();
+			jLabelImageCountNr.setText("(0)");
 			GridBagConstraints gridBagConstraints = new GridBagConstraints();
 			gridBagConstraints.insets = new Insets(0, 0, 5, 0);
 			gridBagConstraints.fill = GridBagConstraints.BOTH;
 			gridBagConstraints.gridy = 0;
 			gridBagConstraints.weightx = 1.0;
 			gridBagConstraints.gridx = 3;
-			jLabel = new JLabel();
-			jLabel.setText("Images: ");
+			jLabelImageCountTxt = new JLabel();
+			jLabelImageCountTxt.setText("Images: ");
 			jPanelImagePicker = new JPanel();
 			GridBagLayout gbl_jPanelImagePicker = new GridBagLayout();
 			gbl_jPanelImagePicker.columnWeights = new double[]{0.0, 0.0, 0.0, 1.0};
@@ -701,9 +702,9 @@ public class ImageDisplayFrame extends JFrame {
 			gbc_jLabel.insets = new Insets(0, 0, 5, 5);
 			gbc_jLabel.gridx = 1;
 			gbc_jLabel.gridy = 0;
-			jPanelImagePicker.add(jLabel, gbc_jLabel);
+			jPanelImagePicker.add(jLabelImageCountTxt, gbc_jLabel);
 			jPanelImagePicker.add(getJComboBoxImagePicker(), gridBagConstraints);
-			jPanelImagePicker.add(jLabel1, gridBagConstraints1);
+			jPanelImagePicker.add(jLabelImageCountNr, gridBagConstraints1);
 		}
 		return jPanelImagePicker;
 	}
@@ -738,23 +739,19 @@ public class ImageDisplayFrame extends JFrame {
 							String filename = jComboBoxImagePicker.getSelectedItem()!=null ? jComboBoxImagePicker.getSelectedItem().toString() : null;
 							if (filename != null && targetSpecimen != null) {
 								// find matching images, set first one as the display image.
-								ICImageLifeCycle ils = new ICImageLifeCycle();
-								List<ICImage> images = null;
-								if (filename == null) {
-									assert (targetSpecimen != null);
-									images = ils.findBySpecimen(targetSpecimen);
-								} else if (targetSpecimen == null) {
-									assert (filename != null);
-									images = ils.findByPath(filename);
+								Set<ICImage> images = null;
+								if (targetSpecimen.getICImages() == null){
+									ICImageLifeCycle ils = new ICImageLifeCycle();
+										images = new HashSet<>(ils.findBy(new HashMap<String, Object>() {{
+												put("Filename", filename);
+												put("SPECIMENID", targetSpecimen.getSpecimenId());
+											}
+										}));
 								} else {
-									images = ils.findBy(new HashMap<String, Object>() {{
-											put("path", filename);
-											put("SPECIMENID", targetSpecimen.getSpecimenId());
-										}
-									});
+									images = targetSpecimen.getICImages();
 								}
 								if (images!=null && images.size()>0) { 
-									log.debug("Found: " + images.size());
+									log.debug("Found images: " + images.size());
 									Iterator<ICImage> ii = images.iterator();
 									boolean found = false;
 									while (ii.hasNext() && !found) { 
@@ -764,9 +761,8 @@ public class ImageDisplayFrame extends JFrame {
 										log.debug("image path is " + image.getPath());
 										log.debug("target specimen bar code is " + targetSpecimen.getBarcode());
 										log.debug("image specimen barcode is " + image.getSpecimen().getBarcode());
-										//allie fix - added !image.getPath().equals("")
-										if (!image.getPath().equals("") && image.getPath().toUpperCase().contains(".JPG") && image.getSpecimen()!=null  && !image.getSpecimen().getBarcode().equals(targetSpecimen.getBarcode())) { 
-											// same filename, but wrong path.
+										if (image.getFilename().equals(filename) || image.getPath().equals("") || image.getPath().toUpperCase().contains(".JPG") || image.getSpecimen()==null || !image.getSpecimen().getBarcode().equals(targetSpecimen.getBarcode())) {
+											// wrong path or filename
 											log.debug("WrongFile: " + image.getPath());
 										} else { 
 											found = true;
@@ -778,10 +774,8 @@ public class ImageDisplayFrame extends JFrame {
 											try {
 												defaultTemplate = PositionTemplate.findTemplateForImage(image);
 												loadImagesFromFileSingle(fileToCheck, defaultTemplate, image);
-											} catch (ImageLoadException e3) {
-												log.error(e3);
-											} catch (BadTemplateException e1) {
-												log.error(e1);
+											} catch (ImageLoadException | BadTemplateException ex) {
+												log.error(ex);
 											}
 										}
 									}

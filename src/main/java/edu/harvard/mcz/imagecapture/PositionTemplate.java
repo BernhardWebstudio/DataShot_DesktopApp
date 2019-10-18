@@ -185,16 +185,7 @@ public class PositionTemplate {
 	 * @see edu.harvard.mcz.imagecapture.exceptions.NoComponentPartsTemplateException
 	 */
 	public PositionTemplate(String templateToUse) throws NoSuchTemplateException {
-		boolean found = false;
-		if (templateToUse.equals(TEMPLATE_DEFAULT)) { 
-			useDefaultValues();
-			found = true;
-		}
-		found = loadTemplateValues(templateToUse);
-//		if (templateToUse.equals(PositionTemplate.TEMPLATE_TEST_1)) { 
-//			loadTemplateValues(templateToUse);
-//			found = true;
-//		}		
+		boolean found = loadTemplateValues(templateToUse);
 		if (!found) { 
 			throw new NoSuchTemplateException("No such template as " + templateToUse );
 		}

@@ -69,6 +69,7 @@ public class SearchDialog extends JDialog {
     private JTextField textFieldHigherGeog;
     private JLabel lblHigherGeography;
     private JTextField jTextFieldInterpretedDate;
+    private Dimension maxComboBoxDims = new Dimension(350, 250);
 
     /**
      * @param owner
@@ -450,6 +451,7 @@ public class SearchDialog extends JDialog {
             jComboBoxCollection.setModel(new DefaultComboBoxModel<String>(sls.getDistinctCollections()));
             jComboBoxCollection.setEditable(true);
             jComboBoxCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Collection"));
+            jComboBoxCollection.setMaximumSize(this.maxComboBoxDims);
             AutoCompleteDecorator.decorate(jComboBoxCollection);
         }
         return jComboBoxCollection;
@@ -471,6 +473,7 @@ public class SearchDialog extends JDialog {
             jComboBoxWorkflowStatus = new JComboBox(values.toArray());
             jComboBoxWorkflowStatus.getModel().setSelectedItem("");
             jComboBoxWorkflowStatus.setEditable(true);
+            jComboBoxWorkflowStatus.setMaximumSize(this.maxComboBoxDims);
         }
         return jComboBoxWorkflowStatus;
     }
@@ -497,6 +500,7 @@ public class SearchDialog extends JDialog {
             ICImageLifeCycle ils = new ICImageLifeCycle();
             jComboBoxPath = new JComboBox(ils.getDistinctPaths());
             jComboBoxPath.setEditable(true);
+            jComboBoxPath.setMaximumSize(this.maxComboBoxDims);
         }
         return jComboBoxPath;
     }
@@ -512,6 +516,7 @@ public class SearchDialog extends JDialog {
             jComboBoxEntryBy = new JComboBox(tls.getDistinctUsers());
             jComboBoxEntryBy.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxEntryBy);
+            jComboBoxEntryBy.setMaximumSize(this.maxComboBoxDims);
         }
         return jComboBoxEntryBy;
     }
@@ -527,6 +532,7 @@ public class SearchDialog extends JDialog {
             jComboBoxIdentifiedBy = new JComboBox(sls.getDistinctDeterminers());
             jComboBoxIdentifiedBy.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxIdentifiedBy);
+            jComboBoxIdentifiedBy.setMaximumSize(this.maxComboBoxDims);
         }
         return jComboBoxIdentifiedBy;
     }
@@ -592,6 +598,7 @@ public class SearchDialog extends JDialog {
             jComboBoxCollector = new JComboBox(cls.getDistinctCollectors());
             jComboBoxCollector.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxCollector);
+            jComboBoxCollector.setMaximumSize(this.maxComboBoxDims);
         }
         return jComboBoxCollector;
     }
@@ -626,6 +633,7 @@ public class SearchDialog extends JDialog {
             jComboBoxCountry = new JComboBox(values.toArray());
             jComboBoxCountry.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxCountry);
+            jComboBoxCountry.setMaximumSize(this.maxComboBoxDims);
         }
         return jComboBoxCountry;
     }
@@ -648,6 +656,7 @@ public class SearchDialog extends JDialog {
             jComboBoxPrimaryDivision = new JComboBox(values.toArray());
             jComboBoxPrimaryDivision.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxPrimaryDivision);
+            jComboBoxPrimaryDivision.setMaximumSize(this.maxComboBoxDims);
         }
         return jComboBoxPrimaryDivision;
     }
@@ -670,6 +679,7 @@ public class SearchDialog extends JDialog {
             jComboBoxQuestions = new JComboBox(values.toArray());
             jComboBoxQuestions.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxQuestions);
+            jComboBoxQuestions.setMaximumSize(this.maxComboBoxDims);
         }
         return jComboBoxQuestions;
     }

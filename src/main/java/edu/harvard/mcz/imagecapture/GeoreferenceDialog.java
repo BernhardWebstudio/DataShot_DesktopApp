@@ -358,22 +358,11 @@ public class GeoreferenceDialog extends JDialog {
 		JLabel lblLongitude = new JLabel("Longitude");
 		lblLongitude.setHorizontalAlignment(SwingConstants.RIGHT);
 		contentPanel.add(lblLongitude);
-		{
+
 			textFieldDecimalLong = new JTextField();
 			contentPanel.add(textFieldDecimalLong);
 			textFieldDecimalLong.setColumns(10);
-		}
-		{
-			JLabel lblDatum = new JLabel("Datum");
-			lblDatum.setHorizontalAlignment(SwingConstants.RIGHT);
-			contentPanel.add(lblDatum);
-		}
 
-		ComboBoxModel<String> datumModel = new ListComboBoxModel<String>(LatLong.getDatumValues());
-		cbDatum = new JComboBox<String>(datumModel);
-		
-		contentPanel.add(cbDatum);
-		
 		JLabel lblMethod = new JLabel("Method");
 		lblMethod.setHorizontalAlignment(SwingConstants.RIGHT);
 		contentPanel.add(lblMethod);
@@ -386,6 +375,17 @@ public class GeoreferenceDialog extends JDialog {
 			}
 		});
 		contentPanel.add(cbMethod);
+
+
+			JLabel lblDatum = new JLabel("Datum");
+			lblDatum.setHorizontalAlignment(SwingConstants.RIGHT);
+			contentPanel.add(lblDatum);
+
+
+		ComboBoxModel<String> datumModel = new ListComboBoxModel<String>(LatLong.getDatumValues());
+		cbDatum = new JComboBox<String>(datumModel);
+		
+		contentPanel.add(cbDatum);
 		
 		JLabel lblAccuracy = new JLabel("GPS Accuracy");
 		lblAccuracy.setHorizontalAlignment(SwingConstants.RIGHT);

@@ -19,6 +19,7 @@
  */
 package edu.harvard.mcz.imagecapture;
 
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -122,7 +123,9 @@ public class SpecimenController {
 	 * 
 	 * @return true if specimen was changed, false if not, false if isInTable() is false.
 	 */
-	public boolean nextSpecimenInTable() { 
+	public boolean nextSpecimenInTable() {
+		// TODO: move cursor juggling to UI classes
+		this.resultFrame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		boolean result = false;
 		if (inTable && model!=null && currentRow > -1) {
 			try { 
@@ -136,6 +139,7 @@ public class SpecimenController {
 				log.debug(e);
 			}
 		}
+		this.resultFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		return result;
 	}
 	
@@ -145,7 +149,9 @@ public class SpecimenController {
 	 * 
 	 * @return true if specimen was changed, false in not, false if isInTable() is false.
 	 */
-	public boolean previousSpecimenInTable() { 
+	public boolean previousSpecimenInTable() {
+		// TODO: move cursor juggling to UI classes
+		this.resultFrame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		boolean result = false;
 		if (inTable && model!=null && currentRow > -1 && currentRow > 0) {
 			try { 
@@ -159,6 +165,7 @@ public class SpecimenController {
 				log.debug(e);
 			}
 		}
+		this.resultFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		return result;
 	}
 		

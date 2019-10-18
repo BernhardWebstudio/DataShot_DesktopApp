@@ -19,12 +19,6 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-
-import javax.swing.JPanel;
-
 import edu.harvard.mcz.imagecapture.data.Collector;
 import edu.harvard.mcz.imagecapture.data.CollectorLifeCycle;
 import edu.harvard.mcz.imagecapture.data.CollectorTableModel;
@@ -38,6 +32,7 @@ import edu.harvard.mcz.imagecapture.data.LifeStage;
 import edu.harvard.mcz.imagecapture.data.LocationInCollection;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.data.NatureOfId;
+import edu.harvard.mcz.imagecapture.data.Number;
 import edu.harvard.mcz.imagecapture.data.NumberLifeCycle;
 import edu.harvard.mcz.imagecapture.data.NumberTableModel;
 import edu.harvard.mcz.imagecapture.data.Sex;
@@ -56,45 +51,42 @@ import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.FilteringGeogJComboBox;
 import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor;
-import edu.harvard.mcz.imagecapture.data.Number;
-
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
-
-import javax.swing.JTextField;
-
 import java.awt.GridBagLayout;
-
-import javax.swing.JLabel;
-
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Set;
-
+import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextPane;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-
-import java.net.URL;
-import java.util.prefs.Preferences;
-
 import javax.swing.JTextArea;
-import javax.swing.JCheckBox;
+import javax.swing.JTextField;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
-
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -136,7 +128,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JTextField jTextFieldSpecies = null;
 	private JTextField jTextFieldSubspecies = null;
 	private JTextField jTextFieldLocality = null;
-	private JButton jButton = null;
+	private JButton jButtonSave = null;
 	private JComboBox<String> jComboBoxCollection = null;
 	private JTextField jTextFieldLastUpdatedBy = null;
 	private JScrollPane jScrollPaneCollectors = null;
@@ -158,8 +150,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JTextField jTextFieldDateCreated = null;
 	private JButton jButtonNumbersAdd = null;
 	private JButton jButtonCollectorAdd = null;
-	private JScrollPane jScrollPane = null;
-	private JTextPane jTextPaneWarnings = null;
 	private JTextField jTextFieldDrawerNumber = null;
 	private JTextField jTextFieldVerbatimLocality = null;
 	private FilteringGeogJComboBox comboBoxHigherGeog;
@@ -185,7 +175,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JTextField jTextFieldInfraspecificRank = null;
 	private JTextField jTextFieldAuthorship = null;
 	private JTextField jTextFieldUnnamedForm = null;
-	private JLabel jLabel32 = null;
 	private JTextField jTextFieldMinElevation = null;
 	private JTextField textFieldMaxElev = null;
 	private JComboBox<String> comboBoxElevUnits = null;
@@ -203,7 +192,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JTextField jTextFieldInferences = null;
 	private JButton jButtonGetHistory = null;
 	private JButton jButtonCopyPrev = null;
-	private JButton jButtonCopyPrevTaxon = null;
 	private JButton jButtonNext = null;
 	private SpecimenDetailsViewPane thisPane = null;
     private JButton jButtonPrevious = null;
@@ -215,7 +203,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JButton jButton1 = null;
 	private JButton jButton2 = null;
 	private JButton jButtonSpecificLocality = null;
-	private JLabel jLabelImageCount = null;
+	private JTextField jTextFieldImageCount = null;
 	private JTextField textFieldMicrohabitat = null;
 	private JComboBox<String> jComboBoxNatureOfId;
 	private JTextField jTextFieldDateDetermined;
@@ -255,11 +243,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 //			}
 //		}
 		try {
+			thisPane = this;
 			s.attachClean(specimen);
 			specimenController = aControler;
 			initialize();
-			setValues();	
-			thisPane = this;
+			setValues();
 		} catch (SessionException e) { 
 			log.debug(e.getMessage(),e);
 			Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Database Connection Error.");
@@ -290,21 +278,17 @@ public class SpecimenDetailsViewPane extends JPanel {
 	        
 	    // Comment this block out to use design tool.
 	    //   see also getCbTypeStatus
-	        
-	    if (Singleton.getSingletonInstance().getProperties().getProperties().getProperty(
-	    		 ImageCaptureProperties.KEY_DETAILS_SCROLL).equals(ImageCaptureProperties.VALUE_DETAILS_SCROLL_FORCE_ON)) { 
+
 	    JScrollPane scrollPane = new JScrollPane(getJPanel(),
-	    		JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-	    		JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+	    		JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+	    		JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+	    scrollPane.setBorder(BorderFactory.createEmptyBorder());
 	    this.add(scrollPane, BorderLayout.CENTER);
-	    } else {
-			this.add(getJPanel(), BorderLayout.CENTER);
-		}
 	}
 	
 	public void setWarning(String warning) { 
-		jTextPaneWarnings.setText(warning);
-		jTextPaneWarnings.setForeground(Color.RED);
+		jTextFieldStatus.setText(warning);
+		jTextFieldStatus.setForeground(Color.RED);
 	}
 	
 	private void setWarnings() { 
@@ -323,22 +307,25 @@ public class SpecimenDetailsViewPane extends JPanel {
 				if (!rbc.equals(ebc)) { 
 					// warn of mismatch, but only if configured to expect both to be present.
 					if (Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_REDUNDANT_COMMENT_BARCODE).equals("true")) {
-						jTextPaneWarnings.setText("Warning: An image has mismatch between Comment and Barcode.");
-						jTextPaneWarnings.setForeground(Color.RED);
+						this.setWarning("Warning: An image has mismatch between Comment and Barcode.");
 						log.debug("Setting: Warning: Image has mismatch between Comment and Barcode.");
 					}
 				}
 			}
 		}
 		if (higherGeogNotFoundWarning!=null && higherGeogNotFoundWarning.length()>0) { 
-			jTextPaneWarnings.setText(higherGeogNotFoundWarning.toString());
-			jTextPaneWarnings.setForeground(Color.RED);
+			this.setWarning(higherGeogNotFoundWarning.toString());
 		}
+	}
+
+	public void setStatus(String status) {
+		jTextFieldStatus.setText(status);
+		jTextFieldStatus.setForeground(Color.BLACK);
 	}
 		
 	private void save() { 
 		try { 
-			jTextFieldStatus.setText("Saving");
+			this.setStatus("Saving");
 			if (jTableCollectors.isEditing()) {
 				jTableCollectors.getCellEditor().stopCellEditing();
 			}
@@ -497,7 +484,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			try {
 				specimenController.save();   // save the record
 				setStateToClean();    // enable the navigation buttons
-				jTextFieldStatus.setText("Saved");  // inform the user
+				this.setStatus("Saved");  // inform the user
 				jTextFieldStatus.setForeground(Color.BLACK);
 				setWarnings();
 				jTextFieldLastUpdatedBy.setText(specimen.getLastUpdatedBy());
@@ -508,16 +495,14 @@ public class SpecimenDetailsViewPane extends JPanel {
 
 			} catch (SaveFailedException e) {
 				setStateToDirty();    // disable the navigation buttons
-				jTextFieldStatus.setText("Error. " + e.getMessage());
-				jTextFieldStatus.setForeground(MainFrame.BG_COLOR_ERROR);
+				this.setWarning("Error: " + e.getMessage());
 			}
 			SpecimenLifeCycle sls = new SpecimenLifeCycle();
 			Singleton.getSingletonInstance().getMainFrame().setCount(sls.findSpecimenCount());
 		} catch (Exception e) {
 			// trap any exception and notify the user
 	    	setStateToDirty();    // disable the navigation buttons
-	    	jTextFieldStatus.setText("Error. " + e.getMessage()); 
-	    	jTextFieldStatus.setForeground(MainFrame.BG_COLOR_ERROR);
+	    	this.setWarning("Error. " + e.getMessage()); 
 	    	log.error(e);
 		}
 		updateDeterminationCount();
@@ -734,14 +719,13 @@ public class SpecimenDetailsViewPane extends JPanel {
 		
 		
 		setSpecimenPartsTableCellEditors();
-		
-		
+		this.updateDeterminationCount();
 	}
 	
 	private void setValues() { 
 		log.debug("okok copy previous, specimenid is " + specimen.getSpecimenId());
 		log.debug("invoking setValues()");
-		jTextFieldStatus.setText("Setting values");
+		this.setStatus("Setting values");
 		jTextFieldBarcode.setText(specimen.getBarcode());
 		
 		//alliefix - set to value from properties
@@ -943,19 +927,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 		
 		updateDeterminationCount();
 		
-		if (specimen.getICImages()!=null) { 
-			int imageCount = specimen.getICImages().size();
-			jLabelImageCount.setText("Number of Images = "+ imageCount);
-			if (imageCount>1) { 
-				jLabelImageCount.setForeground(Color.RED);
-			} else { 
-				jLabelImageCount.setForeground(Color.BLACK);
-			}
-		}
+		updateImageCount();
 		
 		setWarnings();
 		this.setStateToClean();
-		jTextFieldStatus.setText("Loaded");
+		this.setStatus("Loaded");
 	}
 
 	private void updateDeterminationCount() {
@@ -999,6 +975,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jPanel.add(this.getBarcodeJTextField(), "grow");
 			this.addBasicJLabel(jPanel, "Collection");
 			jPanel.add(this.getLocationInCollectionJComboBox());
+			// row
+			this.addBasicJLabel(jPanel, "Number of Images");
+			jPanel.add(this.getJTextFieldImgCount(), "grow");
+			this.addBasicJLabel(jPanel, "Migration Status");
+			jPanel.add(this.getJTextFieldMigrationStatus(), "grow");
 			// section: family, classification
 			// row
 			this.addBasicJLabel(jPanel, "Family");
@@ -1006,13 +987,13 @@ public class SpecimenDetailsViewPane extends JPanel {
 			this.addBasicJLabel(jPanel, "Subfamily");
 			jPanel.add(this.getJTextFieldSubfamily(), "grow");
 			// row
-			this.addBasicJLabel(jPanel, "Species");
-			jPanel.add(this.getSpecificEpithetJTextField(), "grow");
-			this.addBasicJLabel(jPanel, "Subspecies");
-			jPanel.add(this.getSubspecifcEpithetJTextField(), "grow");
-			// row
 			this.addBasicJLabel(jPanel, "Genus");
 			jPanel.add(this.getGenusJTextField(), "grow");
+			this.addBasicJLabel(jPanel, "Species");
+			jPanel.add(this.getSpecificEpithetJTextField(), "grow");
+			// row
+			this.addBasicJLabel(jPanel, "Subspecies");
+			jPanel.add(this.getSubspecifcEpithetJTextField(), "grow");
 			this.addBasicJLabel(jPanel, "Tribe");
 			jPanel.add(this.getJTextFieldTribe(), "grow");
 			//row
@@ -1111,6 +1092,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 			// row
 			this.addBasicJLabel(jPanel, "Specimen Notes");
 			jPanel.add(this.getJScrollPaneNotes(), "span 3, grow");
+			// double row
+			this.addBasicJLabel(jPanel, "Numbers & more");
+			jPanel.add(this.getNumbersJScrollPane(), "span 3 2, grow");
+			jPanel.add(this.getJButtonNumbersAdd());
 			// section: other fields
 			// row
 			this.addBasicJLabel(jPanel, "Drawer Number");
@@ -1127,10 +1112,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jPanel.add(this.getLastUpdatedByJTextField(), "grow");
 			this.addBasicJLabel(jPanel, "Last edit date");
 			jPanel.add(this.getJTextFieldDateUpdated(), "grow");
-			// double row
-			this.addBasicJLabel(jPanel, "Numbers & more");
-			jPanel.add(this.getNumbersJScrollPane(), "span 3 2, grow");
-			jPanel.add(this.getJButtonNumbersAdd());
 			// row
 			this.addBasicJLabel(jPanel, "Workflow Status");
 			jPanel.add(this.getJComboBoxWorkflowStatus());
@@ -1139,10 +1120,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 			// row
 			this.addBasicJLabel(jPanel, "Questions");
 			jPanel.add(this.getQuestionsJTextField(), "grow, span 3");
-			// row
-			this.addBasicJLabel(jPanel, "Migration Status");
-			jPanel.add(this.getJTextFieldMigrationStatus(), "grow");
-			jPanel.add(this.getJTextFieldImgCount(), "grow, span 2");
 			// section: controls
 			jPanel.add(this.getJButtonCopyPrev());
 			jPanel.add(this.getHistoryJButton());
@@ -1261,18 +1238,18 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * @return javax.swing.JButton	
 	 */
 	private JButton getSaveJButton() {
-		if (jButton == null) {
-			jButton = new JButton("Save");
+		if (jButtonSave == null) {
+			jButtonSave = new JButton("Save");
 			if (specimen.isStateDone()) { 
-				jButton.setEnabled(false);
-				jButton.setText("Migrated " + specimen.getLoadFlags());
+				jButtonSave.setEnabled(false);
+				jButtonSave.setText("Migrated " + specimen.getLoadFlags());
 			}
-			jButton.setMnemonic(KeyEvent.VK_S);
-			jButton.setToolTipText("Save changes to this record to the database.  No fields should have red backgrounds before you save.");
-			jButton.addActionListener(new java.awt.event.ActionListener() {
+			jButtonSave.setMnemonic(KeyEvent.VK_S);
+			jButtonSave.setToolTipText("Save changes to this record to the database.  No fields should have red backgrounds before you save.");
+			jButtonSave.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					try { 
-					    thisPane.getParent().getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+					    thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					} catch (Exception ex) { 
 						log.error(ex);
 					}
@@ -1285,14 +1262,14 @@ public class SpecimenDetailsViewPane extends JPanel {
 					
 					
 					try { 
-					    thisPane.getParent().getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					    thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 					} catch (Exception ex) { 
 						log.error(ex);
 					}
 				}
 			});
 		}
-		return jButton;
+		return jButtonSave;
 	}
 
 	/**
@@ -1776,33 +1753,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 			
 		}
 		return jButtonCollectorAdd;
-	}
-
-	/**
-	 * This method initializes jScrollPane	
-	 * 	
-	 * @return javax.swing.JScrollPane	
-	 */
-	private JScrollPane getWarnJScrollPane() {
-		if (jScrollPane == null) {
-			jScrollPane = new JScrollPane();
-			jScrollPane.setViewportView(getWarnJTextPane());
-		}
-		return jScrollPane;
-	}
-
-	/**
-	 * This method initializes jTextPane	
-	 * 	
-	 * @return javax.swing.JTextPane	
-	 */
-	private JTextPane getWarnJTextPane() {
-		if (jTextPaneWarnings == null) {
-			jTextPaneWarnings = new JTextPane();
-			jTextPaneWarnings.setEditable(false);
-			jTextPaneWarnings.setBackground(this.getBackground());
-		}
-		return jTextPaneWarnings;
 	}
 
 	/**
@@ -2553,29 +2503,21 @@ public class SpecimenDetailsViewPane extends JPanel {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					//TODO here save the data in memory for "copy prev"
 					try {
-						try { 
-						    thisPane.getParent().getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-						} catch (Exception ex) { 
-							log.error(ex);
-						}
 						// try to move to the next specimen in the table.
 						if (thisPane.specimenController.nextSpecimenInTable()) {
 						   //thisPane.myControler.setSpecimen(thisPane.specimen.getSpecimenId() + 1);
 						   thisPane.setVisible(false);
 						   thisPane.specimenController.displayInEditor();
 						   thisPane.invalidate();
-						}
-						try { 
-						    thisPane.getParent().getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-						} catch (Exception ex) { 
-							log.error(ex);
+						} else {
+							thisPane.setWarning("No next specimen available.");
 						}
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					} finally { 
 						try { 
-						    thisPane.getParent().getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+						    thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 						} catch (Exception ex) { 
 							log.error(ex);
 						}
@@ -2607,32 +2549,17 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jButtonPrevious.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					try {
-						try { 
-						    thisPane.getParent().getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-						} catch (Exception ex) { 
-							log.error(ex);
-						}
 						// try to move to the previous specimen in the table.
 						if (thisPane.specimenController.previousSpecimenInTable()) {
 						   thisPane.setVisible(false);
 						   thisPane.specimenController.displayInEditor();
-						   thisPane.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 						   thisPane.invalidate();
+						} else {
+							thisPane.setWarning("No previous specimen available.");
 						}
-						try { 
-						thisPane.getParent().getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-						} catch (Exception ex) { 
-							log.error(ex);
-						} 
 					} catch (Exception e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
-					} finally {
-						try { 
-						thisPane.getParent().getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));;
-						} catch (Exception ex) { 
-							log.error(ex);
-						}
 					}
 				}
 			});
@@ -2878,12 +2805,31 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * 	
 	 * @return javax.swing.JTextField	
 	 */
-	private JLabel getJTextFieldImgCount() {
-		if (jLabelImageCount == null) {
-			jLabelImageCount = new JLabel("Number of Images = 0");
-			jTextFieldDateCreated.setForeground(Color.BLACK);
+	private JTextField getJTextFieldImgCount() {
+		if (jTextFieldImageCount == null) {
+			jTextFieldImageCount = new JTextField();
+			jTextFieldImageCount.setForeground(Color.BLACK);
+			jTextFieldImageCount.setEnabled(false);
+			updateImageCount();
 		}
-		return jLabelImageCount;
+		return jTextFieldImageCount;
+	}
+
+	/**
+	 * Set the image count value into the corresponding field.
+	 * Set the color to red if there is more than 1 image
+	 */
+	private void updateImageCount() {
+		int imageCount = 0;
+		if (specimen.getICImages()!=null) {
+			imageCount = specimen.getICImages().size();
+		}
+		jTextFieldImageCount.setText(Integer.toString(imageCount));
+		if (imageCount > 1) {
+			jTextFieldImageCount.setForeground(Color.RED);
+		} else {
+			jTextFieldImageCount.setForeground(Color.BLACK);
+		}
 	}
 
 	/*

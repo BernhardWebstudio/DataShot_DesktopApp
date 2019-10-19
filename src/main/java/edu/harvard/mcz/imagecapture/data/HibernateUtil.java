@@ -1,17 +1,10 @@
 package edu.harvard.mcz.imagecapture.data;
 
-import com.mysql.cj.jdbc.exceptions.CommunicationsException;
-import edu.harvard.mcz.imagecapture.LoginDialog;
-
 import java.awt.Cursor;
 import java.awt.Dialog.ModalityType;
-import java.net.ConnectException;
 import java.util.List;
 import java.util.Properties;
 
-import edu.harvard.mcz.imagecapture.MainFrame;
-import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.exceptions.ConnectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
@@ -19,6 +12,10 @@ import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.service.spi.ServiceException;
+
+import edu.harvard.mcz.imagecapture.LoginDialog;
+import edu.harvard.mcz.imagecapture.MainFrame;
+import edu.harvard.mcz.imagecapture.Singleton;
 
 /**
  * Singleton class to obtain access to Hibernate sessions, used in the *LifeCycle classes.
@@ -178,12 +175,12 @@ public class HibernateUtil {
 		LoginDialog loginDialog = new LoginDialog();
 		Properties settings = Singleton.getSingletonInstance().getProperties().getProperties();
 		// detect usage of placeholders, replace with settings if available
-		loginDialog.setConnection(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.url", "${hibernate.url}"));
-		loginDialog.setDialect(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.dialect", "${hibernate.dialect}"));
-		loginDialog.setDriver(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.driver_class", "${hibernate.driver_class}"));
+		loginDialog.setConnection(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.url", "URL_PLACEHOLDER"));
+		loginDialog.setDialect(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.dialect", "DIALECT_PLACEHOLDER"));
+		loginDialog.setDriver(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.driver_class", "DRIVER_CLASS_PLACEHOLDER"));
 		// If the database username(schema) and password are present load them as well.
-		loginDialog.setDBUserName(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.username", "${hibernate.user}"));
-		loginDialog.setDBPassword(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.password", "${hibernate.password}"));
+		loginDialog.setDBUserName(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.username", "USER_PLACEHOLDER"));
+		loginDialog.setDBPassword(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.password", "PASSWORD_PLACEHOLDER"));
 		// Display the LoginDialog as a modal dialog 
 		loginDialog.setModalityType(ModalityType.APPLICATION_MODAL);
 		loginDialog.setVisible(true);

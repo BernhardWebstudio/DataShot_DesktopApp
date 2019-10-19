@@ -1,5 +1,8 @@
 language: java
-sudo: false # faster builds
+
+jdk:
+- oraclejdk7
+- openjdk6
 
 install: true
 
@@ -8,4 +11,27 @@ cache:
     - $HOME/.m2
 
 script:
-  - "mvn package -P prod"
+- mvn package -P 
+
+deploy:
+  - provider: releases
+    overwrite: true
+    api_key:
+      secure: pn7GfJ4ZFt8hL6GAh6YfevjyI0U62XQLvRD2RU0sE6ZKwo82SJ9Ji9SHG9BJRPz8hKspOizBfM9HDMtWFp5TP5A0nUOBixdFDAMW4nDaqYAGERatTeK0VEI3inMpDwhZ+9acQs0B5Xxk1MEm2mlGl4+JVLGke9kJCtyAX3bg3IkdY2UsFh1oTu2OHsE4EUn7Rlva9q4O2urxe7Y+gA6+wfhNpwXiAEB+v4OE+wySYIejAQC+10LpAyHguXNgoHq4xEVsnRoI1Bk33xJ5iOYf8rprVQuAxCVYFP/uniPhPEfdVGHTahXVbKHmmJq9NwvaEXyhrups/Y61vEBpMmqdos0Bc2Y2W8UrV1ClCdhfQ0aPBDL/nKgQnHFedliLwjfwX9jKD69pVDtiD6tRgbtZ+HfKghVFYyoXzX3PsJkQINsbS/h/AXeVNCEbaH74Hv+0bdlJ/hYtz7IHQaoxKV1CX8a97vwDSEy1X+mvsP6s8qg34qrsqj0Z3qGM2IAvf1DGTiguR8xQVHzD3uSIIrXjXIJDO5zAHO0VmRY5CZqwYnnXIXZrqSnHP/g3N11Ro8cEvUgletPx3O5k/2wgPe7kyBnD2+Buoy0T21Yz/LHhW/ibfILQn4TpemFs/ymj6DvS84j/DBOM2Lkj4QhVh21m50+M/Qbmjs8bXi8vgdRPwhI=
+    file_glob: true
+    file: target/DataShot*.jar
+    name: "DataShot-$(date +'%Y%m%d')-beta"
+    prerelease: true
+    on:
+      repo: BernhardWebstudio/DataShot_DesktopApp
+      branch: master
+  - provider: releases
+    api_key:
+      secure: pn7GfJ4ZFt8hL6GAh6YfevjyI0U62XQLvRD2RU0sE6ZKwo82SJ9Ji9SHG9BJRPz8hKspOizBfM9HDMtWFp5TP5A0nUOBixdFDAMW4nDaqYAGERatTeK0VEI3inMpDwhZ+9acQs0B5Xxk1MEm2mlGl4+JVLGke9kJCtyAX3bg3IkdY2UsFh1oTu2OHsE4EUn7Rlva9q4O2urxe7Y+gA6+wfhNpwXiAEB+v4OE+wySYIejAQC+10LpAyHguXNgoHq4xEVsnRoI1Bk33xJ5iOYf8rprVQuAxCVYFP/uniPhPEfdVGHTahXVbKHmmJq9NwvaEXyhrups/Y61vEBpMmqdos0Bc2Y2W8UrV1ClCdhfQ0aPBDL/nKgQnHFedliLwjfwX9jKD69pVDtiD6tRgbtZ+HfKghVFYyoXzX3PsJkQINsbS/h/AXeVNCEbaH74Hv+0bdlJ/hYtz7IHQaoxKV1CX8a97vwDSEy1X+mvsP6s8qg34qrsqj0Z3qGM2IAvf1DGTiguR8xQVHzD3uSIIrXjXIJDO5zAHO0VmRY5CZqwYnnXIXZrqSnHP/g3N11Ro8cEvUgletPx3O5k/2wgPe7kyBnD2+Buoy0T21Yz/LHhW/ibfILQn4TpemFs/ymj6DvS84j/DBOM2Lkj4QhVh21m50+M/Qbmjs8bXi8vgdRPwhI=
+    file_glob: true
+    file: target/DataShot*.jar
+    prerelease: false
+    on:
+      repo: BernhardWebstudio/DataShot_DesktopApp
+      tags: true
+      branch: master

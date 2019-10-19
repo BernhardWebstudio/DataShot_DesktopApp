@@ -166,21 +166,6 @@
 			<artifactId>hibernate-core</artifactId>
 			<!--<version>6.0.0.Alpha2</version>-->
 			<version>5.4.4.Final</version>
-			<!--<version>4.3.11.Final</version>-->
-			<!--<exclusions>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-log4j12</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.slf4j</groupId>
-					<artifactId>slf4j-api</artifactId>
-				</exclusion>
-			</exclusions>-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
@@ -325,7 +310,7 @@
 						<configuration>
 							<!-- exclude junit, we need runtime dependency only -->
 							<includeScope>runtime</includeScope>
-<!--							<outputDirectory>${project.build.directory}/lib/</outputDirectory>-->
+							<!--							<outputDirectory>${project.build.directory}/lib/</outputDirectory>-->
 							<overWriteReleases>false</overWriteReleases>
 							<overWriteSnapshots>false</overWriteSnapshots>
 							<overWriteIfNewer>true</overWriteIfNewer>
@@ -404,6 +389,20 @@
                     property to test.
                 -->
 				<build.profile.id>test</build.profile.id>
+			</properties>
+		</profile>
+		<!-- The configuration of the distribution profile -->
+		<profile>
+			<id>dist</id>
+			<properties>
+				<!--
+                    Specifies the build.profile.id property that must be equal than the name of
+                    the directory that contains the profile specific configuration file.
+                    Because the name of the directory that contains the configuration file of the
+                    testing profile is test, we must set the value of the build.profile.id
+                    property to test.
+                -->
+				<build.profile.id>dist</build.profile.id>
 			</properties>
 		</profile>
 		<profile>

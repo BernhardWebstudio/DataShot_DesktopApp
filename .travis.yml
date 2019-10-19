@@ -7,7 +7,7 @@ cache:
     - $HOME/.m2
 
 script:
-- mvn package -P 
+- mvn package -P dist
 
 deploy:
   - provider: releases

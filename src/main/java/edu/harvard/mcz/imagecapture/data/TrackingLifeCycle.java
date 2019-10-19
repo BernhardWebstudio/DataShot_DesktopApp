@@ -13,6 +13,10 @@ import org.hibernate.Session;
 import org.hibernate.SessionException;
 import org.hibernate.query.Query;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+
 /**
  * Home object for domain model class Tracking.
  * @see edu.harvard.mcz.imagecapture.data.Tracking
@@ -221,19 +225,26 @@ public class TrackingLifeCycle {
    */
   @SuppressWarnings("unchecked")
   public List<Tracking> findBySpecimenId(Long specimenId) {
-    log.debug("finding all Tracking instances");
+    log.debug("finding Tracking instances by specimen");
     try {
       List<Tracking> results = null;
       Session session = HibernateUtil.getSessionFactory().getCurrentSession();
       session.beginTransaction();
       try {
-        results = session
-                      .createQuery("From Tracking t where Specimen = " +
-                                   Long.toString(specimenId) +
-                                   " order by t.eventDateTime ")
-                      .list();
-        log.debug("find all successful, result size: " + results.size());
-        System.out.println("find all successful, result size: " +
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery cr = cb.createQuery(Tracking.class);
+        Root<Tracking> root = cr.from(Tracking.class);
+        cr.select(root);
+        cr.where(cb.equal(root.get("specimen"), specimenId));
+        results = session.createQuery(cr).getResultList();
+//        results = session
+//                      .createQuery("SELECT * From Tracking t where Specimen = " +
+//                                   Long.toString(specimenId) +
+//                                   " order by t.eventDateTime ")
+//                      .list();
+        log.debug("find by specimen id successful, result size: " + results.size());
+        System.out.println("find by specimen successful, result size: " +
                            results.size());
         session.getTransaction().commit();
       } catch (HibernateException e) {
@@ -246,7 +257,7 @@ public class TrackingLifeCycle {
       }
       return results;
     } catch (RuntimeException re) {
-      log.error("find all failed", re);
+      log.error("find by specimen id failed", re);
       throw re;
     }
   }

@@ -72,7 +72,7 @@ public class HibernateUtil {
 			while (!success && loginDialog.getResult()!=LoginDialog.RESULT_CANCEL) {
 				// Check authentication (starting with the database user(schema)/password.
 				String username;
-				if (loginDialog.getResult()==LoginDialog.RESULT_LOGIN) { 
+				if (loginDialog.getResult()==LoginDialog.RESULT_LOGIN) {
 					if (Singleton.getSingletonInstance().getMainFrame() != null) {
 			           Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 					   Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Connecting to database");
@@ -86,9 +86,10 @@ public class HibernateUtil {
 					try {
 						sessionFactory = config.buildSessionFactory();
 					} catch (JDBCConnectionException| ServiceException ex) {
-						loginDialog = HibernateUtil.getLoginDialog(config, "Initial SessionFactory creation failed. Database not connectable: " + ex.getMessage());
+						config = new Configuration().configure();
 						success = false;
 						sessionFactory = null;
+						loginDialog = HibernateUtil.getLoginDialog(config, "Initial SessionFactory creation failed. Database not connectable: " + ex.getMessage());
 						try {
 							Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Database connection failed.");
 						} catch (NullPointerException e) {
@@ -132,6 +133,7 @@ public class HibernateUtil {
 							}
 							sessionFactory.close();
 							sessionFactory = null;
+							config = new Configuration().configure();
 							try { 
 							    Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Login failed.");
 							} catch (NullPointerException ex) { 
@@ -146,6 +148,7 @@ public class HibernateUtil {
 						success = false;
 						sessionFactory.close();
 						sessionFactory = null;
+						config = new Configuration().configure();
 						if (Singleton.getSingletonInstance().getMainFrame() != null) {
 						    Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Login failed.");
 						} 

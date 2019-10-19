@@ -1,4 +1,36 @@
-#Changelog
+# Changelog
+
+## v1.9.1
+* [[`bfbedcd97b`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/bfbedcd97b)] - Configure travis to automatically build and release new versions (Tim Bernhard)
+* [[`eb1beebd34`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/eb1beebd34)] - Improve editing of specimen (Tim Bernhard)
+* [[`5725e6d71d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/5725e6d71d)] - Improve layout of search dialog (Tim Bernhard)
+* [[`866dfdd1da`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/866dfdd1da)] - Fix issue where image could not be switched (Tim Bernhard)
+* [[`7b3a41dc7e`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/7b3a41dc7e)] - Fix issue where search would crash (Tim Bernhard)
+* [[`4861afc524`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4861afc524)] - Switch georeference method & datum according to [ETHEntColl#6](https://github.com/ETHEntColl/DataShot_DesktopApp_ETH/issues/6) (Tim Bernhard)
+* [[`5060701b0d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/5060701b0d)] - Implement window size keeping mechanism for edit panel (Tim Bernhard)
+* [[`f879f3ee84`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f879f3ee84)] - Deactivate next/prev button if not applicable anyway (Tim Bernhard)
+* [[`08c8e40908`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/08c8e40908)] - Add autocomplete to Search Dialog (Tim Bernhard)
+* [[`b18e143734`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b18e143734)] - Improve look & feel by using always native one (Tim Bernhard)
+* [[`4972993f83`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4972993f83)] - Enable packaging with dependencies upon compilation (Tim Bernhard)
+* [[`0ac486b4d1`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/0ac486b4d1)] - Improve startup performance by reducing nr. of db requests (Tim Bernhard)
+* [[`c5c7915a6a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c5c7915a6a)] - Enable loading of db properties from imagecapture config to plain way for CI (Tim Bernhard)
+* [[`171b9ca301`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/171b9ca301)] - Use MigLayout to improve login dialog layout (Tim Bernhard)
+* [[`83b5b6b74f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/83b5b6b74f)] - Refactor SpecimenDetailsViewPane to improve structure and scaling (Tim Bernhard)
+* [[`5727d648ca`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/5727d648ca)] - Increase update rate of det & georeference button (Tim Bernhard)
+* [[`c17920f0b3`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c17920f0b3)] - Add option to automatically update database (required: flyway db table) (Tim Bernhard)
+* [[`2391859955`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/2391859955)] - Fix issue leading to much waiting time when executing simple search (Tim Bernhard)
+* [[`d3187d764d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d3187d764d)] - Updates to improve search & file processing reliability (Tim Bernhard)
+* [[`475c8d8e11`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/475c8d8e11)] - Working towards cleaner error handling (Tim Bernhard)
+* [[`87b8c3d843`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/87b8c3d843)] - Reduce time required for template detection (Tim Bernhard)
+* [[`e746f5cd11`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e746f5cd11)] - Upgrade much dependencies. Solve some followed issues. (Tim Bernhard)
+* [[`974dced2a5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/974dced2a5)] - Add CHANGELOG from Allie's GitHub (Tim Bernhard)
+* [[`fad2e5efc3`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/fad2e5efc3)] - Fix wrong icon on report saved dialog (Tim Bernhard)
+* [[`c80a0ede6a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c80a0ede6a)] - Make the configuration easier (Tim Bernhard)
+* [[`a0acbc6fb1`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/a0acbc6fb1)] - Fix build errors (Tim Bernhard)
+* [[`dd5cf58a5b`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/dd5cf58a5b)] - Merge in Allies changes (Tim Bernhard)
+* [[`947dd9a8f7`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/947dd9a8f7)] - Hibernate config changes (Althea Parker)
+* [[`8048ec39cb`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8048ec39cb)] - Fix copy previous with complex fields: numbers, collectors, parts (Althea Parker)
+
 
 ## Up to tag v1.6.0 resp. 15.8.2019
 

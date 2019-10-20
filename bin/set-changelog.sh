@@ -17,9 +17,9 @@ if [ -x "$(changelog-maker -h)" ]; then
 fi
 # construct the changelog since the last change
 CHANGES=$( changelog-maker --commit-url=https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/{ref} )
-CHANGES="##$MVN_VERSION\n$CHANGES"
+CHANGES="$CHANGES"
 # switch to directory with changelog file
 cd "$SCRIPT_DIR/../" || exit;
 EXISTING_CHANGES=$(cat CHANGELOG.md)
-EXISTING_CHANGES=$(echo "$EXISTING_CHANGES" | sed "s/# Changelog\n//g" )
-printf "# Changelog\n\n%s\n\n%s" "$CHANGES" "$EXISTING_CHANGES" > CHANGELOG.md;
+EXISTING_CHANGES=$(echo "$EXISTING_CHANGES" | sed "s/# Changelog//g" )
+printf "# Changelog\n\n## v%s\n%s\n%s" "$MVN_VERSION" "$CHANGES" "$EXISTING_CHANGES" > CHANGELOG.md;

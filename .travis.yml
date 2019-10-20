@@ -9,16 +9,6 @@ cache:
 script:
 - mvn package -P dist
 
-before_deploy:
-  # set a tag enabling overwriting of files if non set
-  - if [ $(git tag -l --points-at HEAD) ]; then
-      export TRAVIS_TAG="untagged-$(date +'%Y%m%d')";
-      git config --local user.name "BeWe DataShot Travis";
-      git config --local user.email "travis@bernhard-webstudio.ch";
-      git tag $TRAVIS_TAG;
-    fi
-
-
 branches:
   except:
     - /^untagged-.*/

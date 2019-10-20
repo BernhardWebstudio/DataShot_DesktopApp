@@ -349,9 +349,9 @@
 		<profile>
 			<id>dev</id>
 			<!-- The development profile is active by default -->
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
+<!--			<activation>-->
+<!--				<activeByDefault>true</activeByDefault>-->
+<!--			</activation>-->
 			<properties>
 				<!--
                     Specifies the build.profile.id property that must be equal than the name of

@@ -12,8 +12,16 @@ script:
 before_deploy:
   # set a tag enabling overwriting of files if non set
   - if [ $(git tag -l --points-at HEAD) ]; then
-      export TRAVIS_TAG=$(date +'%Y%m%d');
+      export TRAVIS_TAG="untagged-$(date +'%Y%m%d')";
+      git config --local user.name "BeWe DataShot Travis";
+      git config --local user.email "travis@bernhard-webstudio.ch";
+      git tag $TRAVIS_TAG;
     fi
+
+
+branches:
+  except:
+    - /^untagged-.*/
 
 deploy:
   - provider: releases
@@ -36,6 +44,7 @@ deploy:
     file_glob: true
     file: target/DataShot*.jar
     skip_cleanup: true
+    name: "DataShot V$TRAVIS_TAG"
     prerelease: false
     draft: true
     on:

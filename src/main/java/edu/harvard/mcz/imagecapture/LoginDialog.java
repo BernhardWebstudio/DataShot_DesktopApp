@@ -111,6 +111,7 @@ public class LoginDialog extends JDialog {
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     this.setLocation((screenSize.width - this.getWidth()) / 2,
                      (screenSize.height - this.getHeight()) / 2);
+    this.pack();
   }
 
   /**
@@ -385,6 +386,7 @@ public class LoginDialog extends JDialog {
       this.setSize(new Dimension(650, 355));
       jPanelAdvanced.setVisible(true);
     }
+    this.pack();
   }
 
   /**

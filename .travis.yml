@@ -11,8 +11,8 @@ script:
 
 before_deploy:
   # set a tag enabling overwriting of files if non set
-  - if test $(git rev-parse master) = $(git rev-parse $tag^{commit}); then
-      export TRAVIS_TAG=$(date +'%Y%m%d')
+  - if [ $(git tag -l --points-at HEAD) ]; then
+      export TRAVIS_TAG=$(date +'%Y%m%d');
     fi
 
 deploy:

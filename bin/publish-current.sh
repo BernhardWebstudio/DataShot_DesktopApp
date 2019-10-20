@@ -11,4 +11,4 @@ cd "$SCRIPT_DIR/.." || exit;
 git commit -am "Update changelog & publish Version $MVN_VERSION"
 
 git tag -a "$MVN_VERSION" -m "Version $MVN_VERSION" #\n\nChanges:\n$GIT_HISTORY"
-git push && git push --tags
+git push --follow-tags

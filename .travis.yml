@@ -9,6 +9,12 @@ cache:
 script:
 - mvn package -P dist
 
+before_deploy:
+  # set a tag enabling overwriting of files if non set
+  - if test $(git rev-parse master) = $(git rev-parse $tag^{commit}); then
+      export TRAVIS_TAG=$(date +'%Y%m%d')
+    fi
+
 deploy:
   - provider: releases
     overwrite: true
@@ -19,7 +25,8 @@ deploy:
     skip_cleanup: true
     name: "DataShot-$(date +'%Y%m%d')-beta"
     prerelease: true
-    body: "Momentary Snapshot Version. Refer to the git history, commit log or the CHANGELOG.md file for current changes"
+    draft: false
+    body: "Momentary Snapshot Version. Refer to the git history, [commit log](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commits/master) for current changes"
     on:
       repo: BernhardWebstudio/DataShot_DesktopApp
       branch: master

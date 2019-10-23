@@ -40,6 +40,7 @@ import javax.imageio.ImageIO;
 
 import com.adobe.internal.xmp.XMPException;
 import com.adobe.internal.xmp.XMPMeta;
+import com.google.zxing.*;
 import edu.harvard.mcz.imagecapture.jobs.JobSingleBarcodeScan;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -62,12 +63,6 @@ import com.drew.metadata.exif.ExifSubIFDDescriptor;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.drew.metadata.xmp.XmpDirectory;
-import com.google.zxing.BinaryBitmap;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.LuminanceSource;
-import com.google.zxing.NotFoundException;
-import com.google.zxing.ReaderException;
-import com.google.zxing.Result;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
@@ -152,8 +147,7 @@ public class CandidateImageFile {
 			
 		try {
 			template = new PositionTemplate(templateName);
-			log.info("template ID is.........." + template.getTemplateId());
-			//log.info("templateName is......." + templateName);
+			log.info("template ID is " + template.getTemplateId());
 		} catch (NoSuchTemplateException e) {
 			log.error("Position template detector returned an unknown template name: " + templateName + ".", e);
 		}
@@ -170,8 +164,36 @@ public class CandidateImageFile {
 				log.error("Unable to OCR file: " + candidateFile.getName() + " " + e.getMessage());
 			}
 		}
-		templateUsed = template;		
-		
+		templateUsed = template;
+	}
+
+	/**
+	 * Constructor
+	 *
+	 * @param aFile the image file that may contain a barcode or text.
+	 * @param aTemplate the PositionTemplate to use to identify where a barcode or OCR text may occur
+	 * in the image provided by aFile.
+	 *
+	 * @throws UnreadableFileException if aFile cannot be read.
+	 * @throws OCRReadException
+	 */
+	public CandidateImageFile(File aFile, PositionTemplate aTemplate) throws UnreadableFileException {
+		setFile(aFile, aTemplate);
+		if (!aFile.canRead()) {
+			try {
+				throw new UnreadableFileException("Can't read file " + aFile.getCanonicalPath());
+			} catch (IOException e) {
+				throw new UnreadableFileException("IOException on trying to get filename.");
+			}
+		}
+	}
+
+	/**
+	 * Constructor with no parameters to use to access convenience static methods.
+	 * Must follow with setFile() to use for processing images.
+	 * @see this.setFile(...);
+	 */
+	public CandidateImageFile() {
 	}
 	
 	/**
@@ -272,9 +294,7 @@ public class CandidateImageFile {
 					} catch (MetadataException e) {
 						log.debug("Error reading EXIF orientation metadata." +  e.getMessage() );
 					}
-				} catch (NullPointerException e1) {
-					log.debug("Error processing EXIF data." + e1.getMessage());
-				} catch (ImageProcessingException e1) {
+				} catch (NullPointerException | ImageProcessingException e1) {
 					log.debug("Error processing EXIF data." + e1.getMessage());
 				} catch (IOException e1) {
 					log.error("Error reading file. " + e1.getMessage());
@@ -376,35 +396,6 @@ public class CandidateImageFile {
 		}
 		log.debug(result.toString());
 		return result;
-	}	
-	
-	/**
-	 * Constructor
-	 * 
-	 * @param aFile the image file that may contain a barcode or text.
-	 * @param aTemplate the PositionTemplate to use to identify where a barcode or OCR text may occur
-	 * in the image provided by aFile.
-	 * 
-	 * @throws UnreadableFileException if aFile cannot be read.
-	 * @throws OCRReadException 
-	 */
-	public CandidateImageFile(File aFile, PositionTemplate aTemplate) throws UnreadableFileException { 
-		setFile(aFile, aTemplate);
-		if (!aFile.canRead()) { 
-			try {
-				throw new UnreadableFileException("Can't read file " + aFile.getCanonicalPath());
-			} catch (IOException e) {
-				throw new UnreadableFileException("IOException on trying to get filename.");
-			}
-		}
-	}
-
-	/**
-	 * Constructor with no parameters to use to access convenience static methods.
-	 * Must follow with setFile() to use for processing images.
-	 * @see this.setFile(...);
-	 */
-	public CandidateImageFile() { 
 	}
 
 
@@ -824,9 +815,6 @@ public class CandidateImageFile {
 			} catch (IOException e) {
 				log.error("Error reading file for exif metadata.");
 				log.error(e.getMessage());
-			} catch (ImageProcessingException e) {
-				log.error("Error processing file for metadata.");
-				log.error(e.getMessage());
 			}
 			if (exifComment==null || exifComment.trim().length()==0) { 
 				// Try to see if there is an xmp dc:description block
@@ -947,7 +935,8 @@ public class CandidateImageFile {
 			} 
 		}
 		return returnValue;
-	}	
+	}
+
 	/**
 	 * Convenience method to check an image for a barcode.  Does not set any instance variables of CandidateImageFile, 
 	 * and does not behave precisely as the getBarcodeText() methods.  Result state is not available from getBarcodeStatus()
@@ -970,12 +959,7 @@ public class CandidateImageFile {
 			Result result;
 			BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 			try {
-				QRCodeReader reader = new QRCodeReader();
-				Hashtable<DecodeHintType, Object> hints = null;
-				hints = new Hashtable<DecodeHintType, Object>(3);
-				hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE); 
-				result = reader.decode(bitmap,hints);
-				returnValue= result.getText();
+				returnValue = getQRCodeText(bitmap);
 			} catch (ReaderException e) {
 				returnValue = "";
 			}
@@ -997,7 +981,19 @@ public class CandidateImageFile {
 			} 
 		}
 		return returnValue;
-	}		
+	}
+
+	private static String getQRCodeText(BinaryBitmap bitmap) throws NotFoundException, ChecksumException, FormatException {
+		Result result;
+		String returnValue;
+		QRCodeReader reader = new QRCodeReader();
+		Hashtable<DecodeHintType, Object> hints = null;
+		hints = new Hashtable<DecodeHintType, Object>(3);
+		hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+		result = reader.decode(bitmap,hints);
+		returnValue= result.getText();
+		return returnValue;
+	}
 
 	public String getBarcodeTextAtFoundTemplate() { 
 		return getBarcodeText(this.templateUsed);
@@ -1021,7 +1017,7 @@ public class CandidateImageFile {
 			return catalogNumberBarcodeText;
 		}
 				
-		String returnValue = "";
+		String returnValue = null;
 		if (positionTemplate.getTemplateId().equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
 			// Check the entire image for a barcode and return.
 			returnValue = getBarcodeText();
@@ -1033,12 +1029,11 @@ public class CandidateImageFile {
 			try {
 				image = ImageIO.read(candidateFile);
 			} catch (IOException e) {
-				error = e.toString() + " " + e.getMessage();
-				returnValue = error;
+				log.error(e);
 			}
 			if (image == null) {
-				returnValue =  "Could not decode image. " + error;
 				barcodeStatus = RESULT_ERROR;
+				log.error("Image null. Could not decode...");
 			} else { 
 				if (image.getWidth() > positionTemplate.getBarcodeULPosition().width && image.getWidth() == Math.round(positionTemplate.getImageSize().getWidth())) {
 					// image might plausibly match template
@@ -1072,47 +1067,36 @@ public class CandidateImageFile {
 		return returnValue;
 	}
 
-	/** Scan the entire image for any QR Code barcode (could find a taxon barcode or a catalog number barcode).
+	/**
+	 * Scan the entire image for any QR Code barcode (could find a taxon barcode or a catalog number barcode).
 	 * Check for error states with a call to getBarcodeStatus().  Does not store or set the state with any read
 	 * barcode value.  
 	 * 
 	 * @return a string representing the text of the barcode, if any.
 	 */
 	public String getBarcodeText() {
-		String returnValue = "";
+		String returnValue;
 		BufferedImage image = null;
-		String error = "";
 		barcodeStatus = RESULT_ERROR;
 		try {
 			image = ImageIO.read(candidateFile);
 		} catch (IOException e) {
-			error = e.toString() + " " + e.getMessage();
-			returnValue = error;
+			log.error(e);
 		}
 		if (image == null) {
-			returnValue =  "Could not decode image. " + error;
+			returnValue = null;
+			log.error("Image could not be decoded: is null");
 			barcodeStatus = RESULT_ERROR;
 		} else { 
 			LuminanceSource source = new BufferedImageLuminanceSource(image);
-			Result result;
 			try {
 				BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-				QRCodeReader reader = new QRCodeReader();
-				Hashtable<DecodeHintType, Object> hints = null;
-				hints = new Hashtable<DecodeHintType, Object>(3);
-				hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE); 
-				result = reader.decode(bitmap,hints);
-				returnValue= result.getText();
+				returnValue = getQRCodeText(bitmap);
 				barcodeStatus = RESULT_BARCODE_SCANNED;
-			} catch (ReaderException | IllegalArgumentException e) {
-				returnValue = e.toString() + " " + e.getMessage();
+			} catch (Exception e) {
+				returnValue = null;
+				log.error(e);
 				barcodeStatus = RESULT_ERROR;
-			} // seen in MCZ-ENT00051680
-			catch (Exception e2) {
-				// Just in case reader.decode throws some other error, 
-				// we should trap it rather than failing.
-				returnValue =  "Unexpected error from  ZXing decoder: " + e2.getMessage();
-				barcodeStatus = RESULT_ERROR; 
 			}
 		} 
 		return returnValue;
@@ -1168,6 +1152,7 @@ public class CandidateImageFile {
 	 * @param height in pixels of the area to decode
 	 * 
 	 * @return string content of barcode found, or an empty string
+	 * TODO: refactor this abdomen
 	 */
 	public static String readBarcodeFromLocation(BufferedImage image, int left, int top, int width, int height, boolean quickCheck)	{
 		String returnValue = "";
@@ -1191,7 +1176,7 @@ public class CandidateImageFile {
 
 					// First, try the source crop directly.
 					CandidateImageFile temp = new CandidateImageFile();
-					TextStatus checkResult = temp.checkSourceForBarcode(source, true);
+					TextStatus checkResult = temp.checkSourceForBarcode(source, log.isDebugEnabled());
 					if (checkResult.getStatus()!=CandidateImageFile.RESULT_ERROR) { 
 						returnValue = checkResult.getText();
 					} 
@@ -1236,22 +1221,22 @@ public class CandidateImageFile {
 									boolean sharpen = false;
 									boolean brighter = false;
 									boolean dimmer = false;
+//									assert (!(widthToTry.contains("sharpen") && widthToTry.contains("brighter") && widthToTry.contains("dimmer")));
 									if (widthToTry.contains("sharpen")) { 
 										sharpen = true;
 										widthToTry = widthToTry.replace("sharpen", "");
-									}
-									if (widthToTry.contains("brighter")) { 
+									} else if (widthToTry.contains("brighter")) {
 										brighter = true;
 										dimmer = false;
 										widthToTry = widthToTry.replace("brighter", "");
-									}
-									if (widthToTry.contains("dimmer")) { 
+									} else if (widthToTry.contains("dimmer")) {
 										brighter = false;
 										dimmer = true;
 										widthToTry = widthToTry.replace("dimmer", "");
 									}
 									// strip out any remaining non-numeric characters (sharpen'ed')
 									widthToTry = widthToTry.replaceAll("[^0-9.]", "");
+									log.debug("WidthToTry: " + widthToTry.toString());
 									// Try rescaling to a configured scaling width value.
 									Double scalingWidth = 0d;
 									try { 
@@ -1351,10 +1336,9 @@ public class CandidateImageFile {
 						}
 						if (returnValue == null) {
 							// Try again with some small displacements of window
-							boolean doneLoop = false;
+							doubleLoop:
 							for (int shiftLeft=left-3; shiftLeft<=left+3; shiftLeft=shiftLeft+6) {
 								for (int shiftTop = top - 3; shiftTop <= top + 3; shiftTop = shiftTop + 6) {
-									if (!doneLoop) {
 										inBounds = false;
 										try {
 											log.debug("Trying displacement of crop: " + shiftLeft + "," + shiftTop);
@@ -1367,10 +1351,9 @@ public class CandidateImageFile {
 											checkResult = temp.checkSourceForBarcode(source, true);
 											if (checkResult.getStatus() != CandidateImageFile.RESULT_ERROR) {
 												returnValue = checkResult.getText();
-												doneLoop = true;
+												break doubleLoop;
 											}
 										}
-									}
 								}
 							}
 						

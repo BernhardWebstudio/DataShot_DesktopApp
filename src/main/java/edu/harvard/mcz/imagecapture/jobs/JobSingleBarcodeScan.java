@@ -491,27 +491,7 @@ public class JobSingleBarcodeScan implements RunnableJob, Runnable {
 							}
 							// trim family to fit (in case multiple parts of taxon name weren't parsed
 							// and got concatenated into family field.
-							if (s.getFamily().length()>40) { 
-								s.setFamily(s.getFamily().substring(0,40));
-							}
-							
-							if(parser != null){ //allie edit one line
-							
-								s.setGenus(parser.getGenus());
-								s.setSpecificEpithet(parser.getSpecificEpithet());
-								s.setSubspecificEpithet(parser.getSubspecificEpithet());
-								s.setInfraspecificEpithet(parser.getInfraspecificEpithet());
-								s.setInfraspecificRank(parser.getInfraspecificRank());
-								s.setAuthorship(parser.getAuthorship());
-								s.setDrawerNumber(((DrawerNameReturner)parser).getDrawerNumber());
-								s.setCollection(((CollectionReturner)parser).getCollection());
-								s.setCreatingPath(ImageCaptureProperties.getPathBelowBase(fileToCheck));
-								s.setCreatingFilename(fileToCheck.getName());
-								if (parser.getIdentifiedBy()!=null && parser.getIdentifiedBy().length()>0) {
-									s.setIdentifiedBy(parser.getIdentifiedBy());
-								}
-							
-							} //end allie edit one line
+							s = setBasicSpecimenFromParser(parser, s);
 							
 							log.debug(s.getCollection());
 
@@ -708,6 +688,23 @@ public class JobSingleBarcodeScan implements RunnableJob, Runnable {
 		SpecimenLifeCycle sls = new SpecimenLifeCycle();
 		Singleton.getSingletonInstance().getMainFrame().setCount(sls.findSpecimenCount());
 		Singleton.getSingletonInstance().getJobList().removeJob((RunnableJob)this);
+	}
+
+	static Specimen setBasicSpecimenFromParser(TaxonNameReturner parser, Specimen s) {
+		if (s.getFamily().length()>40) {
+			s.setFamily(s.getFamily().substring(0,40));
+		}
+
+		if (parser != null){
+		s.setGenus(parser.getGenus());
+		s.setSpecificEpithet(parser.getSpecificEpithet());
+		s.setSubspecificEpithet(parser.getSubspecificEpithet());
+		s.setInfraspecificEpithet(parser.getInfraspecificEpithet());
+		s.setInfraspecificRank(parser.getInfraspecificRank());
+		s.setAuthorship(parser.getAuthorship());
+		s.setDrawerNumber(((DrawerNameReturner)parser).getDrawerNumber());
+		s.setCollection(((CollectionReturner)parser).getCollection());}
+		return s;
 	}
 
 	/* (non-Javadoc)

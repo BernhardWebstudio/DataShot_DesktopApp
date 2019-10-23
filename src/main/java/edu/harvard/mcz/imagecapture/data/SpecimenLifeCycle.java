@@ -18,8 +18,10 @@ import org.hibernate.*;
 import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.query.Query;
 
+import javax.persistence.PersistenceException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -78,8 +80,12 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			   session.getTransaction().commit();
 			   log.debug("persist successful");
 			   track(transientInstance);
-			} catch (HibernateException e) { 
+			} catch (PersistenceException e) {
 				session.getTransaction().rollback();
+				try {
+					session.close();
+				} catch (SessionException se) {
+				}
 				String message = e.getMessage();
 				String pmessage = "";
 				try {
@@ -89,19 +95,19 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				}
 				log.error("persist failed", e);
 				String existsPattern = "^Duplicate entry '.*' for key 'Barcode'$";
-				if (message.matches(existsPattern) || pmessage.matches(existsPattern) ) { 
+				if (message.matches(existsPattern) || pmessage.matches(existsPattern) || e instanceof ConstraintViolationException) {
+					log.debug("specimen exists");
 					 throw new SpecimenExistsException("Specimen record exists for " + transientInstance.getBarcode());
-				} else { 
+				} else {
+					log.debug("specimen save failed");
 				     throw new SaveFailedException("Unable to save specimen " + transientInstance.getBarcode());
 				}
 			}
 			try { session.close(); } catch (SessionException e) { }
-		} catch (SpecimenExistsException see) {
+		} catch (SpecimenExistsException | SaveFailedException see) {
 			// Pass on upwards unchanged
+			log.error("persist failed see", see);
 			throw see;
-		} catch (SaveFailedException sfe) {
-			// Pass on upwards unchanged
-			throw sfe;
 		} catch (RuntimeException re) {
 			// Catch, log, and pass on any other exception.
 			log.error("persist failed", re);
@@ -294,8 +300,8 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			session.beginTransaction();
 			List<Specimen> results = null;
 			try { 
-				Query query  =  session.createQuery("From Specimen as s where s.barcode = ?");
-				query.setParameter(0, barcode);
+				Query query  =  session.createQuery("From Specimen as s where s.barcode = ?1");
+				query.setParameter(1, barcode);
 				results = (List<Specimen>) query.list();				
 			    log.debug("find query successful, result size: " + results.size());
 			    session.getTransaction().commit();			    

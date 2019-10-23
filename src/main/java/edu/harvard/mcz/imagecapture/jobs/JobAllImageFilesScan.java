@@ -826,26 +826,10 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 												barcodeInImageMetadata = true;
 											}
 											// Log the missmatch
-											if (barcodeInImageMetadata || Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_REDUNDANT_COMMENT_BARCODE).equals("true")) {
-												// If so configured, or if image metadata contains a barcode that doesn't match the barcode in the image
-												// report on barcode/comment missmatch as an error condition.
-												try { 
-													RunnableJobError error =  new RunnableJobError(filename, barcode,
-														barcode, exifComment, "Barcode/Comment mismatch.",
-														parser, (DrawerNameReturner) parser,
-														null, RunnableJobError.TYPE_MISMATCH);
-													counter.appendError(error);
-												} catch (Exception e) { 
-													// we don't want an exception to stop processing 
-													log.error(e);
-												}
-											} else {
-												// Just write into debug log
-												// This would normally the case where the image metadata doesn't contain a barcode but the image does, and reporting of this state as an error has been turned off. 
-												log.debug("Barcode/Comment mismatch: ["+barcode+"]!=["+exifComment+"]");
-											}
+											logMismatch(counter, filename, barcode, exifComment, parser, barcodeInImageMetadata, log);
 										}
 										Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Creating new specimen record.");
+										// TODO: check if Specimen with barcode already exists
 										Specimen s = new Specimen();
 										if ((!Singleton.getSingletonInstance().getBarcodeMatcher().matchesPattern(barcode)) 
 												&& Singleton.getSingletonInstance().getBarcodeMatcher().matchesPattern(exifComment)) {
@@ -910,18 +894,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 										}
 										// trim family to fit (in case multiple parts of taxon name weren't parsed
 										// and got concatenated into family field.
-										if (s.getFamily().length()>40) { 
-											s.setFamily(s.getFamily().substring(0,40));
-										}
-
-										s.setGenus(parser.getGenus());
-										s.setSpecificEpithet(parser.getSpecificEpithet());
-										s.setSubspecificEpithet(parser.getSubspecificEpithet());
-										s.setInfraspecificEpithet(parser.getInfraspecificEpithet());
-										s.setInfraspecificRank(parser.getInfraspecificRank());
-										s.setAuthorship(parser.getAuthorship());
-										s.setDrawerNumber(((DrawerNameReturner)parser).getDrawerNumber());
-										s.setCollection(((CollectionReturner)parser).getCollection());
+										JobSingleBarcodeScan.setBasicSpecimenFromParser(parser, s);
 										s.setCreatingPath(ImageCaptureProperties.getPathBelowBase(fileToCheck));
 										s.setCreatingFilename(fileToCheck.getName());
 										if (parser.getIdentifiedBy()!=null && parser.getIdentifiedBy().length()>0) {
@@ -986,18 +959,25 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 												List <Specimen> checkResult = sh.findByBarcode(barcode);
 												if (checkResult.size()==1) { 
 													s = checkResult.get(0);
-												} 
-												String badParse = "";
+												}
 												// Drawer number with length limit (and specimen that fails to save at over this length makes
 												// a good canary for labels that parse very badly.
 												if (((DrawerNameReturner)parser).getDrawerNumber().length()>MetadataRetriever.getFieldLength(Specimen.class, "DrawerNumber")) {
+													String badParse = "";
 													badParse = "Parsing problem. \nDrawer number is too long: " + s.getDrawerNumber() + "\n";
+													RunnableJobError error =  new RunnableJobError(filename, barcode,
+															rawBarcode, exifComment, badParse,
+															(TaxonNameReturner)parser, (DrawerNameReturner)parser,
+															e, RunnableJobError.TYPE_BAD_PARSE);
+													counter.appendError(error);
+												} else {
+													RunnableJobError error =  new RunnableJobError(filename, barcode,
+															rawBarcode, exifComment, e.getMessage(),
+															(TaxonNameReturner)parser, (DrawerNameReturner)parser,
+															e, RunnableJobError.TYPE_SAVE_FAILED);
+													counter.appendError(error);
+
 												}
-												RunnableJobError error =  new RunnableJobError(filename, barcode,
-														rawBarcode, exifComment, badParse,
-														(TaxonNameReturner)parser, (DrawerNameReturner)parser,
-														null, RunnableJobError.TYPE_BAD_PARSE);
-												counter.appendError(error);
 											} catch (Exception err) {
 												log.error(e);
 												log.error(err);
@@ -1020,17 +1000,24 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 												} 
 												RunnableJobError error =  new RunnableJobError(filename, barcode,
 														rawBarcode, exifComment, badParse,
-														(TaxonNameReturner)parser, (DrawerNameReturner)parser,
+														parser, (DrawerNameReturner)parser,
 														err, RunnableJobError.TYPE_SAVE_FAILED);
 												counter.appendError(error);
 												counter.incrementFilesFailed();
 												s = null;
 											}
+										} catch (Exception ex) {
+											log.error(ex);
+											RunnableJobError error =  new RunnableJobError(filename, barcode,
+													rawBarcode, exifComment, ex.getMessage(),
+													parser, (DrawerNameReturner)parser,
+													ex, RunnableJobError.TYPE_SAVE_FAILED);
+											counter.appendError(error);
 										}
 										if (s!=null) { 
 											tryMe.setSpecimen(s);
 										}
-									} 
+									}
 									tryMe.setRawBarcode(rawBarcode);
 									if (isDrawerImage) { 
 										tryMe.setDrawerNumber(exifComment);
@@ -1121,9 +1108,29 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 			} 
 			Singleton.getSingletonInstance().getMainFrame().notifyListener(runStatus, this);
 		}
-
 	}
-	
+
+	static void logMismatch(Counter counter, String filename, String barcode, String exifComment, TaxonNameReturner parser, boolean barcodeInImageMetadata, Log log) {
+		if (barcodeInImageMetadata || Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_REDUNDANT_COMMENT_BARCODE).equals("true")) {
+			// If so configured, or if image metadata contains a barcode that doesn't match the barcode in the image
+			// report on barcode/comment missmatch as an error condition.
+			try {
+				RunnableJobError error =  new RunnableJobError(filename, barcode,
+					barcode, exifComment, "Barcode/Comment mismatch.",
+					parser, (DrawerNameReturner) parser,
+					null, RunnableJobError.TYPE_MISMATCH);
+				counter.appendError(error);
+			} catch (Exception e) {
+				// we don't want an exception to stop processing
+				log.error(e);
+			}
+		} else {
+			// Just write into debug log
+			// This would normally the case where the image metadata doesn't contain a barcode but the image does, and reporting of this state as an error has been turned off.
+			log.debug("Barcode/Comment mismatch: ["+barcode+"]!=["+exifComment+"]");
+		}
+	}
+
 	private void setPercentComplete(int aPercentage) { 
 		//set value
 		percentComplete = aPercentage;

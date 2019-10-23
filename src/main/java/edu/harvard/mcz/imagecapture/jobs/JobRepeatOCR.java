@@ -49,10 +49,8 @@ import edu.harvard.mcz.imagecapture.data.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.data.UnitTrayLabel;
 import edu.harvard.mcz.imagecapture.data.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
-import edu.harvard.mcz.imagecapture.exceptions.OCRReadException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
-import edu.harvard.mcz.imagecapture.interfaces.CollectionReturner;
 import edu.harvard.mcz.imagecapture.interfaces.DrawerNameReturner;
 import edu.harvard.mcz.imagecapture.interfaces.RunStatus;
 import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
@@ -365,25 +363,8 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
 						barcodeInImageMetadata = true;
 					}
 					// Log the mismatch
-					if (barcodeInImageMetadata || Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_REDUNDANT_COMMENT_BARCODE).equals("true")) {
-						// report on missmatch if the image metadata contained a value or 
-						// if the image metadata is expected to contain a value 
-						try { 
-							RunnableJobError error =  new RunnableJobError(filename, barcode,
-									barcode, exifComment, "Barcode/Comment mismatch.",
-									parser, (DrawerNameReturner) parser,
-									null, RunnableJobError.TYPE_MISMATCH);
-							counter.appendError(error);
-						} catch (Exception e) { 
-							// we don't want an exception to stop processing 
-							log.error(e);
-						}
-					} else {
-						// Just log if the image metadata is not expected to contain a value 
-						// This would be the case of a barcode in the image, but not in the image metadata.
-						log.debug("Barcode/Comment mismatch: ["+barcode+"]!=["+exifComment+"]");
-					}
-				}
+                    JobAllImageFilesScan.logMismatch(counter, filename, barcode, exifComment, parser, barcodeInImageMetadata, log);
+                }
 				if (isSpecimenImage && Singleton.getSingletonInstance().getBarcodeMatcher().matchesPattern(rawBarcode) ) {
 					// Parse and store OCR in an updated specimen record.
 					Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Updating " + barcode + ".");
@@ -436,18 +417,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
 							}
 							// trim family to fit (in case multiple parts of taxon name weren't parsed
 							// and got concatenated into family field.
-							if (s.getFamily().length()>40) { 
-								s.setFamily(s.getFamily().substring(0,40));
-							}
-
-							s.setGenus(parser.getGenus());
-							s.setSpecificEpithet(parser.getSpecificEpithet());
-							s.setSubspecificEpithet(parser.getSubspecificEpithet());
-							s.setInfraspecificEpithet(parser.getInfraspecificEpithet());
-							s.setInfraspecificRank(parser.getInfraspecificRank());
-							s.setAuthorship(parser.getAuthorship());
-							s.setDrawerNumber(((DrawerNameReturner)parser).getDrawerNumber());
-							s.setCollection(((CollectionReturner)parser).getCollection());
+							JobSingleBarcodeScan.setBasicSpecimenFromParser(parser, s);
 							if (s.getCreatingPath()==null || s.getCreatingPath().length()==0 ) { 
 							    s.setCreatingPath(ImageCaptureProperties.getPathBelowBase(file));
 							}
@@ -542,8 +512,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
 			}
 		} catch (UnreadableFileException e1) {
 			log.error("Unable to read selected file." + e1.getMessage());
-		} 
-
+		}
 	}
 
 	/* (non-Javadoc)

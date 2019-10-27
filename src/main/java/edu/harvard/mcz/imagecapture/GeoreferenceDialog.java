@@ -103,14 +103,9 @@ public class GeoreferenceDialog extends JDialog {
 		textFieldDecimalLat.setText(georeference.getDecLatString());
 		textFieldDecimalLong.setText(georeference.getDecLongString());
 		
-		log.debug("load geo data ... " + georeference.getDecLatString());
-		log.debug("load geo data ... " + georeference.getDecLongString());
-		
-		//here should set the button label
-		
-		//alliefix - should be WGS84
-		//cbDatum.setSelectedItem(georeference.getDatum());
-		cbDatum.setSelectedIndex(2);
+		log.debug("load geo data: lat: " + georeference.getDecLatString() + ", long: " + georeference.getDecLongString());
+
+		cbDatum.setSelectedItem(georeference.getDatum());
 		
 		cbMethod.setSelectedItem(georeference.getGeorefmethod());
 		
@@ -384,6 +379,8 @@ public class GeoreferenceDialog extends JDialog {
 
 		ComboBoxModel<String> datumModel = new ListComboBoxModel<String>(LatLong.getDatumValues());
 		cbDatum = new JComboBox<String>(datumModel);
+		// set default
+		cbDatum.setSelectedIndex(2);
 		
 		contentPanel.add(cbDatum);
 		

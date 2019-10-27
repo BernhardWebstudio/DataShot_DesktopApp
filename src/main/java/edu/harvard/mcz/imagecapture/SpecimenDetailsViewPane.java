@@ -2504,7 +2504,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 					//TODO here save the data in memory for "copy prev"
 					try {
 						// try to move to the next specimen in the table.
-						if (thisPane.specimenController.nextSpecimenInTable()) {
+						if (thisPane.specimenController.openNextSpecimenInTable()) {
 						   //thisPane.myControler.setSpecimen(thisPane.specimen.getSpecimenId() + 1);
 						   thisPane.setVisible(false);
 						   thisPane.specimenController.displayInEditor();
@@ -2550,9 +2550,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					try {
 						// try to move to the previous specimen in the table.
-						if (thisPane.specimenController.previousSpecimenInTable()) {
+						if (thisPane.specimenController.openPreviousSpecimenInTable()) {
 						   thisPane.setVisible(false);
-						   thisPane.specimenController.displayInEditor();
 						   thisPane.invalidate();
 						} else {
 							thisPane.setWarning("No previous specimen available.");

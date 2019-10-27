@@ -478,7 +478,7 @@ public class VerbatimCaptureDialog extends JDialog implements DataChangeListener
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					save();
-					if (specimenController.previousSpecimenInTable()) {
+					if (specimenController.switchToPreviousSpecimenInTable()) {
 					   specimen = specimenController.getSpecimen();
 					   setValues();
 					}
@@ -495,7 +495,7 @@ public class VerbatimCaptureDialog extends JDialog implements DataChangeListener
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					save();
-					if (specimenController.nextSpecimenInTable()) {
+					if (specimenController.switchToNextSpecimenInTable()) {
 					   specimen = specimenController.getSpecimen();
 					   setValues();
 					}

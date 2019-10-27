@@ -118,54 +118,76 @@ public class SpecimenController {
 	}
 	
 	/**
-	 * If the specimen for this controller is in a table model, switches out for next specimen in model.
-	 * If the specimen isn't in a table model, does nothing.  If at last position in table model, does nothing.
+	 * If the specimen for this controller is in a table model, switches out for next specimen in model and displays result.
 	 * 
 	 * @return true if specimen was changed, false if not, false if isInTable() is false.
 	 */
-	public boolean nextSpecimenInTable() {
+	public boolean openNextSpecimenInTable() {
 		// TODO: move cursor juggling to UI classes
 		this.resultFrame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		boolean result = this.switchToNextSpecimenInTable();
+		this.displayInEditor();
+		this.resultFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		return result;
+	}
+
+	/**
+	 * If the specimen for this controller is in a table model, switches out for next specimen in model.
+	 * If the specimen isn't in a table model, does nothing.  If at last position in table model, does nothing.
+	 *
+	 * @return true if specimen was changed, false if not, false if isInTable() is false.
+	 */
+	public boolean switchToNextSpecimenInTable() {
 		boolean result = false;
 		if (inTable && model!=null && currentRow > -1) {
-			try { 
-				Specimen temp = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow+1), 0); 
-				if (temp!=null) { 
-			       specimen = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow+1), 0); 
+			try {
+				Specimen temp = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow+1), 0);
+				if (temp!=null) {
+					specimen = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow+1), 0);
 				}
-			    currentRow = currentRow + 1;
-			    result = true;
-			} catch (IndexOutOfBoundsException e) { 
+				currentRow = currentRow + 1;
+				result = true;
+			} catch (IndexOutOfBoundsException e) {
 				log.debug(e);
 			}
 		}
-		this.resultFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		return result;
 	}
 	
 	/**
-	 * If the specimen for this controller is in a table model, switches out for previous specimen in model.
-	 * If the specimen isn't in a table model, does nothing.  If at first position in table model, does nothing.
+	 * If the specimen for this controller is in a table model, switches out for previous specimen in model and displays the result.
 	 * 
 	 * @return true if specimen was changed, false in not, false if isInTable() is false.
 	 */
-	public boolean previousSpecimenInTable() {
+	public boolean openPreviousSpecimenInTable() {
 		// TODO: move cursor juggling to UI classes
 		this.resultFrame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		boolean result = this.switchToPreviousSpecimenInTable();
+		this.displayInEditor();
+		this.resultFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		return result;
+	}
+
+	/**
+	 * If the specimen for this controller is in a table model, switches out for previous specimen in model.
+	 * If the specimen isn't in a table model, does nothing.  If at first position in table model, does nothing.
+	 *
+	 * @return true if specimen was changed, false in not, false if isInTable() is false.
+	 */
+	public boolean switchToPreviousSpecimenInTable() {
 		boolean result = false;
 		if (inTable && model!=null && currentRow > -1 && currentRow > 0) {
-			try { 
-				Specimen temp =(Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow-1), 0); 
-				if (temp!=null) { 
-			       specimen = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow-1), 0); 
+			try {
+				Specimen temp =(Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow-1), 0);
+				if (temp!=null) {
+					specimen = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow-1), 0);
 				}
-			    currentRow = currentRow - 1;
-			    result = true;
-			} catch (IndexOutOfBoundsException e) { 
+				currentRow = currentRow - 1;
+				result = true;
+			} catch (IndexOutOfBoundsException e) {
 				log.debug(e);
 			}
 		}
-		this.resultFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		return result;
 	}
 		
@@ -278,15 +300,15 @@ public class SpecimenController {
 		return result;
 	}
 	
-	public void displayInEditor() { 
-		boolean isNew = false;
+	public void displayInEditor() {
 		if (resultFrame==null) { 
 		    resultFrame = new ImageDisplayFrame(specimen, this);
-		    isNew = true;
-		} 
+		} else {
+			resultFrame.setTargetSpecimen(specimen);
+		}
 		SpecimenDetailsViewPane p = new SpecimenDetailsViewPane(specimen, this);
 		
-		resultFrame.addWest(p);
+		resultFrame.setWest(p);
 	
 		// Add images of the specimen and labels to the details editor.
 		// TODO: Add box and drawer level images
@@ -300,33 +322,6 @@ public class SpecimenController {
 		     //TODO: check drawer number for trailing letter (e.g. 115.12a), then check 
 		     // for drawer (115.12) and unit tray (115.12a) level images.
 		}
-		if (specimen.getICImages()!=null 
-				&& specimen.getICImages().size()==1 
-				&& (drawerImages==null || drawerImages.isEmpty())) {  
-
-			ICImage image = specimen.getICImages().iterator().next();
-			//TODO: stored path may need separator conversion for different systems. 
-			//String startPointName = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
-			String path = image.getPath();
-			if (path == null) { path = ""; } 
-			//File fileToCheck = new File(startPointName + path + image.getFilename());
-			File fileToCheck = new File(ImageCaptureProperties.assemblePathWithBase(path, image.getFilename()));
-			log.debug(fileToCheck.getPath());
-			try {
-				PositionTemplate template = PositionTemplate.findTemplateForImage(image);
-				try {
-					resultFrame.loadImagesFromFile(fileToCheck, template, image);
-				} catch (BadTemplateException e) {
-					// TODO:  is this the right action, or should this be a fatal error? 
-					log.error("Unexptected BadTemplateException after template tests." + e.getMessage());
-					throw new ImageLoadException("Problem finding template for this file.");
-				}
-
-			} catch (ImageLoadException e2) {
-				System.out.println("Error loading image file.");
-				System.out.println(e2.getMessage());
-			}
-		} else { 
 			if (drawerImages==null || drawerImages.isEmpty()) {
 				// Specimen has multiple images, but no drawer images 
 				log.debug("Specimen with no drawer images: " + specimen.getBarcode());
@@ -340,12 +335,9 @@ public class SpecimenController {
 				images.addAll(drawerImages);
 				resultFrame.loadImagesFromFiles(images);
 			}
-		}
+
 		resultFrame.pack();
 		resultFrame.centerSpecimen();   // Specimen is expected to be at the center of the specimen part of the image.
-		if (isNew) {
-			resultFrame.center();
-		}
 		resultFrame.setVisible(true);
 	}
 

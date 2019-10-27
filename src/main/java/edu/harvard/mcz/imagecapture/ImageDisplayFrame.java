@@ -134,11 +134,18 @@ public class ImageDisplayFrame extends JFrame {
 		prefs = Preferences.userRoot().node(this.getClass().getName());
 	}
 
+	public void setTargetSpecimen(Specimen targetSpecimen) {
+		// TODO: remove setter necessity, fetch via SpecimenController
+		this.targetSpecimen = targetSpecimen;
+	}
+
 	/** Given a set of ICImages, display one of them in the tabs of the ImageDisplayFrame, and
 	 * populate the image chooser pick list with a list of all the images.  Call this method to display 
 	 * more than one image in an ImageDisplayFrame.  Single image is displayed with a call to loadImagesFromFileSingle().
 	 *
-	 * @see edu.harvard.mcz.imagecapture.ImageDisplayFrame#loadImagesFromFile(File, PositionTemplate, ICImage)
+	 * @param Set<ICImage> the image files to display in the tabs of the frame.
+	 * @throws ImageLoadException if there is a problem with the image.
+	 * @throws BadTemplateException
 	 * 
 	 * @param imageFiles
 	 */
@@ -147,9 +154,8 @@ public class ImageDisplayFrame extends JFrame {
 		jComboBoxImagePicker.removeAllItems();
 		Iterator<ICImage> i = imageFiles.iterator();
 		ICImage image = null;
-		int fileCount = 0;
+		int fileCount = imageFiles.size();
 		while (i.hasNext()) {
-			fileCount++;
 			image = i.next();
 	        jComboBoxImagePicker.addItem(image.getFilename());
 	        log.debug("Adding image to picklist: " + image.getPath() + image.getFilename());
@@ -164,7 +170,7 @@ public class ImageDisplayFrame extends JFrame {
 		if (fileCount > 1) {
 			jLabelImageCountNr.setForeground(Color.RED);
 		}
-		jComboBoxImagePicker.setEnabled(true);
+		jComboBoxImagePicker.setEnabled(fileCount > 0);
 		jComboBoxImagePicker.setSelectedItem(image.getFilename());
 		try {
 		    PositionTemplate defaultTemplate = PositionTemplate.findTemplateForImage(image);
@@ -176,33 +182,7 @@ public class ImageDisplayFrame extends JFrame {
 		}
 		jTabbedPane.setSelectedIndex(0);   // move focus to full image tab
 	}
-	
-	/** Call this method to display a single image for a specimen, with its component parts, if indicated
-	 * by the PositionTemplate.  Wrapper around loadImagesFromFileSingle().  The combo box to pick images 
-	 * will display just the name of this file, and won't be selectable.
-	 * 
-	 * @see edu.harvard.mcz.imagecapture.ImageDisplayFrame#loadImagesFromFiles(Set)   
-	 * 
-	 * @param anImageFile the image file to display in the tabs of the frame.
-	 * @param template the position template to use to split the image file into components.
-	 * @throws ImageLoadException if there is a problem with the image.
-	 * @throws BadTemplateException 
-	 */
-	public void loadImagesFromFile(File anImageFile, PositionTemplate template, ICImage image) throws ImageLoadException, BadTemplateException {
-		log.debug(anImageFile.getName());
-		loadImagesFromFileSingle(anImageFile, template, image);
-        jLabelImageCountNr.setText("(1)");
-        log.debug(1);
-        if (jComboBoxImagePicker.getModel().getSize()>0) { 
-            jComboBoxImagePicker.removeAllItems();
-        }
-        log.debug(2);
-        jComboBoxImagePicker.addItem(anImageFile.getName());
-        log.debug(3);
-        jComboBoxImagePicker.setEnabled(false);
-        jTabbedPane.setSelectedIndex(0);   // move focus to full image tab
-	} 
-	
+
 	/** Based on the position template, display the full image in one tab, and parts of the image
 	 * described by the template in other tabs.   
 	 * 
@@ -211,21 +191,16 @@ public class ImageDisplayFrame extends JFrame {
 	 * @throws ImageLoadException
 	 * @throws BadTemplateException
 	 */
-	protected void loadImagesFromFileSingle(File anImageFile, PositionTemplate defaultTemplate, ICImage image) throws ImageLoadException, BadTemplateException {
+	public void loadImagesFromFileSingle(File anImageFile, PositionTemplate defaultTemplate, ICImage image) throws ImageLoadException, BadTemplateException {
 		log.debug(anImageFile.getName());
 		boolean templateProblem = false;
 		selectedImage = image;
 		//TODO: template detection?
 		
 		try {
-			//allie fix
-			//ImageIO.setUseCache(false);
-			
 			imagefile = ImageIO.read(anImageFile);
 						
 			log.debug(anImageFile.getPath());
-			// Display the full image
-			this.setFullImage();
 			// Show the component parts of the image as defined by the position template.
 			if (defaultTemplate.getTemplateId().equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
 				// clear component parts
@@ -299,9 +274,8 @@ public class ImageDisplayFrame extends JFrame {
 					System.out.println(ex.getMessage());	
 				}
 			}
-			//allie fix
-			//imagefile.flush();
-			//imagefile = null;
+			// Display the full image (also packs!)
+			this.setFullImage();
 		} catch (IOException e1) {
 			log.debug("IOException!");
 			System.out.println("Error reading image file: " + e1.getMessage());
@@ -407,7 +381,7 @@ public class ImageDisplayFrame extends JFrame {
 		}
 	}
 	
-	public void addWest(JPanel panel) {
+	public void setWest(JPanel panel) {
 		jContentPane.removeAll();
 		jContentPane.setLayout(new MigLayout("wrap 2, fill", "[grow]", "[grow]"));
 		jContentPane.add(panel, "grow"); // west
@@ -607,7 +581,7 @@ public class ImageDisplayFrame extends JFrame {
     	if (imagefile!=null) { 
     	    getPanelFullImage().setImage(imagefile);
     	    // We need to make sure the container hierarchy holding the image knows what
-    	    // size the image pane is before zoom to fit will work.f
+    	    // size the image pane is before zoom to fit will work.
     	    this.pack();  
     	    imagePaneFullImage.zoomToFit();
     	}

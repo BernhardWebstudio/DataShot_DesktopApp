@@ -264,7 +264,7 @@ public class JobSingleBarcodeScan implements RunnableJob, Runnable {
 				}
 
 				try {
-					resultFrame.loadImagesFromFile(fileToCheck, defaultTemplate, null);
+					resultFrame.loadImagesFromFileSingle(fileToCheck, defaultTemplate, null);
 				} catch (ImageLoadException e2) {
 					System.out.println("Error loading image file.");
 					System.out.println(e2.getMessage());
@@ -284,7 +284,7 @@ public class JobSingleBarcodeScan implements RunnableJob, Runnable {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						resultFrame.loadImagesFromFile(fileToCheck, defaultTemplate, null);
+						resultFrame.loadImagesFromFileSingle(fileToCheck, defaultTemplate, null);
 					} catch (ImageLoadException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -608,7 +608,7 @@ public class JobSingleBarcodeScan implements RunnableJob, Runnable {
 								e.printStackTrace();
 							}
 							SpecimenDetailsViewPane sPane = new SpecimenDetailsViewPane(tryMe.getSpecimen(), controler);
-							resultFrame.addWest((JPanel)sPane);
+							resultFrame.setWest((JPanel)sPane);
 							if (!tryMe.getRawBarcode().equals(tryMe.getRawExifBarcode())) { 
 								if (Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_REDUNDANT_COMMENT_BARCODE).equals("true")) {
 									// If so configured, warn about missmatch 
@@ -662,7 +662,7 @@ public class JobSingleBarcodeScan implements RunnableJob, Runnable {
 										JOptionPane.ERROR_MESSAGE);
 							}
 							SpecimenDetailsViewPane sPane = new SpecimenDetailsViewPane(existing.getSpecimen(), controler);
-							resultFrame.addWest((JPanel)sPane);
+							resultFrame.setWest((JPanel)sPane);
 							resultFrame.center();
 							resultFrame.setActiveTab(ImageDisplayFrame.TAB_LABELS);
 							resultFrame.fitPinLabels();

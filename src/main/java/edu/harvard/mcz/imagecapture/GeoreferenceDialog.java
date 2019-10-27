@@ -105,8 +105,9 @@ public class GeoreferenceDialog extends JDialog {
 		
 		log.debug("load geo data: lat: " + georeference.getDecLatString() + ", long: " + georeference.getDecLongString());
 
-		cbDatum.setSelectedItem(georeference.getDatum());
-		
+		if (!georeference.getDatum().equals("")) {
+			cbDatum.setSelectedItem(georeference.getDatum());
+		}
 		cbMethod.setSelectedItem(georeference.getGeorefmethod());
 		
 		txtGPSAccuracy.setText(georeference.getGpsaccuracyString());
@@ -144,7 +145,6 @@ public class GeoreferenceDialog extends JDialog {
 		}
 		
 		String state = this.comboBoxOrigUnits.getSelectedItem().toString();
-		log.debug(state);
 		switch (state) { 
 		case "degrees dec. minutes":
 			this.textFieldDecimalLat.setEnabled(false);
@@ -380,7 +380,7 @@ public class GeoreferenceDialog extends JDialog {
 		ComboBoxModel<String> datumModel = new ListComboBoxModel<String>(LatLong.getDatumValues());
 		cbDatum = new JComboBox<String>(datumModel);
 		// set default
-		cbDatum.setSelectedIndex(2);
+		cbDatum.setSelectedItem("WGS84");
 		
 		contentPanel.add(cbDatum);
 		

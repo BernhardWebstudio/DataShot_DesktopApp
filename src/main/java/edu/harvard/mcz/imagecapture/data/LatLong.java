@@ -34,7 +34,7 @@ public class LatLong implements Serializable {
 
 	private Long latLongId;
 	private Boolean acceptedLatLongFg = true;
-	private String datum = "unknown";
+	private String datum;
 	private BigDecimal decLat;
 	private BigDecimal decLatMin;
 	private BigDecimal decLong;
@@ -134,7 +134,7 @@ public class LatLong implements Serializable {
 	}
 
 	public String getDatum() {
-		return this.datum;
+		return this.datum == null ? "" : this.datum;
 	}
 
 	public void setDatum(String datum) {

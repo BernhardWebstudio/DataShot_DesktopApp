@@ -1320,6 +1320,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jScrollPaneCollectors = new JScrollPane();
 			jScrollPaneCollectors.setViewportView(getJTableCollectors());
 			jScrollPaneCollectors.setMaximumSize(new Dimension(1000, 100));
+			jScrollPaneCollectors.addMouseWheelListener(new MouseWheelScrollListener(jScrollPaneCollectors));
 			jScrollPaneCollectors.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
 					thisPane.setStateToDirty();
@@ -1407,6 +1408,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 					thisPane.setStateToDirty();
 				}
 			});
+			jScrollPaneSpecimenParts.addMouseWheelListener(new MouseWheelScrollListener(jScrollPaneSpecimenParts));
 		}
 		return jScrollPaneSpecimenParts;
 	}	
@@ -1549,6 +1551,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 					thisPane.setStateToDirty();
 				}
 			});
+			jScrollPaneNumbers.addMouseWheelListener(new MouseWheelScrollListener(jScrollPaneNumbers));
 		}
 		return jScrollPaneNumbers;
 	}
@@ -2679,6 +2682,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jScrollPaneNotes.setViewportView(getJTextAreaNotes());
 			jScrollPaneNotes.setPreferredSize(new Dimension(0, 50));
 			jScrollPaneNotes.setMinimumSize(new Dimension(0, 50));
+			jScrollPaneNotes.addMouseWheelListener(new MouseWheelScrollListener(jScrollPaneNotes));
 			//jScrollPaneNotes.add(getJTextAreaNotes()); //allie!!!
 		}
 		return jScrollPaneNotes;

@@ -1,5 +1,19 @@
 # Changelog
 
+## v1.9.3-SNAPSHOT
+* [[`2bb30feb55`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/2bb30feb55)] - Load imagecapture version from maven (Tim Bernhard)
+* [[`20552cad9d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/20552cad9d)] - Add MouseWheelScrollListener to propagate scrolling of Collector, Parts, Notes and Numbers to parent (Tim Bernhard)
+* [[`46ac09b61b`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/46ac09b61b)] - Increse scroll speed & limit jTable sizes to partially fix #10 (Tim Bernhard)
+* [[`fff5142055`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/fff5142055)] - Fix issue #13 where georeference datum returned to default (Tim Bernhard)
+* [[`a6d913b580`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/a6d913b580)] - Fix issue #13 where every cbDatum was WSG84 (Tim Bernhard)
+* [[`5784366c09`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/5784366c09)] - Fix image staying after image switch, issue #9 (Tim Bernhard)
+* [[`b2317d46d9`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b2317d46d9)] - Improve (slightly) stability &  helpfulness of error messages (Tim Bernhard)
+* [[`d1cd163952`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d1cd163952)] - Cleanup publishing scripts (Tim Bernhard)
+* [[`253f8ce290`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/253f8ce290)] - Let draft deploy act on any taged branch (Tim Bernhard)
+* [[`757de6802a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/757de6802a)] - remove duplicates in changelog originating from double deploy (Tim Bernhard)
+* [[`8e37bf0469`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8e37bf0469)] - Update changelog & publish Version 1.9.2-SNAPSHOT (Tim Bernhard)
+
+
 ## v1.9.2-SNAPSHOT
 * [[`28b3e8c20d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/28b3e8c20d)] - Fix issue where a failed login required a restart (Tim Bernhard)
 * [[`e091534ee3`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e091534ee3)] - Fix issue where history did not work anymore (Tim Bernhard)

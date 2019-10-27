@@ -47,10 +47,8 @@ import edu.harvard.mcz.imagecapture.data.TrackingLifeCycle;
 import edu.harvard.mcz.imagecapture.data.TypeStatus;
 import edu.harvard.mcz.imagecapture.data.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
-import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
-import edu.harvard.mcz.imagecapture.ui.FilteringGeogJComboBox;
-import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor;
+import edu.harvard.mcz.imagecapture.ui.*;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -282,6 +280,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	    JScrollPane scrollPane = new JScrollPane(getJPanel(),
 	    		JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 	    		JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+	    scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 	    scrollPane.setBorder(BorderFactory.createEmptyBorder());
 	    this.add(scrollPane, BorderLayout.CENTER);
 	}
@@ -665,8 +664,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			specimen.getDeterminations().add(newdet);
 
 		}		
-				
-	
+
 		//+georeference
 		Set<LatLong> georeferences = specimen.getLatLong();
 		LatLong newgeo = georeferences.iterator().next();
@@ -1245,7 +1243,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 				jButtonSave.setText("Migrated " + specimen.getLoadFlags());
 			}
 			jButtonSave.setMnemonic(KeyEvent.VK_S);
-			jButtonSave.setToolTipText("Save changes to this record to the database.  No fields should have red backgrounds before you save.");
+			jButtonSave.setToolTipText("Save changes to this record to the database. No fields should have red backgrounds before you save.");
 			jButtonSave.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
 					try { 
@@ -1321,7 +1319,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		if (jScrollPaneCollectors == null) {
 			jScrollPaneCollectors = new JScrollPane();
 			jScrollPaneCollectors.setViewportView(getJTableCollectors());
-			jScrollPaneCollectors.setPreferredSize(new Dimension(jScrollPaneCollectors.getWidth(), 150));
+			jScrollPaneCollectors.setMaximumSize(new Dimension(1000, 100));
 			jScrollPaneCollectors.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
 					thisPane.setStateToDirty();
@@ -1342,31 +1340,17 @@ public class SpecimenDetailsViewPane extends JPanel {
 			
 			// Note: When setting the values, the table column editor needs to be reset there, as the model is replaced.
 
-			//the original line!!!
-			//FilteringAgentJComboBox field = new FilteringAgentJComboBox();
-						
-			//the original line!!
-			//jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(field));
-			
-			//allie change: this works with text fields only
-			/*JTextField field = new JTextField();
-			field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
-			jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));*/
-			//end allie change
-			
-			//allie new - combo boxes
 			JComboBox field = new JComboBox();
 			//field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
 			jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(field));
 			//
-			
-			jTableCollectors.setRowHeight(jTableCollectors.getRowHeight()+4);
+			jTableCollectors.setShowGrid(true);
+			jTableCollectors.setRowHeight(jTableCollectors.getRowHeight() + 5);
 		    jTableCollectors.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
 					thisPane.setStateToDirty();
 				}
 			});
-		    
 		    jTableCollectors.addMouseListener(new MouseAdapter() {
 				@Override
 				public void mousePressed(MouseEvent e) {
@@ -1383,7 +1367,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 					}
 				}
 			});
-		    
+		    // row deletion
 		    jPopupCollectors = new JPopupMenu();
 			JMenuItem menuItemDeleteRow = new JMenuItem("Delete Row");
 			menuItemDeleteRow.addActionListener(new ActionListener() {
@@ -1417,10 +1401,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		if (jScrollPaneSpecimenParts == null) {
 			jScrollPaneSpecimenParts = new JScrollPane();
 			jScrollPaneSpecimenParts.setViewportView(getJTableSpecimenParts());
-			//jScrollPaneSpecimenParts.setPreferredSize(new Dimension(0, 150));
-			//jScrollPaneSpecimenParts.setMinimumSize(new Dimension(0, 100));
-			jScrollPaneSpecimenParts.setPreferredSize(new Dimension(0, 75));
-			jScrollPaneSpecimenParts.setMinimumSize(new Dimension(0, 75));
+			jScrollPaneSpecimenParts.setMaximumSize(new Dimension(1000, 100));
 			jScrollPaneSpecimenParts.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
 					thisPane.setStateToDirty();
@@ -1434,11 +1415,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 		if (jTableSpecimenParts == null) {
 			try { 
 		        jTableSpecimenParts = new JTable(new SpecimenPartsTableModel(specimen.getSpecimenParts()));
-		        jTableSpecimenParts.getColumnModel().getColumn(0).setPreferredWidth(90);
 			} catch (NullPointerException e) { 
 			    jTableSpecimenParts = new JTable(new SpecimenPartsTableModel());
-		        jTableSpecimenParts.getColumnModel().getColumn(0).setPreferredWidth(90);
 			}
+			jTableSpecimenParts.getColumnModel().getColumn(0).setPreferredWidth(90);
+			jTableSpecimenParts.setRowHeight(jTableSpecimenParts.getRowHeight() + 5);
 			setSpecimenPartsTableCellEditors();
 			
 		    log.debug(specimen.getSpecimenParts().size());
@@ -1562,9 +1543,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		if (jScrollPaneNumbers == null) {
 			jScrollPaneNumbers = new JScrollPane();
 			jScrollPaneNumbers.setViewportView(getNumberJTable());
-			if (jTextFieldBarcode != null) {
-				jScrollPaneNumbers.setPreferredSize(new Dimension(jScrollPaneNumbers.getWidth(),jTextFieldBarcode.getFontMetrics(jTextFieldBarcode.getFont()).getHeight()*6));
-			}
+			jScrollPaneNumbers.setMaximumSize(new Dimension(1000, 100));
 			jScrollPaneNumbers.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
 					thisPane.setStateToDirty();
@@ -1598,7 +1577,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 					thisPane.setStateToDirty();
 				}
 			});
-            
+            jTableNumbers.setRowHeight(jTableNumbers.getRowHeight() + 5);
             
             jTableNumbers.addMouseListener(new MouseAdapter() {
 				@Override
@@ -2463,7 +2442,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jButtonCopyPrev = new JButton();
 			jButtonCopyPrev.setText("Copy Prev");
 			jButtonCopyPrev.setToolTipText("Copy previous record values into this screen");
-			//TODO what is this for???
+			//TODO: decide on keyboard shortcut
 			//jButtonCopyPrev.setMnemonic(KeyEvent.VK_H);
 			jButtonCopyPrev.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {

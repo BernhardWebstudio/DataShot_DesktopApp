@@ -167,10 +167,8 @@ public class ImageDisplayFrame extends JFrame {
 		//File fileToCheck = new File(startPointName + path + image.getFilename());
 		File fileToCheck = new File(ImageCaptureProperties.assemblePathWithBase(path, image.getFilename()));
 		jLabelImageCountNr.setText("(" + fileCount + ")");
-		if (fileCount > 1) {
-			jLabelImageCountNr.setForeground(Color.RED);
-		}
-		jComboBoxImagePicker.setEnabled(fileCount > 0);
+		jLabelImageCountNr.setForeground(fileCount > 1 ? Color.RED : Color.BLACK);
+		jComboBoxImagePicker.setEnabled(fileCount > 1);
 		jComboBoxImagePicker.setSelectedItem(image.getFilename());
 		try {
 		    PositionTemplate defaultTemplate = PositionTemplate.findTemplateForImage(image);

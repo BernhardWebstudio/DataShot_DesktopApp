@@ -576,7 +576,7 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 		try { 
 			System.out.println("Saving properties file: " + propertiesFilePath.toString());
 		    propertiesStream = new FileOutputStream(propertiesFilePath.toString());
-			properties.store(propertiesStream, ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.APP_VERSION +  " Properties" );
+			properties.store(propertiesStream, ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion() +  " Properties" );
 			propertiesStream.close();
 		} catch (Exception e) { 
 			System.out.println("Error saving properties.");

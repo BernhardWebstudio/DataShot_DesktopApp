@@ -24,8 +24,10 @@ package edu.harvard.mcz.imagecapture;
 
 import java.awt.Cursor;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import javax.swing.JOptionPane;
 /** for experimental chat support
@@ -72,8 +74,8 @@ import edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcher;
 public class ImageCaptureApp {
 
 	private static final Log log = LogFactory.getLog(ImageCaptureApp.class);
+	private static String APP_VERSION;
 
-	public static final String APP_VERSION = "1.9.0-SNAPSHOT";
 	public static final String APP_NAME = "DataShot";
 	public static final String APP_DESCRIPTION = "Rapid capture of data from images of pin Labels and pinned insect \nspecimens developed for the MCZ Lepidoptera collection";
 	public static final String APP_COPYRIGHT = "Copyright © 2009-2017 President and Fellows of Harvard College";
@@ -147,13 +149,7 @@ public class ImageCaptureApp {
 					// Use cross platform if native uses space on forms much too inefficiently
 					// UIManager.getCrossPlatformLookAndFeelClassName());
 					UIManager.getSystemLookAndFeelClassName());
-		} catch (UnsupportedLookAndFeelException e) {
-			log.error(e);
-		} catch (ClassNotFoundException e) {
-			log.error(e);
-		} catch (InstantiationException e) {
-			log.error(e);
-		} catch (IllegalAccessException e) {
+		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			log.error(e);
 		}
 
@@ -236,6 +232,21 @@ public class ImageCaptureApp {
 		 * TODO Auto-generated catch block e.printStackTrace(); } } }
 		 */
 
+
+	}
+
+	public static String getAppVersion() {
+		if (APP_VERSION == null) {
+			// fetch version
+			try {
+				Properties privateProperties = new Properties();
+				privateProperties.load(ImageCaptureApp.class.getClassLoader().getResourceAsStream("imagecapture.private.properties"));
+				APP_VERSION = privateProperties.getProperty("project.version");
+			} catch (IOException e) {
+				APP_VERSION = "failed-loading-version";
+			}
+		}
+		return APP_VERSION;
 	}
 
 	/**

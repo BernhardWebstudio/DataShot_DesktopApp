@@ -434,7 +434,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
 							if (s.getFamily().equals("Formicidae")) { 
 							      s.setLocationInCollection(LocationInCollection.GENERALANT);
 							}							
-							s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.APP_VERSION);
+							s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion());
 							SpecimenLifeCycle sh = new SpecimenLifeCycle();
 							try { 
 								// *** Save a database record of the specimen.

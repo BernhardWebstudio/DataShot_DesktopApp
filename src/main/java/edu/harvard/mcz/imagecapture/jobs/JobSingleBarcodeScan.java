@@ -512,7 +512,7 @@ public class JobSingleBarcodeScan implements RunnableJob, Runnable {
 							}
 							// ********* End Special Cases **********
 							
-							s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.APP_VERSION);
+							s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion());
 							SpecimenLifeCycle sh = new SpecimenLifeCycle();
 							try { 
 								sh.persist(s);

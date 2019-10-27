@@ -588,7 +588,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 	 */
 	private JMenuItem getJMenuItemVersion() {
 		if (jMenuItemVersion == null) {
-			jMenuItemVersion = new JMenuItem(ImageCaptureApp.APP_NAME + " Ver: " + ImageCaptureApp.APP_VERSION);
+			jMenuItemVersion = new JMenuItem(ImageCaptureApp.APP_NAME + " Ver: " + ImageCaptureApp.getAppVersion());
 			jMenuItemVersion.setEnabled(false);
 		}
 		return jMenuItemVersion;

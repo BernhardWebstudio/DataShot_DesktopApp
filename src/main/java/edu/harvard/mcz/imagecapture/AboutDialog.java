@@ -298,7 +298,7 @@ public class AboutDialog extends JDialog {
 	 */
 	private JTextField getJTextFieldVersion() {
 		if (jTextFieldVersion == null) {
-			jTextFieldVersion = new JTextField(ImageCaptureApp.APP_VERSION);
+			jTextFieldVersion = new JTextField(ImageCaptureApp.getAppVersion());
 			jTextFieldVersion.setEditable(false);
 		}
 		return jTextFieldVersion;

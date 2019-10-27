@@ -922,7 +922,7 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable{
 										// ********* End Special Cases **********
 										
 										
-										s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.APP_VERSION);
+										s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion());
 										s.setDateCreated(new Date());
 										SpecimenLifeCycle sh = new SpecimenLifeCycle();
 										try { 

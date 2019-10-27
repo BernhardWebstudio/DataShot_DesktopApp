@@ -64,7 +64,7 @@ public class AllowedVersionLifeCycle {
 		Iterator<AllowedVersion> i = allowedVersions.iterator();
 		while (i.hasNext()) { 
 			String version = i.next().getVersion();
-			String currentVersion = ImageCaptureApp.APP_VERSION;
+			String currentVersion = ImageCaptureApp.getAppVersion();
 			if (version!=null && currentVersion!=null &&
 					version.length()<=currentVersion.length() &&
 					currentVersion.startsWith(version)) 

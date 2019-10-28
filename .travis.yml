@@ -34,7 +34,7 @@ deploy:
     file_glob: true
     file: target/DataShot*.jar
     skip_cleanup: true
-    name: "DataShot V$TRAVIS_TAG"
+    name: "DataShot $TRAVIS_TAG"
     prerelease: false
     draft: true
     on:

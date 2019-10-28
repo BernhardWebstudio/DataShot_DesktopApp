@@ -1317,10 +1317,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 */
 	private JScrollPane getJScrollPaneCollectors() {
 		if (jScrollPaneCollectors == null) {
-			jScrollPaneCollectors = new JScrollPane();
+			jScrollPaneCollectors = this.getBasicWrapperJScrollPane();
 			jScrollPaneCollectors.setViewportView(getJTableCollectors());
-			jScrollPaneCollectors.setMaximumSize(new Dimension(1000, 100));
-			jScrollPaneCollectors.addMouseWheelListener(new MouseWheelScrollListener(jScrollPaneCollectors));
 			jScrollPaneCollectors.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
 					thisPane.setStateToDirty();
@@ -1400,15 +1398,13 @@ public class SpecimenDetailsViewPane extends JPanel {
 	
 	private JScrollPane getJScrollPaneSpecimenParts() {
 		if (jScrollPaneSpecimenParts == null) {
-			jScrollPaneSpecimenParts = new JScrollPane();
+			jScrollPaneSpecimenParts = this.getBasicWrapperJScrollPane();
 			jScrollPaneSpecimenParts.setViewportView(getJTableSpecimenParts());
-			jScrollPaneSpecimenParts.setMaximumSize(new Dimension(1000, 100));
 			jScrollPaneSpecimenParts.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
 					thisPane.setStateToDirty();
 				}
 			});
-			jScrollPaneSpecimenParts.addMouseWheelListener(new MouseWheelScrollListener(jScrollPaneSpecimenParts));
 		}
 		return jScrollPaneSpecimenParts;
 	}	
@@ -1543,15 +1539,13 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 */
 	private JScrollPane getNumbersJScrollPane() {
 		if (jScrollPaneNumbers == null) {
-			jScrollPaneNumbers = new JScrollPane();
+			jScrollPaneNumbers = this.getBasicWrapperJScrollPane();
 			jScrollPaneNumbers.setViewportView(getNumberJTable());
-			jScrollPaneNumbers.setMaximumSize(new Dimension(1000, 100));
 			jScrollPaneNumbers.addKeyListener(new java.awt.event.KeyAdapter() {
 				public void keyTyped(java.awt.event.KeyEvent e) {
 					thisPane.setStateToDirty();
 				}
 			});
-			jScrollPaneNumbers.addMouseWheelListener(new MouseWheelScrollListener(jScrollPaneNumbers));
 		}
 		return jScrollPaneNumbers;
 	}
@@ -2671,6 +2665,14 @@ public class SpecimenDetailsViewPane extends JPanel {
 		return jTextFieldCitedInPub;
 	}
 
+	private JScrollPane getBasicWrapperJScrollPane() {
+		JScrollPane pane = new JScrollPane();
+		pane.addMouseWheelListener(new MouseWheelScrollListener(pane));
+		int maxHeight = Integer.parseInt(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_MAX_FIELD_HEIGHT));
+		pane.setMaximumSize(new Dimension(1000, maxHeight));
+		return pane;
+	}
+
 	/**
 	 * This method initializes jScrollPane1	
 	 * 	
@@ -2678,11 +2680,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 */
 	private JScrollPane getJScrollPaneNotes() {
 		if (jScrollPaneNotes == null) {
-			jScrollPaneNotes = new JScrollPane();
+			jScrollPaneNotes = this.getBasicWrapperJScrollPane();
 			jScrollPaneNotes.setViewportView(getJTextAreaNotes());
-			jScrollPaneNotes.setPreferredSize(new Dimension(0, 50));
-			jScrollPaneNotes.setMinimumSize(new Dimension(0, 50));
-			jScrollPaneNotes.addMouseWheelListener(new MouseWheelScrollListener(jScrollPaneNotes));
 			//jScrollPaneNotes.add(getJTextAreaNotes()); //allie!!!
 		}
 		return jScrollPaneNotes;

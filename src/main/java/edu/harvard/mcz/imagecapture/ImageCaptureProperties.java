@@ -180,7 +180,12 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 	 * Show the login dialog with the advanced options open by default (desirable for 
 	 * developers working with development/test/production databases) if true.
 	 */
-	public static final String KEY_LOGIN_SHOW_ADVANCED = "login.showadvanced";	
+	public static final String KEY_LOGIN_SHOW_ADVANCED = "login.showadvanced";
+
+	/**
+	 * The maximum height for editor fields
+	 */
+	public static final String KEY_MAX_FIELD_HEIGHT = "editor.fields.maxHeight";
 	
 	
 	private static final Log log = LogFactory.getLog(ImageCaptureProperties.class);
@@ -266,7 +271,7 @@ public class ImageCaptureProperties  extends AbstractTableModel {
         }
 		
 		if (fileSeparator.equals("\\")) {
-			if (!base.endsWith("\\")) { base = base + "\\";  } 
+			if (!base.endsWith("\\")) { base = base + "\\\\";  }
 			// the separator "\" is represented in java as "\\" and in a java regular expression as "\\\\"
 			base = base.replaceAll("\\\\", "\\\\\\\\");
 		} else { 
@@ -530,6 +535,9 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 		}			
 		if (!properties.containsKey(KEY_DEFAULT_TEMPLATES)) {
 			properties.setProperty(KEY_DEFAULT_TEMPLATES, PositionTemplate.TEMPLATE_DEFAULT);
+		}
+		if (!properties.containsKey(KEY_MAX_FIELD_HEIGHT)) {
+			properties.setProperty(KEY_MAX_FIELD_HEIGHT, "100");
 		}
 		
 	}

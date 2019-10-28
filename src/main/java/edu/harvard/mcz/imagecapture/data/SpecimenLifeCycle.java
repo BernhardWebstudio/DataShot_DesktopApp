@@ -170,7 +170,8 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 		}
 	}
 
-	/** Re-associate a transient instance with a session.
+	/**
+	 * Re-associate a transient instance with a session.
 	 * 
 	 * @param instance
 	 */

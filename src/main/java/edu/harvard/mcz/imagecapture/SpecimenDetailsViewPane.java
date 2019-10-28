@@ -66,6 +66,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
+import javax.persistence.OptimisticLockException;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
@@ -246,14 +247,17 @@ public class SpecimenDetailsViewPane extends JPanel {
 			specimenController = aControler;
 			initialize();
 			setValues();
-		} catch (SessionException e) { 
-			log.debug(e.getMessage(),e);
-			Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Database Connection Error.");
-			HibernateUtil.terminateSessionFactory();
-			this.setVisible(false);			
-		} catch (TransactionException e) { 
-			log.debug(e.getMessage(),e);
-			Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Database Connection Error.");
+		} catch (Exception e) {
+			String status = "Undefined error initializing SpecimenDetails. Restarting Database connection...";
+			if (e instanceof SessionException || e instanceof TransactionException) {
+				status = "Database Connection Error. Resetting connection... Try again.";
+			} else if (e instanceof IllegalStateException) {
+				status = "Illegal state exception. Last edit possibly lost. Try again.";
+			} else if (e instanceof OptimisticLockException){
+				status = "Error: last edited entry has been modified externally. Try again.";
+			}
+			Singleton.getSingletonInstance().getMainFrame().setStatusMessage(status);
+			log.debug(e.getMessage(), e);
 			HibernateUtil.terminateSessionFactory();
 			this.setVisible(false);
 		}

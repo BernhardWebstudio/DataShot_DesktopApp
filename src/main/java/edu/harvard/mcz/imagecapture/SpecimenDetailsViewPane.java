@@ -61,9 +61,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Set;
+import java.util.*;
 import javax.persistence.OptimisticLockException;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultCellEditor;
@@ -84,6 +82,8 @@ import javax.swing.JTextField;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
+
+import edu.harvard.mcz.imagecapture.utility.OpenStreetMapUtils;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -1585,6 +1585,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 							public void componentHidden(ComponentEvent e) {
 								updateJButtonGeoreference();
 								super.componentHidden(e);
+								autocompleteGeoDataFromGeoreference();
 							}
 						});
 	        		}
@@ -2760,6 +2761,27 @@ public class SpecimenDetailsViewPane extends JPanel {
 			textFieldMicrohabitat = new JTextField();
 		}
 		return textFieldMicrohabitat;
+	}
+
+	private void autocompleteGeoDataFromGeoreference() {
+		LatLong georeff = this.specimen.getLatLong().iterator().next();
+		// do it async as the request could take longer than desired
+		new Thread(() -> {
+			log.debug("Fetching address from openstreetmap");
+		Map<String, Object> data = OpenStreetMapUtils.getInstance().reverseSearchValues(georeff.getDecLat(), georeff.getDecLong(), new ArrayList<>(Arrays.asList(
+				"address.state",
+				"address.country"
+		)));
+		if (data != null){
+			log.debug("Got address from openstreetmap: " + data.toString());
+		if (this.getCountryJTextField().getSelectedItem().equals("")) {
+			this.getCountryJTextField().setSelectedItem((String) data.get("address.country"));
+		} else {
+			log.debug("Won't set country as is '" + this.getCountryJTextField().getSelectedItem() + "'.");
+		}
+		if (this.getPrimaryDivisionJTextField().getSelectedItem().equals("")) {
+			this.getPrimaryDivisionJTextField().setSelectedItem((String) data.get("address.state"));}
+		}}).start();
 	}
 	
 	/**

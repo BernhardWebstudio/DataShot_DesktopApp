@@ -33,14 +33,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.RowFilter;
+import javax.swing.*;
 import javax.swing.table.TableRowSorter;
+
+import edu.harvard.mcz.imagecapture.ui.CopyRowButtonEditor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionException;
@@ -170,11 +166,15 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
       jTable.setRowSorter(sorter);
       jTable.setDefaultRenderer(Specimen.class, new ButtonRenderer());
       jTable.setDefaultEditor(Specimen.class, new ButtonEditor());
+      jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY)).setCellRenderer(new ButtonRenderer("Copy"));
+      jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY)).setCellEditor(new CopyRowButtonEditor(new JCheckBox()));
       // set some column widths
       int characterWidth = Singleton.getSingletonInstance().getCharacterWidth();
       jTable.getColumnModel().getColumn(0).setPreferredWidth(characterWidth *
-                                                             5);
+                                                             3);
       jTable.getColumnModel().getColumn(1).setPreferredWidth(characterWidth *
+              3);
+      jTable.getColumnModel().getColumn(2).setPreferredWidth(characterWidth *
                                                              14);
     }
     return jTable;
@@ -311,8 +311,8 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
    */
   @Override
   public void notifyDataHasChanged() {
-    log.debug("Notified");
     ((SpecimenListTableModel)jTable.getModel()).fireTableDataChanged();
+    log.debug("Data change notified.");
   }
 
   /**

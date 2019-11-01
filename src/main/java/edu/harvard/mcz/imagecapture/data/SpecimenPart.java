@@ -231,14 +231,16 @@ public class SpecimenPart implements Cloneable {
 	@Override
 	public Object clone() {
 		SpecimenPart newPart = new SpecimenPart(specimenId, partName, preserveMethod, lotCount, lotCountModifier, new ArrayList<>());
-		ArrayList<SpecimenPartAttribute> attrCollection = new ArrayList();
-		ListIterator iterator = (ListIterator) attributeCollection.iterator();
-		while (iterator.hasNext()) {
-			SpecimenPartAttribute newSpecPartAttr = (SpecimenPartAttribute) ((SpecimenPartAttribute)iterator.next()).clone();
-			newSpecPartAttr.setSpecimenPart(newPart);
-			attrCollection.add(newSpecPartAttr);
+		ArrayList<SpecimenPartAttribute> newAttributeCollection = new ArrayList();
+		if (this.attributeCollection != null) {
+			Iterator<SpecimenPartAttribute> iterator = this.attributeCollection.iterator();
+			while (iterator.hasNext()) {
+				SpecimenPartAttribute newSpecPartAttr = (SpecimenPartAttribute) ((SpecimenPartAttribute)iterator.next()).clone();
+				newSpecPartAttr.setSpecimenPart(newPart);
+				newAttributeCollection.add(newSpecPartAttr);
+			}
 		}
-		newPart.attributeCollection = attrCollection;
+		newPart.attributeCollection = newAttributeCollection;
 		return newPart;
 	}
 }

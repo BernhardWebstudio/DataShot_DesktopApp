@@ -19,9 +19,14 @@
  */
 package edu.harvard.mcz.imagecapture.data;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 
+import edu.harvard.mcz.imagecapture.ImageCaptureApp;
+import edu.harvard.mcz.imagecapture.Singleton;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -37,22 +42,22 @@ public class SpecimenListTableModel extends AbstractTableModel {
 	private static final long serialVersionUID = -8394267503927374758L;
 	
 	public static final int COL_ID = 0;
-	public static final int COL_BARCODE = 1;
-	public static final int COL_WORKFLOW = 2;
-	public static final int COL_FAMILY = 3;
-	public static final int COL_SUBFAMILY = 4;
-	public static final int COL_TRIBE = 5;
-	public static final int COL_GENUS = 6;
-	public static final int COL_SPECIFIC = 7;
-	public static final int COL_SUBSPECIFIC = 8;
-	//public static final int COL_HIGHERGEOG = 9;
-	public static final int COL_COUNTRY = 9;
-	public static final int COL_DIVISION = 10;
-	public static final int COL_VERBLOCALITY = 11;
-	//public static final int COL_DRAWER = 12;
-	public static final int COLUMCOUNT = 12;
+	public static final int COL_COPY = 1;
+	public static final int COL_BARCODE = 2;
+	public static final int COL_WORKFLOW = 3;
+	public static final int COL_FAMILY = 4;
+	public static final int COL_SUBFAMILY = 5;
+	public static final int COL_TRIBE = 6;
+	public static final int COL_GENUS = 7;
+	public static final int COL_SPECIFIC = 8;
+	public static final int COL_SUBSPECIFIC = 9;
+	public static final int COL_COUNTRY = 10;
+	public static final int COL_DIVISION = 11;
+	public static final int COL_VERBLOCALITY = 12;
+	public static final int COLUMCOUNT = 13;
 	
 	private List<Specimen> specimens = null;
+	private JButton copyBtn = null;
 	
 	public SpecimenListTableModel(List<Specimen> specimenList) { 
 		specimens = specimenList;
@@ -86,6 +91,9 @@ public class SpecimenListTableModel extends AbstractTableModel {
 			//result = s.getSpecimenId();
 			result = s;
 			break;
+			case COL_COPY:
+				result = s;
+				break;
 		case COL_BARCODE:
 			result = s.getBarcode();
 			break;
@@ -153,8 +161,11 @@ public class SpecimenListTableModel extends AbstractTableModel {
 		String result = null;
 		switch (columnIndex) { 
 		case COL_ID:
-			result = "";
+			result = "Edit";
 			break;
+			case COL_COPY:
+				result = "Copy";
+				break;
 		case COL_BARCODE:
 			result = "Barcode";
 			break;
@@ -201,7 +212,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
 	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex) {
 		boolean result = false;
-		if (columnIndex==COL_ID) { 
+		if (columnIndex == COL_ID || columnIndex == COL_COPY) {
 			result = true;
 		}
 		return result;

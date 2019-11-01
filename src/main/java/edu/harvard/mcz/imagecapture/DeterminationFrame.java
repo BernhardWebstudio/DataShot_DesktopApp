@@ -32,16 +32,12 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
-import java.text.ParseException;
-
-import edu.harvard.mcz.imagecapture.data.CollectorTableModel;
 import edu.harvard.mcz.imagecapture.data.Determination;
 import edu.harvard.mcz.imagecapture.data.DeterminationTableModel;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.data.NatureOfId;
 import edu.harvard.mcz.imagecapture.data.Specimen;
 import edu.harvard.mcz.imagecapture.data.TypeStatus;
-import edu.harvard.mcz.imagecapture.ui.FilteringAgentJComboBox;
 import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor;
 
 import java.awt.Dimension;
@@ -58,11 +54,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import javax.swing.JLabel;
-import javax.swing.text.MaskFormatter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
 
 /** DeterminationFrame for editing identification history
  * 
@@ -81,7 +75,7 @@ public class DeterminationFrame extends JFrame {
     private int clickedOnDetsRow;
     private JPopupMenu jPopupDets;
 
-    private DeterminationTableModel determinations = null;
+    private DeterminationTableModel determinationsModel;
     private Specimen specimen = null;
 	private JPanel jPanel = null;
 	private JButton jButtonAdd = null;
@@ -97,7 +91,7 @@ public class DeterminationFrame extends JFrame {
 	public DeterminationFrame() {
 		super();
 		thisFrame = this;
-		this.determinations = new DeterminationTableModel();
+		this.determinationsModel = new DeterminationTableModel();
 		initialize();
 		jButtonAdd.setEnabled(false);
 	}
@@ -105,11 +99,11 @@ public class DeterminationFrame extends JFrame {
 	/**
 	 * Constructor to show an arbitrary list of determinations.
 	 * 
-	 * @param determinations
+	 * @param determinationsModel
 	 */
-	public DeterminationFrame(DeterminationTableModel determinations) {
+	public DeterminationFrame(DeterminationTableModel determinationsModel) {
 		super();
-		this.determinations = determinations;
+		this.determinationsModel = determinationsModel;
 		initialize();
 		jButtonAdd.setEnabled(false);
 	}	
@@ -120,15 +114,15 @@ public class DeterminationFrame extends JFrame {
 	 */
 	public DeterminationFrame(Specimen aSpecimen) {
 		super();
-		determinations = new DeterminationTableModel(aSpecimen.getDeterminations());
+		determinationsModel = new DeterminationTableModel(aSpecimen.getDeterminations());
 		specimen = aSpecimen;
 		initialize();
 		jButtonAdd.setEnabled(true);
 	}	
 	
 	public void setSpecimen(Specimen aSpecimen) { 
-		determinations = new DeterminationTableModel(aSpecimen.getDeterminations());
-		jTableDeterminations.setModel(determinations);
+		determinationsModel = new DeterminationTableModel(aSpecimen.getDeterminations());
+		jTableDeterminations.setModel(determinationsModel);
 		setTableColumnEditors();
 		specimen = aSpecimen;
 		jButtonAdd.setEnabled(true);
@@ -191,11 +185,7 @@ public class DeterminationFrame extends JFrame {
 	private JTable getJTable() {
 		if (jTableDeterminations == null) {
 			jTableDeterminations = new JTable();
-			DeterminationTableModel model = new DeterminationTableModel();
-			jTableDeterminations.setModel(model);
-			if (determinations!=null) { 
-				jTableDeterminations.setModel(determinations);
-			}
+			jTableDeterminations.setModel(determinationsModel);
 			
 			//allie change 
 			//here is where the select field is set for determiner!!!
@@ -235,6 +225,7 @@ public class DeterminationFrame extends JFrame {
 							if (ok==JOptionPane.OK_OPTION) { 
 								log.debug("deleting determination row " + clickedOnDetsRow);
 					            ((DeterminationTableModel)jTableDeterminations.getModel()).deleteRow(clickedOnDetsRow);
+					            // force removal as apparently the jTableDeterminationsModel is not reliable enough
 							} else { 
 								log.debug("determination row delete canceled by user.");
 							}
@@ -305,7 +296,7 @@ public class DeterminationFrame extends JFrame {
 					   }
 					   Determination d = new Determination();
 			           d.setSpecimen(specimen);
-					   determinations.addDetermination(d);
+					   determinationsModel.addDetermination(d);
 					} 
 				}
 			});

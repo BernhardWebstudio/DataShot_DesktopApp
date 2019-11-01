@@ -83,17 +83,18 @@ public class DeterminationLifeCycle {
 	}
 
 	public void delete(Determination persistentInstance) throws SaveFailedException {
-		log.debug("deleting Determination instance");
+		log.debug("Deleting Determination instance with id " + persistentInstance.getDeterminationId());
 		try {
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
 			try { 
 				session.delete(persistentInstance);
+				session.getTransaction().commit();
 			    log.debug("delete successful");
 			} catch (HibernateException e) { 
 				session.getTransaction().rollback();
 				log.error(e.getMessage());
-				throw new SaveFailedException("Unable to save determination record. " + e.getMessage());
+				throw new SaveFailedException("Unable to delete determination record. " + e.getMessage());
 			}
 			try { session.close(); } catch (SessionException e) { }	
 		} catch (RuntimeException re) {

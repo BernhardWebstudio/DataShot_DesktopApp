@@ -9,82 +9,82 @@ import java.util.Date;
  */
 public class Tracking implements java.io.Serializable {
 
-	private static final long serialVersionUID = 3045144335474980280L;
-	
-	private Long trackingId;
-	private Specimen specimen;
-	private String user;
-	private String eventType;
-	private Date eventDateTime;
+    private static final long serialVersionUID = 3045144335474980280L;
 
-	public Tracking() {
-		this.eventDateTime = new Date();
-	}
+    private Long trackingId;
+    private Specimen specimen;
+    private String user;
+    private String eventType;
+    private Date eventDateTime;
 
-	public Tracking(Specimen specimen, Date eventDateTime) {
-		this.specimen = specimen;
-		if (eventDateTime==null) { 
-			this.eventDateTime = new Date();
-		} else { 
-		   this.eventDateTime = (Date) eventDateTime.clone();
-		}
-	}
+    public Tracking() {
+        this.eventDateTime = new Date();
+    }
 
-	public Tracking(Specimen specimen, String user, String eventType,
-			Date eventDateTime) {
-		this.specimen = specimen;
-		this.user = user;
-		this.eventType = eventType;
-		if (eventDateTime==null) { 
-			this.eventDateTime = new Date();
-		} else { 		
-		    this.eventDateTime = (Date) eventDateTime.clone();
-		}
-	}
+    public Tracking(Specimen specimen, Date eventDateTime) {
+        this.specimen = specimen;
+        if (eventDateTime == null) {
+            this.eventDateTime = new Date();
+        } else {
+            this.eventDateTime = (Date) eventDateTime.clone();
+        }
+    }
 
-	public Long getTrackingId() {
-		return this.trackingId;
-	}
+    public Tracking(Specimen specimen, String user, String eventType,
+                    Date eventDateTime) {
+        this.specimen = specimen;
+        this.user = user;
+        this.eventType = eventType;
+        if (eventDateTime == null) {
+            this.eventDateTime = new Date();
+        } else {
+            this.eventDateTime = (Date) eventDateTime.clone();
+        }
+    }
 
-	public void setTrackingId(Long trackingId) {
-		this.trackingId = trackingId;
-	}
+    public Long getTrackingId() {
+        return this.trackingId;
+    }
 
-	public Specimen getSpecimen() {
-		return this.specimen;
-	}
+    public void setTrackingId(Long trackingId) {
+        this.trackingId = trackingId;
+    }
 
-	public void setSpecimen(Specimen specimen) {
-		this.specimen = specimen;
-	}
+    public Specimen getSpecimen() {
+        return this.specimen;
+    }
 
-	public String getUser() {
-		return this.user;
-	}
+    public void setSpecimen(Specimen specimen) {
+        this.specimen = specimen;
+    }
 
-	public void setUser(String user) {
-		this.user = user;
-	}
+    public String getUser() {
+        return this.user;
+    }
 
-	public String getEventType() {
-		return this.eventType;
-	}
+    public void setUser(String user) {
+        this.user = user;
+    }
 
-	public void setEventType(String eventType) {
-		this.eventType = eventType;
-	}
+    public String getEventType() {
+        return this.eventType;
+    }
 
-	public Date getEventDateTime() {
-		Date result = this.eventDateTime;
-		return result;
-	}
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
 
-	public void setEventDateTime(Date eventDateTime) {
-		if (eventDateTime==null) { 
-			this.eventDateTime = null;
-		} else { 
-		    this.eventDateTime = (Date) eventDateTime.clone();
-		}
-	}
+    public Date getEventDateTime() {
+        Date result = this.eventDateTime;
+        return result;
+    }
+
+    public void setEventDateTime(Date eventDateTime) {
+        if (eventDateTime == null) {
+            this.eventDateTime = null;
+        } else {
+            this.eventDateTime = (Date) eventDateTime.clone();
+        }
+    }
 
 }

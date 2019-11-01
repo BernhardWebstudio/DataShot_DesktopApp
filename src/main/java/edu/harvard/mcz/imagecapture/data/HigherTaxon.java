@@ -2,69 +2,62 @@ package edu.harvard.mcz.imagecapture.data;
 
 /**
  * HigherTaxon, authority file of Family, Subfamily, and Tribe names.
- * 
- * @author Paul J. Morris
- *
  */
 public class HigherTaxon implements java.io.Serializable {
-	
-	private static final long serialVersionUID = -5729385642306510832L;
-	private Integer id;
-	private String family;
-	private String subfamily;
-	private String tribe;
-	private int hasCastes;
 
-	public HigherTaxon() {
-	}
+    private static final long serialVersionUID = -5729385642306510832L;
+    private Integer id;
+    private String family;
+    private String subfamily;
+    private String tribe;
+    private int hasCastes;
 
-	public HigherTaxon(String family, String subfamily, String tribe) {
-         this.family = family;
-         this.subfamily = subfamily;
-         this.tribe = tribe;
-	}
+    public HigherTaxon() {
+    }
 
-	public Integer getId() {
-		return id;
-	}
+    public HigherTaxon(String family, String subfamily, String tribe) {
+        this.family = family;
+        this.subfamily = subfamily;
+        this.tribe = tribe;
+    }
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    public Integer getId() {
+        return id;
+    }
 
-	public String getFamily() {
-		return family;
-	}
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-	public void setFamily(String family) {
-		this.family = family;
-	}
+    public String getFamily() {
+        return family;
+    }
 
-	public String getSubfamily() {
-		return subfamily;
-	}
+    public void setFamily(String family) {
+        this.family = family;
+    }
 
-	public void setSubfamily(String subfamily) {
-		this.subfamily = subfamily;
-	}
+    public String getSubfamily() {
+        return subfamily;
+    }
 
-	public String getTribe() {
-		return tribe;
-	}
+    public void setSubfamily(String subfamily) {
+        this.subfamily = subfamily;
+    }
 
-	public void setTribe(String tribe) {
-		this.tribe = tribe;
-	}
+    public String getTribe() {
+        return tribe;
+    }
 
-	public int getHasCastes() {
-		return hasCastes;
-	}
+    public void setTribe(String tribe) {
+        this.tribe = tribe;
+    }
 
-	public void setHasCastes(int hasCastes) {
-		this.hasCastes = hasCastes;
-	}
+    public int getHasCastes() {
+        return hasCastes;
+    }
 
-
-
-
+    public void setHasCastes(int hasCastes) {
+        this.hasCastes = hasCastes;
+    }
 }

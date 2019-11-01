@@ -2,7 +2,7 @@ package edu.harvard.mcz.imagecapture.tests;
 /**
  * AllTests.java
  * edu.harvard.mcz.imagecapture.tests
- * Copyright © 2009 President and Fellows of Harvard College
+ *
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of Version 2 of the GNU General Public License
@@ -16,7 +16,7 @@ package edu.harvard.mcz.imagecapture.tests;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- * Author: Paul J. Morris
+
  */
 import java.io.File;
 
@@ -29,7 +29,7 @@ import junit.framework.TestSuite;
  * AllTests includes class constants for resources within edu.harvard.mcz.imagecapture.tests.resources
  * that are used repeatedly in the unit tests themselves.
  * 
- * @author Paul J. Morris
+ *
  *
  */
 public class AllTests {

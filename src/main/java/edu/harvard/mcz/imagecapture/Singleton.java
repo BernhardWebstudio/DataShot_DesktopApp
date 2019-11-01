@@ -1,194 +1,188 @@
 /**
  * Singleton.java
  * edu.harvard.mcz.imagecapture
- * Copyright © 2009 President and Fellows of Harvard College
  *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of Version 2 of the GNU General Public License
  * as published by the Free Software Foundation.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * Author: Paul J. Morris
+ * <p>
  */
 package edu.harvard.mcz.imagecapture;
 
-import java.util.ArrayList;
-
+import edu.harvard.mcz.imagecapture.data.Users;
+import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
+import edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import edu.harvard.mcz.imagecapture.data.Users;
-import edu.harvard.mcz.imagecapture.data.UsersLifeCycle;
-import edu.harvard.mcz.imagecapture.exceptions.NoSuchValueException;
-import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
-import edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcher;
-
 
 /** Thread safe singleton object for imagecapture application.
- * 
+ *
  * Usage:
  * <pre> 
-      Singleton.getSingletonInstance.set{Method}(aRelevantObject) // store single instance to singleton.
-      Singleton.getSingletonInstance.get{Method}().doStuffWithObject() // retrieve single instance from singleton.
-   </pre>
- * 
- * @author Paul J. Morris
+ Singleton.getSingletonInstance.set{Method}(aRelevantObject) // store single instance to singleton.
+ Singleton.getSingletonInstance.get{Method}().doStuffWithObject() // retrieve single instance from singleton.
+ </pre>
+ *
+ *
  *
  */
 public class Singleton {
-	
-	private static final Log log = LogFactory.getLog(Singleton.class);
-	
-	// Eagerly create for thread safety.
-	private static Singleton singletonInstance = new Singleton();
-	
-	private  ImageCaptureProperties properties = null;
-	private  MainFrame mainFrame;
-	private  Users user = null;
-	private  BarcodeMatcher barcodeMatcher = null;
-	private  BarcodeBuilder barcodeBuilder = null;
-	private  RunnableJobTableModel jobList = new RunnableJobTableModel();
-	private  int characterWidth = 10;
 
-	/** Private constructor to prevent the creation
-	 * of multiple instances of Singleton objects.  
-	 */
-	private Singleton() { 
-	}
+    private static final Log log = LogFactory.getLog(Singleton.class);
 
-	/** Use this method to access the Singleton.
-	 * 
-	 * @return the sole Singleton instance.
-	 */
-	public static Singleton getSingletonInstance() { 
-		return singletonInstance;
-	}
+    // Eagerly create for thread safety.
+    private static Singleton singletonInstance = new Singleton();
 
-	public MainFrame getMainFrame() {
-		return mainFrame;
-	}
+    private ImageCaptureProperties properties = null;
+    private MainFrame mainFrame;
+    private Users user = null;
+    private BarcodeMatcher barcodeMatcher = null;
+    private BarcodeBuilder barcodeBuilder = null;
+    private RunnableJobTableModel jobList = new RunnableJobTableModel();
+    private int characterWidth = 10;
 
-	/** Store a single instance of a MainFrame to be referenced from 
-	 * elsewhere in the program.  
-	 * 
-	 * @param aMainFrame sole instance of MainFrame to be referenced  
-	 */
-	public void setMainFrame(MainFrame aMainFrame) {
-		mainFrame = aMainFrame;
-	}
-	
-	public  ImageCaptureProperties getProperties() { 
-		if (properties == null) {
-			// load a default properties if we haven't been given one yet.
-			properties = new ImageCaptureProperties();
-		}
-		return properties;
-	}
-	
-	public  void setProperties(ImageCaptureProperties anImageCaptureProperties) {
-		properties = anImageCaptureProperties;
-	}
+    /** Private constructor to prevent the creation
+     * of multiple instances of Singleton objects.
+     */
+    private Singleton() {
+    }
 
-	/**
-	 * Store the currently authenticated user
-	 * and look up and store the fullname that goes with this username.
-	 * A call on this method will make appropriate values available for
-	 * both getCurrentUsername() and getUserFullName().
-	 *
-	 * @param user
-	 */
-	public void setCurrentUser(Users user) {
-		this.user = user;
-		this.getMainFrame().setStatusMessage("Connected as "+ this.user.getFullname());
-	}
-	
-	/**
-	 * 
-	 * @return the db username of what should be the currently 
-	 * authenticated user.  
-	 * 
-	 */
-	public String getCurrentUsername() {
-		return this.user.getUsername();
-	}
+    /** Use this method to access the Singleton.
+     *
+     * @return the sole Singleton instance.
+     */
+    public static Singleton getSingletonInstance() {
+        return singletonInstance;
+    }
 
-	/**
-	 * Note that there is no setUserFullName() method, the singleton
-	 * value of userFullName is set automatically through a call to 
-	 * setCurrentUsername().
-	 * 
-	 * @return the userFullName
-	 */
-	public String getUserFullName() {
-		return this.user.getFullname();
-	}
+    public MainFrame getMainFrame() {
+        return mainFrame;
+    }
 
-	/** Note that there is no setUser() method.  The value is set automatically
-	 * through a call to setCurrentUsername();
-	 *  
-	 * @return the current user
-	 */
-	public Users getUser() {
-		return user;
-	}
+    /** Store a single instance of a MainFrame to be referenced from
+     * elsewhere in the program.
+     *
+     * @param aMainFrame sole instance of MainFrame to be referenced
+     */
+    public void setMainFrame(MainFrame aMainFrame) {
+        mainFrame = aMainFrame;
+    }
 
-	public void unsetCurrentUser() {
-		user = null;
-	}
+    public ImageCaptureProperties getProperties() {
+        if (properties == null) {
+            // load a default properties if we haven't been given one yet.
+            properties = new ImageCaptureProperties();
+        }
+        return properties;
+    }
 
-	/**
-	 * @return the barcodeMatchedr
-	 */
-	public BarcodeMatcher getBarcodeMatcher() {
-		return barcodeMatcher;
-	}
+    public void setProperties(ImageCaptureProperties anImageCaptureProperties) {
+        properties = anImageCaptureProperties;
+    }
 
-	/**
-	 * @param barcodeMatcher the barcodeMatchedr to set
-	 */
-	public void setBarcodeMatcher(BarcodeMatcher barcodeMatcher) {
-		this.barcodeMatcher = barcodeMatcher;
-	}
+    /**
+     * Store the currently authenticated user
+     * and look up and store the fullname that goes with this username.
+     * A call on this method will make appropriate values available for
+     * both getCurrentUsername() and getUserFullName().
+     *
+     * @param user
+     */
+    public void setCurrentUser(Users user) {
+        this.user = user;
+        this.getMainFrame().setStatusMessage("Connected as " + this.user.getFullname());
+    }
 
-	/**
-	 * @return the barcodeBuilder
-	 */
-	public BarcodeBuilder getBarcodeBuilder() {
-		return barcodeBuilder;
-	}
+    /**
+     *
+     * @return the db username of what should be the currently
+     * authenticated user.
+     *
+     */
+    public String getCurrentUsername() {
+        return this.user.getUsername();
+    }
 
-	/**
-	 * @param barcodeBuilder the barcodeBuilder to set
-	 */
-	public void setBarcodeBuilder(BarcodeBuilder barcodeBuilder) {
-		this.barcodeBuilder = barcodeBuilder;
-	}
+    /**
+     * Note that there is no setUserFullName() method, the singleton
+     * value of userFullName is set automatically through a call to
+     * setCurrentUsername().
+     *
+     * @return the userFullName
+     */
+    public String getUserFullName() {
+        return this.user.getFullname();
+    }
 
-	public void setJobList(RunnableJobTableModel jobList) {
-		this.jobList = jobList;
-	}
+    /** Note that there is no setUser() method.  The value is set automatically
+     * through a call to setCurrentUsername();
+     *
+     * @return the current user
+     */
+    public Users getUser() {
+        return user;
+    }
 
-	public RunnableJobTableModel getJobList() {
-		return jobList;
-	}
+    public void unsetCurrentUser() {
+        user = null;
+    }
 
-	public void setCharacterWidth(int characterWidth) {
-		if (characterWidth > 8) { 
-		    this.characterWidth = characterWidth;
-		} else { 
-			this.characterWidth = 8;
-		}
-	}
+    /**
+     * @return the barcodeMatchedr
+     */
+    public BarcodeMatcher getBarcodeMatcher() {
+        return barcodeMatcher;
+    }
 
-	public int getCharacterWidth() {
-		return characterWidth;
-	}
-	
+    /**
+     * @param barcodeMatcher the barcodeMatchedr to set
+     */
+    public void setBarcodeMatcher(BarcodeMatcher barcodeMatcher) {
+        this.barcodeMatcher = barcodeMatcher;
+    }
+
+    /**
+     * @return the barcodeBuilder
+     */
+    public BarcodeBuilder getBarcodeBuilder() {
+        return barcodeBuilder;
+    }
+
+    /**
+     * @param barcodeBuilder the barcodeBuilder to set
+     */
+    public void setBarcodeBuilder(BarcodeBuilder barcodeBuilder) {
+        this.barcodeBuilder = barcodeBuilder;
+    }
+
+    public RunnableJobTableModel getJobList() {
+        return jobList;
+    }
+
+    public void setJobList(RunnableJobTableModel jobList) {
+        this.jobList = jobList;
+    }
+
+    public int getCharacterWidth() {
+        return characterWidth;
+    }
+
+    public void setCharacterWidth(int characterWidth) {
+        if (characterWidth > 8) {
+            this.characterWidth = characterWidth;
+        } else {
+            this.characterWidth = 8;
+        }
+    }
+
 }

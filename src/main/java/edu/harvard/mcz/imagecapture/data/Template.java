@@ -7,329 +7,329 @@ package edu.harvard.mcz.imagecapture.data;
  */
 public class Template implements java.io.Serializable {
 
-	private static final long serialVersionUID = -7457138600715862183L;
-	
-	private String templateId;
-	private String name;
-	private Integer imageSizeX;
-	private Integer imageSizeY;
-	private Integer barcodePositionX;
-	private Integer barcodePositionY;
-	private Integer barcodeSizeX;
-	private Integer barcodeSizeY;
-	private Integer specimenPositionX;
-	private Integer specimenPositionY;
-	private Integer specimenSizeX;
-	private Integer specimenSizeY;
-	private Integer textPositionX;
-	private Integer textPositionY;
-	private Integer textSizeX;
-	private Integer textSizeY;
-	private Integer labelPositionX;
-	private Integer labelPositionY;
-	private Integer labelSizeX;
-	private Integer labelSizeY;
-	private Integer utLabelPositionX;
-	private Integer utLabelPositionY;
-	private Integer utLabelSizeX;
-	private Integer utLabelSizey;
-	private Integer utBarcodePositionX;
-	private Integer utBarcodePositionY;
-	private Integer utBarcodeSizeX;
-	private Integer utBarcodeSizeY;	
-	private boolean editable;
-	private ICImage referenceImage;
+    private static final long serialVersionUID = -7457138600715862183L;
 
-	public Template() {
-	}
+    private String templateId;
+    private String name;
+    private Integer imageSizeX;
+    private Integer imageSizeY;
+    private Integer barcodePositionX;
+    private Integer barcodePositionY;
+    private Integer barcodeSizeX;
+    private Integer barcodeSizeY;
+    private Integer specimenPositionX;
+    private Integer specimenPositionY;
+    private Integer specimenSizeX;
+    private Integer specimenSizeY;
+    private Integer textPositionX;
+    private Integer textPositionY;
+    private Integer textSizeX;
+    private Integer textSizeY;
+    private Integer labelPositionX;
+    private Integer labelPositionY;
+    private Integer labelSizeX;
+    private Integer labelSizeY;
+    private Integer utLabelPositionX;
+    private Integer utLabelPositionY;
+    private Integer utLabelSizeX;
+    private Integer utLabelSizey;
+    private Integer utBarcodePositionX;
+    private Integer utBarcodePositionY;
+    private Integer utBarcodeSizeX;
+    private Integer utBarcodeSizeY;
+    private boolean editable;
+    private ICImage referenceImage;
 
-	public Template(String templateId) {
-		this.templateId = templateId;
-	}
+    public Template() {
+    }
 
-	public Template(String templateId, String name, Integer imageSizeX,
-			Integer imageSizeY, Integer barcodePositionX,
-			Integer barcodePositionY, Integer barcodeSizeX,
-			Integer barcodeSizeY, Integer specimenPositionX,
-			Integer specimenPositionY, Integer specimenSizeX,
-			Integer specimenSizeY, Integer textPositionX,
-			Integer textPositionY, Integer textSizeX, Integer textSizeY,
-			Integer labelPositionX, Integer labelPositionY, Integer labelSizeX,
-			Integer labelSizeY, Integer utLabelPositionX,
-			Integer utLabelPositionY, Integer utLabelSizeX, Integer utLabelSizey, 
-			boolean editable, ICImage referenceImage,
-			Integer utBarcodePositionY, Integer utBarcodeSizeX, Integer utBarcodeSizeY
-			) {
-		this.templateId = templateId;
-		this.name = name;
-		this.imageSizeX = imageSizeX;
-		this.imageSizeY = imageSizeY;
-		this.barcodePositionX = barcodePositionX;
-		this.barcodePositionY = barcodePositionY;
-		this.barcodeSizeX = barcodeSizeX;
-		this.barcodeSizeY = barcodeSizeY;
-		this.specimenPositionX = specimenPositionX;
-		this.specimenPositionY = specimenPositionY;
-		this.specimenSizeX = specimenSizeX;
-		this.specimenSizeY = specimenSizeY;
-		this.textPositionX = textPositionX;
-		this.textPositionY = textPositionY;
-		this.textSizeX = textSizeX;
-		this.textSizeY = textSizeY;
-		this.labelPositionX = labelPositionX;
-		this.labelPositionY = labelPositionY;
-		this.labelSizeX = labelSizeX;
-		this.labelSizeY = labelSizeY;
-		this.utLabelPositionX = utLabelPositionX;
-		this.utLabelPositionY = utLabelPositionY;
-		this.utLabelSizeX = utLabelSizeX;
-		this.utLabelSizey = utLabelSizey;
-		this.utBarcodePositionX = utLabelPositionX;
-		this.utBarcodePositionY = utLabelPositionY;
-		this.utBarcodeSizeX = utBarcodeSizeX;
-		this.utBarcodeSizeY = utBarcodeSizeY;
-		this.editable = editable;
-		this.referenceImage = referenceImage;
-	}
+    public Template(String templateId) {
+        this.templateId = templateId;
+    }
 
-	public String getTemplateId() {
-		return this.templateId;
-	}
+    public Template(String templateId, String name, Integer imageSizeX,
+                    Integer imageSizeY, Integer barcodePositionX,
+                    Integer barcodePositionY, Integer barcodeSizeX,
+                    Integer barcodeSizeY, Integer specimenPositionX,
+                    Integer specimenPositionY, Integer specimenSizeX,
+                    Integer specimenSizeY, Integer textPositionX,
+                    Integer textPositionY, Integer textSizeX, Integer textSizeY,
+                    Integer labelPositionX, Integer labelPositionY, Integer labelSizeX,
+                    Integer labelSizeY, Integer utLabelPositionX,
+                    Integer utLabelPositionY, Integer utLabelSizeX, Integer utLabelSizey,
+                    boolean editable, ICImage referenceImage,
+                    Integer utBarcodePositionY, Integer utBarcodeSizeX, Integer utBarcodeSizeY
+    ) {
+        this.templateId = templateId;
+        this.name = name;
+        this.imageSizeX = imageSizeX;
+        this.imageSizeY = imageSizeY;
+        this.barcodePositionX = barcodePositionX;
+        this.barcodePositionY = barcodePositionY;
+        this.barcodeSizeX = barcodeSizeX;
+        this.barcodeSizeY = barcodeSizeY;
+        this.specimenPositionX = specimenPositionX;
+        this.specimenPositionY = specimenPositionY;
+        this.specimenSizeX = specimenSizeX;
+        this.specimenSizeY = specimenSizeY;
+        this.textPositionX = textPositionX;
+        this.textPositionY = textPositionY;
+        this.textSizeX = textSizeX;
+        this.textSizeY = textSizeY;
+        this.labelPositionX = labelPositionX;
+        this.labelPositionY = labelPositionY;
+        this.labelSizeX = labelSizeX;
+        this.labelSizeY = labelSizeY;
+        this.utLabelPositionX = utLabelPositionX;
+        this.utLabelPositionY = utLabelPositionY;
+        this.utLabelSizeX = utLabelSizeX;
+        this.utLabelSizey = utLabelSizey;
+        this.utBarcodePositionX = utLabelPositionX;
+        this.utBarcodePositionY = utLabelPositionY;
+        this.utBarcodeSizeX = utBarcodeSizeX;
+        this.utBarcodeSizeY = utBarcodeSizeY;
+        this.editable = editable;
+        this.referenceImage = referenceImage;
+    }
 
-	public void setTemplateId(String templateId) {
-		this.templateId = templateId;
-	}
+    public String getTemplateId() {
+        return this.templateId;
+    }
 
-	public String getName() {
-		return this.name;
-	}
+    public void setTemplateId(String templateId) {
+        this.templateId = templateId;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public Integer getImageSizeX() {
-		return this.imageSizeX;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setImageSizeX(Integer imageSizeX) {
-		this.imageSizeX = imageSizeX;
-	}
+    public Integer getImageSizeX() {
+        return this.imageSizeX;
+    }
 
-	public Integer getImageSizeY() {
-		return this.imageSizeY;
-	}
+    public void setImageSizeX(Integer imageSizeX) {
+        this.imageSizeX = imageSizeX;
+    }
 
-	public void setImageSizeY(Integer imageSizeY) {
-		this.imageSizeY = imageSizeY;
-	}
+    public Integer getImageSizeY() {
+        return this.imageSizeY;
+    }
 
-	public Integer getBarcodePositionX() {
-		return this.barcodePositionX;
-	}
+    public void setImageSizeY(Integer imageSizeY) {
+        this.imageSizeY = imageSizeY;
+    }
 
-	public void setBarcodePositionX(Integer barcodePositionX) {
-		this.barcodePositionX = barcodePositionX;
-	}
+    public Integer getBarcodePositionX() {
+        return this.barcodePositionX;
+    }
 
-	public Integer getBarcodePositionY() {
-		return this.barcodePositionY;
-	}
+    public void setBarcodePositionX(Integer barcodePositionX) {
+        this.barcodePositionX = barcodePositionX;
+    }
 
-	public void setBarcodePositionY(Integer barcodePositionY) {
-		this.barcodePositionY = barcodePositionY;
-	}
+    public Integer getBarcodePositionY() {
+        return this.barcodePositionY;
+    }
 
-	public Integer getBarcodeSizeX() {
-		return this.barcodeSizeX;
-	}
+    public void setBarcodePositionY(Integer barcodePositionY) {
+        this.barcodePositionY = barcodePositionY;
+    }
 
-	public void setBarcodeSizeX(Integer barcodeSizeX) {
-		this.barcodeSizeX = barcodeSizeX;
-	}
+    public Integer getBarcodeSizeX() {
+        return this.barcodeSizeX;
+    }
 
-	public Integer getBarcodeSizeY() {
-		return this.barcodeSizeY;
-	}
+    public void setBarcodeSizeX(Integer barcodeSizeX) {
+        this.barcodeSizeX = barcodeSizeX;
+    }
 
-	public void setBarcodeSizeY(Integer barcodeSizeY) {
-		this.barcodeSizeY = barcodeSizeY;
-	}
+    public Integer getBarcodeSizeY() {
+        return this.barcodeSizeY;
+    }
 
-	public Integer getSpecimenPositionX() {
-		return this.specimenPositionX;
-	}
+    public void setBarcodeSizeY(Integer barcodeSizeY) {
+        this.barcodeSizeY = barcodeSizeY;
+    }
 
-	public void setSpecimenPositionX(Integer specimenPositionX) {
-		this.specimenPositionX = specimenPositionX;
-	}
+    public Integer getSpecimenPositionX() {
+        return this.specimenPositionX;
+    }
 
-	public Integer getSpecimenPositionY() {
-		return this.specimenPositionY;
-	}
+    public void setSpecimenPositionX(Integer specimenPositionX) {
+        this.specimenPositionX = specimenPositionX;
+    }
 
-	public void setSpecimenPositionY(Integer specimenPositionY) {
-		this.specimenPositionY = specimenPositionY;
-	}
+    public Integer getSpecimenPositionY() {
+        return this.specimenPositionY;
+    }
 
-	public Integer getSpecimenSizeX() {
-		return this.specimenSizeX;
-	}
+    public void setSpecimenPositionY(Integer specimenPositionY) {
+        this.specimenPositionY = specimenPositionY;
+    }
 
-	public void setSpecimenSizeX(Integer specimenSizeX) {
-		this.specimenSizeX = specimenSizeX;
-	}
+    public Integer getSpecimenSizeX() {
+        return this.specimenSizeX;
+    }
 
-	public Integer getSpecimenSizeY() {
-		return this.specimenSizeY;
-	}
+    public void setSpecimenSizeX(Integer specimenSizeX) {
+        this.specimenSizeX = specimenSizeX;
+    }
 
-	public void setSpecimenSizeY(Integer specimenSizeY) {
-		this.specimenSizeY = specimenSizeY;
-	}
+    public Integer getSpecimenSizeY() {
+        return this.specimenSizeY;
+    }
 
-	public Integer getTextPositionX() {
-		return this.textPositionX;
-	}
+    public void setSpecimenSizeY(Integer specimenSizeY) {
+        this.specimenSizeY = specimenSizeY;
+    }
 
-	public void setTextPositionX(Integer textPositionX) {
-		this.textPositionX = textPositionX;
-	}
+    public Integer getTextPositionX() {
+        return this.textPositionX;
+    }
 
-	public Integer getTextPositionY() {
-		return this.textPositionY;
-	}
+    public void setTextPositionX(Integer textPositionX) {
+        this.textPositionX = textPositionX;
+    }
 
-	public void setTextPositionY(Integer textPositionY) {
-		this.textPositionY = textPositionY;
-	}
+    public Integer getTextPositionY() {
+        return this.textPositionY;
+    }
 
-	public Integer getTextSizeX() {
-		return this.textSizeX;
-	}
+    public void setTextPositionY(Integer textPositionY) {
+        this.textPositionY = textPositionY;
+    }
 
-	public void setTextSizeX(Integer textSizeX) {
-		this.textSizeX = textSizeX;
-	}
+    public Integer getTextSizeX() {
+        return this.textSizeX;
+    }
 
-	public Integer getTextSizeY() {
-		return this.textSizeY;
-	}
+    public void setTextSizeX(Integer textSizeX) {
+        this.textSizeX = textSizeX;
+    }
 
-	public void setTextSizeY(Integer textSizeY) {
-		this.textSizeY = textSizeY;
-	}
+    public Integer getTextSizeY() {
+        return this.textSizeY;
+    }
 
-	public Integer getLabelPositionX() {
-		return this.labelPositionX;
-	}
+    public void setTextSizeY(Integer textSizeY) {
+        this.textSizeY = textSizeY;
+    }
 
-	public void setLabelPositionX(Integer labelPositionX) {
-		this.labelPositionX = labelPositionX;
-	}
+    public Integer getLabelPositionX() {
+        return this.labelPositionX;
+    }
 
-	public Integer getLabelPositionY() {
-		return this.labelPositionY;
-	}
+    public void setLabelPositionX(Integer labelPositionX) {
+        this.labelPositionX = labelPositionX;
+    }
 
-	public void setLabelPositionY(Integer labelPositionY) {
-		this.labelPositionY = labelPositionY;
-	}
+    public Integer getLabelPositionY() {
+        return this.labelPositionY;
+    }
 
-	public Integer getLabelSizeX() {
-		return this.labelSizeX;
-	}
+    public void setLabelPositionY(Integer labelPositionY) {
+        this.labelPositionY = labelPositionY;
+    }
 
-	public void setLabelSizeX(Integer labelSizeX) {
-		this.labelSizeX = labelSizeX;
-	}
+    public Integer getLabelSizeX() {
+        return this.labelSizeX;
+    }
 
-	public Integer getLabelSizeY() {
-		return this.labelSizeY;
-	}
+    public void setLabelSizeX(Integer labelSizeX) {
+        this.labelSizeX = labelSizeX;
+    }
 
-	public void setLabelSizeY(Integer labelSizeY) {
-		this.labelSizeY = labelSizeY;
-	}
+    public Integer getLabelSizeY() {
+        return this.labelSizeY;
+    }
 
-	public Integer getUtLabelPositionX() {
-		return this.utLabelPositionX;
-	}
+    public void setLabelSizeY(Integer labelSizeY) {
+        this.labelSizeY = labelSizeY;
+    }
 
-	public void setUtLabelPositionX(Integer utLabelPositionX) {
-		this.utLabelPositionX = utLabelPositionX;
-	}
+    public Integer getUtLabelPositionX() {
+        return this.utLabelPositionX;
+    }
 
-	public Integer getUtLabelPositionY() {
-		return this.utLabelPositionY;
-	}
+    public void setUtLabelPositionX(Integer utLabelPositionX) {
+        this.utLabelPositionX = utLabelPositionX;
+    }
 
-	public void setUtLabelPositionY(Integer utLabelPositionY) {
-		this.utLabelPositionY = utLabelPositionY;
-	}
+    public Integer getUtLabelPositionY() {
+        return this.utLabelPositionY;
+    }
 
-	public Integer getUtLabelSizeX() {
-		return this.utLabelSizeX;
-	}
+    public void setUtLabelPositionY(Integer utLabelPositionY) {
+        this.utLabelPositionY = utLabelPositionY;
+    }
 
-	public void setUtLabelSizeX(Integer utLabelSizeX) {
-		this.utLabelSizeX = utLabelSizeX;
-	}
+    public Integer getUtLabelSizeX() {
+        return this.utLabelSizeX;
+    }
 
-	public Integer getUtLabelSizey() {
-		return this.utLabelSizey;
-	}
+    public void setUtLabelSizeX(Integer utLabelSizeX) {
+        this.utLabelSizeX = utLabelSizeX;
+    }
 
-	public void setUtLabelSizey(Integer utLabelSizey) {
-		this.utLabelSizey = utLabelSizey;
-	}
+    public Integer getUtLabelSizey() {
+        return this.utLabelSizey;
+    }
 
-	public void setEditable(boolean editable) {
-		this.editable = editable;
-	}
+    public void setUtLabelSizey(Integer utLabelSizey) {
+        this.utLabelSizey = utLabelSizey;
+    }
 
-	public boolean getEditable() {
-		return editable;
-	}
+    public boolean getEditable() {
+        return editable;
+    }
 
-	public void setReferenceImage(ICImage referenceImage) {
-		this.referenceImage = referenceImage;
-	}
+    public void setEditable(boolean editable) {
+        this.editable = editable;
+    }
 
-	public ICImage getReferenceImage() {
-		return referenceImage;
-	}
+    public ICImage getReferenceImage() {
+        return referenceImage;
+    }
 
-	public void setUtBarcodePositionX(Integer utBarcodePositionX) {
-		this.utBarcodePositionX = utBarcodePositionX;
-	}
+    public void setReferenceImage(ICImage referenceImage) {
+        this.referenceImage = referenceImage;
+    }
 
-	public Integer getUtBarcodePositionX() {
-		return utBarcodePositionX;
-	}
+    public Integer getUtBarcodePositionX() {
+        return utBarcodePositionX;
+    }
 
-	public void setUtBarcodePositionY(Integer utBarcodePositionY) {
-		this.utBarcodePositionY = utBarcodePositionY;
-	}
+    public void setUtBarcodePositionX(Integer utBarcodePositionX) {
+        this.utBarcodePositionX = utBarcodePositionX;
+    }
 
-	public Integer getUtBarcodePositionY() {
-		return utBarcodePositionY;
-	}
+    public Integer getUtBarcodePositionY() {
+        return utBarcodePositionY;
+    }
 
-	public void setUtBarcodeSizeX(Integer utBarcodeSizeX) {
-		this.utBarcodeSizeX = utBarcodeSizeX;
-	}
+    public void setUtBarcodePositionY(Integer utBarcodePositionY) {
+        this.utBarcodePositionY = utBarcodePositionY;
+    }
 
-	public Integer getUtBarcodeSizeX() {
-		return utBarcodeSizeX;
-	}
+    public Integer getUtBarcodeSizeX() {
+        return utBarcodeSizeX;
+    }
 
-	public void setUtBarcodeSizeY(Integer utBarcodeSizeY) {
-		this.utBarcodeSizeY = utBarcodeSizeY;
-	}
+    public void setUtBarcodeSizeX(Integer utBarcodeSizeX) {
+        this.utBarcodeSizeX = utBarcodeSizeX;
+    }
 
-	public Integer getUtBarcodeSizeY() {
-		return utBarcodeSizeY;
-	}
+    public Integer getUtBarcodeSizeY() {
+        return utBarcodeSizeY;
+    }
+
+    public void setUtBarcodeSizeY(Integer utBarcodeSizeY) {
+        this.utBarcodeSizeY = utBarcodeSizeY;
+    }
 
 }

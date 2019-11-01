@@ -1,99 +1,99 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
 <!-- Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA -->
-<hibernate-mapping default-lazy="false" >
-    <class name="edu.harvard.mcz.imagecapture.data.Template" table="Template" >
+<hibernate-mapping default-lazy="false">
+    <class name="edu.harvard.mcz.imagecapture.data.Template" table="Template">
         <id name="templateId" type="string">
-            <column name="TemplateId" length="50" />
-            <generator class="assigned" />
+            <column name="TemplateId" length="50"/>
+            <generator class="assigned"/>
         </id>
         <property name="name" type="string">
-            <column name="Template_Name" />
+            <column name="Template_Name"/>
         </property>
         <property name="imageSizeX" type="java.lang.Integer">
-            <column name="ImageSizeX" />
+            <column name="ImageSizeX"/>
         </property>
         <property name="imageSizeY" type="java.lang.Integer">
-            <column name="ImageSizeY" />
+            <column name="ImageSizeY"/>
         </property>
         <property name="barcodePositionX" type="java.lang.Integer">
-            <column name="BarcodePositionX" />
+            <column name="BarcodePositionX"/>
         </property>
         <property name="barcodePositionY" type="java.lang.Integer">
-            <column name="BarcodePositionY" />
+            <column name="BarcodePositionY"/>
         </property>
         <property name="barcodeSizeX" type="java.lang.Integer">
-            <column name="BarcodeSizeX" />
+            <column name="BarcodeSizeX"/>
         </property>
         <property name="barcodeSizeY" type="java.lang.Integer">
-            <column name="BarcodeSizeY" />
+            <column name="BarcodeSizeY"/>
         </property>
         <property name="specimenPositionX" type="java.lang.Integer">
-            <column name="SpecimenPositionX" />
+            <column name="SpecimenPositionX"/>
         </property>
         <property name="specimenPositionY" type="java.lang.Integer">
-            <column name="SpecimenPositionY" />
+            <column name="SpecimenPositionY"/>
         </property>
         <property name="specimenSizeX" type="java.lang.Integer">
-            <column name="SpecimenSizeX" />
+            <column name="SpecimenSizeX"/>
         </property>
         <property name="specimenSizeY" type="java.lang.Integer">
-            <column name="SpecimenSizeY" />
+            <column name="SpecimenSizeY"/>
         </property>
         <property name="textPositionX" type="java.lang.Integer">
-            <column name="TextPositionX" />
+            <column name="TextPositionX"/>
         </property>
         <property name="textPositionY" type="java.lang.Integer">
-            <column name="TextPositionY" />
+            <column name="TextPositionY"/>
         </property>
         <property name="textSizeX" type="java.lang.Integer">
-            <column name="TextSizeX" />
+            <column name="TextSizeX"/>
         </property>
         <property name="textSizeY" type="java.lang.Integer">
-            <column name="TextSizeY" />
+            <column name="TextSizeY"/>
         </property>
         <property name="labelPositionX" type="java.lang.Integer">
-            <column name="LabelPositionX" />
+            <column name="LabelPositionX"/>
         </property>
         <property name="labelPositionY" type="java.lang.Integer">
-            <column name="LabelPositionY" />
+            <column name="LabelPositionY"/>
         </property>
         <property name="labelSizeX" type="java.lang.Integer">
-            <column name="LabelSizeX" />
+            <column name="LabelSizeX"/>
         </property>
         <property name="labelSizeY" type="java.lang.Integer">
-            <column name="LabelSizeY" />
+            <column name="LabelSizeY"/>
         </property>
         <property name="utLabelPositionX" type="java.lang.Integer">
-            <column name="UtLabelPositionX" />
+            <column name="UtLabelPositionX"/>
         </property>
         <property name="utLabelPositionY" type="java.lang.Integer">
-            <column name="UtLabelPositionY" />
+            <column name="UtLabelPositionY"/>
         </property>
         <property name="utLabelSizeX" type="java.lang.Integer">
-            <column name="UtLabelSizeX" />
+            <column name="UtLabelSizeX"/>
         </property>
         <property name="utLabelSizey" type="java.lang.Integer">
-            <column name="UtLabelSizey" />
+            <column name="UtLabelSizey"/>
         </property>
         <property name="utBarcodePositionX" type="java.lang.Integer">
-            <column name="UtBarcodePositionX" />
+            <column name="UtBarcodePositionX"/>
         </property>
         <property name="utBarcodePositionY" type="java.lang.Integer">
-            <column name="UtBarcodePositionY" />
+            <column name="UtBarcodePositionY"/>
         </property>
         <property name="utBarcodeSizeX" type="java.lang.Integer">
-            <column name="UtBarcodeSizeX" />
+            <column name="UtBarcodeSizeX"/>
         </property>
         <property name="utBarcodeSizeY" type="java.lang.Integer">
-            <column name="UtBarcodeSizeY" />
-        </property>        
+            <column name="UtBarcodeSizeY"/>
+        </property>
         <property name="editable" type="java.lang.Boolean">
-            <column name="Editable" />
-        </property>        
+            <column name="Editable"/>
+        </property>
         <many-to-one name="referenceImage" class="edu.harvard.mcz.imagecapture.data.ICImage" fetch="join">
-            <column name="ReferenceImage" />
+            <column name="ReferenceImage"/>
         </many-to-one>
     </class>
 </hibernate-mapping>

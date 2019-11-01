@@ -25,7 +25,7 @@ of the image contains labels specific to the specimen (pin labels in the
 case of pinned insects), which portion of the image contains labels 
 specific to the container (unit tray labels), and which portion of the 
 image contains a human readable current identifiction (as a failover if
-the machine readable form is not read).  These templates are configurable.
+the machine readable form is not read). These templates are configurable.
 
 This software suite assumes that images are stored at a known location on a 
 mounted networked filesystem, and that each instance of the software is 
@@ -106,14 +106,8 @@ This will present you with a login dialog to run the tests, populated from the v
 The resulting executable jar file will be in build/Datashot{version}-jar-with-dependencies.jar,
 you can run it, for example, with:
 ```shell script
-java -jar DataShot-1.2.4-jar-with-dependencies.jar 
-```
-
-Builds were previously done with a mix of maven and ant to build the executable jar.  These are still available with
-the profile ant (which will leave executable jars in the build/ directory: 
-```shell script
-mvn package -P ant
-```
+java -jar DataShot-1.9.4-jar-with-dependencies.jar 
+``
 
 Note: If using maven 2, and you get a build error in the form of dependency problem about jai-image-io-core: 
 
@@ -209,7 +203,8 @@ The following configuration parameters are critical for setup:
     images.metadatacontainsbarcode=true
     default.preparation=pinned
 
-configuration.collection must be one of MCZ-ENT or ETHZ-ENT, it configures what catalog number barcodes are expected (and, later, other behavior).
+configuration.collection must be one of MCZ-ENT or ETHZ-ENT, 
+it configures what catalog number barcodes are expected (and, later, other behavior).
 
 images.thumbnailheight and images.thumbnailwidth determine the size of thumbnail images that will be generated when images are preprocessed.
 
@@ -272,6 +267,7 @@ The following configuration parameters control the behavior of the user interfac
     numbertypes.showall=false
     template.default=Default template
     login.showadvanced=false
+    editor.fields.maxHeight=570
 
 The following configuration parameters are for setting up tesseract as an OCR failover and ImageMagick for
 creating thumbnails (and transforming images for OCR failover):
@@ -279,8 +275,15 @@ creating thumbnails (and transforming images for OCR failover):
     images.barcoderescalesize=400
     program.convert=/usr/bin/convert
     program.tesseract=tesseract 
-    convert.parameters=\ -depth 8 -compress None -type Grayscale 
+    convert.parameters=\ -depth 8 -compress None -type Grayscale
     program.mogrify=mogrify 
+
+The following parameters can be used to configure the database access in case you work with the 
+generic, dist profile, resp. downloaded the current [jar from GitHub](https://github.com/BernhardWebstudio/DataShot_DesktopApp/releases):
+
+    hibernate.connection.username=root
+    hibernate.connection.url=jdbc\:mysql\://localhost\:3306/lepidoptera?serverTimezone\=Europe/Zurich
+    hibernate.connection.password=...
 
 The following properties just store recent activity, they aren't involved in configuration.
 
@@ -288,7 +291,8 @@ The following properties just store recent activity, they aren't involved in con
     scanonebarcode.lastpath=~/testImages/base/problem_2016Oct12/IMG_000057.JPG
 
 **Note well: If you do not configure each deployed instance, it will not behave as you expect since 
-default values for these configuration parameters will be used.**  
+default values for these configuration parameters will be used.** 
+
 
 ## Templates
 

@@ -1,21 +1,20 @@
 /**
  * TaxonNameReturner.java
  * edu.harvard.mcz.imagecapture.interfaces
- * Copyright © 2009 President and Fellows of Harvard College
  *
+ * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of Version 2 of the GNU General Public License
  * as published by the Free Software Foundation.
- *
+ * <p>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ * <p>
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
- * Author: Paul J. Morris
+ * <p>
  */
 package edu.harvard.mcz.imagecapture.interfaces;
 
@@ -27,60 +26,60 @@ package edu.harvard.mcz.imagecapture.interfaces;
  * example:
  * TaxonNameReturner parser = new ConcreteTaxonNameParser(aStringToParse);
  * String authorship = parser.getAuthorship();
- * 
- * @author Paul J. Morris
+ *
+ *
  *
  */
 public interface TaxonNameReturner {
 
-	/**
-	 * @return the authorship
-	 */
-	public String getAuthorship();
+    /**
+     * @return the authorship
+     */
+    String getAuthorship();
 
-	/**
-	 * @return the family
-	 */
-	public String getFamily();
+    /**
+     * @return the family
+     */
+    String getFamily();
 
-	/**
-	 * @return the subfamily
-	 */
-	public String getSubfamily();
+    /**
+     * @return the subfamily
+     */
+    String getSubfamily();
 
-	/**
-	 * @return the tribe
-	 */
-	public String getTribe();
+    /**
+     * @return the tribe
+     */
+    String getTribe();
 
-	/**
-	 * @return the genus
-	 */
-	public String getGenus();
+    /**
+     * @return the genus
+     */
+    String getGenus();
 
-	/**
-	 * @return the specificEpithet
-	 */
-	public String getSpecificEpithet();
+    /**
+     * @return the specificEpithet
+     */
+    String getSpecificEpithet();
 
-	/**
-	 * @return the subspecificEpithet
-	 */
-	public String getSubspecificEpithet();
+    /**
+     * @return the subspecificEpithet
+     */
+    String getSubspecificEpithet();
 
-	/**
-	 * @return the infraspecificEpithet
-	 */
-	public String getInfraspecificEpithet();
+    /**
+     * @return the infraspecificEpithet
+     */
+    String getInfraspecificEpithet();
 
-	/**
-	 * @return the infraspecificRank
-	 */
-	public String getInfraspecificRank();
-	
-	/**
-	 * @return the determiner
-	 */
-	public String getIdentifiedBy();
+    /**
+     * @return the infraspecificRank
+     */
+    String getInfraspecificRank();
+
+    /**
+     * @return the determiner
+     */
+    String getIdentifiedBy();
 
 }

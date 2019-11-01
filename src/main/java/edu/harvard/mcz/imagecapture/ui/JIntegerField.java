@@ -3,7 +3,6 @@ package edu.harvard.mcz.imagecapture.ui;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.ParseException;
 
 /**
  * A Java swing bean to represent an integer field in a GUI. Features admissible values.

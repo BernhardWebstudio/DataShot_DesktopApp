@@ -1,10 +1,8 @@
 package edu.harvard.mcz.imagecapture.utility;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
-import jdk.nashorn.internal.parser.JSONParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -109,8 +107,8 @@ public class OpenStreetMapUtils {
     /**
      * Find an address by its coordinates
      *
-     * @param lat the latitude of the address
-     * @param lon the longitude of the address
+     * @param lat  the latitude of the address
+     * @param lon  the longitude of the address
      * @param keys
      * @return
      */
@@ -121,7 +119,8 @@ public class OpenStreetMapUtils {
 
     /**
      * Fetch a values, specified with key, from OpenStreetMap API
-     * @param url the endpoint
+     *
+     * @param url  the endpoint
      * @param keys the JSONArray keys
      * @return a map of the key to its value
      */
@@ -149,8 +148,8 @@ public class OpenStreetMapUtils {
 
         JSONObject obj = null;
         try {
-            obj = new JSONObject(queryResult); }
-        catch (JSONException e) {
+            obj = new JSONObject(queryResult);
+        } catch (JSONException e) {
             log.error(e);
         }
 

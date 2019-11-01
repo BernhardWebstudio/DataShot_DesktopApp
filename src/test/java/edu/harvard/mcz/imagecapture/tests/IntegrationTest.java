@@ -14,7 +14,7 @@ package edu.harvard.mcz.imagecapture.tests;
  * </configuration>
  * 
  * 
- * @author mole
+ *
  *
  */
 public interface IntegrationTest { }

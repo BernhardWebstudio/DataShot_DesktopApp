@@ -1,12 +1,9 @@
 package edu.harvard.mcz.imagecapture.ui;
 
-import java.awt.Component;
-import java.awt.event.MouseEvent;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 
 /**
  * Passes mouse wheel events to the parent component if this component

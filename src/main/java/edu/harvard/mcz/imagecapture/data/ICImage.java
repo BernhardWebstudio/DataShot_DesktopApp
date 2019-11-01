@@ -7,150 +7,150 @@ package edu.harvard.mcz.imagecapture.data;
  */
 public class ICImage implements java.io.Serializable {
 
-	private static final long serialVersionUID = -6798658217903637142L;
-	
-	private Long imageId;
-	private Specimen specimen;
-	private String rawBarcode;
-	private String rawExifBarcode;
-	private String filename;
-	private String rawOcr;
-	private String path;
-	private String uri;
-	private String templateId;
-	private String drawerNumber;
-	private String md5sum;  
+    private static final long serialVersionUID = -6798658217903637142L;
 
-	public ICImage() {
-	}
+    private Long imageId;
+    private Specimen specimen;
+    private String rawBarcode;
+    private String rawExifBarcode;
+    private String filename;
+    private String rawOcr;
+    private String path;
+    private String uri;
+    private String templateId;
+    private String drawerNumber;
+    private String md5sum;
 
-	public ICImage(Specimen specimen) {
-		this.specimen = specimen;
-	}
+    public ICImage() {
+    }
 
-	public ICImage(Specimen specimen, String rawBarcode, String rawExifBarcode, String filename,
-			String rawOcr, String path, String uri, String templateId, String drawerNumber) {
-		this.specimen = specimen;
-		this.rawBarcode = rawBarcode;
-		this.rawExifBarcode = rawExifBarcode;
-		this.filename = filename;
-		setRawOcr(rawOcr);
-		this.path = path;
-		this.uri = uri;
-		this.templateId = templateId;
-		setDrawerNumber(drawerNumber);
-	}
+    public ICImage(Specimen specimen) {
+        this.specimen = specimen;
+    }
 
-	public Long getImageId() {
-		return this.imageId;
-	}
+    public ICImage(Specimen specimen, String rawBarcode, String rawExifBarcode, String filename,
+                   String rawOcr, String path, String uri, String templateId, String drawerNumber) {
+        this.specimen = specimen;
+        this.rawBarcode = rawBarcode;
+        this.rawExifBarcode = rawExifBarcode;
+        this.filename = filename;
+        setRawOcr(rawOcr);
+        this.path = path;
+        this.uri = uri;
+        this.templateId = templateId;
+        setDrawerNumber(drawerNumber);
+    }
 
-	public void setImageId(Long imageId) {
-		this.imageId = imageId;
-	}
+    public Long getImageId() {
+        return this.imageId;
+    }
 
-	public Specimen getSpecimen() {
-		return this.specimen;
-	}
+    public void setImageId(Long imageId) {
+        this.imageId = imageId;
+    }
 
-	public void setSpecimen(Specimen specimen) {
-		this.specimen = specimen;
-	}
+    public Specimen getSpecimen() {
+        return this.specimen;
+    }
 
-	public String getRawBarcode() {
-		return this.rawBarcode;
-	}
+    public void setSpecimen(Specimen specimen) {
+        this.specimen = specimen;
+    }
 
-	public void setRawBarcode(String rawBarcode) {
-		this.rawBarcode = rawBarcode;
-	    if (this.rawBarcode!=null && this.rawBarcode.length() > MetadataRetriever.getFieldLength(ICImage.class, "rawBarcode")) { 
-	        this.rawBarcode = this.rawBarcode.substring(0, MetadataRetriever.getFieldLength(ICImage.class, "rawBarcode")); 
-	    }
-	}
-	
-	public String getRawExifBarcode() {
-		return this.rawExifBarcode;
-	}
+    public String getRawBarcode() {
+        return this.rawBarcode;
+    }
 
-	public void setRawExifBarcode(String rawExifBarcode) {
-		this.rawExifBarcode = rawExifBarcode;
-	    if (this.rawExifBarcode!=null && this.rawExifBarcode.length() > MetadataRetriever.getFieldLength(ICImage.class, "rawExifBarcode")) { 
-	        this.rawExifBarcode = this.rawExifBarcode.substring(0, MetadataRetriever.getFieldLength(ICImage.class, "rawExifBarcode")); 
-	    }		
-	}	
+    public void setRawBarcode(String rawBarcode) {
+        this.rawBarcode = rawBarcode;
+        if (this.rawBarcode != null && this.rawBarcode.length() > MetadataRetriever.getFieldLength(ICImage.class, "rawBarcode")) {
+            this.rawBarcode = this.rawBarcode.substring(0, MetadataRetriever.getFieldLength(ICImage.class, "rawBarcode"));
+        }
+    }
 
-	public String getFilename() {
-		return this.filename;
-	}
+    public String getRawExifBarcode() {
+        return this.rawExifBarcode;
+    }
 
-	public void setFilename(String filename) {
-		this.filename = filename;
-	}
+    public void setRawExifBarcode(String rawExifBarcode) {
+        this.rawExifBarcode = rawExifBarcode;
+        if (this.rawExifBarcode != null && this.rawExifBarcode.length() > MetadataRetriever.getFieldLength(ICImage.class, "rawExifBarcode")) {
+            this.rawExifBarcode = this.rawExifBarcode.substring(0, MetadataRetriever.getFieldLength(ICImage.class, "rawExifBarcode"));
+        }
+    }
 
-	public String getRawOcr() {
-		return this.rawOcr;
-	}
+    public String getFilename() {
+        return this.filename;
+    }
 
-	public void setRawOcr(String rawOcr) {
-		this.rawOcr = rawOcr;
-	    if (this.rawOcr!=null && this.rawOcr.length() > MetadataRetriever.getFieldLength(ICImage.class, "rawOcr")) { 
-	        this.rawOcr = this.rawOcr.substring(0, MetadataRetriever.getFieldLength(ICImage.class, "rawOcr")); 
-	    }		
-	}
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
 
-	public String getPath() {
-		return this.path;
-	}
+    public String getRawOcr() {
+        return this.rawOcr;
+    }
 
-	public void setPath(String path) {
-		this.path = path;
-	}
+    public void setRawOcr(String rawOcr) {
+        this.rawOcr = rawOcr;
+        if (this.rawOcr != null && this.rawOcr.length() > MetadataRetriever.getFieldLength(ICImage.class, "rawOcr")) {
+            this.rawOcr = this.rawOcr.substring(0, MetadataRetriever.getFieldLength(ICImage.class, "rawOcr"));
+        }
+    }
 
-	public String getUri() {
-		return this.uri;
-	}
+    public String getPath() {
+        return this.path;
+    }
 
-	public void setUri(String uri) {
-		this.uri = uri;
-	}
+    public void setPath(String path) {
+        this.path = path;
+    }
 
-	public String getTemplateId() {
-		return templateId;
-	}
+    public String getUri() {
+        return this.uri;
+    }
 
-	public void setTemplateId(String templateId) {
-		this.templateId = templateId;
-	}
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
 
-	/**
-	 * @return the drawerNumber
-	 */
-	public String getDrawerNumber() {
-		return drawerNumber;
-	}
+    public String getTemplateId() {
+        return templateId;
+    }
 
-	/**
-	 * @param drawerNumber the drawerNumber to set
-	 */
-	public void setDrawerNumber(String drawerNumber) {
-		this.drawerNumber = drawerNumber;
-	    if (this.drawerNumber!=null && this.drawerNumber.length() > MetadataRetriever.getFieldLength(ICImage.class, "drawerNumber")) { 
-	        this.drawerNumber = this.drawerNumber.substring(0, MetadataRetriever.getFieldLength(ICImage.class, "drawerNumber")); 
-	    }	
-	}
+    public void setTemplateId(String templateId) {
+        this.templateId = templateId;
+    }
 
-	/**
-	 * @return the md5sum
-	 */
-	public String getMd5sum() {
-		return md5sum;
-	}
+    /**
+     * @return the drawerNumber
+     */
+    public String getDrawerNumber() {
+        return drawerNumber;
+    }
 
-	/**
-	 * @param md5sum the md5sum to set
-	 */
-	public void setMd5sum(String md5sum) {
-		this.md5sum = md5sum;
-	}
-	
+    /**
+     * @param drawerNumber the drawerNumber to set
+     */
+    public void setDrawerNumber(String drawerNumber) {
+        this.drawerNumber = drawerNumber;
+        if (this.drawerNumber != null && this.drawerNumber.length() > MetadataRetriever.getFieldLength(ICImage.class, "drawerNumber")) {
+            this.drawerNumber = this.drawerNumber.substring(0, MetadataRetriever.getFieldLength(ICImage.class, "drawerNumber"));
+        }
+    }
+
+    /**
+     * @return the md5sum
+     */
+    public String getMd5sum() {
+        return md5sum;
+    }
+
+    /**
+     * @param md5sum the md5sum to set
+     */
+    public void setMd5sum(String md5sum) {
+        this.md5sum = md5sum;
+    }
+
 }

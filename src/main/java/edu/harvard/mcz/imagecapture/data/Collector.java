@@ -7,50 +7,50 @@ package edu.harvard.mcz.imagecapture.data;
  */
 public class Collector implements java.io.Serializable, Cloneable {
 
-	private static final long serialVersionUID = 4879266496355071312L;
-	
-	private Long collectorId;
-	private Specimen specimen;
-	private String collectorName;
+    private static final long serialVersionUID = 4879266496355071312L;
 
-	public Collector() {
-	}
+    private Long collectorId;
+    private Specimen specimen;
+    private String collectorName;
 
-	public Collector(Specimen specimen) {
-		this.specimen = specimen;
-	}
+    public Collector() {
+    }
 
-	public Collector(Specimen specimen, String collectorName) {
-		this.specimen = specimen;
-		this.collectorName = collectorName;
-	}
+    public Collector(Specimen specimen) {
+        this.specimen = specimen;
+    }
 
-	public Long getCollectorId() {
-		return this.collectorId;
-	}
+    public Collector(Specimen specimen, String collectorName) {
+        this.specimen = specimen;
+        this.collectorName = collectorName;
+    }
 
-	public void setCollectorId(Long collectorId) {
-		this.collectorId = collectorId;
-	}
+    public Long getCollectorId() {
+        return this.collectorId;
+    }
 
-	public Specimen getSpecimen() {
-		return this.specimen;
-	}
+    public void setCollectorId(Long collectorId) {
+        this.collectorId = collectorId;
+    }
 
-	public void setSpecimen(Specimen specimen) {
-		this.specimen = specimen;
-	}
+    public Specimen getSpecimen() {
+        return this.specimen;
+    }
 
-	public String getCollectorName() {
-		return this.collectorName;
-	}
+    public void setSpecimen(Specimen specimen) {
+        this.specimen = specimen;
+    }
 
-	public void setCollectorName(String collectorName) {
-		this.collectorName = collectorName;
-	}
+    public String getCollectorName() {
+        return this.collectorName;
+    }
 
-	@Override
-	public Object clone() {
-		return new Collector(this.specimen, this.collectorName);
-	}
+    public void setCollectorName(String collectorName) {
+        this.collectorName = collectorName;
+    }
+
+    @Override
+    public Object clone() {
+        return new Collector(this.specimen, this.collectorName);
+    }
 }

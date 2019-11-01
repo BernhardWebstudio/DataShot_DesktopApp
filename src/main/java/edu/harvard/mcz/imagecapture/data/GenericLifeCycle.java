@@ -200,7 +200,6 @@ public abstract class GenericLifeCycle<T> {
     }
 
     /**
-     *
      * @param instance
      * @return
      * @deprecated {use findByExample instead}
@@ -210,7 +209,6 @@ public abstract class GenericLifeCycle<T> {
     }
 
     /**
-     *
      * @param instance
      * @return
      * @deprecated {use findByExample instead}

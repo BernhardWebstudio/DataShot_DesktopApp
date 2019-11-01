@@ -3,7 +3,6 @@ package edu.harvard.mcz.imagecapture.ui;
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.Specimen;
-import edu.harvard.mcz.imagecapture.data.SpecimenLifeCycle;
 
 import javax.swing.*;
 import java.awt.*;
@@ -47,7 +46,7 @@ public class CopyRowButtonEditor extends DefaultCellEditor {
         button.setText(label);
         isPushed = true;
         try {
-        target = (Specimen) value;
+            target = (Specimen) value;
         } catch (Exception e) {
             // TODO: handle?
         }
@@ -67,7 +66,6 @@ public class CopyRowButtonEditor extends DefaultCellEditor {
         isPushed = false;
         return label;
     }
-
 
 
     @Override

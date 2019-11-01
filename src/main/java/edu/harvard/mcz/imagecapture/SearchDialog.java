@@ -1,7 +1,7 @@
 /**
  * SearchDialog.java
  * edu.harvard.mcz.imagecapture
- * Copyright © 2009 President and Fellows of Harvard College
+ *
  * <p>
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of Version 2 of the GNU General Public License
@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * <p>
- * Author: Paul J. Morris
  */
 package edu.harvard.mcz.imagecapture;
 
@@ -24,17 +23,17 @@ import edu.harvard.mcz.imagecapture.ui.JIntegerField;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import javax.swing.*;
 
 /**
  * SearchDialog
  *
- * @author Paul J. Morris
+ *
  */
 public class SearchDialog extends JDialog {
 
@@ -60,9 +59,9 @@ public class SearchDialog extends JDialog {
     private JComboBox jComboBoxCollector = null;
     private JTextField jTextFieldVerbatimLocality = null;
     private JComboBox jComboBoxCountry = null;
-		private JComboBox jComboBoxQuestions = null;
-		private JIntegerField jOffsetNumberField = null;
-		private JIntegerField jLimitNumberField = null;
+    private JComboBox jComboBoxQuestions = null;
+    private JIntegerField jOffsetNumberField = null;
+    private JIntegerField jLimitNumberField = null;
     private JTextField jTextFieldTribe = null;
     //private JTextField jTextFieldPrimaryDivision = null;
     private JComboBox<String> jComboBoxPrimaryDivision = null;
@@ -318,9 +317,9 @@ public class SearchDialog extends JDialog {
                     this.getWorkflowsJComboBox(),
                     this.getQuestionJComboBox(),
                     this.getUsersJComboBox(),
-										this.getIdentifiedByComboBox(),
-										this.getLimitJIntegerField(),
-										this.getOffsetJIntegerField()
+                    this.getIdentifiedByComboBox(),
+                    this.getLimitJIntegerField(),
+                    this.getOffsetJIntegerField()
             };
 
             assert (fields.length == labels.length);
@@ -694,23 +693,23 @@ public class SearchDialog extends JDialog {
             jTextFieldTribe = new JTextField();
         }
         return jTextFieldTribe;
-		}
-		
-		private JIntegerField getOffsetJIntegerField() {
-			if (jOffsetNumberField == null) {
-				jOffsetNumberField = new JIntegerField();
-				jOffsetNumberField.setValue(0);
-			}
-			return jOffsetNumberField;
-		}
-		
-		private JIntegerField getLimitJIntegerField() {
-			if (jLimitNumberField == null) {
-				jLimitNumberField = new JIntegerField();
-				jLimitNumberField.setValue(100);
-			}
-			return jLimitNumberField;
-		}
+    }
+
+    private JIntegerField getOffsetJIntegerField() {
+        if (jOffsetNumberField == null) {
+            jOffsetNumberField = new JIntegerField();
+            jOffsetNumberField.setValue(0);
+        }
+        return jOffsetNumberField;
+    }
+
+    private JIntegerField getLimitJIntegerField() {
+        if (jLimitNumberField == null) {
+            jLimitNumberField = new JIntegerField();
+            jLimitNumberField.setValue(100);
+        }
+        return jLimitNumberField;
+    }
 
     /**
      * This method initializes jTextField

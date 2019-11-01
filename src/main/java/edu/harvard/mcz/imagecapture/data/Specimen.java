@@ -1052,7 +1052,7 @@ public class Specimen implements java.io.Serializable {
 		}
 		if (georeferences.isEmpty()) { 
 			LatLong georef = new LatLong();
-			georef.setSpecimenId(this);
+			georef.setSpecimen(this);
 			georeferences.add(georef);
 		}
 		return georeferences;
@@ -1104,7 +1104,7 @@ public class Specimen implements java.io.Serializable {
 	public void attachNewPart() {  					
 		SpecimenPart newPart = new SpecimenPart();
 		newPart.setPreserveMethod(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_DEFAULT_PREPARATION));
-		newPart.setSpecimenId(this);
+		newPart.setSpecimen(this);
 		SpecimenPartLifeCycle spls = new SpecimenPartLifeCycle();
 		try {
 			spls.persist(newPart);

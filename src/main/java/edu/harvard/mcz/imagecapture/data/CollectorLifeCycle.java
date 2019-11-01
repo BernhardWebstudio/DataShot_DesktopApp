@@ -100,7 +100,7 @@ public class CollectorLifeCycle {
   }
 
   public void delete(Collector persistentInstance)throws SaveFailedException {
-    log.debug("deleting Collector instance");
+    log.debug("Deleting Collector instance with id " + persistentInstance.getCollectorId());
     try {
       Session session = HibernateUtil.getSessionFactory().getCurrentSession();
       session.beginTransaction();

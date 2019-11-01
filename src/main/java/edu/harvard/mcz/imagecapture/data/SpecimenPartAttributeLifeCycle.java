@@ -66,8 +66,7 @@ public class SpecimenPartAttributeLifeCycle {
 	}	
 	
 	public void persist(SpecimenPartAttribute instance)  throws SaveFailedException {
-		log.debug("persisting detatched SpecimenPartAttribute instance");
-		log.debug(instance.getSpecimenPartId());
+		log.debug("persisting detatched SpecimenPartAttribute instance: " + instance.getSpecimenPart().getSpecimenPartId());
 		try {
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			session.beginTransaction();
@@ -85,7 +84,6 @@ public class SpecimenPartAttributeLifeCycle {
 			log.error("persist failed", re);
 			throw re;
 		}
-		log.debug(instance.getSpecimenPartId());
 	}
 	
 	@SuppressWarnings("unchecked")

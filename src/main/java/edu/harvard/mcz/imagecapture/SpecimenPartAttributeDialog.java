@@ -214,7 +214,7 @@ public class SpecimenPartAttributeDialog extends JDialog {
 						newAttribs.setAttributeValue(comboBoxValue.getSelectedItem().toString());
 						newAttribs.setAttributeUnits(textFieldUnits.getText());
 						newAttribs.setAttributeRemark(textFieldRemarks.getText());
-						newAttribs.setSpecimenPartId(parentPart);
+						newAttribs.setSpecimenPart(parentPart);
 						newAttribs.setAttributeDeterminer(Singleton.getSingletonInstance().getUserFullName());
 						parentPart.getAttributeCollection().add(newAttribs);
 						SpecimenPartAttributeLifeCycle sls = new SpecimenPartAttributeLifeCycle();
@@ -230,7 +230,7 @@ public class SpecimenPartAttributeDialog extends JDialog {
 				panel.add(btnAdd, "4, 10");
 			}
 	        try {
-			    JLabel lblNewLabel = new JLabel(parentPart.getSpecimenId().getBarcode() + ":" + parentPart.getPartName() + " " + parentPart.getPreserveMethod() + " (" + parentPart.getLotCount() + ")    Right click on table to edit attributes.");
+			    JLabel lblNewLabel = new JLabel(parentPart.getSpecimen().getBarcode() + ":" + parentPart.getPartName() + " " + parentPart.getPreserveMethod() + " (" + parentPart.getLotCount() + ")    Right click on table to edit attributes.");
 			    contentPanel.add(lblNewLabel, BorderLayout.NORTH);
 		    } catch (Exception e) {
 	    		JLabel lblNewLabel = new JLabel("No Specimen");

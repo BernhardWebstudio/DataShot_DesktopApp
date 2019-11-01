@@ -10,7 +10,7 @@ import org.apache.commons.logging.LogFactory;
  * @author mole
  *
  */
-public class SpecimenPartAttribute {
+public class SpecimenPartAttribute implements Cloneable {
 	
 	private static final Log log = LogFactory.getLog(SpecimenPart.class);
 
@@ -34,12 +34,28 @@ public class SpecimenPartAttribute {
 	 * @param attributeDate
 	 */
 	public SpecimenPartAttribute(Long specimenPartAttributeId,
-			SpecimenPart specimenPartId, String attributeType,
-			String attributeValue, String attributeUnits,
-			String attributeRemark, String attributeDeterminer,
-			Date attributeDate) {
-		super();
+								 SpecimenPart specimenPartId, String attributeType,
+								 String attributeValue, String attributeUnits,
+								 String attributeRemark, String attributeDeterminer,
+								 Date attributeDate) {
+		this(specimenPartId, attributeType, attributeValue, attributeUnits, attributeRemark, attributeDeterminer, attributeDate);
 		this.specimenPartAttributeId = specimenPartAttributeId;
+	}
+
+	/**
+	 * @param specimenPartId
+	 * @param attributeType
+	 * @param attributeValue
+	 * @param attributeUnits
+	 * @param attributeRemark
+	 * @param attributeDeterminer
+	 * @param attributeDate
+	 */
+	public SpecimenPartAttribute(SpecimenPart specimenPartId, String attributeType,
+								 String attributeValue, String attributeUnits,
+								 String attributeRemark, String attributeDeterminer,
+								 Date attributeDate) {
+		super();
 		this.specimenPartId = specimenPartId;
 		this.attributeType = attributeType;
 		this.attributeValue = attributeValue;
@@ -47,7 +63,6 @@ public class SpecimenPartAttribute {
 		this.attributeRemark = attributeRemark;
 		this.attributeDeterminer = attributeDeterminer;
 		this.attributeDate = attributeDate;
-		log.debug(specimenPartAttributeId);
 	}
 
 	/**
@@ -74,13 +89,23 @@ public class SpecimenPartAttribute {
 	/**
 	 * @return the specimenPartId
 	 */
+	public SpecimenPart getSpecimenPart() {
+		return specimenPartId;
+	}
+
+	// legacy as long as the hibernate property is called specimenPartId
 	public SpecimenPart getSpecimenPartId() {
 		return specimenPartId;
 	}
 
 	/**
-	 * @param specimenPartId the specimenPartId to set
+	 * @param specimenPart the specimenPartId to set
 	 */
+	public void setSpecimenPart(SpecimenPart specimenPart) {
+		this.specimenPartId = specimenPart;
+	}
+
+	// legacy as long as the hibernate property is called specimenId
 	public void setSpecimenPartId(SpecimenPart specimenPartId) {
 		this.specimenPartId = specimenPartId;
 	}
@@ -167,5 +192,13 @@ public class SpecimenPartAttribute {
 	 */
 	public void setAttributeDate(Date prepTypeAttributeDate) {
 		this.attributeDate = prepTypeAttributeDate;
+	}
+
+	@Override
+	public Object clone() {
+		SpecimenPartAttribute newAttr = new SpecimenPartAttribute(
+				(SpecimenPart) specimenPartId.clone(), attributeType, attributeValue, attributeUnits, attributeRemark, attributeDeterminer, (Date) attributeDate.clone()
+		);
+		return newAttr;
 	}
 }

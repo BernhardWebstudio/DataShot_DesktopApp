@@ -3,6 +3,7 @@ package edu.harvard.mcz.imagecapture.data;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.ListIterator;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -14,7 +15,7 @@ import org.apache.commons.logging.LogFactory;
  *
  *
  */
-public class SpecimenPart {
+public class SpecimenPart implements Cloneable {
 	
 	public static final String[] PARTNAMES = {
 		"whole animal", "partial animal",
@@ -52,8 +53,23 @@ public class SpecimenPart {
 			String partName, String preserveMethod, int lotCount,
 			String lotCountModifier,
 			Collection<SpecimenPartAttribute> attributeCollection) {
-		super();
+		this(specimenId, partName, preserveMethod, lotCount, lotCountModifier, attributeCollection);
 		this.specimenPartId = specimenPartId;
+	}
+
+	/**
+	 * @param specimenId
+	 * @param partName
+	 * @param preserveMethod
+	 * @param lotCount
+	 * @param lotCountModifier
+	 * @param attributeCollection
+	 */
+	public SpecimenPart(Specimen specimenId,
+						String partName, String preserveMethod, int lotCount,
+						String lotCountModifier,
+						Collection<SpecimenPartAttribute> attributeCollection) {
+		super();
 		this.specimenId = specimenId;
 		this.partName = partName;
 		this.preserveMethod = preserveMethod;
@@ -79,6 +95,11 @@ public class SpecimenPart {
 	/**
 	 * @return the specimenId
 	 */
+	public Specimen getSpecimen() {
+		return specimenId;
+	}
+
+	// legacy as long as the hibernate property is called specimenId
 	public Specimen getSpecimenId() {
 		return specimenId;
 	}
@@ -86,6 +107,11 @@ public class SpecimenPart {
 	/**
 	 * @param specimenId the specimenId to set
 	 */
+	public void setSpecimen(Specimen specimenId) {
+		this.specimenId = specimenId;
+	}
+
+	// legacy as long as the hibernate property is called specimenId
 	public void setSpecimenId(Specimen specimenId) {
 		this.specimenId = specimenId;
 	}
@@ -154,7 +180,7 @@ public class SpecimenPart {
 			attributeCollection = new ArrayList<SpecimenPartAttribute>();
 			SpecimenPartAttributeLifeCycle spals = new SpecimenPartAttributeLifeCycle();
 			SpecimenPartAttribute example = new SpecimenPartAttribute();
-			example.setSpecimenPartId(this);
+			example.setSpecimenPart(this);
 			example.setAttributeType(null);
 			example.setAttributeValue(null);
 			example.setAttributeUnits(null);
@@ -201,5 +227,18 @@ public class SpecimenPart {
 		log.debug(result.toString());
 		return result.toString();
 	}
-	
+
+	@Override
+	public Object clone() {
+		SpecimenPart newPart = new SpecimenPart(specimenId, partName, preserveMethod, lotCount, lotCountModifier, new ArrayList<>());
+		ArrayList<SpecimenPartAttribute> attrCollection = new ArrayList();
+		ListIterator iterator = (ListIterator) attributeCollection.iterator();
+		while (iterator.hasNext()) {
+			SpecimenPartAttribute newSpecPartAttr = (SpecimenPartAttribute) ((SpecimenPartAttribute)iterator.next()).clone();
+			newSpecPartAttr.setSpecimenPart(newPart);
+			attrCollection.add(newSpecPartAttr);
+		}
+		newPart.attributeCollection = attrCollection;
+		return newPart;
+	}
 }

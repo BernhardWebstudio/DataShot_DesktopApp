@@ -118,7 +118,6 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
     URL cursorFile = this.getClass().getResource(
         "/edu/harvard/mcz/imagecapture/resources/images/magnifying_glass.gif");
     try {
-      log.debug(cursorFile.toString());
       Image zoomCursorImage = ImageIO.read(cursorFile);
       Point hotPoint = new Point(5, 5);
       zoomCursor = Toolkit.getDefaultToolkit().createCustomCursor(

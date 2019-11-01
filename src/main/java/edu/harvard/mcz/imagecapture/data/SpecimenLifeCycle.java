@@ -150,8 +150,8 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			try {
 			   if (!instance.getLatLong().isEmpty()) { 
 				   LatLong ll = instance.getLatLong().iterator().next();
-				   if (ll.getSpecimenId()==null) { 
-					   instance.getLatLong().iterator().next().setSpecimenId(instance);
+				   if (ll.getSpecimen()==null) {
+					   instance.getLatLong().iterator().next().setSpecimen(instance);
 				   }
 			   }
 			   session.saveOrUpdate(instance); 

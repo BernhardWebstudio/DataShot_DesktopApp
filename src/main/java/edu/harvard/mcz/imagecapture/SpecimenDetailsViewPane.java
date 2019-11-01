@@ -39,7 +39,6 @@ import edu.harvard.mcz.imagecapture.data.Sex;
 import edu.harvard.mcz.imagecapture.data.Specimen;
 import edu.harvard.mcz.imagecapture.data.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.data.SpecimenPart;
-import edu.harvard.mcz.imagecapture.data.SpecimenPartAttribute;
 import edu.harvard.mcz.imagecapture.data.SpecimenPartLifeCycle;
 import edu.harvard.mcz.imagecapture.data.SpecimenPartsTableModel;
 import edu.harvard.mcz.imagecapture.data.Tracking;
@@ -63,7 +62,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
 import javax.persistence.OptimisticLockException;
@@ -511,7 +509,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		updateDeterminationCount();
 	}
 	
-	private void copyPreviousRecord(){
+	private void copyPreviousRecord() {
 		log.debug("calling copyPreviousRecord()");
 		//thisPane.setStateToDirty();
 		jTextFieldDateDetermined.setText(previousSpecimen.getDateIdentified());	
@@ -537,7 +535,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 		}	
 		jTextFieldLocality.setText(previousSpecimen.getSpecificLocality());
 		jComboBoxCollection.setSelectedItem(previousSpecimen.getCollection());
-		jTableCollectors.setModel(new CollectorTableModel(previousSpecimen.getCollectors()));
 		jTextFieldDateNos.setText(previousSpecimen.getDateNos());
 		jTextFieldISODate.setText(previousSpecimen.getIsoDate());
 		jTextFieldDateEmerged.setText(previousSpecimen.getDateEmerged());
@@ -556,12 +553,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 		specimen.getNumbers().clear();
 		for (Number number : previousSpecimen.getNumbers()) {
 			//specimen.getNumbers().add((edu.harvard.mcz.imagecapture.data.Number)iter.next());
-			Number n = new Number();
-			Number n2 = number;
-			n.setNumber(new String(n2.getNumber()));
+			Number n = (Number) number.clone();
 			n.setSpecimen(specimen);
-			n.setNumberId(new Long(n2.getNumberId()));
-			n.setNumberType(new String(n2.getNumberType()));
 			specimen.getNumbers().add(n);
 
 		}
@@ -571,49 +564,9 @@ public class SpecimenDetailsViewPane extends JPanel {
 		
 		
 		//+ preparation type (the whole table!) = specimen parts
-		/*jTableSpecimenParts.setModel(new SpecimenPartsTableModel(previousSpecimen.getSpecimenParts()));
-		jTableSpecimenParts.getColumnModel().getColumn(0).setPreferredWidth(90);
-		for (int i = 0; i < jTableSpecimenParts.getColumnCount(); i++) {
-		    TableColumn column = jTableSpecimenParts.getColumnModel().getColumn(i);
-		    if (i == 0) {
-		        column.setPreferredWidth(120); 
-		    } else {
-		        column.setPreferredWidth(50);
-		    }
-		}
-		
-		specimen.getSpecimenParts().clear();
-		Iterator<edu.harvard.mcz.imagecapture.data.SpecimenPart> iterp = previousSpecimen.getSpecimenParts().iterator();
-		while(iterp.hasNext()){
-			specimen.getSpecimenParts().add((edu.harvard.mcz.imagecapture.data.SpecimenPart)iterp.next());
-		}
-		jTableSpecimenParts.setModel(new SpecimenPartsTableModel(specimen.getSpecimenParts()));*/
-		
-		specimen.getSpecimenParts().clear();
 		for (SpecimenPart specimenPart : previousSpecimen.getSpecimenParts()) {
-			SpecimenPart part = new SpecimenPart();
-			SpecimenPart part2 = specimenPart;
-			Collection<SpecimenPartAttribute> coll = new ArrayList<SpecimenPartAttribute>();
-			Collection<SpecimenPartAttribute> coll2 = part2.getAttributeCollection();
-			for (SpecimenPartAttribute pa2 : coll2) {
-				SpecimenPartAttribute pa = new SpecimenPartAttribute();
-				pa.setAttributeDate(pa2.getAttributeDate());
-				pa.setAttributeDeterminer(pa.getAttributeDeterminer());
-				pa.setAttributeRemark(pa2.getAttributeRemark());
-				pa.setAttributeType(pa2.getAttributeType());
-				pa.setAttributeUnits(pa2.getAttributeUnits());
-				pa.setAttributeValue(pa2.getAttributeValue());
-				pa.setSpecimenPartAttributeId(pa2.getSpecimenPartAttributeId());
-				pa.setSpecimenPartId(pa2.getSpecimenPartId());
-				coll.add(pa);
-			}
-			part.setAttributeCollection(coll);
-			part.setLotCount(part2.getLotCount());
-			part.setLotCountModifier(part2.getLotCountModifier());
-			part.setPartName(part2.getPartName());
-			part.setPreserveMethod(part2.getPreserveMethod());
-			part.setSpecimenId(part2.getSpecimenId());
-			part.setSpecimenPartId(part2.getSpecimenPartId());
+			SpecimenPart part = (SpecimenPart) specimenPart.clone();
+			part.setSpecimen(specimen);
 			specimen.getSpecimenParts().add(part);
 		}
 		jTableSpecimenParts.setModel(new SpecimenPartsTableModel(specimen.getSpecimenParts()));
@@ -625,19 +578,13 @@ public class SpecimenDetailsViewPane extends JPanel {
 			specimen.getCollectors().add((edu.harvard.mcz.imagecapture.data.Collector)iterc.next());
 		}		
 		jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));*/
-		
-		specimen.getCollectors().clear();
+
 		for (Collector collector : previousSpecimen.getCollectors()) {
-			Collector c = new Collector();
-			Collector c2 = collector;
-			c.setCollectorId(c2.getCollectorId());
-			c.setCollectorName(c2.getCollectorName());
+			Collector c = (Collector) collector.clone();
 			c.setSpecimen(specimen);
 			specimen.getCollectors().add(c);
-		}		
+		}
 		jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));
-
-		
 	
 		CollectorLifeCycle cls = new CollectorLifeCycle();
 		JComboBox<String> jComboBoxCollector = new JComboBox<>(cls.getDistinctCollectors());
@@ -646,67 +593,19 @@ public class SpecimenDetailsViewPane extends JPanel {
 		jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(jComboBoxCollector));
 		AutoCompleteDecorator.decorate(jComboBoxCollector);		
 		
-		//+determinations 
-		specimen.getDeterminations().clear();
+		//+determinations
 		for (Determination prevdet : previousSpecimen.getDeterminations()) {
-			Determination newdet = new Determination();
-			newdet.setGenus(prevdet.getGenus());
-			newdet.setSpecificEpithet(prevdet.getSpecificEpithet());
-			newdet.setSubspecificEpithet(prevdet.getSubspecificEpithet());
-			newdet.setInfraspecificEpithet(prevdet.getInfraspecificEpithet());
-			newdet.setInfraspecificRank(prevdet.getInfraspecificRank());
-			newdet.setAuthorship(prevdet.getAuthorship());
-			newdet.setUnNamedForm(prevdet.getUnNamedForm());
-			newdet.setIdentifiedBy(prevdet.getIdentifiedBy());
-			newdet.setTypeStatus(prevdet.getTypeStatus());
-			newdet.setSpeciesNumber(prevdet.getSpeciesNumber());
-			newdet.setVerbatimText(prevdet.getVerbatimText());
-			newdet.setNatureOfId(prevdet.getNatureOfId());
-			newdet.setDateIdentified(prevdet.getDateIdentified());
-			newdet.setRemarks(prevdet.getRemarks());
+			Determination newdet = prevdet.clone();
 			newdet.setSpecimen(specimen);
 			specimen.getDeterminations().add(newdet);
 
 		}		
 
 		//+georeference
-		Set<LatLong> georeferences = specimen.getLatLong();
-		LatLong newgeo = georeferences.iterator().next();
-		newgeo.setSpecimenId(specimen);
-
 		for (LatLong prevgeo : previousSpecimen.getLatLong()) {
-			newgeo.setAcceptedLatLongFg(prevgeo.getAcceptedLatLongFg());
-			newgeo.setAcceptedLatLongFg(prevgeo.getAcceptedLatLongFg());
-			newgeo.setDatum(prevgeo.getDatum());
-			newgeo.setDecLat(prevgeo.getDecLat());
-			newgeo.setDecLatMin(prevgeo.getDecLatMin());
-			newgeo.setDecLong(prevgeo.getDecLong());
-			newgeo.setDecLongMin(prevgeo.getDecLongMin());
-			newgeo.setDeterminedByAgent(prevgeo.getDeterminedByAgent());
-			newgeo.setDeterminedDate(prevgeo.getDeterminedDate());
-			newgeo.setExtent(prevgeo.getExtent());
-			newgeo.setFieldVerifiedFg(prevgeo.getFieldVerifiedFg());
-			newgeo.setGeorefmethod(prevgeo.getGeorefmethod());
-			newgeo.setGpsaccuracy(prevgeo.getGpsaccuracy());
-			newgeo.setLatDeg(prevgeo.getLatDeg());
-			newgeo.setLatDir(prevgeo.getLatDir());
-			newgeo.setLatLongForNnpFg(prevgeo.getLatLongForNnpFg());
-			newgeo.setLatLongRefSource(prevgeo.getLatLongRefSource());
-			newgeo.setLatLongRemarks(prevgeo.getLatLongRemarks());
-			newgeo.setLatMin(prevgeo.getLatMin());
-			newgeo.setLatSec(prevgeo.getLatSec());
-			newgeo.setLongDeg(prevgeo.getLongDeg());
-			newgeo.setLongDir(prevgeo.getLongDir());
-			newgeo.setLongMin(prevgeo.getLongMin());
-			newgeo.setLongSec(prevgeo.getLongSec());
-			newgeo.setMaxErrorDistance(prevgeo.getMaxErrorDistance());
-			newgeo.setMaxErrorUnits(prevgeo.getMaxErrorUnits());
-			newgeo.setNearestNamedPlace(prevgeo.getNearestNamedPlace());
-			newgeo.setOrigLatLongUnits(prevgeo.getOrigLatLongUnits());
-			newgeo.setUtmEw(prevgeo.getUtmEw());
-			newgeo.setUtmNs(prevgeo.getUtmNs());
-			newgeo.setUtmZone(prevgeo.getUtmZone());
-			newgeo.setVerificationstatus(prevgeo.getVerificationstatus());
+			LatLong newgeo = prevgeo.clone();
+			newgeo.setSpecimen(specimen);
+			specimen.getLatLong().add(newgeo);
 		}
 
 		
@@ -725,8 +624,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	}
 	
 	private void setValues() { 
-		log.debug("okok copy previous, specimenid is " + specimen.getSpecimenId());
-		log.debug("invoking setValues()");
+		log.debug("okok setting values, specimenid is " + specimen.getSpecimenId());
 		this.setStatus("Setting values");
 		jTextFieldBarcode.setText(specimen.getBarcode());
 		
@@ -1679,7 +1577,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	        			Set<LatLong> georeferences = specimen.getLatLong();
 	        			//log.debug("the lat long is : " + specimen.getLatLong().);
 	        			LatLong georeference = georeferences.iterator().next();
-	        			georeference.setSpecimenId(specimen);
+	        			georeference.setSpecimen(specimen);
 	        			GeoreferenceDialog georefDialog = new GeoreferenceDialog(georeference);
 	        			georefDialog.setVisible(true);
 						georefDialog.addComponentListener(new ComponentAdapter() {
@@ -2288,7 +2186,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 					log.debug("Adding new SpecimenPart");
 					SpecimenPart newPart = new SpecimenPart();
 					newPart.setPreserveMethod(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_DEFAULT_PREPARATION));
-					newPart.setSpecimenId(specimen);
+					newPart.setSpecimen(specimen);
 					SpecimenPartLifeCycle spls = new SpecimenPartLifeCycle();
                     log.debug("Attaching new SpecimenPart");
 					try {

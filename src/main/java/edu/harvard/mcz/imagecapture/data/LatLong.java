@@ -24,12 +24,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The persistent class for the LAT_LONG database table.
  * 
  */
-public class LatLong implements Serializable {
+public class LatLong implements Serializable, Cloneable {
 	private static final long serialVersionUID = 1L;
 
 	private Long latLongId;
@@ -43,7 +44,7 @@ public class LatLong implements Serializable {
 	private Date determinedDate = new Date();
 	private BigDecimal extent;
 	private Boolean fieldVerifiedFg;
-	private String georefmethod = "unknown";
+	private String georefmethod = "";
 	private BigDecimal gpsaccuracy;
 	private Integer latDeg;
 	private String latDir;
@@ -368,12 +369,22 @@ public class LatLong implements Serializable {
 		this.origLatLongUnits = origLatLongUnits;
 	}
 
-	public Specimen getSpecimenId() {
+	public Specimen getSpecimen() {
 		return this.specimenId;
 	}
 
-	public void setSpecimenId(Specimen specimenid) {
-		this.specimenId = specimenid;
+	// legacy as long as the hibernate property is called specimenId
+	public Specimen getSpecimenId() {
+		return specimenId;
+	}
+
+	// legacy as long as the hibernate property is called specimenId
+	public void setSpecimenId(Specimen specimenId) {
+		this.specimenId = specimenId;
+	}
+
+	public void setSpecimen(Specimen specimen) {
+		this.specimenId = specimen;
 	}
 
 	public Integer getUtmEw() {
@@ -508,29 +519,69 @@ public class LatLong implements Serializable {
 	}
 
 	/**
-	 * Check whether this object has the same properties as a similar object
+	 * Check whether this object has the same properties as a similar object.
+	 * Note that due to historical reasons, not every property is compared.
+	 * If need to check for strict equality, compare the id's!
+	 * Examples of uncompaired properties:
+	 * - georefmethod: had different defaults over time, so we could get fals positives
 	 *
 	 * @param coord
-	 * @return whether these few properties are equal
+	 * @return whether these few properties are equal.
 	 */
 	public boolean equals(LatLong coord) {
 		return coord.acceptedLatLongFg == this.acceptedLatLongFg &&
 				coord.fieldVerifiedFg == this.fieldVerifiedFg &&
 				coord.latLongForNnpFg == this.latLongForNnpFg &&
-				coord.decLat == this.decLat &&
-				coord.decLatMin == this.decLatMin &&
+				Objects.equals(coord.decLat, this.decLat) &&
+				Objects.equals(coord.decLatMin, this.decLatMin) &&
 				coord.acceptedLatLongFg == this.acceptedLatLongFg &&
-				coord.decLong == this.decLong &&
-				coord.decLongMin == this.decLongMin &&
-				coord.determinedByAgent == this.determinedByAgent &&
-				coord.extent == this.extent &&
-				coord.latDeg == this.latDeg &&
-				coord.latDir == this.latDir &&
-				coord.latMin == this.latMin &&
-				coord.latSec == this.latSec &&
-				coord.gpsaccuracy == this.gpsaccuracy &&
-				coord.maxErrorDistance == this.maxErrorDistance &&
-				coord.maxErrorUnits == this.maxErrorUnits &&
-				coord.georefmethod == this.georefmethod;
+				Objects.equals(coord.decLong, this.decLong) &&
+				Objects.equals(coord.decLongMin, this.decLongMin) &&
+				Objects.equals(coord.determinedByAgent, this.determinedByAgent) &&
+				Objects.equals(coord.extent, this.extent) &&
+				Objects.equals(coord.latDeg, this.latDeg) &&
+				Objects.equals(coord.latDir, this.latDir) &&
+				Objects.equals(coord.latMin, this.latMin) &&
+				Objects.equals(coord.latSec, this.latSec) &&
+				Objects.equals(coord.gpsaccuracy, this.gpsaccuracy) &&
+				Objects.equals(coord.maxErrorDistance, this.maxErrorDistance) &&
+				Objects.equals(coord.maxErrorUnits, this.maxErrorUnits);
+	}
+	
+	public LatLong clone() {
+		LatLong newgeo = new LatLong();
+		newgeo.setAcceptedLatLongFg(this.getAcceptedLatLongFg());
+		newgeo.setAcceptedLatLongFg(this.getAcceptedLatLongFg());
+		newgeo.setDatum(this.getDatum());
+		newgeo.setDecLat(this.getDecLat());
+		newgeo.setDecLatMin(this.getDecLatMin());
+		newgeo.setDecLong(this.getDecLong());
+		newgeo.setDecLongMin(this.getDecLongMin());
+		newgeo.setDeterminedByAgent(this.getDeterminedByAgent());
+		newgeo.setDeterminedDate(this.getDeterminedDate());
+		newgeo.setExtent(this.getExtent());
+		newgeo.setFieldVerifiedFg(this.getFieldVerifiedFg());
+		newgeo.setGeorefmethod(this.getGeorefmethod());
+		newgeo.setGpsaccuracy(this.getGpsaccuracy());
+		newgeo.setLatDeg(this.getLatDeg());
+		newgeo.setLatDir(this.getLatDir());
+		newgeo.setLatLongForNnpFg(this.getLatLongForNnpFg());
+		newgeo.setLatLongRefSource(this.getLatLongRefSource());
+		newgeo.setLatLongRemarks(this.getLatLongRemarks());
+		newgeo.setLatMin(this.getLatMin());
+		newgeo.setLatSec(this.getLatSec());
+		newgeo.setLongDeg(this.getLongDeg());
+		newgeo.setLongDir(this.getLongDir());
+		newgeo.setLongMin(this.getLongMin());
+		newgeo.setLongSec(this.getLongSec());
+		newgeo.setMaxErrorDistance(this.getMaxErrorDistance());
+		newgeo.setMaxErrorUnits(this.getMaxErrorUnits());
+		newgeo.setNearestNamedPlace(this.getNearestNamedPlace());
+		newgeo.setOrigLatLongUnits(this.getOrigLatLongUnits());
+		newgeo.setUtmEw(this.getUtmEw());
+		newgeo.setUtmNs(this.getUtmNs());
+		newgeo.setUtmZone(this.getUtmZone());
+		newgeo.setVerificationstatus(this.getVerificationstatus());
+		return newgeo;
 	}
 }

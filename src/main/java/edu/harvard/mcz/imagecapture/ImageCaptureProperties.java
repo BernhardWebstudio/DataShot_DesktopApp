@@ -537,7 +537,7 @@ public class ImageCaptureProperties  extends AbstractTableModel {
 			properties.setProperty(KEY_DEFAULT_TEMPLATES, PositionTemplate.TEMPLATE_DEFAULT);
 		}
 		if (!properties.containsKey(KEY_MAX_FIELD_HEIGHT)) {
-			properties.setProperty(KEY_MAX_FIELD_HEIGHT, "100");
+			properties.setProperty(KEY_MAX_FIELD_HEIGHT, "70");
 		}
 		
 	}

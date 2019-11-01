@@ -1,5 +1,16 @@
 # Changelog
 
+## v1.9.4-SNAPSHOT
+* [[`489216eb79`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/489216eb79)] - Run Intellij's code cleanup and reformat code for easier developement (Tim Bernhard)
+* [[`6856dcb2ba`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/6856dcb2ba)] - Use basic autocompletion using OpenStreetmap when having entered lat, long (see also #7) (Tim Bernhard)
+* [[`ffd17e375d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/ffd17e375d)] - Implement copy button to fix #14 (Tim Bernhard)
+* [[`9d2c5c073c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/9d2c5c073c)] - Refactor copy-previous to use java cloning (possibly fix #16, collector copying) (Tim Bernhard)
+* [[`fea6575ce0`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/fea6575ce0)] - Fix issue where missing transaction commit led to dets not being deleted (#15) (Tim Bernhard)
+* [[`6a1dfa7eda`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/6a1dfa7eda)] - Catch more exceptions when initializing SpecimenDetailsViewPane (Tim Bernhard)
+* [[`89e95b8fcd`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/89e95b8fcd)] - Add possiblity to set field max height in imagecapture preferences (Tim Bernhard)
+* [[`d2f66b4762`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d2f66b4762)] - Update changelog & publish Version 1.9.3-SNAPSHOT (Tim Bernhard)
+
+
 ## v1.9.3-SNAPSHOT
 * [[`2bb30feb55`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/2bb30feb55)] - Load imagecapture version from maven (Tim Bernhard)
 * [[`20552cad9d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/20552cad9d)] - Add MouseWheelScrollListener to propagate scrolling of Collector, Parts, Notes and Numbers to parent (Tim Bernhard)

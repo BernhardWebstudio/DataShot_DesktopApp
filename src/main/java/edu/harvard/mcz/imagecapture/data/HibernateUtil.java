@@ -27,6 +27,7 @@ public class HibernateUtil {
 
     private static final Log log = LogFactory.getLog(HibernateUtil.class);
     private static SessionFactory sessionFactory = null;
+    private static Properties properties = new Properties();
 
     public static void terminateSessionFactory() {
         try {
@@ -42,6 +43,15 @@ public class HibernateUtil {
                 sessionFactory = null;
             }
         }
+    }
+
+    /**
+     * Reset the session factory by terminating & starting a new one
+     */
+    public static void restartSessionFactory() {
+        HibernateUtil.terminateSessionFactory();
+        Configuration configuration = new Configuration().configure().setProperties(properties);
+        sessionFactory = configuration.buildSessionFactory();
     }
 
 
@@ -62,32 +72,31 @@ public class HibernateUtil {
         }
         try {
             // Create the Configuration from hibernate.cfg.xml
-            Configuration config = new Configuration().configure();
+            Configuration configuration = new Configuration().configure();
             // Add authentication properties obtained from the user
             boolean success = false;
             // retrieve the connection parameters from hibernate.cfg.xml and load into the LoginDialog
-            LoginDialog loginDialog = HibernateUtil.getLoginDialog(config, null);
+            LoginDialog loginDialog = HibernateUtil.getLoginDialog(configuration, null);
             while (!success && loginDialog.getResult() != LoginDialog.RESULT_CANCEL) {
                 // Check authentication (starting with the database user(schema)/password.
-                String username;
                 if (loginDialog.getResult() == LoginDialog.RESULT_LOGIN) {
                     if (Singleton.getSingletonInstance().getMainFrame() != null) {
                         Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                         Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Connecting to database");
                     }
-                    config.setProperty("hibernate.connection.password", loginDialog.getDBPassword());
-                    username = loginDialog.getDBUserName();
-                    config.setProperty("hibernate.connection.username", username);
-                    config.setProperty("hibernate.connection.url", loginDialog.getConnection());
+                    properties.setProperty("hibernate.connection.password", loginDialog.getDBPassword());
+                    properties.setProperty("hibernate.connection.username", loginDialog.getDBUserName());
+                    properties.setProperty("hibernate.connection.url", loginDialog.getConnection());
+                    configuration.setProperties(properties);
                     // Now create the SessionFactory from this configuration
-                    log.debug(config.getProperty("hibernate.connection.url"));
+                    log.debug(configuration.getProperty("hibernate.connection.url"));
                     try {
-                        sessionFactory = config.buildSessionFactory();
+                        sessionFactory = configuration.buildSessionFactory();
                     } catch (JDBCConnectionException | ServiceException ex) {
-                        config = new Configuration().configure();
+                        configuration = new Configuration().configure();
                         success = false;
                         sessionFactory = null;
-                        loginDialog = HibernateUtil.getLoginDialog(config, "Initial SessionFactory creation failed. Database not connectable: " + ex.getMessage());
+                        loginDialog = HibernateUtil.getLoginDialog(configuration, "Initial SessionFactory creation failed. Database not connectable: " + ex.getMessage());
                         try {
                             Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Database connection failed.");
                         } catch (NullPointerException e) {
@@ -124,14 +133,14 @@ public class HibernateUtil {
                             }
                         }
                         if (!success) {
-                            loginDialog = HibernateUtil.getLoginDialog(config, "Login failed: Incorrect Email and/or Password.");
+                            loginDialog = HibernateUtil.getLoginDialog(configuration, "Login failed: Incorrect Email and/or Password.");
                             success = false;
                             if (loginDialog.getUsername() != null) {
                                 log.debug("Login failed for " + loginDialog.getUsername());
                             }
                             sessionFactory.close();
                             sessionFactory = null;
-                            config = new Configuration().configure();
+                            configuration = new Configuration().configure();
                             try {
                                 Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Login failed.");
                             } catch (NullPointerException ex) {
@@ -142,11 +151,11 @@ public class HibernateUtil {
                         log.error(e.getMessage());
                         log.trace(e.getMessage(), e);
                         System.out.println("Initial SessionFactory creation failed." + e.getMessage());
-                        loginDialog = HibernateUtil.getLoginDialog(config, "Login failed: " + e.getCause());
+                        loginDialog = HibernateUtil.getLoginDialog(configuration, "Login failed: " + e.getCause());
                         success = false;
                         sessionFactory.close();
                         sessionFactory = null;
-                        config = new Configuration().configure();
+                        configuration = new Configuration().configure();
                         if (Singleton.getSingletonInstance().getMainFrame() != null) {
                             Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Login failed.");
                         }

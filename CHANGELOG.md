@@ -8,7 +8,6 @@
 * [[`fea6575ce0`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/fea6575ce0)] - Fix issue where missing transaction commit led to dets not being deleted (#15) (Tim Bernhard)
 * [[`6a1dfa7eda`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/6a1dfa7eda)] - Catch more exceptions when initializing SpecimenDetailsViewPane (Tim Bernhard)
 * [[`89e95b8fcd`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/89e95b8fcd)] - Add possiblity to set field max height in imagecapture preferences (Tim Bernhard)
-* [[`d2f66b4762`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d2f66b4762)] - Update changelog & publish Version 1.9.3-SNAPSHOT (Tim Bernhard)
 
 
 ## v1.9.3-SNAPSHOT

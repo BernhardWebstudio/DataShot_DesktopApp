@@ -42,9 +42,7 @@ import java.net.URL;
 import java.util.*;
 
 /**
- * JPanel for editing a record of a Specimen in a details view for that specimen. 
- *
- *
+ * JPanel for editing a record of a Specimen in a details view for that specimen.
  *
  *  TODO: BugID: 10 add length limits (remaining to do for Number/Collector tables, 
  *  and for JComboBox fields).
@@ -202,7 +200,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             }
             Singleton.getSingletonInstance().getMainFrame().setStatusMessage(status);
             log.debug(e.getMessage(), e);
-            HibernateUtil.terminateSessionFactory();
+            HibernateUtil.restartSessionFactory();
             this.setVisible(false);
         }
     }
@@ -330,9 +328,6 @@ public class SpecimenDetailsViewPane extends JPanel {
                 log.debug("okok in save(), prev specimenid is " + previousSpecimen.getSpecimenId());
             }
 
-            //allie change
-            //log.debug("THE jCBDeterminer TEXT IS " + jCBDeterminer.getText());
-            //specimen.setIdentifiedBy(jCBDeterminer.getText());
             specimen.setIdentifiedBy((String) jCBDeterminer.getSelectedItem());
 
             specimen.setDateIdentified(jTextFieldDateDetermined.getText());
@@ -346,14 +341,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 
             specimen.setUnNamedForm(jTextFieldUnnamedForm.getText());
             specimen.setVerbatimLocality(jTextFieldVerbatimLocality.getText());
-            //allieremove
-			/*if (comboBoxHigherGeog.getSelectedIndex()==-1 && comboBoxHigherGeog.getSelectedItem()==null) {
-				specimen.setHigherGeography("");
-			} else {
-				// combo box contains a geography object, obtain the higher geography string.
-				specimen.setHigherGeography(((HigherGeographyComboBoxModel)comboBoxHigherGeog.getModel()).getSelectedItemHigherGeography());
-			}*/
-            //specimen.setCountry(jTextFieldCountry.getText());
             specimen.setCountry((String) jComboBoxCountry.getSelectedItem());
             specimen.setValidDistributionFlag(jCheckBoxValidDistributionFlag.isSelected());
             specimen.setPrimaryDivison((String) jComboBoxPrimaryDivision.getSelectedItem());
@@ -514,6 +501,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
 
         //+ preparation type (the whole table!) = specimen parts
+        specimen.getSpecimenParts().clear();
         for (SpecimenPart specimenPart : previousSpecimen.getSpecimenParts()) {
             SpecimenPart part = (SpecimenPart) specimenPart.clone();
             part.setSpecimen(specimen);
@@ -528,7 +516,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			specimen.getCollectors().add((edu.harvard.mcz.imagecapture.data.Collector)iterc.next());
 		}		
 		jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));*/
-
+        specimen.getCollectors().clear();
         for (Collector collector : previousSpecimen.getCollectors()) {
             Collector c = (Collector) collector.clone();
             c.setSpecimen(specimen);
@@ -544,6 +532,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         AutoCompleteDecorator.decorate(jComboBoxCollector);
 
         //+determinations
+        specimen.getDeterminations().clear();
         for (Determination prevdet : previousSpecimen.getDeterminations()) {
             Determination newdet = prevdet.clone();
             newdet.setSpecimen(specimen);
@@ -552,12 +541,50 @@ public class SpecimenDetailsViewPane extends JPanel {
         }
 
         //+georeference
-        for (LatLong prevgeo : previousSpecimen.getLatLong()) {
-            LatLong newgeo = prevgeo.clone();
-            newgeo.setSpecimen(specimen);
-            specimen.getLatLong().add(newgeo);
-        }
+//        specimen.getLatLong().clear();
+//        for (LatLong prevgeo : previousSpecimen.getLatLong()) {
+//            LatLong newgeo = prevgeo.clone();
+//            newgeo.setSpecimen(specimen);
+//            specimen.getLatLong().add(newgeo);
+//        }
+        Set<LatLong> georeferences = specimen.getLatLong();
+        LatLong newgeo = georeferences.iterator().next();
+        newgeo.setSpecimenId(specimen);
 
+        for (LatLong prevgeo : previousSpecimen.getLatLong()) {
+            newgeo.setAcceptedLatLongFg(prevgeo.getAcceptedLatLongFg());
+            newgeo.setAcceptedLatLongFg(prevgeo.getAcceptedLatLongFg());
+            newgeo.setDatum(prevgeo.getDatum());
+            newgeo.setDecLat(prevgeo.getDecLat());
+            newgeo.setDecLatMin(prevgeo.getDecLatMin());
+            newgeo.setDecLong(prevgeo.getDecLong());
+            newgeo.setDecLongMin(prevgeo.getDecLongMin());
+            newgeo.setDeterminedByAgent(prevgeo.getDeterminedByAgent());
+            newgeo.setDeterminedDate(prevgeo.getDeterminedDate());
+            newgeo.setExtent(prevgeo.getExtent());
+            newgeo.setFieldVerifiedFg(prevgeo.getFieldVerifiedFg());
+            newgeo.setGeorefmethod(prevgeo.getGeorefmethod());
+            newgeo.setGpsaccuracy(prevgeo.getGpsaccuracy());
+            newgeo.setLatDeg(prevgeo.getLatDeg());
+            newgeo.setLatDir(prevgeo.getLatDir());
+            newgeo.setLatLongForNnpFg(prevgeo.getLatLongForNnpFg());
+            newgeo.setLatLongRefSource(prevgeo.getLatLongRefSource());
+            newgeo.setLatLongRemarks(prevgeo.getLatLongRemarks());
+            newgeo.setLatMin(prevgeo.getLatMin());
+            newgeo.setLatSec(prevgeo.getLatSec());
+            newgeo.setLongDeg(prevgeo.getLongDeg());
+            newgeo.setLongDir(prevgeo.getLongDir());
+            newgeo.setLongMin(prevgeo.getLongMin());
+            newgeo.setLongSec(prevgeo.getLongSec());
+            newgeo.setMaxErrorDistance(prevgeo.getMaxErrorDistance());
+            newgeo.setMaxErrorUnits(prevgeo.getMaxErrorUnits());
+            newgeo.setNearestNamedPlace(prevgeo.getNearestNamedPlace());
+            newgeo.setOrigLatLongUnits(prevgeo.getOrigLatLongUnits());
+            newgeo.setUtmEw(prevgeo.getUtmEw());
+            newgeo.setUtmNs(prevgeo.getUtmNs());
+            newgeo.setUtmZone(prevgeo.getUtmZone());
+            newgeo.setVerificationstatus(prevgeo.getVerificationstatus());
+        }
 
         //new - verbatim locality
         jTextFieldVerbatimLocality.setText(previousSpecimen.getVerbatimLocality());
@@ -567,7 +594,6 @@ public class SpecimenDetailsViewPane extends JPanel {
         jComboBoxFeatures.setSelectedItem(previousSpecimen.getFeatures());
         //new - collecting method
         jTextFieldCollectingMethod.setText(previousSpecimen.getCollectingMethod());
-
 
         setSpecimenPartsTableCellEditors();
         this.updateDeterminationCount();

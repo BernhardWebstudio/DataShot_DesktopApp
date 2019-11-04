@@ -219,7 +219,6 @@ public class SpecimenPart implements Cloneable {
             counter++;
             log.debug(counter);
         }
-        log.debug(result.toString());
         return result.toString();
     }
 

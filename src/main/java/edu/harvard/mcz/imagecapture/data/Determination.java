@@ -22,7 +22,6 @@ public class Determination implements java.io.Serializable, Cloneable {
     private String typeStatus;
     private String speciesNumber;
     private String verbatimText;
-
     private String natureOfId;
     private String dateIdentified;
     private String remarks;
@@ -41,7 +40,9 @@ public class Determination implements java.io.Serializable, Cloneable {
     public Determination(Specimen specimen, String genus,
                          String specificEpithet, String subspecificEpithet,
                          String infraspecificEpithet, String infraspecificRank,
-                         String authorship, String unNamedForm, String identifiedBy, String typeStatus, String speciesNumber) {
+                         String authorship, String unNamedForm,
+                         String identifiedBy, String typeStatus,
+                         String speciesNumber, String natureOfId) {
         this.specimen = specimen;
         this.genus = genus;
         this.specificEpithet = specificEpithet;
@@ -53,6 +54,7 @@ public class Determination implements java.io.Serializable, Cloneable {
         this.identifiedBy = identifiedBy;
         this.typeStatus = typeStatus;
         this.speciesNumber = speciesNumber;
+        this.natureOfId = natureOfId;
     }
 
     public Long getDeterminationId() {
@@ -215,9 +217,10 @@ public class Determination implements java.io.Serializable, Cloneable {
 
     public Determination clone() {
         Determination newDet = new Determination(
-                specimen, genus, specificEpithet, subspecificEpithet,
+                specimen, genus,
+                specificEpithet, subspecificEpithet,
                 infraspecificEpithet, infraspecificRank,
-                authorship, unNamedForm, identifiedBy, typeStatus, speciesNumber
+                authorship, unNamedForm, identifiedBy, typeStatus, speciesNumber, natureOfId
         );
         newDet.setVerbatimText(this.verbatimText);
         newDet.setRemarks(this.remarks);

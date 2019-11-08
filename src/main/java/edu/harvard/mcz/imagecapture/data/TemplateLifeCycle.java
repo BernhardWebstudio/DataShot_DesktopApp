@@ -211,7 +211,7 @@ public class TemplateLifeCycle {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public List<Template> findAll() {
         log.debug("finding all Template instances");
         try {

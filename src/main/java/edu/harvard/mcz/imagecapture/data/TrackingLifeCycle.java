@@ -182,7 +182,7 @@ public class TrackingLifeCycle {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public List<Specimen> findSpecimensByUser(String user) {
         log.debug("finding all Tracking instances");
         try {
@@ -224,7 +224,7 @@ public class TrackingLifeCycle {
      *                   for.
      * @return a list of the tracking records for that specimen.
      */
-    @SuppressWarnings("unchecked")
+
     public List<Tracking> findBySpecimenId(Long specimenId) {
         log.debug("finding Tracking instances by specimen");
         try {
@@ -263,7 +263,7 @@ public class TrackingLifeCycle {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public List<Tracking> findAll() {
         log.debug("finding all Tracking instances");
         try {

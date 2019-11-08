@@ -32,7 +32,7 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
         super(ICImage.class, ICImageLifeCycle.log);
     }
 
-    @SuppressWarnings("unchecked")
+
     public static List<ICImage> findMismatchedImages() {
         log.debug("finding Images with barcode missmatches ");
         try {
@@ -63,7 +63,7 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public static List<ICImage> findDrawerImages(String aDrawerNumber) {
         log.debug("finding Images for drawer " + aDrawerNumber);
         try {
@@ -94,7 +94,7 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public static List<ICImage> findNotDrawerNoTemplateImages() {
         log.debug("finding Images for template " +
                 PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS);
@@ -305,7 +305,7 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
     /**
      * @return list of all image files sorted by filename
      */
-    @SuppressWarnings("unchecked")
+
     public List<ICImage> findAll() {
         log.debug("finding all Images");
         try {
@@ -338,7 +338,7 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
      *
      * @return list of all image files with a particular path.
      */
-    @SuppressWarnings("unchecked")
+
     public List<ICImage> findAllInDir(String path) {
         log.debug("finding all Images with path " + path);
         try {
@@ -385,7 +385,7 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
      * "" as the
      * first item in the array.
      */
-    @SuppressWarnings("unchecked")
+
     public String[] getDistinctPaths() {
         ArrayList<String> types = new ArrayList<String>();
         types.add(""); // put blank at top of list.

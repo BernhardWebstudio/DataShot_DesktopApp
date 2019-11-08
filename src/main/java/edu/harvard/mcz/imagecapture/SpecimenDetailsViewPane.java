@@ -55,10 +55,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     private static final int STATE_CLEAN = 0;
     private static final int STATE_DIRTY = 1;
-    //allie add
-    Specimen previousSpecimen = null;
+    private Specimen previousSpecimen = null;
     private Specimen specimen;  //  @jve:decl-index=0:
-    private Specimen lastEditedSpecimen = null;
     private SpecimenController specimenController = null;
     private int state;   // dirty if data in controls has been changed and not saved to specimen.
 
@@ -148,10 +146,6 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField textFieldMicrohabitat = null;
     private JComboBox<String> jComboBoxNatureOfId;
     private JTextField jTextFieldDateDetermined;
-
-    //allie change
-    //private JTextField jCBDeterminer;
-    //private FilteringAgentJComboBox jCBDeterminer;
     private JComboBox<String> jCBDeterminer = null;
 
     private JTextField jTextFieldIdRemarks;
@@ -532,12 +526,11 @@ public class SpecimenDetailsViewPane extends JPanel {
         AutoCompleteDecorator.decorate(jComboBoxCollector);
 
         //+determinations
-        specimen.getDeterminations().clear();
+        specimen.getDeterminations().removeAll(specimen.getDeterminations());
         for (Determination prevdet : previousSpecimen.getDeterminations()) {
             Determination newdet = prevdet.clone();
             newdet.setSpecimen(specimen);
             specimen.getDeterminations().add(newdet);
-
         }
 
         //+georeference
@@ -1349,11 +1342,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     private void setSpecimenPartsTableCellEditors() {
         log.debug("Setting cell editors");
-        JComboBox<String> comboBoxPart = new JComboBox<>(SpecimenPart.PARTNAMES);
+        JComboBox<String> comboBoxPart = new JComboBox<>(SpecimenPart.PART_NAMES);
         //comboBoxPart.addItem("whole animal");
         //comboBoxPart.addItem("partial animal");
         getJTableSpecimenParts().getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(comboBoxPart));
-        JComboBox<String> comboBoxPrep = new JComboBox<>(SpecimenPart.PRESERVENAMES);
+        JComboBox<String> comboBoxPrep = new JComboBox<>(SpecimenPart.PRESERVATION_NAMES);
         //comboBoxPrep.addItem("pinned");
         //comboBoxPrep.addItem("pointed");
         //comboBoxPrep.addItem("carded");

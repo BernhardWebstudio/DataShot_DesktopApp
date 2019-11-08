@@ -42,7 +42,7 @@ public class NumberLifeCycle {
      * @return an array of strings consisting of { "", "Unknown", select distinct
      * numberType from Number }
      */
-    @SuppressWarnings("unchecked")
+
     public static String[] getDistinctTypes() {
         ArrayList<String> types = new ArrayList<String>();
         if (Singleton.getSingletonInstance()

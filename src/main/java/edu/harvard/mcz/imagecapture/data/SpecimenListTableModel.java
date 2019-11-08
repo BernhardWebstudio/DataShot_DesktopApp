@@ -131,7 +131,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
      * Must be implemented for ButtonEditor to work.  Needs to return Long for
      * ID column that is to contain button to work with ButtonEditor.
      */
-    @SuppressWarnings("unchecked")
+
     public Class getColumnClass(int c) {
         // Given current implementation of button in SpecimenBrowser,
         // needs to return Long for ID column that is to contain button

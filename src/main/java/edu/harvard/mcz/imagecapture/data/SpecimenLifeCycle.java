@@ -115,8 +115,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             tls.persist(t);
         } catch (SaveFailedException e) {
             // TODO Handle save error in UI
-            e.printStackTrace();
-            System.out.println(e.getMessage());
+            log.error(e);
         }
     }
 
@@ -176,45 +175,18 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
     }
 
-    /**Save or update an existing specimen record.
+    /**
+     * Save or update an existing specimen record.
      *
      * @param instance of a Specimen that that is to be saved.
      * @throws SaveFailedException
      */
     public void attachDirty(Specimen instance) throws SaveFailedException {
-        log.debug("attaching dirty Specimen instance");
-        Iterator<Collector> i = instance.getCollectors().iterator();
-        while (i.hasNext()) {
-            Collector col = i.next();
-            if (col.getCollectorName() == null || col.getCollectorName().trim().length() == 0 || col.getCollectorName().equals("[remove]")) {
-                instance.getCollectors().remove(col);
-                CollectorLifeCycle cls = new CollectorLifeCycle();
-                cls.delete(col);
-            }
-        }
-        Iterator<Number> in = instance.getNumbers().iterator();
-        log.debug("in attachDirty - start iterating numbers!");
-        while (in.hasNext()) {
-            log.debug("iterating numbers 1");
-            Number num = in.next();
-            if ((num.getNumber() == null || num.getNumber().trim().length() == 0) &&
-                    (num.getNumberType() == null || num.getNumberType().length() == 0)
-            ) {
-                instance.getNumbers().remove(num);
-                NumberLifeCycle nls = new NumberLifeCycle();
-                nls.delete(num);
-            }
-        }
+        log.debug("attaching dirty Specimen instance with id " + instance.getSpecimenId());
         try {
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             session.beginTransaction();
             try {
-                if (!instance.getLatLong().isEmpty()) {
-                    LatLong ll = instance.getLatLong().iterator().next();
-                    if (ll.getSpecimen() == null) {
-                        instance.getLatLong().iterator().next().setSpecimen(instance);
-                    }
-                }
                 session.saveOrUpdate(instance);
                 session.getTransaction().commit();
                 log.debug("attach successful");
@@ -371,7 +343,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public List<Specimen> findByBarcode(String barcode) {
         log.debug("findByBarcode '" + barcode + "' start");
         try {
@@ -399,7 +371,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public List<Specimen> findAll() {
         log.debug("finding all Specimens");
         try {
@@ -425,7 +397,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public List<Specimen> findAllPage(int startAt, int fetchSize) {
         log.debug("finding " + fetchSize + " Specimens from " + startAt + ".");
         try {
@@ -458,7 +430,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     }
 
     //Select distinct path from ICImage im where im.path is not null order by im.path
-    @SuppressWarnings("unchecked")
+
     public List<ICImage> findImagesByPath(String path) {
         log.debug("finding images by path " + path);
         try {
@@ -466,8 +438,6 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             session.beginTransaction();
             List<ICImage> results = null;
             try {
-
-
                 //System.out.println("path is " + path);
                 //this works
                 String sql = "";
@@ -498,39 +468,43 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     }
 
     //get all image paths (folder name / date imaged) available
-    @SuppressWarnings("unchecked")
+
     public String[] getDistinctPaths() {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add("");    // put blank at top of list.
         try {
             String sql = "Select distinct im.path from ICImage im order by im.imageId";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            try {
-                session.beginTransaction();
-                Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    // add, only if value isn't the "" put at top of list above.
-                    if (!value.equals("")) {
-                        collections.add(value.trim());
-                    }
-                }
-                session.getTransaction().commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error(e.getMessage());
-            }
-            try {
-                session.close();
-            } catch (SessionException e) {
-            }
-            String[] result = collections.toArray(new String[]{});
-            return result;
+            return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error(re);
             return new String[]{};
         }
+    }
+
+    private String[] loadStringsBySQL(ArrayList<String> collections, String sql) {
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        try {
+            session.beginTransaction();
+            Query q = session.createQuery(sql);
+            Iterator i = q.iterate();
+            while (i.hasNext()) {
+                String value = (String) i.next();
+                // add, only if value isn't the "" put at top of list above.
+                if (!value.equals("")) {
+                    collections.add(value.trim());
+                }
+            }
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            log.error(e.getMessage());
+        }
+        try {
+            session.close();
+        } catch (SessionException e) {
+        }
+        String[] result = collections.toArray(new String[]{});
+        return result;
     }
 
     public String findSpecimenCount() {
@@ -652,7 +626,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
+
     public List<Specimen> findForVerbatim(String genus, String specificEpithet, String workflowStatus) {
         log.debug("finding Specimen instances for verbatim capture");
         try {
@@ -682,7 +656,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public List<CountValue> findTaxaFromVerbatim(VerbatimCount verbatim) {
         log.debug("finding counts of taxa for verbatim values");
         List<CountValue> result = new ArrayList<CountValue>();
@@ -728,7 +702,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     /**
      * Find specimen records that are currently in state verbatim captured and which have
      * the provided values for verbatim fields.
@@ -799,35 +773,12 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         return returnValue;
     }
 
-    @SuppressWarnings("unchecked")
     public String[] getDistinctCountries() {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add("");    // put blank at top of list.
         try {
             String sql = "Select distinct country from Specimen spe where spe.country is not null order by spe.country  ";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            try {
-                session.beginTransaction();
-                Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    // add, only if value isn't the "" put at top of list above.
-                    if (!value.equals("")) {
-                        collections.add(value.trim());
-                    }
-                }
-                session.getTransaction().commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error(e.getMessage());
-            }
-            try {
-                session.close();
-            } catch (SessionException e) {
-            }
-            String[] result = collections.toArray(new String[]{});
-            return result;
+            return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error(re);
             return new String[]{};
@@ -895,42 +846,18 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 
     }
 
-    @SuppressWarnings("unchecked")
     public String[] getDistinctCollections() {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add("");    // put blank at top of list.
         try {
             String sql = "Select distinct collection from Specimen spe where spe.collection is not null order by spe.collection  ";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            try {
-                session.beginTransaction();
-                Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    // add, only if value isn't the "" put at top of list above.
-                    if (!value.equals("")) {
-                        collections.add(value.trim());
-                    }
-                }
-                session.getTransaction().commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error(e.getMessage());
-            }
-            try {
-                session.close();
-            } catch (SessionException e) {
-            }
-            String[] result = collections.toArray(new String[]{});
-            return result;
+            return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error(re);
             return new String[]{};
         }
     }
 
-    @SuppressWarnings("unchecked")
     public String[] getDistinctDeterminers() {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add("");    // put blank at top of list.
@@ -967,7 +894,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public String[] getDistinctPrimaryDivisions() {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add("");    // put blank at top of list.
@@ -1004,35 +931,13 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public String[] getDistinctQuestions() {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add("");    // put blank at top of list.
         try {
             String sql = "Select distinct questions from Specimen spe where spe.questions is not null order by spe.questions  ";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            try {
-                session.beginTransaction();
-                Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    // add, only if value isn't the "" put at top of list above.
-                    if (!value.equals("")) {
-                        collections.add(value.trim());
-                    }
-                }
-                session.getTransaction().commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error(e.getMessage());
-            }
-            try {
-                session.close();
-            } catch (SessionException e) {
-            }
-            String[] result = collections.toArray(new String[]{});
-            return result;
+            return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error(re);
             return new String[]{};

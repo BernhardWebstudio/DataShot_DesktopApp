@@ -192,7 +192,7 @@ public class UnitTrayLabelLifeCycle {
     /**
      * @return
      */
-    @SuppressWarnings("unchecked")
+
     public List<UnitTrayLabel> findAll() {
         log.debug("finding all UnitTrayLabel");
         try {

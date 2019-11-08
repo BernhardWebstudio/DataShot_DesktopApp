@@ -59,7 +59,7 @@ public class MetadataRetriever {
      *
      * TODO: add field type recognition, currently returns only "****" masks.
      */
-    @SuppressWarnings("unchecked")
+
     public static MaskFormatter getMask(Class aTableClass, String fieldname) {
         MaskFormatter formatter = null;
         try {
@@ -89,7 +89,7 @@ public class MetadataRetriever {
      * TODO: implement tests for more than just length.
      *
      */
-    @SuppressWarnings("unchecked")
+
     public static InputVerifier getInputVerifier(final Class aTableClass, final String fieldname, final JTextField field) {
         InputVerifier result = null;
         if (
@@ -165,7 +165,7 @@ public class MetadataRetriever {
      * @param fieldname the name of the field in that table (case insensitive).
      * @return the number of characters that can be put into the field.
      */
-    @SuppressWarnings("unchecked")
+
     public static int getFieldLength(Class aTableClass, String fieldname) {
         int length = 0;
         if (aTableClass == Specimen.class) {
@@ -397,7 +397,7 @@ public class MetadataRetriever {
      * @param fieldname
      * @return a String containing a help text suitable for use as a tooltip or other context help display.
      */
-    @SuppressWarnings("unchecked")
+
     public static String getFieldHelp(Class aTableClass, String fieldname) {
         String help = "No help available";
         if (aTableClass == Specimen.class) {

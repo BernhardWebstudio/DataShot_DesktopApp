@@ -95,7 +95,7 @@ public class SpecimenPartAttributeLifeCycle {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public List<SpecimenPartAttribute> findBySpecimenPart(SpecimenPart part) {
         log.debug("finding SpecimenPartAttribute instance by specimen part");
         try {

@@ -10,8 +10,8 @@
                 <param name="sequence">SEQ_DETERMINATIONID</param>
             </generator>
         </id>
-        <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.data.Specimen" fetch="select">
-            <column name="SpecimenId" not-null="true"/>
+        <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.data.Specimen">
+            <column name="SpecimenId" /><!-- TODO: rethink nullability -->
         </many-to-one>
         <property name="genus" type="string">
             <column name="Genus" length="40"/>
@@ -46,7 +46,6 @@
         <property name="verbatimText" type="string">
             <column name="VerbatimText" length="255"/>
         </property>
-
         <property name="natureOfId" type="string">
             <column name="NatureOfId" length="255"/>
         </property>
@@ -56,6 +55,5 @@
         <property name="remarks" type="string">
             <column name="remarks" length="65535"/>
         </property>
-
     </class>
 </hibernate-mapping>

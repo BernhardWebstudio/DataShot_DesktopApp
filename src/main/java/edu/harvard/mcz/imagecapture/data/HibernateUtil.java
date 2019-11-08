@@ -210,7 +210,7 @@ public class HibernateUtil {
      * @return the value of the property
      */
     private static String getConfigOrSettingsValue(Configuration config, Properties settings, String key, String value) {
-        if (config.getProperty(key).equals(value)) {
+        if (config.getProperty(key) != null && config.getProperty(key).equals(value)) {
             return settings.getProperty(key, value);
         } else {
             return config.getProperty(key);

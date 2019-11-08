@@ -3,16 +3,14 @@ package edu.harvard.mcz.imagecapture.data;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * Proxy object for SpecimenPart
  */
 public class SpecimenPart implements Cloneable {
 
-    public static final String[] PARTNAMES = {
+    public static final String[] PART_NAMES = {
             "whole animal", "partial animal",
             "partial animal: abdomen", "partial animal: body", "partial animal: legs", "partial animal: wings",
             "cocoon", "frass", "frass chain", "genitalia", "head capsule",
@@ -20,7 +18,7 @@ public class SpecimenPart implements Cloneable {
             "molt", "other", "pupal exuvia", "pupal shelter", "puparium",
             "sphragis"
     };
-    public static final String[] PRESERVENAMES = {"pinned", "pointed", "carded", "envelope", "capsule", "alcohol"};
+    public static final String[] PRESERVATION_NAMES = {"pinned", "pointed", "carded", "envelope", "capsule", "alcohol"};
 
     private static final Log log = LogFactory.getLog(SpecimenPart.class);
 
@@ -47,7 +45,7 @@ public class SpecimenPart implements Cloneable {
     public SpecimenPart(Long specimenPartId, Specimen specimenId,
                         String partName, String preserveMethod, int lotCount,
                         String lotCountModifier,
-                        Collection<SpecimenPartAttribute> attributeCollection) {
+                        Set<SpecimenPartAttribute> attributeCollection) {
         this(specimenId, partName, preserveMethod, lotCount, lotCountModifier, attributeCollection);
         this.specimenPartId = specimenPartId;
     }
@@ -63,7 +61,7 @@ public class SpecimenPart implements Cloneable {
     public SpecimenPart(Specimen specimenId,
                         String partName, String preserveMethod, int lotCount,
                         String lotCountModifier,
-                        Collection<SpecimenPartAttribute> attributeCollection) {
+                        Set<SpecimenPartAttribute> attributeCollection) {
         super();
         this.specimenId = specimenId;
         this.partName = partName;
@@ -172,20 +170,15 @@ public class SpecimenPart implements Cloneable {
      */
     public Collection<SpecimenPartAttribute> getAttributeCollection() {
         if (attributeCollection == null) {
-            attributeCollection = new ArrayList<SpecimenPartAttribute>();
+            attributeCollection = new HashSet<>();
             SpecimenPartAttributeLifeCycle spals = new SpecimenPartAttributeLifeCycle();
-            SpecimenPartAttribute example = new SpecimenPartAttribute();
-            example.setSpecimenPart(this);
-            example.setAttributeType(null);
-            example.setAttributeValue(null);
-            example.setAttributeUnits(null);
-            example.setAttributeRemark(null);
-            example.setAttributeDeterminer(null);
-            example.setAttributeDate(null);
-            //attributeCollection.addAll(spals.findByExample(example));
             attributeCollection.addAll(spals.findBySpecimenPart(this));
         }
         return attributeCollection;
+    }
+
+    public Collection<SpecimenPartAttribute> getSpecimenPartAttributes() {
+        return getAttributeCollection();
     }
 
     /**
@@ -194,6 +187,10 @@ public class SpecimenPart implements Cloneable {
     public void setAttributeCollection(
             Collection<SpecimenPartAttribute> attributeCollection) {
         this.attributeCollection = attributeCollection;
+    }
+
+    public void setSpecimenPartAttributes(Collection<SpecimenPartAttribute> attributeCollection) {
+        setAttributeCollection(attributeCollection);
     }
 
     /**
@@ -224,8 +221,8 @@ public class SpecimenPart implements Cloneable {
 
     @Override
     public Object clone() {
-        SpecimenPart newPart = new SpecimenPart(specimenId, partName, preserveMethod, lotCount, lotCountModifier, new ArrayList<>());
-        ArrayList<SpecimenPartAttribute> newAttributeCollection = new ArrayList();
+        SpecimenPart newPart = new SpecimenPart(specimenId, partName, preserveMethod, lotCount, lotCountModifier, new HashSet<>());
+        Set<SpecimenPartAttribute> newAttributeCollection = new HashSet<>();
         if (this.attributeCollection != null) {
             Iterator<SpecimenPartAttribute> iterator = this.attributeCollection.iterator();
             while (iterator.hasNext()) {

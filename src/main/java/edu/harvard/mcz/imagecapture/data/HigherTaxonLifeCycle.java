@@ -17,7 +17,7 @@ public class HigherTaxonLifeCycle {
 
     private static final Log log = LogFactory.getLog(HigherTaxonLifeCycle.class);
 
-    @SuppressWarnings("unchecked")
+
     public static String[] selectDistinctFamily() {
         List<String> result = new ArrayList<String>();
         try {
@@ -49,7 +49,7 @@ public class HigherTaxonLifeCycle {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public static String[] selectDistinctSubfamily(String family) {
         List<String> result = new ArrayList<String>();
         try {
@@ -96,7 +96,7 @@ public class HigherTaxonLifeCycle {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public static String[] selectDistinctTribe(String subfamily) {
         List<String> result = new ArrayList<String>();
         try {
@@ -291,7 +291,7 @@ public class HigherTaxonLifeCycle {
     /**
      * @return list of all higher files sorted by family
      */
-    @SuppressWarnings("unchecked")
+
     public List<HigherTaxon> findAll() {
         log.debug("finding all Higher Taxa");
         try {
@@ -319,7 +319,7 @@ public class HigherTaxonLifeCycle {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public boolean isMatched(String aFamily, String aSubfamily) {
         boolean result = false;
         try {
@@ -352,7 +352,7 @@ public class HigherTaxonLifeCycle {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public boolean isMatched(String aFamily, String aSubfamily, String aTribe) {
         boolean result = false;
         try {
@@ -392,7 +392,7 @@ public class HigherTaxonLifeCycle {
      * @return a String containing the matched family name, null
      * if no match or a connection problem.
      */
-    @SuppressWarnings("unchecked")
+
     public String findMatch(String aFamily) {
         String result = null;
         try {
@@ -438,7 +438,7 @@ public class HigherTaxonLifeCycle {
      * 1st element being the subfamily name, null
      * if no match or a connection problem.
      */
-    @SuppressWarnings("unchecked")
+
     public String[] findMatch(String aFamily, String aSubfamily) {
         String[] result = null;
         try {
@@ -489,7 +489,7 @@ public class HigherTaxonLifeCycle {
      * null if no match or a connection
      * problem.
      */
-    @SuppressWarnings("unchecked")
+
     public String[] findMatch(String aFamily, String aSubfamily, String aTribe) {
         String[] result = null;
         try {

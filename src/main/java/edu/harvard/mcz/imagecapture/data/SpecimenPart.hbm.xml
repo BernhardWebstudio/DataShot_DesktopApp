@@ -11,7 +11,7 @@
             </generator>
         </id>
         <many-to-one name="specimenId" class="edu.harvard.mcz.imagecapture.data.Specimen">
-            <column name="SpecimenId" not-null="true"/>
+            <column name="SpecimenId" />
         </many-to-one>
         <property name="partName" type="string">
             <column name="Part_Name" not-null="true" length="255" default="whole animal"/>
@@ -25,5 +25,11 @@
         <property name="lotCountModifier" type="string">
             <column name="Lot_Count_Modifier" length="5"/>
         </property>
+<!--        <set name="specimenPartAttributes" inverse="true" cascade="all" fetch="subselect">-->
+<!--            <key>-->
+<!--                <column name="SpecimenPartId"/>-->
+<!--            </key>-->
+<!--            <one-to-many class="edu.harvard.mcz.imagecapture.data.SpecimenPartAttribute"/>-->
+<!--        </set>-->
     </class>
 </hibernate-mapping>

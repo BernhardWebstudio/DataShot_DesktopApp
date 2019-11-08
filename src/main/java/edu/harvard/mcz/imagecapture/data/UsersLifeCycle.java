@@ -28,7 +28,7 @@ public class UsersLifeCycle {
 
     private static final Log log = LogFactory.getLog(UsersLifeCycle.class);
 
-    @SuppressWarnings("unchecked")
+
     public static boolean isUserAdministrator(int aUserID) {
         boolean returnValue = false;
 
@@ -49,7 +49,7 @@ public class UsersLifeCycle {
         return returnValue;
     }
 
-    @SuppressWarnings("unchecked")
+
     public static boolean isUserChiefEditor(int aUserID) {
         boolean returnValue = false;
 
@@ -101,7 +101,7 @@ public class UsersLifeCycle {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     public String getFullNameForUserName(String aUsername) throws NoSuchValueException {
         String returnValue = "";
 

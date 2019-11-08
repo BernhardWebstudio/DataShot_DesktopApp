@@ -1,5 +1,12 @@
 # Changelog
 
+## v1.10.1-SNAPSHOT
+* [[`52de6c0489`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/52de6c0489)] - Fix issue where copy-previous led to empty georeference (Tim Bernhard)
+* [[`1f4c5adc9a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/1f4c5adc9a)] - Update georeference button after copy previous (Tim Bernhard)
+* [[`27414f4ac1`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/27414f4ac1)] - Fix issue where save was impossible after copy previous (Tim Bernhard)
+* [[`d60dbd6815`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d60dbd6815)] - Update changelog & publish Version 1.10.0-SNAPSHOT (Tim Bernhard)
+
+
 ## v1.10.0-SNAPSHOT
 * [[`edacdc0874`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/edacdc0874)] - Exclude more comparisons in LatLong emptycheck – fix #20, ETHEntColl/DataShot\_DesktopApp\_ETH#9 (Tim Bernhard)
 * [[`8597231923`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8597231923)] - Repair search by 'Entry by' (fix #19, ETHEntColl/DataShot\_DesktopApp\_ETH#12) (Tim Bernhard)

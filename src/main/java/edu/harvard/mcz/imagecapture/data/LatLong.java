@@ -547,8 +547,7 @@ public class LatLong implements Serializable, Cloneable {
      * @return
      */
     private boolean equalsOneD(LatLong subject, LatLong defaultVal) {
-        return
-                subject.acceptedLatLongFg == defaultVal.acceptedLatLongFg &&
+        return  subject.acceptedLatLongFg == defaultVal.acceptedLatLongFg &&
                 emptyOrEqual(subject.decLat, defaultVal.decLat) &&
                 emptyOrEqual(subject.decLatMin, defaultVal.decLatMin) &&
                 emptyOrEqual(subject.decLong, defaultVal.decLong) &&

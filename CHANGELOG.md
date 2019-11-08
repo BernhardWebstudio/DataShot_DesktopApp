@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.10.0-SNAPSHOT
+* [[`edacdc0874`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/edacdc0874)] - Exclude more comparisons in LatLong emptycheck – fix #20, ETHEntColl/DataShot\_DesktopApp\_ETH#9 (Tim Bernhard)
+* [[`8597231923`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8597231923)] - Repair search by 'Entry by' (fix #19, ETHEntColl/DataShot\_DesktopApp\_ETH#12) (Tim Bernhard)
+* [[`8867e781b5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8867e781b5)] - Let IntelliJ IDEA cleanup code (Tim Bernhard)
+* [[`7097ed7dd1`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/7097ed7dd1)] - Fix FlywayUpgrade for new V1.10+ (Tim Bernhard)
+* [[`1a8b1d6922`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/1a8b1d6922)] - With the new relations, code can be shortened again (Tim Bernhard)
+* [[`65a39fc7a3`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/65a39fc7a3)] - Fix #18: duplicate SpecimenParts upon CopyPrevious (Tim Bernhard)
+* [[`0256581ad9`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/0256581ad9)] - Fix issue where repeatedly copied determinations led to problems saving (Tim Bernhard)
+* [[`24e1be0b5a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/24e1be0b5a)] - Fix issue #17: failed to save after copy previous (Tim Bernhard)
+* [[`0e04db2aad`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/0e04db2aad)] - Update changelog & publish Version 1.9.4-SNAPSHOT (Tim Bernhard)
+
+
 ## v1.9.4-SNAPSHOT
 * [[`489216eb79`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/489216eb79)] - Run Intellij's code cleanup and reformat code for easier developement (Tim Bernhard)
 * [[`6856dcb2ba`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/6856dcb2ba)] - Use basic autocompletion using OpenStreetmap when having entered lat, long (see also #7) (Tim Bernhard)

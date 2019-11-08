@@ -1047,6 +1047,7 @@ public class Specimen implements java.io.Serializable {
         if (georeferences == null) {
             georeferences = new HashSet<LatLong>();
         }
+        // TODO: remove the following code if possible
         if (georeferences.isEmpty()) {
             LatLong georef = new LatLong();
             georef.setSpecimen(this);

@@ -573,7 +573,6 @@ public class LatLong implements Serializable, Cloneable {
     public LatLong clone() {
         LatLong newgeo = new LatLong();
         newgeo.setAcceptedLatLongFg(this.getAcceptedLatLongFg());
-        newgeo.setAcceptedLatLongFg(this.getAcceptedLatLongFg());
         newgeo.setDatum(this.getDatum());
         newgeo.setDecLat(this.getDecLat());
         newgeo.setDecLatMin(this.getDecLatMin());

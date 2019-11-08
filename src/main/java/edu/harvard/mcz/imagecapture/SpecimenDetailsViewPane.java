@@ -535,11 +535,14 @@ public class SpecimenDetailsViewPane extends JPanel {
 
         //+georeference
         specimen.getLatLong().clear();
+        // prepare hash set as otherwise, in getLatLong(), an empty LatLong is returned
+        HashSet<LatLong> latLongs = new HashSet<>();
         for (LatLong prevgeo : previousSpecimen.getLatLong()) {
             LatLong newgeo = prevgeo.clone();
-            newgeo.setSpecimen(specimen);
-            specimen.getLatLong().add(newgeo);
+            log.debug("Got newgeo with lat " + newgeo.getDecLat());
+            latLongs.add(newgeo);
         }
+        specimen.setLatLong(latLongs);
 
         //new - verbatim locality
         jTextFieldVerbatimLocality.setText(previousSpecimen.getVerbatimLocality());

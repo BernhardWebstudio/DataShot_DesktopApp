@@ -437,7 +437,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             this.setWarning("Error. " + e.getMessage());
             log.error(e);
         }
-        updateDeterminationCount();
+        updateContentDependentLabels();
     }
 
     private void copyPreviousRecord() {
@@ -551,7 +551,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         jTextFieldCollectingMethod.setText(previousSpecimen.getCollectingMethod());
 
         setSpecimenPartsTableCellEditors();
-        this.updateDeterminationCount();
+        updateContentDependentLabels();
     }
 
     private void setValues() {
@@ -756,9 +756,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         }
         setSpecimenPartsTableCellEditors();
 
-        updateDeterminationCount();
-
-        updateImageCount();
+        updateContentDependentLabels();
 
         setWarnings();
         this.setStateToClean();
@@ -2837,5 +2835,11 @@ public class SpecimenDetailsViewPane extends JPanel {
             });
         }
         return jTextFieldIdRemarks;
+    }
+
+    private void updateContentDependentLabels() {
+        updateJButtonGeoreference();
+        updateDeterminationCount();
+        updateJButtonCopyPrev();
     }
 }  //  @jve:decl-index=0:visual-constraint="10,15"

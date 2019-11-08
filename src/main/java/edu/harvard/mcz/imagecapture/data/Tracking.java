@@ -17,8 +17,11 @@ public class Tracking implements java.io.Serializable {
     private String eventType;
     private Date eventDateTime;
 
+    /**
+     * Utility constructor if no date is needed
+     */
     public Tracking() {
-        this.eventDateTime = new Date();
+
     }
 
     public Tracking(Specimen specimen, Date eventDateTime) {
@@ -30,16 +33,15 @@ public class Tracking implements java.io.Serializable {
         }
     }
 
+    public Tracking(Specimen specimen, String user, String eventType) {
+        this(specimen, user, eventType, null);
+    }
+
     public Tracking(Specimen specimen, String user, String eventType,
                     Date eventDateTime) {
-        this.specimen = specimen;
+        this(specimen, eventDateTime);
         this.user = user;
         this.eventType = eventType;
-        if (eventDateTime == null) {
-            this.eventDateTime = new Date();
-        } else {
-            this.eventDateTime = (Date) eventDateTime.clone();
-        }
     }
 
     public Long getTrackingId() {

@@ -23,6 +23,7 @@ import org.hibernate.query.Query;
 import javax.persistence.PersistenceException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -106,10 +107,9 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
      * @param specimen the specimen for which the change is to be logged to the tracking table.
      */
     protected void track(Specimen specimen) {
-        Tracking t = new Tracking();
-        t.setEventType(specimen.getWorkFlowStatus());
-        t.setSpecimen(specimen);
-        t.setUser(Singleton.getSingletonInstance().getUserFullName());
+        Tracking t = new Tracking(
+                specimen, Singleton.getSingletonInstance().getUserFullName(), specimen.getWorkFlowStatus(), new Date()
+        );
         TrackingLifeCycle tls = new TrackingLifeCycle();
         try {
             tls.persist(t);

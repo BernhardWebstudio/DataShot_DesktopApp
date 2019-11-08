@@ -534,49 +534,11 @@ public class SpecimenDetailsViewPane extends JPanel {
         }
 
         //+georeference
-//        specimen.getLatLong().clear();
-//        for (LatLong prevgeo : previousSpecimen.getLatLong()) {
-//            LatLong newgeo = prevgeo.clone();
-//            newgeo.setSpecimen(specimen);
-//            specimen.getLatLong().add(newgeo);
-//        }
-        Set<LatLong> georeferences = specimen.getLatLong();
-        LatLong newgeo = georeferences.iterator().next();
-        newgeo.setSpecimenId(specimen);
-
+        specimen.getLatLong().clear();
         for (LatLong prevgeo : previousSpecimen.getLatLong()) {
-            newgeo.setAcceptedLatLongFg(prevgeo.getAcceptedLatLongFg());
-            newgeo.setAcceptedLatLongFg(prevgeo.getAcceptedLatLongFg());
-            newgeo.setDatum(prevgeo.getDatum());
-            newgeo.setDecLat(prevgeo.getDecLat());
-            newgeo.setDecLatMin(prevgeo.getDecLatMin());
-            newgeo.setDecLong(prevgeo.getDecLong());
-            newgeo.setDecLongMin(prevgeo.getDecLongMin());
-            newgeo.setDeterminedByAgent(prevgeo.getDeterminedByAgent());
-            newgeo.setDeterminedDate(prevgeo.getDeterminedDate());
-            newgeo.setExtent(prevgeo.getExtent());
-            newgeo.setFieldVerifiedFg(prevgeo.getFieldVerifiedFg());
-            newgeo.setGeorefmethod(prevgeo.getGeorefmethod());
-            newgeo.setGpsaccuracy(prevgeo.getGpsaccuracy());
-            newgeo.setLatDeg(prevgeo.getLatDeg());
-            newgeo.setLatDir(prevgeo.getLatDir());
-            newgeo.setLatLongForNnpFg(prevgeo.getLatLongForNnpFg());
-            newgeo.setLatLongRefSource(prevgeo.getLatLongRefSource());
-            newgeo.setLatLongRemarks(prevgeo.getLatLongRemarks());
-            newgeo.setLatMin(prevgeo.getLatMin());
-            newgeo.setLatSec(prevgeo.getLatSec());
-            newgeo.setLongDeg(prevgeo.getLongDeg());
-            newgeo.setLongDir(prevgeo.getLongDir());
-            newgeo.setLongMin(prevgeo.getLongMin());
-            newgeo.setLongSec(prevgeo.getLongSec());
-            newgeo.setMaxErrorDistance(prevgeo.getMaxErrorDistance());
-            newgeo.setMaxErrorUnits(prevgeo.getMaxErrorUnits());
-            newgeo.setNearestNamedPlace(prevgeo.getNearestNamedPlace());
-            newgeo.setOrigLatLongUnits(prevgeo.getOrigLatLongUnits());
-            newgeo.setUtmEw(prevgeo.getUtmEw());
-            newgeo.setUtmNs(prevgeo.getUtmNs());
-            newgeo.setUtmZone(prevgeo.getUtmZone());
-            newgeo.setVerificationstatus(prevgeo.getVerificationstatus());
+            LatLong newgeo = prevgeo.clone();
+            newgeo.setSpecimen(specimen);
+            specimen.getLatLong().add(newgeo);
         }
 
         //new - verbatim locality

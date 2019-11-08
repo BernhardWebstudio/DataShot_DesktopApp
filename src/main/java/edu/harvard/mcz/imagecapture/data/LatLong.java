@@ -18,6 +18,10 @@
  */
 package edu.harvard.mcz.imagecapture.data;
 
+import edu.harvard.mcz.imagecapture.SpecimenBrowser;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -113,7 +117,7 @@ public class LatLong implements Serializable, Cloneable {
     }
 
     public boolean isEmpty() {
-        return this.equals(new LatLong());
+        return this.equalsOneD(this, new LatLong());
     }
 
     public Long getLatLongId() {
@@ -521,30 +525,50 @@ public class LatLong implements Serializable, Cloneable {
      * Note that due to historical reasons, not every property is compared.
      * If need to check for strict equality, compare the id's!
      * Examples of uncompaired properties:
-     * - georefmethod: had different defaults over time, so we could get fals
-     * positives
-     *
+     * @see LatLong#equalsOneD(LatLong, LatLong)
+     * TODO: not used, but if, please refactor.
      * @param coord
      * @return whether these few properties are equal.
      */
     public boolean equals(LatLong coord) {
-        return coord.acceptedLatLongFg == this.acceptedLatLongFg &&
-                coord.fieldVerifiedFg == this.fieldVerifiedFg &&
-                coord.latLongForNnpFg == this.latLongForNnpFg &&
-                Objects.equals(coord.decLat, this.decLat) &&
-                Objects.equals(coord.decLatMin, this.decLatMin) &&
-                coord.acceptedLatLongFg == this.acceptedLatLongFg &&
-                Objects.equals(coord.decLong, this.decLong) &&
-                Objects.equals(coord.decLongMin, this.decLongMin) &&
-                Objects.equals(coord.determinedByAgent, this.determinedByAgent) &&
-                Objects.equals(coord.extent, this.extent) &&
-                Objects.equals(coord.latDeg, this.latDeg) &&
-                Objects.equals(coord.latDir, this.latDir) &&
-                Objects.equals(coord.latMin, this.latMin) &&
-                Objects.equals(coord.latSec, this.latSec) &&
-                Objects.equals(coord.gpsaccuracy, this.gpsaccuracy) &&
-                Objects.equals(coord.maxErrorDistance, this.maxErrorDistance) &&
-                Objects.equals(coord.maxErrorUnits, this.maxErrorUnits);
+        return this.equalsOneD(coord, this) && this.equalsOneD(this, coord);
+    }
+
+    /**
+     * Check whether two objects are similar in the sense where one of the objects
+     * Examples of uncompaired properties:
+     * - georefmethod: had different defaults over time, so we could get false
+     * positives
+     * - fieldVerifiedFg: had undefined behaviour in some cases
+     * - latLongForNnpFg: had undefined behaviour in some cases
+     *
+     * @param subject this object may have null/""/0.0 values to return true
+     * @param defaultVal this object has the acceptable default values to return true
+     * @return
+     */
+    private boolean equalsOneD(LatLong subject, LatLong defaultVal) {
+        return
+                subject.acceptedLatLongFg == defaultVal.acceptedLatLongFg &&
+                emptyOrEqual(subject.decLat, defaultVal.decLat) &&
+                emptyOrEqual(subject.decLatMin, defaultVal.decLatMin) &&
+                emptyOrEqual(subject.decLong, defaultVal.decLong) &&
+                emptyOrEqual(subject.decLongMin, defaultVal.decLongMin) &&
+                emptyOrEqual(subject.determinedByAgent, defaultVal.determinedByAgent) &&
+                emptyOrEqual(subject.extent, defaultVal.extent) &&
+                emptyOrEqual(subject.latDeg, defaultVal.latDeg) &&
+                emptyOrEqual(subject.latDir, defaultVal.latDir) &&
+                emptyOrEqual(subject.latMin, defaultVal.latMin) &&
+                emptyOrEqual(subject.latSec, defaultVal.latSec) &&
+                emptyOrEqual(subject.gpsaccuracy, defaultVal.gpsaccuracy) &&
+                emptyOrEqual(subject.maxErrorDistance, defaultVal.maxErrorDistance);
+    }
+
+    private boolean emptyOrEqual(String subject, String defaultVal) {
+        return subject == null || subject.equals("") || subject.equals(defaultVal);
+    }
+
+    private boolean emptyOrEqual(java.lang.Number subject, java.lang.Number defaultVal) {
+        return subject == null || subject.doubleValue() == 0.0 || subject.equals(defaultVal);
     }
 
     public LatLong clone() {

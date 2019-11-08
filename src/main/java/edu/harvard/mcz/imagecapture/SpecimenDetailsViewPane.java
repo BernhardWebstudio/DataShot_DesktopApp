@@ -1532,7 +1532,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     }
 
     private void updateJButtonGeoreference() {
-        if (specimen.getLatLong() != null && !specimen.getLatLong().isEmpty()) {
+        if (specimen.getLatLong() != null && !specimen.getLatLong().isEmpty() && !specimen.getLatLong().iterator().next().isEmpty()) {
             jButtonGeoReference.setText("✅ Georeference (1)");
         } else {
             jButtonGeoReference.setText("❔ Georeference (0)");
@@ -2702,25 +2702,27 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     private void autocompleteGeoDataFromGeoreference() {
         LatLong georeff = this.specimen.getLatLong().iterator().next();
-        // do it async as the request could take longer than desired
-        new Thread(() -> {
-            log.debug("Fetching address from openstreetmap");
-            Map<String, Object> data = OpenStreetMapUtils.getInstance().reverseSearchValues(georeff.getDecLat(), georeff.getDecLong(), new ArrayList<>(Arrays.asList(
-                    "address.state",
-                    "address.country"
-            )));
-            if (data != null) {
-                log.debug("Got address from openstreetmap: " + data.toString());
-                if (this.getCountryJTextField().getSelectedItem().equals("")) {
-                    this.getCountryJTextField().setSelectedItem(data.get("address.country"));
-                } else {
-                    log.debug("Won't set country as is '" + this.getCountryJTextField().getSelectedItem() + "'.");
+        if (georeff.getDecLat() != null && georeff.getDecLong() != null) {
+            // do it async as the request could take longer than desired
+            new Thread(() -> {
+                log.debug("Fetching address from openstreetmap");
+                Map<String, Object> data = OpenStreetMapUtils.getInstance().reverseSearchValues(georeff.getDecLat(), georeff.getDecLong(), new ArrayList<>(Arrays.asList(
+                        "address.state",
+                        "address.country"
+                )));
+                if (data != null) {
+                    log.debug("Got address from openstreetmap: " + data.toString());
+                    if (this.getCountryJTextField().getSelectedItem().equals("")) {
+                        this.getCountryJTextField().setSelectedItem(data.get("address.country"));
+                    } else {
+                        log.debug("Won't set country as is '" + this.getCountryJTextField().getSelectedItem() + "'.");
+                    }
+                    if (this.getPrimaryDivisionJTextField().getSelectedItem().equals("")) {
+                        this.getPrimaryDivisionJTextField().setSelectedItem(data.get("address.state"));
+                    }
                 }
-                if (this.getPrimaryDivisionJTextField().getSelectedItem().equals("")) {
-                    this.getPrimaryDivisionJTextField().setSelectedItem(data.get("address.state"));
-                }
-            }
-        }).start();
+            }).start();
+        }
     }
 
     /**

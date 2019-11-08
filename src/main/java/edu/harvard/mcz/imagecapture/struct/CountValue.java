@@ -23,10 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Data Structure to hold counts and values for arbitrary select count(*), field from table queries
- * for arbitrary fields. 
- *
- *
- *
+ * for arbitrary fields.
  */
 public class CountValue {
     private static final Log log = LogFactory.getLog(CountValue.class);

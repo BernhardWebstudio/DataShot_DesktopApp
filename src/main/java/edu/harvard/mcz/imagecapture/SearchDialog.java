@@ -32,8 +32,6 @@ import java.util.Set;
 
 /**
  * SearchDialog
- *
- *
  */
 public class SearchDialog extends JDialog {
 

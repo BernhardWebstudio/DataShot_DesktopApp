@@ -44,7 +44,6 @@ import java.util.*;
 
 /**
  *
- *
  */
 public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
     private static final Log log = LogFactory.getLog(JobVerbatimFieldLoad.class);
@@ -524,10 +523,10 @@ public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
      * Attempt to read file with a given CSV format, and if successful, return
      * the number of rows in the file.
      *
-     * @param file to check for csv rows.
+     * @param file        to check for csv rows.
      * @param formatToTry the CSV format to try to read the file with.
      * @return number of rows in the file.
-     * @throws IOException on a problem reading the header.
+     * @throws IOException           on a problem reading the header.
      * @throws FileNotFoundException on not finding the file.
      */
     protected int readRows(File file, CSVFormat formatToTry) throws IOException, FileNotFoundException {

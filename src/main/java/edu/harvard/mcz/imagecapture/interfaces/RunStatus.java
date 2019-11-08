@@ -20,9 +20,6 @@ package edu.harvard.mcz.imagecapture.interfaces;
 
 /**
  * Describes the status of a RunnableJob
- *
- *
- *
  */
 public class RunStatus {
 
@@ -36,7 +33,6 @@ public class RunStatus {
     public static final int STATUS_DONE = 101;
 
     /**
-     *
      * @param aStatus status code to test, from one of the RunStatus.STATUS_* constants.
      * @return false if aStatus is that of a still running job, true if aStatus is that
      * of a job that has completed either successfully or with an error state.

@@ -41,7 +41,6 @@ import java.util.Iterator;
 
 /**
  *
- *
  */
 public class VerbatimCaptureDialog extends JDialog implements DataChangeListener {
 

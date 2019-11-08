@@ -20,7 +20,6 @@ package edu.harvard.mcz.imagecapture.interfaces;
 
 /**
  *
- *
  */
 public interface CollectionReturner {
 

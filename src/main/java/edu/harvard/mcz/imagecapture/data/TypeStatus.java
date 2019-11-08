@@ -24,9 +24,6 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Controled Vocabulary for type status of specimens/names
- *
- *
- *
  */
 public class TypeStatus implements ValueLister {
     private static final Log log = LogFactory.getLog(TypeStatus.class);

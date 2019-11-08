@@ -30,7 +30,6 @@ import java.util.List;
 
 /**
  *
- *
  */
 public class AgentNameComboBoxModel implements ComboBoxModel<MCZbaseAuthAgentName> {
     private static final long serialVersionUID = -4856432985354519476L;

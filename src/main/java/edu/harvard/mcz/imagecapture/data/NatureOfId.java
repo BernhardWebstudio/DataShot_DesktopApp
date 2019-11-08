@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  *
- *
  */
 public class NatureOfId {
     public static final String LEGACY = "legacy";

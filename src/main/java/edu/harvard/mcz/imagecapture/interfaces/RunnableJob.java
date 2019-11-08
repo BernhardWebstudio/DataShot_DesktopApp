@@ -24,19 +24,15 @@ import java.util.Date;
 /**
  * Interface for batch scans of files and other operations for which starting the operation,
  * stopping, the operation, and finding out the status and completeness of the operation may
- * be desirable.  All implementations should have some non trivial start() method, but may or 
- * may not have functional code behind the other methods.  
- *
- * TODO: Break this into multiple interfaces (StartableJob, StoppableJob, etc.) 
- *
- *
- *
+ * be desirable.  All implementations should have some non trivial start() method, but may or
+ * may not have functional code behind the other methods.
+ * <p>
+ * TODO: Break this into multiple interfaces (StartableJob, StoppableJob, etc.)
  */
 public interface RunnableJob {
 
     /**
      * Start the RunnableJob.
-     *
      */
     void start();
 
@@ -71,14 +67,15 @@ public interface RunnableJob {
     boolean registerListener(RunnerListener aJobListener);
 
     /**
-     * Get a brief description of what sort of job this is in 
+     * Get a brief description of what sort of job this is in
      * a form understandable by a user.
      *
      * @return a string representing to the user what sort of job this is.
      */
     String getName();
 
-    /** Get the timestamp for when this job was started.
+    /**
+     * Get the timestamp for when this job was started.
      *
      * @return a date representing the time this job started.
      */

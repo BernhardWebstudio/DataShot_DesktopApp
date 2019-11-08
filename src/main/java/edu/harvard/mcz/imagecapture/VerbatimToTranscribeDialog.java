@@ -34,7 +34,6 @@ import java.awt.event.ActionListener;
 
 /**
  *
- *
  */
 public class VerbatimToTranscribeDialog extends JDialog {
 

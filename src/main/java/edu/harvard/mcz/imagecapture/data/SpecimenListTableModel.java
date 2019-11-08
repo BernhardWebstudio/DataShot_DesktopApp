@@ -25,10 +25,8 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.util.List;
 
-/** SpecimenListTableModel
- *
- *
- *
+/**
+ * SpecimenListTableModel
  */
 public class SpecimenListTableModel extends AbstractTableModel {
 
@@ -198,7 +196,9 @@ public class SpecimenListTableModel extends AbstractTableModel {
         return result;
     }
 
-    /** Must be implemented for ButtonEditor to work.
+    /**
+     * Must be implemented for ButtonEditor to work.
+     *
      * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
      */
     @Override

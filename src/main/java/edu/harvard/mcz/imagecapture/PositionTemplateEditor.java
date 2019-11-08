@@ -39,12 +39,10 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
-/** PositionTemplateEditor allows viewing and creation of position templates indicating which portions 
+/**
+ * PositionTemplateEditor allows viewing and creation of position templates indicating which portions
  * of an image file contain a barcode, OCR text, a specimen, labels from the unit tray, and labels from
  * the specimen's pin.
- *
- *
- *
  */
 public class PositionTemplateEditor extends JFrame {
 
@@ -184,7 +182,8 @@ public class PositionTemplateEditor extends JFrame {
         drawLayers();
     }
 
-    /** Set the image displayed in the editor given an URL (needed to load from resource inside jar).
+    /**
+     * Set the image displayed in the editor given an URL (needed to load from resource inside jar).
      *
      * @param anImageURL an URL pointing to an image file.
      * @throws IOException
@@ -195,7 +194,8 @@ public class PositionTemplateEditor extends JFrame {
         loadImage(ImageIO.read(anImageURL));
     }
 
-    /**Set the image displayed in the editor given a File
+    /**
+     * Set the image displayed in the editor given a File
      *
      * @param anImageFile the image file to display.
      * @throws IOException
@@ -564,7 +564,6 @@ public class PositionTemplateEditor extends JFrame {
 
     /**
      * Set the text for each button as the position and size of the relevant portion of the template.
-     *
      */
     private void setButtonTexts() {
         controlBarcode.setText("UL=" + template.getBarcodePosition().width + "," + template.getBarcodePosition().height + " W/H=" + template.getBarcodeSize().width + "," + template.getBarcodeSize().height);

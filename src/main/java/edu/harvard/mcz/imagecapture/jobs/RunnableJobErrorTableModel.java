@@ -21,11 +21,9 @@ package edu.harvard.mcz.imagecapture.jobs;
 import javax.swing.table.AbstractTableModel;
 import java.util.List;
 
-/** RunnableJobErrorTableModel, table model for displaying error reports about preprocessing images.
- * Can handle different types of reports by specifying a TYPE_ constant in the constructor.   
- *
- *
- *
+/**
+ * RunnableJobErrorTableModel, table model for displaying error reports about preprocessing images.
+ * Can handle different types of reports by specifying a TYPE_ constant in the constructor.
  */
 public class RunnableJobErrorTableModel extends AbstractTableModel {
 

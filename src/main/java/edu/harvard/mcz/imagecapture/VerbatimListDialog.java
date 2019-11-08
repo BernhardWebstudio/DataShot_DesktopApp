@@ -35,7 +35,6 @@ import java.awt.event.ActionListener;
 
 /**
  *
- *
  */
 public class VerbatimListDialog extends JDialog implements DataChangeListener {
     private static final long serialVersionUID = 6589370164897719328L;

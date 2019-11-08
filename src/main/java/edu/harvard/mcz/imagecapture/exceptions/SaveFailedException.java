@@ -7,9 +7,6 @@ package edu.harvard.mcz.imagecapture.exceptions;
 /**
  * SaveFailedException can be thrown when an attempt to persist an instance of a
  * class as a database record fails.
- *
- *
- *
  */
 public class SaveFailedException extends Exception {
 

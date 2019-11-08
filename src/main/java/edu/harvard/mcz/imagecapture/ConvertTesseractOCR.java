@@ -31,18 +31,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-/**Takes a buffered image, generates a TIFF file from it with a call
+/**
+ * Takes a buffered image, generates a TIFF file from it with a call
  * out to ImageMagick or GraphicsMagick convert, then passes that tiff
  * file on to TesseractOCR for Tesseract to OCR the tiff tile.
- *
+ * <p>
  * Usage:
  * <pre>
- ConvertTesseractOCR ocr = new ConvertTesseractOCR(aBufferedImage);
- String result = ocr.getOCRText();
- </pre>
- *
- *
- *
+ * ConvertTesseractOCR ocr = new ConvertTesseractOCR(aBufferedImage);
+ * String result = ocr.getOCRText();
+ * </pre>
  */
 public class ConvertTesseractOCR implements OCR {
 
@@ -54,10 +52,12 @@ public class ConvertTesseractOCR implements OCR {
         subimage = anImageToOCR;
     }
 
-    /**Command line test for this class.
+    /**
+     * Command line test for this class.
+     *
      * @param args will take first argument as path and name of file,
-     * will extract a portion of this image to test using the default
-     * position template.
+     *             will extract a portion of this image to test using the default
+     *             position template.
      * @see edu.harvard.mcz.imagecapture.PositionTemplate
      */
     public static void main(String[] args) {

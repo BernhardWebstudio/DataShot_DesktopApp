@@ -18,10 +18,8 @@
  */
 package edu.harvard.mcz.imagecapture.data;
 
-/**Authority list for values of Specimen.workFlowStatus.
- *
- *
- *
+/**
+ * Authority list for values of Specimen.workFlowStatus.
  */
 public class WorkFlowStatus {
 
@@ -108,7 +106,7 @@ public class WorkFlowStatus {
      * into.
      *
      * @return array of string constants for all workflow status values that might
-     *     be
+     * be
      * set by a user.
      */
     public static String[] getWorkFlowStatusValues() {
@@ -153,8 +151,8 @@ public class WorkFlowStatus {
      *
      * @param workflowStatus a current workflow state to check
      * @return true if the record can be placed into state verbatim captured from
-     *   its current (other) state, false otherwise.  False if the current state
-     *   is already verbatim captured.
+     * its current (other) state, false otherwise.  False if the current state
+     * is already verbatim captured.
      */
     public static boolean allowsVerbatimUpdate(String workflowStatus) {
         boolean result = false;
@@ -175,8 +173,8 @@ public class WorkFlowStatus {
      *
      * @param workflowStatus a current workflow state to check
      * @return true if the record can be placed into state verbatim captured from
-     *   its current (other) state, false otherwise.  True if the current state
-     *   is already verbatim captured.
+     * its current (other) state, false otherwise.  True if the current state
+     * is already verbatim captured.
      */
     public static boolean allowsVerbatimUpdateOverwrite(String workflowStatus) {
         boolean result = false;
@@ -198,11 +196,10 @@ public class WorkFlowStatus {
      * Test to see whether or not a state can be changed to verbatim classified.
      *
      * @param workflowStatus a current workflow state to check.
-     *
      * @return true if the record can be placed into state verbatim classified
-     *     from
-     *   its current (other) state, false otherwise.  True if the current state is
-     *   verbatim classified.
+     * from
+     * its current (other) state, false otherwise.  True if the current state is
+     * verbatim classified.
      */
     public static boolean allowsClassifiedUpdate(String workflowStatus) {
         boolean result = false;

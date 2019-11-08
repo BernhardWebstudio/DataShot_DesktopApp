@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  *
- *
  */
 public class HeaderCheckResult {
 
@@ -63,7 +62,7 @@ public class HeaderCheckResult {
 
     /**
      * @param message the message to append to the message for this
-     *     HeaderCheckResult
+     *                HeaderCheckResult
      */
     public void addToMessage(String message) {
         if (this.message == null) {

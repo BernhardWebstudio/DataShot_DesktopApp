@@ -18,16 +18,15 @@
  */
 package edu.harvard.mcz.imagecapture.exceptions;
 
-/** NoComponentPartsTemplateExeption is to handle the special case of an image that should be shown only
+/**
+ * NoComponentPartsTemplateExeption is to handle the special case of an image that should be shown only
  * as an entire image without being divided into component parts using a template.  The PositionTemplate constant
  * TEMPLATE_NO_COMPONENT_PARTS can be used to identify such images, and when a PositionTemplate is instantiated
- * with this constant as the template, a NoComponentPartsTemplateExeption will be thrown, allowing code to determine 
- * that the entire image should be shown.   This is an alternative to passing the image to the PositionTemplate so that 
+ * with this constant as the template, a NoComponentPartsTemplateExeption will be thrown, allowing code to determine
+ * that the entire image should be shown.   This is an alternative to passing the image to the PositionTemplate so that
  * the image size is returned from all PositionTemplate methods.
  *
  * @deprecated
- *
- *
  */
 public class NoComponentPartsTemplateException extends Exception {
 

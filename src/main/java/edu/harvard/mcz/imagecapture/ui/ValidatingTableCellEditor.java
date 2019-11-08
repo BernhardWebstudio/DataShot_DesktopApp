@@ -27,16 +27,13 @@ import java.awt.*;
 /**
  * ValidatingTableCellEditor provides a JTextField with an inputVerifier as a
  * cell editor that can be used as an editor for cells in a JTable.
- *
+ * <p>
  * Example:
  * <pre>
- JTextField field = new JTextField();
- field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
- jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));
- </pre>
- *
- *
- *
+ * JTextField field = new JTextField();
+ * field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
+ * jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));
+ * </pre>
  */
 public class ValidatingTableCellEditor extends DefaultCellEditor {
 

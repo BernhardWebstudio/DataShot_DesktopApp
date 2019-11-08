@@ -26,10 +26,8 @@ import edu.harvard.mcz.imagecapture.utility.HashUtility;
 import javax.swing.*;
 import java.awt.*;
 
-/** EditUserPanel
- *
- *
- *
+/**
+ * EditUserPanel
  */
 public class EditUserPanel extends JPanel {
 

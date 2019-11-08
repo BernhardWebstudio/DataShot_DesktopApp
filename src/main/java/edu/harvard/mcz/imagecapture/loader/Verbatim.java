@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  *
- *
  */
 public class Verbatim {
     public static final String NO_PIN_LABELS = "No Pin Labels";

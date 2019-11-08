@@ -33,13 +33,13 @@ import java.util.List;
 
 /**
  *
- *
  */
 public class SpecimenPartAttributeLifeCycle {
     private static final Log log =
             LogFactory.getLog(SpecimenPartAttributeLifeCycle.class);
 
-    /**Save or update an existing specimen part attribute record.
+    /**
+     * Save or update an existing specimen part attribute record.
      *
      * @param instance of a Specimen that that is to be saved.
      * @throws SaveFailedException
@@ -127,7 +127,8 @@ public class SpecimenPartAttributeLifeCycle {
         }
     }
 
-    /**Delete existing specimen part attribute record.
+    /**
+     * Delete existing specimen part attribute record.
      *
      * @param instance of a SpecimenPartAttribute that that is to be removed.
      * @throws SaveFailedException

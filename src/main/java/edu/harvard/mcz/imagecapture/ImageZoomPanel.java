@@ -37,9 +37,6 @@ import java.net.URL;
  *
  * @see edu.harvard.mcz.imagecapture.ImagePanel
  * @see edu.harvard.mcz.imagecapture.ImageDisplayFrame
- *
- *
- *
  */
 public class ImageZoomPanel extends JPanel implements MouseListener {
 
@@ -62,7 +59,6 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
 
     /**
      * This method initializes without an image
-     *
      */
     public ImageZoomPanel() {
         super();
@@ -72,6 +68,7 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
 
     /**
      * Constructor to initialize with an image.
+     *
      * @param anImage the image to display
      */
     public ImageZoomPanel(BufferedImage anImage) {
@@ -99,7 +96,6 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
 
     /**
      * This method initializes this
-     *
      */
     private void initialize() {
         this.setSize(new Dimension(553, 323));

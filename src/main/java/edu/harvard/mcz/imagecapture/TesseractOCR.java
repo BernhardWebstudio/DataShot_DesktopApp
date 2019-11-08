@@ -26,22 +26,20 @@ import org.apache.commons.logging.LogFactory;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-/**Uses a system runtime call to tesseract to obtain OCR text from a TIFF image file.
- *
- * Usage: 
+/**
+ * Uses a system runtime call to tesseract to obtain OCR text from a TIFF image file.
+ * <p>
+ * Usage:
  * <pre>
- String output = null;
- try {
- TesseractOCR t = new TesseractOCR();
- t.setTarget("filenameToOCR.tif");
- output = t.getOCRText();
- } catch (OCRReadException e) {
- // handle exception
- }
- </pre>
- *
- *
- *
+ * String output = null;
+ * try {
+ * TesseractOCR t = new TesseractOCR();
+ * t.setTarget("filenameToOCR.tif");
+ * output = t.getOCRText();
+ * } catch (OCRReadException e) {
+ * // handle exception
+ * }
+ * </pre>
  */
 public class TesseractOCR implements OCR {
 
@@ -52,7 +50,8 @@ public class TesseractOCR implements OCR {
     //private String language = "-l spa";
     private String language = "-l lepid";  // Lepidoptera training set
 
-    /**Run TesseractOCR from the command line to OCR a single file, intended as a test of installation.
+    /**
+     * Run TesseractOCR from the command line to OCR a single file, intended as a test of installation.
      * Displays the content of the tesseract output file to standard output.
      * Could be used as a shell wrapper to run tesseract and put the results on standard output to be
      * piped elsewhere.
@@ -83,7 +82,8 @@ public class TesseractOCR implements OCR {
 
     }
 
-    /**Sets the name of the TIFF image file from which tesseract is to try to
+    /**
+     * Sets the name of the TIFF image file from which tesseract is to try to
      * extract text.
      *
      * @param aTargetFile filename, including path, of the file that is to be OCRed.

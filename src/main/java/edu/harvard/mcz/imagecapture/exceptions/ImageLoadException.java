@@ -18,10 +18,8 @@
  */
 package edu.harvard.mcz.imagecapture.exceptions;
 
-/** ImageLoadException to be thrown on any problem from trying to load an image.
- *
- *
- *
+/**
+ * ImageLoadException to be thrown on any problem from trying to load an image.
  */
 public class ImageLoadException extends Exception {
 

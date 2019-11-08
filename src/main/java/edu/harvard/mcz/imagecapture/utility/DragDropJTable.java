@@ -26,9 +26,6 @@ import java.util.Vector;
 
 /**
  * DragDropJTable: a JTable that supports drag and drop
- *
- *
- *
  */
 public class DragDropJTable extends JTable {
 
@@ -135,10 +132,8 @@ public class DragDropJTable extends JTable {
         return new StringSelection(out);
     }
 
-    /** DdTransferHandler Custom Drag and drop transfer handler.
-     *
-     *
-     *
+    /**
+     * DdTransferHandler Custom Drag and drop transfer handler.
      */
     class DdTransferHandler extends TransferHandler {
 

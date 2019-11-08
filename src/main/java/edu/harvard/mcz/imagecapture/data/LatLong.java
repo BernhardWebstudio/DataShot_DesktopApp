@@ -27,7 +27,6 @@ import java.util.Objects;
 
 /**
  * The persistent class for the LAT_LONG database table.
- *
  */
 public class LatLong implements Serializable, Cloneable {
     private static final long serialVersionUID = 1L;

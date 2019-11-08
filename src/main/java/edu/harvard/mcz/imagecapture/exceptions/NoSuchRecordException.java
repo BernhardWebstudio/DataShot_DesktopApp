@@ -18,11 +18,9 @@
  */
 package edu.harvard.mcz.imagecapture.exceptions;
 
-/** NoSuchRecordException can be thrown when an attempt to look up a particular record in a 
- * database returns no matches.  
- *
- *
- *
+/**
+ * NoSuchRecordException can be thrown when an attempt to look up a particular record in a
+ * database returns no matches.
  */
 public class NoSuchRecordException extends Exception {
 

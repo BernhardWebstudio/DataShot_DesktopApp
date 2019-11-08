@@ -30,9 +30,6 @@ import java.util.List;
 
 /**
  * Class to prepare records for MCZbase Media Bulkloader
- *
- *
- *
  */
 public class BulkMedia {
     private static final Log log = LogFactory.getLog(BulkMedia.class);

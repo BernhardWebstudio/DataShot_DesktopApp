@@ -31,10 +31,8 @@ import javax.swing.*;
 import java.io.File;
 import java.util.*;
 
-/** JobRepeatOCR
- *
- *
- *
+/**
+ * JobRepeatOCR
  */
 public class JobRepeatOCR implements RunnableJob, Runnable {
 
@@ -60,9 +58,8 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
     private int percentComplete = 0;
 
     /**
-     *  Default constructor.  Creates an OCR job to repeat the OCR on all
-     *  images for all specimens in state OCR.
-     *
+     * Default constructor.  Creates an OCR job to repeat the OCR on all
+     * images for all specimens in state OCR.
      */
     public JobRepeatOCR() {
         scan = SCAN_ALL;
@@ -76,16 +73,15 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
      * on which to repeat OCR for specimens in state OCR or to repeat OCR
      * for a specific directory specified by startAt, again for specimens in
      * state OCR.
-     *
+     * <p>
      * Behavior:
-     *
+     * <p>
      * whatToScan=SCAN_ALL, startAt is ignored, equivalent to default constructor.
      * whatToScan=SCAN_SELECT, startAt is used as starting point for directory chooser dialog.
      * whatToScan=SCAN_SPECIFIC, startAt is used as starting point for repeat (if null falls back to SCAN_SELECT).
      *
-     *
      * @param whatToScan one of SCAN_ALL, SCAN_SPECIFIC, SCAN_SELECT
-     * @param startAt null or a directory starting point.
+     * @param startAt    null or a directory starting point.
      */
     public JobRepeatOCR(int whatToScan, File startAt) {
         scan = SCAN_SELECT;

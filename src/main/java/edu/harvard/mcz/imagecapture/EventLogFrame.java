@@ -25,11 +25,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-/** Display the history of database record creation and updates for specimens including the history 
+/**
+ * Display the history of database record creation and updates for specimens including the history
  * of status changes in the workflow.  Can display either the history for a single specimen or the entire
- * tracking table for all specimens.  
- *
- *
+ * tracking table for all specimens.
  */
 public class EventLogFrame extends JFrame {
 
@@ -65,7 +64,6 @@ public class EventLogFrame extends JFrame {
 
     /**
      * This method initializes this
-     *
      */
     private void initialize() {
         this.setSize(709, 340);

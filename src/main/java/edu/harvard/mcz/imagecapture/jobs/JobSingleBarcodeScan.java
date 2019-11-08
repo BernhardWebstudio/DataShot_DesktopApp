@@ -37,19 +37,17 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-/** Examines a single image file attempts to determine the correct template, tries to parse data from the image, launches 
- * a display of the barcode, labels, unit tray label, and specimen parts of the image, and if persistence is requested, 
- * stores the image and specimen data in the database and launches a UI for editing the specimen record. 
+/**
+ * Examines a single image file attempts to determine the correct template, tries to parse data from the image, launches
+ * a display of the barcode, labels, unit tray label, and specimen parts of the image, and if persistence is requested,
+ * stores the image and specimen data in the database and launches a UI for editing the specimen record.
  * The image file to scan is selected by the user from a file picker dialog which is launched when starting the job.
- *
+ * <p>
  * Usage:
  * <pre>
- JobSingleBarcodeScan s = new JobSingleBarcodeScan(true);
- s.start();
- </pre>
- *
- *
- *
+ * JobSingleBarcodeScan s = new JobSingleBarcodeScan(true);
+ * s.start();
+ * </pre>
  */
 public class JobSingleBarcodeScan implements RunnableJob, Runnable {
 
@@ -70,11 +68,12 @@ public class JobSingleBarcodeScan implements RunnableJob, Runnable {
         init();
     }
 
-    /**Constructor allowing specification of persistence.
+    /**
+     * Constructor allowing specification of persistence.
      *
      * @param persistResult if true enables connection to database to persist changes, and adds editable form
-     * showing the current specimen record in the database that matches the barcode extracted from the image, creating
-     * the image and specimen records if needed.
+     *                      showing the current specimen record in the database that matches the barcode extracted from the image, creating
+     *                      the image and specimen records if needed.
      */
     public JobSingleBarcodeScan(boolean persistResult) {
         persist = persistResult;

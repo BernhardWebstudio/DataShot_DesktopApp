@@ -22,12 +22,11 @@ import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
-/** ButtonRenderer works together with ButonEditor and a TableModel that implements  
+/**
+ * ButtonRenderer works together with ButonEditor and a TableModel that implements
  * isCellEditable() for relevant cells to produce a clickable button in a cell.
+ *
  * @see edu.harvard.mcz.imagecapture.ui.ButtonEditor
- *
- *
- *
  */
 public class ButtonRenderer extends JButton implements TableCellRenderer {
 

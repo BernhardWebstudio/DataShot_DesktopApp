@@ -25,9 +25,6 @@ import java.io.File;
 
 /**
  * PositionTemplateDetector interface for detecting PositionTemplates for image files.
- *
- *
- *
  */
 public interface PositionTemplateDetector {
 
@@ -35,10 +32,10 @@ public interface PositionTemplateDetector {
      * Given a file, determine if a PositionTemplate applies to that file and if so
      * return the identifier for the PositionTemplate.
      *
-     * @see edu.harvard.mcz.imagecapture.PositionTemplate
      * @param anImageFile to check
      * @return the templateId of the PositionTemplate as a String
      * @throws UnreadableFileException if the file cannot be read.
+     * @see edu.harvard.mcz.imagecapture.PositionTemplate
      */
     String detectTemplateForImage(File anImageFile) throws UnreadableFileException;
 

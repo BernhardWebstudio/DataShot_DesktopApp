@@ -27,7 +27,6 @@ import java.awt.*;
 
 /**
  *
- *
  */
 public class ProgressBarRenderer implements TableCellRenderer {
 

@@ -27,21 +27,20 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.util.List;
 
-/** UnitTrayLabelTableModel
- *
- *
- *
+/**
+ * UnitTrayLabelTableModel
  */
 public class UnitTrayLabelTableModel extends AbstractTableModel {
 
     // TODO: Add a cloning function
     // TODO: Better support for copy and paste of multiple cells.
 
-    /** When a new row is added, the value of ordinal will be set to zero.
-     *
+    /**
+     * When a new row is added, the value of ordinal will be set to zero.
      */
     public static final int NEXT_ORDINAL_ZERO = 0;
-    /** When a new row is added the value of ordinal will be set to the
+    /**
+     * When a new row is added the value of ordinal will be set to the
      * value of the largest ordinal currently in the database plus 1.
      */
     public static final int NEXT_ORDINAL_MAXPLUSONE = 1;

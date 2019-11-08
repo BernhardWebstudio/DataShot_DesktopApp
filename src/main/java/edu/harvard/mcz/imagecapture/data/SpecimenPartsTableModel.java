@@ -29,7 +29,6 @@ import java.util.Set;
 
 /**
  *
- *
  */
 public class SpecimenPartsTableModel extends AbstractTableModel {
 

@@ -21,10 +21,9 @@ package edu.harvard.mcz.imagecapture.data;
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 
-/**Controled vocabulary for Specimen.locationInCollection, storage and workflow
+/**
+ * Controled vocabulary for Specimen.locationInCollection, storage and workflow
  * indicator for types, general collection, slides, etc.
- *
- *
  */
 public class LocationInCollection {
 
@@ -38,7 +37,7 @@ public class LocationInCollection {
      * of collections.
      *
      * @return a string array of values for the location in collection suitable
-     *     for populating a picklist.
+     * for populating a picklist.
      */
     public static String[] getLocationInCollectionValues() {
 

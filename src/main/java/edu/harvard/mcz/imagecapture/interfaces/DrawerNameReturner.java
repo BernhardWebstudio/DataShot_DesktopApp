@@ -20,12 +20,9 @@ package edu.harvard.mcz.imagecapture.interfaces;
 
 /**
  * DrawerNameReturner
- *
+ * <p>
  * Interface for returning the DrawerNumber from a source such as a class
  * that parses data off of an OCR of a label.
- *
- *
- *
  */
 public interface DrawerNameReturner {
 

@@ -45,8 +45,6 @@ import java.util.prefs.Preferences;
 
 /**
  * Display parts of images (and possibly a data entry form) of a specimen and its labels.
- *
- *
  */
 public class ImageDisplayFrame extends JFrame {
 
@@ -109,6 +107,7 @@ public class ImageDisplayFrame extends JFrame {
 
     /**
      * This is the default constructor
+     *
      * @param specimen
      */
     public ImageDisplayFrame(Specimen specimen, SpecimenController specimenController) {
@@ -131,15 +130,15 @@ public class ImageDisplayFrame extends JFrame {
         this.targetSpecimen = targetSpecimen;
     }
 
-    /** Given a set of ICImages, display one of them in the tabs of the ImageDisplayFrame, and
+    /**
+     * Given a set of ICImages, display one of them in the tabs of the ImageDisplayFrame, and
      * populate the image chooser pick list with a list of all the images.  Call this method to display
      * more than one image in an ImageDisplayFrame.  Single image is displayed with a call to loadImagesFromFileSingle().
      *
      * @param Set<ICImage> the image files to display in the tabs of the frame.
-     * @throws ImageLoadException if there is a problem with the image.
-     * @throws BadTemplateException
-     *
      * @param imageFiles
+     * @throws ImageLoadException   if there is a problem with the image.
+     * @throws BadTemplateException
      */
     public void loadImagesFromFiles(Set<ICImage> imageFiles) {
         log.debug(imageFiles.size());
@@ -175,7 +174,8 @@ public class ImageDisplayFrame extends JFrame {
         jTabbedPane.setSelectedIndex(0);   // move focus to full image tab
     }
 
-    /** Based on the position template, display the full image in one tab, and parts of the image
+    /**
+     * Based on the position template, display the full image in one tab, and parts of the image
      * described by the template in other tabs.
      *
      * @param anImageFile
@@ -287,7 +287,6 @@ public class ImageDisplayFrame extends JFrame {
 
     /**
      * This method initializes this
-     *
      */
     private void initialize() {
         this.setContentPane(getJContentPane());

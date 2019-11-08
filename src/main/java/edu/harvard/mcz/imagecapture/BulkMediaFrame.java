@@ -41,9 +41,6 @@ import java.io.PrintWriter;
 
 /**
  * Frame to manage creating BulkMedia files from image files.
- *
- *
- *
  */
 public class BulkMediaFrame extends JFrame implements PropertyChangeListener {
     public static final String BULKFILENAME = "media_bulkload.csv";

@@ -30,12 +30,10 @@ import java.io.FileOutputStream;
 import java.util.Enumeration;
 import java.util.Properties;
 
-/** Filesystem persistence and retrieval of properties for ImageCapture Application.
+/**
+ * Filesystem persistence and retrieval of properties for ImageCapture Application.
  * Includes constants for key names to use in properties file, and definition of default
  * values for properties to go with these keys if they aren't defined in the persistent file.
- *
- *
- *
  */
 public class ImageCaptureProperties extends AbstractTableModel {
 
@@ -168,10 +166,10 @@ public class ImageCaptureProperties extends AbstractTableModel {
     public static final String KEY_DEFAULT_TEMPLATES = "template.default";
 
     /**
-     *  Value for KEY_DETAILS_SCROLL that will cause the specimen details view pane to
-     *  have scroll bars forced to be turned on.
+     * Value for KEY_DETAILS_SCROLL that will cause the specimen details view pane to
+     * have scroll bars forced to be turned on.
      *
-     *  @see #KEY_DETAILS_SCROLL
+     * @see #KEY_DETAILS_SCROLL
      */
     public static final String VALUE_DETAILS_SCROLL_FORCE_ON = "on";
 
@@ -209,7 +207,8 @@ public class ImageCaptureProperties extends AbstractTableModel {
         checkDefaults();
     }
 
-    /** Given a File (which could be a directory path as a File object), return
+    /**
+     * Given a File (which could be a directory path as a File object), return
      * the portion of the path to that file (directory) that is below the path
      * described by KEY_IMAGEBASE.
      *
@@ -259,7 +258,8 @@ public class ImageCaptureProperties extends AbstractTableModel {
         return result;
     }
 
-    /** Warning: For unit testing only.  Do not invoke this method.  Always use getPathBelowBase(File aFilename) instead.
+    /**
+     * Warning: For unit testing only.  Do not invoke this method.  Always use getPathBelowBase(File aFilename) instead.
      *
      * @see edu.harvard.mcz.imagecapture.ImageCaptureProperties#getPathBelowBase(File)
      */
@@ -334,6 +334,7 @@ public class ImageCaptureProperties extends AbstractTableModel {
 
     /**
      * Warning: For unit testing only.  Do not invoke this method.  Use assemblePathWithBase(String aDirectoryPath, String aFileName) instead.
+     *
      * @see edu.harvard.mcz.imagecapture.ImageCaptureProperties#assemblePathWithBase(String, String)
      */
     public static String assemblePathWithBase(String aDirectoryPath, String aFileName, String fileSeparator) {
@@ -425,7 +426,7 @@ public class ImageCaptureProperties extends AbstractTableModel {
      * Note: if the KEY_TEMPLATEDEFAULT property does not match a hardcoded
      * PositionTemplate, a database lookup will be triggered and, if the request
      * is being made at application launch, a login dialog will be launched.
-     *
+     * <p>
      * Take no action if there is no match to the KEY_TEMPLATEDEFAULT
      *
      * @return true if template in properties exists, false if no match to key or
@@ -448,9 +449,9 @@ public class ImageCaptureProperties extends AbstractTableModel {
         return result;
     }
 
-    /** Make sure required properties are present as keys, if they aren't add
+    /**
+     * Make sure required properties are present as keys, if they aren't add
      * them with default values.  This is where the default properties are defined.
-     *
      */
     private void checkDefaults() {
         if (!properties.containsKey(KEY_SPECIFIC_COLLECTION)) {

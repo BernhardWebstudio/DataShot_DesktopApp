@@ -27,10 +27,8 @@ import org.apache.commons.logging.LogFactory;
 import javax.swing.*;
 import java.awt.*;
 
-/** ChangePasswordDialog
- *
- *
- *
+/**
+ * ChangePasswordDialog
  */
 public class ChangePasswordDialog extends JDialog {
 
@@ -52,21 +50,23 @@ public class ChangePasswordDialog extends JDialog {
     private JPanel jPanel = null;
     private Users user = null;
 
-    /** Must construct with a Users object.
-     *
+    /**
+     * Must construct with a Users object.
      */
     @SuppressWarnings("unused")
     private ChangePasswordDialog() {
     }
 
-    /** Must construct with a Users object.
-     *
+    /**
+     * Must construct with a Users object.
      */
     @SuppressWarnings("unused")
     private ChangePasswordDialog(Frame owner) {
     }
 
-    /** Construct a new change password dialog for a user.
+    /**
+     * Construct a new change password dialog for a user.
+     *
      * @param owner
      */
     public ChangePasswordDialog(Frame owner, Users aUser) {

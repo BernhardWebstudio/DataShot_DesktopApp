@@ -35,7 +35,6 @@ import java.text.SimpleDateFormat;
 
 /**
  *
- *
  */
 public class GeoreferenceDialog extends JDialog {
 

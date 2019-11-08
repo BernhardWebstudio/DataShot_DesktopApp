@@ -26,13 +26,11 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
-/** UserDialog is a user interface for editing metadata about
- * participants in the project.  
+/**
+ * UserDialog is a user interface for editing metadata about
+ * participants in the project.
  *
  * @see edu.harvard.mcz.imagecapture.data.Users
- *
- *
- *
  */
 public class UserDialog extends JDialog {
 
@@ -56,7 +54,6 @@ public class UserDialog extends JDialog {
 
     /**
      * Default constructor.  Dialog is built as modal off of MainFrame.
-     *
      */
     public UserDialog() {
         super(Singleton.getSingletonInstance().getMainFrame(), true);  // construct as modal dialog
@@ -69,7 +66,6 @@ public class UserDialog extends JDialog {
 
     /**
      * Constructor specifying a user to edit.  Dialog is built as modal off of MainFrame.
-     *
      */
     public UserDialog(Users aUser) {
         super(Singleton.getSingletonInstance().getMainFrame(), true); // construct as modal dialog
@@ -88,7 +84,6 @@ public class UserDialog extends JDialog {
     }
 
     /**
-     *
      * @return false if the user was saved, true otherwise.
      */
     public boolean getWasCancled() {
@@ -106,7 +101,6 @@ public class UserDialog extends JDialog {
     /**
      * This method initializes this, setting up the layout of the dialog.
      * Built with VisualEditor in Eclipse.
-     *
      */
     private void initialize() {
         this.setSize(new Dimension(504, 188));

@@ -23,9 +23,6 @@ import java.util.List;
 
 /**
  * ICImageListTableModel model to display image metadata in a table.
- *
- *
- *
  */
 public class ICImageListTableModel extends AbstractTableModel {
 
@@ -170,6 +167,7 @@ public class ICImageListTableModel extends AbstractTableModel {
 
     /**
      * Must be implemented for ButtonEditor to work.
+     *
      * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
      */
     @Override

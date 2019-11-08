@@ -56,10 +56,7 @@ import java.util.*;
 
 /**
  * Image File that might contain text that can be extracted by OCR or a barcode that
- * can be extracted by barcode recognition. 
- *
- *
- *
+ * can be extracted by barcode recognition.
  */
 public class CandidateImageFile {
 
@@ -145,10 +142,9 @@ public class CandidateImageFile {
     /**
      * Constructor
      *
-     * @param aFile the image file that may contain a barcode or text.
+     * @param aFile     the image file that may contain a barcode or text.
      * @param aTemplate the PositionTemplate to use to identify where a barcode or OCR text may occur
-     * in the image provided by aFile.
-     *
+     *                  in the image provided by aFile.
      * @throws UnreadableFileException if aFile cannot be read.
      * @throws OCRReadException
      */
@@ -166,6 +162,7 @@ public class CandidateImageFile {
     /**
      * Constructor with no parameters to use to access convenience static methods.
      * Must follow with setFile() to use for processing images.
+     *
      * @see this.setFile(...);
      */
     public CandidateImageFile() {
@@ -319,8 +316,10 @@ public class CandidateImageFile {
     }
 
 
-    /** Produce a BulkMedia record suitable for loading into the MCZbase bulk media bulkloader
-     * from an image file.  
+    /**
+     * Produce a BulkMedia record suitable for loading into the MCZbase bulk media bulkloader
+     * from an image file.
+     *
      * @param filename the filename to load as bulk media.
      * @return BulkMedia objeect for that file.
      */
@@ -379,10 +378,10 @@ public class CandidateImageFile {
      * and both errors and the absence of a barcode in the image result in an empty string being returned.
      * If a template is specified and no barcode is detected, tries again with some image scaling and contrast variations.
      *
-     * @param image The BufferedImage to check for a barcode.
+     * @param image            The BufferedImage to check for a barcode.
      * @param positionTemplate The position template specifying where in the image to check for the barcode, if
-     * TEMPLATE_NO_COMPONENT_PARTS, the entire image is checked for a barcode, otherwise only the part of the image
-     * specified by the template is checked.
+     *                         TEMPLATE_NO_COMPONENT_PARTS, the entire image is checked for a barcode, otherwise only the part of the image
+     *                         specified by the template is checked.
      * @return the text of the barcode found in the barcode portion of the position template, or an empty string.
      */
     public static String getBarcodeTextFromImage(BufferedImage image, PositionTemplate positionTemplate, boolean quickCheck) {
@@ -420,14 +419,14 @@ public class CandidateImageFile {
      * Convenience method to check an image for a barcode.  Does not set any instance variables of CandidateImageFile,
      * and does not behave precisely as the getBarcodeText() methods.  Result state is not available from getBarcodeStatus()
      * and both errors and the absence of a barcode in the image result in an empty string being returned.
-     *
+     * <p>
      * Attempts read of relevant crop from image, then attempts this with crop area scaled down, then attempts it
      * with crop area sharpened.  Does not include shifts of location of crop area.
      *
-     * @param image The BufferedImage to check for a barcode.
+     * @param image            The BufferedImage to check for a barcode.
      * @param positionTemplate The position template specifying where in the image to check for the barcode, if
-     * TEMPLATE_NO_COMPONENT_PARTS, the entire image is checked for a barcode, otherwise only the part of the image
-     * specified by the template for the UnitTrayLabel is checked.
+     *                         TEMPLATE_NO_COMPONENT_PARTS, the entire image is checked for a barcode, otherwise only the part of the image
+     *                         specified by the template for the UnitTrayLabel is checked.
      * @return the text of the barcode found in the UnitTrayLabel (text) portion of the position template, or an empty string.
      */
     public static String getBarcodeUnitTrayTextFromImage(BufferedImage image, PositionTemplate positionTemplate) {
@@ -477,12 +476,11 @@ public class CandidateImageFile {
     /**
      * Read the barcode content from a portion of an image.
      *
-     * @param image to crop a portion out of to detect a barcode
-     * @param left x coordinate in image of leftmost pixels to decode
-     * @param top y coordinate in image of topmost pixels to decode,  left and top are the upper left x,y coordinate
-     * @param width in pixels of the area to decode
+     * @param image  to crop a portion out of to detect a barcode
+     * @param left   x coordinate in image of leftmost pixels to decode
+     * @param top    y coordinate in image of topmost pixels to decode,  left and top are the upper left x,y coordinate
+     * @param width  in pixels of the area to decode
      * @param height in pixels of the area to decode
-     *
      * @return string content of barcode found, or an empty string
      * TODO: refactor this abdomen
      */
@@ -740,13 +738,13 @@ public class CandidateImageFile {
         return returnValue;
     }
 
-    /** Test to see if the file provided in the constructor or the setFile method is readable.  This method
+    /**
+     * Test to see if the file provided in the constructor or the setFile method is readable.  This method
      * is called from both the CandidateImageFile(File aFile, PositionTemplate aTemplate) constructor and the
      * setFile(File aFile, PositionTemplate aTemplate) method, so it shouldn't be necessary to call it externally.
      *
      * @return true if file is readable, throws UnreadableFileException exception rather than returning false
      * if file can't be read.
-     *
      * @throws UnreadableFileException if file is null, or if it doesn't exist or if it can't be read.
      */
     public boolean isFileReadable() throws UnreadableFileException {
@@ -783,7 +781,8 @@ public class CandidateImageFile {
         labelText = null;
     }
 
-    /** Change the image file and position template.
+    /**
+     * Change the image file and position template.
      *
      * @param aFile
      * @param aTemplate
@@ -921,7 +920,8 @@ public class CandidateImageFile {
         return returnValue;
     }
 
-    /** If the image contains a taxon label text encoded in a QRCode barcode in the position specified
+    /**
+     * If the image contains a taxon label text encoded in a QRCode barcode in the position specified
      * for the Taxon/UnitTrayLabel Barcode by the PositionTemplate, return that text as a UnitTrayLabel
      * object.
      *
@@ -1005,7 +1005,8 @@ public class CandidateImageFile {
         return resultLabel;
     }
 
-    /** Return the text found by OCR of the taxon label (getTextPosition) region of the
+    /**
+     * Return the text found by OCR of the taxon label (getTextPosition) region of the
      * image according to the specified template.
      *
      * @param aTemplate
@@ -1081,7 +1082,8 @@ public class CandidateImageFile {
         return labelText;
     }
 
-    /** Get the text, if any, from the Exif UserComment of the image file.
+    /**
+     * Get the text, if any, from the Exif UserComment of the image file.
      *
      * @return the content of the Exif UserComment decoded as a string.
      */
@@ -1196,9 +1198,9 @@ public class CandidateImageFile {
      * of a PositionTemplate for a QR Code barcode.
      *
      * @param positionTemplate the position template to use to identify the part of the image that may contain
-     * a barcode.
+     *                         a barcode.
      * @return a text string representing the content of the barcode, if any.
-     *      Check for error states with a call to getBarcodeStatus();
+     * Check for error states with a call to getBarcodeStatus();
      */
     public String getBarcodeText(PositionTemplate positionTemplate) {
 
@@ -1337,9 +1339,6 @@ public class CandidateImageFile {
     /**
      * Utility inner class to carry text and status values from barcode reader
      * methods.
-     *
-     *
-     *
      */
     private class TextStatus {
         String text;

@@ -28,10 +28,7 @@ import java.text.ParseException;
 
 /**
  * MetadataRetriever produces metadata (field lengths, tooltip texts, input masks, input verifiers)
- * for fields in tables in database.  
- *
- *
- *
+ * for fields in tables in database.
  */
 public class MetadataRetriever {
 
@@ -47,16 +44,16 @@ public class MetadataRetriever {
      * Generates a MaskFormatter for a JFormattedTextField based upon the length (and potentially the type) of the
      * underlying text field.  Doesn't work well for normal varchar() fields, as the JTextField appears to be full
      * of spaces.
-     *
+     * <p>
      * Usage:
      * <pre>
-     JFormattedTextField jtext_for_fieldname = new JFormattedTextField(MetadataRetriever(tablename.class,"fieldname"));
-     </pre>
+     * JFormattedTextField jtext_for_fieldname = new JFormattedTextField(MetadataRetriever(tablename.class,"fieldname"));
+     * </pre>
      *
      * @param aTableClass
      * @param fieldname
      * @return a MaskFormatter for a jFormattedTextField
-     *
+     * <p>
      * TODO: add field type recognition, currently returns only "****" masks.
      */
 
@@ -75,19 +72,18 @@ public class MetadataRetriever {
 
     /**
      * Generates an InputVerifier for a JTextField
-     *
+     * <p>
      * Usage:
      * <pre>
-     JTextField jText_for_fieldname = new JTextField();
-     jText_for_fieldname.addInputVerifier(MetadataRetriever.getInputVerifier(tablename.class,"fieldname",jText_for_fieldname));
-     </pre>
+     * JTextField jText_for_fieldname = new JTextField();
+     * jText_for_fieldname.addInputVerifier(MetadataRetriever.getInputVerifier(tablename.class,"fieldname",jText_for_fieldname));
+     * </pre>
      *
      * @param aTableClass table proxy object for fieldname
-     * @param fieldname field for which to check the fieldlength
-     * @param field  JTextField to which the InputVerifier is being added.
+     * @param fieldname   field for which to check the fieldlength
+     * @param field       JTextField to which the InputVerifier is being added.
      * @return an InputVerifier for the JTextField
      * TODO: implement tests for more than just length.
-     *
      */
 
     public static InputVerifier getInputVerifier(final Class aTableClass, final String fieldname, final JTextField field) {
@@ -153,16 +149,17 @@ public class MetadataRetriever {
         return result;
     }
 
-    /** Determine the length of a field from the class of the proxy object
+    /**
+     * Determine the length of a field from the class of the proxy object
      * for the table and the name of the field.
-     *
+     * <p>
      * Usage:
      * <pre>
-     int genusSize = MetadataRetriever.getFieldLength(Specimen.class, "genus");
-     </pre>
+     * int genusSize = MetadataRetriever.getFieldLength(Specimen.class, "genus");
+     * </pre>
      *
      * @param aTableClass the class of the proxy object over the table.
-     * @param fieldname the name of the field in that table (case insensitive).
+     * @param fieldname   the name of the field in that table (case insensitive).
      * @return the number of characters that can be put into the field.
      */
 
@@ -622,8 +619,7 @@ public class MetadataRetriever {
      * Test to see whether a field allowed to be updated by an external process.
      *
      * @param aTableClass the class for the table in which the field occurs.
-     * @param fieldname the name of the field (case insensitive).
-     *
+     * @param fieldname   the name of the field (case insensitive).
      * @return true if the field is allowed to be updated by an external process, false otherwise.
      */
     public static boolean isFieldExternallyUpdatable(Class aTableClass, String fieldname) {
@@ -770,7 +766,7 @@ public class MetadataRetriever {
      * Test to see whether a field in a table is intended to hold verbatim values.
      *
      * @param aTableClass the class for the table.
-     * @param fieldname the field to check (not case sensitive)
+     * @param fieldname   the field to check (not case sensitive)
      * @return true if the field is intended to hold verbatim data, false otherwise.
      */
     public static boolean isFieldVerbatim(Class aTableClass, String fieldname) {
@@ -812,7 +808,7 @@ public class MetadataRetriever {
      * Identify whether a field in a table contains values that are process metadata.
      *
      * @param aTableClass table to check
-     * @param fieldname field in aTableClass
+     * @param fieldname   field in aTableClass
      * @return true if process metadata field, false otherwise.
      */
     public static boolean isFieldProcessMetadata(Class aTableClass, String fieldname) {

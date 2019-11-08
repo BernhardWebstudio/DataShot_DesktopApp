@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
-import org.flywaydb.core.internal.command.DbMigrate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
@@ -34,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *
  *
  */
 public class AllowedVersionLifeCycle {

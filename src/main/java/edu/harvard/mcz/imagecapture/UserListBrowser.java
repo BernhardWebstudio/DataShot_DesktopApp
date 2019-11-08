@@ -31,9 +31,6 @@ import java.awt.*;
 
 /**
  * UserListPanel
- *
- *
- *
  */
 public class UserListBrowser extends JPanel {
 

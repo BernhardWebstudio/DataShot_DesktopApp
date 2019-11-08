@@ -30,8 +30,6 @@ import java.net.URL;
 /**
  * A database login dialog, including both username/password credentials and
  * specification of the database connection parameters.
- *
- *
  */
 public class LoginDialog extends JDialog {
 
@@ -58,7 +56,6 @@ public class LoginDialog extends JDialog {
 
     /**
      * Default constructor.  Produces a login dialog.
-     *
      */
     public LoginDialog() {
         super();
@@ -73,7 +70,6 @@ public class LoginDialog extends JDialog {
 
     /**
      * This method initializes this
-     *
      */
     private void initialize() {
         this.setContentPane(getJPanel());

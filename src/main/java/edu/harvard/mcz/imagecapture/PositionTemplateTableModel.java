@@ -22,10 +22,8 @@ import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 
-/** TemplateTableModel
- *
- *
- *
+/**
+ * TemplateTableModel
  */
 public class PositionTemplateTableModel extends AbstractTableModel {
 
@@ -34,14 +32,14 @@ public class PositionTemplateTableModel extends AbstractTableModel {
     private List<PositionTemplate> templates = null;
 
     /**
-     *  Default constructor with an initially empty set of templates.
+     * Default constructor with an initially empty set of templates.
      */
     public PositionTemplateTableModel() {
         templates = new ArrayList<PositionTemplate>();
     }
 
     /**
-     *  Constructor with an initial set of templates.
+     * Constructor with an initial set of templates.
      */
     public PositionTemplateTableModel(List<PositionTemplate> aTemplateSet) {
         templates = aTemplateSet;

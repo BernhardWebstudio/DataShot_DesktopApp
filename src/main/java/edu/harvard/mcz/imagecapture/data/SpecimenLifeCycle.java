@@ -990,16 +990,20 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                 }
                 criteria.setProjection(Projections.id());
                 List<?> ids = criteria.list();
-                criteria = session.createCriteria(Specimen.class)
-                        .add(Restrictions.in("id", ids))
-                        .setFetchMode("trackings", FetchMode.JOIN)
-                        .setFetchMode("ICImages", FetchMode.JOIN)
-                        .setFetchMode("collectors", FetchMode.JOIN)
-                        .setFetchMode("LatLong", FetchMode.JOIN)
-                        .setFetchMode("numbers", FetchMode.JOIN)
-                        .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+                if (ids.size() > 0) {
+                    criteria = session.createCriteria(Specimen.class)
+                            .add(Restrictions.in("id", ids))
+                            .setFetchMode("trackings", FetchMode.JOIN)
+                            .setFetchMode("ICImages", FetchMode.JOIN)
+                            .setFetchMode("collectors", FetchMode.JOIN)
+                            .setFetchMode("LatLong", FetchMode.JOIN)
+                            .setFetchMode("numbers", FetchMode.JOIN)
+                            .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
-                results = (List<Specimen>) criteria.list();
+                    results = (List<Specimen>) criteria.list();
+                } else {
+                    results = new ArrayList<>();
+                }
                 log.debug("find by example like successful, result size: " + results.size());
                 session.getTransaction().commit();
             } catch (HibernateException e) {

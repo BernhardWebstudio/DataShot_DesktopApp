@@ -19,16 +19,13 @@
 package edu.harvard.mcz.imagecapture.interfaces;
 
 /**
- * Interface for classes that are able to return atomic taxon name components. 
+ * Interface for classes that are able to return atomic taxon name components.
  * Intended as the return interface from a taxon name parser, and thus doesn't
  * include methods to set a string to parse or to parse the string, these can be
  * included in the instantiation of a concrete instance of a parser class, for
  * example:
  * TaxonNameReturner parser = new ConcreteTaxonNameParser(aStringToParse);
  * String authorship = parser.getAuthorship();
- *
- *
- *
  */
 public interface TaxonNameReturner {
 

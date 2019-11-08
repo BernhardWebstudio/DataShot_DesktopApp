@@ -33,9 +33,6 @@ import java.net.URL;
  * WhatsThisImageDialog is a dialog to allow users to identify the
  * nature (specimen, drawer) of images for which barcode detection and
  * OCR isn't able to detect the nature of the image.
- *
- *
- *
  */
 public class WhatsThisImageDialog extends JDialog {
 
@@ -77,7 +74,7 @@ public class WhatsThisImageDialog extends JDialog {
     /**
      * Constructor with the image to display as a parameter.
      *
-     * @param owner the parent frame for this dialog.
+     * @param owner       the parent frame for this dialog.
      * @param imageToShow the image of unknown nature to display.
      */
     public WhatsThisImageDialog(Frame owner, BufferedImage imageToShow) {
@@ -92,7 +89,7 @@ public class WhatsThisImageDialog extends JDialog {
      * display a broken image icon if File can't be read as an
      * image.
      *
-     * @param owner the parent frame for this dialog.
+     * @param owner           the parent frame for this dialog.
      * @param imageFileToShow the image file of unknown nature to display.
      */
     public WhatsThisImageDialog(Frame owner, File imageFileToShow) {

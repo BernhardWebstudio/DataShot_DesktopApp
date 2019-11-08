@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  *
- *
  */
 public class PartAssociation {
     private static final Log log = LogFactory.getLog(PartAssociation.class);

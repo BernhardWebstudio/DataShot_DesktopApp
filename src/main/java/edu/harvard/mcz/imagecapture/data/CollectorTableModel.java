@@ -28,9 +28,6 @@ import java.util.Set;
 
 /**
  * Table Model for Collector objects showing just the name of the Collector.
- *
- *
- *
  */
 public class CollectorTableModel extends AbstractTableModel {
 
@@ -129,7 +126,9 @@ public class CollectorTableModel extends AbstractTableModel {
     }
 
 
-    /** addCollector adds a Collector to this model as a new row
+    /**
+     * addCollector adds a Collector to this model as a new row
+     *
      * @param collector the collector to add to the table model.
      */
     public void addCollector(Collector collector) {

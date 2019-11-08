@@ -31,17 +31,15 @@ import java.io.IOException;
 import java.util.List;
 import java.util.ListIterator;
 
-/** ConfiguredBarcodePositionTemplateDetector find a template by the position of a barcode in an image file
+/**
+ * ConfiguredBarcodePositionTemplateDetector find a template by the position of a barcode in an image file
  * without recourse to construction of a a CandidateImageFile instance, and checks for a catalog
  * number barcode that follows the configured pattern in the templated position, not just any readable barcode.
- *
+ * <p>
  * This class makes the assumption that a template can be uniquely identified by the location of the
  * barcode in the image.  Each template must have the barcode in a uniquely different place.
  *
- *
- *
  * @see edu.harvard.mcz.imagecapture.PositionTemplate
- *
  */
 public class ConfiguredBarcodePositionTemplateDetector implements PositionTemplateDetector {
 

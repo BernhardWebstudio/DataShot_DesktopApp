@@ -33,7 +33,6 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  *
- *
  */
 //@Entity
 //@Table(name = "allowed_version", catalog = "lepidoptera", schema = "")

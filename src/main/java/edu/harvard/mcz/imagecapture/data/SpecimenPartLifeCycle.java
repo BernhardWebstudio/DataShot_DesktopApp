@@ -29,7 +29,6 @@ import org.hibernate.SessionException;
 
 /**
  *
- *
  */
 public class SpecimenPartLifeCycle {
     private static final Log log = LogFactory.getLog(SpecimenPartLifeCycle.class);
@@ -38,9 +37,8 @@ public class SpecimenPartLifeCycle {
      * Save a new specimen record, and add an entry in the tracking table.
      *
      * @param transientInstance instance of a Specimen that doesn't have a
-     *     matching
-     * database record which is to be saved as a new record in the database.
-     *
+     *                          matching
+     *                          database record which is to be saved as a new record in the database.
      * @throws SaveFailedException
      * @throws SpecimenExistsException
      */
@@ -98,7 +96,8 @@ public class SpecimenPartLifeCycle {
         }
     }
 
-    /**Save or update an existing specimen part record.
+    /**
+     * Save or update an existing specimen part record.
      *
      * @param instance of a SpecimenPart that that is to be saved.
      * @throws SaveFailedException
@@ -161,7 +160,8 @@ public class SpecimenPartLifeCycle {
         }
     }
 
-    /**Save or update an existing specimen part record.
+    /**
+     * Save or update an existing specimen part record.
      *
      * @param instance of a SpecimenPart that that is to be removed.
      * @throws SaveFailedException

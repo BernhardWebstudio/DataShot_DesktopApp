@@ -28,7 +28,6 @@ import org.hibernate.SessionException;
 
 /**
  *
- *
  */
 public class ExternalHistoryLifeCycle {
 

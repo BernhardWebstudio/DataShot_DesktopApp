@@ -11,7 +11,7 @@
             </generator>
         </id>
         <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.data.Specimen">
-            <column name="SpecimenId" /><!-- TODO: rethink nullability -->
+            <column name="SpecimenId"/><!-- TODO: rethink nullability -->
         </many-to-one>
         <property name="genus" type="string">
             <column name="Genus" length="40"/>

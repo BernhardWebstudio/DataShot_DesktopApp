@@ -28,7 +28,6 @@ import java.util.List;
 
 /**
  *
- *
  */
 public class MCZbaseAuthAgentNameLifeCycle {
     private static final Log log =

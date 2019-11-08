@@ -36,9 +36,6 @@ import java.util.ArrayList;
 /**
  * SpecimenBrowser is a Searchable, Sortable, tabular view of multiple
  * specimens.
- *
- *
- *
  */
 public class SpecimenBrowser extends JPanel implements DataChangeListener {
 
@@ -65,7 +62,6 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 
     /**
      * This method initializes an instance of SpecimenBrowser
-     *
      */
     public SpecimenBrowser() {
         super();
@@ -93,7 +89,6 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 
     /**
      * This method initializes this
-     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());

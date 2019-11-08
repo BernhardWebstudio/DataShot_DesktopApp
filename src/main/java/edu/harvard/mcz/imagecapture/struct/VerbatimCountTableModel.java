@@ -27,7 +27,6 @@ import java.util.List;
 
 /**
  *
- *
  */
 public class VerbatimCountTableModel extends AbstractTableModel {
 

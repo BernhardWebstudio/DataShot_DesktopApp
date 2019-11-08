@@ -36,10 +36,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/** RunnableJobReportDialog
- *
- *
- *
+/**
+ * RunnableJobReportDialog
  */
 public class RunnableJobReportDialog extends JDialog {
 

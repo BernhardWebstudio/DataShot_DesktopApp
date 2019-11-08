@@ -23,12 +23,9 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 
 /**
- * Frame to display list of property key/value pairs where the values for each 
+ * Frame to display list of property key/value pairs where the values for each
  * key can be edited and the changes can be saved to the imagecapture.properties
  * file.
- *
- *
- *
  */
 public class PropertiesEditor extends JFrame {
 
@@ -58,7 +55,6 @@ public class PropertiesEditor extends JFrame {
 
     /**
      * This method initializes this, an instance of PropertiesEditor setting up the frame.
-     *
      */
     private void initialize() {
         this.setSize(669, 347);

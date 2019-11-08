@@ -23,9 +23,6 @@ import java.util.List;
 
 /**
  * Counter
- *
- *
- *
  */
 public class Counter {
 

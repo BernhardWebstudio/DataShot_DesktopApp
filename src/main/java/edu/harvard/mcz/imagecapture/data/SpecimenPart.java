@@ -3,7 +3,10 @@ package edu.harvard.mcz.imagecapture.data;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Proxy object for SpecimenPart
@@ -177,16 +180,16 @@ public class SpecimenPart implements Cloneable {
         return attributeCollection;
     }
 
-    public Collection<SpecimenPartAttribute> getSpecimenPartAttributes() {
-        return getAttributeCollection();
-    }
-
     /**
      * @param attributeCollection the attributeCollection to set
      */
     public void setAttributeCollection(
             Collection<SpecimenPartAttribute> attributeCollection) {
         this.attributeCollection = attributeCollection;
+    }
+
+    public Collection<SpecimenPartAttribute> getSpecimenPartAttributes() {
+        return getAttributeCollection();
     }
 
     public void setSpecimenPartAttributes(Collection<SpecimenPartAttribute> attributeCollection) {

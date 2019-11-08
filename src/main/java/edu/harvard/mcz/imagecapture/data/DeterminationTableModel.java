@@ -27,11 +27,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-/** DeterminationTableModel, a table model for Determinations, able to list the
+/**
+ * DeterminationTableModel, a table model for Determinations, able to list the
  * additional determinations for a specimen.
- *
- *
- *
  */
 public class DeterminationTableModel extends AbstractTableModel {
 
@@ -66,8 +64,8 @@ public class DeterminationTableModel extends AbstractTableModel {
      * take another action on an ID)
      *
      * @param aDeterminationList the lists of determinations to display in the table.
-     * @param enableIdEditor true to include the determinationId to the table model in an editable
-     * column.
+     * @param enableIdEditor     true to include the determinationId to the table model in an editable
+     *                           column.
      */
     public DeterminationTableModel(Set<Determination> aDeterminationList, boolean enableIdEditor) {
         showEditableId = enableIdEditor;
@@ -227,7 +225,9 @@ public class DeterminationTableModel extends AbstractTableModel {
     }
 
 
-    /** addDetermination adds a determination to this model as a new row
+    /**
+     * addDetermination adds a determination to this model as a new row
+     *
      * @param aDetermination the determination to add to the table model.
      */
     public void addDetermination(Determination aDetermination) {

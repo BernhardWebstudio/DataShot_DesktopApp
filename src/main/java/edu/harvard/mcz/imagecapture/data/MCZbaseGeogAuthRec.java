@@ -22,29 +22,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- *
- *
  * Proxy object for MCZbase/Arctos GEOG_AUTH_REC table
  * (higher geography authority file)
- *
- CREATE TABLE MCZBASE_GEOG_AUTH_REC (
- GEOG_AUTH_REC_ID bigint NOT NULL primary key auto_increment,
- CONTINENT_OCEAN VARCHAR(70),
- COUNTRY VARCHAR(70),
- STATE_PROV VARCHAR(75),
- COUNTY VARCHAR(50),
- QUAD VARCHAR(30),
- FEATURE VARCHAR(50),
- ISLAND VARCHAR(50),
- ISLAND_GROUP VARCHAR(50),
- SEA VARCHAR(50),
- VALID_CATALOG_TERM_FG int NOT NULL,
- SOURCE_AUTHORITY VARCHAR(45) NOT NULL,
- HIGHER_GEOG VARCHAR(255),
- OCEAN_REGION VARCHAR(50),
- OCEAN_SUBREGION VARCHAR(50)
- );
- *
+ * <p>
+ * CREATE TABLE MCZBASE_GEOG_AUTH_REC (
+ * GEOG_AUTH_REC_ID bigint NOT NULL primary key auto_increment,
+ * CONTINENT_OCEAN VARCHAR(70),
+ * COUNTRY VARCHAR(70),
+ * STATE_PROV VARCHAR(75),
+ * COUNTY VARCHAR(50),
+ * QUAD VARCHAR(30),
+ * FEATURE VARCHAR(50),
+ * ISLAND VARCHAR(50),
+ * ISLAND_GROUP VARCHAR(50),
+ * SEA VARCHAR(50),
+ * VALID_CATALOG_TERM_FG int NOT NULL,
+ * SOURCE_AUTHORITY VARCHAR(45) NOT NULL,
+ * HIGHER_GEOG VARCHAR(255),
+ * OCEAN_REGION VARCHAR(50),
+ * OCEAN_SUBREGION VARCHAR(50)
+ * );
  */
 public class MCZbaseGeogAuthRec {
     private static final Log log = LogFactory.getLog(MCZbaseGeogAuthRec.class);

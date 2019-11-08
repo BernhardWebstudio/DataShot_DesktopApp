@@ -24,18 +24,16 @@ import javax.swing.*;
 import java.awt.*;
 
 
-/** ValidatingTableCellEditor provides a JTextField with an inputVerifier as a
+/**
+ * ValidatingTableCellEditor provides a JTextField with an inputVerifier as a
  * cell editor that can be used as an editor for cells in a JTable.
- *
+ * <p>
  * Example:
  * <pre>
- JTextField field = new JTextField();
- field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
- jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));
- </pre>
- *
- *
- *
+ * JTextField field = new JTextField();
+ * field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
+ * jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));
+ * </pre>
  */
 public class PicklistTableCellEditor extends ComboBoxCellEditor {
 
@@ -57,7 +55,7 @@ public class PicklistTableCellEditor extends ComboBoxCellEditor {
      * Constructor
      *
      * @param textField JComboBox to support the picklist
-     * @param editable value to set for editable of the jcombobox
+     * @param editable  value to set for editable of the jcombobox
      */
     public PicklistTableCellEditor(JComboBox textField, boolean editable) {
         super(textField);

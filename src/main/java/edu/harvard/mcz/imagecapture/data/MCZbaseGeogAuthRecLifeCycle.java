@@ -30,7 +30,6 @@ import java.util.List;
 
 /**
  *
- *
  */
 public class MCZbaseGeogAuthRecLifeCycle {
     private static final Log log =

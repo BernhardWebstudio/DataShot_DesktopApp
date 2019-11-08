@@ -43,10 +43,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-/** Main user interface window for image capture application when run as a java application from the desktop.
- *
- *
- *
+/**
+ * Main user interface window for image capture application when run as a java application from the desktop.
  */
 public class MainFrame extends JFrame implements RunnerListener {
 
@@ -253,7 +251,6 @@ public class MainFrame extends JFrame implements RunnerListener {
 
     /**
      * This method initializes the main frame.
-     *
      */
     private void initialize() {
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));

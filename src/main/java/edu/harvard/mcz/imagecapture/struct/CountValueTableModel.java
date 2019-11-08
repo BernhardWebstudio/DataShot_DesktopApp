@@ -28,7 +28,6 @@ import java.util.List;
 
 /**
  *
- *
  */
 public class CountValueTableModel extends AbstractTableModel {
 

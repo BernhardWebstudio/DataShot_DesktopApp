@@ -1,8 +1,6 @@
 -- tell DataShot's own system that we are already at v. 1.9.0
-insert into
-  allowed_version (version)
-VALUES
-  ("1.9");
+insert into allowed_version (version)
+VALUES ("1.9");
 -- add keys/indices to speed some things up
 CREATE INDEX SpecimenBarcodeIdx ON Specimen (Barcode);
 CREATE INDEX SpecimenWorkflowStatusIdx ON Specimen (WorkFlowStatus);

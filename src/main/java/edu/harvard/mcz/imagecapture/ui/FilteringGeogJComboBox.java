@@ -40,7 +40,6 @@ import java.util.Iterator;
 
 /**
  *
- *
  */
 public class FilteringGeogJComboBox extends JComboBox<MCZbaseGeogAuthRec> implements FocusListener {
     private static final long serialVersionUID = -7988464282872345110L;
@@ -61,8 +60,6 @@ public class FilteringGeogJComboBox extends JComboBox<MCZbaseGeogAuthRec> implem
     }
 
     /**
-     *
-     *
      * @param valueList
      */
     public FilteringGeogJComboBox(HigherGeographyComboBoxModel model) {

@@ -31,11 +31,9 @@ import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.util.ArrayList;
 
-/** ImageListBrowser is a Searchable, Sortable, tabular view of multiple specimen images with Edit buttons
+/**
+ * ImageListBrowser is a Searchable, Sortable, tabular view of multiple specimen images with Edit buttons
  * to display the details for a specimen found in an image.
- *
- *
- *
  */
 public class ImageListBrowser extends JPanel {
 
@@ -58,7 +56,6 @@ public class ImageListBrowser extends JPanel {
 
     /**
      * This method initializes an instance of SpecimenBrowser
-     *
      */
     public ImageListBrowser() {
         super();
@@ -83,7 +80,6 @@ public class ImageListBrowser extends JPanel {
 
     /**
      * This method initializes this
-     *
      */
     private void initialize() {
         this.setLayout(new BorderLayout());

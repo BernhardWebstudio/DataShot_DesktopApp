@@ -18,10 +18,8 @@
  */
 package edu.harvard.mcz.imagecapture.exceptions;
 
-/** PrintFailedException
- *
- *
- *
+/**
+ * PrintFailedException
  */
 public class PrintFailedException extends Exception {
 

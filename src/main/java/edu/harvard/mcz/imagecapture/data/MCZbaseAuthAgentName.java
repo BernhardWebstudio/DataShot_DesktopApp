@@ -19,25 +19,22 @@
 package edu.harvard.mcz.imagecapture.data;
 
 /**
- *
- *
  * Proxy object for MCZbase/Arctos GEOG_AUTH_REC table
  * (higher geography authority file)
  * Use database link agent_name@mczbase_auth and public synonym
  * mczbase_agent_name_auth in production Oracle, table below in test MySQL.
- *    create or replace public synonym MCZBASE_AUTH_AGENT_NAME for
- agent_name@MCZBASE_AUTH;
- *    select * from MCZBASE_AUTH_AGENT_NAME;
+ * create or replace public synonym MCZBASE_AUTH_AGENT_NAME for
+ * agent_name@MCZBASE_AUTH;
+ * select * from MCZBASE_AUTH_AGENT_NAME;
  * Use database link and view in production Oracle, table below in test MySQL.
- *
- CREATE TABLE MCZBASE_AUTH_AGENT_NAME (
- AGENT_NAME_ID bigint NOT NULL primary key auto_increment,
- AGENT_ID bigint,
- AGENT_NAME_TYPE VARCHAR(18),
- DONOR_CARD_PRESENT_FG int,
- AGENT_NAME VARCHAR(184)
- );
- *
+ * <p>
+ * CREATE TABLE MCZBASE_AUTH_AGENT_NAME (
+ * AGENT_NAME_ID bigint NOT NULL primary key auto_increment,
+ * AGENT_ID bigint,
+ * AGENT_NAME_TYPE VARCHAR(18),
+ * DONOR_CARD_PRESENT_FG int,
+ * AGENT_NAME VARCHAR(184)
+ * );
  */
 public class MCZbaseAuthAgentName {
 

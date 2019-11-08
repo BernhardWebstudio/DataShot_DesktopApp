@@ -20,16 +20,13 @@ package edu.harvard.mcz.imagecapture.loader.ex;
 
 /**
  * Superclass for exceptions related to loading data from files.
- *
- *
- *
  */
 public class LoadException extends Exception {
 
     private static final long serialVersionUID = -3858923874213162905L;
 
     /**
-     *  Default Constructtor
+     * Default Constructtor
      */
     public LoadException() {
         super("Error Loading Data");

@@ -38,11 +38,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * JobRecheckForTemplates, recheck image files that have no template identified, but should have one, 
+ * JobRecheckForTemplates, recheck image files that have no template identified, but should have one,
  * and try to identify their template.  Can be run after a new template has been created.
- *
- *
- *
  */
 public class JobRecheckForTemplates implements RunnableJob, Runnable {
 
@@ -78,16 +75,15 @@ public class JobRecheckForTemplates implements RunnableJob, Runnable {
     /**
      * Create a recheck for templates job to bring up dialog to pick a specific directory
      * on which to recheck image records for templates.
-     *
+     * <p>
      * Behavior:
-     *
+     * <p>
      * whatToScan=SCAN_ALL, all records having no template and a linked specimen are rechecked.
      * whatToScan=SCAN_SELECT, startAt is used as starting point for directory chooser dialog.
      * whatToScan=SCAN_SPECIFIC, startAt is used as starting point for repeat (if null falls back to SCAN_SELECT).
      *
-     *
      * @param whatToScan one of SCAN_SPECIFIC, SCAN_SELECT
-     * @param startAt null or a directory starting point.
+     * @param startAt    null or a directory starting point.
      */
     public JobRecheckForTemplates(int whatToScan, File startAt) {
         init(whatToScan, startAt);

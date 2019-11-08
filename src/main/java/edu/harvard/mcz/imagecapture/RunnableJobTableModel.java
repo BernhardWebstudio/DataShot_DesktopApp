@@ -31,9 +31,6 @@ import java.util.Set;
 
 /**
  * JobTableModel
- *
- *
- *
  */
 public class RunnableJobTableModel extends AbstractTableModel implements RunnerListener {
 
@@ -174,7 +171,9 @@ public class RunnableJobTableModel extends AbstractTableModel implements RunnerL
         return returnvalue;
     }
 
-    /** addJob adds a RunnableJob to this model as a new row
+    /**
+     * addJob adds a RunnableJob to this model as a new row
+     *
      * @param aJob the RunnableJob to add to the table model.
      */
     public void addJob(RunnableJob aJob) {

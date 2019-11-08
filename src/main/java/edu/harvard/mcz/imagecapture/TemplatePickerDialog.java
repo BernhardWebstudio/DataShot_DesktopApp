@@ -40,7 +40,6 @@ import java.util.ListIterator;
 
 /**
  *
- *
  */
 public class TemplatePickerDialog extends JDialog {
     private static final Log log = LogFactory.getLog(TemplatePickerDialog.class);

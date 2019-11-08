@@ -32,28 +32,30 @@ import java.util.List;
 import java.util.*;
 
 /**
- * Description of the coordinates within an image where parts of the image to pass to 
+ * Description of the coordinates within an image where parts of the image to pass to
  * barcode reading software, OCR software, and which parts are to be displayed as containing
  * a specimen image or specimen labels.   Wrapper for persistent Template class.  Provides special
- * case template TEMPLATE_NO_COMPONENT_PARTS for handling any size image that isn't templated.  
- * Provides hard coded default template.  Provides methods to get/set coordinates as Dimension 
+ * case template TEMPLATE_NO_COMPONENT_PARTS for handling any size image that isn't templated.
+ * Provides hard coded default template.  Provides methods to get/set coordinates as Dimension
  * objects as a convenience over Template's get/set of individual heights and widths as integers.
- *
- * DefaultPositionTemplateDetector makes the assumption that a template can be uniquely identified 
- * by the location of the barcode in the image.  
- *
+ * <p>
+ * DefaultPositionTemplateDetector makes the assumption that a template can be uniquely identified
+ * by the location of the barcode in the image.
+ * <p>
  * Each template must have the barcode in a uniquely different place.
- *
- *
  */
 public class PositionTemplate {
 
-    /** Special case template for images that aren't split into component parts
+    /**
+     * Special case template for images that aren't split into component parts
      * with a template.
+     *
      * @see edu.harvard.mcz.imagecapture.exceptions.NoComponentPartsTemplateException
      */
     public static final String TEMPLATE_NO_COMPONENT_PARTS = "Whole Image Only";
-    /** The hardcoded default template. */
+    /**
+     * The hardcoded default template.
+     */
     public static final String TEMPLATE_DEFAULT = "Default template";
     public static final String TEMPLATE_TEST_1 = "Small Template 1";
     private static final Log log = LogFactory.getLog(PositionTemplate.class);
@@ -94,17 +96,18 @@ public class PositionTemplate {
         isEditable = editable;
     }
 
-    /** Use a template defined by a PositionTemplate.TEMPLATE_* constant or potentially from
+    /**
+     * Use a template defined by a PositionTemplate.TEMPLATE_* constant or potentially from
      * another valid source.  A template defines which pixel coordinates on the image contain
      * which information.   The template cannot be changed for an instance of PositionTemplate once
      * it has been instantiated.  This constructor is the only means of setting the template to use.
      * Create a new instance of PositionTemplate if you wish to use a different template.
-     *
+     * <p>
      * The list of available templateIds can be retrieved with PositionTemplate.getTemplates().
-     * @see edu.harvard.mcz.imagecapture.PositionTemplate#getTemplateIds()
      *
      * @param templateToUse the templateID of the template to use in this instance of PositionTemplate.
      * @throws NoSuchTemplateException when templateToUse doesn't exist.
+     * @see edu.harvard.mcz.imagecapture.PositionTemplate#getTemplateIds()
      * @see edu.harvard.mcz.imagecapture.exceptions.NoComponentPartsTemplateException
      */
     public PositionTemplate(String templateToUse) throws NoSuchTemplateException {
@@ -114,7 +117,8 @@ public class PositionTemplate {
         }
     }
 
-    /** Construct a PositionTemplate from a Template.
+    /**
+     * Construct a PositionTemplate from a Template.
      *
      * @param templateInstance
      */
@@ -136,7 +140,8 @@ public class PositionTemplate {
         textSize = new Dimension(templateInstance.getTextSizeX(), templateInstance.getTextSizeY());
     }
 
-    /** Fetch the list of valid template names (including the no component parts template).
+    /**
+     * Fetch the list of valid template names (including the no component parts template).
      * Use these names in the constructor PositionTemplate(String templateToUse);
      *
      * @return a list of the identifiers of the currently available templates.
@@ -201,7 +206,8 @@ public class PositionTemplate {
         return results;
     }
 
-    /** Given an ICImage, look up the template for that image in the database, if none, run a template detector
+    /**
+     * Given an ICImage, look up the template for that image in the database, if none, run a template detector
      * to determine the template for the image.
      *
      * @param image the ICImage for which the PositionTemplate is to be returned.
@@ -280,7 +286,8 @@ public class PositionTemplate {
         isEditable = false;
     }
 
-    /** Get the identifying name of this position template.  This name is fixed for an instance
+    /**
+     * Get the identifying name of this position template.  This name is fixed for an instance
      * during its construction.   This name corresponds to one of the strings returned by
      * PositionTemplate.getTemplates();   Redundant with getTemplateId()
      *
@@ -293,7 +300,8 @@ public class PositionTemplate {
         return getTemplateId();
     }
 
-    /** Get the free text descriptive name of the position template for potential display to a person.
+    /**
+     * Get the free text descriptive name of the position template for potential display to a person.
      * Use getTemplateIdentifier() to identify templates in code.
      *
      * @return the descriptive name of the template.
@@ -473,9 +481,10 @@ public class PositionTemplate {
         this.utLabelPosition = utLabelPosition;
     }
 
-    /** private method, to use a different template, instantiate a new PositionTemplate.
+    /**
+     * private method, to use a different template, instantiate a new PositionTemplate.
      * Contains hardcoded templates other than the default
-     *
+     * <p>
      * TODO: Extend to external persistent templates that aren't hard coded.
      *
      * @param templateToUse
@@ -638,7 +647,6 @@ public class PositionTemplate {
     }
 
     /**
-     *
      * @return true if this PositionTemplate can be edited by the user.
      */
     public boolean isEditable() {
@@ -680,7 +688,8 @@ public class PositionTemplate {
         this.templateName = templateName;
     }
 
-    /** Get the identifying name of this position template.  This name is fixed for an instance
+    /**
+     * Get the identifying name of this position template.  This name is fixed for an instance
      * during its construction.   This name corresponds to one of the strings returned by
      * PositionTemplate.getTemplates();  Redundant with getTemplateIdentifier().
      *

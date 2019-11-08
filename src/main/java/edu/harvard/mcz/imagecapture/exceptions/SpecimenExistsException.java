@@ -20,9 +20,6 @@ package edu.harvard.mcz.imagecapture.exceptions;
 /**
  * Exeptions produced by trying to create a specimen record when a record
  * for that specimen already exists.
- *
- *
- *
  */
 public class SpecimenExistsException extends Exception {
 

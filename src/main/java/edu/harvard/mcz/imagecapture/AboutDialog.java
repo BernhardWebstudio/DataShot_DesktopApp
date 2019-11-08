@@ -22,12 +22,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
-/** AboutDialog, a dialog describing the application, its version, contributors, and libraries.
- *
+/**
+ * AboutDialog, a dialog describing the application, its version, contributors, and libraries.
+ * <p>
  * Note: Revision, as shown here is one revision behind the commit to CVS of the jar file.
- *
- *
- *
  */
 public class AboutDialog extends JDialog {
 
@@ -56,7 +54,6 @@ public class AboutDialog extends JDialog {
 
     /**
      * This method initializes
-     *
      */
     public AboutDialog() {
         super();
@@ -66,7 +63,6 @@ public class AboutDialog extends JDialog {
 
     /**
      * This method initializes this
-     *
      */
     private void initialize() {
         this.setSize(new Dimension(694, 530));

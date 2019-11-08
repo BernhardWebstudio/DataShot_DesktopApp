@@ -22,10 +22,7 @@ package edu.harvard.mcz.imagecapture.interfaces;
  * BarcodeMatcher, interface for retrieving the numeric part of the text string found in a
  * barcode that identifies a specimen, and for checking if a text string matches the pattern
  * for the text that is expected to go in a barcode. Only concerns the text that is stored
- * in a barcode, not the actual encoding of the barcode.  
- *
- *
- *
+ * in a barcode, not the actual encoding of the barcode.
  */
 public interface BarcodeMatcher {
 
@@ -37,7 +34,8 @@ public interface BarcodeMatcher {
      */
     Integer extractNumber(String aBarcode);
 
-    /** Given a string, does it exactly match the pattern of the text to put in a barcode
+    /**
+     * Given a string, does it exactly match the pattern of the text to put in a barcode
      *
      * @param aBarcode
      * @return

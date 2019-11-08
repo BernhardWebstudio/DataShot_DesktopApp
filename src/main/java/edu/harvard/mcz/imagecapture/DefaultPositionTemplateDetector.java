@@ -28,14 +28,12 @@ import java.io.File;
 import java.util.List;
 import java.util.ListIterator;
 
-/** DefaultPositionTemplateDetector find a template by the position of a barcode in an image file.
+/**
+ * DefaultPositionTemplateDetector find a template by the position of a barcode in an image file.
  * This class makes the assumption that a template can be uniqely idenfified by the location of the
  * barcode in the image.  Each template must have the bardcode in a uniquely different place.
  *
- *
- *
  * @see edu.harvard.mcz.imagecapture.PositionTemplate
- *
  */
 public class DefaultPositionTemplateDetector implements PositionTemplateDetector {
 

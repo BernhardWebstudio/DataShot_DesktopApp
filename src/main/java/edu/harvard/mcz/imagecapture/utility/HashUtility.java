@@ -22,15 +22,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-/** HashUtility provides a convenience method for working with java.security.MessageDigest 
+/**
+ * HashUtility provides a convenience method for working with java.security.MessageDigest
  * that takes a string and returns the SHA1 hash of it as a string.  Intended as a convenience utility
- * for obtaining SHA1 hashes of relatively short strings without having to deal with conversion to and 
+ * for obtaining SHA1 hashes of relatively short strings without having to deal with conversion to and
  * from arrays of bytes.  Not intended as a general purpose wrapper for SHA1 digests, use the
  * MessageDigest class to obtain hashes for use as checksums of files and for purposes other than
- * obtaining SHA1 hashes of Strings.   
- *
- *
- *
+ * obtaining SHA1 hashes of Strings.
  */
 public class HashUtility {
 
@@ -39,7 +37,7 @@ public class HashUtility {
      * MessageDigest is not available, or if the utf-8 encoding is not supported.
      *
      * @param stringToHash the string on which an SHA1 hash is to be computed, this string is assumed to be
-     * in UTF-8 encoding.
+     *                     in UTF-8 encoding.
      * @return a string containing a hexidecimal encoding of the SHA1 message digest of the stringToHash note
      * this will be an empty string if an error is encountered in computing the hash.
      */

@@ -23,9 +23,9 @@ import edu.harvard.mcz.imagecapture.utility.MathUtility;
 import javax.swing.*;
 import java.awt.*;
 
-/** ImagePanel displays a zoomable image in a JPanel.  Support class for ImageZoomPanel,
+/**
+ * ImagePanel displays a zoomable image in a JPanel.  Support class for ImageZoomPanel,
  * which includes both the controls and the image in an ImagePanel.
- *
  *
  * @see edu.harvard.mcz.imagecapture.ImageZoomPanel
  */

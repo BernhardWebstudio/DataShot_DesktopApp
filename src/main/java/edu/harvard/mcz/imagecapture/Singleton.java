@@ -25,16 +25,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 
-/** Thread safe singleton object for imagecapture application.
- *
+/**
+ * Thread safe singleton object for imagecapture application.
+ * <p>
  * Usage:
- * <pre> 
- Singleton.getSingletonInstance.set{Method}(aRelevantObject) // store single instance to singleton.
- Singleton.getSingletonInstance.get{Method}().doStuffWithObject() // retrieve single instance from singleton.
- </pre>
- *
- *
- *
+ * <pre>
+ * Singleton.getSingletonInstance.set{Method}(aRelevantObject) // store single instance to singleton.
+ * Singleton.getSingletonInstance.get{Method}().doStuffWithObject() // retrieve single instance from singleton.
+ * </pre>
  */
 public class Singleton {
 
@@ -51,13 +49,15 @@ public class Singleton {
     private RunnableJobTableModel jobList = new RunnableJobTableModel();
     private int characterWidth = 10;
 
-    /** Private constructor to prevent the creation
+    /**
+     * Private constructor to prevent the creation
      * of multiple instances of Singleton objects.
      */
     private Singleton() {
     }
 
-    /** Use this method to access the Singleton.
+    /**
+     * Use this method to access the Singleton.
      *
      * @return the sole Singleton instance.
      */
@@ -69,7 +69,8 @@ public class Singleton {
         return mainFrame;
     }
 
-    /** Store a single instance of a MainFrame to be referenced from
+    /**
+     * Store a single instance of a MainFrame to be referenced from
      * elsewhere in the program.
      *
      * @param aMainFrame sole instance of MainFrame to be referenced
@@ -104,10 +105,8 @@ public class Singleton {
     }
 
     /**
-     *
      * @return the db username of what should be the currently
      * authenticated user.
-     *
      */
     public String getCurrentUsername() {
         return this.user.getUsername();
@@ -124,7 +123,8 @@ public class Singleton {
         return this.user.getFullname();
     }
 
-    /** Note that there is no setUser() method.  The value is set automatically
+    /**
+     * Note that there is no setUser() method.  The value is set automatically
      * through a call to setCurrentUsername();
      *
      * @return the current user

@@ -34,11 +34,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- * Dialog providing a list of specimen part attributes for a specimen part, 
+ * Dialog providing a list of specimen part attributes for a specimen part,
  * with the ability to add more attributes.
- *
- *
- *
  */
 public class SpecimenPartAttributeDialog extends JDialog {
     private static final long serialVersionUID = 1870811168027430021L;

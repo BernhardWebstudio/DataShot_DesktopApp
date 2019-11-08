@@ -33,7 +33,6 @@ import java.util.List;
 
 /**
  *
- *
  */
 public class ThumbnailBuilder implements Runnable {
     private static final Log log = LogFactory.getLog(ThumbnailBuilder.class);

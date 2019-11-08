@@ -36,12 +36,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-/** JobFileReconciliation, walk through the image directories and find all files that have a filename
+/**
+ * JobFileReconciliation, walk through the image directories and find all files that have a filename
  * pattern that matches that of an image file that should be in the database, check if they are, and
  * report if they are not present in the database.
- *
- *
- *
  */
 public class JobFileReconciliation implements RunnableJob, Runnable {
 

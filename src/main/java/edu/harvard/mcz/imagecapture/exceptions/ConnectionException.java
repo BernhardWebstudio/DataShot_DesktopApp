@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  *
- *
  */
 public class ConnectionException extends Exception {
 

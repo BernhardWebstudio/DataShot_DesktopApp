@@ -27,10 +27,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-/** DeterminationFrame for editing identification history
- *
- *
- *
+/**
+ * DeterminationFrame for editing identification history
  */
 public class DeterminationFrame extends JFrame {
 
@@ -77,7 +75,8 @@ public class DeterminationFrame extends JFrame {
         jButtonAdd.setEnabled(false);
     }
 
-    /** Constructor to show a list of determinations for a particular specimen.
+    /**
+     * Constructor to show a list of determinations for a particular specimen.
      *
      * @param aSpecimen
      */

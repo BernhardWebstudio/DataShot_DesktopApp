@@ -22,10 +22,8 @@ import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
 
-/** UsersTableModel
- *
- *
- *
+/**
+ * UsersTableModel
  */
 public class UsersTableModel extends AbstractTableModel {
 

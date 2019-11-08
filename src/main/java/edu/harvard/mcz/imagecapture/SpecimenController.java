@@ -35,9 +35,6 @@ import java.util.Set;
 
 /**
  * Control actions that can be taken on Specimen objects.
- *
- *
- *
  */
 public class SpecimenController {
 
@@ -61,12 +58,13 @@ public class SpecimenController {
         inTable = false;
     }
 
-    /** Create a specimen controller for a specimen in a table.  If this constructor suceeds then isInTable()
+    /**
+     * Create a specimen controller for a specimen in a table.  If this constructor suceeds then isInTable()
      * will return true.
      *
-     * @param aSpecimen the specimen
-     * @param aModel a SpecimenListTableModel containing the specimen
-     * @param aTable the table in which the SpecimenListTableModel is shown.
+     * @param aSpecimen     the specimen
+     * @param aModel        a SpecimenListTableModel containing the specimen
+     * @param aTable        the table in which the SpecimenListTableModel is shown.
      * @param theCurrentRow the row of the specimen in the view of the table.
      * @throws NoSuchRecordException
      */

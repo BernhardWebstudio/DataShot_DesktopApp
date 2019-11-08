@@ -36,25 +36,22 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 /**
- * ButtonEditor A clickable button in a table cell that brings up a details view for the row 
+ * ButtonEditor A clickable button in a table cell that brings up a details view for the row
  * containing the button. Works with ButtonRenderer and a TableModel that implements isCellEditable().
- *
+ * <p>
  * Note: This implementation is specific to a Specimen identified by its id.
- *
+ * <p>
  * Example Usage (assuming that only the ID column is of type Long):
  * <pre>
- SpecimenLifeCycle s = new SpecimenLifeCycle();
- jTable.setModel(new SpecimenListTableModel(s.findAll()));
- jTable.setDefaultRenderer(Long.class, new ButtonRenderer());
- jTable.setDefaultEditor(Long.class, new ButtonEditor());
- </pre>
+ * SpecimenLifeCycle s = new SpecimenLifeCycle();
+ * jTable.setModel(new SpecimenListTableModel(s.findAll()));
+ * jTable.setDefaultRenderer(Long.class, new ButtonRenderer());
+ * jTable.setDefaultEditor(Long.class, new ButtonEditor());
+ * </pre>
  *
  * @see edu.harvard.mcz.imagecapture.data.SpecimenListTableModel#isCellEditable(int, int)
  * @see edu.harvard.mcz.imagecapture.data.SpecimenListTableModel#getColumnClass(int)
  * @see edu.harvard.mcz.imagecapture.ui.ButtonRenderer
- *
- *
- *
  */
 public class ButtonEditor extends AbstractCellEditor implements TableCellEditor, ActionListener {
 
@@ -92,11 +89,11 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor,
      * the OPEN_ constants to specify what context this button is operating in,
      * or the action to take on pressing the button, using the ACTION_constants.
      *
-     * @param aFormToOpen the form within which to display the record identified
-     * by the value of the cell for which this button is the CellEditor the available
-     * actions to be taken on a button press are specified by the OPEN_ constants, 
-     * or more generally the action to take on pressing the button, specified by
-     * the ACTION_ constants.
+     * @param aFormToOpen      the form within which to display the record identified
+     *                         by the value of the cell for which this button is the CellEditor the available
+     *                         actions to be taken on a button press are specified by the OPEN_ constants,
+     *                         or more generally the action to take on pressing the button, specified by
+     *                         the ACTION_ constants.
      * @param aParentComponent the component within which the table is embedded.
      */
     public ButtonEditor(int aFormToOpen, Component aParentComponent) {

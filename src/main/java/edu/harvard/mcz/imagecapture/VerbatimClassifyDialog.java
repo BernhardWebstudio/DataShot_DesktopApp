@@ -44,7 +44,6 @@ import java.util.Map;
 
 /**
  *
- *
  */
 public class VerbatimClassifyDialog extends JDialog {
 

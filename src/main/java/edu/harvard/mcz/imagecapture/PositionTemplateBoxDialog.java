@@ -24,10 +24,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 
-/** PositionTemplateBoxDialog
- *
- *
- *
+/**
+ * PositionTemplateBoxDialog
  */
 public class PositionTemplateBoxDialog extends JDialog {
 
@@ -68,7 +66,8 @@ public class PositionTemplateBoxDialog extends JDialog {
 
     private JLabel jLabelFeedback = null;
 
-    /** Don't call this constructor, use PositionTemplateBoxDialog(Frame owner, Dimension ImageSize, Dimension aULToChange, Dimension aSizeToChange,  String description)
+    /**
+     * Don't call this constructor, use PositionTemplateBoxDialog(Frame owner, Dimension ImageSize, Dimension aULToChange, Dimension aSizeToChange,  String description)
      * and provide values to edit instead.  Protected so that it can be overridden in a class that extends this dialog (presumbably to create a new box with some default values).
      *
      * @param owner
@@ -78,15 +77,16 @@ public class PositionTemplateBoxDialog extends JDialog {
         thisDialog = this;
     }
 
-    /** Dialog to obtain new values for the upper left corner and size of a rectangular box drawn on an image 
-     * identified by the upper left corner of the box and the height and width of the box in all in units of 
-     * pixels.  
+    /**
+     * Dialog to obtain new values for the upper left corner and size of a rectangular box drawn on an image
+     * identified by the upper left corner of the box and the height and width of the box in all in units of
+     * pixels.
      *
-     * @param owner the parent frame of this dialog.
-     * @param imageSize the height and width of the image onto which this box is placed
-     * @param aULToChange the upper left corner of the box, in units of pixels of the image
-     * @param aSizeToChange the height and width of the box, in units of pixels of the image 
-     * @param description a text description of the box to display on the dialog.
+     * @param owner         the parent frame of this dialog.
+     * @param imageSize     the height and width of the image onto which this box is placed
+     * @param aULToChange   the upper left corner of the box, in units of pixels of the image
+     * @param aSizeToChange the height and width of the box, in units of pixels of the image
+     * @param description   a text description of the box to display on the dialog.
      * @throws BadTemplateException if a dimension parameter has a height or width less than or equal to zero (aULtoChange can be 0).
      */
     public PositionTemplateBoxDialog(Frame owner, Dimension imageSize, Dimension aULToChange, Dimension aSizeToChange, String description) throws BadTemplateException {
@@ -141,7 +141,8 @@ public class PositionTemplateBoxDialog extends JDialog {
         return jContentPane;
     }
 
-    /** Get the upper left coordinate of the box in pixels on the
+    /**
+     * Get the upper left coordinate of the box in pixels on the
      * original image.
      *
      * @return ul the upper left coordinate of the box.

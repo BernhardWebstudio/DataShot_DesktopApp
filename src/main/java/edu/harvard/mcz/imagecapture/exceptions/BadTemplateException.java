@@ -18,14 +18,12 @@
  */
 package edu.harvard.mcz.imagecapture.exceptions;
 
-/** BadTemplateException to be thrown when a template does not fit an image file to which it is being applied.  
- * This exception should be thrown when there is a problem applying a template, as opposed to NoSuchTemplateException 
+/**
+ * BadTemplateException to be thrown when a template does not fit an image file to which it is being applied.
+ * This exception should be thrown when there is a problem applying a template, as opposed to NoSuchTemplateException
  * which should be thrown when trying to construct a PositionTemplate.
  *
  * @see edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException
- *
- *
- *
  */
 public class BadTemplateException extends Exception {
 

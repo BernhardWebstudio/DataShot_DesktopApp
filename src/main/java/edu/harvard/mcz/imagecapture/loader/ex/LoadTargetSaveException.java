@@ -21,7 +21,6 @@ package edu.harvard.mcz.imagecapture.loader.ex;
 
 /**
  *
- *
  */
 public class LoadTargetSaveException extends LoadException {
 

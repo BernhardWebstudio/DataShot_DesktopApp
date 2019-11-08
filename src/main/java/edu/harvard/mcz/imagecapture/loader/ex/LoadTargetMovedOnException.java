@@ -22,16 +22,13 @@ package edu.harvard.mcz.imagecapture.loader.ex;
  * Exception on data loading indicating that the target record for update
  * from the data load has moved further down the the workflow within the
  * DataShot system and is past the point where the desired load is allowed.
- *
- *
- *
  */
 public class LoadTargetMovedOnException extends LoadException {
 
     private static final long serialVersionUID = 5171194333707975248L;
 
     /**
-     *  Default Constructor.
+     * Default Constructor.
      */
     public LoadTargetMovedOnException() {
         super("Target record has been updated to a workflow state that can't be updated by this load.");

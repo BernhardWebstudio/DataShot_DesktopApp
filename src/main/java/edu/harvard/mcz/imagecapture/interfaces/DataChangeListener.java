@@ -20,9 +20,6 @@ package edu.harvard.mcz.imagecapture.interfaces;
 
 /**
  * DataChangeListener
- *
- *
- *
  */
 public interface DataChangeListener {
 

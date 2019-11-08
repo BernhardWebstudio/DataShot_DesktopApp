@@ -21,9 +21,6 @@ package edu.harvard.mcz.imagecapture.interfaces;
 /**
  * Interface for providing a string array of values that can be used
  * for purposes such as populating a pick list.
- *
- *
- *
  */
 public interface ValueLister {
 

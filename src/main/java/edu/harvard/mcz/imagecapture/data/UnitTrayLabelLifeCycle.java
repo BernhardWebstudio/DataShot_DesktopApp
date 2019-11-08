@@ -29,10 +29,8 @@ import org.hibernate.query.Query;
 
 import java.util.List;
 
-/** UnitTrayLabelLifeCycle
- *
- *
- *
+/**
+ * UnitTrayLabelLifeCycle
  */
 public class UnitTrayLabelLifeCycle {
 

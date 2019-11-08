@@ -37,10 +37,7 @@ import java.util.*;
 /**
  * Check all image files either under the image root directory or in a selected directory
  * and add records for files that aren't yet known to the database that contain barcode
- * information and add corresponding specimen records for new specimens.  
- *
- *
- *
+ * information and add corresponding specimen records for new specimens.
  */
 public class JobAllImageFilesScan implements RunnableJob, Runnable {
 
@@ -83,16 +80,15 @@ public class JobAllImageFilesScan implements RunnableJob, Runnable {
     /**
      * Create a scan job to bring up dialog to pick a specific directory to scan, or
      * to scan a specific directory specified by startAt.
-     *
+     * <p>
      * Behavior:
-     *
+     * <p>
      * whatToScan=SCAN_ALL, startAt is ignored, equivalent to default constructor.
      * whatToScan=SCAN_SELECT, startAt is used as starting point for directory chooser dialog.
      * whatToScan=SCAN_SPECIFIC, startAt is used as starting point for scan (if null falls back to SCAN_SELECT).
      *
-     *
      * @param whatToScan one of SCAN_ALL, SCAN_SPECIFIC, SCAN_SELECT
-     * @param startAt null or a directory starting point.
+     * @param startAt    null or a directory starting point.
      */
     public JobAllImageFilesScan(int whatToScan, File startAt) {
         scan = SCAN_SELECT;

@@ -37,7 +37,6 @@ import java.awt.event.ActionListener;
 
 /**
  *
- *
  */
 public class SpecimenPartAttribEditDialog extends JDialog {
     private static final long serialVersionUID = -549010965241755136L;

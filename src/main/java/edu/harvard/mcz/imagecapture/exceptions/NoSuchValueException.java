@@ -18,10 +18,8 @@
  */
 package edu.harvard.mcz.imagecapture.exceptions;
 
-/** NoSuchValueException can be thrown when an input value is not found in a controlled vocabulary.
- *
- *
- *
+/**
+ * NoSuchValueException can be thrown when an input value is not found in a controlled vocabulary.
  */
 public class NoSuchValueException extends Exception {
 

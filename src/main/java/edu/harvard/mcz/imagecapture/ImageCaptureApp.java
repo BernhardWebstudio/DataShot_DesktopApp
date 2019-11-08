@@ -59,9 +59,6 @@ import java.util.Properties;
  * @see edu.harvard.mcz.imagecapture.MainFrame
  * @see edu.harvard.mcz.imagecapture.Singleton
  * @see edu.harvard.mcz.imagecapture.ImageCaptureProperties
- *
- *
- *
  */
 public class ImageCaptureApp {
 

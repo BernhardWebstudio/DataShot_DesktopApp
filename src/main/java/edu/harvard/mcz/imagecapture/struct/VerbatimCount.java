@@ -23,9 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  * Data Structure to hold counts and unique values of verbatim fields.
- *
- *
- *
  */
 public class VerbatimCount {
     private static final Log log = LogFactory.getLog(VerbatimCount.class);

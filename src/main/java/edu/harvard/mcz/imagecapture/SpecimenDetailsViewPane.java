@@ -43,9 +43,9 @@ import java.util.*;
 
 /**
  * JPanel for editing a record of a Specimen in a details view for that specimen.
- *
- *  TODO: BugID: 10 add length limits (remaining to do for Number/Collector tables, 
- *  and for JComboBox fields).
+ * <p>
+ * TODO: BugID: 10 add length limits (remaining to do for Number/Collector tables,
+ * and for JComboBox fields).
  */
 public class SpecimenDetailsViewPane extends JPanel {
 
@@ -202,7 +202,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     /**
      * Initializes the specimen details view pane.
-     *  Note, contains comments indicating how to enable visual designer with this class.
+     * Note, contains comments indicating how to enable visual designer with this class.
      */
     private void initialize() {
         BorderLayout borderLayout = new BorderLayout();
@@ -2420,7 +2420,8 @@ public class SpecimenDetailsViewPane extends JPanel {
         }
     }
 
-    /** State of the data in the forms as compared to the specimen from which the data was loaded.
+    /**
+     * State of the data in the forms as compared to the specimen from which the data was loaded.
      *
      * @return true if the data as displayed in the forms hasn't changed since the data was last loaded from
      * or saved to the specimen, otherwise false indicating a dirty record.

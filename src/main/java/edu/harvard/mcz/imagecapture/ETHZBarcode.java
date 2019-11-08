@@ -24,13 +24,10 @@ import edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcher;
 import java.util.regex.Pattern;
 
 /**
- * Recognition and construction of text strings found in ETHZ-ENT barcode labels.  
- *
- * This class deals with the text of the decoded barcode, which is expected be in the form ETHZ-ENT[0-9]{7}.  
- * This class doesn't decode or encode the text into a QRCode barcode, that is done with calls to the ZXing library.  
- *
- *
- *
+ * Recognition and construction of text strings found in ETHZ-ENT barcode labels.
+ * <p>
+ * This class deals with the text of the decoded barcode, which is expected be in the form ETHZ-ENT[0-9]{7}.
+ * This class doesn't decode or encode the text into a QRCode barcode, that is done with calls to the ZXing library.
  */
 public class ETHZBarcode implements BarcodeMatcher, BarcodeBuilder {
 

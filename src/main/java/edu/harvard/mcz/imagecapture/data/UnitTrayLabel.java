@@ -28,12 +28,9 @@ import java.util.Date;
 
 /**
  * UnitTrayLabel
- *
+ * <p>
  * Includes factory method for decoding a set of key-value pairs in JSON, and a
  * method for constructing such a string with a JSON encoding.
- *
- *
- *
  */
 public class UnitTrayLabel
         implements TaxonNameReturner, DrawerNameReturner, CollectionReturner {
@@ -232,7 +229,7 @@ public class UnitTrayLabel
      *
      * @param jsonEncodedLabel the JSON to decode.
      * @return a new UnitTrayLabel populated with the values found in the supplied
-     *     jsonEncodedLabel text or null on a failure.
+     * jsonEncodedLabel text or null on a failure.
      * @see toJSONString
      */
     public static UnitTrayLabel createFromJSONString(String jsonEncodedLabel) {

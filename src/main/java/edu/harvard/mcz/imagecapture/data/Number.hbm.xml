@@ -11,7 +11,7 @@
             </generator>
         </id>
         <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.data.Specimen" cascade="save-update">
-            <column name="SpecimenId" />
+            <column name="SpecimenId"/>
         </many-to-one>
         <property name="number" type="string">
             <column name="OTHER_NUMBER" length="50"/>

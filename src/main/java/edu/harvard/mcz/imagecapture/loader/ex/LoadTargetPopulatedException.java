@@ -20,7 +20,6 @@ package edu.harvard.mcz.imagecapture.loader.ex;
 
 /**
  *
- *
  */
 public class LoadTargetPopulatedException extends LoadException {
 

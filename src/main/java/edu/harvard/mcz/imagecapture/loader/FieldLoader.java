@@ -34,7 +34,6 @@ import java.util.*;
 
 /**
  *
- *
  */
 public class FieldLoader {
     private static final Log log = LogFactory.getLog(FieldLoader.class);
@@ -88,7 +87,7 @@ public class FieldLoader {
      *
      * @param possibleField header to check
      * @return true if possibleField is (case insensitive) in the list of known
-     *   fields, false if not.  Throws a null pointer exception if possibleField is null.
+     * fields, false if not.  Throws a null pointer exception if possibleField is null.
      */
     public boolean isFieldKnown(String possibleField) {
         return knownFields.containsKey(possibleField.toLowerCase());
@@ -102,12 +101,11 @@ public class FieldLoader {
      * Given a barcode number and a value for verbatimUnclassifiedText, update the verbatim value for the matching
      * Specimen record, leaves the Specimen record in workflow state WorkFlowStatus.STAGE_VERBATIM.
      *
-     * @param barcode must match exactly one Specimen record.
+     * @param barcode                  must match exactly one Specimen record.
      * @param verbatimUnclassifiedText value for this field in Specimen.
-     * @param questions value to append to this field in Specimen.
-     * @param overwriteExisting if true, overwrite any value of verbatimUnclassifiedText in the matching Specimen record.
+     * @param questions                value to append to this field in Specimen.
+     * @param overwriteExisting        if true, overwrite any value of verbatimUnclassifiedText in the matching Specimen record.
      * @return if the new value was saved
-     *
      * @throws LoadException on an error
      */
     public boolean load(String barcode, String verbatimUnclassifiedText, String verbatimClusterIdentifier, String questions, boolean overwriteExisting) throws LoadException {
@@ -165,15 +163,14 @@ public class FieldLoader {
      * Give a barcode number and the set of verbatim fields, attempt to set the values for those verbatim fields for a record.
      * Does not overwrite existing non-empty values, does not modify record if any verbatim field contains a value.
      *
-     * @param barcode field, must match on exactly one Specimen record.
-     * @param verbatimLocality value for this field in Specimen.
-     * @param verbatimDate value for this field in Specimen.
-     * @param verbatimCollector value for this field in Specimen.
-     * @param verbatimCollection value for this field in Specimen.
-     * @param verbatimNumbers value for this field in Specimen.
+     * @param barcode                  field, must match on exactly one Specimen record.
+     * @param verbatimLocality         value for this field in Specimen.
+     * @param verbatimDate             value for this field in Specimen.
+     * @param verbatimCollector        value for this field in Specimen.
+     * @param verbatimCollection       value for this field in Specimen.
+     * @param verbatimNumbers          value for this field in Specimen.
      * @param verbatimUnclassifiedText value for this field in Specimen.
-     * @param questions value to append to this field in Specimen.
-     *
+     * @param questions                value to append to this field in Specimen.
      * @return true if record with the provided barcode number was updated.
      * @throws LoadException on an error, including any existing value for any of the verbatim fields.
      */
@@ -255,14 +252,12 @@ public class FieldLoader {
     /**
      * Give a barcode number and an arbitrary set of fields in Specimen, attempt to set the values for those fields for a record.
      *
-     * @param barcode field, must match on exactly one Specimen record.
-     * @param data map of field names and data values
-     * @param questions value to append to this field in Specimen.
-     * @param newWorkflowStatus to set Specimen.workflowStatus to.
+     * @param barcode                     field, must match on exactly one Specimen record.
+     * @param data                        map of field names and data values
+     * @param questions                   value to append to this field in Specimen.
+     * @param newWorkflowStatus           to set Specimen.workflowStatus to.
      * @param allowUpdateExistingVerbatim if true can load can overwrite the value in an existing verbatim field.
-     *
      * @return true if one or more fields were updated.
-     *
      * @throws LoadException on an error (particularly from inability to map keys in data to fields in Specimen.
      */
     public boolean loadFromMap(String barcode, Map<String, String> data, String newWorkflowStatus, boolean allowUpdateExistingVerbatim) throws LoadException {
@@ -527,12 +522,10 @@ public class FieldLoader {
      *
      * @param headers the headers to check against allowed fields in List<String> form.
      * @return a HeaderCheckResult object containing a result (true) and a message, the
-     *    result is true if there are no unmatched fields in the load, currently exceptions
-     *    are thrown instead of any false cases for result.
-     *
+     * result is true if there are no unmatched fields in the load, currently exceptions
+     * are thrown instead of any false cases for result.
      * @throws LoadException if no barcode field is found, if no data fields are found, or if
-     *    one or more unknown (not mapped to DataShot specimen) fields are found.
-     *
+     *                       one or more unknown (not mapped to DataShot specimen) fields are found.
      * @see HeaderCheckResult.loadFromMap
      */
     public HeaderCheckResult checkHeaderList(List<String> headers) throws LoadException {

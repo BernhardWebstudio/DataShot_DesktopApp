@@ -25,10 +25,8 @@ import edu.harvard.mcz.imagecapture.ui.ProgressBarRenderer;
 import javax.swing.*;
 import java.awt.*;
 
-/** RunnableJobFrame
- *
- *
- *
+/**
+ * RunnableJobFrame
  */
 public class RunnableJobFrame extends JFrame {
 

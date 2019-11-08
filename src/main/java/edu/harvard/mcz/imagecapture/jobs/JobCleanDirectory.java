@@ -39,9 +39,6 @@ import java.util.List;
 
 /**
  * JobCleanDirectory, scan a directory for image files that have been deleted, and remove the related image records.
- *
- *
- *
  */
 public class JobCleanDirectory implements RunnableJob, Runnable {
 
@@ -76,15 +73,14 @@ public class JobCleanDirectory implements RunnableJob, Runnable {
     /**
      * Create a clean images job to bring up dialog to pick a specific directory
      * on which to clean up image records.
-     *
+     * <p>
      * Behavior:
-     *
+     * <p>
      * whatToScan=SCAN_SELECT, startAt is used as starting point for directory chooser dialog.
      * whatToScan=SCAN_SPECIFIC, startAt is used as starting point for repeat (if null falls back to SCAN_SELECT).
      *
-     *
      * @param whatToScan one of SCAN_SPECIFIC, SCAN_SELECT
-     * @param startAt null or a directory starting point.
+     * @param startAt    null or a directory starting point.
      */
     public JobCleanDirectory(int whatToScan, File startAt) {
         init(whatToScan, startAt);
@@ -94,7 +90,7 @@ public class JobCleanDirectory implements RunnableJob, Runnable {
      * Setup initial parameters before run.
      *
      * @param whatToScan one of SCAN_SPECIFIC, SCAN_SELECT
-     * @param startAt null or a directory starting point.
+     * @param startAt    null or a directory starting point.
      */
     public void init(int whatToScan, File startAt) {
         listeners = new ArrayList<RunnerListener>();

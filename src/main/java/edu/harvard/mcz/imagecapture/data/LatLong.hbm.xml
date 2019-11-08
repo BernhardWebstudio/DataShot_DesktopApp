@@ -10,7 +10,7 @@
                 <param name="sequence">SEQ_LAT_LONG</param>
             </generator>
         </id>
-        <many-to-one name="specimenId" class="edu.harvard.mcz.imagecapture.data.Specimen" cascade="save-update">
+        <many-to-one name="specimenId" class="edu.harvard.mcz.imagecapture.data.Specimen">
             <column name="SpecimenId"/>
         </many-to-one>
         <property name="datum" type="string">
@@ -64,7 +64,6 @@
         <property name="latLongRemarks" type="string">
             <column name="LAT_LONG_REMARKS" length="4000"/>
         </property>
-
         <property name="latDeg" type="java.lang.Integer">
             <column name="LAT_DEG"/>
         </property>
@@ -77,7 +76,6 @@
         <property name="latSec" type="java.math.BigDecimal">
             <column name="LAT_SEC"/>
         </property>
-
         <property name="longDeg" type="java.lang.Integer">
             <column name="LONG_DEG"/>
         </property>
@@ -90,7 +88,6 @@
         <property name="longSec" type="java.math.BigDecimal">
             <column name="LONG_SEC"/>
         </property>
-
         <property name="maxErrorDistance" type="java.lang.Integer">
             <column name="MAX_ERROR_DISTANCE"/>
         </property>
@@ -146,6 +143,5 @@
         | VERIFICATIONSTATUS   | varchar(40)    | NO   |     | NULL    |                |
 
          -->
-
     </class>
 </hibernate-mapping>

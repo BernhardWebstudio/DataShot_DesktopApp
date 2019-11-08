@@ -16,6 +16,10 @@ ALTER TABLE Tracking
     Modify SpecimenId bigint null;
 ALTER TABLE external_history
     Modify SpecimenId bigint null;
+ALTER TABLE LAT_LONG
+    DROP INDEX FK_specimen_ID;
+ALTER TABLE LAT_LONG
+    ADD INDEX FK_specimen_ID(SpecimenId);
 -- tell DataShot's own system what our current version is
 INSERT INTO allowed_version (version)
 VALUES ("1.10");

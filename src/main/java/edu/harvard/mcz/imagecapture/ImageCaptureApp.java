@@ -276,7 +276,7 @@ public class ImageCaptureApp {
                     .setStatusMessage("Database does not support version, update needed.");
             int response = JOptionPane.showConfirmDialog(Singleton.getSingletonInstance().getMainFrame(),
                     "The database does not support" + APP_NAME + " version " + APP_VERSION
-                            + ".  A software (or database) update to " + allowed + " is required. "
+                            + ".  A software (or database) update from " + allowed + " is required. "
                             + "Are you ready to try the upgrade of the database? Make sure no one else will need the old version.",
                     "Update Required", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             log.error("Database does not allow version " + ImageCaptureApp.APP_VERSION + ". Upgrade will "
@@ -286,6 +286,7 @@ public class ImageCaptureApp {
                 // try to upgrade the database scheme
                 try {
                     AllowedVersionLifeCycle.upgrade();
+                    Singleton.getSingletonInstance().getMainFrame().setStatusMessage("DB Upgrade OK");
                 } catch (Exception e) {
                     log.error("Upgrade failed", e);
                     JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(),

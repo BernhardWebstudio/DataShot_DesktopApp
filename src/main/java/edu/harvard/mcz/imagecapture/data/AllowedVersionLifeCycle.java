@@ -22,6 +22,8 @@ import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.FlywayException;
+import org.flywaydb.core.internal.command.DbMigrate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
@@ -100,14 +102,18 @@ public class AllowedVersionLifeCycle {
         String url = (String) properties.get("connection.url");
         String username = (String) properties.get("connection.username");
         String password = (String) properties.get("connection.password");
-        log.debug("Found connection details: " + url + ", " + username + ", " +
-                password);
         // Create the Flyway instance and point it to the database
         Flyway flyway =
                 Flyway.configure().dataSource(url, username, password).load();
-
         // Start the migration
-        flyway.migrate();
+        try {
+            flyway.migrate();
+        } catch (FlywayException e) {
+            log.error(e);
+            // not the nice way, ok.
+            flyway.repair();
+            flyway.migrate();
+        }
     }
 
     /**

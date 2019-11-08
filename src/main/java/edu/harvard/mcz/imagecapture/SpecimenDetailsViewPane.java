@@ -526,7 +526,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         AutoCompleteDecorator.decorate(jComboBoxCollector);
 
         //+determinations
-        specimen.getDeterminations().removeAll(specimen.getDeterminations());
+        specimen.getDeterminations().clear();
         for (Determination prevdet : previousSpecimen.getDeterminations()) {
             Determination newdet = prevdet.clone();
             newdet.setSpecimen(specimen);

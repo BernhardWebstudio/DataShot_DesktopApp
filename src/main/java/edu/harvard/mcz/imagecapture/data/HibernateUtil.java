@@ -54,6 +54,10 @@ public class HibernateUtil {
         sessionFactory = configuration.buildSessionFactory();
     }
 
+    public static Properties getProperties() {
+        return HibernateUtil.properties;
+    }
+
 
     /**
      * Using the Hibernate configuration in Configuration from hibernate.cfg.xml

@@ -75,7 +75,7 @@ public class ImageCaptureApp {
             + "You should have received a copy of the GNU General Public License along\n "
             + "with this program; if not, write to the Free Software Foundation, Inc.,\n "
             + "51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.\n ";
-    public static final String APP_CONTRIBUTORS = "Design: Brendan Haley, Linda Ford, Rodney Eastwood, Paul J. Morris.  Code: Paul J. Morris";
+    public static final String APP_CONTRIBUTORS = "Brendan Haley, Linda Ford, Rodney Eastwood, Paul J. Morris, Tim Bernhard.";
     public static final String APP_LIBRARIES = "Hibernate, Tesseract, ZXing, Log4J, drew.metadata.exif, iText, event_date_qc";
     public static final String APP_REV = "$Rev$"; // ImageCapture.jar file built before commit will be one revision
     /**

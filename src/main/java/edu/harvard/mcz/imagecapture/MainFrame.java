@@ -348,7 +348,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     private JMenuItem getJMenuItemLogout() {
         if (jMenuItemLogout == null) {
             jMenuItemLogout = new JMenuItem();
-            jMenuItemLogout.setText("Change User");
+            jMenuItemLogout.setText("Logout & change user");
             jMenuItemLogout.setMnemonic(KeyEvent.VK_U);
             jMenuItemLogout.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {

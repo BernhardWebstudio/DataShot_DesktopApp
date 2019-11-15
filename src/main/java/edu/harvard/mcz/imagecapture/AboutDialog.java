@@ -18,6 +18,8 @@
  */
 package edu.harvard.mcz.imagecapture;
 
+import net.miginfocom.swing.MigLayout;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -35,15 +37,8 @@ public class AboutDialog extends JDialog {
     private JButton jButton = null;
     private AboutDialog thisDialog = null;
     private JPanel jPanel = null;
-    private JLabel jLabel = null;
     private JTextField jTextFieldApp = null;
-    private JLabel jLabel1 = null;
     private JTextField jTextFieldVersion = null;
-    private JLabel jLabel2 = null;
-    private JLabel jLabel3 = null;
-    private JLabel jLabel4 = null;
-    private JLabel jLabel5 = null;
-    private JLabel jLabel6 = null;
     private JTextField jTextField = null;
     private JTextArea jTextArea = null;
     private JTextField jTextFieldCopyright = null;
@@ -74,7 +69,7 @@ public class AboutDialog extends JDialog {
     }
 
     /**
-     * This method initializes jPanel
+     * This method assembles the close button with the content jpanels
      *
      * @return javax.swing.JPanel
      */
@@ -82,8 +77,8 @@ public class AboutDialog extends JDialog {
         if (jContentPane == null) {
             jContentPane = new JPanel();
             jContentPane.setLayout(new BorderLayout());
-            jContentPane.add(getJPanel1(), BorderLayout.SOUTH);
-            jContentPane.add(getJPanel2(), BorderLayout.CENTER);
+            jContentPane.add(getJPanelWrapper(), BorderLayout.SOUTH);
+            jContentPane.add(getJPanelContent(), BorderLayout.CENTER);
         }
         return jContentPane;
     }
@@ -93,11 +88,11 @@ public class AboutDialog extends JDialog {
      *
      * @return javax.swing.JPanel
      */
-    private JPanel getJPanel1() {
+    private JPanel getJPanelWrapper() {
         if (jPanel1 == null) {
             jPanel1 = new JPanel();
             jPanel1.setLayout(new GridBagLayout());
-            jPanel1.add(getJButton(), new GridBagConstraints());
+            jPanel1.add(getJButtonClose(), new GridBagConstraints());
         }
         return jPanel1;
     }
@@ -107,7 +102,7 @@ public class AboutDialog extends JDialog {
      *
      * @return javax.swing.JButton
      */
-    private JButton getJButton() {
+    private JButton getJButtonClose() {
         if (jButton == null) {
             jButton = new JButton();
             jButton.setText("Close");
@@ -123,140 +118,40 @@ public class AboutDialog extends JDialog {
     }
 
     /**
-     * This method initializes jPanel
+     * This method initializes the content jPanel
      *
      * @return javax.swing.JPanel
      */
-    private JPanel getJPanel2() {
+    private JPanel getJPanelContent() {
         if (jPanel == null) {
-            GridBagConstraints gridBagConstraints10 = new GridBagConstraints();
-            gridBagConstraints10.fill = GridBagConstraints.VERTICAL;
-            gridBagConstraints10.gridy = 7;
-            gridBagConstraints10.weightx = 1.0;
-            gridBagConstraints10.anchor = GridBagConstraints.WEST;
-            gridBagConstraints10.gridx = 1;
-            GridBagConstraints gridBagConstraints9 = new GridBagConstraints();
-            gridBagConstraints9.insets = new Insets(0, 0, 5, 0);
-            gridBagConstraints9.fill = GridBagConstraints.VERTICAL;
-            gridBagConstraints9.gridy = 6;
-            gridBagConstraints9.weightx = 1.0;
-            gridBagConstraints9.anchor = GridBagConstraints.WEST;
-            gridBagConstraints9.gridx = 1;
-            GridBagConstraints gridBagConstraints8 = new GridBagConstraints();
-            gridBagConstraints8.insets = new Insets(0, 0, 5, 0);
-            gridBagConstraints8.fill = GridBagConstraints.VERTICAL;
-            gridBagConstraints8.gridy = 5;
-            gridBagConstraints8.weightx = 1.0;
-            gridBagConstraints8.anchor = GridBagConstraints.WEST;
-            gridBagConstraints8.gridx = 1;
-            GridBagConstraints gridBagConstraints7 = new GridBagConstraints();
-            gridBagConstraints7.insets = new Insets(0, 0, 5, 0);
-            gridBagConstraints7.fill = GridBagConstraints.BOTH;
-            gridBagConstraints7.gridy = 3;
-            gridBagConstraints7.weightx = 1.0;
-            gridBagConstraints7.weighty = 1.0;
-            gridBagConstraints7.gridx = 1;
-            GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
-            gridBagConstraints6.insets = new Insets(0, 0, 5, 0);
-            gridBagConstraints6.fill = GridBagConstraints.VERTICAL;
-            gridBagConstraints6.gridy = 2;
-            gridBagConstraints6.weightx = 1.0;
-            gridBagConstraints6.anchor = GridBagConstraints.WEST;
-            gridBagConstraints6.gridx = 1;
-            GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
-            gridBagConstraints5.gridx = 0;
-            gridBagConstraints5.insets = new Insets(0, 0, 0, 5);
-            gridBagConstraints5.anchor = GridBagConstraints.EAST;
-            gridBagConstraints5.gridy = 7;
-            jLabel6 = new JLabel();
-            jLabel6.setText("Libraries");
-            GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
-            gridBagConstraints4.gridx = 0;
-            gridBagConstraints4.insets = new Insets(0, 0, 5, 5);
-            gridBagConstraints4.anchor = GridBagConstraints.EAST;
-            gridBagConstraints4.gridy = 6;
-            jLabel5 = new JLabel();
-            jLabel5.setText("Contributors");
-            GridBagConstraints gridBagConstraints31 = new GridBagConstraints();
-            gridBagConstraints31.gridx = 0;
-            gridBagConstraints31.insets = new Insets(0, 0, 5, 5);
-            gridBagConstraints31.anchor = GridBagConstraints.EAST;
-            gridBagConstraints31.gridy = 5;
-            jLabel4 = new JLabel();
-            jLabel4.setText("Copyright");
-            GridBagConstraints gridBagConstraints21 = new GridBagConstraints();
-            gridBagConstraints21.gridx = 0;
-            gridBagConstraints21.insets = new Insets(0, 0, 5, 5);
-            gridBagConstraints21.anchor = GridBagConstraints.EAST;
-            gridBagConstraints21.gridy = 3;
-            jLabel3 = new JLabel();
-            jLabel3.setText("Description");
-            GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
-            gridBagConstraints11.gridx = 0;
-            gridBagConstraints11.anchor = GridBagConstraints.EAST;
-            gridBagConstraints11.insets = new Insets(0, 0, 5, 5);
-            gridBagConstraints11.gridy = 2;
-            jLabel2 = new JLabel();
-            jLabel2.setText("Revision");
-            GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
-            gridBagConstraints3.insets = new Insets(0, 0, 5, 0);
-            gridBagConstraints3.fill = GridBagConstraints.VERTICAL;
-            gridBagConstraints3.gridy = 1;
-            gridBagConstraints3.weightx = 1.0;
-            gridBagConstraints3.anchor = GridBagConstraints.WEST;
-            gridBagConstraints3.gridx = 1;
-            GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-            gridBagConstraints2.gridx = 0;
-            gridBagConstraints2.anchor = GridBagConstraints.EAST;
-            gridBagConstraints2.insets = new Insets(0, 0, 5, 5);
-            gridBagConstraints2.gridy = 1;
-            jLabel1 = new JLabel();
-            jLabel1.setText("Version");
-            GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-            gridBagConstraints1.insets = new Insets(0, 0, 5, 0);
-            gridBagConstraints1.fill = GridBagConstraints.VERTICAL;
-            gridBagConstraints1.gridy = 0;
-            gridBagConstraints1.weightx = 1.0;
-            gridBagConstraints1.anchor = GridBagConstraints.WEST;
-            gridBagConstraints1.gridx = 1;
-            GridBagConstraints gridBagConstraints = new GridBagConstraints();
-            gridBagConstraints.gridx = 0;
-            gridBagConstraints.anchor = GridBagConstraints.EAST;
-            gridBagConstraints.insets = new Insets(0, 10, 5, 5);
-            gridBagConstraints.gridy = 0;
-            jLabel = new JLabel();
-            jLabel.setText("Application");
-            jPanel = new JPanel();
-            GridBagLayout gbl_jPanel = new GridBagLayout();
-            gbl_jPanel.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0};
-            gbl_jPanel.columnWeights = new double[]{0.0, 1.0};
-            jPanel.setLayout(gbl_jPanel);
-            jPanel.add(jLabel, gridBagConstraints);
-            jPanel.add(getJTextFieldApp(), gridBagConstraints1);
-            jPanel.add(jLabel1, gridBagConstraints2);
-            jPanel.add(getJTextFieldVersion(), gridBagConstraints3);
-            jPanel.add(jLabel2, gridBagConstraints11);
-            jPanel.add(jLabel3, gridBagConstraints21);
-            GridBagConstraints gbc_lblLicence = new GridBagConstraints();
-            gbc_lblLicence.anchor = GridBagConstraints.EAST;
-            gbc_lblLicence.insets = new Insets(0, 0, 5, 5);
-            gbc_lblLicence.gridx = 0;
-            gbc_lblLicence.gridy = 4;
-            jPanel.add(getLblLicence(), gbc_lblLicence);
-            GridBagConstraints gbc_textArea = new GridBagConstraints();
-            gbc_textArea.insets = new Insets(0, 0, 5, 0);
-            gbc_textArea.fill = GridBagConstraints.BOTH;
-            gbc_textArea.gridx = 1;
-            gbc_textArea.gridy = 4;
-            jPanel.add(getTextArea(), gbc_textArea);
-            jPanel.add(jLabel4, gridBagConstraints31);
-            jPanel.add(jLabel5, gridBagConstraints4);
-            jPanel.add(jLabel6, gridBagConstraints5);
-            jPanel.add(getJTextField(), gridBagConstraints6);
-            jPanel.add(getJTextArea(), gridBagConstraints7);
-            jPanel.add(getJTextField1(), gridBagConstraints8);
-            jPanel.add(getJTextField12(), gridBagConstraints9);
-            jPanel.add(getJTextField2(), gridBagConstraints10);
+            jPanel = new JPanel(new MigLayout());
+            // set fields
+            String[] labels = {
+                    "Application",
+                    "Version",
+                    "Description",
+                    "License",
+                    "Copyright",
+                    "Contributors",
+                    "Libraries"
+            };
+
+            Component[] fields = {
+                    this.getJTextFieldApp(),
+                    this.getJTextFieldVersion(),
+                    this.getJTextAreaDescription(),
+                    this.getTextAreaLicense(),
+                    this.getJTextFieldCopyright(),
+                    this.getJTextFieldContributors(),
+                    this.getJTextFieldLibraries()
+            };
+
+            for (int i = 0; i < labels.length; i++) {
+                JLabel label = new JLabel();
+                label.setText(labels[i]);
+                jPanel1.add(label, "align label");
+                jPanel1.add(fields[i], "grow");
+            }
         }
         return jPanel;
     }
@@ -305,7 +200,7 @@ public class AboutDialog extends JDialog {
      *
      * @return javax.swing.JTextArea
      */
-    private JTextArea getJTextArea() {
+    private JTextArea getJTextAreaDescription() {
         if (jTextArea == null) {
             jTextArea = new JTextArea(3, 50);
             jTextArea.setText(ImageCaptureApp.APP_DESCRIPTION);
@@ -319,7 +214,7 @@ public class AboutDialog extends JDialog {
      *
      * @return javax.swing.JTextField
      */
-    private JTextField getJTextField1() {
+    private JTextField getJTextFieldCopyright() {
         if (jTextFieldCopyright == null) {
             jTextFieldCopyright = new JTextField(ImageCaptureApp.APP_COPYRIGHT);
             jTextFieldCopyright.setEditable(false);
@@ -332,7 +227,7 @@ public class AboutDialog extends JDialog {
      *
      * @return javax.swing.JTextField
      */
-    private JTextField getJTextField12() {
+    private JTextField getJTextFieldContributors() {
         if (jTextField1 == null) {
             jTextField1 = new JTextField(ImageCaptureApp.APP_CONTRIBUTORS);
             jTextField1.setEditable(false);
@@ -345,7 +240,7 @@ public class AboutDialog extends JDialog {
      *
      * @return javax.swing.JTextField
      */
-    private JTextField getJTextField2() {
+    private JTextField getJTextFieldLibraries() {
         if (jTextField2 == null) {
             jTextField2 = new JTextField(ImageCaptureApp.APP_LIBRARIES);
             jTextField2.setEditable(false);
@@ -354,19 +249,16 @@ public class AboutDialog extends JDialog {
     }
 
 
-    private JTextArea getTextArea() {
+    /**
+     *
+     * @return JTextArea
+     */
+    private JTextArea getTextAreaLicense() {
         if (textArea == null) {
             textArea = new JTextArea();
             textArea.setText(ImageCaptureApp.APP_LICENSE);
             textArea.setEditable(false);
         }
         return textArea;
-    }
-
-    private JLabel getLblLicence() {
-        if (lblLicence == null) {
-            lblLicence = new JLabel("Licence");
-        }
-        return lblLicence;
     }
 }  //  @jve:decl-index=0:visual-constraint="10,10"

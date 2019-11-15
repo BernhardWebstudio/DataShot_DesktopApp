@@ -29,10 +29,10 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
-import edu.harvard.mcz.imagecapture.data.UnitTrayLabel;
-import edu.harvard.mcz.imagecapture.data.UnitTrayLabelLifeCycle;
+import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 import edu.harvard.mcz.imagecapture.exceptions.PrintFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
+import edu.harvard.mcz.imagecapture.lifecycle.UnitTrayLabelLifeCycle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

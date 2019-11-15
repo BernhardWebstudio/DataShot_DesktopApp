@@ -4,8 +4,8 @@
 package edu.harvard.mcz.imagecapture;
 
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
-import edu.harvard.mcz.imagecapture.data.Specimen;
-import edu.harvard.mcz.imagecapture.data.UnitTrayLabel;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 import edu.harvard.mcz.imagecapture.interfaces.CollectionReturner;
 import edu.harvard.mcz.imagecapture.interfaces.DrawerNameReturner;
 import edu.harvard.mcz.imagecapture.interfaces.TaxonNameReturner;

@@ -17,7 +17,7 @@
  */
 package edu.harvard.mcz.imagecapture.tests;
 
-import edu.harvard.mcz.imagecapture.data.Users;
+import edu.harvard.mcz.imagecapture.entity.Users;
 import junit.framework.TestCase;
 
 public class TestOfPasswordComplexity extends TestCase {

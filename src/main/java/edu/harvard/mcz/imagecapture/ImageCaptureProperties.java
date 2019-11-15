@@ -18,6 +18,7 @@
  */
 package edu.harvard.mcz.imagecapture;
 
+import edu.harvard.mcz.imagecapture.entity.SpecimenPart;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -124,7 +125,7 @@ public class ImageCaptureProperties extends AbstractTableModel {
     /**
      * The default value for preparation type (e.g. pinned).
      *
-     * @see edu.harvard.mcz.imagecapture.data.SpecimenPart#preserveMethod
+     * @see SpecimenPart#preserveMethod
      */
     public static final String KEY_DEFAULT_PREPARATION = "default.preparation";
     /**

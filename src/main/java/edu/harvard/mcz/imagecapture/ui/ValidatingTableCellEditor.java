@@ -18,7 +18,7 @@
  */
 package edu.harvard.mcz.imagecapture.ui;
 
-import edu.harvard.mcz.imagecapture.MainFrame;
+import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
 
 import javax.swing.*;
 import java.awt.*;

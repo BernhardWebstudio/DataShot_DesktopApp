@@ -1,8 +1,10 @@
 package edu.harvard.mcz.imagecapture.data;
 
-import edu.harvard.mcz.imagecapture.LoginDialog;
-import edu.harvard.mcz.imagecapture.MainFrame;
+import edu.harvard.mcz.imagecapture.ui.dialog.LoginDialog;
+import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
 import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.entity.Users;
+import edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;

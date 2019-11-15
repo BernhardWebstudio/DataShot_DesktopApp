@@ -22,10 +22,12 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import edu.harvard.mcz.imagecapture.data.AllowedVersionLifeCycle;
-import edu.harvard.mcz.imagecapture.data.Specimen;
-import edu.harvard.mcz.imagecapture.data.SpecimenLifeCycle;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.exceptions.ConnectionException;
+import edu.harvard.mcz.imagecapture.lifecycle.AllowedVersionLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
+import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
+import edu.harvard.mcz.imagecapture.ui.tablemodel.RunnableJobTableModel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
@@ -56,7 +58,7 @@ import java.util.Properties;
  * Main entry point for user interface of ImageCapture Java Application. Creates
  * a SingletonObject, loads the properties file, and opens a MainFrame
  *
- * @see edu.harvard.mcz.imagecapture.MainFrame
+ * @see MainFrame
  * @see edu.harvard.mcz.imagecapture.Singleton
  * @see edu.harvard.mcz.imagecapture.ImageCaptureProperties
  */

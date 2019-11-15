@@ -18,7 +18,7 @@
  */
 package edu.harvard.mcz.imagecapture.encoder;
 
-import edu.harvard.mcz.imagecapture.data.UnitTrayLabel;
+import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 
 /**
  * QREncoder

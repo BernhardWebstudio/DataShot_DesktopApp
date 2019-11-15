@@ -18,9 +18,11 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import edu.harvard.mcz.imagecapture.data.Users;
+import edu.harvard.mcz.imagecapture.entity.Users;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcher;
+import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
+import edu.harvard.mcz.imagecapture.ui.tablemodel.RunnableJobTableModel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

@@ -18,11 +18,17 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import edu.harvard.mcz.imagecapture.data.*;
+import edu.harvard.mcz.imagecapture.entity.ICImage;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchRecordException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsException;
 import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener;
+import edu.harvard.mcz.imagecapture.lifecycle.ICImageLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
+import edu.harvard.mcz.imagecapture.ui.frame.ImageDisplayFrame;
+import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
+import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

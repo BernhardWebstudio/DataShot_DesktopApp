@@ -19,11 +19,11 @@
 package edu.harvard.mcz.imagecapture.loader;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
-import edu.harvard.mcz.imagecapture.RunnableJobReportDialog;
+import edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialog;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
-import edu.harvard.mcz.imagecapture.data.Specimen;
-import edu.harvard.mcz.imagecapture.data.WorkFlowStatus;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.interfaces.RunStatus;
 import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
 import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;

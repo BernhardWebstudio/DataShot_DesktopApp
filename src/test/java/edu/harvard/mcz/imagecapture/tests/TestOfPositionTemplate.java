@@ -21,7 +21,7 @@ import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.PositionTemplate;
 import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.data.Template;
+import edu.harvard.mcz.imagecapture.entity.Template;
 import edu.harvard.mcz.imagecapture.exceptions.BadTemplateException;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 import junit.framework.TestCase;

@@ -17,7 +17,7 @@
  */
 package edu.harvard.mcz.imagecapture.tests;
 
-import edu.harvard.mcz.imagecapture.data.UnitTrayLabel;
+import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 import junit.framework.TestCase;
 
 /** TestOfUnitTrayLabel
@@ -35,7 +35,7 @@ public class TestOfUnitTrayLabel extends TestCase {
     }
 
     /**
-     * Test method for {@link edu.harvard.mcz.imagecapture.data.UnitTrayLabel#toJSONString()}.
+     * Test method for {@link UnitTrayLabel#toJSONString()}.
      */
     public void testToJSONString() {
         UnitTrayLabel u = new UnitTrayLabel();
@@ -54,7 +54,7 @@ public class TestOfUnitTrayLabel extends TestCase {
     }
 
     /**
-     * Test method for {@link edu.harvard.mcz.imagecapture.data.UnitTrayLabel#createFromJSONString(java.lang.String)}.
+     * Test method for {@link UnitTrayLabel#createFromJSONString(java.lang.String)}.
      */
     public void testCreateFromJSONString() {
         UnitTrayLabel u = new UnitTrayLabel();

@@ -2,7 +2,7 @@ package edu.harvard.mcz.imagecapture.ui;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.data.Specimen;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
 
 import javax.swing.*;
 import java.awt.*;

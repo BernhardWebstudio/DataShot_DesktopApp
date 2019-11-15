@@ -18,11 +18,11 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import edu.harvard.mcz.imagecapture.data.Users;
-import edu.harvard.mcz.imagecapture.data.UsersLifeCycle;
-import edu.harvard.mcz.imagecapture.data.UsersTableModel;
+import edu.harvard.mcz.imagecapture.entity.Users;
+import edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
+import edu.harvard.mcz.imagecapture.ui.tablemodel.UsersTableModel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

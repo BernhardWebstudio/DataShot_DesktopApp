@@ -17,7 +17,7 @@
  */
 package edu.harvard.mcz.imagecapture.tests;
 
-import edu.harvard.mcz.imagecapture.data.Specimen;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
 import junit.framework.TestCase;
 
 import java.util.Date;
@@ -37,7 +37,7 @@ public class TestOfSpecimen extends TestCase {
     }
 
     /**
-     * Test method for {@link edu.harvard.mcz.imagecapture.data.Specimen#setFamily(java.lang.String)}.
+     * Test method for {@link Specimen#setFamily(java.lang.String)}.
      */
     public void testSetFamily() {
         // Testing issues around char/byte length.

@@ -19,8 +19,8 @@
 package edu.harvard.mcz.imagecapture.encoder;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
-import edu.harvard.mcz.imagecapture.data.UnitTrayLabelTableModel;
 import edu.harvard.mcz.imagecapture.exceptions.PrintFailedException;
+import edu.harvard.mcz.imagecapture.ui.tablemodel.UnitTrayLabelTableModel;
 import edu.harvard.mcz.imagecapture.utility.DragDropJTable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

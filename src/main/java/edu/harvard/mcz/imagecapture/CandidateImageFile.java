@@ -37,10 +37,11 @@ import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
 import edu.harvard.mcz.imagecapture.data.BulkMedia;
-import edu.harvard.mcz.imagecapture.data.UnitTrayLabel;
+import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 import edu.harvard.mcz.imagecapture.exceptions.OCRReadException;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
+import edu.harvard.mcz.imagecapture.ui.frame.BulkMediaFrame;
 import org.apache.commons.cli.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -323,7 +324,7 @@ public class CandidateImageFile {
      * @param filename the filename to load as bulk media.
      * @return BulkMedia objeect for that file.
      */
-    protected static BulkMedia parseOneFileToBulkMedia(String filename) {
+    public static BulkMedia parseOneFileToBulkMedia(String filename) {
         BulkMedia result = new BulkMedia();
         File f = new File(filename);
         try {

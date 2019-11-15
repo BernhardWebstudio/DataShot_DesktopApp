@@ -18,13 +18,16 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import edu.harvard.mcz.imagecapture.data.ICImage;
-import edu.harvard.mcz.imagecapture.data.ICImageLifeCycle;
+import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.exceptions.BadTemplateException;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
+import edu.harvard.mcz.imagecapture.lifecycle.ICImageLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
+import edu.harvard.mcz.imagecapture.ui.dialog.PositionTemplateBoxDialog;
+import edu.harvard.mcz.imagecapture.ui.frame.ImagePanelForDrawing;
+import edu.harvard.mcz.imagecapture.ui.tablemodel.PositionTemplateTableModel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -941,7 +944,7 @@ public class PositionTemplateEditor extends JFrame {
     /**
      * This method initializes imagePanelForDrawing
      *
-     * @return edu.harvard.mcz.imagecapture.ImagePanelForDrawing
+     * @return edu.harvard.mcz.imagecapture.ui.frame.ImagePanelForDrawing
      */
     private ImagePanelForDrawing getImagePanelForDrawing() {
         if (imagePanelForDrawing == null) {

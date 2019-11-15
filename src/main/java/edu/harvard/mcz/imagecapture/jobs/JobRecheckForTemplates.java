@@ -19,13 +19,14 @@
 package edu.harvard.mcz.imagecapture.jobs;
 
 import edu.harvard.mcz.imagecapture.*;
-import edu.harvard.mcz.imagecapture.data.ICImage;
-import edu.harvard.mcz.imagecapture.data.ICImageLifeCycle;
+import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
 import edu.harvard.mcz.imagecapture.interfaces.RunStatus;
 import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
 import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
+import edu.harvard.mcz.imagecapture.lifecycle.ICImageLifeCycle;
+import edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;

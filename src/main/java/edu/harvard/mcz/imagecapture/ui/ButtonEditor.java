@@ -19,12 +19,20 @@
 package edu.harvard.mcz.imagecapture.ui;
 
 import edu.harvard.mcz.imagecapture.*;
-import edu.harvard.mcz.imagecapture.data.*;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.SpecimenPart;
+import edu.harvard.mcz.imagecapture.entity.Users;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchRecordException;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener;
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.struct.GenusSpeciesCount;
 import edu.harvard.mcz.imagecapture.struct.VerbatimCount;
+import edu.harvard.mcz.imagecapture.ui.dialog.SpecimenPartAttributeDialog;
+import edu.harvard.mcz.imagecapture.ui.dialog.VerbatimCaptureDialog;
+import edu.harvard.mcz.imagecapture.ui.dialog.VerbatimClassifyDialog;
+import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -49,8 +57,8 @@ import java.util.List;
  * jTable.setDefaultEditor(Long.class, new ButtonEditor());
  * </pre>
  *
- * @see edu.harvard.mcz.imagecapture.data.SpecimenListTableModel#isCellEditable(int, int)
- * @see edu.harvard.mcz.imagecapture.data.SpecimenListTableModel#getColumnClass(int)
+ * @see SpecimenListTableModel#isCellEditable(int, int)
+ * @see SpecimenListTableModel#getColumnClass(int)
  * @see edu.harvard.mcz.imagecapture.ui.ButtonRenderer
  */
 public class ButtonEditor extends AbstractCellEditor implements TableCellEditor, ActionListener {

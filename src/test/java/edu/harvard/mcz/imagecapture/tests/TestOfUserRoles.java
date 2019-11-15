@@ -17,7 +17,7 @@
  */
 package edu.harvard.mcz.imagecapture.tests;
 
-import edu.harvard.mcz.imagecapture.data.Users;
+import edu.harvard.mcz.imagecapture.entity.Users;
 import junit.framework.TestCase;
 
 /**
@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 public class TestOfUserRoles extends TestCase {
 
     /**
-     * Test method for {@link edu.harvard.mcz.imagecapture.data.Users#isUserRole(java.lang.String)}.
+     * Test method for {@link Users#isUserRole(java.lang.String)}.
      */
     public void testIsUserRole() {
         Users user = new Users();

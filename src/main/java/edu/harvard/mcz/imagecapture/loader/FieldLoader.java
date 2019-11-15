@@ -19,9 +19,17 @@
 package edu.harvard.mcz.imagecapture.loader;
 
 import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.data.Number;
-import edu.harvard.mcz.imagecapture.data.*;
+import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
+import edu.harvard.mcz.imagecapture.entity.Collector;
+import edu.harvard.mcz.imagecapture.entity.ExternalHistory;
+import edu.harvard.mcz.imagecapture.entity.Number;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
+import edu.harvard.mcz.imagecapture.lifecycle.CollectorLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.ExternalHistoryLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.NumberLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.loader.ex.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -18,11 +18,11 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import edu.harvard.mcz.imagecapture.data.ICImage;
-import edu.harvard.mcz.imagecapture.data.Template;
-import edu.harvard.mcz.imagecapture.data.TemplateLifeCycle;
+import edu.harvard.mcz.imagecapture.entity.ICImage;
+import edu.harvard.mcz.imagecapture.entity.Template;
 import edu.harvard.mcz.imagecapture.exceptions.*;
 import edu.harvard.mcz.imagecapture.interfaces.PositionTemplateDetector;
+import edu.harvard.mcz.imagecapture.lifecycle.TemplateLifeCycle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

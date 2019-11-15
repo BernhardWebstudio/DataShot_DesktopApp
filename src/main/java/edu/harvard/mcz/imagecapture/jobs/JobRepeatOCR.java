@@ -19,11 +19,19 @@
 package edu.harvard.mcz.imagecapture.jobs;
 
 import edu.harvard.mcz.imagecapture.*;
-import edu.harvard.mcz.imagecapture.data.*;
+import edu.harvard.mcz.imagecapture.data.LocationInCollection;
+import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
+import edu.harvard.mcz.imagecapture.entity.ICImage;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
 import edu.harvard.mcz.imagecapture.interfaces.*;
+import edu.harvard.mcz.imagecapture.lifecycle.HigherTaxonLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
+import edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialog;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

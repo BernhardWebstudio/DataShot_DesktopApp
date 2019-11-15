@@ -18,9 +18,10 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import edu.harvard.mcz.imagecapture.data.Users;
-import edu.harvard.mcz.imagecapture.data.UsersLifeCycle;
+import edu.harvard.mcz.imagecapture.entity.Users;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
+import edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycle;
+import edu.harvard.mcz.imagecapture.ui.dialog.LoginDialog;
 import edu.harvard.mcz.imagecapture.utility.HashUtility;
 
 import javax.swing.*;

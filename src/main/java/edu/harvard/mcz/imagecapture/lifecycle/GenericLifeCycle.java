@@ -1,16 +1,16 @@
 package edu.harvard.mcz.imagecapture.lifecycle;
 
-import org.apache.commons.logging.Log;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.metadata.ClassMetadata;
-
+import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import java.util.*;
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.util.*;
+import org.apache.commons.logging.Log;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.metadata.ClassMetadata;
 // import org.hibernate.metamodel.model.domain.spi.EntityTypeDescriptor;
 // import org.hibernate.metamodel.model.domain.spi.NonIdPersistentAttribute;
 // import org.hibernate.metamodel.spi.MetamodelImplementor;

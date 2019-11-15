@@ -19,15 +19,14 @@
 package edu.harvard.mcz.imagecapture.ui.tablemodel;
 
 import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.data.UnitTrayLabelLifeCycle;
 import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import edu.harvard.mcz.imagecapture.lifecycle.UnitTrayLabelLifeCycle;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
-import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * UnitTrayLabelTableModel

@@ -31,6 +31,7 @@ import org.hibernate.internal.SessionFactoryImpl;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  *
@@ -94,12 +95,16 @@ public class AllowedVersionLifeCycle {
      */
     public static void upgrade() {
         // Load the Configuration from hibernate.cfg.xml
-        SessionFactoryImpl sessionFactory =
+        /*SessionFactoryImpl sessionFactory =
                 (SessionFactoryImpl) HibernateUtil.getSessionFactory();
         Map<String, Object> properties = sessionFactory.getProperties();
         String url = (String) properties.get("connection.url");
         String username = (String) properties.get("connection.username");
-        String password = (String) properties.get("connection.password");
+        String password = (String) properties.get("connection.password");*/
+        Properties properties = HibernateUtil.getProperties();
+        String url = properties.getProperty("hibernate.connection.url");
+        String username = properties.getProperty("hibernate.connection.username");
+        String password = properties.getProperty("hibernate.connection.username");
         // Create the Flyway instance and point it to the database
         Flyway flyway =
                 Flyway.configure().dataSource(url, username, password).load();

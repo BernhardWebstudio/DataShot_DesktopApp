@@ -142,7 +142,8 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JComboBox<String> jComboBoxLocationInCollection = null;
     private JTextField jTextFieldInferences = null;
     private JButton jButtonGetHistory = null;
-    private JButton jButtonCopyPrev = null;
+    private JButton jButtonPaste = null;
+    private JButton jButtonCopy = null;
     private JButton jButtonNext = null;
     private SpecimenDetailsViewPane thisPane = null;
     private JButton jButtonPrevious = null;
@@ -279,6 +280,11 @@ public class SpecimenDetailsViewPane extends JPanel {
     }
 
     private void save() {
+        try {
+            thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+        } catch (Exception ex) {
+            log.error(ex);
+        }
         try {
             this.setStatus("Saving");
             if (jTableCollectors.isEditing()) {
@@ -433,10 +439,6 @@ public class SpecimenDetailsViewPane extends JPanel {
                 setWarnings();
                 jTextFieldLastUpdatedBy.setText(specimen.getLastUpdatedBy());
                 jTextFieldDateLastUpdated.setText(specimen.getDateLastUpdated().toString());
-
-                //allie added this
-                ImageCaptureApp.lastEditedSpecimenCache = specimen;
-
             } catch (SaveFailedException e) {
                 setStateToDirty();    // disable the navigation buttons
                 this.setWarning("Error: " + e.getMessage());
@@ -450,6 +452,12 @@ public class SpecimenDetailsViewPane extends JPanel {
             log.error(e);
         }
         updateContentDependentLabels();
+
+        try {
+            thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        } catch (Exception ex) {
+            log.error(ex);
+        }
     }
 
     private void copyPreviousRecord() {
@@ -965,18 +973,19 @@ public class SpecimenDetailsViewPane extends JPanel {
             this.addBasicJLabel(jPanel, "Questions");
             jPanel.add(this.getQuestionsJTextField(), "grow, span 3");
             // section: controls
-            jPanel.add(this.getJButtonCopyPrev());
-            jPanel.add(this.getHistoryJButton());
-            jPanel.add(this.getNextPrevButtonGroup());
-            jPanel.add(this.getSaveJButton(), "tag apply");
+            jPanel.add(this.getJButtonPaste(), "span, split 5, sizegroup elevation");
+            jPanel.add(this.getJButtonHistory(), "sizegroup elevation");
+            jPanel.add(this.getNextPrevButtonGroup(), "sizegroup elevation");
+            jPanel.add(this.getSaveJButton(), "sizegroup elevation, tag apply");
+            jPanel.add(this.getJButtonCopySave(), "sizegroup elevation");
         }
         return jPanel;
     }
 
     private void addBasicJLabel(JPanel target, String labelText) {
         JLabel label = new JLabel();
-        label.setText(labelText);
-        target.add(label, "align label");
+        label.setText(labelText.concat(":"));
+        target.add(label, "tag label, right"); //"align label" was removed as requested
     }
 
     private JPanel getNextPrevButtonGroup() {
@@ -1092,24 +1101,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             jButtonSave.setToolTipText("Save changes to this record to the database. No fields should have red backgrounds before you save.");
             jButtonSave.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    try {
-                        thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                    } catch (Exception ex) {
-                        log.error(ex);
-                    }
-
                     save();
-
-                    //this really does nothing!
-                    ((CollectorTableModel) jTableCollectors.getModel()).fireTableDataChanged();
-                    ((NumberTableModel) jTableNumbers.getModel()).fireTableDataChanged();
-
-
-                    try {
-                        thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                    } catch (Exception ex) {
-                        log.error(ex);
-                    }
                 }
             });
         }
@@ -2258,7 +2250,7 @@ public class SpecimenDetailsViewPane extends JPanel {
      *
      * @return javax.swing.JButton
      */
-    private JButton getHistoryJButton() {
+    private JButton getJButtonHistory() {
         if (jButtonGetHistory == null) {
             jButtonGetHistory = new JButton();
             jButtonGetHistory.setText("History");
@@ -2283,28 +2275,46 @@ public class SpecimenDetailsViewPane extends JPanel {
     }
 
 
-    private JButton getJButtonCopyPrev() {
+    private JButton getJButtonPaste() {
         log.debug("prev spec:::");
-        if (jButtonCopyPrev == null) {
-            jButtonCopyPrev = new JButton();
-            jButtonCopyPrev.setText("Copy Prev");
-            jButtonCopyPrev.setToolTipText("Copy previous record values into this screen");
+        if (jButtonPaste == null) {
+            jButtonPaste = new JButton();
+            jButtonPaste.setText("Paste");
+            jButtonPaste.setToolTipText("Paste previous record values into this screen");
             //TODO: decide on keyboard shortcut
             //jButtonCopyPrev.setMnemonic(KeyEvent.VK_H);
-            jButtonCopyPrev.addActionListener(new java.awt.event.ActionListener() {
+            jButtonPaste.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     //populate the fields with the data.
                     previousSpecimen = ImageCaptureApp.lastEditedSpecimenCache;
                     copyPreviousRecord();
                 }
             });
-            this.updateJButtonCopyPrev();
+            this.updateJButtonPaste();
         }
-        return jButtonCopyPrev;
+        return jButtonPaste;
     }
 
-    private void updateJButtonCopyPrev() {
-        jButtonCopyPrev.setEnabled(!(this.previousSpecimen == null && ImageCaptureApp.lastEditedSpecimenCache == null));
+    private void updateJButtonPaste() {
+        jButtonPaste.setEnabled(!(this.previousSpecimen == null && ImageCaptureApp.lastEditedSpecimenCache == null));
+    }
+
+    private JButton getJButtonCopySave() {
+        if (jButtonCopy == null) {
+            jButtonCopy = new JButton();
+            jButtonPaste.setText("Save & Copy");
+            jButtonPaste.setToolTipText("Copy the values of this record after saving it");
+            //TODO: decide on keyboard shortcut
+            //jButtonCopyPrev.setMnemonic(KeyEvent.VK_H);
+            jButtonPaste.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    //populate the fields with the data.
+                    thisPane.save();
+                    ImageCaptureApp.lastEditedSpecimenCache = thisPane.specimen;
+                }
+            });
+        }
+        return jButtonCopy;
     }
 
 
@@ -2327,11 +2337,10 @@ public class SpecimenDetailsViewPane extends JPanel {
             jButtonNext.setEnabled(specimenController.hasNextSpecimenInTable());
             jButtonNext.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    //TODO here save the data in memory for "copy prev"
                     try {
                         // try to move to the next specimen in the table.
+                        thisPane.setStatus("Switching to next specimen...");
                         if (thisPane.specimenController.openNextSpecimenInTable()) {
-                            //thisPane.myControler.setSpecimen(thisPane.specimen.getSpecimenId() + 1);
                             thisPane.setVisible(false);
                             thisPane.specimenController.displayInEditor();
                             thisPane.invalidate();
@@ -2376,6 +2385,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     try {
                         // try to move to the previous specimen in the table.
+                        thisPane.setStatus("Switching to previous specimen...");
                         if (thisPane.specimenController.openPreviousSpecimenInTable()) {
                             thisPane.setVisible(false);
                             thisPane.invalidate();
@@ -2390,19 +2400,6 @@ public class SpecimenDetailsViewPane extends JPanel {
             });
         }
         return jButtonPrevious;
-    }
-
-    /**
-     * This method initializes jPanel1
-     *
-     * @return javax.swing.JPanel
-     */
-    private JPanel getJPanel1() {
-        if (jPanel1 == null) {
-            jPanel1 = new JPanel();
-            jPanel1.setLayout(new GridBagLayout());
-        }
-        return jPanel1;
     }
 
     private void setStateToClean() {
@@ -2855,6 +2852,6 @@ public class SpecimenDetailsViewPane extends JPanel {
     private void updateContentDependentLabels() {
         updateJButtonGeoreference();
         updateDeterminationCount();
-        updateJButtonCopyPrev();
+        updateJButtonPaste();
     }
 }  //  @jve:decl-index=0:visual-constraint="10,15"

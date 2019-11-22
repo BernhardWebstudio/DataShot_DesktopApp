@@ -145,6 +145,7 @@ public class SearchDialog extends JDialog {
             this.getRootPane().setDefaultButton(jButton);
             jButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Searching...");
                     Specimen searchCriteria = new Specimen();
                     // Default specimen is created with valid distribution flag = true, etc. need to remove this
                     // from the search criteria for a search by example.

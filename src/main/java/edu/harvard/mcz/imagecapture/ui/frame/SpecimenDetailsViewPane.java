@@ -18,8 +18,13 @@
  */
 package edu.harvard.mcz.imagecapture.ui.frame;
 
-import edu.harvard.mcz.imagecapture.*;
-import edu.harvard.mcz.imagecapture.data.*;
+import edu.harvard.mcz.imagecapture.ImageCaptureApp;
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.SpecimenController;
+import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.data.LocationInCollection;
+import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.entity.Number;
 import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.entity.fixed.*;
@@ -560,6 +565,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         for (LatLong prevgeo : previousSpecimen.getLatLong()) {
             LatLong newgeo = prevgeo.clone();
             log.debug("Got newgeo with lat " + newgeo.getDecLat());
+            newgeo.setSpecimen(specimen);
             latLongs.add(newgeo);
         }
         specimen.setLatLong(latLongs);
@@ -821,7 +827,7 @@ public class SpecimenDetailsViewPane extends JPanel {
      */
     private JPanel getJPanel() {
         if (jPanel == null) {
-            jPanel = new JPanel(new MigLayout("wrap 4")); // 4 col layout
+            jPanel = new JPanel(new MigLayout("wrap 4, fillx")); // 4 col layout
             // section: top information
             this.addBasicJLabel(jPanel, "Barcode");
             jPanel.add(this.getBarcodeJTextField(), "grow");
@@ -888,9 +894,9 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPanel.add(this.getJButtonGeoreference());
             // row
             jPanel.add(new JLabel("Elevation"), "span, split 6, sizegroup elevation");
-            jPanel.add(new JLabel("from"), "align label, sizegroup elevation");
+            jPanel.add(new JLabel("from:"), "align label, sizegroup elevation, right");
             jPanel.add(this.getVerbatimElevationJTextField(), "grow, sizegroup elevation");
-            jPanel.add(new JLabel("to"), "align label, sizegroup elevation");
+            jPanel.add(new JLabel("to:"), "align label, sizegroup elevation, right");
             jPanel.add(this.getTextFieldMaxElev(), "grow, sizegroup elevation");
             jPanel.add(this.getComboBoxElevUnits(), "wrap, sizegroup elevation");
             // section: collection
@@ -973,11 +979,12 @@ public class SpecimenDetailsViewPane extends JPanel {
             this.addBasicJLabel(jPanel, "Questions");
             jPanel.add(this.getQuestionsJTextField(), "grow, span 3");
             // section: controls
-            jPanel.add(this.getJButtonPaste(), "span, split 5, sizegroup elevation");
-            jPanel.add(this.getJButtonHistory(), "sizegroup elevation");
-            jPanel.add(this.getNextPrevButtonGroup(), "sizegroup elevation");
-            jPanel.add(this.getSaveJButton(), "sizegroup elevation, tag apply");
-            jPanel.add(this.getJButtonCopySave(), "sizegroup elevation");
+            jPanel.add(this.getJButtonPaste(), "span, split 6"); //, sizegroup controls");
+            jPanel.add(this.getJButtonHistory());//, "sizegroup controls");
+            jPanel.add(this.getJButtonPrevious(), "tag back");
+            jPanel.add(this.getJButtonNext(), "tag next");
+            jPanel.add(this.getJButtonCopySave(), "tag apply");//, "sizegroup controls");
+            jPanel.add(this.getSaveJButton(), "tag apply");//, "sizegroup controls");
         }
         return jPanel;
     }
@@ -986,13 +993,6 @@ public class SpecimenDetailsViewPane extends JPanel {
         JLabel label = new JLabel();
         label.setText(labelText.concat(":"));
         target.add(label, "tag label, right"); //"align label" was removed as requested
-    }
-
-    private JPanel getNextPrevButtonGroup() {
-        JPanel group = new JPanel(new MigLayout());
-        group.add(this.getJButtonPrevious(), "tag back");
-        group.add(this.getJButtonNext(), "tag next");
-        return group;
     }
 
     /**
@@ -2274,7 +2274,11 @@ public class SpecimenDetailsViewPane extends JPanel {
         return jButtonGetHistory;
     }
 
-
+    /**
+     * Instantiate - if necessary - the button to paste the copied specimen on the current one
+     *
+     * @return
+     */
     private JButton getJButtonPaste() {
         log.debug("prev spec:::");
         if (jButtonPaste == null) {
@@ -2282,7 +2286,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             jButtonPaste.setText("Paste");
             jButtonPaste.setToolTipText("Paste previous record values into this screen");
             //TODO: decide on keyboard shortcut
-            //jButtonCopyPrev.setMnemonic(KeyEvent.VK_H);
+            //jButtonPaste.setMnemonic(KeyEvent.VK_H);
             jButtonPaste.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     //populate the fields with the data.
@@ -2299,17 +2303,22 @@ public class SpecimenDetailsViewPane extends JPanel {
         jButtonPaste.setEnabled(!(this.previousSpecimen == null && ImageCaptureApp.lastEditedSpecimenCache == null));
     }
 
+    /**
+     * Instantiate - if necessary - the button to save and then copy the current specimen
+     *
+     * @return
+     */
     private JButton getJButtonCopySave() {
         if (jButtonCopy == null) {
             jButtonCopy = new JButton();
-            jButtonPaste.setText("Save & Copy");
-            jButtonPaste.setToolTipText("Copy the values of this record after saving it");
+            jButtonCopy.setText("Save & Copy");
+            jButtonCopy.setToolTipText("Copy the values of this record after saving it");
             //TODO: decide on keyboard shortcut
-            //jButtonCopyPrev.setMnemonic(KeyEvent.VK_H);
-            jButtonPaste.addActionListener(new java.awt.event.ActionListener() {
+            //jButtonCopy.setMnemonic(KeyEvent.VK_H);
+            jButtonCopy.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    //populate the fields with the data.
                     thisPane.save();
+                    // TODO: rather clone the specimen to prevent external/later changes
                     ImageCaptureApp.lastEditedSpecimenCache = thisPane.specimen;
                 }
             });

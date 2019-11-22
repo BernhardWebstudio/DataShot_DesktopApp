@@ -20,11 +20,11 @@ package edu.harvard.mcz.imagecapture.ui.dialog;
 
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
-import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.entity.Collector;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.Tracking;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.lifecycle.CollectorLifeCycle;
 import edu.harvard.mcz.imagecapture.lifecycle.ICImageLifeCycle;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
@@ -273,7 +273,7 @@ public class SearchDialog extends JDialog {
         if (jPanel1 == null) {
             // set titles etc.
 
-            jPanel1 = new JPanel(new MigLayout("wrap 2"));
+            jPanel1 = new JPanel(new MigLayout("wrap 2, fillx"));
             JLabel jLabelInstructions = new JLabel("Search for specimens. Use % as a wildcard.");
             Font f = jLabelInstructions.getFont();
             // bold
@@ -334,8 +334,8 @@ public class SearchDialog extends JDialog {
             assert (fields.length == labels.length);
             for (int i = 0; i < labels.length; i++) {
                 JLabel label = new JLabel();
-                label.setText(labels[i]);
-                jPanel1.add(label, "align label");
+                label.setText(labels[i].concat(":"));
+                jPanel1.add(label, "right"); //"align label");
                 jPanel1.add(fields[i], "grow");
             }
 						/*

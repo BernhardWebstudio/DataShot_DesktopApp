@@ -194,6 +194,8 @@ public class GeoreferenceDialog extends JDialog {
                 lblErrorLabel.setText("Error: Latitude number format");
                 result = false;
             }
+        } else {
+            georeference.setDecLat(null);
         }
         if (textFieldDecimalLong.getText().length() > 0) {
             try {
@@ -203,6 +205,8 @@ public class GeoreferenceDialog extends JDialog {
                 lblErrorLabel.setText("Error: Longitude number format");
                 result = false;
             }
+        } else {
+            georeference.setDecLong(null);
         }
         if (cbDatum.getSelectedItem() != null) {
             georeference.setDatum(cbDatum.getSelectedItem().toString());

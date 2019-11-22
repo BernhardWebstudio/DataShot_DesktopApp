@@ -1001,6 +1001,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                             .setFetchMode("collectors", FetchMode.JOIN)
                             .setFetchMode("LatLong", FetchMode.JOIN)
                             .setFetchMode("numbers", FetchMode.JOIN)
+                            .setFetchMode("specimenParts", FetchMode.JOIN)
                             .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
                     results = (List<Specimen>) criteria.list();

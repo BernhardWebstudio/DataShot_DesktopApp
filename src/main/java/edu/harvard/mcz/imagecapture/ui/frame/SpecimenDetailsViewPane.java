@@ -196,7 +196,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 //			}
 //		}
         try {
-            thisPane = this;
             s.attachClean(specimen);
             specimenController = aControler;
             initialize();
@@ -223,6 +222,7 @@ public class SpecimenDetailsViewPane extends JPanel {
      * Note, contains comments indicating how to enable visual designer with this class.
      */
     private void initialize() {
+        thisPane = this;
         BorderLayout borderLayout = new BorderLayout();
         borderLayout.setHgap(0);
         borderLayout.setVgap(0);
@@ -2320,6 +2320,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                     thisPane.save();
                     // TODO: rather clone the specimen to prevent external/later changes
                     ImageCaptureApp.lastEditedSpecimenCache = thisPane.specimen;
+                    thisPane.setStatus("Saved & copied specimen with id " + thisPane.specimen.getSpecimenId());
                 }
             });
         }
@@ -2351,7 +2352,6 @@ public class SpecimenDetailsViewPane extends JPanel {
                         thisPane.setStatus("Switching to next specimen...");
                         if (thisPane.specimenController.openNextSpecimenInTable()) {
                             thisPane.setVisible(false);
-                            thisPane.specimenController.displayInEditor();
                             thisPane.invalidate();
                         } else {
                             thisPane.setWarning("No next specimen available.");

@@ -1,7 +1,21 @@
 # Changelog
 
-## v
-
+## v1.10.2-SNAPSHOT
+* [[`029100c95a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/029100c95a)] - Update changelog & publish Version (Tim Bernhard)
+* [[`f9820ad0e5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f9820ad0e5)] - Try to improve feedback by app when switching/saving/copying (too fast?) (Tim Bernhard)
+* [[`c3656fc15c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c3656fc15c)] - Reformat code (Tim Bernhard)
+* [[`191bdd4729`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/191bdd4729)] - Possibly fix issue (#22) where georeference got lost after saving twice (Tim Bernhard)
+* [[`6b21c6cb86`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/6b21c6cb86)] - Align search lables right too (Tim Bernhard)
+* [[`5cac867ad5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/5cac867ad5)] - Align labels right as requested (Tim Bernhard)
+* [[`47920ccd00`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/47920ccd00)] - Slighly improve search speed (Tim Bernhard)
+* [[`94254c7030`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/94254c7030)] - Show search status in mainframe (Tim Bernhard)
+* [[`51e5600e1b`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/51e5600e1b)] - Enable resetting of declong, declat to fix #23 (Tim Bernhard)
+* [[`c762a7f370`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c762a7f370)] - Fix few broken imports from refactoring (Tim Bernhard)
+* [[`9891f08236`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/9891f08236)] - Initial refactor of project structure to be better maintainable (Tim Bernhard)
+* [[`93e66caf44`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/93e66caf44)] - Merge branch 'master' of github.com:BernhardWebstudio/DataShot\_DesktopApp (Tim Bernhard)
+* [[`e6eacd38e2`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e6eacd38e2)] - Improve menu & about dialog phrasing (Tim Bernhard)
+* [[`b9d4261948`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b9d4261948)] - Use HibernateUtil instead of Factory to get hibernate properties for database migration (Tim Bernhard)
+* [[`4241aacb97`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4241aacb97)] - Update changelog & publish Version 1.10.1-SNAPSHOT (Tim Bernhard)
 
 
 ## v1.10.1-SNAPSHOT

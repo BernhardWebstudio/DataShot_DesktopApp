@@ -18,7 +18,10 @@
  */
 package edu.harvard.mcz.imagecapture.jobs;
 
-import edu.harvard.mcz.imagecapture.*;
+import edu.harvard.mcz.imagecapture.ConfiguredBarcodePositionTemplateDetector;
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.PositionTemplate;
+import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;

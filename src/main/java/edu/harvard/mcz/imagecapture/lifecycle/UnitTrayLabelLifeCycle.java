@@ -21,7 +21,6 @@ package edu.harvard.mcz.imagecapture.lifecycle;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
@@ -29,6 +28,8 @@ import org.hibernate.LockMode;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
 import org.hibernate.query.Query;
+
+import java.util.List;
 
 /**
  * UnitTrayLabelLifeCycle

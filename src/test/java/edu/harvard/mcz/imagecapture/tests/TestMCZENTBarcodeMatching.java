@@ -22,10 +22,8 @@ import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcher;
 import junit.framework.TestCase;
 
-/** TestBarcodeMatching
- *
- *
- *
+/**
+ * TestBarcodeMatching
  */
 public class TestMCZENTBarcodeMatching extends TestCase {
 

@@ -30,12 +30,10 @@ import org.junit.experimental.categories.Category;
 import java.util.List;
 import java.util.ListIterator;
 
-/** TestOfPositionTemplate tests the construction of PositionTemplate and the internal
- * consistency of the list of templates provided by PositionTemplate and the default template 
+/**
+ * TestOfPositionTemplate tests the construction of PositionTemplate and the internal
+ * consistency of the list of templates provided by PositionTemplate and the default template
  * known to the Singleton.
- *
- *
- *
  */
 @Category(IntegrationTest.class)
 public class TestOfPositionTemplate extends TestCase {

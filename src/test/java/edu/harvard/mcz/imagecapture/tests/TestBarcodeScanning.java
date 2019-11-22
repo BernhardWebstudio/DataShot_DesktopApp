@@ -28,10 +28,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
-/**  Test cases for reading barcodes from image files.
- *
- *
- *
+/**
+ * Test cases for reading barcodes from image files.
  */
 public class TestBarcodeScanning extends TestCase {
 

@@ -20,10 +20,8 @@ package edu.harvard.mcz.imagecapture.tests;
 import edu.harvard.mcz.imagecapture.utility.HashUtility;
 import junit.framework.TestCase;
 
-/** TestofHashUtility
- *
- *
- *
+/**
+ * TestofHashUtility
  */
 public class TestofHashUtility extends TestCase {
 

@@ -5,8 +5,11 @@ package edu.harvard.mcz.imagecapture.lifecycle;
 
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.entity.ICImage;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.SpecimenPart;
+import edu.harvard.mcz.imagecapture.entity.Tracking;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
-import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.exceptions.ConnectionException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsException;
@@ -1001,7 +1004,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                             .setFetchMode("collectors", FetchMode.JOIN)
                             .setFetchMode("LatLong", FetchMode.JOIN)
                             .setFetchMode("numbers", FetchMode.JOIN)
-                            .setFetchMode("specimenParts", FetchMode.JOIN)
+                            .setFetchMode("parts", FetchMode.JOIN)
                             .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
 
                     results = (List<Specimen>) criteria.list();
@@ -1016,13 +1019,13 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             }
             if (results != null) {
                 for (int i = 0; i < results.size(); i++) {
-                    try {
+                   /* try {
                         log.debug("Parts: " + results.get(i).getSpecimenParts().size());
                         log.debug("Parts: " + ((SpecimenPart) results.get(i).getSpecimenParts().toArray()[0]).getPartAttributeValuesConcat());
                         log.debug("Part Attribute: " + ((SpecimenPartAttribute) ((SpecimenPart) results.get(i).getSpecimenParts().toArray()[0]).getAttributeCollection().toArray()[0]).getSpecimenPartAttributeId());
                     } catch (Exception e) {
                         log.debug(e.getMessage());
-                    }
+                    }*/
                 }
             } else {
                 results = new ArrayList<>();

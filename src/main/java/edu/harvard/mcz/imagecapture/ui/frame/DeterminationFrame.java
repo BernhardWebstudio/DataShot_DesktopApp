@@ -19,10 +19,10 @@
 package edu.harvard.mcz.imagecapture.ui.frame;
 
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
-import edu.harvard.mcz.imagecapture.entity.fixed.NatureOfId;
-import edu.harvard.mcz.imagecapture.entity.fixed.TypeStatus;
 import edu.harvard.mcz.imagecapture.entity.Determination;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.fixed.NatureOfId;
+import edu.harvard.mcz.imagecapture.entity.fixed.TypeStatus;
 import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.DeterminationTableModel;
 import org.apache.commons.logging.Log;

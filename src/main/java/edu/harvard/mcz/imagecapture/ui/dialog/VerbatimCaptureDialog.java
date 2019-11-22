@@ -19,16 +19,16 @@
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
-import edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel;
 import edu.harvard.mcz.imagecapture.PositionTemplate;
 import edu.harvard.mcz.imagecapture.SpecimenController;
-import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.ImageLoadException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener;
 import edu.harvard.mcz.imagecapture.loader.Verbatim;
+import edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

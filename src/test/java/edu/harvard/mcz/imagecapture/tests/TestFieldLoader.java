@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 
 /**
  *
- *
  */
 public class TestFieldLoader {
     private static final Log log = LogFactory.getLog(TestFieldLoader.class);

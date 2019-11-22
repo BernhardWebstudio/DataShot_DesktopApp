@@ -20,10 +20,8 @@ package edu.harvard.mcz.imagecapture.tests;
 import edu.harvard.mcz.imagecapture.Singleton;
 import junit.framework.TestCase;
 
-/** TestOfSingleton tests that the Singleton class is indeed a singleton.
- *
- *
- *
+/**
+ * TestOfSingleton tests that the Singleton class is indeed a singleton.
  */
 public class TestOfSingleton extends TestCase {
 

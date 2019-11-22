@@ -19,9 +19,9 @@
 package edu.harvard.mcz.imagecapture.data;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
-import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
 import edu.harvard.mcz.imagecapture.entity.Number;
 import edu.harvard.mcz.imagecapture.entity.*;
+import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
 
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;

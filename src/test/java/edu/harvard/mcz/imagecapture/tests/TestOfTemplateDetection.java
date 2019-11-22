@@ -25,11 +25,9 @@ import org.junit.experimental.categories.Category;
 
 import java.io.File;
 
-/** TestOfTemplateDetection tests the ability of the DefaultPositionTemplateDetector to correctly 
+/**
+ * TestOfTemplateDetection tests the ability of the DefaultPositionTemplateDetector to correctly
  * detect templates for images with barcodes in standard positions.
- *
- *
- *
  */
 @Category(IntegrationTest.class)
 public class TestOfTemplateDetection extends TestCase {

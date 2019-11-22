@@ -23,10 +23,8 @@ import junit.framework.TestCase;
 
 import java.io.File;
 
-/** testOfImageCaptureProperties
- *
- *
- *
+/**
+ * testOfImageCaptureProperties
  */
 public class TestOfImageCaptureProperties extends TestCase {
 
@@ -60,6 +58,7 @@ public class TestOfImageCaptureProperties extends TestCase {
     /**
      * Test method for {@link edu.harvard.mcz.imagecapture.ImageCaptureProperties#getPathBelowBase(java.io.File)}.
      * Tests generation of path from base given a path including base and a filename.
+     *
      * @see edu.harvard.mcz.imagecapture.ImageCaptureProperties#KEY_IMAGEBASE
      */
     public void testGetPathBelowBaseForFile() {
@@ -86,6 +85,7 @@ public class TestOfImageCaptureProperties extends TestCase {
     /**
      * Test method for {@link edu.harvard.mcz.imagecapture.ImageCaptureProperties#getPathBelowBase(java.io.File)}.
      * Tests generation of path from base given a path from root.
+     *
      * @see edu.harvard.mcz.imagecapture.ImageCaptureProperties#KEY_IMAGEBASE
      */
     public void testGetPathBelowBase() {

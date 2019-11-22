@@ -20,10 +20,8 @@ package edu.harvard.mcz.imagecapture.tests;
 import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 import junit.framework.TestCase;
 
-/** TestOfUnitTrayLabel
- *
- *
- *
+/**
+ * TestOfUnitTrayLabel
  */
 public class TestOfUnitTrayLabel extends TestCase {
 

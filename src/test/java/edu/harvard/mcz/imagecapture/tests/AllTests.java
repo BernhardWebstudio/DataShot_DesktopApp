@@ -24,12 +24,9 @@ import java.io.File;
 
 /**
  * AllTests invokes the suite of unit tests for edu.harvard.mcz.imagecapture classes.
- *
+ * <p>
  * AllTests includes class constants for resources within edu.harvard.mcz.imagecapture.tests.resources
  * that are used repeatedly in the unit tests themselves.
- *
- *
- *
  */
 public class AllTests {
 
@@ -43,6 +40,7 @@ public class AllTests {
 
     /**
      * Run the JUnit tests (but not integration tests).
+     *
      * @return Test
      */
     public static Test suite() {

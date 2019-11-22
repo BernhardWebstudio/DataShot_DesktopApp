@@ -19,8 +19,8 @@
 package edu.harvard.mcz.imagecapture;
 
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
-import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor;

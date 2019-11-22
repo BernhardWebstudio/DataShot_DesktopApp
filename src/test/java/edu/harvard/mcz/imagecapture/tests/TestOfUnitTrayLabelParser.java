@@ -23,10 +23,8 @@ import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.UnitTrayLabelParser;
 import junit.framework.TestCase;
 
-/** TestOfUnitTrayLabelParser
- *
- *
- *
+/**
+ * TestOfUnitTrayLabelParser
  */
 public class TestOfUnitTrayLabelParser extends TestCase {
 

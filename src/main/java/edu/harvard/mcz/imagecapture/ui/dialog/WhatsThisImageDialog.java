@@ -19,9 +19,9 @@
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel;
 import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
-import edu.harvard.mcz.imagecapture.Singleton;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

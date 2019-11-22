@@ -19,10 +19,10 @@
 package edu.harvard.mcz.imagecapture.ui;
 
 import edu.harvard.mcz.imagecapture.*;
-import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.SpecimenPart;
 import edu.harvard.mcz.imagecapture.entity.Users;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchRecordException;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener;

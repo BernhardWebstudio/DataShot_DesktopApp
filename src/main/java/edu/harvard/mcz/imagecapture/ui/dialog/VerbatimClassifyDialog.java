@@ -18,7 +18,6 @@
  */
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
-import edu.harvard.mcz.imagecapture.ui.tablemodel.CollectorTableModel;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.entity.Collector;
 import edu.harvard.mcz.imagecapture.entity.Number;
@@ -32,6 +31,7 @@ import edu.harvard.mcz.imagecapture.struct.CountValueTableModel;
 import edu.harvard.mcz.imagecapture.struct.VerbatimCount;
 import edu.harvard.mcz.imagecapture.ui.field.FilteringAgentJComboBox;
 import edu.harvard.mcz.imagecapture.ui.field.FilteringGeogJComboBox;
+import edu.harvard.mcz.imagecapture.ui.tablemodel.CollectorTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.HigherGeographyComboBoxModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.NumberTableModel;
 import org.apache.commons.logging.Log;

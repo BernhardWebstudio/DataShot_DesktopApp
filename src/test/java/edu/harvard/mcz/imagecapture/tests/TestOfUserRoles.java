@@ -22,7 +22,6 @@ import junit.framework.TestCase;
 
 /**
  *
- *
  */
 public class TestOfUserRoles extends TestCase {
 

@@ -22,10 +22,10 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.FormSpecs;
 import com.jgoodies.forms.layout.RowSpec;
+import edu.harvard.mcz.imagecapture.entity.SpecimenPartAttribute;
 import edu.harvard.mcz.imagecapture.entity.fixed.Caste;
 import edu.harvard.mcz.imagecapture.entity.fixed.LifeStage;
 import edu.harvard.mcz.imagecapture.entity.fixed.Sex;
-import edu.harvard.mcz.imagecapture.entity.SpecimenPartAttribute;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

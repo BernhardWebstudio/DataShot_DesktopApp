@@ -22,10 +22,8 @@ import junit.framework.TestCase;
 
 import java.util.Date;
 
-/** TestOfSpecimen Test sanity checks in Specimen class.
- *
- *
- *
+/**
+ * TestOfSpecimen Test sanity checks in Specimen class.
  */
 public class TestOfSpecimen extends TestCase {
 

@@ -32,9 +32,6 @@ import java.util.Hashtable;
 
 /**
  * Allows testing of barcode detection by ZXing in an image file.
- *
- *
- *
  */
 public class BarcodeReadTest {
     private static final Log log = LogFactory.getLog(BarcodeReadTest.class);

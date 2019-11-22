@@ -25,11 +25,10 @@ import org.junit.experimental.categories.Category;
 
 import java.io.File;
 
-/** TestOfCandidateImageFile tests construction and some capabilities of CandidateImageFile.
+/**
+ * TestOfCandidateImageFile tests construction and some capabilities of CandidateImageFile.
  *
  * @see edu.harvard.mcz.imagecapture.CandidateImageFile
- *
- *
  */
 @Category(IntegrationTest.class)
 public class TestOfCandidateImageFile extends TestCase {

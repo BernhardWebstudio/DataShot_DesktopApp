@@ -1,5 +1,9 @@
 # Changelog
 
+## v
+
+
+
 ## v1.10.1-SNAPSHOT
 * [[`52de6c0489`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/52de6c0489)] - Fix issue where copy-previous led to empty georeference (Tim Bernhard)
 * [[`1f4c5adc9a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/1f4c5adc9a)] - Update georeference button after copy previous (Tim Bernhard)

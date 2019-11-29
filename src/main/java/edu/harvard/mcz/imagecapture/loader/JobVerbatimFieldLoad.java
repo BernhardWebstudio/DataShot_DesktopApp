@@ -183,7 +183,7 @@ public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
                                 int lineNumber = 0;
                                 while (iterator.hasNext()) {
                                     lineNumber++;
-                                    counter.incrementSpecimens();
+                                    counter.incrementSpecimenDatabased();
                                     CSVRecord record = iterator.next();
                                     try {
                                         String verbatimUnclassifiedText = record.get("verbatimUnclassifiedText");
@@ -224,7 +224,7 @@ public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
                                 int lineNumber = 0;
                                 while (iterator.hasNext()) {
                                     lineNumber++;
-                                    counter.incrementSpecimens();
+                                    counter.incrementSpecimenDatabased();
                                     CSVRecord record = iterator.next();
                                     try {
                                         String verbatimUnclassifiedText = record.get("verbatimUnclassifiedText");
@@ -271,7 +271,7 @@ public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
                                 int lineNumber = 0;
                                 while (iterator.hasNext()) {
                                     lineNumber++;
-                                    counter.incrementSpecimens();
+                                    counter.incrementSpecimenDatabased();
                                     CSVRecord record = iterator.next();
                                     try {
                                         String verbatimLocality = record.get("verbatimLocality");
@@ -365,7 +365,7 @@ public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
                                             } else {
                                                 updated = fl.loadFromMap(barcode, data, WorkFlowStatus.STAGE_VERBATIM, true);
                                             }
-                                            counter.incrementSpecimens();
+                                            counter.incrementSpecimenDatabased();
                                             if (updated) {
                                                 counter.incrementSpecimensUpdated();
                                             }

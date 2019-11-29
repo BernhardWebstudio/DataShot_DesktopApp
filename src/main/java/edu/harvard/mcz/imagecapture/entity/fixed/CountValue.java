@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * <p>
  */
-package edu.harvard.mcz.imagecapture.struct;
+package edu.harvard.mcz.imagecapture.entity.fixed;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

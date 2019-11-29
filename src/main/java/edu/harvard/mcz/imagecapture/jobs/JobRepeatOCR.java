@@ -308,7 +308,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
                     parser = labelRead;
                 } else {
                     log.debug("Failing over to OCR with tesseract");
-                    rawOCR = scannableFile.getLabelOCRText(templateToUse);
+                    rawOCR = scannableFile.getTaxonLabelOCRText(templateToUse);
                     parser = new UnitTrayLabelParser(rawOCR);
                     foundQRText = ((UnitTrayLabelParser) parser).isParsedFromJSON();
                 }

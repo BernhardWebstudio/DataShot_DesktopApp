@@ -131,7 +131,7 @@ public class CandidateImageFile {
         if (!template.getTemplateId().equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
             try {
                 if (getTaxonLabelQRText(template) == null) {
-                    getLabelOCRText(template);
+                    getTaxonLabelOCRText(template);
                 }
             } catch (OCRReadException e) {
                 log.error("Unable to OCR file: " + candidateFile.getName() + " " + e.getMessage());
@@ -801,7 +801,7 @@ public class CandidateImageFile {
         if (!aTemplate.getTemplateId().equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
             try {
                 if (getTaxonLabelQRText(aTemplate) == null) {
-                    getLabelOCRText(aTemplate);
+                    getTaxonLabelOCRText(aTemplate);
                 }
             } catch (OCRReadException e) {
                 log.error("Unable to OCR file: " + candidateFile.getName() + " " + e.getMessage());
@@ -1014,7 +1014,7 @@ public class CandidateImageFile {
      * @return a string
      * @throws OCRReadException
      */
-    public String getLabelOCRText(PositionTemplate aTemplate) throws OCRReadException {
+    public String getTaxonLabelOCRText(PositionTemplate aTemplate) throws OCRReadException {
         // Actual read attempt is only invoked once,
         // subsequent calls return cached value.
         log.debug("in CandidateImageFile.getLabelOCRText() 1 labelText is " + labelText);

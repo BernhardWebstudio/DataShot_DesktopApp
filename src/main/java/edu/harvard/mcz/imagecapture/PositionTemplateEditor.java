@@ -28,12 +28,12 @@ import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.dialog.PositionTemplateBoxDialog;
 import edu.harvard.mcz.imagecapture.ui.frame.ImagePanelForDrawing;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.PositionTemplateTableModel;
+import edu.harvard.mcz.imagecapture.utility.FileUtility;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -622,18 +622,11 @@ public class PositionTemplateEditor extends JFrame {
             jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     jLabelFeedback.setText("");
-                    final JFileChooser fileChooser = new JFileChooser();
-                    if (Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_LASTPATH) != null) {
-                        fileChooser.setCurrentDirectory(new File(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_LASTPATH)));
-                    }
-                    //FileNameExtensionFilter filter = new FileNameExtensionFilter("TIFF Images", "tif", "tiff");
-                    FileNameExtensionFilter filter = new FileNameExtensionFilter("Image files", "tif", "tiff", "jpg", "jpeg", "png");
-                    fileChooser.setFileFilter(filter);
-                    int returnValue = fileChooser.showOpenDialog(Singleton.getSingletonInstance().getMainFrame());
-                    if (returnValue == JFileChooser.APPROVE_OPTION) {
+                    File imageFile = FileUtility.askForImageFile(new File(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_LASTPATH)));
+                    if (imageFile != null) {
                         jLabelFeedback.setText("Loading...");
                         try {
-                            setImageFile(fileChooser.getSelectedFile());
+                            setImageFile(imageFile);
                             jLabelFeedback.setText("");
                             drawLayers();
                         } catch (IOException e1) {

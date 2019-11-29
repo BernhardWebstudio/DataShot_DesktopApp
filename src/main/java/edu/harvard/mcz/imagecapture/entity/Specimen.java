@@ -1088,16 +1088,16 @@ public class Specimen implements java.io.Serializable {
 
     public String getLoadFlags() {
         String result = "Unexpected State";
-        if (flagInBulkloader == false && flagInMCZbase == false && flagAncilaryAlsoInMCZbase == false) {
+        if (!flagInBulkloader && !flagInMCZbase && !flagAncilaryAlsoInMCZbase) {
             result = "In DataShot";
         }
-        if (flagInBulkloader == true && flagInMCZbase == false && flagAncilaryAlsoInMCZbase == false) {
+        if (flagInBulkloader && !flagInMCZbase && !flagAncilaryAlsoInMCZbase) {
             result = "In Bulkloader";
         }
-        if (flagInBulkloader == true && flagInMCZbase == true && flagAncilaryAlsoInMCZbase == false) {
+        if (flagInBulkloader && flagInMCZbase && !flagAncilaryAlsoInMCZbase) {
             result = "Adding Image and Ids.";
         }
-        if (flagInBulkloader == true && flagInMCZbase == true && flagAncilaryAlsoInMCZbase == true) {
+        if (flagInBulkloader && flagInMCZbase && flagAncilaryAlsoInMCZbase) {
             result = WorkFlowStatus.STAGE_DONE;
         }
         return result;

@@ -31,10 +31,11 @@ public class Counter {
     private int filesDatabased = 0;
     private int filesExisting = 0;
     private int filesFailed = 0;
-    private int specimensDatabased = 0;
     private int directories = 0;
     private int directoriesFailed = 0;
+    private int specimensExisting = 0;
     private int specimensUpdated = 0;
+    private int specimensDatabased = 0;
     private int filesUpdated = 0;
     private StringBuffer errorReport;
     private List<RunnableJobError> errors = null;
@@ -65,8 +66,12 @@ public class Counter {
         return errorReport.toString();
     }
 
-    public void incrementSpecimens() {
+    public void incrementSpecimenDatabased() {
         specimensDatabased++;
+    }
+
+    public void incrementSpecimenExisting() {
+        specimensExisting++;
     }
 
     public void incrementTotal() {
@@ -160,7 +165,7 @@ public class Counter {
     }
 
     /**
-     * @param specimensUpdated the specimensUpdated to set
+     *
      */
     public void incrementSpecimensUpdated() {
         this.specimensUpdated++;
@@ -174,7 +179,7 @@ public class Counter {
     }
 
     /**
-     * @param filesUpdated the filesUpdated to set
+     *
      */
     public void incrementFilesUpdated() {
         this.filesUpdated++;
@@ -184,4 +189,21 @@ public class Counter {
         return errors;
     }
 
+    @Override
+    public String toString() {
+        String report = "Scanned " + this.getDirectories() + " directories.\n";
+        report += "Scanned  " + this.getFilesSeen() + " files.\n";
+        report += "Created  " + this.getFilesDatabased() + " new image records.\n";
+        if (this.getFilesUpdated() > 0) {
+            report += "Updated  " + this.getFilesUpdated() + " image records.\n";
+
+        }
+        report += "Created  " + this.getSpecimens() + " new specimen records.\n";
+        if (this.getSpecimensUpdated() > 0) {
+            report += "Updated  " + this.getSpecimensUpdated() + " specimen records.\n";
+
+        }
+        report += "Found " + this.getFilesFailed() + " files with problems.\n";
+        return report;
+    }
 }

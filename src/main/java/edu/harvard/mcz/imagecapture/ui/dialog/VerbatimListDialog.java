@@ -18,12 +18,12 @@
  */
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
+import edu.harvard.mcz.imagecapture.entity.fixed.VerbatimCount;
 import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
-import edu.harvard.mcz.imagecapture.struct.VerbatimCount;
-import edu.harvard.mcz.imagecapture.struct.VerbatimCountTableModel;
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
+import edu.harvard.mcz.imagecapture.ui.tablemodel.VerbatimCountTableModel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 

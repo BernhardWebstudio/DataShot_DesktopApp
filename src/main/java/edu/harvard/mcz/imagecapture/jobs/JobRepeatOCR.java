@@ -359,32 +359,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
                             // Only update if the result was in state OCR.
                             //
                             // Look up likely matches for the OCR of the higher taxa in the HigherTaxon authority file.
-                            if (parser.getTribe().trim().equals("")) {
-                                HigherTaxonLifeCycle hls = new HigherTaxonLifeCycle();
-                                if (hls.isMatched(parser.getFamily(), parser.getSubfamily())) {
-                                    // If there is a match, use it.
-                                    String[] higher = hls.findMatch(parser.getFamily(), parser.getSubfamily());
-                                    s.setFamily(higher[0]);
-                                    s.setSubfamily(higher[1]);
-                                } else {
-                                    // otherwise use the raw OCR output.
-                                    s.setFamily(parser.getFamily());
-                                    s.setSubfamily(parser.getSubfamily());
-                                }
-                                s.setTribe("");
-                            } else {
-                                HigherTaxonLifeCycle hls = new HigherTaxonLifeCycle();
-                                if (hls.isMatched(parser.getFamily(), parser.getSubfamily(), parser.getTribe())) {
-                                    String[] higher = hls.findMatch(parser.getFamily(), parser.getSubfamily(), parser.getTribe());
-                                    s.setFamily(higher[0]);
-                                    s.setSubfamily(higher[1]);
-                                    s.setTribe(higher[2]);
-                                } else {
-                                    s.setFamily(parser.getFamily());
-                                    s.setSubfamily(parser.getSubfamily());
-                                    s.setTribe(parser.getTribe());
-                                }
-                            }
+                            AbstractFileScanJob.extractFamilyToSpecimen(parser, s);
                             if (!parser.getFamily().equals("")) {
                                 // check family against database (with a soundex match)
                                 HigherTaxonLifeCycle hls = new HigherTaxonLifeCycle();

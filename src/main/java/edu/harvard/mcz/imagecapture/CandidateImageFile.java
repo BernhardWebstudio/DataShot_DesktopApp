@@ -1,5 +1,5 @@
 /**
- * CandidateImageFile.java
+ * java
  * edu.harvard.mcz.imagecapture
  *
  * <p>
@@ -18,6 +18,11 @@
  */
 package edu.harvard.mcz.imagecapture;
 
+import boofcv.abst.fiducial.QrCodeDetector;
+import boofcv.alg.fiducial.qrcode.QrCode;
+import boofcv.factory.fiducial.FactoryFiducial;
+import boofcv.io.image.ConvertBufferedImage;
+import boofcv.struct.image.GrayU8;
 import com.adobe.internal.xmp.XMPException;
 import com.adobe.internal.xmp.XMPMeta;
 import com.drew.imaging.ImageMetadataReader;
@@ -36,6 +41,7 @@ import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
+import edu.harvard.mcz.imagecapture.CandidateImageFile.TextStatus;
 import edu.harvard.mcz.imagecapture.data.BulkMedia;
 import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
@@ -53,6 +59,7 @@ import java.awt.image.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.*;
 
 /**
@@ -86,7 +93,7 @@ public class CandidateImageFile {
     private int unitTrayTaxonLabelTextStatus;
     private String labelText = null;
     private UnitTrayLabel unitTrayLabel;
-    private String dateCreated = null;
+    private Date dateCreated = null;
     private PositionTemplate templateUsed = null;
 
     /**
@@ -192,7 +199,7 @@ public class CandidateImageFile {
             if (hasFile) {
                 int exit = 1;
                 String filename = cmd.getOptionValue("file");
-                String line = CandidateImageFile.parseOneFile(filename);
+                String line = parseOneFile(filename);
                 if (line != null) {
                     System.out.println(line);
                     exit = 0;
@@ -385,7 +392,7 @@ public class CandidateImageFile {
      *                         specified by the template is checked.
      * @return the text of the barcode found in the barcode portion of the position template, or an empty string.
      */
-    public static String getBarcodeTextFromImage(BufferedImage image, PositionTemplate positionTemplate, boolean quickCheck) {
+    public String getBarcodeTextFromImage(BufferedImage image, PositionTemplate positionTemplate, boolean quickCheck) {
 
         log.debug(positionTemplate.getName());
         String returnValue = "";
@@ -430,7 +437,7 @@ public class CandidateImageFile {
      *                         specified by the template for the UnitTrayLabel is checked.
      * @return the text of the barcode found in the UnitTrayLabel (text) portion of the position template, or an empty string.
      */
-    public static String getBarcodeUnitTrayTextFromImage(BufferedImage image, PositionTemplate positionTemplate) {
+    public String getBarcodeUnitTrayTextFromImage(BufferedImage image, PositionTemplate positionTemplate) {
         String returnValue = "";
         if (positionTemplate.getTemplateId().equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
             // Check the entire image for a barcode and return.
@@ -483,242 +490,235 @@ public class CandidateImageFile {
      * @param width  in pixels of the area to decode
      * @param height in pixels of the area to decode
      * @return string content of barcode found, or an empty string
-     * TODO: refactor this abdomen
      */
-    public static String readBarcodeFromLocation(BufferedImage image, int left, int top, int width, int height, boolean quickCheck) {
-        String returnValue = "";
-        if (image != null) {
-            if (image.getWidth() >= left + width && image.getHeight() >= top + height) {
-                // provided crop area falls within image.
-                log.debug("Attempting to detect barcode in TL:" + left + "x" + top + " +" + width + "x" + height);
-                LuminanceSource source = null;
-                LuminanceSource cropSource = null;
-                boolean inBounds = false;
-                try {
-                    // Create a crop of the image, test this cropped area
-                    source = new BufferedImageLuminanceSource(image, left, top, width, height);
-                    inBounds = true;
-                } catch (IllegalArgumentException e) {
-                    inBounds = false;
-                    returnValue = "";
-                    log.debug(e.getMessage());
-                }
-                if (inBounds) {
-
-                    // First, try the source crop directly.
-                    CandidateImageFile temp = new CandidateImageFile();
-                    TextStatus checkResult = temp.checkSourceForBarcode(source, log.isDebugEnabled());
-                    if (checkResult.getStatus() != CandidateImageFile.RESULT_ERROR) {
-                        returnValue = checkResult.getText();
-                    }
-                    log.debug("result: " + returnValue);
-                    log.debug(checkResult.getStatus());
-
-                    if (!quickCheck) {
-                        // If this is not a quick check, keep trying harder
-
-                        if (checkResult.getStatus() == CandidateImageFile.RESULT_ERROR) {
-                            // Second, try rescaling (to a 800 pixel width)
-                            log.debug("Trying again with scaled image crop: " + INITIAL_SCALING_WIDTH + "px.");
-                            Double scale = CandidateImageFile.INITIAL_SCALING_WIDTH / width;
-                            returnValue = CandidateImageFile.checkWithScale(image, left, top, width, height, scale);
-                        }
-
-                        if (returnValue == null) {
-                            // Third, try rescaling to configured scaling widths
-                            String scaling = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGERESCALE);
-                            ArrayList<String> scalingBits = new ArrayList<String>();
-                            if (scaling.contains(",")) {
-                                scalingBits.addAll(Arrays.asList(scaling.split(",")));
-                            } else {
-                                scalingBits.add(scaling);
-                            }
-
-                            Kernel kernel = new Kernel(3, 3, matrix);
-                            ConvolveOp convolver = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
-
-                            Iterator<String> i = scalingBits.iterator();
-
-                            if (log.isDebugEnabled()) {
-                                log.debug("Configured transforms:");
-                                while (i.hasNext()) {
-                                    log.debug(i.next());
-                                }
-                                i = scalingBits.iterator();
-                            }
-                            while (i.hasNext()) {
-                                String widthToTry = i.next();
-                                if (checkResult.getStatus() == CandidateImageFile.RESULT_ERROR) {
-                                    boolean sharpen = false;
-                                    boolean brighter = false;
-                                    boolean dimmer = false;
-//									assert (!(widthToTry.contains("sharpen") && widthToTry.contains("brighter") && widthToTry.contains("dimmer")));
-                                    if (widthToTry.contains("sharpen")) {
-                                        sharpen = true;
-                                        widthToTry = widthToTry.replace("sharpen", "");
-                                    } else if (widthToTry.contains("brighter")) {
-                                        brighter = true;
-                                        dimmer = false;
-                                        widthToTry = widthToTry.replace("brighter", "");
-                                    } else if (widthToTry.contains("dimmer")) {
-                                        brighter = false;
-                                        dimmer = true;
-                                        widthToTry = widthToTry.replace("dimmer", "");
-                                    }
-                                    // strip out any remaining non-numeric characters (sharpen'ed')
-                                    widthToTry = widthToTry.replaceAll("[^0-9.]", "");
-                                    log.debug("WidthToTry: " + widthToTry);
-                                    // Try rescaling to a configured scaling width value.
-                                    Double scalingWidth = 0d;
-                                    try {
-                                        scalingWidth = Double.parseDouble(widthToTry);
-                                        if (scalingWidth < 1) {
-                                            scalingWidth = INITIAL_SCALING_WIDTH / 2;
-                                        }
-                                    } catch (NumberFormatException e) {
-                                        log.error(e.getMessage());
-                                    }
-                                    if ((width != scalingWidth && scalingWidth != INITIAL_SCALING_WIDTH) || (sharpen || brighter || dimmer)) {
-                                        try {
-                                            // if a rescaling different from what's been done in steps 1 and 2 has been configured, rescale and try again.
-                                            // skip any configured transforms that are identical to steps 1 or 2.
-                                            log.debug("Trying again with scaled image crop to: " + scalingWidth + "px.");
-                                            Double scale = scalingWidth / width;
-                                            int scaledHeight = (int) (height * scale);
-                                            int scaledWidth = (int) (width * scale);
-                                            BufferedImage cropped = image.getSubimage(left, top, width, height);
-                                            int initialH = cropped.getHeight();
-                                            int initialW = cropped.getWidth();
-                                            // BufferedImage scaled = new BufferedImage(initialW, initialH, cropped.getType());
-                                            BufferedImage scaled = new BufferedImage(scaledWidth, scaledHeight, cropped.getType());
-                                            AffineTransform rescaleTransform = new AffineTransform();
-                                            rescaleTransform.scale(scale, scale);
-                                            AffineTransformOp scaleOp = new AffineTransformOp(rescaleTransform, AffineTransformOp.TYPE_BILINEAR);
-                                            scaled = scaleOp.filter(cropped, scaled);
-                                            if (sharpen) {
-                                                log.debug("Also sharpening the crop");
-                                                BufferedImage dest = new BufferedImage(scaledWidth, scaledHeight, cropped.getType());
-                                                scaled = convolver.filter(scaled, dest);
-                                            }
-                                            if (brighter) {
-                                                log.debug("Also brightening the crop");
-                                                RescaleOp rescaleOp = new RescaleOp(1.2f, 15, null);
-                                                BufferedImage src = scaled;
-                                                scaled = rescaleOp.filter(src, scaled);
-                                            }
-                                            if (dimmer) {
-                                                log.debug("Also dimming the crop");
-                                                RescaleOp rescaleOp = new RescaleOp(0.80f, -15, null);
-                                                BufferedImage src = scaled;
-                                                scaled = rescaleOp.filter(src, scaled);
-                                            }
-                                            source = new BufferedImageLuminanceSource(scaled);
-                                            checkResult = temp.checkSourceForBarcode(source, true);
-                                            if (checkResult.getStatus() != CandidateImageFile.RESULT_ERROR) {
-                                                returnValue = checkResult.getText();
-                                            }
-                                        } catch (Exception e) {
-                                            log.error(e.getMessage(), e);
-                                        }
-                                    }
-                                } else {
-                                    // last try succeeded, skip subsequent
-                                    log.debug("Skipping: " + widthToTry);
-                                }
-                            } // end while loop
-                        }
-
-                        if (checkResult.getStatus() == CandidateImageFile.RESULT_ERROR) {
-                            // Try again with a sharpened image
-                            try {
-                                log.debug("Trying again with image sharpened.");
-                                Kernel kernel = new Kernel(3, 3, matrix);
-                                ConvolveOp convolver = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
-                                BufferedImage sharpened = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
-                                sharpened = convolver.filter(image, sharpened);
-                                source = new BufferedImageLuminanceSource(sharpened, left, top, width, height);
-                                checkResult = temp.checkSourceForBarcode(source, true);
-                                if (checkResult.getStatus() != CandidateImageFile.RESULT_ERROR) {
-                                    returnValue = checkResult.getText();
-                                }
-                            } catch (IllegalArgumentException e) {
-                                log.error(e.getMessage(), e);
-                            }
-                        }
-                        if (checkResult.getStatus() == CandidateImageFile.RESULT_ERROR) {
-                            log.debug("Trying one stop brighter");
-                            BufferedImage crop = image.getSubimage(left, top, width, height);
-                            returnValue = CandidateImageFile.checkWithConfiguration(crop, 1.2f, 15, null);
-                            if (returnValue == null) {
-                                log.debug("Trying one stop dimmer");
-                                returnValue = CandidateImageFile.checkWithConfiguration(crop, 0.80f, -15, null);
-                            }
-                            if (returnValue == null) {
-                                log.debug("Trying two stops dimmer");
-                                returnValue = CandidateImageFile.checkWithConfiguration(crop, 0.60f, -30, null);
-                                if (returnValue == null) {
-                                    log.debug("Trying two stops brighter");
-                                    returnValue = CandidateImageFile.checkWithConfiguration(crop, 1.4f, 30, null);
-                                    if (returnValue == null) {
-                                        log.debug("Trying three stops brighter");
-                                        returnValue = CandidateImageFile.checkWithConfiguration(crop, 1.6f, 45, null);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    if (returnValue == null) {
-                        // Try again with some small displacements of window
-                        doubleLoop:
-                        for (int shiftLeft = left - 3; shiftLeft <= left + 3; shiftLeft = shiftLeft + 6) {
-                            for (int shiftTop = top - 3; shiftTop <= top + 3; shiftTop = shiftTop + 6) {
-                                inBounds = false;
-                                try {
-                                    log.debug("Trying displacement of crop: " + shiftLeft + "," + shiftTop);
-                                    source = new BufferedImageLuminanceSource(image, shiftLeft, shiftTop, width, height);
-                                    inBounds = true;
-                                } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
-                                    // shift falls outside image, inBounds = false
-                                }
-                                if (inBounds) {
-                                    checkResult = temp.checkSourceForBarcode(source, true);
-                                    if (checkResult.getStatus() != CandidateImageFile.RESULT_ERROR) {
-                                        returnValue = checkResult.getText();
-                                        break doubleLoop;
-                                    }
-                                }
-                            }
-                        }
-
-                    } // not quick check
-                } // in bounds
-            } else {
-                log.debug("Provided coordinates fall outside bounds of image.");
-            }
-        } else {
-            log.error("Image is null");
+    public String readBarcodeFromLocation(BufferedImage image, int left, int top, int width, int height, boolean quickCheck) {
+        TextStatus returnValue = new TextStatus("", RESULT_ERROR);
+        if (image == null) {
+            log.error("Image null");
+            return "";
         }
-        return returnValue;
+        if (image.getWidth() >= left + width && image.getHeight() >= top + height) {
+            // provided crop area falls within image.
+            log.debug("Attempting to detect barcode in TL: " + left + "x" + top + " +" + width + "x" + height);
+            LuminanceSource source = null;
+            try {
+                // Create a crop of the image, test this cropped area
+                source = new BufferedImageLuminanceSource(image, left, top, width, height);
+            } catch (IllegalArgumentException e) {
+                log.error("Provided coordinates fall outside bounds of image; Error: " + e.getMessage());
+                return "";
+            }
+
+            // 1, try the source crop directly.
+            CandidateImageFile temp = new CandidateImageFile();
+            returnValue = temp.checkSourceForBarcode(source, log.isDebugEnabled());
+            log.debug("result: " + returnValue.getText() + " at status: " + returnValue.getText());
+
+            if (quickCheck) {
+                if (returnValue.getText() == null) {
+                    returnValue = checkWithDisplacing(image, left, top, width, height);
+                }
+                return returnValue.getText();
+            }
+            // If this is not a quick check, keep trying harder
+            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
+                // 2, try rescaling (to a 800 pixel width)
+                log.debug("Trying again with scaled image crop: " + INITIAL_SCALING_WIDTH + "px.");
+                double scale = INITIAL_SCALING_WIDTH / width;
+                returnValue = checkWithScale(image, left, top, width, height, scale);
+            }
+
+            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
+                // 3, try another barcode scanner
+                checkSourceForBarcode(image.getSubimage(left, top, width, height));
+            }
+
+            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
+                // 4, try rescaling to configured scaling widths
+                String scaling = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGERESCALE);
+                ArrayList<String> scalingBits = new ArrayList<String>();
+                if (scaling.contains(",")) {
+                    scalingBits.addAll(Arrays.asList(scaling.split(",")));
+                } else {
+                    scalingBits.add(scaling);
+                }
+                for (String transform : scalingBits) {
+                    returnValue = checkWithTransform(image, left, top, width, height, transform);
+                    if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
+                        log.info("Success at image '" + candidateFile.getName() + "' with transform = " + transform + ".");
+                        break;
+                    }
+                } // end while loop
+            }
+
+            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
+                // 5, try again with a sharpened image
+                try {
+                    log.debug("Trying again with image sharpened.");
+                    Kernel kernel = new Kernel(3, 3, matrix);
+                    ConvolveOp convolver = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+                    BufferedImage sharpened = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+                    sharpened = convolver.filter(image, sharpened);
+                    source = new BufferedImageLuminanceSource(sharpened, left, top, width, height);
+                    returnValue = temp.checkSourceForBarcode(source, true);
+                } catch (IllegalArgumentException e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+
+            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
+                // 6, try again with scale factors & offsets
+                BufferedImage crop = image.getSubimage(left, top, width, height);
+                float[] scaleFactors = {1.2f, 0.8f, 0.6f, 1.4f, 1.6f};
+                int[] offsets = {15, -15, -30, 30, 45};
+                doubleLoop:
+                for (int i = 0; i < scaleFactors.length; ++i) {
+                    for (int o = 0; o < offsets.length; ++o) {
+                        returnValue = checkWithConfiguration(crop, scaleFactors[i], offsets[o], null);
+                        if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
+                            log.info("Success at image '" + candidateFile.getName() + "' with offset = " + offsets[o] + " and scaleFactor = " + scaleFactors[i]);
+                            break doubleLoop;
+                        }
+                    }
+                }
+            }
+
+            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
+                // Try again with some small displacements of window
+                returnValue = checkWithDisplacing(image, left, top, width, height);
+            }
+        }
+
+        return returnValue.getText();
     }
 
-    private static String checkWithConfiguration(BufferedImage crop, float scaleFactor, int offset) {
-        return CandidateImageFile.checkWithConfiguration(crop, scaleFactor, offset, null);
+    /**
+     * Check an image for a barcode at a certain displacement
+     *
+     * @param image          the image to check
+     * @param left           the original left to find the barcode at
+     * @param top            the original top to find the barcode at
+     * @param width          the original with of the image
+     * @param height         the original height of the image
+     * @param transformToTry the specification of the transformation which should be applied to check
+     * @return the status of the check
+     */
+    private TextStatus checkWithTransform(BufferedImage image, int left, int top, int width, int height, String transformToTry) {
+        Kernel kernel = new Kernel(3, 3, matrix);
+        ConvolveOp convolver = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+        TextStatus checkResult = new TextStatus("", RESULT_NOT_CHECKED);
+        LuminanceSource source;
+        boolean sharpen = false;
+        boolean brighter = false;
+        boolean dimmer = false;
+        //	assert (!(widthToTry.contains("sharpen") && widthToTry.contains("brighter") && widthToTry.contains("dimmer")));
+        if (transformToTry.contains("sharpen")) {
+            sharpen = true;
+            transformToTry = transformToTry.replace("sharpen", "");
+        } else if (transformToTry.contains("brighter")) {
+            brighter = true;
+            dimmer = false;
+            transformToTry = transformToTry.replace("brighter", "");
+        } else if (transformToTry.contains("dimmer")) {
+            brighter = false;
+            dimmer = true;
+            transformToTry = transformToTry.replace("dimmer", "");
+        }
+        // strip out any remaining non-numeric characters (sharpen'ed')
+        transformToTry = transformToTry.replaceAll("[^0-9.]", "");
+        log.debug("TransformToTry: " + transformToTry);
+        // Try rescaling to a configured scaling width value.
+        double scalingWidth = 0d;
+        try {
+            scalingWidth = Double.parseDouble(transformToTry);
+            if (scalingWidth < 1) {
+                scalingWidth = INITIAL_SCALING_WIDTH / 2;
+            }
+        } catch (NumberFormatException e) {
+            log.error(e.getMessage());
+        }
+        if ((width != scalingWidth && scalingWidth != INITIAL_SCALING_WIDTH) || (sharpen || brighter || dimmer)) {
+            try {
+                // if a rescaling different from what's been done in steps 1 and 2 has been configured, rescale and try again.
+                // skip any configured transforms that are identical to steps 1 or 2.
+                log.debug("Trying again with scaled image crop to: " + scalingWidth + "px.");
+                double scale = scalingWidth / width;
+                int scaledHeight = (int) (height * scale);
+                int scaledWidth = (int) (width * scale);
+                BufferedImage cropped = image.getSubimage(left, top, width, height);
+                int initialH = cropped.getHeight();
+                int initialW = cropped.getWidth();
+                // BufferedImage scaled = new BufferedImage(initialW, initialH, cropped.getType());
+                BufferedImage scaled = new BufferedImage(scaledWidth, scaledHeight, cropped.getType());
+                AffineTransform rescaleTransform = new AffineTransform();
+                rescaleTransform.scale(scale, scale);
+                AffineTransformOp scaleOp = new AffineTransformOp(rescaleTransform, AffineTransformOp.TYPE_BILINEAR);
+                scaled = scaleOp.filter(cropped, scaled);
+                if (sharpen) {
+                    log.debug("Also sharpening the crop");
+                    BufferedImage dest = new BufferedImage(scaledWidth, scaledHeight, cropped.getType());
+                    scaled = convolver.filter(scaled, dest);
+                }
+                if (brighter) {
+                    log.debug("Also brightening the crop");
+                    RescaleOp rescaleOp = new RescaleOp(1.2f, 15, null);
+                    BufferedImage src = scaled;
+                    scaled = rescaleOp.filter(src, scaled);
+                }
+                if (dimmer) {
+                    log.debug("Also dimming the crop");
+                    RescaleOp rescaleOp = new RescaleOp(0.80f, -15, null);
+                    BufferedImage src = scaled;
+                    scaled = rescaleOp.filter(src, scaled);
+                }
+                source = new BufferedImageLuminanceSource(scaled);
+                checkResult = this.checkSourceForBarcode(source, true);
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+        return checkResult;
     }
 
-    private static String checkWithConfiguration(BufferedImage crop, float scaleFactor, int offset, RenderingHints hints) {
-        String returnValue = null;
-        RescaleOp rescaleOp = new RescaleOp(1.6f, 45, null);
+    /**
+     * Check an image source for barcode, trysing
+     *
+     * @param image
+     * @param left
+     * @param top
+     * @param width
+     * @param height
+     * @return
+     */
+    private TextStatus checkWithDisplacing(BufferedImage image, int left, int top, int width, int height) {
+        LuminanceSource source;
+        TextStatus checkResult = new TextStatus("", RESULT_ERROR);
+        doubleLoop:
+        for (int shiftLeft = left - 3; shiftLeft <= left + 3; shiftLeft = shiftLeft + 6) {
+            for (int shiftTop = top - 3; shiftTop <= top + 3; shiftTop = shiftTop + 6) {
+                try {
+                    log.debug("Trying displacement of crop: " + shiftLeft + "," + shiftTop);
+                    source = new BufferedImageLuminanceSource(image, shiftLeft, shiftTop, width, height);
+                    checkResult = this.checkSourceForBarcode(source, true);
+                    if (checkResult.getStatus() != RESULT_ERROR) {
+                        break doubleLoop;
+                    }
+                } catch (ArrayIndexOutOfBoundsException | IllegalArgumentException e) {
+                    // shift falls outside image, inBounds = false
+                }
+            }
+        }
+        return checkResult;
+    }
+
+    private TextStatus checkWithConfiguration(BufferedImage crop, float scaleFactor, int offset, RenderingHints hints) {
+        RescaleOp rescaleOp = new RescaleOp(scaleFactor, offset, hints);
         rescaleOp.filter(crop, crop);
         BufferedImageLuminanceSource cropSource = new BufferedImageLuminanceSource(crop);
-        CandidateImageFile temp = new CandidateImageFile();
-        TextStatus checkResult = temp.checkSourceForBarcode(cropSource, log.isDebugEnabled());
-        if (checkResult.getStatus() != CandidateImageFile.RESULT_ERROR) {
-            returnValue = checkResult.getText();
-        }
-        return returnValue;
+        return checkSourceForBarcode(cropSource, log.isDebugEnabled());
     }
 
-    private static String checkWithScale(BufferedImage image, int left, int top, int width, int height, double scale) {
+    private TextStatus checkWithScale(BufferedImage image, int left, int top, int width, int height, double scale) {
         String returnValue = null;
         int scaledHeight = (int) (height * scale);
         int scaledWidth = (int) (width * scale);
@@ -732,11 +732,7 @@ public class CandidateImageFile {
         scaled = scaleOp.filter(cropped, scaled);
         BufferedImageLuminanceSource cropSource = new BufferedImageLuminanceSource(scaled);
         CandidateImageFile temp = new CandidateImageFile();
-        TextStatus checkResult = temp.checkSourceForBarcode(cropSource, log.isDebugEnabled());
-        if (checkResult.getStatus() != CandidateImageFile.RESULT_ERROR) {
-            returnValue = checkResult.getText();
-        }
-        return returnValue;
+        return temp.checkSourceForBarcode(cropSource, log.isDebugEnabled());
     }
 
     /**
@@ -749,25 +745,20 @@ public class CandidateImageFile {
      * @throws UnreadableFileException if file is null, or if it doesn't exist or if it can't be read.
      */
     public boolean isFileReadable() throws UnreadableFileException {
-        boolean result = false;
-        boolean test = false;
         try {
             if (candidateFile == null) {
                 throw new UnreadableFileException("No such file. CandidateImageFile given null for a filename.");
             }
-            test = candidateFile.exists();
-            if (test == false) {
+            if (candidateFile.exists() == false) {
                 throw new UnreadableFileException("No such file as: " + candidateFile.getAbsolutePath());
             }
-            test = candidateFile.canRead();
-            if (test == false) {
+            if (candidateFile.canRead() == false) {
                 throw new UnreadableFileException("Can't read file: " + candidateFile.getAbsolutePath());
             }
-            result = test;
         } catch (SecurityException e) {
             throw new UnreadableFileException("Can't read file: " + candidateFile.getAbsolutePath() + " Security problem." + e.getMessage());
         }
-        return result;
+        return true;
     }
 
     private void init() {
@@ -922,6 +913,31 @@ public class CandidateImageFile {
     }
 
     /**
+     * Check an image source for a barcode using BoofCV scanner
+     *
+     * @param source the image to check
+     * @return the status tuple
+     */
+    private TextStatus checkSourceForBarcode(BufferedImage source) {
+        GrayU8 gray = ConvertBufferedImage.convertFrom(source, (GrayU8) null);
+
+        QrCodeDetector<GrayU8> detector = FactoryFiducial.qrcode(null, GrayU8.class);
+
+        detector.process(gray);
+
+        // Get's a list of all the qr codes it could successfully detect and decode
+        List<QrCode> detections = detector.getDetections();
+        log.debug("BoofCV QRScanner found " + detections.size() + " barcodes. Success only if 1. Additionally, failures: " + detector.getFailures().size());
+
+        if (detections.size() == 1) {
+            for (QrCode detection : detections) {
+                return new TextStatus(detection.message, RESULT_BARCODE_SCANNED);
+            }
+        }
+        return new TextStatus("", RESULT_ERROR);
+    }
+
+    /**
      * If the image contains a taxon label text encoded in a QRCode barcode in the position specified
      * for the Taxon/UnitTrayLabel Barcode by the PositionTemplate, return that text as a UnitTrayLabel
      * object.
@@ -1017,7 +1033,7 @@ public class CandidateImageFile {
     public String getTaxonLabelOCRText(PositionTemplate aTemplate) throws OCRReadException {
         // Actual read attempt is only invoked once,
         // subsequent calls return cached value.
-        log.debug("in CandidateImageFile.getLabelOCRText() 1 labelText is " + labelText);
+        log.debug("in getLabelOCRText() 1 labelText is " + labelText);
         if (labelText == null) {
             BufferedImage image = null;
             String error = "";
@@ -1061,7 +1077,7 @@ public class CandidateImageFile {
                         int w = aTemplate.getTextSize().width + 1;
                         int h = aTemplate.getTextSize().height + 1;
 
-                        log.debug("in CandidateImageFile.getLabelOCRText() 10");
+                        log.debug("in getLabelOCRText() 10");
                         // OCR and parse UnitTray Label
                         ConvertTesseractOCR o = new ConvertTesseractOCR(image.getSubimage(x, y, w, h));
                         labelText = "";
@@ -1096,8 +1112,6 @@ public class CandidateImageFile {
             String exifComment = "";
             try {
                 Metadata metadata = JpegMetadataReader.readMetadata(candidateFile, JpegMetadataReader.ALL_READERS);
-
-
                 // [Exif] User Comment
                 Directory exifDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
                 ExifSubIFDDescriptor descriptor = new ExifSubIFDDescriptor((ExifSubIFDDirectory) exifDirectory);
@@ -1135,10 +1149,8 @@ public class CandidateImageFile {
                             if (description != null && description.trim().length() > 0) {
                                 exifComment = description;
                             }
-                        } catch (NullPointerException e1) {
+                        } catch (NullPointerException | XMPException e1) {
                             log.error(e1.getMessage(), e1);
-                        } catch (XMPException e) {
-                            log.error(e.getMessage(), e);
                         }
                     }
                 } catch (JpegProcessingException e1) {
@@ -1155,24 +1167,29 @@ public class CandidateImageFile {
         return exifCommentText;
     }
 
-    public String getExifDateCreated() {
+    /**
+     * Get the Metatdata: created from this file
+     *
+     * @param format the format of the desired date
+     * @return the date, formated as specified by parameter format, or null if none is found
+     */
+    public String getExifDateCreated(String format) {
         // Actual read attempt is only invoked once,
         // subsequent calls return cached value.
         if (dateCreated == null) {
             // read, or re-read the file for a comment
-            Date date = null;
             try {
                 Metadata metadata = JpegMetadataReader.readMetadata(candidateFile);
                 // [Exif] date
                 Directory exifDirectory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-                date = exifDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME);
-                if (date == null) {
-                    date = exifDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+                dateCreated = exifDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME);
+                if (dateCreated == null) {
+                    dateCreated = exifDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
                 }
-                if (date == null) {
-                    date = exifDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_DIGITIZED);
+                if (dateCreated == null) {
+                    dateCreated = exifDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_DIGITIZED);
                 }
-                log.debug("Exif DateTime = " + SimpleDateFormat.getDateInstance().format(date));
+                log.debug("Exif DateTime = " + SimpleDateFormat.getDateInstance().format(dateCreated));
             } catch (JpegProcessingException e2) {
                 log.error("Error reading exif metadata.");
                 log.error(e2.getMessage());
@@ -1180,16 +1197,29 @@ public class CandidateImageFile {
                 log.error("Error reading file for exif metadata.");
                 log.error(e.getMessage());
             }
-            // cache the date if one was found, otherwise null.
-            if (date != null) {
-                // date format shown on the media bulkloader example page.
-                SimpleDateFormat format = new SimpleDateFormat("dd MMMMM yyyy");
-                dateCreated = format.format(date);
-            }
         }
-        return dateCreated;
+        if (dateCreated != null) {
+            // date format shown on the media bulkloader example page.
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
+            return simpleDateFormat.format(dateCreated);
+        }
+        return null;
     }
 
+    /**
+     * Get the Metatdata: created from this file
+     *
+     * @return the created date, formated dd MMMMM yyyy
+     */
+    public String getExifDateCreated() {
+        return getExifDateCreated("dd MMMMM yyyy");
+    }
+
+    /**
+     * Get the identifying barcode
+     *
+     * @return the barcode/identifier
+     */
     public String getBarcodeTextAtFoundTemplate() {
         return getBarcodeText(this.templateUsed);
     }
@@ -1234,9 +1264,7 @@ public class CandidateImageFile {
                     // image might plausibly match template
                     int left = positionTemplate.getBarcodeULPosition().width;    //* @param left x coordinate of leftmost pixels to decode
                     int top = positionTemplate.getBarcodeULPosition().height;  //* @param top y coordinate of topmost pixels to decode
-                    int right = left + positionTemplate.getBarcodeSize().width;  //* @param right one more than the x coordinate of rightmost pixels to decode. That is, we will decode
                     //*  pixels whose x coordinate is in [left,right)
-                    int bottom = top + positionTemplate.getBarcodeSize().height; //* @param bottom likewise, one more than the y coordinate of the bottommost pixels to decode
                     int width = positionTemplate.getBarcodeSize().width;
                     int height = positionTemplate.getBarcodeSize().height;
                     returnValue = readBarcodeFromLocation(image, left, top, width, height, false);

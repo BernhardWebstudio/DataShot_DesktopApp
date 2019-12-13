@@ -82,13 +82,8 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         log.debug("Checking image file: " + filename);
         CandidateImageFile.debugCheckHeightWidth(containedFile);
         // scan file for barcodes and ocr of unit tray label text
-        CandidateImageFile scannableFile = null;
         try {
-            // PositionTemplateDetector detector = new ConfiguredBarcodePositionTemplateDetector();
-            boolean isSpecimenImage = false;
-            boolean isDrawerImage = false;
             boolean reattach = false;  // image is detached instance and should be reattached instead of persisted denovo.
-            // try {
             // Check for an existing image record.
             ICImageLifeCycle imageLifeCycle = new ICImageLifeCycle();
             ICImage existingTemplate = new ICImage();
@@ -134,18 +129,10 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                 log.debug("Record exists, skipping file " + filename);
                 counter.incrementFilesExisting();
             }
-            // } catch (NoSuchTemplateException e) {
-            //	log.error("Detected Template for image doesn't exist. " + e.getMessage());
-            //}
-
-
         } catch (UnreadableFileException e) {
             counter.incrementFilesFailed();
             counter.appendError(new RunnableJobError(containedFile.getName(), "", "Could not read file", new UnreadableFileException(), RunnableJobError.TYPE_FILE_READ));
             log.error("Couldn't read file." + e.getMessage());
-            //} catch (OCRReadException e) {
-            //	counter.incrementFilesFailed();
-            //	log.error("Couldn't OCR file." + e.getMessage());
         }
     }
 
@@ -228,7 +215,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
             }
         }
 
-        // Test: is exifComment a barcode:
+        // Test: is exifComment a barcode:-
 
         // Case 1: This is an image of papers associated with a container (a unit tray or a box).
         // This case can be identified by there being no barcode data associated with the image.
@@ -256,23 +243,15 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                 isDrawerImage = true;
                 System.out.println("Drawer Image");
             } else {
-                if (templateId.equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
-                    log.debug("Image doesn't appear to contain a barcode in a templated position.");
-                    RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
-                            barcode, exifComment, "Image doesn't appear to contain a barcode in a templated position.",
-                            null, null,
-                            null, RunnableJobError.TYPE_NO_TEMPLATE);
-                    counter.appendError(error);
-                    counter.incrementFilesFailed();
-                } else {
-                    // Nothing found.  Need to ask.
-                    RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
-                            barcode, exifComment, "Image doesn't appear to contain a barcode in a templated position.",
-                            null, null,
-                            null, RunnableJobError.TYPE_UNKNOWN);
-                    counter.appendError(error);
-                    counter.incrementFilesFailed();
-                }
+                // no way we could continue from here on
+                int errorType = templateId.equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS) ? RunnableJobError.TYPE_NO_TEMPLATE : RunnableJobError.TYPE_UNKNOWN;
+                RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
+                        barcode, exifComment, "Image doesn't appear to contain a barcode in a templated position.",
+                        null, null,
+                        null, errorType);
+                counter.appendError(error);
+                counter.incrementFilesFailed();
+                return;
             }
         }
 
@@ -393,32 +372,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         } else {
             // We failed over to OCR, try lookup in DB.
             s.setFamily("");  // make sure there's a a non-null value in family.
-            if (parser.getTribe().trim().equals("")) {
-                HigherTaxonLifeCycle hls = new HigherTaxonLifeCycle();
-                if (hls.isMatched(parser.getFamily(), parser.getSubfamily())) {
-                    // If there is a match, use it.
-                    String[] higher = hls.findMatch(parser.getFamily(), parser.getSubfamily());
-                    s.setFamily(higher[0]);
-                    s.setSubfamily(higher[1]);
-                } else {
-                    // otherwise use the raw OCR output.
-                    s.setFamily(parser.getFamily());
-                    s.setSubfamily(parser.getSubfamily());
-                }
-                s.setTribe("");
-            } else {
-                HigherTaxonLifeCycle hls = new HigherTaxonLifeCycle();
-                if (hls.isMatched(parser.getFamily(), parser.getSubfamily(), parser.getTribe())) {
-                    String[] higher = hls.findMatch(parser.getFamily(), parser.getSubfamily(), parser.getTribe());
-                    s.setFamily(higher[0]);
-                    s.setSubfamily(higher[1]);
-                    s.setTribe(higher[2]);
-                } else {
-                    s.setFamily(parser.getFamily());
-                    s.setSubfamily(parser.getSubfamily());
-                    s.setTribe(parser.getTribe());
-                }
-            }
+            extractFamilyToSpecimen(parser, s);
         }
         if (state.equals(WorkFlowStatus.STAGE_0)) {
             // Look up likely matches for the OCR of the higher taxa in the HigherTaxon authority file.
@@ -536,9 +490,43 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
     }
 
     /**
+     * Set family, subfamily, based on a taxon returner
+     *
+     * @param parser source of family, subfamily
+     * @param s      the specimen to set the values on
+     */
+    static void extractFamilyToSpecimen(TaxonNameReturner parser, Specimen s) {
+        HigherTaxonLifeCycle hls = new HigherTaxonLifeCycle();
+        if (parser.getTribe().trim().equals("")) {
+            if (hls.isMatched(parser.getFamily(), parser.getSubfamily())) {
+                // If there is a match, use it.
+                String[] higher = hls.findMatch(parser.getFamily(), parser.getSubfamily());
+                s.setFamily(higher[0]);
+                s.setSubfamily(higher[1]);
+            } else {
+                // otherwise use the raw OCR output.
+                s.setFamily(parser.getFamily());
+                s.setSubfamily(parser.getSubfamily());
+            }
+            s.setTribe("");
+        } else {
+            if (hls.isMatched(parser.getFamily(), parser.getSubfamily(), parser.getTribe())) {
+                String[] higher = hls.findMatch(parser.getFamily(), parser.getSubfamily(), parser.getTribe());
+                s.setFamily(higher[0]);
+                s.setSubfamily(higher[1]);
+                s.setTribe(higher[2]);
+            } else {
+                s.setFamily(parser.getFamily());
+                s.setSubfamily(parser.getSubfamily());
+                s.setTribe(parser.getTribe());
+            }
+        }
+    }
+
+    /**
      * Set the completeness percentage in main frame & notify listeners
      *
-     * @param aPercentage
+     * @param aPercentage the progress percentage
      */
     protected void setPercentComplete(final int aPercentage) {
         //set value

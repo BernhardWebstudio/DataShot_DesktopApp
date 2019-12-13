@@ -41,7 +41,6 @@ import com.google.zxing.*;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
-import edu.harvard.mcz.imagecapture.CandidateImageFile.TextStatus;
 import edu.harvard.mcz.imagecapture.data.BulkMedia;
 import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;

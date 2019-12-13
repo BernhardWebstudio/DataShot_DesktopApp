@@ -280,6 +280,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     }
 
     public void setStatus(String status) {
+        log.info("Setting status to: ".concat(status));
         jTextFieldStatus.setText(status);
         jTextFieldStatus.setForeground(Color.BLACK);
     }
@@ -299,7 +300,6 @@ public class SpecimenDetailsViewPane extends JPanel {
                 jTableSpecimenParts.getCellEditor().stopCellEditing();
             }
             if (jTableNumbers.isEditing()) {
-                log.debug("jTableNumbers IS editing!!!");
                 jTableNumbers.getCellEditor().stopCellEditing();
             }
 
@@ -313,7 +313,6 @@ public class SpecimenDetailsViewPane extends JPanel {
             if (jComboBoxLocationInCollection.getSelectedItem() != null) {
                 specimen.setLocationInCollection(jComboBoxLocationInCollection.getSelectedItem().toString());
             }
-
 
             specimen.setDrawerNumber(jTextFieldDrawerNumber.getText());
             if (jComboBoxFamily.getSelectedIndex() == -1 && jComboBoxFamily.getSelectedItem() == null) {
@@ -434,7 +433,6 @@ public class SpecimenDetailsViewPane extends JPanel {
             specimen.setDateLastUpdated(new Date());
             specimen.setWorkFlowStatus(jComboBoxWorkflowStatus.getSelectedItem().toString());
 
-
             specimen.setQuestions(jTextFieldQuestions.getText());
             try {
                 specimenController.save();   // save the record
@@ -455,6 +453,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             setStateToDirty();    // disable the navigation buttons
             this.setWarning("Error. " + e.getMessage());
             log.error(e);
+            throw e;
         }
         updateContentDependentLabels();
 

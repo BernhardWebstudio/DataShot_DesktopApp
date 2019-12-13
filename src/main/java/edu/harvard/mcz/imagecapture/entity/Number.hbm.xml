@@ -10,7 +10,7 @@
                 <param name="sequence">SEQ_NUMBERID</param>
             </generator>
         </id>
-        <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.entity.Specimen" cascade="save-update">
+        <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.entity.Specimen">
             <column name="SpecimenId"/>
         </many-to-one>
         <property name="number" type="string">

@@ -105,6 +105,10 @@ public class NumberTableModel extends AbstractTableModel {
      */
     @Override
     public void setValueAt(Object value, int rowIndex, int columnIndex) {
+        if (!(numbers.size() <= rowIndex)) {
+            log.warn("Tried to set value in number table at rowIndex higher than row count; rowIndex: " + rowIndex + "; columnIndex: " + columnIndex + "; value: " + value);
+            return;
+        }
         switch (columnIndex) {
             case 0:
                 ((Number) numbers.toArray()[rowIndex]).setNumber((String) value);
@@ -116,6 +120,8 @@ public class NumberTableModel extends AbstractTableModel {
     }
 
     /**
+     * Remove a row from this table
+     *
      * @param rowIndex row to be deleted
      */
     public void deleteRow(int rowIndex) {

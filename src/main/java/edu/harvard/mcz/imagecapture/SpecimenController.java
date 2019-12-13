@@ -268,8 +268,9 @@ public class SpecimenController {
         }
         notifyListeners();
         // reload the specimen
-        // Why???
-        //specimen = s.findById(specimen.getSpecimenId());
+        // Why??? Because we can. Also, to kinda show if more than one
+        // user edited the same species
+        specimen = s.findById(specimen.getSpecimenId());
         return result;
     }
 

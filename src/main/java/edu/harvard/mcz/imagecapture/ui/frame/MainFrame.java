@@ -1096,7 +1096,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     private JMenuItem getJMenuItemValidateImageNoDB() {
         if (jMenuItemCheckForABarcode == null) {
             jMenuItemCheckForABarcode = new JMenuItem();
-            jMenuItemCheckForABarcode.setText("Check for Barcodes in Image File");
+            jMenuItemCheckForABarcode.setText("Preprocess One Image File");
             jMenuItemCheckForABarcode.setMnemonic(KeyEvent.VK_C);
             try {
                 jMenuItemCheckForABarcode.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));

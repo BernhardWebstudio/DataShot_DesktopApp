@@ -1031,7 +1031,8 @@ public class PositionTemplateEditor extends JFrame {
             jButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (template != null && imagePanelForDrawing.getImage() != null) {
-                        jTextFieldBarcodeScan.setText(CandidateImageFile.getBarcodeTextFromImage((BufferedImage) imagePanelForDrawing.getImage(), template, false));
+                        CandidateImageFile candidateImageFile = new CandidateImageFile();
+                        jTextFieldBarcodeScan.setText(candidateImageFile.getBarcodeTextFromImage((BufferedImage) imagePanelForDrawing.getImage(), template, false));
                     }
                 }
             });
@@ -1063,7 +1064,8 @@ public class PositionTemplateEditor extends JFrame {
             jButtonUnitTrayBarcode.setText("Check Taxon Barcode");
             jButtonUnitTrayBarcode.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    jTextFieldUnitTrayBarcode.setText(CandidateImageFile.getBarcodeUnitTrayTextFromImage((BufferedImage) imagePanelForDrawing.getImage(), template));
+                    CandidateImageFile candidateImageFile = new CandidateImageFile();
+                    jTextFieldUnitTrayBarcode.setText(candidateImageFile.getBarcodeUnitTrayTextFromImage((BufferedImage) imagePanelForDrawing.getImage(), template));
                 }
             });
         }

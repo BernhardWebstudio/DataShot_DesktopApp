@@ -64,6 +64,9 @@ import java.util.*;
 /**
  * Image File that might contain text that can be extracted by OCR or a barcode that
  * can be extracted by barcode recognition.
+ *
+ * TODO: extract few methods to some DataExtractor class or something.
+ * This class clearly does more than what's expected of a ("Candidate", Image) File
  */
 public class CandidateImageFile {
 

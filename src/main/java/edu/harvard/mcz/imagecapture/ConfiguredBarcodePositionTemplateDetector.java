@@ -98,7 +98,7 @@ public class ConfiguredBarcodePositionTemplateDetector implements PositionTempla
                         // defined by getBarcodeULPosition and getBarcodeSize.
                         String text;
                         if (scannableFile == null) {
-                            text = CandidateImageFile.getBarcodeTextFromImage(image, template, quickCheck);
+                            text = scannableFile.getBarcodeTextFromImage(image, template, quickCheck);
                         } else {
                             text = scannableFile.getBarcodeText(template);
                         }

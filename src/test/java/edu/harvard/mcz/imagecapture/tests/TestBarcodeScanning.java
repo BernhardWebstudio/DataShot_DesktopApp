@@ -79,6 +79,7 @@ public class TestBarcodeScanning extends TestCase {
 
     @Test
     public void testreadBarcodeFromLocation() {
+        CandidateImageFile candidateImageFile = new CandidateImageFile();
         BufferedImage image = null;
 
         File testFile = new File(this.getClass().getResource("/IMG_007027.JPG").getFile());
@@ -95,7 +96,7 @@ public class TestBarcodeScanning extends TestCase {
         } catch (IOException e) {
             fail(e.getMessage());
         }
-        assertEquals("MCZ-ENT00634766", CandidateImageFile.readBarcodeFromLocation(image, left, top, width, height, false));
+        assertEquals("MCZ-ENT00634766", candidateImageFile.readBarcodeFromLocation(image, left, top, width, height, false));
 
         testFile = new File(this.getClass().getResource("/IMG_000069.JPG").getFile());
         //  BarcodePositionX: 3380
@@ -112,11 +113,11 @@ public class TestBarcodeScanning extends TestCase {
         } catch (IOException e) {
             fail(e.getMessage());
         }
-        assertEquals("ETHZ-ENT0003497", CandidateImageFile.readBarcodeFromLocation(image, left, top, width, height, false));
+        assertEquals("ETHZ-ENT0003497", candidateImageFile.readBarcodeFromLocation(image, left, top, width, height, false));
 
         // test some problem inputs
-        assertEquals("", CandidateImageFile.readBarcodeFromLocation(image, left, top, 99999, 99999, false));
-        assertEquals("", CandidateImageFile.readBarcodeFromLocation(null, left, top, width, height, false));
+        assertEquals("", candidateImageFile.readBarcodeFromLocation(image, left, top, 99999, 99999, false));
+        assertEquals("", candidateImageFile.readBarcodeFromLocation(null, left, top, width, height, false));
 
         testFile = new File(this.getClass().getResource(AllTests.FILE_EMPTY).getFile());
         try {
@@ -124,7 +125,7 @@ public class TestBarcodeScanning extends TestCase {
         } catch (IOException e) {
             fail(e.getMessage());
         }
-        assertEquals("", CandidateImageFile.readBarcodeFromLocation(image, left, top, width, height, false));
+        assertEquals("", candidateImageFile.readBarcodeFromLocation(image, left, top, width, height, false));
     }
 
 }

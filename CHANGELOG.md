@@ -1,7 +1,6 @@
 # Changelog
 
 ## v1.10.2-SNAPSHOT
-* [[`029100c95a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/029100c95a)] - Update changelog & publish Version (Tim Bernhard)
 * [[`f9820ad0e5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f9820ad0e5)] - Try to improve feedback by app when switching/saving/copying (too fast?) (Tim Bernhard)
 * [[`c3656fc15c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c3656fc15c)] - Reformat code (Tim Bernhard)
 * [[`191bdd4729`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/191bdd4729)] - Possibly fix issue (#22) where georeference got lost after saving twice (Tim Bernhard)
@@ -15,15 +14,11 @@
 * [[`93e66caf44`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/93e66caf44)] - Merge branch 'master' of github.com:BernhardWebstudio/DataShot\_DesktopApp (Tim Bernhard)
 * [[`e6eacd38e2`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e6eacd38e2)] - Improve menu & about dialog phrasing (Tim Bernhard)
 * [[`b9d4261948`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b9d4261948)] - Use HibernateUtil instead of Factory to get hibernate properties for database migration (Tim Bernhard)
-* [[`4241aacb97`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4241aacb97)] - Update changelog & publish Version 1.10.1-SNAPSHOT (Tim Bernhard)
-
 
 ## v1.10.1-SNAPSHOT
 * [[`52de6c0489`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/52de6c0489)] - Fix issue where copy-previous led to empty georeference (Tim Bernhard)
 * [[`1f4c5adc9a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/1f4c5adc9a)] - Update georeference button after copy previous (Tim Bernhard)
 * [[`27414f4ac1`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/27414f4ac1)] - Fix issue where save was impossible after copy previous (Tim Bernhard)
-* [[`d60dbd6815`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d60dbd6815)] - Update changelog & publish Version 1.10.0-SNAPSHOT (Tim Bernhard)
-
 
 ## v1.10.0-SNAPSHOT
 * [[`edacdc0874`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/edacdc0874)] - Exclude more comparisons in LatLong emptycheck – fix #20, ETHEntColl/DataShot\_DesktopApp\_ETH#9 (Tim Bernhard)

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
-        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+        "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 <!-- Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA -->
 <hibernate-mapping default-lazy="false">
     <class name="edu.harvard.mcz.imagecapture.entity.Specimen" table="Specimen">
@@ -200,17 +200,17 @@
             <column name="externalWorkflowDate"/>
         </property>
         <!-- TODO: rethink nullability of related columns -->
-        <set name="collectors" cascade="all-delete-orphan" fetch="subselect">
+        <set name="collectors" cascade="all" fetch="subselect">
             <key>
-                <column name="SpecimenId"/>
+                <column name="SpecimenId" />
             </key>
-            <one-to-many class="edu.harvard.mcz.imagecapture.entity.Collector"/>
+            <one-to-many class="edu.harvard.mcz.imagecapture.entity.Collector" />
         </set>
-        <set name="determinations" cascade="all-delete-orphan" fetch="subselect">
+        <set name="determinations" cascade="all" fetch="subselect">
             <key>
-                <column name="SpecimenId"/>
+                <column name="SpecimenId" />
             </key>
-            <one-to-many class="edu.harvard.mcz.imagecapture.entity.Determination"/>
+            <one-to-many class="edu.harvard.mcz.imagecapture.entity.Determination" />
         </set>
         <set name="trackings" inverse="true" fetch="subselect">
             <key>
@@ -218,7 +218,7 @@
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.Tracking"/>
         </set>
-        <set name="numbers" cascade="all-delete-orphan" fetch="subselect">
+        <set name="numbers" cascade="all" fetch="subselect">
             <key>
                 <column name="SpecimenId"/>
             </key>
@@ -230,7 +230,7 @@
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.ICImage"/>
         </set>
-        <set name="specimenParts" cascade="all-delete-orphan" fetch="subselect">
+        <set name="specimenParts" cascade="all" fetch="subselect">
             <key>
                 <column name="SpecimenId"/>
             </key>

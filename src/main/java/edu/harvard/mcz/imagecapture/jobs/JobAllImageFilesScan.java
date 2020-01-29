@@ -164,7 +164,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
 
         // If it isn't null, retrieve the image base directory from properties, and test for read access.
         if (imageBase == null || !imageBase.canRead()) {
-            JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(), "Can't start scan. Don't know where images are stored. Set imagbase property.", "Can't Scan.", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(), "Can't start scan. Don't know where images are stored or can't read. Set imagebase property '" + ImageCaptureProperties.KEY_IMAGEBASE + "'. Does the path exist?", "Can't Scan.", JOptionPane.ERROR_MESSAGE);
             return;
         }
         startPoint = imageBase;

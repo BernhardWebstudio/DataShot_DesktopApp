@@ -84,6 +84,7 @@ public class Singleton {
     public ImageCaptureProperties getProperties() {
         if (properties == null) {
             // load a default properties if we haven't been given one yet.
+            log.debug("Recreating properties on request...");
             properties = new ImageCaptureProperties();
         }
         return properties;

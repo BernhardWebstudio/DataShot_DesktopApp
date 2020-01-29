@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Properties;
 
@@ -184,6 +185,12 @@ public class ImageCaptureProperties extends AbstractTableModel {
      * The maximum height for editor fields
      */
     public static final String KEY_MAX_FIELD_HEIGHT = "editor.fields.maxHeight";
+
+    public static final String KEY_DB_URL = "hibernate.connection.url";
+    public static final String KEY_DB_PASSWORD = "hibernate.connection.password";
+    public static final String KEY_DB_USER = "hibernate.connection.username";
+    public static final String KEY_DB_DIALECT = "hibernate.dialect";
+    public static final String KEY_DB_DRIVER = "hibernate.connection.driver_class";
 
 
     private static final Log log = LogFactory.getLog(ImageCaptureProperties.class);
@@ -586,6 +593,12 @@ public class ImageCaptureProperties extends AbstractTableModel {
             try {
                 propertiesStream = new FileInputStream(propertiesFilePath.toString());
                 properties.load(propertiesStream);
+                // test dump
+                /*Enumeration<Object> keys = properties.keys();
+                while (keys.hasMoreElements()) {
+                    String key = (String) keys.nextElement();
+                    log.debug("Got property: " + key + " with value " + properties.getProperty(key));
+                }*/
                 // Test to see if all properties are set in the loaded file
                 checkDefaults();
             } catch (FileNotFoundException e) {

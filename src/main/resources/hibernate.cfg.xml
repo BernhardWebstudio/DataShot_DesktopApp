@@ -5,12 +5,12 @@
 <hibernate-configuration>
     <session-factory>
         <!-- profile specific db config -->
-        <property name="connection.url">${hibernate.url}</property>
-        <property name="connection.username">${hibernate.user}</property>
-        <property name="connection.password">${hibernate.password}</property>
+        <property name="hibernate.connection.url">${hibernate.url}</property>
+        <property name="hibernate.connection.username">${hibernate.user}</property>
+        <property name="hibernate.connection.password">${hibernate.password}</property>
         <!-- global valid -->
-        <property name="dialect">org.hibernate.dialect.MySQLDialect</property>
-        <property name="connection.driver_class">com.mysql.cj.jdbc.Driver</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
         <property name="connection.pool_size">10</property>
         <property name="current_session_context_class">thread</property>
         <property name="show_sql">true</property>

@@ -47,6 +47,7 @@ import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 import edu.harvard.mcz.imagecapture.exceptions.OCRReadException;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
 import edu.harvard.mcz.imagecapture.ui.frame.BulkMediaFrame;
+import georegression.struct.shapes.Polygon2D_F64;
 import org.apache.commons.cli.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,7 +65,7 @@ import java.util.*;
 /**
  * Image File that might contain text that can be extracted by OCR or a barcode that
  * can be extracted by barcode recognition.
- *
+ * <p>
  * TODO: extract few methods to some DataExtractor class or something.
  * This class clearly does more than what's expected of a ("Candidate", Image) File
  */
@@ -382,6 +383,18 @@ public class CandidateImageFile {
         return result;
     }
 
+    private static String getQRCodeText(BinaryBitmap bitmap) throws NotFoundException, ChecksumException, FormatException {
+        Result result;
+        String returnValue;
+        QRCodeReader reader = new QRCodeReader();
+        Hashtable<DecodeHintType, Object> hints = null;
+        hints = new Hashtable<DecodeHintType, Object>(3);
+        hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
+        result = reader.decode(bitmap, hints);
+        returnValue = result.getText();
+        return returnValue;
+    }
+
     /**
      * Convenience method to check an image for a barcode.  Does not set any instance variables of CandidateImageFile,
      * and does not behave precisely as the getBarcodeText() methods.  Result state is not available from getBarcodeStatus()
@@ -471,18 +484,6 @@ public class CandidateImageFile {
         return returnValue;
     }
 
-    private static String getQRCodeText(BinaryBitmap bitmap) throws NotFoundException, ChecksumException, FormatException {
-        Result result;
-        String returnValue;
-        QRCodeReader reader = new QRCodeReader();
-        Hashtable<DecodeHintType, Object> hints = null;
-        hints = new Hashtable<DecodeHintType, Object>(3);
-        hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
-        result = reader.decode(bitmap, hints);
-        returnValue = result.getText();
-        return returnValue;
-    }
-
     /**
      * Read the barcode content from a portion of an image.
      *
@@ -532,7 +533,12 @@ public class CandidateImageFile {
 
             if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
                 // 3, try another barcode scanner
-                checkSourceForBarcode(image.getSubimage(left, top, width, height));
+                returnValue = checkSourceForBarcode(image.getSubimage(left, top, width, height));
+            }
+
+            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
+                // 3.5, try another barcode scanner, but this time "global"
+                returnValue = checkSourceForBarcodeAt(image, top, left, (int)(0.1 * Math.min(image.getWidth(), image.getHeight())));
             }
 
             if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
@@ -937,6 +943,47 @@ public class CandidateImageFile {
             }
         }
         return new TextStatus("", RESULT_ERROR);
+    }
+
+    /**
+     * Check an image source for a barcode using BoofCV scanner
+     *
+     * @param source   the image to check
+     * @param fromLeft  the expected x distance
+     * @param fromTop the expected y distance
+     * @return the status tuple
+     */
+    private TextStatus checkSourceForBarcodeAt(BufferedImage source, int fromLeft, int fromTop, int tol) {
+        GrayU8 gray = ConvertBufferedImage.convertFrom(source, (GrayU8) null);
+
+        QrCodeDetector<GrayU8> detector = FactoryFiducial.qrcode(null, GrayU8.class);
+
+        detector.process(gray);
+
+        // Get's a list of all the qr codes it could successfully detect and decode
+        List<QrCode> detections = detector.getDetections();
+        log.debug("BoofCV QRScanner found " + detections.size() + " barcodes. Will search for nearest. Additionally, failures: " + detector.getFailures().size());
+        Rectangle toleranceBounds = new Rectangle(fromTop, fromLeft, tol, tol);
+
+        for (QrCode detection : detections) {
+            //
+            if (this.intersect(detection.bounds, toleranceBounds)) {
+                return new TextStatus(detection.message, RESULT_BARCODE_SCANNED);
+            }
+        }
+
+        return new TextStatus("", RESULT_ERROR);
+    }
+
+    private boolean intersect(Polygon2D_F64 first, Rectangle second) {
+        assert first.vertexes.size == 4;
+
+        log.debug("BoofCV found QR with top-left: x0 = " + first.get(0).x + ", y0 = " + first.get(0).y);
+        Rectangle first_p = new Rectangle((int)first.get(0).x, (int)first.get(0).y, (int)Math.abs(first.get(2).x - first.get(0).x), (int)Math.abs(first.get(2).y - first.get(0).y));
+        log.debug("Translating to rectangle: x0 = " + first_p.x + ", y0 = " + first_p.y + ", x3 = " + (first_p.x + first_p.height) + ", y3 = " + (first_p.y + first_p.width));
+        log.debug("Using tolerance bounds: x0 = " + second.x + ", y0 = " + second.y + ", x3 = " + (second.x + second.height) + ", y3 = " + (second.y + second.width));
+        log.debug("Intersection: " + first_p.intersects(second));
+        return first_p.intersects(second);
     }
 
     /**

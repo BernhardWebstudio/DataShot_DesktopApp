@@ -363,7 +363,12 @@ public class MainFrame extends JFrame implements RunnerListener {
                     // remove the current user's browse (important if this is a userbrowse by an
                     // administrator.
                     jPanelCenter.removeAll();
-                    String oldUser = Singleton.getSingletonInstance().getUserFullName();
+                    String oldUser = "anon";
+                    try {
+                        oldUser = Singleton.getSingletonInstance().getUserFullName();
+                    } catch (NullPointerException ex) {
+                        // no one was logged in
+                    }
                     setState(MainFrame.STATE_RESET);
                     Singleton.getSingletonInstance().unsetCurrentUser();
                     HibernateUtil.terminateSessionFactory();
@@ -993,7 +998,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     }
 
     /**
-     * This method initializes jMenuItemPreprocessOneDir
+     * This method initializes jMenuItemPreprocessOneDir: menu to preprocess one directory
      *
      * @return javax.swing.JMenuItem
      */
@@ -1006,7 +1011,7 @@ public class MainFrame extends JFrame implements RunnerListener {
             try {
                 jMenuItemPreprocessOneDir.setIcon(new ImageIcon(this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));
             } catch (Exception e) {
-                log.error("Can't open icon file for jMenuItemScanOneBarcode.");
+                log.error("Can't open icon file for getJMenuItemPreprocessOne.");
                 log.error(e.getLocalizedMessage());
             }
             jMenuItemPreprocessOneDir.addActionListener(new java.awt.event.ActionListener() {

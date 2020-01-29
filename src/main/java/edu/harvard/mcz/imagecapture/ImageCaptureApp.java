@@ -142,10 +142,10 @@ public class ImageCaptureApp {
 
         log.debug(UIManager.getLookAndFeel().getID());
 
-        System.out.println("Starting " + APP_NAME + " " + APP_VERSION);
+        System.out.println("Starting " + APP_NAME + " " + getAppVersion());
         System.out.println(APP_COPYRIGHT);
         System.out.println(APP_LICENSE);
-        log.debug("Starting " + APP_NAME + " " + APP_VERSION);
+        log.debug("Starting " + APP_NAME + " " + getAppVersion());
 
         // open UI and start
         MainFrame mainFrame = new MainFrame();
@@ -154,11 +154,6 @@ public class ImageCaptureApp {
         Singleton.getSingletonInstance().setMainFrame(mainFrame);
         Singleton.getSingletonInstance().unsetCurrentUser();
         log.debug("User interface started");
-
-        // Load properties
-        ImageCaptureProperties properties = new ImageCaptureProperties();
-        Singleton.getSingletonInstance().setProperties(properties);
-        log.debug("Properties loaded");
 
         // Set up a barcode (text read from barcode label for pin) matcher/builder
         if (Singleton.getSingletonInstance().getProperties().getProperties()

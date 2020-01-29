@@ -191,9 +191,9 @@ public class TemplateLifeCycle {
                         "edu.harvard.mcz.imagecapture.entity.Template", id);
                 session.getTransaction().commit();
                 if (instance == null) {
-                    log.debug("get successful, no instance found");
+                    log.debug("template get successful, no instance found");
                 } else {
-                    log.debug("get successful, instance found");
+                    log.debug("template get successful, instance found");
                 }
 
             } catch (HibernateException e) {

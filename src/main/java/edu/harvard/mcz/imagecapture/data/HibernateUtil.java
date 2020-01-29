@@ -1,5 +1,6 @@
 package edu.harvard.mcz.imagecapture.data;
 
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.entity.Users;
 import edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycle;
@@ -15,6 +16,7 @@ import org.hibernate.service.spi.ServiceException;
 
 import java.awt.*;
 import java.awt.Dialog.ModalityType;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 
@@ -90,12 +92,14 @@ public class HibernateUtil {
                         Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                         Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Connecting to database");
                     }
-                    properties.setProperty("hibernate.connection.password", loginDialog.getDBPassword());
-                    properties.setProperty("hibernate.connection.username", loginDialog.getDBUserName());
-                    properties.setProperty("hibernate.connection.url", loginDialog.getConnection());
+                    properties.setProperty(ImageCaptureProperties.KEY_DB_PASSWORD, loginDialog.getDBPassword());
+                    properties.setProperty(ImageCaptureProperties.KEY_DB_USER, loginDialog.getDBUserName());
+                    properties.setProperty(ImageCaptureProperties.KEY_DB_URL, loginDialog.getConnection());
+                    properties.setProperty(ImageCaptureProperties.KEY_DB_DIALECT, loginDialog.getDialect());
+                    properties.setProperty(ImageCaptureProperties.KEY_DB_DRIVER, loginDialog.getDriver());
                     configuration.setProperties(properties);
                     // Now create the SessionFactory from this configuration
-                    log.debug(configuration.getProperty("hibernate.connection.url"));
+                    log.debug(configuration.getProperty(ImageCaptureProperties.KEY_DB_URL));
                     try {
                         sessionFactory = configuration.buildSessionFactory();
                     } catch (JDBCConnectionException | ServiceException ex) {
@@ -190,13 +194,14 @@ public class HibernateUtil {
     private static LoginDialog getLoginDialog(Configuration config, String status) {
         LoginDialog loginDialog = new LoginDialog();
         Properties settings = Singleton.getSingletonInstance().getProperties().getProperties();
-        // detect usage of placeholders, replace with settings if available
-        loginDialog.setConnection(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.url", "URL_PLACEHOLDER"));
-        loginDialog.setDialect(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.dialect", "DIALECT_PLACEHOLDER"));
-        loginDialog.setDriver(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.driver_class", "DRIVER_CLASS_PLACEHOLDER"));
+        Enumeration<Object> keys = settings.keys();
+        // Detect usage of placeholders, replace with settings if available
+        loginDialog.setConnection(HibernateUtil.getConfigOrSettingsValue(config, settings, ImageCaptureProperties.KEY_DB_URL, "URL_PLACEHOLDER"));
+        loginDialog.setDialect(HibernateUtil.getConfigOrSettingsValue(config, settings, ImageCaptureProperties.KEY_DB_DIALECT, "DIALECT_PLACEHOLDER"));
+        loginDialog.setDriver(HibernateUtil.getConfigOrSettingsValue(config, settings, ImageCaptureProperties.KEY_DB_DRIVER, "DRIVER_CLASS_PLACEHOLDER"));
         // If the database username(schema) and password are present load them as well.
-        loginDialog.setDBUserName(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.username", "USER_PLACEHOLDER"));
-        loginDialog.setDBPassword(HibernateUtil.getConfigOrSettingsValue(config, settings, "hibernate.connection.password", "PASSWORD_PLACEHOLDER"));
+        loginDialog.setDBUserName(HibernateUtil.getConfigOrSettingsValue(config, settings, ImageCaptureProperties.KEY_DB_USER, "USER_PLACEHOLDER"));
+        loginDialog.setDBPassword(HibernateUtil.getConfigOrSettingsValue(config, settings, ImageCaptureProperties.KEY_DB_PASSWORD, "PASSWORD_PLACEHOLDER"));
         // Display the LoginDialog as a modal dialog
         loginDialog.setModalityType(ModalityType.APPLICATION_MODAL);
         loginDialog.setVisible(true);
@@ -207,18 +212,22 @@ public class HibernateUtil {
     }
 
     /**
-     * Get a value from settings by key if it has the value in config, else from config
+     * Get a value from settings by key if it has the value, else from config
      *
-     * @param config
-     * @param settings
-     * @param key
-     * @param value
+     * @param config the config to be treated as a better default
+     * @param settings the properties overwriting config, but only if config is still default ("placeholder")
+     * @param key the property key to get the config/setting by
+     * @param value the default we do not want, except we have nothing else
      * @return the value of the property
      */
     private static String getConfigOrSettingsValue(Configuration config, Properties settings, String key, String value) {
-        if (config.getProperty(key) != null && config.getProperty(key).equals(value)) {
+        Enumeration<Object> keys = settings.keys();
+//        if (config.getProperty(key) == null || config.getProperty(key).equals(value)) {
+        if (!settings.getProperty(key, value).equals(value)) {
+//          log.debug("Found value = '" + value + "' for key " + key + ", getting " + settings.getProperty(key, value));
             return settings.getProperty(key, value);
         } else {
+//          log.debug("Did not find value = '" + value + "' for key " + key + ", getting " + config.getProperty(key) + " vs. " + settings.getProperty(key, value));
             return config.getProperty(key);
         }
     }

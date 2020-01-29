@@ -155,23 +155,23 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         // PositionTemplate template = new PositionTemplate(templateId);
         // // Found a barcode in a templated position in the image.
         // // ** Scan the file based on this template.
-        // scannableFile = new CandidateImageFile(fileToCheck, template);
+        // candidateImageFile = new CandidateImageFile(fileToCheck, template);
 
         // Construct a CandidateImageFile with constructor that self detects template
-        CandidateImageFile scannableFile = new CandidateImageFile(containedFile);
-        PositionTemplate template = scannableFile.getTemplateUsed();
+        CandidateImageFile candidateImageFile = new CandidateImageFile(containedFile);
+        PositionTemplate template = candidateImageFile.getTemplateUsed();
         String templateId = template.getName();
         log.debug("Detected Template: " + templateId);
-        log.debug(scannableFile.getCatalogNumberBarcodeStatus());
-        String barcode = scannableFile.getBarcodeTextAtFoundTemplate();
-        if (scannableFile.getCatalogNumberBarcodeStatus() != CandidateImageFile.RESULT_BARCODE_SCANNED) {
+        log.debug(candidateImageFile.getCatalogNumberBarcodeStatus());
+        String barcode = candidateImageFile.getBarcodeTextAtFoundTemplate();
+        if (candidateImageFile.getCatalogNumberBarcodeStatus() != CandidateImageFile.RESULT_BARCODE_SCANNED) {
             log.error("Error scanning for barcode: " + barcode);
             barcode = "";
         }
         log.debug("Barcode: " + barcode);
-        String exifComment = scannableFile.getExifUserCommentText();
+        String exifComment = candidateImageFile.getExifUserCommentText();
         log.debug("ExifComment: " + exifComment);
-        UnitTrayLabel labelRead = scannableFile.getTaxonLabelQRText(template);
+        UnitTrayLabel labelRead = candidateImageFile.getTaxonLabelQRText(template);
         TaxonNameReturner parser;
         String rawOCR;
         String state;
@@ -183,13 +183,13 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
             parser = labelRead;
         } else {
             try {
-                rawOCR = scannableFile.getTaxonLabelOCRText(template);
+                rawOCR = candidateImageFile.getTaxonLabelOCRText(template);
             } catch (OCRReadException e) {
                 log.error(e);
                 rawOCR = "";
                 log.error("Couldn't OCR file." + e.getMessage());
                 RunnableJobError error = new RunnableJobError(image.getFilename(), "OCR Failed",
-                        barcode, exifComment, "Couldn't find text to OCR",
+                        barcode, exifComment, "Couldn't find text to OCR for taxon label.",
                         null, null,
                         e, RunnableJobError.TYPE_NO_TEMPLATE);
                 counter.appendError(error);
@@ -272,8 +272,6 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         if (image.getMd5sum() == null || image.getMd5sum().length() == 0) {
             try {
                 image.setMd5sum(DigestUtils.md5Hex(new FileInputStream(containedFile)));
-            } catch (FileNotFoundException e) {
-                log.error(e.getMessage());
             } catch (IOException e) {
                 log.error(e.getMessage());
             }

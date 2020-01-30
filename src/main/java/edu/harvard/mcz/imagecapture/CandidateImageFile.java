@@ -538,7 +538,7 @@ public class CandidateImageFile {
 
             if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
                 // 3.5, try another barcode scanner, but this time "global"
-                returnValue = checkSourceForBarcodeAt(image, top, left, (int)(0.1 * Math.min(image.getWidth(), image.getHeight())));
+                returnValue = checkSourceForBarcodeAt(image, (int)(top + (height / 2.0)), (int)(left + (width / 2.0)), (int)(Math.max(width, height) + 0.1 * Math.min(image.getWidth(), image.getHeight())));
             }
 
             if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {

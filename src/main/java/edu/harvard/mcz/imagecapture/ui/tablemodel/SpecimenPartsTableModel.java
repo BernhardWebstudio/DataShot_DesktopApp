@@ -101,6 +101,10 @@ public class SpecimenPartsTableModel extends AbstractTableModel {
      */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
+        if (rowIndex >= specimenParts.size()) {
+            log.warn("Cannot get value at row, col: " + rowIndex + ", " + columnIndex  + " due to size " + specimenParts.size() + " in SpecimenPartsTable");
+            return null;
+        }
         Object result = null;
         switch (columnIndex) {
             case 0:
@@ -118,6 +122,9 @@ public class SpecimenPartsTableModel extends AbstractTableModel {
             case 4:
                 result = specimenParts.toArray()[rowIndex];
                 break;
+            default:
+                log.warn("Undefined column with index " + columnIndex);
+                break;
         }
         return result;
     }
@@ -127,6 +134,10 @@ public class SpecimenPartsTableModel extends AbstractTableModel {
      */
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        if (rowIndex >= specimenParts.size()) {
+            log.warn("Cannot set value " + aValue.toString() + " due to size " + specimenParts.size() + " in SpecimenPartsTable at row, col: " + rowIndex + ", " + columnIndex);
+            return;
+        }
         switch (columnIndex) {
             case 0:
                 ((SpecimenPart) specimenParts.toArray()[rowIndex]).setPartName((String) aValue);
@@ -140,6 +151,9 @@ public class SpecimenPartsTableModel extends AbstractTableModel {
             case 3:
                 break;
             case 4:
+                break;
+            default:
+                log.warn("Undefined column with index " + columnIndex);
                 break;
         }
     }

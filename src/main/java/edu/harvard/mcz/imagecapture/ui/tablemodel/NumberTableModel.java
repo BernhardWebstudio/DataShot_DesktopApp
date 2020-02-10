@@ -80,6 +80,10 @@ public class NumberTableModel extends AbstractTableModel {
      */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
+        if (rowIndex >= numbers.size()) {
+            log.warn("Tried to get value in NumberTable at rowIndex higher than row count; rowIndex: " + rowIndex + "; columnIndex: " + columnIndex);
+            return null;
+        }
         Object returnvalue = null;
         switch (columnIndex) {
             case 0:
@@ -105,7 +109,7 @@ public class NumberTableModel extends AbstractTableModel {
      */
     @Override
     public void setValueAt(Object value, int rowIndex, int columnIndex) {
-        if (!(numbers.size() <= rowIndex)) {
+        if (rowIndex >= numbers.size()) {
             log.warn("Tried to set value in number table at rowIndex higher than row count; rowIndex: " + rowIndex + "; columnIndex: " + columnIndex + "; value: " + value);
             return;
         }

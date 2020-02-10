@@ -77,97 +77,98 @@ public class SpecimenDetailsViewPane extends JPanel {
     private SpecimenController specimenController = null;
     private int state;   // dirty if data in controls has been changed and not saved to specimen.
 
-    private JTextField jTextFieldStatus = null;
-    private JPanel jPanel = null;
-    private JTextField jTextFieldBarcode = null;
-    private JTextField jTextFieldGenus = null;
-    private JTextField jTextFieldSpecies = null;
-    private JTextField jTextFieldSubspecies = null;
-    private JTextField jTextFieldLocality = null;
-    private JButton jButtonSave = null;
-    private JComboBox<String> jComboBoxCollection = null;
-    private JTextField jTextFieldLastUpdatedBy = null;
-    private JScrollPane jScrollPaneCollectors = null;
-    private JTable jTableCollectors = null;
-    private JScrollPane jScrollPaneSpecimenParts = null;
-    private JTable jTableSpecimenParts = null;
-    private JScrollPane jScrollPaneNumbers = null;
-    private JTable jTableNumbers = null;
 
-    private int clickedOnPartsRow;
-    private JPopupMenu jPopupSpecimenParts;
-    private int clickedOnCollsRow;
-    private JPopupMenu jPopupCollectors;
-    private int clickedOnNumsRow;
-    private JPopupMenu jPopupNumbers;
 
-    private JTextField jTextFieldDateLastUpdated = null;
-    private JTextField jTextFieldCreator = null;
-    private JTextField jTextFieldDateCreated = null;
-    private JButton jButtonNumbersAdd = null;
-    private JButton jButtonCollectorAdd = null;
-    private JTextField jTextFieldDrawerNumber = null;
-    private JTextField jTextFieldVerbatimLocality = null;
-    private FilteringGeogJComboBox comboBoxHigherGeog;
-    private StringBuffer higherGeogNotFoundWarning = new StringBuffer();
-    private JButton jButtonGeoReference = null;
-    //private JTextField jTextFieldCountry = null;
-    private JComboBox<String> jComboBoxCountry = null;
+
+    // private JTextField jTextFieldPreparationType = null;
     //allie change
+    //private JTextField jTextFieldCountry = null;
     //private JTextField jTextFieldPrimaryDivision = null;
-    private JComboBox<String> jComboBoxPrimaryDivision = null;
+    private FilteringGeogJComboBox comboBoxHigherGeog;
+    private JButton dateEmergedButton = null;
+    private JButton dateCollectedButton = null;
+    private JButton jButtonAddPreparationType;
+    private JButton jButtonCollectorAdd = null;
+    private JButton jButtonCopy = null;
+    private JButton jButtonDeterminations = null;
+    private JButton jButtonGeoReference = null;
+    private JButton jButtonGetHistory = null;
+    private JButton jButtonNext = null;
+    private JButton jButtonNumbersAdd = null;
+    private JButton jButtonPaste = null;
+    private JButton jButtonPrevious = null;
+    private JButton jButtonSave = null;
+    private JButton jButtonSpecificLocality = null;
+    private JCheckBox jCheckBoxValidDistributionFlag = null;
+    private JComboBox<String> cbTypeStatus;
+    private JComboBox<String> comboBoxElevUnits = null;
+    private JComboBox<String> jCBDeterminer = null;
+    private JComboBox<String> jComboBoxCollection = null;
+    private JComboBox<String> jComboBoxCountry = null;
     private JComboBox<String> jComboBoxFamily = null;
-    private JComboBox<String> jComboBoxSubfamily = null;
-    private JTextField jTextFieldTribe = null;
-    private JComboBox<String> jComboBoxSex = null;
     private JComboBox<String> jComboBoxFeatures = null;
     private JComboBox<String> jComboBoxLifeStage = null;
-    private JTextField jTextFieldDateNos = null;
-    private JTextField jTextFieldDateEmerged = null;
-    private JTextField jTextFieldDateEmergedIndicator = null;
+    private JComboBox<String> jComboBoxLocationInCollection = null;
+    private JComboBox<String> jComboBoxNatureOfId;
+    private JComboBox<String> jComboBoxPrimaryDivision = null;
+    private JComboBox<String> jComboBoxSex = null;
+    private JComboBox<String> jComboBoxSubfamily = null;
+    private JComboBox<String> jComboBoxWorkflowStatus = null;
+    private JLabel jLabelDBId = null;
+    private JPanel jPanel = null;
+    private JPanel jPanel1 = null;   // panel for navigation buttons
+    private JPopupMenu jPopupCollectors;
+    private JPopupMenu jPopupNumbers;
+    private JPopupMenu jPopupSpecimenParts;
+    private JScrollPane jScrollPaneCollectors = null;
+    private JScrollPane jScrollPaneNotes = null;
+    private JScrollPane jScrollPaneNumbers = null;
+    private JScrollPane jScrollPaneSpecimenParts = null;
+    private JTable jTableCollectors = null;
+    private JTable jTableNumbers = null;
+    private JTable jTableSpecimenParts = null;
+    private JTextArea jTextAreaSpecimenNotes = null;
+    private JTextField jTextFieldAssociatedTaxon = null;
+    private JTextField jTextFieldAuthorship = null;
+    private JTextField jTextFieldBarcode = null;
+    private JTextField jTextFieldCitedInPub = null;
+    private JTextField jTextFieldCollectingMethod = null;
+    private JTextField jTextFieldCreator = null;
     private JTextField jTextFieldDateCollected = null;
     private JTextField jTextFieldDateCollectedIndicator = null;
+    private JTextField jTextFieldDateCreated = null;
+    private JTextField jTextFieldDateDetermined;
+    private JTextField jTextFieldDateEmerged = null;
+    private JTextField jTextFieldDateEmergedIndicator = null;
+    private JTextField jTextFieldDateLastUpdated = null;
+    private JTextField jTextFieldDateNos = null;
+    private JTextField jTextFieldDrawerNumber = null;
+    private JTextField jTextFieldGenus = null;
+    private JTextField jTextFieldHabitat = null;
+    private JTextField jTextFieldISODate = null;
+    private JTextField jTextFieldIdRemarks;
+    private JTextField jTextFieldImageCount = null;
+    private JTextField jTextFieldInferences = null;
     private JTextField jTextFieldInfraspecificEpithet = null;
     private JTextField jTextFieldInfraspecificRank = null;
-    private JTextField jTextFieldAuthorship = null;
-    private JTextField jTextFieldUnnamedForm = null;
-    private JTextField jTextFieldMinElevation = null;
-    private JTextField textFieldMaxElev = null;
-    private JComboBox<String> comboBoxElevUnits = null;
-    private JTextField jTextFieldCollectingMethod = null;
-    private JTextArea jTextAreaSpecimenNotes = null;
-    private JCheckBox jCheckBoxValidDistributionFlag = null;
+    private JTextField jTextFieldLastUpdatedBy = null;
+    private JTextField jTextFieldLocality = null;
     private JTextField jTextFieldMigrationStatus = null;
+    private JTextField jTextFieldMinElevation = null;
     private JTextField jTextFieldQuestions = null;
-    // private JTextField jTextFieldPreparationType = null;
-    private JButton jButtonAddPreparationType;
-    private JTextField jTextFieldAssociatedTaxon = null;
-    private JTextField jTextFieldHabitat = null;
-    private JComboBox<String> jComboBoxWorkflowStatus = null;
-    private JComboBox<String> jComboBoxLocationInCollection = null;
-    private JTextField jTextFieldInferences = null;
-    private JButton jButtonGetHistory = null;
-    private JButton jButtonPaste = null;
-    private JButton jButtonCopy = null;
-    private JButton jButtonNext = null;
-    private SpecimenDetailsViewPane thisPane = null;
-    private JButton jButtonPrevious = null;
-    private JPanel jPanel1 = null;   // panel for navigation buttons
-    private JTextField jTextFieldISODate = null;
-    private JButton jButtonDeterminations = null;
-    private JTextField jTextFieldCitedInPub = null;
-    private JScrollPane jScrollPaneNotes = null;
-    private JButton jButton1 = null;
-    private JButton jButton2 = null;
-    private JButton jButtonSpecificLocality = null;
-    private JTextField jTextFieldImageCount = null;
+    private JTextField jTextFieldSpecies = null;
+    private JTextField jTextFieldStatus = null;
+    private JTextField jTextFieldSubspecies = null;
+    private JTextField jTextFieldTribe = null;
+    private JTextField jTextFieldUnnamedForm = null;
+    private JTextField jTextFieldVerbatimLocality = null;
+    private JTextField textFieldMaxElev = null;
     private JTextField textFieldMicrohabitat = null;
-    private JComboBox<String> jComboBoxNatureOfId;
-    private JTextField jTextFieldDateDetermined;
-    private JComboBox<String> jCBDeterminer = null;
-
-    private JTextField jTextFieldIdRemarks;
-    private JComboBox<String> cbTypeStatus;
+    private SpecimenDetailsViewPane thisPane = null;
+    private StringBuffer higherGeogNotFoundWarning = new StringBuffer();
+    private int clickedOnCollsRow;
+    private int clickedOnNumsRow;
+    private int clickedOnPartsRow;
 
     /**
      * Construct an instance of a SpecimenDetailsViewPane showing the data present
@@ -175,7 +176,7 @@ public class SpecimenDetailsViewPane extends JPanel {
      *
      * @param aSpecimenInstance the Specimen instance to display for editing.
      */
-    public SpecimenDetailsViewPane(Specimen aSpecimenInstance, SpecimenController aControler) {
+    public SpecimenDetailsViewPane(Specimen aSpecimenInstance, SpecimenController aController) {
         specimen = aSpecimenInstance;
         SpecimenLifeCycle s = new SpecimenLifeCycle();
         setStateToClean();
@@ -197,7 +198,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 //		}
         try {
             s.attachClean(specimen);
-            specimenController = aControler;
+            specimenController = aController;
             initialize();
             setValues();
         } catch (Exception e) {
@@ -435,6 +436,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 
             specimen.setQuestions(jTextFieldQuestions.getText());
             try {
+                // make sure specimen controller does not throw null pointer exception – whyever
+                if (specimenController.getSpecimen() == null) {
+                    specimenController.setSpecimen(specimen);
+                }
                 specimenController.save();   // save the record
                 setStateToClean();    // enable the navigation buttons
                 this.setStatus("Saved");  // inform the user
@@ -448,10 +453,16 @@ public class SpecimenDetailsViewPane extends JPanel {
             }
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
             Singleton.getSingletonInstance().getMainFrame().setCount(sls.findSpecimenCount());
-        } catch (Exception e) {
+        } catch (OptimisticLockException e) {
+            // Oh, well. Issues with foreign keys already deleting items, which are not found afterwards.
+            // We catch these here and silence them. TODO: resolve by changing database structure
+            // We might also catch unwanted ones; böh, too bad – alert the user just in case.
+            log.error(e);
+            this.setWarning("Error: " + e.getMessage());
+        }catch (Exception e) {
             // trap any exception and notify the user
             setStateToDirty();    // disable the navigation buttons
-            this.setWarning("Error. " + e.getMessage());
+            this.setWarning("Error: " + e.getMessage());
             log.error(e);
             throw e;
         }
@@ -867,7 +878,8 @@ public class SpecimenDetailsViewPane extends JPanel {
             // row
             this.addBasicJLabel(jPanel, "ID Date");
             jPanel.add(this.getJTextFieldDateDetermined(), "grow");
-            jPanel.add(this.getDetsJButton(), "span 2");
+            jPanel.add(this.getDetsJButton());
+            jPanel.add(this.getDBIdLabel());
             // row
             this.addBasicJLabel(jPanel, "ID Remark");
             jPanel.add(this.getJTextFieldIdRemarks(), "grow, span 3");
@@ -986,6 +998,18 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPanel.add(this.getSaveJButton(), "tag apply");//, "sizegroup controls");
         }
         return jPanel;
+    }
+
+    private JLabel getDBIdLabel() {
+        if (jLabelDBId == null){
+            jLabelDBId = new JLabel();
+        }
+        updateDBIdLabel();
+        return jLabelDBId;
+    }
+
+    private void updateDBIdLabel() {
+        this.jLabelDBId.setText("DataBase ID: " + specimen.getSpecimenId());
     }
 
     private void addBasicJLabel(JPanel target, String labelText) {
@@ -2542,15 +2566,6 @@ public class SpecimenDetailsViewPane extends JPanel {
         }
         return jScrollPaneNotes;
     }
-	
-	/*private JTextField getJScrollPaneNotes() {
-		if (jScrollPaneNotes == null) {
-			jScrollPaneNotes = new JTextField();
-			//jScrollPaneNotes.setViewportView(getJTextAreaNotes());
-			jScrollPaneNotes.add(getJTextAreaNotes()); //allie!!!
-		}
-		return jScrollPaneNotes;
-	}*/
 
     /**
      * This method initializes jButton1
@@ -2558,10 +2573,11 @@ public class SpecimenDetailsViewPane extends JPanel {
      * @return javax.swing.JButton
      */
     private JButton getDateEmergedJButton() {
-        if (jButton1 == null) {
-            jButton1 = new JButton();
-            jButton1.setText("Date Emerged");
-            jButton1.addActionListener(new java.awt.event.ActionListener() {
+        if (dateEmergedButton == null) {
+            dateEmergedButton = new JButton();
+            dateEmergedButton.setText("Date Emerged");
+            dateEmergedButton.setToolTipText("Fill date emerged with data from verbatim date");
+            dateEmergedButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (jTextFieldDateNos.getText().equals("")) {
                         jTextFieldDateNos.setText(jTextFieldDateEmerged.getText());
@@ -2571,7 +2587,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                 }
             });
         }
-        return jButton1;
+        return dateEmergedButton;
     }
 
     /**
@@ -2580,10 +2596,11 @@ public class SpecimenDetailsViewPane extends JPanel {
      * @return javax.swing.JButton
      */
     private JButton getDateCollectedJButton() {
-        if (jButton2 == null) {
-            jButton2 = new JButton();
-            jButton2.setText("Date Collected");
-            jButton2.addActionListener(new java.awt.event.ActionListener() {
+        if (dateCollectedButton == null) {
+            dateCollectedButton = new JButton();
+            dateCollectedButton.setText("Date Collected");
+            dateCollectedButton.setToolTipText("Fill date collected with data from verbatim date");
+            dateCollectedButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (jTextFieldDateNos.getText().equals("")) {
                         jTextFieldDateNos.setText(jTextFieldDateCollected.getText());
@@ -2593,7 +2610,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                 }
             });
         }
-        return jButton2;
+        return dateCollectedButton;
     }
 
     /**
@@ -2605,6 +2622,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (jButtonSpecificLocality == null) {
             jButtonSpecificLocality = new JButton();
             jButtonSpecificLocality.setText("Specific Locality");
+            jButtonSpecificLocality.setToolTipText("Fill specific locality with data from verbatim locality");
             jButtonSpecificLocality.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     if (jTextFieldVerbatimLocality.getText().equals("")) {
@@ -2669,33 +2687,6 @@ public class SpecimenDetailsViewPane extends JPanel {
         }
     }
 
-    /*
-
-    private FilteringGeogJComboBox getComboBoxHighGeog() {
-        if (comboBoxHigherGeog == null) {
-            MCZbaseGeogAuthRecLifeCycle mls = new MCZbaseGeogAuthRecLifeCycle();
-            comboBoxHigherGeog = new FilteringGeogJComboBox();
-            comboBoxHigherGeog.setHGModel(new HigherGeographyComboBoxModel(mls.findAll()));
-            comboBoxHigherGeog.setEditable(true);
-            comboBoxHigherGeog.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    log.debug(e.getActionCommand());
-                    comboBoxHigherGeog.getSelectedIndex();
-                    log.debug(comboBoxHigherGeog.getSelectedItem());
-                    log.debug("Selected Index: " + comboBoxHigherGeog.getSelectedIndex());
-                    MCZbaseGeogAuthRec utl = (MCZbaseGeogAuthRec) ((HigherGeographyComboBoxModel)comboBoxHigherGeog.getModel()).getSelectedItem();
-                    if (utl==null) {
-                        log.debug("null");
-                    } else {
-                        log.debug(utl.getHigher_geog());
-                        specimen.setHigherGeography(utl.getHigher_geog());
-                        comboBoxHigherGeog.setBackground(Color.WHITE);
-                    }
-                }
-            });
-        }
-        return comboBoxHigherGeog;
-    }*/
     private JTextField getTextFieldMaxElev() {
         if (textFieldMaxElev == null) {
             textFieldMaxElev = new JTextField();
@@ -2768,36 +2759,6 @@ public class SpecimenDetailsViewPane extends JPanel {
      *
      * @return FilteringAgentJComboBox
      */
-    //original code
-	/*private FilteringAgentJComboBox getJCBDeterminer() {
-		if (jCBDeterminer == null) {
-			jCBDeterminer = new FilteringAgentJComboBox();
-			jCBDeterminer.setEditable(true);
-			jCBDeterminer.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "IdentifiedBy"));
-			jCBDeterminer.addKeyListener(new java.awt.event.KeyAdapter() {
-				public void keyTyped(java.awt.event.KeyEvent e) {
-					thisPane.setStateToDirty();
-				}
-			});
-		}
-		return jCBDeterminer;
-	}	*/
-
-    //allie change 1
-	/*private JTextField getJCBDeterminer() {
-		if (jCBDeterminer == null) {
-			jCBDeterminer = new JTextField();
-			jCBDeterminer.setEditable(true);
-			jCBDeterminer.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "IdentifiedBy"));
-			jCBDeterminer.addKeyListener(new java.awt.event.KeyAdapter() {
-				public void keyTyped(java.awt.event.KeyEvent e) {
-					thisPane.setStateToDirty();
-				}
-			});
-		}
-		return jCBDeterminer;
-	}*/
-    //allie change 2
     private JComboBox<String> getJCBDeterminer() {
         log.debug("calling getJCBDeterminer() ... it is " + jCBDeterminer);
         if (jCBDeterminer == null) {
@@ -2861,5 +2822,6 @@ public class SpecimenDetailsViewPane extends JPanel {
         updateJButtonGeoreference();
         updateDeterminationCount();
         updateJButtonPaste();
+        updateDBIdLabel();
     }
-}  //  @jve:decl-index=0:visual-constraint="10,15"
+}

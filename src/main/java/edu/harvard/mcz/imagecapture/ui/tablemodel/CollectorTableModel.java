@@ -91,6 +91,11 @@ public class CollectorTableModel extends AbstractTableModel {
      */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
+        if (rowIndex >= collectors.size()) {
+            log.warn("Cannot get value at row, col: " + rowIndex + ", " + columnIndex  + " due to size " + collectors.size() + " in CollectorTable");
+            return null;
+        }
+
         Object returnvalue = null;
         returnvalue = ((Collector) collectors.toArray()[rowIndex]).getCollectorName();
         return returnvalue;
@@ -110,6 +115,11 @@ public class CollectorTableModel extends AbstractTableModel {
      */
     @Override
     public void setValueAt(Object value, int rowIndex, int columnIndex) {
+        if (rowIndex >= collectors.size()) {
+            log.warn("Cannot set value " + value.toString() + " due to size " + collectors.size() + " in CollectorTable at row, col: " + rowIndex + ", " + columnIndex);
+            return;
+        }
+
         try {
             //Original code from Paul - caused issues
             //((Collector)collectors.toArray()[rowIndex]).setCollectorName((String)value);

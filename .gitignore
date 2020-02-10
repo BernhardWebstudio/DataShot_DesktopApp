@@ -19,3 +19,6 @@ jobreport*csv
 /profiles/test/config.properties
 /profiles/prod/config.properties
 dependency-reduced-pom.xml
+DataShot.iml
+DataShot-*.jar
+imagecapture*.log

@@ -232,6 +232,14 @@ public class SpecimenController {
         return result;
     }
 
+    public boolean setSpecimen(Specimen aSpecimen) {
+        if (aSpecimen != null) {
+            specimen = aSpecimen;
+            return true;
+        }
+        return false;
+    }
+
     public boolean setSpecimen(Long aSpecimenID) throws NoSuchRecordException {
         boolean result = false;
         SpecimenLifeCycle sls = new SpecimenLifeCycle();
@@ -270,7 +278,10 @@ public class SpecimenController {
         // reload the specimen
         // Why??? Because we can. Also, to kinda show if more than one
         // user edited the same species
-        specimen = s.findById(specimen.getSpecimenId());
+        Specimen updatedSpecimen = s.findById(specimen.getSpecimenId());
+        if (updatedSpecimen != null) {
+            specimen = updatedSpecimen;
+        }
         return result;
     }
 

@@ -236,13 +236,13 @@
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.SpecimenPart"/>
         </set>
-        <set name="LatLong" cascade="all-delete-orphan" fetch="subselect">
+        <set name="LatLong" cascade="all" fetch="subselect">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.LatLong"/>
         </set>
-        <set name="externalHistory" cascade="all-delete-orphan" fetch="subselect">
+        <set name="externalHistory" cascade="all" fetch="subselect">
             <key>
                 <column name="SpecimenId"/>
             </key>

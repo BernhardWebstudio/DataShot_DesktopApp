@@ -710,11 +710,10 @@ public class ImageDisplayFrame extends JFrame {
                         log.debug("No selected item");
                     } else {
                         try {
-                            boolean hasParameter = false;
                             String filename = jComboBoxImagePicker.getSelectedItem() != null ? jComboBoxImagePicker.getSelectedItem().toString() : null;
                             if (filename != null && targetSpecimen != null) {
                                 // find matching images, set first one as the display image.
-                                Set<ICImage> images = null;
+                                Set<ICImage> images;
                                 if (targetSpecimen.getICImages() == null) {
                                     ICImageLifeCycle ils = new ICImageLifeCycle();
                                     images = new HashSet<>(ils.findBy(new HashMap<String, Object>() {
@@ -737,7 +736,7 @@ public class ImageDisplayFrame extends JFrame {
                                         log.debug("image path is " + image.getPath());
                                         log.debug("target specimen bar code is " + targetSpecimen.getBarcode());
                                         log.debug("image specimen barcode is " + image.getSpecimen().getBarcode());
-                                        if (image.getFilename().equals(filename) || image.getPath().equals("") || image.getPath().toUpperCase().contains(".JPG") || image.getSpecimen() == null || !image.getSpecimen().getBarcode().equals(targetSpecimen.getBarcode())) {
+                                        if (!image.getFilename().equals(filename) || image.getPath().equals("") || image.getPath().toUpperCase().contains(".JPG") || image.getSpecimen() == null || !image.getSpecimen().getBarcode().equals(targetSpecimen.getBarcode())) {
                                             // wrong path or filename
                                             log.debug("WrongFile: " + image.getPath());
                                         } else {

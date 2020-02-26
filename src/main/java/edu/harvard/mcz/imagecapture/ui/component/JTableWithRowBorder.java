@@ -1,14 +1,16 @@
 package edu.harvard.mcz.imagecapture.ui.component;
 
+import edu.harvard.mcz.imagecapture.ui.DataShotColors;
+
 import javax.swing.*;
 import javax.swing.border.MatteBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 
-public class TableWithRowBorder extends JTable {
+public class JTableWithRowBorder extends JTable {
 
-    public TableWithRowBorder(AbstractTableModel tableModel) {
+    public JTableWithRowBorder(AbstractTableModel tableModel) {
         super(tableModel);
     }
 
@@ -21,10 +23,10 @@ public class TableWithRowBorder extends JTable {
         //  Color row based on a cell value
         //  Alternate row color
         if (!isRowSelected(row)) {
-            c.setBackground(row % 2 == 0 ? getBackground() : Color.LIGHT_GRAY);
+            c.setBackground(row % 2 == 0 ? getBackground() : DataShotColors.VERY_LIGHT_GRAY);
         }
 
-        jc.setBorder(new MatteBorder(0, 0, 1, 0, Color.BLACK));
+        jc.setBorder(new MatteBorder(0, 0, 1, 0, DataShotColors.VERY_DARK_GRAY));
 
 
         //  Use bold font on selected row

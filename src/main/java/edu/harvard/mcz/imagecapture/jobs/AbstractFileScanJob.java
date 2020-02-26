@@ -258,6 +258,8 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         image.setRawBarcode(barcode);
         if (isSpecimenImage) {
             createDatabaseRecordForSpecimen(containedFile, counter, image, barcode, exifComment, parser, labelRead, state);
+            // reattach as we force a save by having cascade= all
+            reattach = true;
         }
         if (isDrawerImage) {
             image.setDrawerNumber(exifComment);

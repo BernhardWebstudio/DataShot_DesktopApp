@@ -25,6 +25,7 @@ import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.image.GrayU8;
 import com.adobe.internal.xmp.XMPException;
 import com.adobe.internal.xmp.XMPMeta;
+import com.adobe.internal.xmp.properties.XMPProperty;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.imaging.jpeg.JpegMetadataReader;
@@ -538,7 +539,7 @@ public class CandidateImageFile {
 
             if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
                 // 3.5, try another barcode scanner, but this time "global"
-                returnValue = checkSourceForBarcodeAt(image, (int)(top + (height / 2.0)), (int)(left + (width / 2.0)), (int)(Math.max(width, height) + 0.1 * Math.min(image.getWidth(), image.getHeight())));
+                returnValue = checkSourceForBarcodeAt(image, (int) (top + (height / 2.0)), (int) (left + (width / 2.0)), (int) (Math.max(width, height) + 0.1 * Math.min(image.getWidth(), image.getHeight())));
             }
 
             if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
@@ -949,8 +950,8 @@ public class CandidateImageFile {
      * Check an image source for a barcode using BoofCV scanner
      *
      * @param source   the image to check
-     * @param fromLeft  the expected x distance
-     * @param fromTop the expected y distance
+     * @param fromLeft the expected x distance
+     * @param fromTop  the expected y distance
      * @return the status tuple
      */
     private TextStatus checkSourceForBarcodeAt(BufferedImage source, int fromLeft, int fromTop, int tol) {
@@ -979,7 +980,7 @@ public class CandidateImageFile {
         assert first.vertexes.size == 4;
 
         log.debug("BoofCV found QR with top-left: x0 = " + first.get(0).x + ", y0 = " + first.get(0).y);
-        Rectangle first_p = new Rectangle((int)first.get(0).x, (int)first.get(0).y, (int)Math.abs(first.get(2).x - first.get(0).x), (int)Math.abs(first.get(2).y - first.get(0).y));
+        Rectangle first_p = new Rectangle((int) first.get(0).x, (int) first.get(0).y, (int) Math.abs(first.get(2).x - first.get(0).x), (int) Math.abs(first.get(2).y - first.get(0).y));
         log.debug("Translating to rectangle: x0 = " + first_p.x + ", y0 = " + first_p.y + ", x3 = " + (first_p.x + first_p.height) + ", y3 = " + (first_p.y + first_p.width));
         log.debug("Using tolerance bounds: x0 = " + second.x + ", y0 = " + second.y + ", x3 = " + (second.x + second.height) + ", y3 = " + (second.y + second.width));
         log.debug("Intersection: " + first_p.intersects(second));
@@ -1193,10 +1194,13 @@ public class CandidateImageFile {
 					 */
                         XMPMeta xmpMeta = xmpDirectory.getXMPMeta();
                         try {
-                            String description = xmpMeta.getArrayItem("http://purl.org/dc/elements/1.1/", "dc:description", 1).getValue();
-                            log.debug(description);
-                            if (description != null && description.trim().length() > 0) {
-                                exifComment = description;
+                            XMPProperty descriptionProp = xmpMeta.getArrayItem("http://purl.org/dc/elements/1.1/", "dc:description", 1);
+                            if (descriptionProp != null) {
+                                String description = descriptionProp.getValue();
+                                log.debug(description);
+                                if (description != null && description.trim().length() > 0) {
+                                    exifComment = description;
+                                }
                             }
                         } catch (NullPointerException | XMPException e1) {
                             log.error(e1.getMessage(), e1);

@@ -224,7 +224,7 @@
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.Number"/>
         </set>
-        <set name="ICImages" fetch="subselect">
+        <set name="ICImages" cascade="all" fetch="subselect">
             <key>
                 <column name="SpecimenId"/>
             </key>

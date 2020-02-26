@@ -34,6 +34,7 @@ import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.MouseWheelScrollListener;
 import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor;
+import edu.harvard.mcz.imagecapture.ui.component.JTableWithRowBorder;
 import edu.harvard.mcz.imagecapture.ui.dialog.GeoreferenceDialog;
 import edu.harvard.mcz.imagecapture.ui.field.FilteringGeogJComboBox;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.CollectorTableModel;
@@ -522,7 +523,6 @@ public class SpecimenDetailsViewPane extends JPanel {
             Number n = (Number) number.clone();
             n.setSpecimen(specimen);
             specimen.getNumbers().add(n);
-
         }
         jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));
 
@@ -1196,7 +1196,7 @@ public class SpecimenDetailsViewPane extends JPanel {
      */
     private JTable getJTableCollectors() {
         if (jTableCollectors == null) {
-            jTableCollectors = new JTable(new CollectorTableModel());
+            jTableCollectors = new JTableWithRowBorder(new CollectorTableModel());
 
             // Note: When setting the values, the table column editor needs to be reset there, as the model is replaced.
 
@@ -1274,9 +1274,9 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTable getJTableSpecimenParts() {
         if (jTableSpecimenParts == null) {
             try {
-                jTableSpecimenParts = new JTable(new SpecimenPartsTableModel(specimen.getSpecimenParts()));
+                jTableSpecimenParts = new JTableWithRowBorder(new SpecimenPartsTableModel(specimen.getSpecimenParts()));
             } catch (NullPointerException e) {
-                jTableSpecimenParts = new JTable(new SpecimenPartsTableModel());
+                jTableSpecimenParts = new JTableWithRowBorder(new SpecimenPartsTableModel());
             }
             jTableSpecimenParts.getColumnModel().getColumn(0).setPreferredWidth(90);
             jTableSpecimenParts.setRowHeight(jTableSpecimenParts.getRowHeight() + 5);
@@ -1414,13 +1414,13 @@ public class SpecimenDetailsViewPane extends JPanel {
     }
 
     /**
-     * This method initializes jTable
+     * This method initializes jTable for numbers fields
      *
      * @return javax.swing.JTable
      */
     private JTable getNumberJTable() {
         if (jTableNumbers == null) {
-            jTableNumbers = new JTable(new NumberTableModel());
+            jTableNumbers = new JTableWithRowBorder(new NumberTableModel());
             JComboBox<String> jComboNumberTypes = new JComboBox<String>();
             jComboNumberTypes.setModel(new DefaultComboBoxModel<String>(NumberLifeCycle.getDistinctTypes()));
             jComboNumberTypes.setEditable(true);

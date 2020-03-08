@@ -508,13 +508,14 @@ public class SearchDialog extends JDialog {
             ICImageLifeCycle ils = new ICImageLifeCycle();
             jComboBoxPath = new JComboBox(ils.getDistinctPaths());
             jComboBoxPath.setEditable(true);
+            AutoCompleteDecorator.decorate(jComboBoxPath);
             jComboBoxPath.setMaximumSize(this.maxComboBoxDims);
         }
         return jComboBoxPath;
     }
 
     /**
-     * This method initializes jComboBox3
+     * This method initializes the combobox containing the users labelled "entry by"
      *
      * @return javax.swing.JComboBox
      */

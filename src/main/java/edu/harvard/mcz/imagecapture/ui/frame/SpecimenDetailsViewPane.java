@@ -243,6 +243,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         this.add(scrollPane, BorderLayout.CENTER);
+        this.setMinimumSize(new Dimension(100, 100));
     }
 
     public void setWarning(String warning) {

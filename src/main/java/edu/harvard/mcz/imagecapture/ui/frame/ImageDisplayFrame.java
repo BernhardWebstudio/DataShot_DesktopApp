@@ -37,6 +37,9 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicSplitPaneDivider;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -145,8 +148,7 @@ public class ImageDisplayFrame extends JFrame {
      * populate the image chooser pick list with a list of all the images.  Call this method to display
      * more than one image in an ImageDisplayFrame.  Single image is displayed with a call to loadImagesFromFileSingle().
      *
-     * @param Set<ICImage> the image files to display in the tabs of the frame.
-     * @param imageFiles
+     * @param imageFiles the image files to display in the tabs of the frame.
      * @throws ImageLoadException   if there is a problem with the image.
      * @throws BadTemplateException
      */
@@ -368,8 +370,8 @@ public class ImageDisplayFrame extends JFrame {
     private JPanel getJContentPane() {
         if (jContentPane == null) {
             jContentPane = new JPanel();
-            jContentPane.setLayout(new BorderLayout());
-            jContentPane.add(getJPanelImagesPanel(), BorderLayout.CENTER);
+            jContentPane.setLayout(new MigLayout("wrap 2, fill", "[grow]", "[grow]"));
+            jContentPane.add(getJPanelImagesPanel(), "grow");
         }
         return jContentPane;
     }
@@ -382,13 +384,31 @@ public class ImageDisplayFrame extends JFrame {
         }
     }
 
-    public void setWest(JPanel panel) {
+    public void setWest(JPanel westPanel) {
         jContentPane.removeAll();
-        jContentPane.setLayout(new MigLayout("wrap 2, fill", "[grow]", "[grow]"));
-        jContentPane.add(panel, "grow"); // west
-        jContentPane.add(this.getJPanelImagesPanel(), "grow"); // east, already there
+        jContentPane.setLayout(new MigLayout("wrap 2, fill, insets 0", "[grow]", "[grow]"));
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+        splitPane.setLeftComponent(westPanel);
+        splitPane.setRightComponent(this.getJPanelImagesPanel());
+        jContentPane.add(splitPane, "push, grow");
         this.setWindowLocationSize();
         this.pack();
+        // remove borders
+        splitPane.setBorder(BorderFactory.createEmptyBorder(1, 1, 1, 1));
+        BasicSplitPaneUI flatDividerSplitPaneUI = new BasicSplitPaneUI() {
+            @Override
+            public BasicSplitPaneDivider createDefaultDivider() {
+                return new BasicSplitPaneDivider(this) {
+                    @Override
+                    public void setBorder(Border b) {
+                    }
+                };
+            }
+        };
+        splitPane.setUI(flatDividerSplitPaneUI);
+        splitPane.setBorder(null);
+        // set the sizes of the two panes
+        splitPane.setDividerLocation(0.6);
     }
 
     /**
@@ -545,7 +565,6 @@ public class ImageDisplayFrame extends JFrame {
             jTabbedPane.insertTab("UnitTray Labels", null, getJPanelUTL(), null, TAB_UNITTRAYLABELS);
             jTabbedPane.insertTab("Taxon Label", null, getJPanelUnitTrayTaxon(), null, TAB_UNITTRAY);
             jTabbedPane.insertTab("Barcode", null, getJPanelBarcode(), null, TAB_BARCODE);
-
         }
         return jTabbedPane;
     }

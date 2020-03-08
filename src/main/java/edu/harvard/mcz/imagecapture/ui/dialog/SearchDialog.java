@@ -448,7 +448,7 @@ public class SearchDialog extends JDialog {
     }
 
     /**
-     * This method initializes jComboBox
+     * This method initializes jComboBox labelled collection
      *
      * @return javax.swing.JComboBox
      */
@@ -466,7 +466,7 @@ public class SearchDialog extends JDialog {
     }
 
     /**
-     * This method initializes jComboBox1
+     * This method initializes jComboBox1 labelled workflow
      *
      * @return javax.swing.JComboBox
      */
@@ -482,6 +482,7 @@ public class SearchDialog extends JDialog {
             jComboBoxWorkflowStatus.getModel().setSelectedItem("");
             jComboBoxWorkflowStatus.setEditable(true);
             jComboBoxWorkflowStatus.setMaximumSize(this.maxComboBoxDims);
+            AutoCompleteDecorator.decorate(jComboBoxWorkflowStatus);
         }
         return jComboBoxWorkflowStatus;
     }
@@ -547,7 +548,7 @@ public class SearchDialog extends JDialog {
     }
 
     /**
-     * This method initializes jTextField
+     * This method initializes jTextField providing subfamily info
      *
      * @return javax.swing.JTextField
      */
@@ -559,7 +560,7 @@ public class SearchDialog extends JDialog {
     }
 
     /**
-     * This method initializes jTextField1
+     * This method initializes jTextField labelled subspecies
      *
      * @return javax.swing.JTextField
      */
@@ -578,7 +579,8 @@ public class SearchDialog extends JDialog {
     }
 
     /**
-     * This method initializes jButton1
+     * This method initializes the button to close the form
+     * it might be slightly unnecessary as the behaviour is the same as the OS's window close button
      *
      * @return javax.swing.JButton
      */

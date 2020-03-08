@@ -267,7 +267,7 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
             session.beginTransaction();
             try {
                 instance = (ICImage) session.get(
-                        "edu.harvard.mcz.imagecapture.data.ICImage", id);
+                        "edu.harvard.mcz.imagecapture.entity.ICImage", id);
                 session.getTransaction().commit();
                 if (instance == null) {
                     log.debug("get successful, no instance found");

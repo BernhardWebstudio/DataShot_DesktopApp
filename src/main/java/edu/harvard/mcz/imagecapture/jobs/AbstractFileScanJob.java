@@ -20,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -66,6 +65,40 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
             // Just write into debug log
             // This would normally the case where the image metadata doesn't contain a barcode but the image does, and reporting of this state as an error has been turned off.
             log.debug("Barcode/Comment mismatch: [" + barcode + "]!=[" + exifComment + "]");
+        }
+    }
+
+    /**
+     * Set family, subfamily, based on a taxon returner
+     *
+     * @param parser source of family, subfamily
+     * @param s      the specimen to set the values on
+     */
+    static void extractFamilyToSpecimen(TaxonNameReturner parser, Specimen s) {
+        HigherTaxonLifeCycle hls = new HigherTaxonLifeCycle();
+        if (parser.getTribe().trim().equals("")) {
+            if (hls.isMatched(parser.getFamily(), parser.getSubfamily())) {
+                // If there is a match, use it.
+                String[] higher = hls.findMatch(parser.getFamily(), parser.getSubfamily());
+                s.setFamily(higher[0]);
+                s.setSubfamily(higher[1]);
+            } else {
+                // otherwise use the raw OCR output.
+                s.setFamily(parser.getFamily());
+                s.setSubfamily(parser.getSubfamily());
+            }
+            s.setTribe("");
+        } else {
+            if (hls.isMatched(parser.getFamily(), parser.getSubfamily(), parser.getTribe())) {
+                String[] higher = hls.findMatch(parser.getFamily(), parser.getSubfamily(), parser.getTribe());
+                s.setFamily(higher[0]);
+                s.setSubfamily(higher[1]);
+                s.setTribe(higher[2]);
+            } else {
+                s.setFamily(parser.getFamily());
+                s.setSubfamily(parser.getSubfamily());
+                s.setTribe(parser.getTribe());
+            }
         }
     }
 
@@ -486,40 +519,6 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         }
         if (s != null) {
             image.setSpecimen(s);
-        }
-    }
-
-    /**
-     * Set family, subfamily, based on a taxon returner
-     *
-     * @param parser source of family, subfamily
-     * @param s      the specimen to set the values on
-     */
-    static void extractFamilyToSpecimen(TaxonNameReturner parser, Specimen s) {
-        HigherTaxonLifeCycle hls = new HigherTaxonLifeCycle();
-        if (parser.getTribe().trim().equals("")) {
-            if (hls.isMatched(parser.getFamily(), parser.getSubfamily())) {
-                // If there is a match, use it.
-                String[] higher = hls.findMatch(parser.getFamily(), parser.getSubfamily());
-                s.setFamily(higher[0]);
-                s.setSubfamily(higher[1]);
-            } else {
-                // otherwise use the raw OCR output.
-                s.setFamily(parser.getFamily());
-                s.setSubfamily(parser.getSubfamily());
-            }
-            s.setTribe("");
-        } else {
-            if (hls.isMatched(parser.getFamily(), parser.getSubfamily(), parser.getTribe())) {
-                String[] higher = hls.findMatch(parser.getFamily(), parser.getSubfamily(), parser.getTribe());
-                s.setFamily(higher[0]);
-                s.setSubfamily(higher[1]);
-                s.setTribe(higher[2]);
-            } else {
-                s.setFamily(parser.getFamily());
-                s.setSubfamily(parser.getSubfamily());
-                s.setTribe(parser.getTribe());
-            }
         }
     }
 

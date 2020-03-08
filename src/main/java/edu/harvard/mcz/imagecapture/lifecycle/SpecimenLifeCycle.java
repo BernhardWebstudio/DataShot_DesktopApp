@@ -326,7 +326,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             session.beginTransaction();
             Specimen instance = null;
             try {
-                instance = (Specimen) session.get("edu.harvard.mcz.imagecapture.data.Specimen", id);
+                instance = session.get(Specimen.class, id);
                 session.getTransaction().commit();
                 if (instance == null) {
                     log.debug("get successful, no instance found");
@@ -448,7 +448,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                 //this works
                 String sql = "";
                 if (path.contains("\\")) {
-                    sql = "From ICImage im where im.path='" + path + "\\\' order by imageId";
+                    sql = "From ICImage im where im.path='" + path + "\\' order by imageId";
                 } else {
                     sql = "From ICImage im where im.path='" + path + "' order by imageId";
                 }
@@ -1056,7 +1056,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             session.beginTransaction();
             List<Specimen> results = null;
             try {
-                Criteria criteria = session.createCriteria("edu.harvard.mcz.imagecapture.data.Specimen");
+                Criteria criteria = session.createCriteria(Specimen.class);
                 criteria.add(Example.create(instance));
                 if (instance.getTrackings() != null && instance.getTrackings().size() > 0) {
                     criteria.createCriteria("trackings").add(Example.create(instance.getTrackings().toArray()[0]));

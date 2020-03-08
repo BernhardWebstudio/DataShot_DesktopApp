@@ -214,10 +214,10 @@ public class HibernateUtil {
     /**
      * Get a value from settings by key if it has the value, else from config
      *
-     * @param config the config to be treated as a better default
+     * @param config   the config to be treated as a better default
      * @param settings the properties overwriting config, but only if config is still default ("placeholder")
-     * @param key the property key to get the config/setting by
-     * @param value the default we do not want, except we have nothing else
+     * @param key      the property key to get the config/setting by
+     * @param value    the default we do not want, except we have nothing else
      * @return the value of the property
      */
     private static String getConfigOrSettingsValue(Configuration config, Properties settings, String key, String value) {

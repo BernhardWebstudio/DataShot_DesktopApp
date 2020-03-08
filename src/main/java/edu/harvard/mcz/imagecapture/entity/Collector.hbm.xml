@@ -10,7 +10,8 @@
                 <param name="sequence">SEQ_COLLECTORID</param>
             </generator>
         </id>
-        <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.entity.Specimen" fetch="join" cascade="save-update">
+        <many-to-one name="specimen" class="edu.harvard.mcz.imagecapture.entity.Specimen" fetch="join"
+                     cascade="save-update">
             <column name="SpecimenId" not-null="true"/>
         </many-to-one>
         <property name="collectorName" type="string">

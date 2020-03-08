@@ -167,7 +167,7 @@ public class UnitTrayLabelLifeCycle {
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             session.beginTransaction();
             try {
-                instance = (UnitTrayLabel) session.get("edu.harvard.mcz.imagecapture.data.UnitTrayLabel", id);
+                instance = session.get(UnitTrayLabel.class, id);
                 session.getTransaction().commit();
                 if (instance == null) {
                     log.debug("get successful, no instance found");

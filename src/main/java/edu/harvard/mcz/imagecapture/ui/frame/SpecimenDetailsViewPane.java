@@ -79,8 +79,6 @@ public class SpecimenDetailsViewPane extends JPanel {
     private int state;   // dirty if data in controls has been changed and not saved to specimen.
 
 
-
-
     // private JTextField jTextFieldPreparationType = null;
     //allie change
     //private JTextField jTextFieldCountry = null;
@@ -461,7 +459,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             // We might also catch unwanted ones; böh, too bad – alert the user just in case.
             log.error(e);
             this.setWarning("Error: " + e.getMessage());
-        }catch (Exception e) {
+        } catch (Exception e) {
             // trap any exception and notify the user
             setStateToDirty();    // disable the navigation buttons
             this.setWarning("Error: " + e.getMessage());
@@ -523,7 +521,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         //+numbers
         specimen.getNumbers().clear();
         for (Number number : previousSpecimen.getNumbers()) {
-            //specimen.getNumbers().add((edu.harvard.mcz.imagecapture.data.Number)iter.next());
+            //specimen.getNumbers().add((Number.class)iter.next());
             Number n = (Number) number.clone();
             n.setSpecimen(specimen);
             specimen.getNumbers().add(n);
@@ -1005,7 +1003,7 @@ public class SpecimenDetailsViewPane extends JPanel {
      * @return JLabel the label with the database id
      */
     private JLabel getDBIdLabel() {
-        if (jLabelDBId == null){
+        if (jLabelDBId == null) {
             jLabelDBId = new JLabel();
         }
         updateDBIdLabel();
@@ -2784,7 +2782,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JComboBox<String> getJCBDeterminer() {
         log.debug("calling getJCBDeterminer() ... it is " + jCBDeterminer);
         if (jCBDeterminer == null) {
-            log.debug("initt jCBDeterminer determiner null, making a new one");
+            log.debug("init jCBDeterminer determiner null, making a new one");
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
             jCBDeterminer = new JComboBox<String>();
             jCBDeterminer.setModel(new DefaultComboBoxModel<String>(sls.getDistinctDeterminers()));

@@ -254,7 +254,7 @@ public class UsersLifeCycle {
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             session.beginTransaction();
             try {
-                instance = (Users) session.get("edu.harvard.mcz.imagecapture.data.Users", id);
+                instance = session.get(Users.class, id);
                 session.getTransaction().commit();
                 if (instance == null) {
                     log.debug("get successful, no instance found");

@@ -200,17 +200,17 @@
             <column name="externalWorkflowDate"/>
         </property>
         <!-- TODO: rethink nullability of related columns -->
-        <set name="collectors" cascade="all" fetch="subselect">
+        <set name="collectors" cascade="all" fetch="subselect" order-by="collectorName asc">
             <key>
-                <column name="SpecimenId" />
+                <column name="SpecimenId"/>
             </key>
-            <one-to-many class="edu.harvard.mcz.imagecapture.entity.Collector" />
+            <one-to-many class="edu.harvard.mcz.imagecapture.entity.Collector"/>
         </set>
         <set name="determinations" cascade="all" fetch="subselect">
             <key>
-                <column name="SpecimenId" />
+                <column name="SpecimenId"/>
             </key>
-            <one-to-many class="edu.harvard.mcz.imagecapture.entity.Determination" />
+            <one-to-many class="edu.harvard.mcz.imagecapture.entity.Determination"/>
         </set>
         <set name="trackings" inverse="true" fetch="subselect">
             <key>
@@ -218,7 +218,7 @@
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.Tracking"/>
         </set>
-        <set name="numbers" cascade="all" fetch="subselect">
+        <set name="numbers" cascade="all" fetch="subselect" order-by="number asc">
             <key>
                 <column name="SpecimenId"/>
             </key>

@@ -29,7 +29,7 @@
         <!--            <key>-->
         <!--                <column name="SpecimenPartId"/>-->
         <!--            </key>-->
-        <!--            <one-to-many class="edu.harvard.mcz.imagecapture.data.SpecimenPartAttribute"/>-->
+        <!--            <one-to-many class="edu.harvard.mcz.imagecapture.entity.SpecimenPartAttribute"/>-->
         <!--        </set>-->
     </class>
 </hibernate-mapping>

@@ -225,7 +225,7 @@ public class NumberLifeCycle {
             session.beginTransaction();
             try {
                 instance =
-                        (Number) session.get("edu.harvard.mcz.imagecapture.data.Number", id);
+                        session.get(Number.class, id);
                 if (instance == null) {
                     log.debug("get successful, no instance found");
                 } else {

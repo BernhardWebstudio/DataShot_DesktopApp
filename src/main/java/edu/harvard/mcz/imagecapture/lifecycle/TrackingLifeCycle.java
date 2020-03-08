@@ -162,8 +162,8 @@ public class TrackingLifeCycle {
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             session.beginTransaction();
             try {
-                instance = (Tracking) session.get(
-                        "edu.harvard.mcz.imagecapture.data.Tracking", id);
+                instance = session.get(
+                        Tracking.class, id);
                 session.getTransaction().commit();
                 if (instance == null) {
                     log.debug("get successful, no instance found");

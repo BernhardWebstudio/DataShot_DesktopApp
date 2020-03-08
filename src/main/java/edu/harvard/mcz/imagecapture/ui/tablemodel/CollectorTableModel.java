@@ -37,10 +37,10 @@ public class CollectorTableModel extends AbstractTableModel {
 
     private static final Log log = LogFactory.getLog(CollectorTableModel.class);
 
-    private Set<Collector> collectors = null;
+    private Set<Collector> collectors;
 
     public CollectorTableModel() {
-        collectors = new HashSet<Collector>();
+        collectors = new HashSet<>();
     }
 
     public CollectorTableModel(Set<Collector> aCollectorList) {
@@ -92,7 +92,7 @@ public class CollectorTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (rowIndex >= collectors.size()) {
-            log.warn("Cannot get value at row, col: " + rowIndex + ", " + columnIndex  + " due to size " + collectors.size() + " in CollectorTable");
+            log.warn("Cannot get value at row, col: " + rowIndex + ", " + columnIndex + " due to size " + collectors.size() + " in CollectorTable");
             return null;
         }
 
@@ -121,12 +121,6 @@ public class CollectorTableModel extends AbstractTableModel {
         }
 
         try {
-            //Original code from Paul - caused issues
-            //((Collector)collectors.toArray()[rowIndex]).setCollectorName((String)value);
-            //this fixes the problem with not being able to mouse into the new fields!! but need to find a way to access
-            //the value that was just typed and so far i can't do that...
-
-            //allie change
             ((Collector) collectors.toArray()[rowIndex]).setCollectorName(value.toString());
 
         } catch (Exception e) {
@@ -146,7 +140,6 @@ public class CollectorTableModel extends AbstractTableModel {
     public void addCollector(Collector collector) {
         collectors.add(collector);
         this.fireTableDataChanged();
-
     }
 
     /**

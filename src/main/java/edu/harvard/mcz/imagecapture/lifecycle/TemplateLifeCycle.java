@@ -188,7 +188,7 @@ public class TemplateLifeCycle {
             session.beginTransaction();
             try {
                 instance = (Template) session.get(
-                        "edu.harvard.mcz.imagecapture.entity.Template", id);
+                        Template.class, id);
                 session.getTransaction().commit();
                 if (instance == null) {
                     log.debug("template get successful, no instance found");

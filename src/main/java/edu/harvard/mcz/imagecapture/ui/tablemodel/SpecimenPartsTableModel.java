@@ -102,7 +102,7 @@ public class SpecimenPartsTableModel extends AbstractTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (rowIndex >= specimenParts.size()) {
-            log.warn("Cannot get value at row, col: " + rowIndex + ", " + columnIndex  + " due to size " + specimenParts.size() + " in SpecimenPartsTable");
+            log.warn("Cannot get value at row, col: " + rowIndex + ", " + columnIndex + " due to size " + specimenParts.size() + " in SpecimenPartsTable");
             return null;
         }
         Object result = null;

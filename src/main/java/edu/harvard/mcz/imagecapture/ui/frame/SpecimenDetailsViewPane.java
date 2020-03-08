@@ -476,6 +476,9 @@ public class SpecimenDetailsViewPane extends JPanel {
         }
     }
 
+    /**
+     * Set the fields values to the ones of the previous specimen
+     */
     private void copyPreviousRecord() {
         log.debug("calling copyPreviousRecord()");
         //thisPane.setStateToDirty();
@@ -525,6 +528,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             specimen.getNumbers().add(n);
         }
         jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));
+        this.setupNumberJTableRenderer();
 
         //+ verify the georeference data (we do want it all copied)
 
@@ -593,6 +597,10 @@ public class SpecimenDetailsViewPane extends JPanel {
         updateContentDependentLabels();
     }
 
+    /**
+     * Set the values of the fields to the ones of the specimen
+     * TODO: refactor to unused: move to instantiation of fields, e.g.
+     */
     private void setValues() {
         log.debug("okok setting values, specimenid is " + specimen.getSpecimenId());
         this.setStatus("Setting values");
@@ -736,17 +744,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         log.debug("setValues calling jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));");
         jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));
 
-        // Setting the model will overwrite the existing cell editor bound
-        // to the column model, so we need to add it again.
-        JTextField field1 = new JTextField();
-        field1.setInputVerifier(MetadataRetriever.getInputVerifier(Number.class, "Number", field1));
-        field1.setVerifyInputWhenFocusTarget(true);
-        jTableNumbers.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field1));
-        JComboBox<String> jComboNumberTypes = new JComboBox<String>();
-        jComboNumberTypes.setModel(new DefaultComboBoxModel<String>(NumberLifeCycle.getDistinctTypes()));
-        jComboNumberTypes.setEditable(true);
-        TableColumn typeColumn = jTableNumbers.getColumnModel().getColumn(NumberTableModel.COLUMN_TYPE);
-        typeColumn.setCellEditor(new DefaultCellEditor(jComboNumberTypes));
+        this.setupNumberJTableRenderer();
 
         jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));
 
@@ -1000,6 +998,11 @@ public class SpecimenDetailsViewPane extends JPanel {
         return jPanel;
     }
 
+    /**
+     * Get the label field containing the id of the specimen
+     *
+     * @return JLabel the label with the database id
+     */
     private JLabel getDBIdLabel() {
         if (jLabelDBId == null){
             jLabelDBId = new JLabel();
@@ -1008,6 +1011,9 @@ public class SpecimenDetailsViewPane extends JPanel {
         return jLabelDBId;
     }
 
+    /**
+     * Update the field: data base ID to match the assigned specimen
+     */
     private void updateDBIdLabel() {
         this.jLabelDBId.setText("DataBase ID: " + specimen.getSpecimenId());
     }
@@ -1421,23 +1427,14 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTable getNumberJTable() {
         if (jTableNumbers == null) {
             jTableNumbers = new JTableWithRowBorder(new NumberTableModel());
-            JComboBox<String> jComboNumberTypes = new JComboBox<String>();
-            jComboNumberTypes.setModel(new DefaultComboBoxModel<String>(NumberLifeCycle.getDistinctTypes()));
-            jComboNumberTypes.setEditable(true);
-            TableColumn typeColumn = jTableNumbers.getColumnModel().getColumn(NumberTableModel.COLUMN_TYPE);
-            DefaultCellEditor comboBoxEditor = new DefaultCellEditor(jComboNumberTypes);
-            //TODO: enable autocomplete for numbertypes picklist.
-            //AutoCompleteDecorator.decorate((JComboBox) comboBoxEditor.getComponent());
-            typeColumn.setCellEditor(comboBoxEditor);
-            DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
-            renderer.setToolTipText("Click for pick list of number types.");
-            typeColumn.setCellRenderer(renderer);
+            setupNumberJTableRenderer();
+            jTableNumbers.setRowHeight(jTableNumbers.getRowHeight() + 8);
+
             jTableNumbers.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
                     thisPane.setStateToDirty();
                 }
             });
-            jTableNumbers.setRowHeight(jTableNumbers.getRowHeight() + 5);
 
             jTableNumbers.addMouseListener(new MouseAdapter() {
                 @Override
@@ -1483,6 +1480,30 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPopupNumbers.add(mntmDeleteRow);
         }
         return jTableNumbers;
+    }
+
+    /**
+     * Setting the model will overwrite the existing cell editor bound
+     * to the column model, so we might need to add it again som times.
+     * That's what this function does
+     */
+    private void setupNumberJTableRenderer() {
+        // First, setup the number field
+        JTextField field1 = new JTextField();
+        field1.setInputVerifier(MetadataRetriever.getInputVerifier(Number.class, "Number", field1));
+        field1.setVerifyInputWhenFocusTarget(true);
+        jTableNumbers.getColumnModel().getColumn(NumberTableModel.COLUMN_NUMBER).setCellEditor(new ValidatingTableCellEditor(field1));
+        // Then, setup the type field
+        JComboBox<String> jComboNumberTypes = new JComboBox<String>();
+        jComboNumberTypes.setModel(new DefaultComboBoxModel<String>(NumberLifeCycle.getDistinctTypes()));
+        jComboNumberTypes.setEditable(true);
+        TableColumn typeColumn = jTableNumbers.getColumnModel().getColumn(NumberTableModel.COLUMN_TYPE);
+        DefaultCellEditor comboBoxEditor = new DefaultCellEditor(jComboNumberTypes);
+        AutoCompleteDecorator.decorate((JComboBox) comboBoxEditor.getComponent());
+        typeColumn.setCellEditor(comboBoxEditor);
+        DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+        renderer.setToolTipText("Click for pick list of number types.");
+        typeColumn.setCellRenderer(renderer);
     }
 
     /**

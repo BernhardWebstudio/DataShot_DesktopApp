@@ -1,4 +1,6 @@
 language: java
+os: linux
+
 
 install: true
 
@@ -24,7 +26,7 @@ deploy:
     name: "DataShot-$(date +'%Y%m%d')-beta"
     prerelease: true
     draft: false
-    body: "Momentary Snapshot Version. Refer to the git history, [commit log](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commits/master) for current changes"
+    release_notes: "Momentary Snapshot Version. Refer to the git history, [commit log](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commits/master) for current changes"
     on:
       repo: BernhardWebstudio/DataShot_DesktopApp
       branch: master

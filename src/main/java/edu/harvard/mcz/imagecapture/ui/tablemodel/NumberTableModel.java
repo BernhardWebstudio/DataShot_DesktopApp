@@ -15,7 +15,7 @@ import java.util.Set;
  * JTable.
  */
 public class NumberTableModel extends AbstractTableModel {
-
+    public static final int COLUMN_NUMBER = 0;
     public static final int COLUMN_TYPE = 1;
     private static final long serialVersionUID = 2244991738218368487L;
     private static final Log log = LogFactory.getLog(NumberTableModel.class);
@@ -57,7 +57,7 @@ public class NumberTableModel extends AbstractTableModel {
     public String getColumnName(int columnIndex) {
         String returnvalue = null;
         switch (columnIndex) {
-            case 0:
+            case COLUMN_NUMBER:
                 returnvalue = "Number";
                 break;
             case COLUMN_TYPE:

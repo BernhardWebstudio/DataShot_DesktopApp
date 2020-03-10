@@ -477,7 +477,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     }
 
     /**
-     * This method initializes jMenuItemPreprocess
+     * This method initializes jMenuItemPreprocess: the menu item to start preprocessing all
      *
      * @return javax.swing.JMenuItem
      */
@@ -508,6 +508,11 @@ public class MainFrame extends JFrame implements RunnerListener {
     }
 
 
+    /**
+     * This method initializes the jMenuItem to delete a specimen record
+     *
+     * @return
+     */
     private JMenuItem getJMenuItemDelete() {
         if (jMenuItemDelete == null) {
             jMenuItemDelete = new JMenuItem();
@@ -546,6 +551,11 @@ public class MainFrame extends JFrame implements RunnerListener {
     }
 
 
+    /**
+     * This method initializes the jMenuItem to load a verbatim field/data
+     *
+     * @return
+     */
     private JMenuItem getJMenuItemLoadData() {
         if (jMenuItemLoadData == null) {
             jMenuItemLoadData = new JMenuItem();
@@ -654,6 +664,8 @@ public class MainFrame extends JFrame implements RunnerListener {
     }
 
     /**
+     * This method initializes the menu to access the users overview
+     *
      * @return
      */
     private JMenuItem getJMenuItemUsers() {

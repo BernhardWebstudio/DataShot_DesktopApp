@@ -206,4 +206,26 @@ public class Counter {
         report += "Found " + this.getFilesFailed() + " files with problems.\n";
         return report;
     }
+
+    /**
+     * Merge this counter with another one, adding each others data
+     *
+     * @param counter the counter to merge with
+     */
+    public Counter mergeIn(Counter counter) {
+        this.totalCount += counter.totalCount;
+        this.filesSeen += counter.filesSeen;
+        this.filesDatabased += counter.filesDatabased;
+        this.filesExisting += counter.filesExisting;
+        this.filesFailed += counter.filesFailed;
+        this.directories += counter.directories;
+        this.directoriesFailed += counter.directoriesFailed;
+        this.specimensExisting += counter.specimensExisting;
+        this.specimensUpdated += counter.specimensUpdated;
+        this.specimensDatabased += counter.specimensDatabased;
+        this.filesUpdated += counter.filesUpdated;
+        this.errorReport.append(counter.errorReport);
+        this.errors.addAll(counter.errors);
+        return this;
+    }
 }

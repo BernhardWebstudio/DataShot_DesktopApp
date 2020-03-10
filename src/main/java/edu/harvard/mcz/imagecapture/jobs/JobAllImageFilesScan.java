@@ -37,6 +37,9 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Check all image files either under the image root directory or in a selected directory
@@ -275,6 +278,17 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
      * @param counter    the counter to increment
      */
     private void checkFiles(File startPoint, Counter counter) {
+        checkFiles(startPoint, counter, true);
+    }
+
+    /**
+     * Do the actual processing of each files
+     *
+     * @param startPoint the directory with all files to handle
+     * @param counter    the counter to increment
+     * @param async      whether to do the work in multiple threads
+     */
+    private void checkFiles(File startPoint, Counter counter, boolean async) {
         // pick jpeg files
         // for each file check name against database, if not found, check barcodes, scan and parse text, create records.
         File[] containedFiles = startPoint.listFiles();
@@ -285,6 +299,10 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
         log.debug("Scanning directory: " + startPoint.getPath() + " containing " + containedFiles.length + " files.");
         // create thumbnails in a separate thread
         (new Thread(new ThumbnailBuilderInternal(startPoint))).start();
+
+        // if (async) {
+        ExecutorService es = Executors.newCachedThreadPool();
+        ArrayList<Counter> threadCounters = new ArrayList<>();
 
         for (File containedFile : containedFiles) {
             if (runStatus != RunStatus.STATUS_TERMINATED) {
@@ -307,7 +325,18 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                     if (!containedFile.getName().matches(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEREGEX))) {
                         log.debug("Skipping file [" + containedFile.getName() + "], doesn't match expected filename pattern " + Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEREGEX));
                     } else {
-                        checkFile(containedFile, counter);
+                        if (async) {
+                            Counter localThreadCounter = new Counter();
+                            es.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    checkFile(containedFile, localThreadCounter);
+                                }
+                            });
+                            threadCounters.add(localThreadCounter);
+                        } else {
+                            checkFile(containedFile, counter);
+                        }
                     }
                 }
                 // report progress
@@ -318,6 +347,28 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                 setPercentComplete((int) ((seen / total) * 100));
             }
             Singleton.getSingletonInstance().getMainFrame().notifyListener(runStatus, this);
+        }
+
+        // assemble all threads
+        if (async) {
+            es.shutdown(); // Disable new tasks from being submitted
+            try {
+                if (!es.awaitTermination(60, TimeUnit.MINUTES)) {
+                    es.shutdownNow(); // Cancel currently executing tasks
+                    // Wait a while for tasks to respond to being cancelled
+                    if (!es.awaitTermination(60, TimeUnit.SECONDS)) {
+                        System.err.println("Execution pool did not terminate");
+                    }
+                }
+            } catch (InterruptedException e) {
+                log.error("Execution pool did not terminate", e);
+                es.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+
+            for (Counter c : threadCounters) {
+                counter.mergeIn(c);
+            }
         }
     }
 

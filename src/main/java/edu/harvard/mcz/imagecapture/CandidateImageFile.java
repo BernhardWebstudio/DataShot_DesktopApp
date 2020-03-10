@@ -514,9 +514,8 @@ public class CandidateImageFile {
             }
 
             // 1, try the source crop directly.
-            CandidateImageFile temp = new CandidateImageFile();
-            returnValue = temp.checkSourceForBarcode(source, log.isDebugEnabled());
-            log.debug("result: " + returnValue.getText() + " at status: " + returnValue.getText());
+            returnValue = this.checkSourceForBarcode(source, log.isDebugEnabled());
+            log.debug("result of source barcode check: '" + returnValue.getText() + "' at status: " + returnValue.getStatus());
 
             if (quickCheck) {
                 if (returnValue.getText() == null) {
@@ -525,76 +524,94 @@ public class CandidateImageFile {
                 return returnValue.getText();
             }
             // If this is not a quick check, keep trying harder
-            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
-                // 2, try rescaling (to a 800 pixel width)
-                log.debug("Trying again with scaled image crop: " + INITIAL_SCALING_WIDTH + "px.");
-                double scale = INITIAL_SCALING_WIDTH / width;
-                returnValue = checkWithScale(image, left, top, width, height, scale);
+            if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
+                log.debug("Successful preprocess barcode read from location using method #1");
+                return returnValue.getText();
+            }
+            // 2, try rescaling (to a 800 pixel width)
+            log.debug("Trying again with scaled image crop: " + INITIAL_SCALING_WIDTH + "px.");
+            double scale = INITIAL_SCALING_WIDTH / width;
+            returnValue = checkWithScale(image, left, top, width, height, scale);
+
+
+            if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
+                log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #2");
+                return returnValue.getText();
+            }
+            // 3, try another barcode scanner
+            returnValue = checkSourceForBarcode(image.getSubimage(left, top, width, height));
+
+
+            if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
+                log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #3");
+                return returnValue.getText();
             }
 
-            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
-                // 3, try another barcode scanner
-                returnValue = checkSourceForBarcode(image.getSubimage(left, top, width, height));
+            // 4, try another barcode scanner, but this time "global"
+            returnValue = checkSourceForBarcodeAt(image, (int) (top + (height / 2.0)), (int) (left + (width / 2.0)), (int) (Math.max(width, height) + 0.1 * Math.min(image.getWidth(), image.getHeight())));
+
+
+            if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
+                log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #4");
+                return returnValue.getText();
             }
 
-            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
-                // 3.5, try another barcode scanner, but this time "global"
-                returnValue = checkSourceForBarcodeAt(image, (int) (top + (height / 2.0)), (int) (left + (width / 2.0)), (int) (Math.max(width, height) + 0.1 * Math.min(image.getWidth(), image.getHeight())));
+            // 5, try rescaling to configured scaling widths
+            String scaling = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGERESCALE);
+            ArrayList<String> scalingBits = new ArrayList<String>();
+            if (scaling.contains(",")) {
+                scalingBits.addAll(Arrays.asList(scaling.split(",")));
+            } else {
+                scalingBits.add(scaling);
             }
-
-            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
-                // 4, try rescaling to configured scaling widths
-                String scaling = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGERESCALE);
-                ArrayList<String> scalingBits = new ArrayList<String>();
-                if (scaling.contains(",")) {
-                    scalingBits.addAll(Arrays.asList(scaling.split(",")));
-                } else {
-                    scalingBits.add(scaling);
+            for (String transform : scalingBits) {
+                returnValue = checkWithTransform(image, left, top, width, height, transform);
+                if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
+                    log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #5");
+                    log.info("Success at image '" + candidateFile.getName() + "' with transform = " + transform + ".");
+                    return returnValue.getText();
                 }
-                for (String transform : scalingBits) {
-                    returnValue = checkWithTransform(image, left, top, width, height, transform);
+            } // end while loop
+
+            // 6, try again with a sharpened image
+            try {
+                log.debug("Trying again with image sharpened.");
+                Kernel kernel = new Kernel(3, 3, matrix);
+                ConvolveOp convolver = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
+                BufferedImage sharpened = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+                sharpened = convolver.filter(image, sharpened);
+                source = new BufferedImageLuminanceSource(sharpened, left, top, width, height);
+                returnValue = this.checkSourceForBarcode(source, true);
+            } catch (IllegalArgumentException e) {
+                log.error(e.getMessage(), e);
+            }
+
+            if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
+                log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #6");
+                return returnValue.getText();
+            }
+
+            // 7, try again with scale factors & offsets
+            BufferedImage crop = image.getSubimage(left, top, width, height);
+            float[] scaleFactors = {1.2f, 0.8f, 0.6f, 1.4f, 1.6f};
+            int[] offsets = {15, -15, -30, 30, 45};
+            for (int i = 0; i < scaleFactors.length; ++i) {
+                for (int o = 0; o < offsets.length; ++o) {
+                    returnValue = checkWithConfiguration(crop, scaleFactors[i], offsets[o], null);
                     if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
-                        log.info("Success at image '" + candidateFile.getName() + "' with transform = " + transform + ".");
-                        break;
-                    }
-                } // end while loop
-            }
-
-            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
-                // 5, try again with a sharpened image
-                try {
-                    log.debug("Trying again with image sharpened.");
-                    Kernel kernel = new Kernel(3, 3, matrix);
-                    ConvolveOp convolver = new ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null);
-                    BufferedImage sharpened = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
-                    sharpened = convolver.filter(image, sharpened);
-                    source = new BufferedImageLuminanceSource(sharpened, left, top, width, height);
-                    returnValue = temp.checkSourceForBarcode(source, true);
-                } catch (IllegalArgumentException e) {
-                    log.error(e.getMessage(), e);
-                }
-            }
-
-            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
-                // 6, try again with scale factors & offsets
-                BufferedImage crop = image.getSubimage(left, top, width, height);
-                float[] scaleFactors = {1.2f, 0.8f, 0.6f, 1.4f, 1.6f};
-                int[] offsets = {15, -15, -30, 30, 45};
-                doubleLoop:
-                for (int i = 0; i < scaleFactors.length; ++i) {
-                    for (int o = 0; o < offsets.length; ++o) {
-                        returnValue = checkWithConfiguration(crop, scaleFactors[i], offsets[o], null);
-                        if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
-                            log.info("Success at image '" + candidateFile.getName() + "' with offset = " + offsets[o] + " and scaleFactor = " + scaleFactors[i]);
-                            break doubleLoop;
-                        }
+                        log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #7");
+                        log.info("Success at image '" + candidateFile.getName() + "' with offset = " + offsets[o] + " and scaleFactor = " + scaleFactors[i]);
+                        return returnValue.getText();
                     }
                 }
             }
 
-            if (returnValue.getStatus() != RESULT_BARCODE_SCANNED) {
-                // Try again with some small displacements of window
-                returnValue = checkWithDisplacing(image, left, top, width, height);
+            // 8, Try again with some small displacements of window
+            returnValue = checkWithDisplacing(image, left, top, width, height);
+
+            if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
+                log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #8");
+                return returnValue.getText();
             }
         }
 

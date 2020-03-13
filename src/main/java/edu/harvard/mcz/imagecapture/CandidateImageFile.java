@@ -501,6 +501,7 @@ public class CandidateImageFile {
             log.error("Image null");
             return "";
         }
+        String fileName = candidateFile != null ? candidateFile.getName() : "";
         if (image.getWidth() >= left + width && image.getHeight() >= top + height) {
             // provided crop area falls within image.
             log.debug("Attempting to detect barcode in TL: " + left + "x" + top + " +" + width + "x" + height);
@@ -535,7 +536,7 @@ public class CandidateImageFile {
 
 
             if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
-                log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #2");
+                log.debug("Successful preprocess barcode read of image '" + fileName + "' from location using method #2");
                 return returnValue.getText();
             }
             // 3, try another barcode scanner
@@ -543,7 +544,7 @@ public class CandidateImageFile {
 
 
             if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
-                log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #3");
+                log.debug("Successful preprocess barcode read of image '" + fileName + "' from location using method #3");
                 return returnValue.getText();
             }
 
@@ -552,7 +553,7 @@ public class CandidateImageFile {
 
 
             if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
-                log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #4");
+                log.debug("Successful preprocess barcode read of image '" + fileName + "' from location using method #4");
                 return returnValue.getText();
             }
 
@@ -567,8 +568,8 @@ public class CandidateImageFile {
             for (String transform : scalingBits) {
                 returnValue = checkWithTransform(image, left, top, width, height, transform);
                 if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
-                    log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #5");
-                    log.info("Success at image '" + candidateFile.getName() + "' with transform = " + transform + ".");
+                    log.debug("Successful preprocess barcode read of image '" + fileName + "' from location using method #5");
+                    log.info("Success at image '" + fileName + "' with transform = " + transform + ".");
                     return returnValue.getText();
                 }
             } // end while loop
@@ -587,7 +588,7 @@ public class CandidateImageFile {
             }
 
             if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
-                log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #6");
+                log.debug("Successful preprocess barcode read of image '" + fileName + "' from location using method #6");
                 return returnValue.getText();
             }
 
@@ -599,8 +600,8 @@ public class CandidateImageFile {
                 for (int o = 0; o < offsets.length; ++o) {
                     returnValue = checkWithConfiguration(crop, scaleFactors[i], offsets[o], null);
                     if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
-                        log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #7");
-                        log.info("Success at image '" + candidateFile.getName() + "' with offset = " + offsets[o] + " and scaleFactor = " + scaleFactors[i]);
+                        log.debug("Successful preprocess barcode read of image '" + fileName + "' from location using method #7");
+                        log.info("Success at image '" + fileName + "' with offset = " + offsets[o] + " and scaleFactor = " + scaleFactors[i]);
                         return returnValue.getText();
                     }
                 }
@@ -610,7 +611,7 @@ public class CandidateImageFile {
             returnValue = checkWithDisplacing(image, left, top, width, height);
 
             if (returnValue.getStatus() == RESULT_BARCODE_SCANNED) {
-                log.debug("Successful preprocess barcode read of image '" + candidateFile.getName() + "' from location using method #8");
+                log.debug("Successful preprocess barcode read of image '" + fileName + "' from location using method #8");
                 return returnValue.getText();
             }
         }

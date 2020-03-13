@@ -21,17 +21,14 @@ import org.apache.commons.logging.LogFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
 
-
     private static final Log log = LogFactory.getLog(AbstractFileScanJob.class);
-    protected int percentComplete = 0;
-    protected ArrayList<RunnerListener> listeners = new ArrayList<>();
 
     public AbstractFileScanJob() {
     }
@@ -47,7 +44,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
      * @param barcodeInImageMetadata whether the barcode was extracted from metadata
      * @param log
      */
-    static void logMismatch(Counter counter, String filename, String barcode, String exifComment, TaxonNameReturner parser, boolean barcodeInImageMetadata, Log log) {
+    static void logMismatch(ScanCounterInterface counter, String filename, String barcode, String exifComment, TaxonNameReturner parser, boolean barcodeInImageMetadata, Log log) {
         if (barcodeInImageMetadata || Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_REDUNDANT_COMMENT_BARCODE).equals("true")) {
             // If so configured, or if image metadata contains a barcode that doesn't match the barcode in the image
             // report on barcode/comment missmatch as an error condition.
@@ -103,12 +100,14 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
     }
 
     /**
-     * Do actual processing of one file
+     * Do actual processing of one file.
+     * Static to enable threaded, state-less execution
      *
      * @param containedFile the file to process
-     * @param counter       the counter to keep track of sucess/failure
+     * @param counter       the counter to keep track of success/failure
+     * @param locks         the locks to use to prevent concurrency issues
      */
-    protected void checkFile(File containedFile, Counter counter) {
+    protected static void checkFile(File containedFile, ScanCounterInterface counter, Lock[] locks) {
         Singleton.getSingletonInstance().getProperties().getProperties().setProperty(ImageCaptureProperties.KEY_LASTPATH, containedFile.getPath());
         String filename = containedFile.getName();
         counter.incrementFilesSeen();
@@ -127,7 +126,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                 put("path", path);
                 put("filename", filename);
             }});
-            log.debug(matches != null ? matches.size() : "no matches found");
+            log.debug((matches != null ? matches.size() : "no") + " matches found for " + filename);
             if (matches != null && matches.size() == 1
                     && matches.get(0).getRawBarcode() == null
                     && matches.get(0).getRawExifBarcode() == null
@@ -156,7 +155,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                 }
             }
             if (matches == null || matches.size() == 0) {
-                createDatabaseRecordForFile(containedFile, counter, reattach, imageLifeCycle, existingTemplate);
+                AbstractFileScanJob.createDatabaseRecordForFile(containedFile, counter, reattach, imageLifeCycle, existingTemplate, locks);
             } else {
                 // found an already databased file (where we have barcode/specimen or drawer number data).
                 log.debug("Record exists, skipping file " + filename);
@@ -165,21 +164,22 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         } catch (UnreadableFileException e) {
             counter.incrementFilesFailed();
             counter.appendError(new RunnableJobError(containedFile.getName(), "", "Could not read file", new UnreadableFileException(), RunnableJobError.TYPE_FILE_READ));
-            log.error("Couldn't read file." + e.getMessage());
+            log.error("Couldn't read file " + filename + "." + e.getMessage());
         }
     }
 
     /**
-     * Create a new image database record
+     * Create a new image database record.
+     * Static to enable threaded, state-less execution
      *
      * @param containedFile  the file path relative to the start
      * @param counter        to count errors
      * @param reattach       whether there is already a database record existing, to be overridden
      * @param imageLifeCycle the repository to sage to
      * @param image          providing access to path & filename
-     * @throws UnreadableFileException
+     * @throws UnreadableFileException if the file could not be read
      */
-    protected void createDatabaseRecordForFile(File containedFile, Counter counter, boolean reattach, ICImageLifeCycle imageLifeCycle, ICImage image) throws UnreadableFileException {
+    protected static void createDatabaseRecordForFile(File containedFile, ScanCounterInterface counter, boolean reattach, ICImageLifeCycle imageLifeCycle, ICImage image, Lock[] locks) throws UnreadableFileException {
         boolean isSpecimenImage = false, isDrawerImage = false;
         BarcodeMatcher matcher = Singleton.getSingletonInstance().getBarcodeMatcher();
         // ** Identify the template.
@@ -198,10 +198,10 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         log.debug(candidateImageFile.getCatalogNumberBarcodeStatus());
         String barcode = candidateImageFile.getBarcodeTextAtFoundTemplate();
         if (candidateImageFile.getCatalogNumberBarcodeStatus() != CandidateImageFile.RESULT_BARCODE_SCANNED) {
-            log.error("Error scanning for barcode: " + barcode);
+            log.error("Error scanning for barcode on file '" + containedFile.getName() + "': " + barcode);
             barcode = "";
         }
-        log.debug("Barcode: " + barcode);
+        log.debug("Barcode: of file '" + containedFile.getName() + "':" + barcode);
         String exifComment = candidateImageFile.getExifUserCommentText();
         log.debug("ExifComment: " + exifComment);
         UnitTrayLabel labelRead = candidateImageFile.getTaxonLabelQRText(template);
@@ -211,7 +211,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
 
         if (labelRead != null) {
             rawOCR = labelRead.toJSONString();
-            log.debug("UnitTrayLabel: " + rawOCR);
+            log.debug("UnitTrayLabel: of file '" + containedFile.getName() + "':" + rawOCR);
             state = WorkFlowStatus.STAGE_1;
             parser = labelRead;
         } else {
@@ -220,7 +220,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
             } catch (OCRReadException e) {
                 log.error(e);
                 rawOCR = "";
-                log.error("Couldn't OCR file." + e.getMessage());
+                log.error("Couldn't OCR file '" + containedFile.getName() + "':." + e.getMessage());
                 RunnableJobError error = new RunnableJobError(image.getFilename(), "OCR Failed",
                         barcode, exifComment, "Couldn't find text to OCR for taxon label.",
                         null, null,
@@ -270,11 +270,11 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         if (matcher.matchesPattern(exifComment)
                 || matcher.matchesPattern(barcode)) {
             isSpecimenImage = true;
-            System.out.println("Specimen Image");
+            System.out.println(containedFile.getName() + " is a Specimen Image");
         } else {
             if (exifComment != null && exifComment.matches(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_REGEX_DRAWERNUMBER))) {
                 isDrawerImage = true;
-                System.out.println("Drawer Image");
+                System.out.println(containedFile.getName() + " is a Drawer Image");
             } else {
                 // no way we could continue from here on
                 int errorType = templateId.equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS) ? RunnableJobError.TYPE_NO_TEMPLATE : RunnableJobError.TYPE_UNKNOWN;
@@ -290,7 +290,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
 
         image.setRawBarcode(barcode);
         if (isSpecimenImage) {
-            createDatabaseRecordForSpecimen(containedFile, counter, image, barcode, exifComment, parser, labelRead, state);
+            AbstractFileScanJob.createDatabaseRecordForSpecimen(containedFile, counter, image, barcode, exifComment, parser, labelRead, state, locks);
             // reattach as we force a save by having cascade= all
             reattach = true;
         }
@@ -326,7 +326,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         } catch (SaveFailedException e) {
             log.error(e.getMessage(), e);
             counter.incrementFilesFailed();
-            String failureMessage = "Failed to save image record.  " + e.getMessage();
+            String failureMessage = "Failed to save image record for image " + containedFile.getName() + ".  " + e.getMessage();
             RunnableJobError error = new RunnableJobError(image.getFilename(), "Save Failed",
                     image.getFilename(), image.getPath(), failureMessage,
                     null, null,
@@ -337,14 +337,16 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
             if (Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_REDUNDANT_COMMENT_BARCODE).equals("true")) {
                 // If so configured, log as error
                 if (!image.getRawBarcode().equals(image.getRawExifBarcode())) {
-                    log.error("Warning: Scanned Image has missmatch between barcode and comment.");
+                    log.error("Warning: Scanned Image '" + containedFile.getName() + "' has missmatch between barcode and comment.");
                 }
             }
         }
     }
 
     /**
-     * Create or update an existing Specimen record to associate it with the ICImage
+     * Create or update an existing Specimen record to associate it with the ICImage.
+     * Static to enable threaded, state-less execution.
+     * BUT, since multiple images could reference the same specimen, we have to lock stuff
      *
      * @param containedFile the file of the image
      * @param counter       counter to add errors
@@ -354,7 +356,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
      * @param unitTrayLabel the unit tray label of the Specimen
      * @param state         the workflow state we are in with the specimen/image
      */
-    protected void createDatabaseRecordForSpecimen(File containedFile, Counter counter, ICImage image, String barcode, final String exifComment, TaxonNameReturner parser, UnitTrayLabel unitTrayLabel, String state) {
+    protected static void createDatabaseRecordForSpecimen(File containedFile, ScanCounterInterface counter, ICImage image, String barcode, final String exifComment, TaxonNameReturner parser, UnitTrayLabel unitTrayLabel, String state, Lock[] locks) {
         BarcodeMatcher matcher = Singleton.getSingletonInstance().getBarcodeMatcher();
         final String rawBarcode = barcode;
         if (!rawBarcode.equals(exifComment)) {
@@ -362,7 +364,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
             logMismatch(counter, image.getFilename(), barcode, exifComment, parser, matcher.matchesPattern(exifComment), log);
         }
 
-        Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Creating new specimen record.");
+        Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Creating new specimen record for file " + containedFile.getName() + ".");
         Specimen s = new Specimen();
         if ((!matcher.matchesPattern(barcode))
                 && matcher.matchesPattern(exifComment)) {
@@ -378,163 +380,176 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         }
 
         // check if there already exists a specimen to add the image to
-        SpecimenLifeCycle specimenLifeCycle = new SpecimenLifeCycle();
-        List<Specimen> existingSpecimens = specimenLifeCycle.findByBarcode(s.getBarcode());
-        if (existingSpecimens != null && existingSpecimens.size() > 0) {
-            counter.incrementSpecimenExisting();
-            assert (existingSpecimens.size() == 1);
-            for (Specimen specimen : existingSpecimens) {
-                image.setSpecimen(specimen);
-                specimen.getICImages().add(image);
-                try {
-                    specimenLifeCycle.attachDirty(specimen);
-                } catch (SaveFailedException e) {
-                    counter.appendError(new RunnableJobError(containedFile.getName(), barcode, specimen.getSpecimenId().toString(), "Failed adding image to existing Specimen", e, RunnableJobError.TYPE_SAVE_FAILED));
-                }
-            }
-            return;
+        // but make sure you are the only to try.
+        Lock lock = locks[barcode.hashCode() & (locks.length - 1)];
+        if (lock == null) {
+            log.debug("Lock null, fetched from " + barcode.hashCode() + ", " + locks.length + " and " + (barcode.hashCode() & (locks.length - 1)));
         }
-
-        s.setWorkFlowStatus(state);
-
-        if (unitTrayLabel != null) {
-            //  We got json data from a barcode.
-            s.setFamily(parser.getFamily());
-            s.setSubfamily(parser.getSubfamily());
-            s.setTribe(parser.getTribe());
-        } else {
-            // We failed over to OCR, try lookup in DB.
-            s.setFamily("");  // make sure there's a a non-null value in family.
-            extractFamilyToSpecimen(parser, s);
-        }
-        if (state.equals(WorkFlowStatus.STAGE_0)) {
-            // Look up likely matches for the OCR of the higher taxa in the HigherTaxon authority file.
-            if (!parser.getFamily().equals("")) {
-                // check family against database (with a soundex match)
-                HigherTaxonLifeCycle hls = new HigherTaxonLifeCycle();
-                String match = hls.findMatch(parser.getFamily());
-                if (match != null && !match.trim().equals("")) {
-                    s.setFamily(match);
-                }
-            }
-        }
-        // trim family to fit (in case multiple parts of taxon name weren't parsed
-        // and got concatenated into family field.
-        JobSingleBarcodeScan.setBasicSpecimenFromParser(parser, s);
-        s.setCreatingPath(ImageCaptureProperties.getPathBelowBase(containedFile));
-        s.setCreatingFilename(containedFile.getName());
-        if (parser.getIdentifiedBy() != null && parser.getIdentifiedBy().length() > 0) {
-            s.setIdentifiedBy(parser.getIdentifiedBy());
-        }
-        log.debug(s.getCollection());
-
-        s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion());
-        s.setDateCreated(new Date());
+        lock.lock();
         try {
-            // *** Save a database record of the specimen.
-            specimenLifeCycle.persist(s);
-            counter.incrementSpecimenDatabased();
-            s.attachNewPart();
-        } catch (SpecimenExistsException e) {
-            log.debug(e.getMessage());
-            // Expected case on scanning a second image for a specimen.
-            // Doesn't need to be reported as a parsing error.
-            //
-            // Look up the existing record to link this specimen to it.
-            try {
-                List<Specimen> checkResult = specimenLifeCycle.findByBarcode(barcode);
-                if (checkResult.size() == 1) {
-                    s = checkResult.get(0);
+            SpecimenLifeCycle specimenLifeCycle = new SpecimenLifeCycle();
+            List<Specimen> existingSpecimens = specimenLifeCycle.findByBarcode(s.getBarcode());
+            if (existingSpecimens != null && existingSpecimens.size() > 0) {
+                counter.incrementSpecimenExisting();
+                assert (existingSpecimens.size() == 1);
+                for (Specimen specimen : existingSpecimens) {
+                    image.setSpecimen(specimen);
+                    specimen.getICImages().add(image);
+                    try {
+                        specimenLifeCycle.attachDirty(specimen);
+                    } catch (SaveFailedException e) {
+                        counter.appendError(new RunnableJobError(containedFile.getName(), barcode, specimen.getSpecimenId().toString(), "Failed adding image to existing Specimen", e, RunnableJobError.TYPE_SAVE_FAILED));
+                    }
                 }
-            } catch (Exception e2) {
-                s = null; // so that saving the image record doesn't fail on trying to save linked transient specimen record.
-                String errorMessage = "Linking Error: \nFailed to link image to existing specimen record.\n";
-                RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
-                        rawBarcode, exifComment, errorMessage,
-                        parser, (DrawerNameReturner) parser,
-                        e2, RunnableJobError.TYPE_SAVE_FAILED);
-                counter.appendError(error);
+                return;
             }
-        } catch (SaveFailedException e) {
-            // Couldn't save for some reason other than the
-            // specimen record already existing.  Check for possible
-            // save problems resulting from parsing errors.
-            log.error(e);
-            try {
-                List<Specimen> checkResult = specimenLifeCycle.findByBarcode(barcode);
-                if (checkResult.size() == 1) {
-                    s = checkResult.get(0);
+
+            s.setWorkFlowStatus(state);
+
+            if (unitTrayLabel != null) {
+                //  We got json data from a barcode.
+                s.setFamily(parser.getFamily());
+                s.setSubfamily(parser.getSubfamily());
+                s.setTribe(parser.getTribe());
+            } else {
+                // We failed over to OCR, try lookup in DB.
+                s.setFamily("");  // make sure there's a a non-null value in family.
+                extractFamilyToSpecimen(parser, s);
+            }
+            if (state.equals(WorkFlowStatus.STAGE_0)) {
+                // Look up likely matches for the OCR of the higher taxa in the HigherTaxon authority file.
+                if (!parser.getFamily().equals("")) {
+                    // check family against database (with a soundex match)
+                    HigherTaxonLifeCycle hls = new HigherTaxonLifeCycle();
+                    String match = hls.findMatch(parser.getFamily());
+                    if (match != null && !match.trim().equals("")) {
+                        s.setFamily(match);
+                    }
                 }
-                // Drawer number with length limit (and specimen that fails to save at over this length makes
-                // a good canary for labels that parse very badly.
-                if (((DrawerNameReturner) parser).getDrawerNumber().length() > MetadataRetriever.getFieldLength(Specimen.class, "DrawerNumber")) {
+            }
+            // trim family to fit (in case multiple parts of taxon name weren't parsed
+            // and got concatenated into family field.
+            AbstractFileScanJob.setBasicSpecimenFromParser(parser, s);
+            s.setCreatingPath(ImageCaptureProperties.getPathBelowBase(containedFile));
+            s.setCreatingFilename(containedFile.getName());
+            if (parser.getIdentifiedBy() != null && parser.getIdentifiedBy().length() > 0) {
+                s.setIdentifiedBy(parser.getIdentifiedBy());
+            }
+            log.debug(s.getCollection());
+
+            s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion());
+            s.setDateCreated(new Date());
+            try {
+                // *** Save a database record of the specimen.
+                specimenLifeCycle.persist(s);
+                counter.incrementSpecimenDatabased();
+                s.attachNewPart();
+            } catch (SpecimenExistsException e) {
+                log.debug(e.getMessage());
+                // Expected case on scanning a second image for a specimen.
+                // Doesn't need to be reported as a parsing error.
+                //
+                // Look up the existing record to link this specimen to it.
+                try {
+                    List<Specimen> checkResult = specimenLifeCycle.findByBarcode(barcode);
+                    if (checkResult.size() == 1) {
+                        s = checkResult.get(0);
+                    }
+                } catch (Exception e2) {
+                    s = null; // so that saving the image record doesn't fail on trying to save linked transient specimen record.
+                    String errorMessage = "Linking Error: \nFailed to link image to existing specimen record.\n";
+                    RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
+                            rawBarcode, exifComment, errorMessage,
+                            parser, (DrawerNameReturner) parser,
+                            e2, RunnableJobError.TYPE_SAVE_FAILED);
+                    counter.appendError(error);
+                }
+            } catch (SaveFailedException e) {
+                // Couldn't save for some reason other than the
+                // specimen record already existing.  Check for possible
+                // save problems resulting from parsing errors.
+                log.error(e);
+                try {
+                    List<Specimen> checkResult = specimenLifeCycle.findByBarcode(barcode);
+                    if (checkResult.size() == 1) {
+                        s = checkResult.get(0);
+                    }
+                    // Drawer number with length limit (and specimen that fails to save at over this length makes
+                    // a good canary for labels that parse very badly.
+                    if (((DrawerNameReturner) parser).getDrawerNumber().length() > MetadataRetriever.getFieldLength(Specimen.class, "DrawerNumber")) {
+                        String badParse = "";
+                        badParse = "Parsing problem. \nDrawer number is too long: " + s.getDrawerNumber() + "\n";
+                        RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
+                                rawBarcode, exifComment, badParse,
+                                parser, (DrawerNameReturner) parser,
+                                e, RunnableJobError.TYPE_BAD_PARSE);
+                        counter.appendError(error);
+                    } else {
+                        RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
+                                rawBarcode, exifComment, e.getMessage(),
+                                parser, (DrawerNameReturner) parser,
+                                e, RunnableJobError.TYPE_SAVE_FAILED);
+                        counter.appendError(error);
+
+                    }
+                } catch (Exception err) {
+                    log.error(err);
+
                     String badParse = "";
-                    badParse = "Parsing problem. \nDrawer number is too long: " + s.getDrawerNumber() + "\n";
+                    // Drawer number with length limit (and specimen that fails to save at over this length makes
+                    // a good canary for labels that parse very badly.
+                    if (s.getDrawerNumber() == null) {
+                        badParse = "Parsing problem. \nDrawer number is null: \n";
+                    } else {
+                        if (s.getDrawerNumber().length() > MetadataRetriever.getFieldLength(Specimen.class, "DrawerNumber")) {
+                            // This was an OK test for testing OCR, but in production ends up in records not being
+                            // created for files, which ends up being a larger quality control problem than records
+                            // with bad OCR.
+
+                            // Won't fail this way anymore - drawer number is now enforced in Specimen.setDrawerNumber()
+                            badParse = "Parsing problem. \nDrawer number is too long: " + s.getDrawerNumber() + "\n";
+                        }
+                    }
                     RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
                             rawBarcode, exifComment, badParse,
                             parser, (DrawerNameReturner) parser,
-                            e, RunnableJobError.TYPE_BAD_PARSE);
+                            err, RunnableJobError.TYPE_SAVE_FAILED);
                     counter.appendError(error);
-                } else {
-                    RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
-                            rawBarcode, exifComment, e.getMessage(),
-                            parser, (DrawerNameReturner) parser,
-                            e, RunnableJobError.TYPE_SAVE_FAILED);
-                    counter.appendError(error);
-
+                    counter.incrementFilesFailed();
+                    s = null;
                 }
-            } catch (Exception err) {
-                log.error(err);
-
-                String badParse = "";
-                // Drawer number with length limit (and specimen that fails to save at over this length makes
-                // a good canary for labels that parse very badly.
-                if (s.getDrawerNumber() == null) {
-                    badParse = "Parsing problem. \nDrawer number is null: \n";
-                } else {
-                    if (s.getDrawerNumber().length() > MetadataRetriever.getFieldLength(Specimen.class, "DrawerNumber")) {
-                        // This was an OK test for testing OCR, but in production ends up in records not being
-                        // created for files, which ends up being a larger quality control problem than records
-                        // with bad OCR.
-
-                        // Won't fail this way anymore - drawer number is now enforced in Specimen.setDrawerNumber()
-                        badParse = "Parsing problem. \nDrawer number is too long: " + s.getDrawerNumber() + "\n";
-                    }
-                }
+            } catch (Exception ex) {
+                log.error(ex);
                 RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
-                        rawBarcode, exifComment, badParse,
+                        rawBarcode, exifComment, ex.getMessage(),
                         parser, (DrawerNameReturner) parser,
-                        err, RunnableJobError.TYPE_SAVE_FAILED);
+                        ex, RunnableJobError.TYPE_SAVE_FAILED);
                 counter.appendError(error);
-                counter.incrementFilesFailed();
-                s = null;
             }
-        } catch (Exception ex) {
-            log.error(ex);
-            RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
-                    rawBarcode, exifComment, ex.getMessage(),
-                    parser, (DrawerNameReturner) parser,
-                    ex, RunnableJobError.TYPE_SAVE_FAILED);
-            counter.appendError(error);
+        } finally {
+            lock.unlock();
         }
         if (s != null) {
             image.setSpecimen(s);
         }
     }
 
-    /**
-     * Set the completeness percentage in main frame & notify listeners
-     *
-     * @param aPercentage the progress percentage
-     */
-    protected void setPercentComplete(final int aPercentage) {
-        //set value
-        percentComplete = aPercentage;
-        //notify listeners
-        Singleton.getSingletonInstance().getMainFrame().notifyListener(percentComplete, this);
-        for (RunnerListener listener : listeners) {
-            listener.notifyListener(percentComplete, this);
+    protected static Specimen setBasicSpecimenFromParser(TaxonNameReturner parser, Specimen s) {
+        if (s.getFamily().length() > 40) {
+            s.setFamily(s.getFamily().substring(0, 40));
         }
+
+        if (parser != null) {
+            s.setGenus(parser.getGenus());
+            s.setSpecificEpithet(parser.getSpecificEpithet());
+            s.setSubspecificEpithet(parser.getSubspecificEpithet());
+            s.setInfraspecificEpithet(parser.getInfraspecificEpithet());
+            s.setInfraspecificRank(parser.getInfraspecificRank());
+            s.setAuthorship(parser.getAuthorship());
+            s.setDrawerNumber(((DrawerNameReturner) parser).getDrawerNumber());
+            s.setCollection(((CollectionReturner) parser).getCollection());
+        }
+        return s;
     }
 
     /**

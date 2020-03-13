@@ -22,43 +22,44 @@ import edu.harvard.mcz.imagecapture.interfaces.ScanCounterInterface;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Counter
  */
-public class Counter implements ScanCounterInterface {
+public class AtomicCounter implements ScanCounterInterface {
 
-    private int totalCount = 0;
-    private int filesSeen = 0;
-    private int filesDatabased = 0;
-    private int filesExisting = 0;
-    private int filesFailed = 0;
-    private int directories = 0;
-    private int directoriesFailed = 0;
-    private int specimensExisting = 0;
-    private int specimensUpdated = 0;
-    private int specimensDatabased = 0;
-    private int filesUpdated = 0;
+    private AtomicInteger totalCount = new AtomicInteger(0);
+    private AtomicInteger filesSeen = new AtomicInteger(0);
+    private AtomicInteger filesDatabased = new AtomicInteger(0);
+    private AtomicInteger filesExisting = new AtomicInteger(0);
+    private AtomicInteger filesFailed = new AtomicInteger(0);
+    private AtomicInteger directories = new AtomicInteger(0);
+    private AtomicInteger directoriesFailed = new AtomicInteger(0);
+    private AtomicInteger specimensExisting = new AtomicInteger(0);
+    private AtomicInteger specimensUpdated = new AtomicInteger(0);
+    private AtomicInteger specimensDatabased = new AtomicInteger(0);
+    private AtomicInteger filesUpdated = new AtomicInteger(0);
     private StringBuffer errorReport;
     private List<RunnableJobError> errors = null;
 
-
-    public Counter() {
-        totalCount = 0;
-        filesSeen = 0;
-        filesDatabased = 0;
-        filesExisting = 0;
-        filesFailed = 0;
-        specimensDatabased = 0;
-        directories = 0;
-        directoriesFailed = 0;
-        specimensUpdated = 0;
-        filesUpdated = 0;
+    public AtomicCounter() {
+        totalCount = new AtomicInteger(0);
+        filesSeen = new AtomicInteger(0);
+        filesDatabased = new AtomicInteger(0);
+        filesExisting = new AtomicInteger(0);
+        filesFailed = new AtomicInteger(0);
+        specimensDatabased = new AtomicInteger(0);
+        specimensExisting = new AtomicInteger(0);
+        directories = new AtomicInteger(0);
+        directoriesFailed = new AtomicInteger(0);
+        specimensUpdated = new AtomicInteger(0);
+        filesUpdated = new AtomicInteger(0);
         errorReport = new StringBuffer();
         errors = new ArrayList<RunnableJobError>();
     }
 
-    public void appendError(RunnableJobError anError) {
+    public synchronized void appendError(RunnableJobError anError) {
         errors.add(anError);
         errorReport.append(anError.toString());
         errorReport.append("\n");
@@ -69,78 +70,78 @@ public class Counter implements ScanCounterInterface {
     }
 
     public void incrementSpecimenDatabased() {
-        specimensDatabased++;
+        specimensDatabased.incrementAndGet();
     }
 
     public void incrementSpecimenExisting() {
-        specimensExisting++;
+        specimensExisting.incrementAndGet();
     }
 
     public void incrementTotal() {
-        totalCount++;
+        totalCount.incrementAndGet();
     }
 
     public void incrementFilesSeen() {
-        filesSeen++;
+        filesSeen.incrementAndGet();
     }
 
     /**
      * TODO: automatically increment upon addition of an error, filter by filename if necessary for the number of failed files
      */
     public void incrementFilesFailed() {
-        filesFailed++;
+        filesFailed.incrementAndGet();
     }
 
     public void incrementFilesDatabased() {
-        filesDatabased++;
+        filesDatabased.incrementAndGet();
     }
 
     public void incrementFilesExisting() {
-        filesExisting++;
+        filesExisting.incrementAndGet();
     }
 
     public void incrementDirectories() {
-        directories++;
+        directories.incrementAndGet();
     }
 
     public void incrementDirectoriesFailed() {
-        directoriesFailed++;
+        directoriesFailed.incrementAndGet();
     }
 
     public int getSpecimens() {
-        return specimensDatabased;
+        return specimensDatabased.get();
     }
 
     public int getTotal() {
-        return totalCount;
+        return totalCount.get();
     }
 
     /**
      * @return the files checked
      */
     public int getFilesSeen() {
-        return filesSeen;
+        return filesSeen.get();
     }
 
     /**
      * @return the files for which new database records were created
      */
     public int getFilesDatabased() {
-        return filesDatabased;
+        return filesDatabased.get();
     }
 
     /**
      * @return the files for which database records allready existed
      */
     public int getFilesExisting() {
-        return filesExisting;
+        return filesExisting.get();
     }
 
     /**
      * @return the files for which a check for information needed to create a record Failed.
      */
     public int getFilesFailed() {
-        return filesFailed;
+        return filesFailed.get();
     }
 
 
@@ -148,7 +149,7 @@ public class Counter implements ScanCounterInterface {
      * @return the directories
      */
     public int getDirectories() {
-        return directories;
+        return directories.get();
     }
 
 
@@ -156,42 +157,42 @@ public class Counter implements ScanCounterInterface {
      * @return the directoriesFailed
      */
     public int getDirectoriesFailed() {
-        return directoriesFailed;
+        return directoriesFailed.get();
     }
 
     /**
      * @return the specimensUpdated
      */
     public int getSpecimensUpdated() {
-        return specimensUpdated;
+        return specimensUpdated.get();
     }
 
     /**
      * @return
      */
     public int getSpecimensExisting() {
-        return specimensExisting;
+        return specimensExisting.get();
     }
 
     /**
      *
      */
     public void incrementSpecimensUpdated() {
-        this.specimensUpdated++;
+        this.specimensUpdated.incrementAndGet();
     }
 
     /**
      * @return the filesUpdated
      */
     public int getFilesUpdated() {
-        return filesUpdated;
+        return filesUpdated.get();
     }
 
     /**
      *
      */
     public void incrementFilesUpdated() {
-        this.filesUpdated++;
+        this.filesUpdated.incrementAndGet();
     }
 
     public List<RunnableJobError> getErrors() {
@@ -214,27 +215,5 @@ public class Counter implements ScanCounterInterface {
         }
         report += "Found " + this.getFilesFailed() + " files with problems.\n";
         return report;
-    }
-
-    /**
-     * Merge this counter with another one, adding each others data
-     *
-     * @param counter the counter to merge with
-     */
-    public Counter mergeIn(ScanCounterInterface counter) {
-        this.totalCount += counter.getTotal();
-        this.filesSeen += counter.getFilesSeen();
-        this.filesDatabased += counter.getFilesDatabased();
-        this.filesExisting += counter.getFilesExisting();
-        this.filesFailed += counter.getFilesFailed();
-        this.directories += counter.getDirectories();
-        this.directoriesFailed += counter.getDirectoriesFailed();
-        this.specimensExisting += counter.getSpecimensExisting();
-        this.specimensUpdated += counter.getSpecimensUpdated();
-        this.specimensDatabased += counter.getSpecimens();
-        this.filesUpdated += counter.getFilesUpdated();
-        this.errorReport.append(counter.getErrorReport());
-        this.errors.addAll(counter.getErrors());
-        return this;
     }
 }

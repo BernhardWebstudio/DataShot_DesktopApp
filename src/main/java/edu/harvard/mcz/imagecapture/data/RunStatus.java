@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * <p>
  */
-package edu.harvard.mcz.imagecapture.interfaces;
+package edu.harvard.mcz.imagecapture.data;
 
 /**
  * Describes the status of a RunnableJob

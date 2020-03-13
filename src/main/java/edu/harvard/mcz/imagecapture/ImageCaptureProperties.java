@@ -100,21 +100,18 @@ public class ImageCaptureProperties extends AbstractTableModel {
      */
     public static final String KEY_CONVERT_EXECUTABLE = "program.convert";
     /**
+     * Default ImageMagick convert properties used for JPG to TIFF conversion to
+     * prepare a file for tesseract.
+     */
+    public static final String KEY_CONVERT_PARAMETERS = "program.convert.parameters";
+    /**
      * Path and executable for the ImageMagick program mogrify.  If blank,
      * thumbnails will be generated using Java.
      */
     public static final String KEY_MOGRIFY_EXECUTABLE = "program.mogrify";
     /**
-     * Default ImageMagick convert properties used for JPG to TIFF conversion to
-     * prepare a file for tesseract.
-     */
-    public static final String KEY_CONVERT_PARAMETERS = "convert.parameters";
-    /**
      * Should the specimen details view pane have the scroll bars forced to be
-     * turned on.   If value is VALUE_DETAILS_SCROLL_FORCE_ON, then they will
-     * be on.
-     *
-     * @see #VALUE_DETAILS_SCROLL_FORCE_ON
+     * turned on.
      */
     public static final String KEY_DETAILS_SCROLL = "details.scroll";
     /**
@@ -125,7 +122,7 @@ public class ImageCaptureProperties extends AbstractTableModel {
     /**
      * The default value for preparation type (e.g. pinned).
      *
-     * @see SpecimenPart#preserveMethod
+     * @see SpecimenPart->preserveMethod
      */
     public static final String KEY_DEFAULT_PREPARATION = "default.preparation";
     /**
@@ -147,6 +144,10 @@ public class ImageCaptureProperties extends AbstractTableModel {
      */
     public static final String KEY_THUMBNAIL_WIDTH = "images.thumbnailwidth";
     /**
+     * Whether to generate thumbnails at all
+     */
+    public static final String KEY_GENERATE_THUMBNAILS = "images.generate.thumbnails";
+    /**
      * Regular expression to identify drawer numbers in strings.
      */
     public static final String KEY_REGEX_DRAWERNUMBER = "images.regexdrawernumber";
@@ -167,14 +168,6 @@ public class ImageCaptureProperties extends AbstractTableModel {
     public static final String KEY_DEFAULT_TEMPLATES = "template.default";
 
     /**
-     * Value for KEY_DETAILS_SCROLL that will cause the specimen details view pane to
-     * have scroll bars forced to be turned on.
-     *
-     * @see #KEY_DETAILS_SCROLL
-     */
-    public static final String VALUE_DETAILS_SCROLL_FORCE_ON = "on";
-
-    /**
      * Show the login dialog with the advanced options open by default (desirable for
      * developers working with development/test/production databases) if true.
      */
@@ -184,6 +177,16 @@ public class ImageCaptureProperties extends AbstractTableModel {
      * The maximum height for editor fields
      */
     public static final String KEY_MAX_FIELD_HEIGHT = "editor.fields.maxHeight";
+
+    /**
+     * The percentage of the editor window to be used for editor vs. image view
+     */
+    public static final String KEY_EDITOR_IMPORTANCE = "editor.window.division";
+
+    /**
+     * The level of concurrency, resp. the max. number of different threads to use for one job
+     */
+    public static final String KEY_CONCURRENCY_LEVEL = "concurrency.level";
 
     public static final String KEY_DB_URL = "hibernate.connection.url";
     public static final String KEY_DB_PASSWORD = "hibernate.connection.password";
@@ -552,6 +555,9 @@ public class ImageCaptureProperties extends AbstractTableModel {
             // default value is 120 pixels.
             properties.setProperty(KEY_THUMBNAIL_WIDTH, "80");
         }
+        if (!properties.containsKey(KEY_GENERATE_THUMBNAILS)) {
+            properties.setProperty(KEY_GENERATE_THUMBNAILS, "true");
+        }
         if (!properties.containsKey(KEY_REGEX_DRAWERNUMBER)) {
             // default value is 120 pixels.
             properties.setProperty(KEY_REGEX_DRAWERNUMBER, ImageCaptureApp.REGEX_DRAWERNUMBER);
@@ -571,7 +577,12 @@ public class ImageCaptureProperties extends AbstractTableModel {
         if (!properties.containsKey(KEY_MAX_FIELD_HEIGHT)) {
             properties.setProperty(KEY_MAX_FIELD_HEIGHT, "70");
         }
-
+        if (!properties.containsKey(KEY_EDITOR_IMPORTANCE)) {
+            properties.setProperty(KEY_EDITOR_IMPORTANCE, "0.6");
+        }
+        if (!properties.containsKey(KEY_CONCURRENCY_LEVEL)) {
+            properties.setProperty(KEY_CONCURRENCY_LEVEL, "16");
+        }
     }
 
     /* Place where properties in this instance are persisted.

@@ -20,8 +20,8 @@ package edu.harvard.mcz.imagecapture.jobs;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.entity.Specimen;
-import edu.harvard.mcz.imagecapture.interfaces.*;
+import edu.harvard.mcz.imagecapture.data.RunStatus;
+import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialog;
 import edu.harvard.mcz.imagecapture.utility.FileUtility;
@@ -31,6 +31,8 @@ import org.apache.commons.logging.LogFactory;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Examines a single image file attempts to determine the correct template, tries to parse data from the image, launches
@@ -47,7 +49,8 @@ import java.util.Date;
 public class JobSingleBarcodeScan extends AbstractFileScanJob {
 
     private static final Log log = LogFactory.getLog(JobSingleBarcodeScan.class);
-
+    protected int percentComplete = 0;
+    protected ArrayList<RunnerListener> listeners = new ArrayList<>();
     private boolean persist = false;
     private Date startDate = null;
     private int runStatus = RunStatus.STATUS_NEW;
@@ -74,23 +77,6 @@ public class JobSingleBarcodeScan extends AbstractFileScanJob {
         init();
     }
 
-    static Specimen setBasicSpecimenFromParser(TaxonNameReturner parser, Specimen s) {
-        if (s.getFamily().length() > 40) {
-            s.setFamily(s.getFamily().substring(0, 40));
-        }
-
-        if (parser != null) {
-            s.setGenus(parser.getGenus());
-            s.setSpecificEpithet(parser.getSpecificEpithet());
-            s.setSubspecificEpithet(parser.getSubspecificEpithet());
-            s.setInfraspecificEpithet(parser.getInfraspecificEpithet());
-            s.setInfraspecificRank(parser.getInfraspecificRank());
-            s.setAuthorship(parser.getAuthorship());
-            s.setDrawerNumber(((DrawerNameReturner) parser).getDrawerNumber());
-            s.setCollection(((CollectionReturner) parser).getCollection());
-        }
-        return s;
-    }
 
     private void init() {
         listeners = new ArrayList<RunnerListener>();
@@ -142,7 +128,8 @@ public class JobSingleBarcodeScan extends AbstractFileScanJob {
             String filename = fileToCheck.getName();
             log.debug("Selected file " + filename + " to scan for barcodes");
             Counter counter = new Counter();
-            checkFile(fileToCheck, counter);
+            final Lock[] locks = new ReentrantLock[1];
+            checkFile(fileToCheck, counter, locks);
             RunnableJobReportDialog errorReportDialog = new RunnableJobReportDialog(Singleton.getSingletonInstance().getMainFrame(), counter.toString(), counter.getErrors(), "Preprocess Result");
             errorReportDialog.setVisible(true);
         } else {
@@ -167,6 +154,21 @@ public class JobSingleBarcodeScan extends AbstractFileScanJob {
     @Override
     public int percentComplete() {
         return percentComplete;
+    }
+
+    /**
+     * Set the completeness percentage in main frame & notify listeners
+     *
+     * @param aPercentage the progress percentage
+     */
+    protected void setPercentComplete(final int aPercentage) {
+        //set value
+        percentComplete = aPercentage;
+        //notify listeners
+        Singleton.getSingletonInstance().getMainFrame().notifyListener(percentComplete, this);
+        for (RunnerListener listener : listeners) {
+            listener.notifyListener(percentComplete, this);
+        }
     }
 
     /* (non-Javadoc)

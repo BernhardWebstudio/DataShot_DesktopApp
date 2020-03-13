@@ -187,7 +187,7 @@ public class TemplateLifeCycle {
             log.debug("getting Template instance 2");
             session.beginTransaction();
             try {
-                instance = (Template) session.get(
+                instance = session.get(
                         Template.class, id);
                 session.getTransaction().commit();
                 if (instance == null) {

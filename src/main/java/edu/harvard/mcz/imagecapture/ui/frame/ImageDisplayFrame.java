@@ -408,7 +408,7 @@ public class ImageDisplayFrame extends JFrame {
         splitPane.setUI(flatDividerSplitPaneUI);
         splitPane.setBorder(null);
         // set the sizes of the two panes
-        splitPane.setDividerLocation(0.6);
+        splitPane.setDividerLocation(Double.parseDouble(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_EDITOR_IMPORTANCE, "0.6")));
     }
 
     /**

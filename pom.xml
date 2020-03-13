@@ -97,11 +97,6 @@
 			<name>Maven Central</name>
 			<url>https://repo1.maven.org/maven2/</url>
 		</repository>
-		<repository>
-			<id>jeecg</id>
-			<name>JEECG</name>
-			<url>https://maven.jeecg.org/nexus/content/repositories/jeecg/</url>
-		</repository>
 	</repositories>
 	<dependencies>
 		<dependency>
@@ -159,12 +154,6 @@
 			<groupId>com.miglayout</groupId>
 			<artifactId>miglayout-swing</artifactId>
 			<version>5.2</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/com.oracle/ojdbc14 -->
-		<dependency>
-			<groupId>com.oracle</groupId>
-			<artifactId>ojdbc14</artifactId>
-			<version>10.2.0.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jgoodies</groupId>

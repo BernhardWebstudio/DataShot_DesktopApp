@@ -123,9 +123,9 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JScrollPane jScrollPaneNotes = null;
     private JScrollPane jScrollPaneNumbers = null;
     private JScrollPane jScrollPaneSpecimenParts = null;
-    private JTable jTableCollectors = null;
-    private JTable jTableNumbers = null;
-    private JTable jTableSpecimenParts = null;
+    private JTableWithRowBorder jTableCollectors = null;
+    private JTableWithRowBorder jTableNumbers = null;
+    private JTableWithRowBorder jTableSpecimenParts = null;
     private JTextArea jTextAreaSpecimenNotes = null;
     private JTextField jTextFieldAssociatedTaxon = null;
     private JTextField jTextFieldAuthorship = null;
@@ -540,14 +540,9 @@ public class SpecimenDetailsViewPane extends JPanel {
             specimen.getSpecimenParts().add(part);
         }
         jTableSpecimenParts.setModel(new SpecimenPartsTableModel(specimen.getSpecimenParts()));
+        this.setupSpecimenPartsJTableRenderer();
 
-        //collectors - copy
-		/*specimen.getCollectors().clear();
-		Iterator<edu.harvard.mcz.imagecapture.data.Collector> iterc = previousSpecimen.getCollectors().iterator();
-		while(iterc.hasNext()){
-			specimen.getCollectors().add((edu.harvard.mcz.imagecapture.data.Collector)iterc.next());
-		}		
-		jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));*/
+        //+collectors
         specimen.getCollectors().clear();
         for (Collector collector : previousSpecimen.getCollectors()) {
             Collector c = (Collector) collector.clone();
@@ -555,13 +550,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             specimen.getCollectors().add(c);
         }
         jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));
-
-        CollectorLifeCycle cls = new CollectorLifeCycle();
-        JComboBox<String> jComboBoxCollector = new JComboBox<>(cls.getDistinctCollectors());
-        jComboBoxCollector.setEditable(true);
-        //field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
-        jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(jComboBoxCollector));
-        AutoCompleteDecorator.decorate(jComboBoxCollector);
+        this.setupCollectorJTableRenderer();
 
         //+determinations
         specimen.getDeterminations().clear();
@@ -592,7 +581,6 @@ public class SpecimenDetailsViewPane extends JPanel {
         //new - collecting method
         jTextFieldCollectingMethod.setText(previousSpecimen.getCollectingMethod());
 
-        setSpecimenPartsTableCellEditors();
         updateContentDependentLabels();
     }
 
@@ -742,55 +730,13 @@ public class SpecimenDetailsViewPane extends JPanel {
         //without this, it does save the 1st record, and it does not copy the next record!
         log.debug("setValues calling jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));");
         jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));
-
         this.setupNumberJTableRenderer();
 
         jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));
-
-
-        // Setting the model will overwrite the existing cell editor bound
-        // to the column model, so we need to add it again.
-
-        //this line is the original!!!
-        //FilteringAgentJComboBox field = new FilteringAgentJComboBox();
-
-        //paul's comments
-        //field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
-        //jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new PicklistTableCellEditor(field, true));
-
-        //this line is the original!!!
-        //jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(field));
-
-        //paul's comments
-        //field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
-        //field.setVerifyInputWhenFocusTarget(true);
-
-        //allie - change: this is for simple text fields. below it has changed to combo boxes!
-		/*JTextField field = new JTextField();
-		field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
-		jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));*/
-        //end allie change
-
-        //allie new
-        CollectorLifeCycle cls = new CollectorLifeCycle();
-        JComboBox<String> jComboBoxCollector = new JComboBox<>(cls.getDistinctCollectors());
-        jComboBoxCollector.setEditable(true);
-        //field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
-        jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(jComboBoxCollector));
-        AutoCompleteDecorator.decorate(jComboBoxCollector);
-        //end allie new
+        this.setupCollectorJTableRenderer();
 
         jTableSpecimenParts.setModel(new SpecimenPartsTableModel(specimen.getSpecimenParts()));
-        jTableSpecimenParts.getColumnModel().getColumn(0).setPreferredWidth(90);
-        for (int i = 0; i < jTableSpecimenParts.getColumnCount(); i++) {
-            TableColumn column = jTableSpecimenParts.getColumnModel().getColumn(i);
-            if (i == 0) {
-                column.setPreferredWidth(120);
-            } else {
-                column.setPreferredWidth(50);
-            }
-        }
-        setSpecimenPartsTableCellEditors();
+        setupSpecimenPartsJTableRenderer();
 
         updateContentDependentLabels();
 
@@ -1201,66 +1147,38 @@ public class SpecimenDetailsViewPane extends JPanel {
      */
     private JTable getJTableCollectors() {
         if (jTableCollectors == null) {
-            jTableCollectors = new JTableWithRowBorder(new CollectorTableModel());
+            try {
+                jTableCollectors = new JTableWithRowBorder(new CollectorTableModel(this.specimen.getCollectors()));
+            } catch (NullPointerException e) {
+                jTableCollectors = new JTableWithRowBorder(new CollectorTableModel());
+            }
 
-            // Note: When setting the values, the table column editor needs to be reset there, as the model is replaced.
-
-            JComboBox field = new JComboBox();
-            //field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
-            jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(field));
-            //
-            jTableCollectors.setShowGrid(true);
+            setupCollectorJTableRenderer();
             jTableCollectors.setRowHeight(jTableCollectors.getRowHeight() + 5);
-            jTableCollectors.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
+
+            jTableCollectors.setObjectName("Collector");
+            jTableCollectors.setParentPane(thisPane);
+            jTableCollectors.addListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
                     thisPane.setStateToDirty();
                 }
             });
-            jTableCollectors.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        clickedOnCollsRow = ((JTable) e.getComponent()).getSelectedRow();
-                        jPopupCollectors.show(e.getComponent(), e.getX(), e.getY());
-                    }
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        clickedOnCollsRow = ((JTable) e.getComponent()).getSelectedRow();
-                        jPopupCollectors.show(e.getComponent(), e.getX(), e.getY());
-                    }
-                }
-            });
-            // row deletion
-            jPopupCollectors = new JPopupMenu();
-            JMenuItem menuItemDeleteRow = new JMenuItem("Delete Row");
-            menuItemDeleteRow.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        log.debug(clickedOnCollsRow);
-                        if (clickedOnCollsRow >= 0) {
-                            int ok = JOptionPane.showConfirmDialog(thisPane, "Delete the selected collector?", "Delete Collector", JOptionPane.OK_CANCEL_OPTION);
-                            if (ok == JOptionPane.OK_OPTION) {
-                                log.debug("deleting collectors row " + clickedOnCollsRow);
-                                ((CollectorTableModel) jTableCollectors.getModel()).deleteRow(clickedOnCollsRow);
-                                setStateToDirty();
-                            } else {
-                                log.debug("collector row delete canceled by user.");
-                            }
-                        } else {
-                            JOptionPane.showMessageDialog(thisPane, "Unable to select row to delete.  Try empting the value and pressing Save.");
-                        }
-                    } catch (Exception ex) {
-                        log.error(ex.getMessage());
-                        JOptionPane.showMessageDialog(thisPane, "Failed to delete a collector row. " + ex.getMessage());
-                    }
-                }
-            });
-            jPopupCollectors.add(menuItemDeleteRow);
+            jTableCollectors.enableDeleteability();
         }
         return jTableCollectors;
+    }
+
+    /**
+     * Setup from time to time the editor
+     */
+    private void setupCollectorJTableRenderer() {
+        CollectorLifeCycle cls = new CollectorLifeCycle();
+        JComboBox<String> jComboBoxCollector = new JComboBox<>(cls.getDistinctCollectors());
+        jComboBoxCollector.setEditable(true);
+        //field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
+        jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(jComboBoxCollector));
+        AutoCompleteDecorator.decorate(jComboBoxCollector);
     }
 
     private JScrollPane getJScrollPaneSpecimenParts() {
@@ -1285,68 +1203,28 @@ public class SpecimenDetailsViewPane extends JPanel {
             }
             jTableSpecimenParts.getColumnModel().getColumn(0).setPreferredWidth(90);
             jTableSpecimenParts.setRowHeight(jTableSpecimenParts.getRowHeight() + 5);
-            setSpecimenPartsTableCellEditors();
+            setupSpecimenPartsJTableRenderer();
 
             log.debug(specimen.getSpecimenParts().size());
 
-            jTableSpecimenParts.addMouseListener(new MouseAdapter() {
+            jTableSpecimenParts.setObjectName("Specimen Part");
+            jTableSpecimenParts.setParentPane(thisPane);
+            jTableSpecimenParts.addListener(new ActionListener() {
                 @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        clickedOnPartsRow = ((JTable) e.getComponent()).getSelectedRow();
-                        jPopupSpecimenParts.show(e.getComponent(), e.getX(), e.getY());
-                    }
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        clickedOnPartsRow = ((JTable) e.getComponent()).getSelectedRow();
-                        jPopupSpecimenParts.show(e.getComponent(), e.getX(), e.getY());
-                    }
+                public void actionPerformed(ActionEvent actionEvent) {
+                    thisPane.setStateToDirty();
                 }
             });
-
-            jPopupSpecimenParts = new JPopupMenu();
-            JMenuItem mntmDeleteRow = new JMenuItem("Delete Row");
-            mntmDeleteRow.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        if (clickedOnPartsRow >= 0) {
-                            int ok = JOptionPane.showConfirmDialog(thisPane, "Delete the selected preparation?", "Delete Preparation", JOptionPane.OK_CANCEL_OPTION);
-                            if (ok == JOptionPane.OK_OPTION) {
-                                log.debug("deleting parts row " + clickedOnPartsRow);
-                                ((SpecimenPartsTableModel) jTableSpecimenParts.getModel()).deleteRow(clickedOnPartsRow);
-                                setStateToDirty();
-                            } else {
-                                log.debug("parts row delete canceled by user.");
-                            }
-                        } else {
-                            JOptionPane.showMessageDialog(thisPane, "Unable to select row to delete.");
-                        }
-                    } catch (Exception ex) {
-                        log.error(ex.getMessage());
-                        JOptionPane.showMessageDialog(thisPane, "Failed to delete a part attribute row. " + ex.getMessage());
-                    }
-                }
-            });
-            jPopupSpecimenParts.add(mntmDeleteRow);
+            jTableSpecimenParts.enableDeleteability();
         }
         return jTableSpecimenParts;
     }
 
-    private void setSpecimenPartsTableCellEditors() {
-        log.debug("Setting cell editors");
+    private void setupSpecimenPartsJTableRenderer() {
+        log.debug("Setting specimen part cell editors");
         JComboBox<String> comboBoxPart = new JComboBox<>(SpecimenPart.PART_NAMES);
-        //comboBoxPart.addItem("whole animal");
-        //comboBoxPart.addItem("partial animal");
         getJTableSpecimenParts().getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(comboBoxPart));
         JComboBox<String> comboBoxPrep = new JComboBox<>(SpecimenPart.PRESERVATION_NAMES);
-        //comboBoxPrep.addItem("pinned");
-        //comboBoxPrep.addItem("pointed");
-        //comboBoxPrep.addItem("carded");
-        //comboBoxPrep.addItem("capsule");
-        //comboBoxPrep.addItem("envelope");
         getJTableSpecimenParts().getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(comboBoxPrep));
 
         getJTableSpecimenParts().getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
@@ -1425,58 +1303,23 @@ public class SpecimenDetailsViewPane extends JPanel {
      */
     private JTable getNumberJTable() {
         if (jTableNumbers == null) {
-            jTableNumbers = new JTableWithRowBorder(new NumberTableModel());
+            try {
+                jTableNumbers = new JTableWithRowBorder(new NumberTableModel(specimen.getNumbers()));
+            } catch (NullPointerException e) {
+                jTableNumbers = new JTableWithRowBorder(new NumberTableModel());
+            }
+            jTableNumbers.setRowHeight(jTableNumbers.getRowHeight() + 5);
             setupNumberJTableRenderer();
-            jTableNumbers.setRowHeight(jTableNumbers.getRowHeight() + 8);
 
-            jTableNumbers.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
+            jTableNumbers.setObjectName("Number");
+            jTableNumbers.setParentPane(thisPane);
+            jTableNumbers.addListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
                     thisPane.setStateToDirty();
                 }
             });
-
-            jTableNumbers.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        clickedOnNumsRow = ((JTable) e.getComponent()).getSelectedRow();
-                        jPopupNumbers.show(e.getComponent(), e.getX(), e.getY());
-                    }
-                }
-
-                @Override
-                public void mouseReleased(MouseEvent e) {
-                    if (e.isPopupTrigger()) {
-                        clickedOnNumsRow = ((JTable) e.getComponent()).getSelectedRow();
-                        jPopupNumbers.show(e.getComponent(), e.getX(), e.getY());
-                    }
-                }
-            });
-
-            jPopupNumbers = new JPopupMenu();
-            JMenuItem mntmDeleteRow = new JMenuItem("Delete Row");
-            mntmDeleteRow.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        if (clickedOnNumsRow >= 0) {
-                            int ok = JOptionPane.showConfirmDialog(thisPane, "Delete the selected number?", "Delete Number", JOptionPane.OK_CANCEL_OPTION);
-                            if (ok == JOptionPane.OK_OPTION) {
-                                log.debug("deleting numbers row " + clickedOnNumsRow);
-                                ((NumberTableModel) jTableNumbers.getModel()).deleteRow(clickedOnNumsRow);
-                                setStateToDirty();
-                            } else {
-                                log.debug("number row delete canceled by user.");
-                            }
-                        } else {
-                            JOptionPane.showMessageDialog(thisPane, "Unable to select row to delete.  Try empting number and type and pressing Save.");
-                        }
-                    } catch (Exception ex) {
-                        log.error(ex.getMessage());
-                        JOptionPane.showMessageDialog(thisPane, "Failed to delete a number row. " + ex.getMessage());
-                    }
-                }
-            });
-            jPopupNumbers.add(mntmDeleteRow);
+            jTableNumbers.enableDeleteability();
         }
         return jTableNumbers;
     }
@@ -1493,13 +1336,12 @@ public class SpecimenDetailsViewPane extends JPanel {
         field1.setVerifyInputWhenFocusTarget(true);
         jTableNumbers.getColumnModel().getColumn(NumberTableModel.COLUMN_NUMBER).setCellEditor(new ValidatingTableCellEditor(field1));
         // Then, setup the type field
-        JComboBox<String> jComboNumberTypes = new JComboBox<String>();
-        jComboNumberTypes.setModel(new DefaultComboBoxModel<String>(NumberLifeCycle.getDistinctTypes()));
+        JComboBox<String> jComboNumberTypes = new JComboBox<String>(NumberLifeCycle.getDistinctTypes());
         jComboNumberTypes.setEditable(true);
         TableColumn typeColumn = jTableNumbers.getColumnModel().getColumn(NumberTableModel.COLUMN_TYPE);
-        DefaultCellEditor comboBoxEditor = new DefaultCellEditor(jComboNumberTypes);
-        AutoCompleteDecorator.decorate((JComboBox) comboBoxEditor.getComponent());
-        typeColumn.setCellEditor(comboBoxEditor);
+        ComboBoxCellEditor comboBoxEditor = new ComboBoxCellEditor(jComboNumberTypes);
+        AutoCompleteDecorator.decorate(jComboNumberTypes);
+        typeColumn.setCellEditor(new ComboBoxCellEditor(jComboNumberTypes));
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
         renderer.setToolTipText("Click for pick list of number types.");
         typeColumn.setCellRenderer(renderer);

@@ -14,7 +14,7 @@ import java.util.Set;
  * NumberTableModel Table model for displaying and editing Number records in a
  * JTable.
  */
-public class NumberTableModel extends AbstractTableModel {
+public class NumberTableModel extends AbstractDeleteableTableModel {
     public static final int COLUMN_NUMBER = 0;
     public static final int COLUMN_TYPE = 1;
     private static final long serialVersionUID = 2244991738218368487L;

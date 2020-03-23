@@ -31,7 +31,7 @@ import java.util.Set;
 /**
  * Table Model for Collector objects showing just the name of the Collector.
  */
-public class CollectorTableModel extends AbstractTableModel {
+public class CollectorTableModel extends AbstractDeleteableTableModel {
 
     private static final long serialVersionUID = -3022078380872976717L;
 

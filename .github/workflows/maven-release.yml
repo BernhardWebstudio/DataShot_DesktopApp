@@ -22,7 +22,7 @@ jobs:
     - name: Build with Maven
       # without -DskipTests, we also run tests, which should prevent 
       # the package from being packaged if tests fail
-      run: mvn -B package --file pom.xml
+      run: mvn -B package --file pom.xml -P dist
     - name: Determine Changelog
       id: changelog_determiner
       # TODO: verify directory of run

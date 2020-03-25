@@ -27,7 +27,7 @@ jobs:
     - name: Build with Maven
       # without -DskipTests, we also run tests, which should prevent 
       # the package from being packaged if tests fail
-      run: mvn -B package --file pom.xml
+      run: mvn -B package --file pom.xml -P dist
     - name: Determine Prerelease Name
       id: name_determiner
       run: echo "##[set-output name=name;]DataShot-$(date +'%Y%m%d')-beta"

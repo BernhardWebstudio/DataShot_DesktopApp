@@ -4,14 +4,9 @@
 name: Java CI with Maven
 
 on:
-  push:
-    branches: [ master ]
-    tags-ignore:
-      - 'v*' # do not run on tags, as we run the full publish then
-    paths-ignore:
-      - 'bin/'
-      - 'docs_manual'
-      - '.github'
+  create:
+    tags:
+      - 'v*' # run only on all tags
 
 jobs:
   build:
@@ -28,22 +23,26 @@ jobs:
       # without -DskipTests, we also run tests, which should prevent 
       # the package from being packaged if tests fail
       run: mvn -B package --file pom.xml
-    - name: Determine Prerelease Name
-      id: name_determiner
-      run: echo "##[set-output name=name;]DataShot-$(date +'%Y%m%d')-beta"
-    - name: Create Pre-release
-      id: create_prerelease
+    - name: Determine Changelog
+      id: changelog_determiner
+      # TODO: verify directory of run
+      run: |
+        echo $PWD;
+        echo "##[set-output name=changelog;]$(./bin/extract-changelog CHANGELOG.md ${{ github.ref }})"
+    - name: Create Release
+      id: create_release
       if: success()
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        release_name: ${{ steps.name_determiner.outputs.name }}
-        body: "Momentary Snapshot Version. Refer to the git history, [commit log](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commits/master) for current changes"
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: ${{ steps.changelog_determiner.outputs.changelog }}
         draft: false
-        prerelease: true
-    - name: Upload Pre-release
-      id: upload_prerelease
+        prerelease: false
+    - name: Upload Release
+      id: upload_release
       if: success()
       #uses: actions/upload-release-asset@v1
       #env:
@@ -57,4 +56,4 @@ jobs:
       with:
         pattern: "target/DataShot*.jar"
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        release-url: ${{ steps.create_prerelease.outputs.upload_url }}
+        release-url: ${{ steps.create_release.outputs.upload_url }}

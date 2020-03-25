@@ -21,4 +21,4 @@ jobs:
         with:
           java-version: ${{matrix.java}}
       - name: Test with Maven, Java ${{matrix.java}}
-        run: mvn -B package -P test
+        run: mvn -B package --file pom.xml

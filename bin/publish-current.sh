@@ -1,4 +1,9 @@
 #!/bin/sh
+
+# remove snapshot. Requires maven versions >= 2.10
+mvn versions:set -DremoveSnapshot
+
+# fetch new version
 MVN_VERSION=$(mvn -q \
     -Dexec.executable=echo \
     -Dexec.args='${project.version}' \

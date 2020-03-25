@@ -16,7 +16,7 @@ if [ -x "$(changelog-maker -h)" ]; then
   exit 1;
 fi
 # construct the changelog since the last change
-CHANGES=$( changelog-maker --commit-url=https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/{ref} )
+CHANGES=$( changelog-maker --commit-url="https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/{ref}" )
 CHANGES="$CHANGES"
 # switch to directory with changelog file
 cd "$SCRIPT_DIR/../" || exit;

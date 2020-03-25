@@ -150,6 +150,21 @@ you can run it with:
 ```shell script
 java -jar CandidateImageFile.jar -h
 ```
+
+## Publishing
+
+GitHub Actions are setup to automatically make a release on GitHub. 
+Use the script [`bin/publish-current.sh`](bin/publish-current.sh) 
+to remove the -SNAPSHOT postfix from the maven version,
+set the git tag to the current version and publish it.
+
+Note that the version numbers are correlated with the version declared for maven in `pom.xml`.
+
+To increase them automatically, use one of the scripts of 
+`bin/prepare-major.sh`, `bin/prepare-minor.sh` and `bin/prepare-patch.sh`.
+Do run the matching script after a publish to make sure the next 
+snapshot (test) version has an increased [semver](https://semver.org) version.
+
 # Setup 
 
 Setup involves configuring the application, building one or more carriers, 

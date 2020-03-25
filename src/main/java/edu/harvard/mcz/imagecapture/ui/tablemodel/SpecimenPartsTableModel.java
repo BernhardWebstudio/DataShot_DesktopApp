@@ -24,7 +24,6 @@ import edu.harvard.mcz.imagecapture.lifecycle.SpecimenPartLifeCycle;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.swing.table.AbstractTableModel;
 import java.util.HashSet;
 import java.util.Set;
 

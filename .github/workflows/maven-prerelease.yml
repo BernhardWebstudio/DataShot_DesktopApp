@@ -10,8 +10,8 @@ on:
       - 'v*' # do not run on tags, as we run the full publish then
     paths-ignore:
       - 'bin/'
-      - 'docs_manual'
-      - '.github'
+      - 'docs_manual/'
+      - '.github/'
 
 jobs:
   build:

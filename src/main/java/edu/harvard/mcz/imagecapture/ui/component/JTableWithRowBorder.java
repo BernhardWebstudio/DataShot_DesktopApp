@@ -2,10 +2,6 @@ package edu.harvard.mcz.imagecapture.ui.component;
 
 import edu.harvard.mcz.imagecapture.ui.DataShotColors;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.AbstractDeleteableTableModel;
-import edu.harvard.mcz.imagecapture.utility.EventEmitter;
-import javafx.event.Event;
-import javafx.event.EventDispatchChain;
-import javafx.event.EventDispatcher;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -32,6 +28,11 @@ public class JTableWithRowBorder extends JTable {
 
     protected ArrayList<ActionListener> listeners = new ArrayList<>();
 
+    public JTableWithRowBorder(AbstractDeleteableTableModel tableModel) {
+        super(tableModel);
+        this.setShowGrid(true);
+    }
+
     /**
      * Add listener to listen for any events changing the content of this table
      *
@@ -43,11 +44,6 @@ public class JTableWithRowBorder extends JTable {
 
     public void removeListener(ActionListener listener) {
         listeners.remove(listener);
-    }
-
-    public JTableWithRowBorder(AbstractDeleteableTableModel tableModel) {
-        super(tableModel);
-        this.setShowGrid(true);
     }
 
     /**
@@ -71,7 +67,6 @@ public class JTableWithRowBorder extends JTable {
     /**
      * Enable the option to delete rows.
      * Note that only the events which lead to data change are emitted.
-     *
      */
     public void enableDeleteability() {
         if (deletableRows == false) {
@@ -150,7 +145,6 @@ public class JTableWithRowBorder extends JTable {
     }
 
     /**
-     *
      * @param event
      */
     protected void emitEvent(ActionEvent event) {

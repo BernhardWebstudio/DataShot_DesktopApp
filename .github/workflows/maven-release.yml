@@ -23,12 +23,12 @@ jobs:
       # without -DskipTests, we also run tests, which should prevent 
       # the package from being packaged if tests fail
       run: mvn -B package --file pom.xml -P dist
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
     - name: Determine Changelog
       id: changelog_determiner
-      # TODO: verify directory of run
-      run: |
-        echo $PWD;
-        echo "##[set-output name=changelog;]$(./bin/extract-changelog CHANGELOG.md ${{ github.ref }})"
+      run: echo "##[set-output name=changelog;]$(./bin/extract-changelog.sh CHANGELOG.md ${{ steps.get_version.outputs.VERSION }})"
     - name: Create Release
       id: create_release
       if: success()

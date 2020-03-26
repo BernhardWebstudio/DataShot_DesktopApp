@@ -1,20 +1,10 @@
 # Changelog
 
 ## v1.11.0
-* [[`b3b7c7de6a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b3b7c7de6a)] - Rename GitHub Actions and -tags (Tim Bernhard)
-* [[`056a3a0dc9`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/056a3a0dc9)] - Change travis to GitHub action badge (Tim Bernhard)
-* [[`5f30b6b937`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/5f30b6b937)] - Remove unused breaking imports (Tim Bernhard)
-* [[`65238f7479`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/65238f7479)] - Tell GitHub Actions which profile to use (Tim Bernhard)
-* [[`9b098f5497`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/9b098f5497)] - Setup GitHub Action to release main version too (Tim Bernhard)
-* [[`4c1992a2fe`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4c1992a2fe)] - Create maven-prerelease.yml (Tim Bernhard)
-* [[`78eec4cf3a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/78eec4cf3a)] - Remove travis before setting up GitHub Actions (Tim Bernhard)
+* [[`b3b7c7de6a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/056a3a0dc9)] - Change travis to GitHub actions (Tim Bernhard)
 * [[`0eb868951b`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/0eb868951b)] - Slightly improve reuse of code for fielded, editable tables (Tim Bernhard)
-* [[`390cffad94`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/390cffad94)] - Fix tests by slightly reducing statefullness of CandidateImageFile (Tim Bernhard)
-* [[`d6b20fecdd`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d6b20fecdd)] - Remove dependency to fix issue with jpeeg travis connection (Tim Bernhard)
 * [[`60b3078356`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/60b3078356)] - Use multithreading to speedup preprocessing (+ added config) (Tim Bernhard)
-* [[`e39e4fdb07`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e39e4fdb07)] - Implement a first, basic parallelization of joballimagefilesscan (Tim Bernhard)
 * [[`d8a9172f2a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d8a9172f2a)] - Clearly log which image was successfully scanned using which method (Tim Bernhard)
-* [[`62784f9cd1`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/62784f9cd1)] - Reformat code after unsuccessfull attempt to get collectors sorted (Tim Bernhard)
 * [[`b9ea16db0c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b9ea16db0c)] - Fix issue #12 by adding a pane to resize image & field panes (Tim Bernhard)
 * [[`5b26ff6458`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/5b26ff6458)] - Add autocomplete functionality to other search comboboxes (Tim Bernhard)
 * [[`05d5ef850a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/05d5ef850a)] - Fix part of #28: reinitialize numbers table after paste (Tim Bernhard)
@@ -29,11 +19,8 @@
 * [[`83209a884f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/83209a884f)] - Update Hibernate config namespace to fix deprecation (Tim Bernhard)
 * [[`a6f677713c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/a6f677713c)] - Fix build by replacing static with instance calls. (Tim Bernhard)
 * [[`b8f649157f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b8f649157f)] - Improve readability of QR Code checks (still improveable) (Tim Bernhard)
-* [[`d6f04b5707`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d6f04b5707)] - Improve readability of QR Code checks (still improveable) (Tim Bernhard)
 * [[`3793c63751`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/3793c63751)] - Fix (possibly) #24 by further minorly adjusting hibernate mapping (Tim Bernhard)
 * [[`bc7621841b`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/bc7621841b)] - Refactor Job(Single|All)ImageFileScan to use same simplified base code (Tim Bernhard)
-* [[`2221ab00f0`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/2221ab00f0)] - Update changelog to publish Version v1.10.2-SNAPSHOT (Tim Bernhard)
-
 
 ## v1.10.2-SNAPSHOT
 * [[`f9820ad0e5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f9820ad0e5)] - Try to improve feedback by app when switching/saving/copying (too fast?) (Tim Bernhard)

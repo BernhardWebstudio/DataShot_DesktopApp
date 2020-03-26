@@ -5,7 +5,7 @@ support an object-precapture-image-data workflow for capture of natural
 science collections data.  
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1040876.svg)](https://doi.org/10.5281/zenodo.1040876)
-[![Build Status](https://github.com/BernhardWebstudio/DataShot_DesktopApp./workflows/Maven%20Tests/badge.svg)](https://github.com/BernhardWebstudio/DataShot_DesktopApp/actions)
+[![Build Status](https://github.com/BernhardWebstudio/DataShot_DesktopApp/workflows/Maven%20Tests/badge.svg)](https://github.com/BernhardWebstudio/DataShot_DesktopApp/actions)
 
 This software was designed to work along side MCZbase and to load data from
 the DataShot staging database into MCZbase through a variant of the MCZbase
@@ -24,7 +24,7 @@ identification (produced by the PreCapture application), which portion
 of the image contains labels specific to the specimen (pin labels in the 
 case of pinned insects), which portion of the image contains labels 
 specific to the container (unit tray labels), and which portion of the 
-image contains a human readable current identifiction (as a failover if
+image contains a human readable current identification (as a failover if
 the machine readable form is not read). These templates are configurable.
 
 This software suite assumes that images are stored at a known location on a 
@@ -89,7 +89,7 @@ mvn package -P prod
 An executable jar file will be found in the build/ directory (and in the target/ directory).
 
 If you are working with an IDE (such as eclipse), you will probably want to use the following somewhat
-bizare incantation to create the executable jar file including the not_vcs/ configuration files, 
+bizarre incantation to create the executable jar file including the not_vcs/ configuration files, 
 and then to clean out the target/ directory so that your IDE will use the configuration files 
 from src/main/java rather than not_vcs (in target/classes) (letting your build with the IDE use 
 the default hibernate and log4j configurations, rather than the production ones, which get placed 

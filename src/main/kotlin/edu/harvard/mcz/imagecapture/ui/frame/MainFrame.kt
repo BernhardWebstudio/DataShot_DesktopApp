@@ -20,16 +20,446 @@
  *
  *
  */
-package edu.harvard.mcz.imagecapture.ui.frameimportimport
+package edu.harvard.mcz.imagecapture.ui.frame
 
-edu.harvard.mcz.imagecapture.data .HibernateUtilimport edu.harvard.mcz.imagecapture.jobs.Counterimport org.apache.commons.logging.Logimport org.apache.commons.logging.LogFactoryimport java.awt.*import java.awt.event.ActionEventimport
+import HibernateUtil
+import edu.harvard.mcz.imagecapture.*
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties
+import edu.harvard.mcz.imagecapture.data.LocationInCollection
+import edu.harvard.mcz.imagecapture.encoder.UnitTrayLabelBrowser
+import edu.harvard.mcz.imagecapture.entity.ICImage
+import edu.harvard.mcz.imagecapture.entity.Specimen
+import edu.harvard.mcz.imagecapture.entity.Users
+import edu.harvard.mcz.imagecapture.exceptions.ConnectionException
+import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder
+import edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcher
+import edu.harvard.mcz.imagecapture.interfaces.RunnableJob
+import edu.harvard.mcz.imagecapture.interfaces.RunnerListener
+import edu.harvard.mcz.imagecapture.jobs.Counter
+import edu.harvard.mcz.imagecapture.jobs.JobAllImageFilesScan
+import edu.harvard.mcz.imagecapture.jobs.JobCleanDirectory
+import edu.harvard.mcz.imagecapture.jobs.JobFileReconciliation
+import edu.harvard.mcz.imagecapture.jobs.JobRecheckForTemplates
+import edu.harvard.mcz.imagecapture.jobs.JobRepeatOCR
+import edu.harvard.mcz.imagecapture.jobs.JobSingleBarcodeScan
+import edu.harvard.mcz.imagecapture.jobs.RunnableJobError
+import edu.harvard.mcz.imagecapture.jobs.RunnableJobErrorTableModel
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle
+import edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycle
+import edu.harvard.mcz.imagecapture.loader.JobVerbatimFieldLoad
+import edu.harvard.mcz.imagecapture.ui.dialog.*
+import edu.harvard.mcz.imagecapture.ui.frame.MainFrame
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import java.awt.BorderLayout
+import java.awt.GridBagConstraints
+import java.awt.GridBagLayout
+import java.awt.Taskbar
+import java.awt.event.ActionEvent
+import java.awt.event.ActionListener
+import java.awt.event.KeyEvent
+import java.net.URL
+import javax.swing.*
+import javax.swing.text.DefaultEditorKit.CopyAction
+import javax.swing.text.DefaultEditorKit.PasteAction
 
-java.awt.event.KeyEventimport java.io.File
-import java.lang.Exceptionimport
+edu.harvard.mcz.imagecapture.data .
+import HibernateUtil 
+import edu.harvard.mcz.imagecapture.jobs.Counter 
+import org.apache.commons.logging.Log 
+import org.apache.commons.logging.LogFactory java.awt.*import  java.awt.event.ActionEvent
 
-java.net.URLimport java.util.ArrayList
 
-javax.swing.JTextFieldimport java.awt.event.ActionListenerimport java.text.DecimalFormatimport java.lang.NumberFormatExceptionimport javax.swing.JComboBoximport edu.harvard.mcz.imagecapture.entity.MCZbaseGeogAuthRecimport java.awt.event.FocusListenerimport edu.harvard.mcz.imagecapture.ui.tablemodel.HigherGeographyComboBoxModelimport edu.harvard.mcz.imagecapture.ui.field.FilteringGeogJComboBoximport javax.swing.SwingUtilitiesimport java.lang.Runnableimport edu.harvard.mcz.imagecapture.lifecycle.MCZbaseGeogAuthRecLifeCycleimport edu.harvard.mcz.imagecapture.Singletonimport edu.harvard.mcz.imagecapture.ImageCapturePropertiesimport java.awt.event.FocusEventimport edu.harvard.mcz.imagecapture.entity.MCZbaseAuthAgentNameimport edu.harvard.mcz.imagecapture.ui.tablemodel.AgentNameComboBoxModelimport edu.harvard.mcz.imagecapture.ui.field.FilteringAgentJComboBoximport edu.harvard.mcz.imagecapture.lifecycle.MCZbaseAuthAgentNameLifeCycleimport javax.swing.JFrameimport edu.harvard.mcz.imagecapture.interfaces.RunnerListenerimport edu.harvard.mcz.imagecapture.ui.frame.MainFrameimport edu.harvard.mcz.imagecapture.ImageListBrowserimport edu.harvard.mcz.imagecapture.SpecimenBrowserimport edu.harvard.mcz.imagecapture.UserListBrowserimport javax.swing.JMenuBarimport javax.swing.JMenuimport javax.swing.JMenuItemimport javax.swing.JPanelimport javax.swing.JProgressBarimport javax.swing.JLabelimport edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycleimport edu.harvard.mcz.imagecapture.entity.Usersimport javax.swing.WindowConstantsimport java.awt.Taskbarimport java.lang.UnsupportedOperationExceptionimport java.lang.SecurityExceptionimport javax.swing.ImageIconimport edu.harvard.mcz.imagecapture.ImageCaptureAppimport java.lang.NullPointerExceptionimport edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycleimport edu.harvard.mcz.imagecapture.exceptions.ConnectionExceptionimport edu.harvard.mcz.imagecapture.ui.dialog.AboutDialogimport javax.swing.JOptionPaneimport edu.harvard.mcz.imagecapture.jobs.JobAllImageFilesScanimport java.lang.Threadimport javax.swing.JComponentimport edu.harvard.mcz.imagecapture.loader.JobVerbatimFieldLoadimport edu.harvard.mcz.imagecapture.jobs.JobSingleBarcodeScanimport java.awt.BorderLayoutimport edu.harvard.mcz.imagecapture.PropertiesEditorimport javax.swing.text.DefaultEditorKit.CopyActionimport javax.swing.KeyStrokeimport javax.swing.text.DefaultEditorKit.PasteActionimport edu.harvard.mcz.imagecapture.ui.frame.EventLogFrameimport java.awt.GridBagConstraintsimport java.awt.GridBagLayoutimport edu.harvard.mcz.imagecapture.interfaces.RunnableJobimport edu.harvard.mcz.imagecapture.entity.Specimenimport edu.harvard.mcz.imagecapture.PositionTemplateEditorimport edu.harvard.mcz.imagecapture.data .LocationInCollectionimport edu.harvard.mcz.imagecapture.ui.dialog.VerbatimToTranscribeDialogimport edu.harvard.mcz.imagecapture.ui.dialog.VerbatimListDialogimport edu.harvard.mcz.imagecapture.jobs.JobFileReconciliationimport edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilderimport edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcherimport edu.harvard.mcz.imagecapture.entity.ICImageimport edu.harvard.mcz.imagecapture.jobs.RunnableJobErrorimport edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialogimport edu.harvard.mcz.imagecapture.jobs.RunnableJobErrorTableModelimport edu.harvard.mcz.imagecapture.ui.dialog.SearchDialogimport java.lang.StringBuilderimport edu.harvard.mcz.imagecapture.ui.dialog.ChangePasswordDialogimport edu.harvard.mcz.imagecapture.encoder.UnitTrayLabelBrowserimport edu.harvard.mcz.imagecapture.jobs.JobRepeatOCRimport edu.harvard.mcz.imagecapture.ui.frame.RunnableJobFrameimport edu.harvard.mcz.imagecapture.jobs.JobCleanDirectoryimport edu.harvard.mcz.imagecapture.jobs.JobRecheckForTemplatesimport java.awt.Graphics2Dimport edu.harvard.mcz.imagecapture.utility.MathUtilityimport javax.swing.JViewportimport javax.swing.JScrollPaneimport javax.swing.JButtonimport javax.swing.JTableimport edu.harvard.mcz.imagecapture.entity.Trackingimport edu.harvard.mcz.imagecapture.lifecycle.TrackingLifeCycleimport edu.harvard.mcz.imagecapture.ui.tablemodel.TrackingTableModelimport edu.harvard.mcz.imagecapture.ui.frame.BulkMediaFrameimport edu.harvard.mcz.imagecapture.ui.frame.BulkMediaFrame.ScanDirectoryTaskimport edu.harvard.mcz.imagecapture.ui.frame.BulkMediaFrame.PrepareDirectoryActionimport javax.swing.border.EmptyBorderimport java.awt.GridLayoutimport javax.swing.SwingConstantsimport java.beans.PropertyChangeEventimport java.lang.Voidimport javax.swing.JFileChooserimport edu.harvard.mcz.imagecapture.ThumbnailBuilderimport java.io.PrintWriterimport edu.harvard.mcz.imagecapture.data .BulkMediaimport edu.harvard.mcz.imagecapture.CandidateImageFileimport java.io.IOExceptionimport java.io.FileNotFoundExceptionimport java.awt.event.MouseListenerimport java.awt.image.BufferedImageimport edu.harvard.mcz.imagecapture.ui.frame.ImagePanelimport javax.imageio.ImageIOimport edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanelimport edu.harvard.mcz.imagecapture.ui.ButtonRendererimport edu.harvard.mcz.imagecapture.ui.ButtonEditorimport edu.harvard.mcz.imagecapture.ui.ProgressBarRendererimport java.util.prefs.Preferencesimport javax.swing.JTabbedPaneimport edu.harvard.mcz.imagecapture.SpecimenControllerimport edu.harvard.mcz.imagecapture.ui.frame.ImageDisplayFrameimport edu.harvard.mcz.imagecapture.PositionTemplateimport edu.harvard.mcz.imagecapture.exceptions.BadTemplateExceptionimport edu.harvard.mcz.imagecapture.exceptions.ImageLoadExceptionimport kotlin.jvm.Throwsimport java.awt.event.ComponentEventimport java.util.prefs.BackingStoreExceptionimport java.lang.IllegalStateExceptionimport net.miginfocom.swing.MigLayoutimport java.lang.IndexOutOfBoundsExceptionimport javax.swing.JSplitPaneimport javax.swing.BorderFactoryimport javax.swing.plaf.basic.BasicSplitPaneUIimport javax.swing.plaf.basic.BasicSplitPaneDividerimport edu.harvard.mcz.imagecapture.lifecycle.ICImageLifeCycleimport java.util.HashSetimport java.util.HashMapimport edu.harvard.mcz.imagecapture.ui.dialog.TemplatePickerDialogimport edu.harvard.mcz.imagecapture.ui.dialog.VerbatimCaptureDialogimport edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatusimport javax.swing.JPopupMenuimport edu.harvard.mcz.imagecapture.ui.tablemodel.DeterminationTableModelimport edu.harvard.mcz.imagecapture.ui.frame.DeterminationFrameimport java.awt.event.MouseAdapterimport edu.harvard.mcz.imagecapture.entity.fixed.NatureOfIdimport javax.swing.DefaultCellEditorimport edu.harvard.mcz.imagecapture.entity.fixed.TypeStatusimport edu.harvard.mcz.imagecapture.data .MetadataRetrieverimport edu.harvard.mcz.imagecapture.entity.Determinationimport edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditorimport java.awt.Strokeimport javax.swing.JCheckBoximport edu.harvard.mcz.imagecapture.ui.component.JTableWithRowBorderimport javax.swing.JTextAreaimport edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPaneimport java.lang.StringBufferimport edu.harvard.mcz.imagecapture.exceptions.SaveFailedExceptionimport edu.harvard.mcz.imagecapture.ui.tablemodel.NumberTableModelimport edu.harvard.mcz.imagecapture.entity.SpecimenPartimport edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenPartsTableModelimport edu.harvard.mcz.imagecapture.ui.tablemodel.CollectorTableModelimport edu.harvard.mcz.imagecapture.entity.LatLongimport javax.swing.DefaultComboBoxModelimport org.jdesktop.swingx.autocomplete.AutoCompleteDecoratorimport edu.harvard.mcz.imagecapture.lifecycle.CollectorLifeCycleimport org.jdesktop.swingx.autocomplete.ComboBoxCellEditorimport edu.harvard.mcz.imagecapture.lifecycle.NumberLifeCycleimport javax.swing.table.DefaultTableCellRendererimport edu.harvard.mcz.imagecapture.ui.dialog.GeoreferenceDialogimport edu.harvard.mcz.imagecapture.lifecycle.HigherTaxonLifeCycleimport edu.harvard.mcz.imagecapture.entity.fixed.Seximport edu.harvard.mcz.imagecapture.entity.fixed.LifeStageimport edu.harvard.mcz.imagecapture.lifecycle.SpecimenPartLifeCycleimport javax.swing.table.AbstractTableModelimport edu.harvard.mcz.imagecapture.ui.MouseWheelScrollListenerimport edu.harvard.mcz.imagecapture.utility.OpenStreetMapUtilityimport java.util.Arraysimport org.hibernate.SessionExceptionimport javax.swing.JDialogimport edu.harvard.mcz.imagecapture.ui.dialog.UserDialogimport edu.harvard.mcz.imagecapture.ui.dialog.LoginDialogimport javax.swing.JPasswordFieldimport edu.harvard.mcz.imagecapture.utility.HashUtilityimport edu.harvard.mcz.imagecapture.ui.field.JIntegerFieldimport javax.swing.JFormattedTextFieldimport java.text.SimpleDateFormatimport java.math.BigDecimalimport javax.swing.ComboBoxModelimport org.jdesktop.swingx.combobox.ListComboBoxModelimport javax.swing.text.MaskFormatterimport java.awt.FlowLayoutimport edu.harvard.mcz.imagecapture.interfaces.DataChangeListenerimport edu.harvard.mcz.imagecapture.ui.tablemodel.VerbatimCountTableModelimport edu.harvard.mcz.imagecapture.entity.fixed.VerbatimCountimport edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateExceptionimport edu.harvard.mcz.imagecapture.exceptions.UnreadableFileExceptionimport edu.harvard.mcz.imagecapture.ui.dialog.WhatsThisImageDialogimport edu.harvard.mcz.imagecapture.loader.Verbatimimport javax.swing.BoxLayoutimport edu.harvard.mcz.imagecapture.ui.tablemodel.CountValueTableModelimport edu.harvard.mcz.imagecapture.ui.dialog.VerbatimClassifyDialogimport javax.swing.table.TableModelimport edu.harvard.mcz.imagecapture.ui.dialog.PositionTemplateBoxDialogimport edu.harvard.mcz.imagecapture.ui.tablemodel.GenusSpeciesCountTableModelimport edu.harvard.mcz.imagecapture.entity.fixed.GenusSpeciesCountimport edu.harvard.mcz.imagecapture.ui.dialog.SpecimenPartAttributeDialogimport com.jgoodies.forms.layout.FormLayoutimport com.jgoodies.forms.layout.ColumnSpecimport com.jgoodies.forms.layout.FormSpecsimport com.jgoodies.forms.layout.RowSpecimport edu.harvard.mcz.imagecapture.entity.fixed.Casteimport edu.harvard.mcz.imagecapture.entity.fixed.PartAssociationimport edu.harvard.mcz.imagecapture.entity.SpecimenPartAttributeimport edu.harvard.mcz.imagecapture.lifecycle.SpecimenPartAttributeLifeCycleimport edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenPartsAttrTableModelimport edu.harvard.mcz.imagecapture.ui.dialog.SpecimenPartAttribEditDialogimport edu.harvard.mcz.imagecapture.ui.tablemodel.AbstractDeleteableTableModelimport javax.swing.table.TableCellRendererimport edu.harvard.mcz.imagecapture.ui.DataShotColorsimport javax.swing.border.MatteBorderimport edu.harvard.mcz.imagecapture.entity.fixed.CountValueimport edu.harvard.mcz.imagecapture.ui.tablemodel.ICImageListTableModelimport java.text.DateFormatimport edu.harvard.mcz.imagecapture.ui.tablemodel.RunnableJobTableModelimport java.lang.ArrayIndexOutOfBoundsExceptionimport javax.swing.event.ListDataListenerimport javax.swing.event.ListDataEventimport java.lang.ClassCastExceptionimport edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModelimport edu.harvard.mcz.imagecapture.lifecycle.DeterminationLifeCycleimport edu.harvard.mcz.imagecapture.entity.UnitTrayLabelimport edu.harvard.mcz.imagecapture.lifecycle.UnitTrayLabelLifeCycleimport edu.harvard.mcz.imagecapture.ui.tablemodel.UnitTrayLabelTableModelimport javax.swing.AbstractCellEditorimport javax.swing.table.TableCellEditorimport edu.harvard.mcz.imagecapture.exceptions.NoSuchRecordExceptionimport java.awt.event.MouseWheelListenerimport java.awt.event.MouseWheelEventimport javax.swing.JScrollBarimport edu.harvard.mcz.imagecapture.data .RunStatusimport org.hibernate.exception.JDBCConnectionExceptionimport java.lang.ExceptionInInitializerErrorimport java.util.Enumerationimport java.awt.Dialog.ModalityTypeimport javax.swing.InputVerifierimport edu.harvard.mcz.imagecapture.interfaces.ScanCounterInterfaceimport edu.harvard.mcz.imagecapture.DefaultPositionTemplateDetectorimport edu.harvard.mcz.imagecapture.interfaces.TaxonNameReturnerimport edu.harvard.mcz.imagecapture.UnitTrayLabelParserimport edu.harvard.mcz.imagecapture.interfaces.DrawerNameReturnerimport java.util.concurrent.atomic.AtomicIntegerimport edu.harvard.mcz.imagecapture.jobs.AbstractFileScanJobimport edu.harvard.mcz.imagecapture.exceptions.OCRReadExceptionimport org.apache.commons.codec.digest.DigestUtilsimport java.io.FileInputStreamimport edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsExceptionimport edu.harvard.mcz.imagecapture.interfaces.CollectionReturnerimport edu.harvard.mcz.imagecapture.jobs.ThumbnailBuilderJobimport java.lang.Runtimeimport java.lang.Processimport java.io.BufferedReaderimport java.lang.InterruptedExceptionimport edu.harvard.mcz.imagecapture.utility.FileUtilityimport edu.harvard.mcz.imagecapture.jobs.AtomicCounterimport java.util.concurrent.ExecutorServiceimport java.util.concurrent.Executorsimport java.util.concurrent.locks.ReentrantLockimport java.util.concurrent.TimeUnitimport org.hibernate.HibernateExceptionimport edu.harvard.mcz.imagecapture.ConfiguredBarcodePositionTemplateDetectorimport edu.harvard.mcz.imagecapture.interfaces.ValueListerimport edu.harvard.mcz.imagecapture.entity.ExternalHistoryimport kotlin.jvm.JvmOverloadsimport edu.harvard.mcz.imagecapture.entity.AllowedVersionimport edu.harvard.mcz.imagecapture.loader.FieldLoaderimport edu.harvard.mcz.imagecapture.loader.ex.LoadTargetMovedOnExceptionimport edu.harvard.mcz.imagecapture.loader.ex.LoadTargetPopulatedExceptionimport edu.harvard.mcz.imagecapture.loader.ex.LoadTargetSaveExceptionimport edu.harvard.mcz.imagecapture.loader.ex.LoadTargetRecordNotFoundExceptionimport org.filteredpush.qc.date.EventResultimport java.lang.NoSuchMethodExceptionimport java.lang.IllegalAccessExceptionimport java.lang.IllegalArgumentExceptionimport java.lang.reflect.InvocationTargetExceptionimport edu.harvard.mcz.imagecapture.loader.HeaderCheckResultimport edu.harvard.mcz.imagecapture.lifecycle.ExternalHistoryLifeCycleimport java.io.FileReaderimport kotlin.jvm.JvmStaticimport edu.harvard.mcz.imagecapture.encoder.LabelEncoderimport java.util.Hashtableimport com.google.zxing.BarcodeFormatimport com.google.zxing.client.j2se.MatrixToImageWriterimport com.itextpdf.text.BadElementExceptionimport edu.harvard.mcz.imagecapture.exceptions.PrintFailedExceptionimport com.itextpdf.text.pdf.PdfWriterimport java.io.FileOutputStreamimport com.itextpdf.text.PageSizeimport com.itextpdf.text.pdf.PdfPTableimport com.itextpdf.text.pdf.PdfPCellimport com.itextpdf.text.BaseColorimport com.itextpdf.text.Paragraphimport java.lang.OutOfMemoryErrorimport javax.swing.undo.UndoManagerimport edu.harvard.mcz.imagecapture.encoder.UnitTrayLabelBrowser.UndoActionimport edu.harvard.mcz.imagecapture.encoder.UnitTrayLabelBrowser.RedoActionimport javax.swing.table.TableRowSorterimport edu.harvard.mcz.imagecapture.utility.DragDropJTableimport javax.swing.DropModeimport javax.swing.event.UndoableEditListenerimport javax.swing.event.UndoableEditEventimport javax.swing.undo.CannotUndoExceptionimport javax.swing.undo.CannotRedoExceptionimport javax.swing.filechooser.FileNameExtensionFilterimport java.security.MessageDigestimport java.security.NoSuchAlgorithmExceptionimport edu.harvard.mcz.imagecapture.utility.DragDropJTable.DdTransferHandlerimport javax.swing.table.TableColumnModelimport javax.swing.ListSelectionModelimport java.awt.datatransfer.StringSelectionimport javax.swing.TransferHandlerimport javax.swing.TransferHandler.TransferSupportimport java.awt.datatransfer.DataFlavorimport java.awt.datatransfer.Transferableimport java.awt.datatransfer.UnsupportedFlavorExceptionimport org.json.JSONObjectimport org.json.JSONExceptionimport edu.harvard.mcz.imagecapture.exceptions.NoSuchValueExceptionimport java.lang.RuntimeExceptionimport org.hibernate.LockModeimport javax.persistence.criteria.CriteriaBuilderimport javax.persistence.criteria.Rootimport org.hibernate.metadata.ClassMetadataimport edu.harvard.mcz.imagecapture.lifecycle.GenericLifeCycleimport javax.persistence.PersistenceExceptionimport org.hibernate.exception.ConstraintViolationExceptionimport org.hibernate.criterion.Exampleimport org.hibernate.criterion.Projectionsimport org.hibernate.criterion.Restrictionsimport edu.harvard.mcz.imagecapture.lifecycle.TemplateLifeCycleimport edu.harvard.mcz.imagecapture.entity.HigherTaxonimport edu.harvard.mcz.imagecapture.lifecycle.AllowedVersionLifeCycleimport org.flywaydb.core.Flywayimport org.flywaydb.core.api.FlywayExceptionimport edu.harvard.mcz.imagecapture.ETHZBarcodeimport edu.harvard.mcz.imagecapture.interfaces.OCRimport edu.harvard.mcz.imagecapture.TesseractOCRimport edu.harvard.mcz.imagecapture.MCZENTBarcodeimport javax.swing.UIManagerimport javax.swing.UnsupportedLookAndFeelExceptionimport java.lang.ClassNotFoundExceptionimport edu.harvard.mcz.imagecapture.ui.CopyRowButtonEditorimport java.util.regex.PatternSyntaxExceptionimport javax.swing.JToolBarimport edu.harvard.mcz.imagecapture.EditUserPanelimport edu.harvard.mcz.imagecapture.ui.tablemodel.UsersTableModelimport java.util.StringTokenizerimport edu.harvard.mcz.imagecapture.interfaces.PositionTemplateDetectorimport org.imgscalr.Scalrimport com.google.zxing.LuminanceSourceimport com.google.zxing.client.j2se.BufferedImageLuminanceSourceimport edu.harvard.mcz.imagecapture.CandidateImageFile.TextStatusimport com.google.zxing.BinaryBitmapimport com.google.zxing.common.HybridBinarizerimport java.awt.image.Kernelimport java.awt.image.ConvolveOpimport java.awt.image.AffineTransformOpimport java.awt.image.RescaleOpimport com.google.zxing.qrcode.QRCodeReaderimport com.google.zxing.DecodeHintTypeimport boofcv.struct.image.GrayU8import boofcv.io.image.ConvertBufferedImageimport boofcv.abst.fiducial.QrCodeDetectorimport boofcv.factory.fiducial.FactoryFiducialimport boofcv.alg.fiducial.qrcode.QrCodeimport georegression.struct.shapes.Polygon2D_F64import edu.harvard.mcz.imagecapture.ConvertTesseractOCRimport com.drew.imaging.jpeg.JpegMetadataReaderimport com.drew.metadata.exif.ExifSubIFDDirectoryimport com.drew.metadata.exif.ExifSubIFDDescriptorimport com.drew.imaging.jpeg.JpegProcessingExceptionimport com.drew.metadata.xmp.XmpDirectoryimport com.drew.imaging.ImageMetadataReaderimport com.drew.metadata.exif.ExifIFD0Directoryimport com.drew.metadata.jpeg.JpegDirectoryimport com.drew.metadata.MetadataExceptionimport com.drew.imaging.ImageProcessingExceptionimport com.google.zxing.ChecksumExceptionimport javax.imageio.ImageTypeSpecifierimport javax.imageio.ImageWriterimport edu.harvard.mcz.imagecapture.ui.frame.ImagePanelForDrawingimport edu.harvard.mcz.imagecapture.ui.tablemodel.PositionTemplateTableModel
+import java.awt.event.KeyEvent java.io.File
+import  java.lang.Exception
+
+
+import java.net.URL java.util.ArrayList
+
+
+import javax.swing.JTextField 
+import java.awt.event.ActionListener 
+import java.text.DecimalFormat 
+import java.lang.NumberFormatException 
+import javax.swing.JComboBox 
+import edu.harvard.mcz.imagecapture.entity.MCZbaseGeogAuthRec 
+import java.awt.event.FocusListener 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.HigherGeographyComboBoxModel 
+import edu.harvard.mcz.imagecapture.ui.field.FilteringGeogJComboBox 
+import javax.swing.SwingUtilities 
+import java.lang.Runnable 
+import edu.harvard.mcz.imagecapture.lifecycle.MCZbaseGeogAuthRecLifeCycle 
+import edu.harvard.mcz.imagecapture.Singleton 
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties 
+import java.awt.event.FocusEvent 
+import edu.harvard.mcz.imagecapture.entity.MCZbaseAuthAgentName 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.AgentNameComboBoxModel 
+import edu.harvard.mcz.imagecapture.ui.field.FilteringAgentJComboBox 
+import edu.harvard.mcz.imagecapture.lifecycle.MCZbaseAuthAgentNameLifeCycle 
+import javax.swing.JFrame 
+import edu.harvard.mcz.imagecapture.interfaces.RunnerListener 
+import edu.harvard.mcz.imagecapture.ui.frame.MainFrame 
+import edu.harvard.mcz.imagecapture.ImageListBrowser 
+import edu.harvard.mcz.imagecapture.SpecimenBrowser 
+import edu.harvard.mcz.imagecapture.UserListBrowser 
+import javax.swing.JMenuBar 
+import javax.swing.JMenu 
+import javax.swing.JMenuItem 
+import javax.swing.JPanel 
+import javax.swing.JProgressBar 
+import javax.swing.JLabel 
+import edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycle 
+import edu.harvard.mcz.imagecapture.entity.Users 
+import javax.swing.WindowConstants 
+import java.awt.Taskbar 
+import java.lang.UnsupportedOperationException 
+import java.lang.SecurityException 
+import javax.swing.ImageIcon 
+import edu.harvard.mcz.imagecapture.ImageCaptureApp 
+import java.lang.NullPointerException 
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle 
+import edu.harvard.mcz.imagecapture.exceptions.ConnectionException 
+import edu.harvard.mcz.imagecapture.ui.dialog.AboutDialog 
+import javax.swing.JOptionPane 
+import edu.harvard.mcz.imagecapture.jobs.JobAllImageFilesScan 
+import java.lang.Thread 
+import javax.swing.JComponent 
+import edu.harvard.mcz.imagecapture.loader.JobVerbatimFieldLoad 
+import edu.harvard.mcz.imagecapture.jobs.JobSingleBarcodeScan 
+import java.awt.BorderLayout 
+import edu.harvard.mcz.imagecapture.PropertiesEditor 
+import javax.swing.text.DefaultEditorKit.CopyAction 
+import javax.swing.KeyStroke 
+import javax.swing.text.DefaultEditorKit.PasteAction 
+import edu.harvard.mcz.imagecapture.ui.frame.EventLogFrame 
+import java.awt.GridBagConstraints 
+import java.awt.GridBagLayout 
+import edu.harvard.mcz.imagecapture.interfaces.RunnableJob 
+import edu.harvard.mcz.imagecapture.entity.Specimen 
+import edu.harvard.mcz.imagecapture.PositionTemplateEditor import edu.harvard.mcz.imagecapture.data.LocationInCollection 
+import edu.harvard.mcz.imagecapture.ui.dialog.VerbatimToTranscribeDialog 
+import edu.harvard.mcz.imagecapture.ui.dialog.VerbatimListDialog 
+import edu.harvard.mcz.imagecapture.jobs.JobFileReconciliation 
+import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder 
+import edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcher 
+import edu.harvard.mcz.imagecapture.entity.ICImage 
+import edu.harvard.mcz.imagecapture.jobs.RunnableJobError 
+import edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialog 
+import edu.harvard.mcz.imagecapture.jobs.RunnableJobErrorTableModel 
+import edu.harvard.mcz.imagecapture.ui.dialog.SearchDialog 
+import java.lang.StringBuilder 
+import edu.harvard.mcz.imagecapture.ui.dialog.ChangePasswordDialog 
+import edu.harvard.mcz.imagecapture.encoder.UnitTrayLabelBrowser 
+import edu.harvard.mcz.imagecapture.jobs.JobRepeatOCR 
+import edu.harvard.mcz.imagecapture.ui.frame.RunnableJobFrame 
+import edu.harvard.mcz.imagecapture.jobs.JobCleanDirectory 
+import edu.harvard.mcz.imagecapture.jobs.JobRecheckForTemplates 
+import java.awt.Graphics2D 
+import edu.harvard.mcz.imagecapture.utility.MathUtility 
+import javax.swing.JViewport 
+import javax.swing.JScrollPane 
+import javax.swing.JButton 
+import javax.swing.JTable 
+import edu.harvard.mcz.imagecapture.entity.Tracking 
+import edu.harvard.mcz.imagecapture.lifecycle.TrackingLifeCycle 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.TrackingTableModel 
+import edu.harvard.mcz.imagecapture.ui.frame.BulkMediaFrame 
+import edu.harvard.mcz.imagecapture.ui.frame.BulkMediaFrame.ScanDirectoryTask 
+import edu.harvard.mcz.imagecapture.ui.frame.BulkMediaFrame.PrepareDirectoryAction 
+import javax.swing.border.EmptyBorder 
+import java.awt.GridLayout 
+import javax.swing.SwingConstants 
+import java.beans.PropertyChangeEvent 
+import java.lang.Void 
+import javax.swing.JFileChooser 
+import edu.harvard.mcz.imagecapture.ThumbnailBuilder 
+import java.io.PrintWriter 
+import edu.harvard.mcz.imagecapture.data.BulkMedia 
+import edu.harvard.mcz.imagecapture.CandidateImageFile 
+import java.io.IOException 
+import java.io.FileNotFoundException 
+import java.awt.event.MouseListener 
+import java.awt.image.BufferedImage 
+import edu.harvard.mcz.imagecapture.ui.frame.ImagePanel 
+import javax.imageio.ImageIO 
+import edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel 
+import edu.harvard.mcz.imagecapture.ui.ButtonRenderer 
+import edu.harvard.mcz.imagecapture.ui.ButtonEditor 
+import edu.harvard.mcz.imagecapture.ui.ProgressBarRenderer 
+import java.util.prefs.Preferences 
+import javax.swing.JTabbedPane 
+import edu.harvard.mcz.imagecapture.SpecimenController 
+import edu.harvard.mcz.imagecapture.ui.frame.ImageDisplayFrame 
+import edu.harvard.mcz.imagecapture.PositionTemplate 
+import edu.harvard.mcz.imagecapture.exceptions.BadTemplateException 
+import edu.harvard.mcz.imagecapture.exceptions.ImageLoadException 
+import kotlin.jvm.Throws 
+import java.awt.event.ComponentEvent 
+import java.util.prefs.BackingStoreException 
+import java.lang.IllegalStateException 
+import net.miginfocom.swing.MigLayout 
+import java.lang.IndexOutOfBoundsException 
+import javax.swing.JSplitPane 
+import javax.swing.BorderFactory 
+import javax.swing.plaf.basic.BasicSplitPaneUI 
+import javax.swing.plaf.basic.BasicSplitPaneDivider 
+import edu.harvard.mcz.imagecapture.lifecycle.ICImageLifeCycle 
+import java.util.HashSet 
+import java.util.HashMap 
+import edu.harvard.mcz.imagecapture.ui.dialog.TemplatePickerDialog 
+import edu.harvard.mcz.imagecapture.ui.dialog.VerbatimCaptureDialog 
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus 
+import javax.swing.JPopupMenu 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.DeterminationTableModel 
+import edu.harvard.mcz.imagecapture.ui.frame.DeterminationFrame 
+import java.awt.event.MouseAdapter 
+import edu.harvard.mcz.imagecapture.entity.fixed.NatureOfId 
+import javax.swing.DefaultCellEditor 
+import edu.harvard.mcz.imagecapture.entity.fixed.TypeStatus 
+import edu.harvard.mcz.imagecapture.data.MetadataRetriever 
+import edu.harvard.mcz.imagecapture.entity.Determination 
+import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor 
+import java.awt.Stroke 
+import javax.swing.JCheckBox 
+import edu.harvard.mcz.imagecapture.ui.component.JTableWithRowBorder 
+import javax.swing.JTextArea 
+import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane 
+import java.lang.StringBuffer 
+import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.NumberTableModel 
+import edu.harvard.mcz.imagecapture.entity.SpecimenPart 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenPartsTableModel 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.CollectorTableModel 
+import edu.harvard.mcz.imagecapture.entity.LatLong 
+import javax.swing.DefaultComboBoxModel 
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator 
+import edu.harvard.mcz.imagecapture.lifecycle.CollectorLifeCycle 
+import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor 
+import edu.harvard.mcz.imagecapture.lifecycle.NumberLifeCycle 
+import javax.swing.table.DefaultTableCellRenderer 
+import edu.harvard.mcz.imagecapture.ui.dialog.GeoreferenceDialog 
+import edu.harvard.mcz.imagecapture.lifecycle.HigherTaxonLifeCycle 
+import edu.harvard.mcz.imagecapture.entity.fixed.Sex 
+import edu.harvard.mcz.imagecapture.entity.fixed.LifeStage 
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenPartLifeCycle 
+import javax.swing.table.AbstractTableModel 
+import edu.harvard.mcz.imagecapture.ui.MouseWheelScrollListener 
+import edu.harvard.mcz.imagecapture.utility.OpenStreetMapUtility 
+import java.util.Arrays 
+import org.hibernate.SessionException 
+import javax.swing.JDialog 
+import edu.harvard.mcz.imagecapture.ui.dialog.UserDialog 
+import edu.harvard.mcz.imagecapture.ui.dialog.LoginDialog 
+import javax.swing.JPasswordField 
+import edu.harvard.mcz.imagecapture.utility.HashUtility 
+import edu.harvard.mcz.imagecapture.ui.field.JIntegerField 
+import javax.swing.JFormattedTextField 
+import java.text.SimpleDateFormat 
+import java.math.BigDecimal 
+import javax.swing.ComboBoxModel 
+import org.jdesktop.swingx.combobox.ListComboBoxModel 
+import javax.swing.text.MaskFormatter 
+import java.awt.FlowLayout 
+import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.VerbatimCountTableModel 
+import edu.harvard.mcz.imagecapture.entity.fixed.VerbatimCount 
+import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException 
+import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException 
+import edu.harvard.mcz.imagecapture.ui.dialog.WhatsThisImageDialog 
+import edu.harvard.mcz.imagecapture.loader.Verbatim 
+import javax.swing.BoxLayout 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.CountValueTableModel 
+import edu.harvard.mcz.imagecapture.ui.dialog.VerbatimClassifyDialog 
+import javax.swing.table.TableModel 
+import edu.harvard.mcz.imagecapture.ui.dialog.PositionTemplateBoxDialog 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.GenusSpeciesCountTableModel 
+import edu.harvard.mcz.imagecapture.entity.fixed.GenusSpeciesCount 
+import edu.harvard.mcz.imagecapture.ui.dialog.SpecimenPartAttributeDialog 
+import com.jgoodies.forms.layout.FormLayout 
+import com.jgoodies.forms.layout.ColumnSpec 
+import com.jgoodies.forms.layout.FormSpecs 
+import com.jgoodies.forms.layout.RowSpec 
+import edu.harvard.mcz.imagecapture.entity.fixed.Caste 
+import edu.harvard.mcz.imagecapture.entity.fixed.PartAssociation 
+import edu.harvard.mcz.imagecapture.entity.SpecimenPartAttribute 
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenPartAttributeLifeCycle 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenPartsAttrTableModel 
+import edu.harvard.mcz.imagecapture.ui.dialog.SpecimenPartAttribEditDialog 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.AbstractDeleteableTableModel 
+import javax.swing.table.TableCellRenderer 
+import edu.harvard.mcz.imagecapture.ui.DataShotColors 
+import javax.swing.border.MatteBorder 
+import edu.harvard.mcz.imagecapture.entity.fixed.CountValue 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.ICImageListTableModel 
+import java.text.DateFormat 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.RunnableJobTableModel 
+import java.lang.ArrayIndexOutOfBoundsException 
+import javax.swing.event.ListDataListener 
+import javax.swing.event.ListDataEvent 
+import java.lang.ClassCastException 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel 
+import edu.harvard.mcz.imagecapture.lifecycle.DeterminationLifeCycle 
+import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel 
+import edu.harvard.mcz.imagecapture.lifecycle.UnitTrayLabelLifeCycle 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.UnitTrayLabelTableModel 
+import javax.swing.AbstractCellEditor 
+import javax.swing.table.TableCellEditor 
+import edu.harvard.mcz.imagecapture.exceptions.NoSuchRecordException 
+import java.awt.event.MouseWheelListener 
+import java.awt.event.MouseWheelEvent 
+import javax.swing.JScrollBar 
+import edu.harvard.mcz.imagecapture.data.RunStatus 
+import org.hibernate.exception.JDBCConnectionException 
+import java.lang.ExceptionInInitializerError 
+import java.util.Enumeration 
+import java.awt.Dialog.ModalityType 
+import javax.swing.InputVerifier 
+import edu.harvard.mcz.imagecapture.interfaces.ScanCounterInterface 
+import edu.harvard.mcz.imagecapture.DefaultPositionTemplateDetector 
+import edu.harvard.mcz.imagecapture.interfaces.TaxonNameReturner 
+import edu.harvard.mcz.imagecapture.UnitTrayLabelParser 
+import edu.harvard.mcz.imagecapture.interfaces.DrawerNameReturner 
+import java.util.concurrent.atomic.AtomicInteger 
+import edu.harvard.mcz.imagecapture.jobs.AbstractFileScanJob 
+import edu.harvard.mcz.imagecapture.exceptions.OCRReadException 
+import org.apache.commons.codec.digest.DigestUtils 
+import java.io.FileInputStream 
+import edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsException 
+import edu.harvard.mcz.imagecapture.interfaces.CollectionReturner 
+import edu.harvard.mcz.imagecapture.jobs.ThumbnailBuilderJob 
+import java.lang.Runtime 
+import java.lang.Process 
+import java.io.BufferedReader 
+import java.lang.InterruptedException 
+import edu.harvard.mcz.imagecapture.utility.FileUtility 
+import edu.harvard.mcz.imagecapture.jobs.AtomicCounter 
+import java.util.concurrent.ExecutorService 
+import java.util.concurrent.Executors 
+import java.util.concurrent.locks.ReentrantLock 
+import java.util.concurrent.TimeUnit 
+import org.hibernate.HibernateException 
+import edu.harvard.mcz.imagecapture.ConfiguredBarcodePositionTemplateDetector 
+import edu.harvard.mcz.imagecapture.interfaces.ValueLister 
+import edu.harvard.mcz.imagecapture.entity.ExternalHistory 
+import kotlin.jvm.JvmOverloads 
+import edu.harvard.mcz.imagecapture.entity.AllowedVersion 
+import edu.harvard.mcz.imagecapture.loader.FieldLoader 
+import edu.harvard.mcz.imagecapture.loader.ex.LoadTargetMovedOnException 
+import edu.harvard.mcz.imagecapture.loader.ex.LoadTargetPopulatedException 
+import edu.harvard.mcz.imagecapture.loader.ex.LoadTargetSaveException 
+import edu.harvard.mcz.imagecapture.loader.ex.LoadTargetRecordNotFoundException 
+import org.filteredpush.qc.date.EventResult 
+import java.lang.NoSuchMethodException 
+import java.lang.IllegalAccessException 
+import java.lang.IllegalArgumentException 
+import java.lang.reflect.InvocationTargetException 
+import edu.harvard.mcz.imagecapture.loader.HeaderCheckResult 
+import edu.harvard.mcz.imagecapture.lifecycle.ExternalHistoryLifeCycle 
+import java.io.FileReader 
+import kotlin.jvm.JvmStatic 
+import edu.harvard.mcz.imagecapture.encoder.LabelEncoder 
+import java.util.Hashtable 
+import com.google.zxing.BarcodeFormat 
+import com.google.zxing.client.j2se.MatrixToImageWriter 
+import com.itextpdf.text.BadElementException 
+import edu.harvard.mcz.imagecapture.exceptions.PrintFailedException 
+import com.itextpdf.text.pdf.PdfWriter 
+import java.io.FileOutputStream 
+import com.itextpdf.text.PageSize 
+import com.itextpdf.text.pdf.PdfPTable 
+import com.itextpdf.text.pdf.PdfPCell 
+import com.itextpdf.text.BaseColor 
+import com.itextpdf.text.Paragraph 
+import java.lang.OutOfMemoryError 
+import javax.swing.undo.UndoManager 
+import edu.harvard.mcz.imagecapture.encoder.UnitTrayLabelBrowser.UndoAction 
+import edu.harvard.mcz.imagecapture.encoder.UnitTrayLabelBrowser.RedoAction 
+import javax.swing.table.TableRowSorter 
+import edu.harvard.mcz.imagecapture.utility.DragDropJTable 
+import javax.swing.DropMode 
+import javax.swing.event.UndoableEditListener 
+import javax.swing.event.UndoableEditEvent 
+import javax.swing.undo.CannotUndoException 
+import javax.swing.undo.CannotRedoException 
+import javax.swing.filechooser.FileNameExtensionFilter 
+import java.security.MessageDigest 
+import java.security.NoSuchAlgorithmException 
+import edu.harvard.mcz.imagecapture.utility.DragDropJTable.DdTransferHandler 
+import javax.swing.table.TableColumnModel 
+import javax.swing.ListSelectionModel 
+import java.awt.datatransfer.StringSelection 
+import javax.swing.TransferHandler 
+import javax.swing.TransferHandler.TransferSupport 
+import java.awt.datatransfer.DataFlavor 
+import java.awt.datatransfer.Transferable 
+import java.awt.datatransfer.UnsupportedFlavorException 
+import org.json.JSONObject 
+import org.json.JSONException 
+import edu.harvard.mcz.imagecapture.exceptions.NoSuchValueException 
+import java.lang.RuntimeException 
+import org.hibernate.LockMode 
+import javax.persistence.criteria.CriteriaBuilder 
+import javax.persistence.criteria.Root 
+import org.hibernate.metadata.ClassMetadata 
+import edu.harvard.mcz.imagecapture.lifecycle.GenericLifeCycle 
+import javax.persistence.PersistenceException 
+import org.hibernate.exception.ConstraintViolationException 
+import org.hibernate.criterion.Example 
+import org.hibernate.criterion.Projections 
+import org.hibernate.criterion.Restrictions 
+import edu.harvard.mcz.imagecapture.lifecycle.TemplateLifeCycle 
+import edu.harvard.mcz.imagecapture.entity.HigherTaxon 
+import edu.harvard.mcz.imagecapture.lifecycle.AllowedVersionLifeCycle 
+import org.flywaydb.core.Flyway 
+import org.flywaydb.core.api.FlywayException 
+import edu.harvard.mcz.imagecapture.ETHZBarcode 
+import edu.harvard.mcz.imagecapture.interfaces.OCR 
+import edu.harvard.mcz.imagecapture.TesseractOCR 
+import edu.harvard.mcz.imagecapture.MCZENTBarcode 
+import javax.swing.UIManager 
+import javax.swing.UnsupportedLookAndFeelException 
+import java.lang.ClassNotFoundException 
+import edu.harvard.mcz.imagecapture.ui.CopyRowButtonEditor 
+import java.util.regex.PatternSyntaxException 
+import javax.swing.JToolBar 
+import edu.harvard.mcz.imagecapture.EditUserPanel 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.UsersTableModel 
+import java.util.StringTokenizer 
+import edu.harvard.mcz.imagecapture.interfaces.PositionTemplateDetector 
+import org.imgscalr.Scalr 
+import com.google.zxing.LuminanceSource 
+import com.google.zxing.client.j2se.BufferedImageLuminanceSource 
+import edu.harvard.mcz.imagecapture.CandidateImageFile.TextStatus 
+import com.google.zxing.BinaryBitmap 
+import com.google.zxing.common.HybridBinarizer 
+import java.awt.image.Kernel 
+import java.awt.image.ConvolveOp 
+import java.awt.image.AffineTransformOp 
+import java.awt.image.RescaleOp 
+import com.google.zxing.qrcode.QRCodeReader 
+import com.google.zxing.DecodeHintType 
+import boofcv.struct.image.GrayU8 
+import boofcv.io.image.ConvertBufferedImage 
+import boofcv.abst.fiducial.QrCodeDetector 
+import boofcv.factory.fiducial.FactoryFiducial 
+import boofcv.alg.fiducial.qrcode.QrCode 
+import georegression.struct.shapes.Polygon2D_F64 
+import edu.harvard.mcz.imagecapture.ConvertTesseractOCR 
+import com.drew.imaging.jpeg.JpegMetadataReader 
+import com.drew.metadata.exif.ExifSubIFDDirectory 
+import com.drew.metadata.exif.ExifSubIFDDescriptor 
+import com.drew.imaging.jpeg.JpegProcessingException 
+import com.drew.metadata.xmp.XmpDirectory 
+import com.drew.imaging.ImageMetadataReader 
+import com.drew.metadata.exif.ExifIFD0Directory 
+import com.drew.metadata.jpeg.JpegDirectory 
+import com.drew.metadata.MetadataException 
+import com.drew.imaging.ImageProcessingException 
+import com.google.zxing.ChecksumException 
+import javax.imageio.ImageTypeSpecifier 
+import javax.imageio.ImageWriter 
+import edu.harvard.mcz.imagecapture.ui.frame.ImagePanelForDrawing 
+import edu.harvard.mcz.imagecapture.ui.tablemodel.PositionTemplateTableModel
 /**
  * Main user interface window for image capture application when run as a java application from the desktop.
  */
@@ -142,7 +572,7 @@ class MainFrame : JFrame(), RunnerListener {
 // ********* the application level users and rights are controlled.             ******************
 // ***********************************************************************************************
 // Disable some menu items if user canceled login dialog.
-        if (Singleton.Companion.getSingletonInstance().getUser() == null) {
+        if (Singleton.getUser() == null) {
             jMenuData.setEnabled(false)
             jMenuItemChangePassword.setEnabled(false)
             jMenuItemPreferences.setEnabled(false)
@@ -176,11 +606,11 @@ class MainFrame : JFrame(), RunnerListener {
             jMenuItemRecheckTemplates.setEnabled(false)
             jMenuItemRecheckAllTemplates.setEnabled(false)
             try { // Enable some menu items only for administrators.
-                if (UsersLifeCycle.Companion.isUserAdministrator(Singleton.Companion.getSingletonInstance().getUser().getUserid())) { //jMenuItemUsers.setEnabled(true);
+                if (UsersLifeCycle.Companion.isUserAdministrator(Singleton.getUser().getUserid())) { //jMenuItemUsers.setEnabled(true);
                     jMenuItemPreprocess.setEnabled(true)
                 }
                 // User privileges and some other items to the chief editor.
-                if (UsersLifeCycle.Companion.isUserChiefEditor(Singleton.Companion.getSingletonInstance().getUser().getUserid())) {
+                if (UsersLifeCycle.Companion.isUserChiefEditor(Singleton.getUser().getUserid())) {
                     jMenuItemUsers.setEnabled(true)
                     jMenuItemEditTemplates.setEnabled(true)
                     jMenuItemLoadData.setEnabled(true)
@@ -188,7 +618,7 @@ class MainFrame : JFrame(), RunnerListener {
                 }
                 // Enable other menu items only for those with full access rights
 // Administrator and full roles both have full access rights
-                if (Singleton.Companion.getSingletonInstance().getUser().isUserRole(Users.Companion.ROLE_FULL)) {
+                if (Singleton.getUser().isUserRole(Users.Companion.ROLE_FULL)) {
                     jMenuAction.setEnabled(true)
                     jMenuItemPreprocessOneDir.setEnabled(true)
                     jMenuConfig.setEnabled(true)
@@ -239,7 +669,7 @@ class MainFrame : JFrame(), RunnerListener {
             log.error(e)
         }
         this.setTitle(ImageCaptureApp.APP_NAME + ": MCZ Rapid Data Capture Application.  Configured For: " +
-                Singleton.Companion.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION)
+                Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION)
         )
         this.setJMenuBar(getJJMenuBar())
         this.setContentPane(getJPanel())
@@ -247,7 +677,7 @@ class MainFrame : JFrame(), RunnerListener {
 
     protected fun updateTitle() {
         this.setTitle(ImageCaptureApp.APP_NAME + ": MCZ Rapid Data Capture Application.  Configured For: " +
-                Singleton.Companion.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION)
+                Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION)
         )
     }
 
@@ -324,13 +754,13 @@ class MainFrame : JFrame(), RunnerListener {
                     jPanelCenter.removeAll()
                     var oldUser = "anon"
                     try {
-                        oldUser = Singleton.Companion.getSingletonInstance().getUserFullName()
+                        oldUser = Singleton.getUserFullName()
                     } catch (ex: NullPointerException) { // no one was logged in
                     }
                     setState(STATE_RESET)
-                    Singleton.Companion.getSingletonInstance().unsetCurrentUser()
+                    Singleton.unsetCurrentUser()
                     HibernateUtil.terminateSessionFactory()
-                    Singleton.Companion.getSingletonInstance().getMainFrame().setStatusMessage("Logged out $oldUser")
+                    Singleton.getMainFrame().setStatusMessage("Logged out $oldUser")
                     // Force a login dialog by connecting to obtain record count;
                     val sls = SpecimenLifeCycle()
                     try {
@@ -431,12 +861,12 @@ class MainFrame : JFrame(), RunnerListener {
             }
             jMenuItemPreprocess.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    val result: Int = JOptionPane.showConfirmDialog(Singleton.Companion.getSingletonInstance().getMainFrame(), "Are you sure, this will check all image files and may take some time.", "Preprocess All?", JOptionPane.YES_NO_OPTION)
+                    val result: Int = JOptionPane.showConfirmDialog(Singleton.getMainFrame(), "Are you sure, this will check all image files and may take some time.", "Preprocess All?", JOptionPane.YES_NO_OPTION)
                     if (result == JOptionPane.YES_OPTION) {
                         val scan = JobAllImageFilesScan()
                         Thread(scan).start()
                     } else {
-                        Singleton.Companion.getSingletonInstance().getMainFrame().setStatusMessage("Preprocess canceled.")
+                        Singleton.getMainFrame().setStatusMessage("Preprocess canceled.")
                     }
                 }
             })
@@ -616,7 +1046,7 @@ class MainFrame : JFrame(), RunnerListener {
             }
             jMenuItemUsers.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    Singleton.Companion.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
+                    Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
                     ulb = UserListBrowser()
                     if (slb != null) {
                         jPanelCenter.remove(slb)
@@ -628,7 +1058,7 @@ class MainFrame : JFrame(), RunnerListener {
                     jPanelCenter.add(ulb, BorderLayout.CENTER)
                     jPanelCenter.revalidate()
                     jPanelCenter.repaint()
-                    Singleton.Companion.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+                    Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
                 }
             })
         }
@@ -803,10 +1233,10 @@ class MainFrame : JFrame(), RunnerListener {
     }
 
     fun setSpecimenBrowseList(searchCriteria: Specimen?, limit: Int, offset: Int) {
-        Singleton.Companion.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
+        Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
         slb = SpecimenBrowser(searchCriteria, true, limit, offset)
         adaptJpanelToSpecimenBrowser(slb)
-        Singleton.Companion.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+        Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
     }
 
     fun adaptJpanelToSpecimenBrowser(slb: SpecimenBrowser) {
@@ -814,7 +1244,7 @@ class MainFrame : JFrame(), RunnerListener {
         jPanelCenter.add(slb, BorderLayout.CENTER)
         jPanelCenter.revalidate()
         jPanelCenter.repaint()
-        if (Singleton.Companion.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_ENABLE_BROWSE) == "false") {
+        if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_ENABLE_BROWSE) == "false") {
             jMenuItemBrowseSpecimens.setEnabled(false)
             jMenuItemBrowseImages.setEnabled(false)
         } else {
@@ -848,15 +1278,15 @@ class MainFrame : JFrame(), RunnerListener {
                 override fun actionPerformed(e: ActionEvent?) { // Create a SpecimenBrowser jpanel and replace the
 // the content of the center of jPanelCenter with it.
 //TODO: extend beyond switching between ilb and slb.
-                    Singleton.Companion.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
+                    Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
                     slb = SpecimenBrowser()
                     adaptJpanelToSpecimenBrowser(slb)
-                    Singleton.Companion.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+                    Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
                     System.gc()
                 }
             })
         }
-        if (Singleton.Companion.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_ENABLE_BROWSE) == "false") {
+        if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_ENABLE_BROWSE) == "false") {
             jMenuItemBrowseSpecimens.setEnabled(false)
         }
         return jMenuItemBrowseSpecimens
@@ -925,13 +1355,13 @@ class MainFrame : JFrame(), RunnerListener {
                 override fun actionPerformed(e: ActionEvent?) { // Create a ImageListBrowser jpanel and replace the
 // the content of the center of jPanelCenter with it.
 //TODO: extend beyond switching between ilb and slb.
-                    Singleton.Companion.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
+                    Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
                     ilb = ImageListBrowser()
                     jPanelCenter.removeAll()
                     jPanelCenter.add(ilb, BorderLayout.CENTER)
                     jPanelCenter.revalidate()
                     jPanelCenter.repaint()
-                    if (Singleton.Companion.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_ENABLE_BROWSE) == "false") {
+                    if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_ENABLE_BROWSE) == "false") {
                         jMenuItemBrowseSpecimens.setEnabled(false)
                         jMenuItemBrowseImages.setEnabled(false)
                     } else {
@@ -939,12 +1369,12 @@ class MainFrame : JFrame(), RunnerListener {
                         jMenuItemBrowseImages.setEnabled(true)
                     }
                     setStatusMessage("Found " + ilb.getRowCount() + " images.")
-                    Singleton.Companion.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+                    Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
                     System.gc()
                 }
             })
         }
-        if (Singleton.Companion.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_ENABLE_BROWSE) == "false") {
+        if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_ENABLE_BROWSE) == "false") {
             jMenuItemBrowseImages.setEnabled(false)
         }
         return jMenuItemBrowseImages
@@ -980,7 +1410,7 @@ class MainFrame : JFrame(), RunnerListener {
                     override fun actionPerformed(e: ActionEvent?) {
                         val scan = JobAllImageFilesScan(
                                 JobAllImageFilesScan.Companion.SCAN_SELECT,
-                                File(Singleton.Companion.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
+                                File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
                         )
                         Thread(scan).start()
                     }
@@ -1110,8 +1540,8 @@ class MainFrame : JFrame(), RunnerListener {
             jMenuItemQCBarcodes.setMnemonic(KeyEvent.VK_B)
             jMenuItemQCBarcodes.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    Singleton.Companion.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
-                    Singleton.Companion.getSingletonInstance().getMainFrame().setStatusMessage("Running barcode QC checks")
+                    Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
+                    Singleton.getMainFrame().setStatusMessage("Running barcode QC checks")
                     val missingBarcodes: Array<String?> = SpecimenLifeCycle.Companion.getMissingBarcodes()
                     ilb = ImageListBrowser(true)
                     if (slb != null) {
@@ -1124,13 +1554,13 @@ class MainFrame : JFrame(), RunnerListener {
                     jPanelCenter.add(ilb, BorderLayout.CENTER)
                     jPanelCenter.revalidate()
                     jPanelCenter.repaint()
-                    Singleton.Companion.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+                    Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
                     log.debug(missingBarcodes.size)
                     if (missingBarcodes.size > 0) {
                         val errorCount = Counter()
                         for (i in missingBarcodes.indices) {
-                            val builder: BarcodeBuilder = Singleton.Companion.getSingletonInstance().getBarcodeBuilder()
-                            val matcher: BarcodeMatcher = Singleton.Companion.getSingletonInstance().getBarcodeMatcher()
+                            val builder: BarcodeBuilder = Singleton.getBarcodeBuilder()
+                            val matcher: BarcodeMatcher = Singleton.getBarcodeMatcher()
                             val previous: String = builder.makeFromNumber(matcher.extractNumber(missingBarcodes[i]) - 1)
                             var previousFile = ""
                             var previousPath = ""
@@ -1155,14 +1585,14 @@ class MainFrame : JFrame(), RunnerListener {
                         }
                         val report = "There are at least " + missingBarcodes.size + " barcodes missing from the sequence.\nMissing numbers are shown below.\nIf two or more numbers are missing in sequence, only the first will be listed here.\n\nFiles with mismmatched barcodes are shown in main window.\n"
                         val errorReportDialog = RunnableJobReportDialog(
-                                Singleton.Companion.getSingletonInstance().getMainFrame(),
+                                Singleton.getMainFrame(),
                                 report,
                                 errorCount.getErrors(),
                                 RunnableJobErrorTableModel.Companion.TYPE_MISSING_BARCODES,
                                 "QC Barcodes Report")
                         errorReportDialog.setVisible(true)
                     } else {
-                        JOptionPane.showMessageDialog(Singleton.Companion.getSingletonInstance().getMainFrame(), "No barcodes are missing from the sequence.\nAny missmatches are shown in table.", "Barcode QC Report", JOptionPane.OK_OPTION)
+                        JOptionPane.showMessageDialog(Singleton.getMainFrame(), "No barcodes are missing from the sequence.\nAny missmatches are shown in table.", "Barcode QC Report", JOptionPane.OK_OPTION)
                     }
                     System.gc()
                 }
@@ -1298,8 +1728,8 @@ class MainFrame : JFrame(), RunnerListener {
             }
             jMenuItemChangePassword.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    if (Singleton.Companion.getSingletonInstance().getUser() != null) {
-                        val cpd = ChangePasswordDialog(thisMainFrame, Singleton.Companion.getSingletonInstance().getUser())
+                    if (Singleton.getUser() != null) {
+                        val cpd = ChangePasswordDialog(thisMainFrame, Singleton.getUser())
                         cpd.setVisible(true)
                     }
                 }
@@ -1341,7 +1771,7 @@ class MainFrame : JFrame(), RunnerListener {
                 jMenuItemStats.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
                         val sls = SpecimenLifeCycle()
-                        JOptionPane.showMessageDialog(Singleton.Companion.getSingletonInstance().getMainFrame(),
+                        JOptionPane.showMessageDialog(Singleton.getMainFrame(),
                                 sls.findSpecimenCount(),
                                 "Record counts",
                                 JOptionPane.INFORMATION_MESSAGE)
@@ -1420,7 +1850,7 @@ class MainFrame : JFrame(), RunnerListener {
             }
             jMenuItemRedoOCROne.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    val target = File(Singleton.Companion.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
+                    val target = File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
                     val r = JobRepeatOCR(JobRepeatOCR.Companion.SCAN_SELECT, target)
                     Thread(r).start()
                 }
@@ -1443,7 +1873,7 @@ class MainFrame : JFrame(), RunnerListener {
                 override fun actionPerformed(e: ActionEvent?) {
                     val r = JobCleanDirectory(
                             JobCleanDirectory.Companion.SCAN_SELECT,
-                            File(Singleton.Companion.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
+                            File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
                     )
                     Thread(r).start()
                 }
@@ -1467,7 +1897,7 @@ class MainFrame : JFrame(), RunnerListener {
                 override fun actionPerformed(e: ActionEvent?) {
                     val r = JobRecheckForTemplates(
                             JobRecheckForTemplates.Companion.SCAN_SELECT,
-                            File(Singleton.Companion.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
+                            File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
                     )
                     Thread(r).start()
                 }
@@ -1503,7 +1933,7 @@ class MainFrame : JFrame(), RunnerListener {
         val BG_COLOR_ENT_FIELD: Color? = Color(255, 246, 213) //  @jve:decl-index=0:
         val BG_COLOR_ERROR: Color? = Color(255, 73, 43) // highlight fields with data errors  //  @jve:decl-index=0:
         private const val serialVersionUID = 536567118673854270L
-        private val log: Log? = LogFactory.getLog(MainFrame::class.java) //  @jve:decl-index=0:
+        private val log: Log = LogFactory.getLog(MainFrame::class.java) //  @jve:decl-index=0:
         private const val STATE_INIT = 0 // initial state of application - most menu items disabled
     }
 

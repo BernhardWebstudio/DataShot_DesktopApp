@@ -29,12 +29,12 @@ class TestOfPasswordComplexity : TestCase() {
         var proposal = "A"
         val user = Users()
         user.setUsername("username")
-        assertFalse(Users.testProposedPassword(proposal, user.getUsername()))
+        assertFalse(Users.testProposedPassword(proposal, user.username))
         proposal = "A9a"
-        assertFalse(Users.testProposedPassword(proposal, user.getUsername()))
-        proposal = user.getUsername()
-        assertFalse(Users.testProposedPassword(proposal, user.getUsername()))
+        assertFalse(Users.testProposedPassword(proposal, user.username))
+        proposal = user.username
+        assertFalse(Users.testProposedPassword(proposal, user.username))
         proposal = "123456789Aa"
-        assertTrue(Users.testProposedPassword(proposal, user.getUsername()))
+        assertTrue(Users.testProposedPassword(proposal, user.username))
     }
 }

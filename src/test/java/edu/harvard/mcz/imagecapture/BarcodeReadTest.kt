@@ -68,7 +68,7 @@ object BarcodeReadTest {
             val reader = QRCodeReader()
             var hints: Hashtable<DecodeHintType?, Any?>? = null
             hints = Hashtable(3)
-            hints[DecodeHintType.TRY_HARDER] = Boolean.TRUE
+            hints[DecodeHintType.TRY_HARDER] = true
             result = reader.decode(bitmap, hints)
             returnValue = result.text
         } catch (e: ReaderException) {

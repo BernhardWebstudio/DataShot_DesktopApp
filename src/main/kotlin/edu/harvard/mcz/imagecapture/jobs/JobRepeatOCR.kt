@@ -166,10 +166,10 @@ class JobRepeatOCR : RunnableJob, Runnable {
                 var imagebase: File? = null // place to start the scan from, imagebase directory for SCAN_ALL
                 var startPoint: File? = null
                 // If it isn't null, retrieve the image base directory from properties, and test for read access.
-                if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE) == null) {
-                    JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Can't start scan.  Don't know where images are stored.  Set imagbase property.", "Can't Scan.", JOptionPane.ERROR_MESSAGE)
+                if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE) == null) {
+                    JOptionPane.showMessageDialog(Singleton.MainFrame, "Can't start scan.  Don't know where images are stored.  Set imagbase property.", "Can't Scan.", JOptionPane.ERROR_MESSAGE)
                 } else {
-                    imagebase = File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
+                    imagebase = File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
                     if (imagebase != null) {
                         if (imagebase.canRead()) {
                             startPoint = imagebase
@@ -186,13 +186,13 @@ class JobRepeatOCR : RunnableJob, Runnable {
                         if (scan == SCAN_SELECT && startPointSpecific != null && startPointSpecific!!.canRead()) {
                             fileChooser.setCurrentDirectory(startPointSpecific)
                         } else {
-                            if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH) != null) {
-                                fileChooser.setCurrentDirectory(File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH)))
+                            if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH) != null) {
+                                fileChooser.setCurrentDirectory(File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH)))
                             }
                         }
-                        val returnValue: Int = fileChooser.showOpenDialog(Singleton.getMainFrame())
+                        val returnValue: Int = fileChooser.showOpenDialog(Singleton.MainFrame)
                         if (returnValue == JFileChooser.APPROVE_OPTION) {
-                            val file: File = fileChooser.getSelectedFile()
+                            val file: File = fileChooser.SelectedFile
                             log!!.debug("Selected base directory: " + file.name + ".")
                             startPoint = file
                         } else { //TODO: handle error condition
@@ -204,15 +204,15 @@ class JobRepeatOCR : RunnableJob, Runnable {
                     }
                     // Check that startPoint is or is within imagebase.
                     if (!ImageCaptureProperties.Companion.isInPathBelowBase(startPoint)) {
-                        val base: String = Singleton.getProperties().getProperties().getProperty(
+                        val base: String = Singleton.Properties.Properties.getProperty(
                                 ImageCaptureProperties.Companion.KEY_IMAGEBASE)
                         log!!.error("Tried to scan directory (" + startPoint!!.path + ") outside of base image directory (" + base + ")")
                         val message = "Can't scan and database files outside of base image directory ($base)"
-                        JOptionPane.showMessageDialog(Singleton.getMainFrame(), message, "Can't Scan outside image base directory.", JOptionPane.YES_NO_OPTION)
+                        JOptionPane.showMessageDialog(Singleton.MainFrame, message, "Can't Scan outside image base directory.", JOptionPane.YES_NO_OPTION)
                     } else { // run in separate thread and allow cancellation and status reporting
 // walk through directory tree
                         if (!startPoint!!.canRead()) {
-                            JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Can't start scan.  Unable to read selected directory: " + startPoint.path, "Can't Scan.", JOptionPane.YES_NO_OPTION)
+                            JOptionPane.showMessageDialog(Singleton.MainFrame, "Can't start scan.  Unable to read selected directory: " + startPoint.path, "Can't Scan.", JOptionPane.YES_NO_OPTION)
                         } else {
                             pathToCheck = ImageCaptureProperties.Companion.getPathBelowBase(startPoint)
                         }
@@ -225,12 +225,12 @@ class JobRepeatOCR : RunnableJob, Runnable {
             val files = ArrayList<File?>()
             for (i in specimens.indices) {
                 val s: Specimen? = specimens[i]
-                val images: MutableSet<ICImage?> = s.getICImages()
+                val images: MutableSet<ICImage?> = s.ICImages
                 val iter: MutableIterator<ICImage?> = images.iterator()
                 while (iter.hasNext() && status != RunStatus.STATUS_TERMINATED) {
                     val image: ICImage? = iter.next()
-                    if (scan == SCAN_ALL || image.getPath().startsWith(pathToCheck)) { // Add image for specimen to list to check
-                        val imageFile = File(assemblePathWithBase(image.getPath(), image.getFilename()))
+                    if (scan == SCAN_ALL || image.Path.startsWith(pathToCheck)) { // Add image for specimen to list to check
+                        val imageFile = File(assemblePathWithBase(image.Path, image.Filename))
                         files.add(imageFile)
                         counter!!.incrementFilesSeen()
                     }
@@ -238,7 +238,7 @@ class JobRepeatOCR : RunnableJob, Runnable {
             }
             val message = "Found " + files.size + " Specimen records on which to repeat OCR."
             log!!.debug(message)
-            Singleton.getMainFrame().setStatusMessage(message)
+            Singleton.MainFrame.setStatusMessage(message)
             return files
         }
 
@@ -258,18 +258,18 @@ class JobRepeatOCR : RunnableJob, Runnable {
         }
         try {
             templateToUse = PositionTemplate(template)
-            log.debug("Set template to: " + templateToUse.getTemplateId())
+            log.debug("Set template to: " + templateToUse.TemplateId)
         } catch (e1: NoSuchTemplateException) {
             try {
                 templateToUse = PositionTemplate(PositionTemplate.Companion.TEMPLATE_DEFAULT)
-                log.error("Template not recongised, reset template to: " + templateToUse.getTemplateId())
+                log.error("Template not recongised, reset template to: " + templateToUse.TemplateId)
             } catch (e2: Exception) { // We shouldn't end up here - we just asked for the default template by its constant.
                 log.fatal("PositionTemplate doesn't recognize TEMPLATE_DEFAULT")
                 log.trace(e2)
                 ImageCaptureApp.exit(ImageCaptureApp.EXIT_ERROR)
             }
         }
-        Singleton.getMainFrame().setStatusMessage("Repeat OCR $filename.")
+        Singleton.MainFrame.setStatusMessage("Repeat OCR $filename.")
         val scannableFile: CandidateImageFile?
         try {
             scannableFile = CandidateImageFile(file, templateToUse)
@@ -299,16 +299,16 @@ class JobRepeatOCR : RunnableJob, Runnable {
                 log.debug(rawOCR)
                 // Test this image to see if is a specimen image
                 var barcode: String = scannableFile.getBarcodeText(templateToUse)
-                Singleton.getMainFrame().setStatusMessage("Checking $barcode.")
-                if (scannableFile.getCatalogNumberBarcodeStatus() != CandidateImageFile.Companion.RESULT_BARCODE_SCANNED) {
+                Singleton.MainFrame.setStatusMessage("Checking $barcode.")
+                if (scannableFile.CatalogNumberBarcodeStatus != CandidateImageFile.Companion.RESULT_BARCODE_SCANNED) {
                     log.error("Error scanning for barcode: $barcode")
                     barcode = ""
                 }
                 println("Barcode=$barcode")
-                val exifComment: String = scannableFile.getExifUserCommentText()
+                val exifComment: String = scannableFile.ExifUserCommentText
                 var isSpecimenImage = false
-                if (Singleton.getBarcodeMatcher().matchesPattern(exifComment)
-                        || Singleton.getBarcodeMatcher().matchesPattern(barcode)) {
+                if (Singleton.BarcodeMatcher.matchesPattern(exifComment)
+                        || Singleton.BarcodeMatcher.matchesPattern(barcode)) {
                     isSpecimenImage = true
                     println("Specimen Image")
                 }
@@ -316,15 +316,15 @@ class JobRepeatOCR : RunnableJob, Runnable {
                 // Check for mismatch in barcode and comment
                 if (rawBarcode != exifComment) { // Use the exifComment if it is a barcode
                     var barcodeInImageMetadata = false
-                    if (Singleton.getBarcodeMatcher().matchesPattern(exifComment)) {
+                    if (Singleton.BarcodeMatcher.matchesPattern(exifComment)) {
                         rawBarcode = exifComment
                         barcodeInImageMetadata = true
                     }
                     // Log the mismatch
                     logMismatch(counter, filename, barcode, exifComment, parser, barcodeInImageMetadata, log)
                 }
-                if (isSpecimenImage && Singleton.getBarcodeMatcher().matchesPattern(rawBarcode)) { // Parse and store OCR in an updated specimen record.
-                    Singleton.getMainFrame().setStatusMessage("Updating $barcode.")
+                if (isSpecimenImage && Singleton.BarcodeMatcher.matchesPattern(rawBarcode)) { // Parse and store OCR in an updated specimen record.
+                    Singleton.MainFrame.setStatusMessage("Updating $barcode.")
                     val sls = SpecimenLifeCycle()
                     val specimenSearch = Specimen()
                     specimenSearch.setBarcode(rawBarcode)
@@ -332,14 +332,14 @@ class JobRepeatOCR : RunnableJob, Runnable {
                     log.debug("Found " + specimens.size + " for barcode " + rawBarcode)
                     if (specimens.size == 1) { // Only update if we got a single match back on the barcode search.
                         var s: Specimen? = specimens[0]
-                        log.debug("Found " + s.getBarcode() + " at state " + s.getWorkFlowStatus())
-                        if (s.getWorkFlowStatus() == WorkFlowStatus.STAGE_0) { // Only update if the result was in state OCR.
+                        log.debug("Found " + s.Barcode + " at state " + s.WorkFlowStatus)
+                        if (s.WorkFlowStatus == WorkFlowStatus.STAGE_0) { // Only update if the result was in state OCR.
 //
 // Look up likely matches for the OCR of the higher taxa in the HigherTaxon authority file.
                             AbstractFileScanJob.extractFamilyToSpecimen(parser, s)
-                            if (parser.getFamily() != "") { // check family against database (with a soundex match)
+                            if (parser.Family != "") { // check family against database (with a soundex match)
                                 val hls = HigherTaxonLifeCycle()
-                                val match: String = hls.findMatch(parser.getFamily())
+                                val match: String = hls.findMatch(parser.Family)
                                 if (match != null && match.trim { it <= ' ' } != "") {
                                     s.setFamily(match)
                                 }
@@ -347,28 +347,28 @@ class JobRepeatOCR : RunnableJob, Runnable {
                             // trim family to fit (in case multiple parts of taxon name weren't parsed
 // and got concatenated into family field.
                             setBasicSpecimenFromParser(parser, s)
-                            if (s.getCreatingPath() == null || s.getCreatingPath().length == 0) {
+                            if (s.CreatingPath == null || s.CreatingPath.length == 0) {
                                 s.setCreatingPath(ImageCaptureProperties.Companion.getPathBelowBase(file))
                             }
-                            if (s.getCreatingFilename() == null || s.getCreatingFilename().length == 0) {
+                            if (s.CreatingFilename == null || s.CreatingFilename.length == 0) {
                                 s.setCreatingFilename(file.name)
                             }
-                            if (parser.getIdentifiedBy() != null && parser.getIdentifiedBy().length > 0) {
-                                s.setIdentifiedBy(parser.getIdentifiedBy())
+                            if (parser.IdentifiedBy != null && parser.IdentifiedBy.length > 0) {
+                                s.setIdentifiedBy(parser.IdentifiedBy)
                             }
-                            log.debug(s.getCollection())
+                            log.debug(s.Collection)
                             // TODO: non-general workflows
-                            s.setLocationInCollection(LocationInCollection.getDefaultLocation())
-                            if (s.getFamily() == "Formicidae") {
+                            s.setLocationInCollection(LocationInCollection.DefaultLocation)
+                            if (s.Family == "Formicidae") {
                                 s.setLocationInCollection(LocationInCollection.GENERALANT)
                             }
-                            s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion())
+                            s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.AppVersion)
                             val sh = SpecimenLifeCycle()
                             try { // *** Save a database record of the specimen.
                                 log.debug("Saving changes for barcode $barcode")
                                 if (foundQRText) { // if we managed to read JSON, then we can move the specimen to text entered.
                                     s.setWorkFlowStatus(WorkFlowStatus.STAGE_1)
-                                    log.debug(s.getWorkFlowStatus())
+                                    log.debug(s.WorkFlowStatus)
                                 }
                                 sh.attachDirty(s)
                                 counter!!.incrementSpecimensUpdated()
@@ -378,8 +378,8 @@ class JobRepeatOCR : RunnableJob, Runnable {
                                     var badParse = ""
                                     // Drawer number with length limit (and specimen that fails to save at over this length makes
 // a good canary for labels that parse very badly.
-                                    if ((parser as DrawerNameReturner?).getDrawerNumber().length > MetadataRetriever.getFieldLength(Specimen::class.java, "DrawerNumber")) {
-                                        badParse = "Parsing problem. \nDrawer number is too long: " + s.getDrawerNumber() + "\n"
+                                    if ((parser as DrawerNameReturner?).DrawerNumber.length > MetadataRetriever.getFieldLength(Specimen::class.java, "DrawerNumber")) {
+                                        badParse = "Parsing problem. \nDrawer number is too long: " + s.DrawerNumber + "\n"
                                     }
                                     val error = RunnableJobError(filename, barcode,
                                             rawBarcode, exifComment, badParse,
@@ -393,14 +393,14 @@ class JobRepeatOCR : RunnableJob, Runnable {
                                     var badParse = ""
                                     // Drawer number with length limit (and specimen that fails to save at over this length makes
 // a good canary for labels that parse very badly.
-                                    if (s.getDrawerNumber() == null) {
+                                    if (s.DrawerNumber == null) {
                                         badParse = "Parsing problem. \nDrawer number is null: \n"
                                     } else {
-                                        if (s.getDrawerNumber().length > MetadataRetriever.getFieldLength(Specimen::class.java, "DrawerNumber")) { // This was an OK test for testing OCR, but in production ends up in records not being
+                                        if (s.DrawerNumber.length > MetadataRetriever.getFieldLength(Specimen::class.java, "DrawerNumber")) { // This was an OK test for testing OCR, but in production ends up in records not being
 // created for files, which ends up being a larger quality control problem than records
 // with bad OCR.
 // Won't fail this way anymore - drawer number is now enforced in Specimen.setDrawerNumber()
-                                            badParse = "Parsing problem. \nDrawer number is too long: " + s.getDrawerNumber() + "\n"
+                                            badParse = "Parsing problem. \nDrawer number is too long: " + s.DrawerNumber + "\n"
                                         }
                                     }
                                     val error = RunnableJobError(filename, barcode,
@@ -442,7 +442,7 @@ class JobRepeatOCR : RunnableJob, Runnable {
      */
     override fun start() {
         startTime = Date()
-        Singleton.getJobList().addJob(this)
+        Singleton.JobList.addJob(this)
         counter = Counter()
         // Obtain a list of image files to repeat OCR
 // (by querying specimens in state OCR and getting list of linked images).
@@ -461,7 +461,7 @@ class JobRepeatOCR : RunnableJob, Runnable {
         if (status != RunStatus.STATUS_TERMINATED) {
             setPercentComplete(100)
         }
-        Singleton.getMainFrame().notifyListener(status, this)
+        Singleton.MainFrame.notifyListener(status, this)
         report()
         done()
     }
@@ -470,7 +470,7 @@ class JobRepeatOCR : RunnableJob, Runnable {
         percentComplete = aPercentage
         log!!.debug(percentComplete)
         //notify listeners
-        Singleton.getMainFrame().notifyListener(percentComplete, this)
+        Singleton.MainFrame.notifyListener(percentComplete, this)
         val i: MutableIterator<RunnerListener?> = listeners!!.iterator()
         while (i.hasNext()) {
             i.next().notifyListener(percentComplete, this)
@@ -481,7 +481,7 @@ class JobRepeatOCR : RunnableJob, Runnable {
      * Cleanup when job is complete.
      */
     private fun done() {
-        Singleton.getJobList().removeJob(this)
+        Singleton.JobList.removeJob(this)
     }
 
     /* (non-Javadoc)
@@ -502,8 +502,8 @@ class JobRepeatOCR : RunnableJob, Runnable {
         var report = "Results of redone OCR on Image files.\n"
         report += "Found  " + counter!!.filesSeen + " specimen database records in state OCR.\n"
         report += "Saved new OCR for " + counter!!.specimensUpdated + " specimens.\n"
-        Singleton.getMainFrame().setStatusMessage("OCR re-do complete.")
-        val errorReportDialog = RunnableJobReportDialog(Singleton.getMainFrame(), report, counter!!.errors, "Repeat OCR Results")
+        Singleton.MainFrame.setStatusMessage("OCR re-do complete.")
+        val errorReportDialog = RunnableJobReportDialog(Singleton.MainFrame, report, counter!!.errors, "Repeat OCR Results")
         errorReportDialog.setVisible(true)
     }
 

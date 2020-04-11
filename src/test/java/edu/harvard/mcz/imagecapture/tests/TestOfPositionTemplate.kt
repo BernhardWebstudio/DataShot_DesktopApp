@@ -46,7 +46,7 @@ class TestOfPositionTemplate
      */
     fun testPositionTemplate() {
         val t = PositionTemplate()
-        assertEquals(t.getName(), PositionTemplate().getName())
+        assertEquals(t.Name, PositionTemplate().Name)
     }
 
     /**
@@ -55,7 +55,7 @@ class TestOfPositionTemplate
     fun testPositionTemplateString() { // Test exceptions on a bad template name.
         try {
             val badTemplate = PositionTemplate("random string that isn't a template name... 123")
-            badTemplate.getClass() // // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
+            badTemplate.Class // // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
             fail("Failed to throw NoSuchTemplateException")
         } catch (e: NoSuchTemplateException) { // pass
         } catch (ex: NullPointerException) { // TODO: Mock object?
@@ -68,7 +68,7 @@ class TestOfPositionTemplate
             var t1: PositionTemplate? = null
             try {
                 t1 = PositionTemplate(PositionTemplate.TEMPLATE_TEST_1)
-                assertNotSame(t.getName(), t1.getName())
+                assertNotSame(t.Name, t1.Name)
             } catch (e: NoSuchTemplateException) {
                 fail("Threw unexpected NoSuchTemplateException")
             }
@@ -78,24 +78,24 @@ class TestOfPositionTemplate
         // Test the special case of TEMPLATE_NO_COMPONENT_PARTS
         try {
             t = PositionTemplate(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)
-            assertEquals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS, t.getTemplateId())
+            assertEquals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS, t.TemplateId)
         } catch (e: NoSuchTemplateException) {
             fail("Threw unexpected NoSuchTemplateException")
         }
     }
 
     fun testAllTemplatesInList() {
-        val templates: List<String> = PositionTemplate.getTemplateIds()
+        val templates: List<String> = PositionTemplate.TemplateIds
         val i = templates.listIterator()
         var foundNoComponentParts = false
         while (i.hasNext()) {
             try {
                 val template = PositionTemplate(i.next())
-                if (template.getTemplateId().equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
+                if (template.TemplateId.equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
                     foundNoComponentParts = true
                 }
             } catch (e: NoSuchTemplateException) {
-                fail("Threw NoSuchTemplate exception for a template on the list of templates." + e.getMessage())
+                fail("Threw NoSuchTemplate exception for a template on the list of templates." + e.Message)
             }
         }
         if (foundNoComponentParts == false) {
@@ -105,10 +105,10 @@ class TestOfPositionTemplate
 
     fun testDefaultPositionTemplateInSingleton() {
         try {
-            val defaultTemplate = PositionTemplate(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_DEFAULT_TEMPLATES))
-            defaultTemplate.getClass() // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
+            val defaultTemplate = PositionTemplate(Singleton.SingletonInstance.Properties.Properties.getProperty(ImageCaptureProperties.KEY_DEFAULT_TEMPLATES))
+            defaultTemplate.Class // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
         } catch (e: NoSuchTemplateException) {
-            fail("Default Position Template returned from Singelton Doesn't exist. " + e.getMessage())
+            fail("Default Position Template returned from Singelton Doesn't exist. " + e.Message)
         }
     }
 
@@ -151,29 +151,29 @@ class TestOfPositionTemplate
         } catch (e: BadTemplateException) {
             fail("BadTemplateException thrown on populating Template from valid PositionTemplate.")
         }
-        assertEquals(t.getName(), t1.getName())
-        assertEquals(t.getImageSizeX(), t.getImageSizeX())
-        assertEquals(t.getImageSizeY(), t.getImageSizeY())
-        assertEquals(t.getBarcodePositionX(), t1.getBarcodePositionX())
-        assertEquals(t.getBarcodePositionY(), t1.getBarcodePositionY())
-        assertEquals(t.getBarcodeSizeX(), t1.getBarcodeSizeX())
-        assertEquals(t.getBarcodeSizeY(), t1.getBarcodeSizeY())
-        assertEquals(t.getTextPositionX(), t1.getTextPositionX())
-        assertEquals(t.getTextPositionY(), t1.getTextPositionY())
-        assertEquals(t.getTextSizeX(), t1.getTextSizeX())
-        assertEquals(t.getTextSizeY(), t1.getTextSizeY())
-        assertEquals(t.getLabelPositionX(), t1.getLabelPositionX())
-        assertEquals(t.getLabelPositionY(), t1.getLabelPositionY())
-        assertEquals(t.getLabelSizeX(), t1.getLabelSizeX())
-        assertEquals(t.getLabelSizeY(), t1.getLabelSizeY())
-        assertEquals(t.getUtLabelPositionX(), t1.getUtLabelPositionX())
-        assertEquals(t.getUtLabelPositionY(), t1.getUtLabelPositionY())
-        assertEquals(t.getUtLabelSizeX(), t1.getUtLabelSizeX())
-        assertEquals(t.getUtLabelSizey(), t1.getUtLabelSizey())
-        assertEquals(t.getSpecimenPositionX(), t1.getSpecimenPositionX())
-        assertEquals(t.getSpecimenPositionY(), t1.getSpecimenPositionY())
-        assertEquals(t.getSpecimenSizeX(), t1.getSpecimenSizeX())
-        assertEquals(t.getSpecimenSizeY(), t1.getSpecimenSizeY())
+        assertEquals(t.Name, t1.Name)
+        assertEquals(t.ImageSizeX, t.ImageSizeX)
+        assertEquals(t.ImageSizeY, t.ImageSizeY)
+        assertEquals(t.BarcodePositionX, t1.BarcodePositionX)
+        assertEquals(t.BarcodePositionY, t1.BarcodePositionY)
+        assertEquals(t.BarcodeSizeX, t1.BarcodeSizeX)
+        assertEquals(t.BarcodeSizeY, t1.BarcodeSizeY)
+        assertEquals(t.TextPositionX, t1.TextPositionX)
+        assertEquals(t.TextPositionY, t1.TextPositionY)
+        assertEquals(t.TextSizeX, t1.TextSizeX)
+        assertEquals(t.TextSizeY, t1.TextSizeY)
+        assertEquals(t.LabelPositionX, t1.LabelPositionX)
+        assertEquals(t.LabelPositionY, t1.LabelPositionY)
+        assertEquals(t.LabelSizeX, t1.LabelSizeX)
+        assertEquals(t.LabelSizeY, t1.LabelSizeY)
+        assertEquals(t.UtLabelPositionX, t1.UtLabelPositionX)
+        assertEquals(t.UtLabelPositionY, t1.UtLabelPositionY)
+        assertEquals(t.UtLabelSizeX, t1.UtLabelSizeX)
+        assertEquals(t.UtLabelSizey, t1.UtLabelSizey)
+        assertEquals(t.SpecimenPositionX, t1.SpecimenPositionX)
+        assertEquals(t.SpecimenPositionY, t1.SpecimenPositionY)
+        assertEquals(t.SpecimenSizeX, t1.SpecimenSizeX)
+        assertEquals(t.SpecimenSizeY, t1.SpecimenSizeY)
     }
 
     /* (non-Javadoc)
@@ -185,7 +185,7 @@ class TestOfPositionTemplate
         // Create an instance of MainFrame to support database connection
         ImageCaptureApp.main(null)
         // hide it so user can't see it.
-        Singleton.getSingletonInstance().getMainFrame().setVisible(false)
+        Singleton.SingletonInstance.MainFrame.setVisible(false)
     }
 
     /* (non-Javadoc)
@@ -195,6 +195,6 @@ class TestOfPositionTemplate
     override fun tearDown() {
         super.tearDown()
         // reference the MainFrame again so it won't be disposed of until these tests are done.
-        Singleton.getSingletonInstance().getMainFrame().setVisible(false)
+        Singleton.SingletonInstance.MainFrame.setVisible(false)
     }
 }

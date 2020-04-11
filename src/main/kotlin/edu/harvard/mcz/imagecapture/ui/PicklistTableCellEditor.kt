@@ -37,7 +37,7 @@ import javax.swing.JTable
  * <pre>
  * JTextField field = new JTextField();
  * field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
- * jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));
+ * jTableCollectors.ColumnModel.getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));
 </pre> *
  */
 class PicklistTableCellEditor : ComboBoxCellEditor {
@@ -64,7 +64,7 @@ class PicklistTableCellEditor : ComboBoxCellEditor {
     }
 
     val cellEditorValue: Any?
-        get() = field.getSelectedItem()
+        get() = field.SelectedItem
 
     //	/* (non-Javadoc)
 //	 * @see javax.swing.DefaultCellEditor#cancelCellEditing()

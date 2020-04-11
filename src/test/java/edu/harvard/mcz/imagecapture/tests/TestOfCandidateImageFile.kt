@@ -45,13 +45,13 @@ class TestOfCandidateImageFile
         var file: CandidateImageFile
         try {
             file = CandidateImageFile(File(this.javaClass.getResource(AllTests.FILE_EMPTY).file), PositionTemplate())
-            file.getClass() // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
+            file.Class // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
         } catch (e: UnreadableFileException) {
-            fail("Threw unexpected UnreadableFileException. " + e.getMessage())
+            fail("Threw unexpected UnreadableFileException. " + e.Message)
         }
         try {
             file = CandidateImageFile(File(AllTests.FILE_INVALID_NAME), PositionTemplate())
-            file.getClass() // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
+            file.Class // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
             fail("Failed to throw UnreadableFileException for nonexistent file.")
         } catch (e: UnreadableFileException) { // pass
         }
@@ -65,18 +65,18 @@ class TestOfCandidateImageFile
         try {
             file = CandidateImageFile(File(this.javaClass.getResource(AllTests.FILE_EMPTY).file), PositionTemplate())
         } catch (e: UnreadableFileException) {
-            fail("Threw unexpected UnreadableFileException. " + e.getMessage())
+            fail("Threw unexpected UnreadableFileException. " + e.Message)
         }
         var ok = false
         try {
             ok = file.isFileReadable()
         } catch (e: UnreadableFileException) {
-            fail("Threw unexpected UnreadableFileException. " + e.getMessage())
+            fail("Threw unexpected UnreadableFileException. " + e.Message)
         }
         assertTrue(ok)
         try {
             file = CandidateImageFile(File(AllTests.FILE_INVALID_NAME), PositionTemplate())
-            file.getClass() // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
+            file.Class // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
             fail("Failed to throw UnreadableFileException for invalid filename")
             try {
                 ok = file.isFileReadable()
@@ -100,7 +100,7 @@ class TestOfCandidateImageFile
             } catch (e: UnreadableFileException) { // pass
             }
         } catch (e: UnreadableFileException) {
-            fail("Threw unexpected UnreadableFileException. " + e.getMessage())
+            fail("Threw unexpected UnreadableFileException. " + e.Message)
         }
     }
 }

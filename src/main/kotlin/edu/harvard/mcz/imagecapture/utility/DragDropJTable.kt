@@ -146,7 +146,7 @@ import can(support: TransferSupport): Boolean { // Only import Strings
         override fun exportDone(c: JComponent?, contents: Transferable?, action: Int) {}
         override fun importData(support: TransferSupport): Boolean {
             try {
-                log!!.debug(support.getTransferable().getTransferData(DataFlavor.stringFlavor))
+                log!!.debug(support.Transferable.getTransferData(DataFlavor.stringFlavor))
             } catch (e1: UnsupportedFlavorException) {
                 log!!.error(e1)
             } catch (e1: IOException) {
@@ -158,12 +158,12 @@ import can(support)) {
                 var targetCol: Int = getSelectedColumn()
                 if (support.isDrop()) { // If this is a drop action (rather than a paste), then the
 // selected row/column will be the source, not the destination.
-                    val dl: JTable.DropLocation = support.getDropLocation() as JTable.DropLocation
-                    targetRow = dl.getRow()
-                    targetCol = dl.getColumn()
+                    val dl: JTable.DropLocation = support.DropLocation as JTable.DropLocation
+                    targetRow = dl.Row
+                    targetCol = dl.Column
                 }
                 try {
-                    val line = (support.getTransferable().getTransferData(DataFlavor.stringFlavor) as String)
+                    val line = (support.Transferable.getTransferData(DataFlavor.stringFlavor) as String)
                     var start = 0
                     var end = line.indexOf("\n")
                     if (end < 0) {

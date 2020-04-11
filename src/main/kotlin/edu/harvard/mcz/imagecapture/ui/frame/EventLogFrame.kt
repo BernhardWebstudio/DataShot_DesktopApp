@@ -454,9 +454,9 @@ class EventLogFrame : JFrame {
         this.setSize(709, 340)
         this.setContentPane(getJContentPane())
         this.setTitle("Event Log")
-        val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize()
-        this.setLocation((screenSize.width - this.getWidth()) / 2,
-                (screenSize.height - this.getHeight()) / 2)
+        val screenSize: Dimension = Toolkit.DefaultToolkit.ScreenSize
+        this.setLocation((screenSize.width - this.Width) / 2,
+                (screenSize.height - this.Height) / 2)
     }
 
     /**

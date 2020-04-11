@@ -453,11 +453,11 @@ class SpecimenPartAttribEditDialog : JDialog {
         thisDialog = this
         targetAttribute = attribute
         init()
-        comboBoxType.setSelectedItem(targetAttribute.getAttributeType())
-        configureComboBoxValue(targetAttribute.getAttributeType())
-        comboBoxValue.setSelectedItem(targetAttribute.getAttributeValue())
-        textFieldUnits.setText(targetAttribute.getAttributeUnits())
-        textFieldRemarks.setText(targetAttribute.getAttributeRemark())
+        comboBoxType.setSelectedItem(targetAttribute.AttributeType)
+        configureComboBoxValue(targetAttribute.AttributeType)
+        comboBoxValue.setSelectedItem(targetAttribute.AttributeValue)
+        textFieldUnits.setText(targetAttribute.AttributeUnits)
+        textFieldRemarks.setText(targetAttribute.AttributeRemark)
     }
 
     private fun init() {
@@ -475,12 +475,12 @@ class SpecimenPartAttribEditDialog : JDialog {
                 okButton.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
                         okButton.grabFocus()
-                        if (comboBoxType.getSelectedIndex() > -1) {
-                            targetAttribute.setAttributeType(comboBoxType.getSelectedItem().toString())
+                        if (comboBoxType.SelectedIndex > -1) {
+                            targetAttribute.setAttributeType(comboBoxType.SelectedItem.toString())
                         }
-                        targetAttribute.setAttributeValue(comboBoxValue.getSelectedItem().toString())
-                        targetAttribute.setAttributeUnits(textFieldUnits.getText())
-                        targetAttribute.setAttributeRemark(textFieldRemarks.getText())
+                        targetAttribute.setAttributeValue(comboBoxValue.SelectedItem.toString())
+                        targetAttribute.setAttributeUnits(textFieldUnits.Text)
+                        targetAttribute.setAttributeRemark(textFieldRemarks.Text)
                         thisDialog.setVisible(false)
                     }
                 })
@@ -525,7 +525,7 @@ class SpecimenPartAttribEditDialog : JDialog {
                 comboBoxType.setModel(DefaultComboBoxModel<Any?>(arrayOf<String?>("caste", "scientific name", "sex", "life stage")))
                 comboBoxType.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
-                        val item: String = comboBoxType.getSelectedItem().toString()
+                        val item: String = comboBoxType.SelectedItem.toString()
                         item?.let { configureComboBoxValue(it) }
                     }
                 })
@@ -537,7 +537,7 @@ class SpecimenPartAttribEditDialog : JDialog {
             }
             {
                 comboBoxValue = JComboBox<Any?>()
-                comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Caste.getCasteValues()))
+                comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Caste.CasteValues))
                 panel.add(comboBoxValue, "4, 4, fill, default")
             }
             {
@@ -567,13 +567,13 @@ class SpecimenPartAttribEditDialog : JDialog {
             comboBoxValue.setEditable(true)
         }
         if (item == "sex") {
-            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Sex.getSexValues()))
+            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Sex.SexValues))
         }
         if (item == "life stage") {
-            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(LifeStage.Companion.getLifeStageValues()))
+            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(LifeStage.Companion.LifeStageValues))
         }
         if (item == "caste") {
-            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Caste.getCasteValues()))
+            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Caste.CasteValues))
         }
     }
 

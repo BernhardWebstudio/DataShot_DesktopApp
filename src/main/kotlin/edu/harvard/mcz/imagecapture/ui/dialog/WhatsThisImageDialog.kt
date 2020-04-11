@@ -494,7 +494,7 @@ class WhatsThisImageDialog : JDialog {
             image = ImageIO.read(imageFileToShow)
             setImage(image)
         } catch (e: IOException) {
-            log.error("Unable to open selected image " + imageFileToShow.getName())
+            log.error("Unable to open selected image " + imageFileToShow.Name)
             log.debug(e)
             val errorFilename: URL? = this.javaClass.getResource(
                     "/edu/harvard/mcz/imagecapture/resources/images/unableToLoadImage.jpg")
@@ -517,10 +517,10 @@ class WhatsThisImageDialog : JDialog {
     }
 
     val barcode: String?
-        get() = jTextFieldBarcode.getText()
+        get() = jTextFieldBarcode.Text
 
     val drawerNumber: String?
-        get() = jTextFieldDrawerNumber.getText()
+        get() = jTextFieldDrawerNumber.Text
 
     fun setImage(anImage: BufferedImage?) {
         imagePanel.setImage(anImage)
@@ -529,9 +529,9 @@ class WhatsThisImageDialog : JDialog {
     val isSpecimen: Boolean
         get() {
             var result = false
-            if (jComboBox.getSelectedItem() == SEL_SPECIMEN &&
-                    Singleton.getBarcodeMatcher().matchesPattern(
-                            jTextFieldBarcode.getText())) {
+            if (jComboBox.SelectedItem == SEL_SPECIMEN &&
+                    Singleton.BarcodeMatcher.matchesPattern(
+                            jTextFieldBarcode.Text)) {
                 result = true
             }
             return result
@@ -540,11 +540,11 @@ class WhatsThisImageDialog : JDialog {
     val isDrawerImage: Boolean
         get() {
             var result = false
-            if (jComboBox.getSelectedItem() == SEL_DRAWER &&
-                    jTextFieldDrawerNumber.getText().matches(
+            if (jComboBox.SelectedItem == SEL_DRAWER &&
+                    jTextFieldDrawerNumber.Text.matches(
                             Singleton
-                                    .getProperties()
-                                    .getProperties()
+                                    .Properties
+                                    .Properties
                                     .getProperty(ImageCaptureProperties.Companion.KEY_REGEX_DRAWERNUMBER))) {
                 result = true
             }
@@ -706,20 +706,20 @@ class WhatsThisImageDialog : JDialog {
             jButton.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) { // test for required values based on the selection on the combo box
                     var okToClose = false
-                    if (jComboBox.getSelectedItem() == SEL_SPECIMEN) {
+                    if (jComboBox.SelectedItem == SEL_SPECIMEN) {
                         if (Singleton
-                                        .getBarcodeMatcher()
-                                        .matchesPattern(jTextFieldBarcode.getText())) {
+                                        .BarcodeMatcher
+                                        .matchesPattern(jTextFieldBarcode.Text)) {
                             okToClose = true
                         } else {
                             jTextFieldBarcode.setBackground(MainFrame.Companion.BG_COLOR_ERROR)
                         }
                     }
-                    if (jComboBox.getSelectedItem() == SEL_DRAWER) {
-                        if (jTextFieldDrawerNumber.getText().matches(
+                    if (jComboBox.SelectedItem == SEL_DRAWER) {
+                        if (jTextFieldDrawerNumber.Text.matches(
                                         Singleton
-                                                .getProperties()
-                                                .getProperties()
+                                                .Properties
+                                                .Properties
                                                 .getProperty(
                                                         ImageCaptureProperties.Companion.KEY_REGEX_DRAWERNUMBER))) {
                             okToClose = true
@@ -727,7 +727,7 @@ class WhatsThisImageDialog : JDialog {
                             jTextFieldDrawerNumber.setBackground(MainFrame.Companion.BG_COLOR_ERROR)
                         }
                     }
-                    if (jComboBox.getSelectedItem() == SEL_DRAWER) {
+                    if (jComboBox.SelectedItem == SEL_DRAWER) {
                         okToClose = true
                     }
                     // Only close if set of values makes sense.
@@ -771,19 +771,19 @@ class WhatsThisImageDialog : JDialog {
     }
 
     private fun checkValues() {
-        if (jComboBox.getSelectedItem() == SEL_SPECIMEN) {
-            if (Singleton.getBarcodeMatcher().matchesPattern(
-                            jTextFieldBarcode.getText())) {
+        if (jComboBox.SelectedItem == SEL_SPECIMEN) {
+            if (Singleton.BarcodeMatcher.matchesPattern(
+                            jTextFieldBarcode.Text)) {
                 jTextFieldBarcode.setBackground(MainFrame.Companion.BG_COLOR_ENT_FIELD)
             } else {
                 jTextFieldBarcode.setBackground(MainFrame.Companion.BG_COLOR_ERROR)
             }
         }
-        if (jComboBox.getSelectedItem() == SEL_DRAWER) {
-            if (jTextFieldDrawerNumber.getText().matches(
+        if (jComboBox.SelectedItem == SEL_DRAWER) {
+            if (jTextFieldDrawerNumber.Text.matches(
                             Singleton
-                                    .getProperties()
-                                    .getProperties()
+                                    .Properties
+                                    .Properties
                                     .getProperty(
                                             ImageCaptureProperties.Companion.KEY_REGEX_DRAWERNUMBER))) {
                 jTextFieldDrawerNumber.setBackground(MainFrame.Companion.BG_COLOR_ENT_FIELD)

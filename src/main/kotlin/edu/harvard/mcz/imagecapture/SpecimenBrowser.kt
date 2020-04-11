@@ -108,13 +108,13 @@ class SpecimenBrowser : JPanel, DataChangeListener {
                 jScrollPane.setViewportView(getJTable())
             } catch (e: SessionException) {
                 log!!.debug(e.message, e)
-                Singleton.getMainFrame().setStatusMessage(
+                Singleton.MainFrame.setStatusMessage(
                         "Database Connection Error.")
                 HibernateUtil.terminateSessionFactory()
                 this.setVisible(false)
             } catch (e: TransactionException) {
                 log!!.debug(e.message, e)
-                Singleton.getMainFrame().setStatusMessage(
+                Singleton.MainFrame.setStatusMessage(
                         "Database Connection Error.")
                 HibernateUtil.terminateSessionFactory()
                 this.setVisible(false)
@@ -153,12 +153,12 @@ class SpecimenBrowser : JPanel, DataChangeListener {
             jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.Companion.COL_COPY)).setCellRenderer(ButtonRenderer("Copy"))
             jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.Companion.COL_COPY)).setCellEditor(CopyRowButtonEditor(JCheckBox()))
             // set some column widths
-            val characterWidth: Int = Singleton.getCharacterWidth()
-            jTable.getColumnModel().getColumn(0).setPreferredWidth(characterWidth *
+            val characterWidth: Int = Singleton.CharacterWidth
+            jTable.ColumnModel.getColumn(0).setPreferredWidth(characterWidth *
                     3)
-            jTable.getColumnModel().getColumn(1).setPreferredWidth(characterWidth *
+            jTable.ColumnModel.getColumn(1).setPreferredWidth(characterWidth *
                     3)
-            jTable.getColumnModel().getColumn(2).setPreferredWidth(characterWidth *
+            jTable.ColumnModel.getColumn(2).setPreferredWidth(characterWidth *
                     14)
         }
         return jTable
@@ -247,7 +247,7 @@ class SpecimenBrowser : JPanel, DataChangeListener {
      */
     private fun getJComboBox(): JComboBox<*>? {
         if (jComboBox == null) {
-            jComboBox = JComboBox<Any?>(WorkFlowStatus.getWorkFlowStatusValues())
+            jComboBox = JComboBox<Any?>(WorkFlowStatus.WorkFlowStatusValues)
             jComboBox.addItem("")
             jComboBox.setSelectedItem("")
             jComboBox.addActionListener(object : ActionListener {
@@ -268,13 +268,13 @@ class SpecimenBrowser : JPanel, DataChangeListener {
             var rf_barcode: RowFilter<SpecimenListTableModel?, Any?>? = null
             val rf_drawer: RowFilter<SpecimenListTableModel?, Any?>? = null
             var rf_workflow: RowFilter<SpecimenListTableModel?, Any?>? = null
-            rf_family = RowFilter.regexFilter(jTextFieldFamily.getText(),
+            rf_family = RowFilter.regexFilter(jTextFieldFamily.Text,
                     SpecimenListTableModel.Companion.COL_FAMILY)
-            rf_barcode = RowFilter.regexFilter(jTextField.getText(),
+            rf_barcode = RowFilter.regexFilter(jTextField.Text,
                     SpecimenListTableModel.Companion.COL_BARCODE)
-            // rf_drawer = RowFilter.regexFilter(jTextFieldDrawerNumber.getText(),
+            // rf_drawer = RowFilter.regexFilter(jTextFieldDrawerNumber.Text,
 // SpecimenListTableModel.COL_DRAWER);
-            rf_workflow = RowFilter.regexFilter(jComboBox.getSelectedItem().toString(),
+            rf_workflow = RowFilter.regexFilter(jComboBox.SelectedItem.toString(),
                     SpecimenListTableModel.Companion.COL_WORKFLOW)
             val i: ArrayList<RowFilter<SpecimenListTableModel?, Any?>?> = ArrayList<RowFilter<SpecimenListTableModel?, Any?>?>()
             i.add(rf_family)
@@ -294,7 +294,7 @@ class SpecimenBrowser : JPanel, DataChangeListener {
      *     edu.harvard.mcz.imagecapture.interfaces.DataChangeListener#notifyDataHasChanged()
      */
     override fun notifyDataHasChanged() {
-        (jTable.getModel() as SpecimenListTableModel).fireTableDataChanged()
+        (jTable.Model as SpecimenListTableModel).fireTableDataChanged()
         log!!.debug("Data change notified.")
     }
 
@@ -336,7 +336,7 @@ class SpecimenBrowser : JPanel, DataChangeListener {
         get() {
             var result = 0
             if (jTable != null) {
-                result = jTable.getRowCount()
+                result = jTable.RowCount
             }
             return result
         }

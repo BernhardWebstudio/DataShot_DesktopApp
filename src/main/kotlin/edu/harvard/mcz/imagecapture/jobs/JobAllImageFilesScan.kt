@@ -141,18 +141,18 @@ class JobAllImageFilesScan : AbstractFileScanJob {
      */
     fun start() {
         startTime = Date()
-        Singleton.getJobList().addJob(this)
+        Singleton.JobList.addJob(this)
         status = RunStatus.STATUS_RUNNING
         startPoint = null
         // place to start the scan from, imageBase directory for SCAN_ALL
-        val imageBasePath: String = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE)
+        val imageBasePath: String = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE)
         var imageBase: File? = null
         if (imageBasePath != null) {
             imageBase = File(imageBasePath)
         }
         // If it isn't null, retrieve the image base directory from properties, and test for read access.
         if (imageBase == null || !imageBase.canRead()) {
-            JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Can't start scan. Don't know where images are stored or can't read. Set imagebase property '" + ImageCaptureProperties.Companion.KEY_IMAGEBASE + "'. Does the path exist?", "Can't Scan.", JOptionPane.ERROR_MESSAGE)
+            JOptionPane.showMessageDialog(Singleton.MainFrame, "Can't start scan. Don't know where images are stored or can't read. Set imagebase property '" + ImageCaptureProperties.Companion.KEY_IMAGEBASE + "'. Does the path exist?", "Can't Scan.", JOptionPane.ERROR_MESSAGE)
             return
         }
         startPoint = imageBase
@@ -166,50 +166,50 @@ class JobAllImageFilesScan : AbstractFileScanJob {
             if (startPointSpecific != null && startPointSpecific!!.canRead()) {
                 searchStartPoint = startPointSpecific
             } else {
-                if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH) != null) {
-                    searchStartPoint = File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH))
+                if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH) != null) {
+                    searchStartPoint = File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH))
                 }
             }
             startPoint = FileUtility.askForDirectory(searchStartPoint)
             if (startPoint == null) {
-                JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Can't scan without a directory.", "Error: No scanning possible.", JOptionPane.ERROR_MESSAGE)
+                JOptionPane.showMessageDialog(Singleton.MainFrame, "Can't scan without a directory.", "Error: No scanning possible.", JOptionPane.ERROR_MESSAGE)
                 return
             }
         }
         // Check that fileToCheck is within imageBase.
         if (!ImageCaptureProperties.Companion.isInPathBelowBase(startPoint)) {
-            val base: String = Singleton.getProperties().getProperties().getProperty(
+            val base: String = Singleton.Properties.Properties.getProperty(
                     ImageCaptureProperties.Companion.KEY_IMAGEBASE)
             log!!.error("Tried to scan directory (" + startPoint!!.path + ") outside of base image directory (" + base + ")")
             val message = "Should and will not scan and database files outside of base image directory ($base)"
-            JOptionPane.showMessageDialog(Singleton.getMainFrame(), message, "Won't scan outside image base directory.", JOptionPane.ERROR_MESSAGE)
+            JOptionPane.showMessageDialog(Singleton.MainFrame, message, "Won't scan outside image base directory.", JOptionPane.ERROR_MESSAGE)
             return
         } else {
             if (!startPoint!!.canRead()) {
-                JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Can't start scan.  Unable to read selected directory: " + startPoint!!.path, "Can't Scan.", JOptionPane.ERROR_MESSAGE)
+                JOptionPane.showMessageDialog(Singleton.MainFrame, "Can't start scan.  Unable to read selected directory: " + startPoint!!.path, "Can't Scan.", JOptionPane.ERROR_MESSAGE)
                 return
             }
             // walk through directory tree
-            Singleton.getMainFrame().setStatusMessage("Scanning path: " + startPoint!!.path)
+            Singleton.MainFrame.setStatusMessage("Scanning path: " + startPoint!!.path)
             val counter = Counter()
             // count files to scan
             countFiles(startPoint!!, counter)
             setPercentComplete(0)
-            Singleton.getMainFrame().notifyListener(status, this)
+            Singleton.MainFrame.notifyListener(status, this)
             counter.incrementDirectories()
             // scan
             if (status != RunStatus.STATUS_TERMINATED) {
                 checkFiles(startPoint!!, counter)
             }
             // report
-            Singleton.getMainFrame().setStatusMessage("Preprocess scan complete")
+            Singleton.MainFrame.setStatusMessage("Preprocess scan complete")
             setPercentComplete(100)
-            Singleton.getMainFrame().notifyListener(status, this)
-            val errorReportDialog = RunnableJobReportDialog(Singleton.getMainFrame(), counter.toString(), counter.errors, "Preprocess Results")
+            Singleton.MainFrame.notifyListener(status, this)
+            val errorReportDialog = RunnableJobReportDialog(Singleton.MainFrame, counter.toString(), counter.errors, "Preprocess Results")
             errorReportDialog.setVisible(true)
         }
         val sls = SpecimenLifeCycle()
-        Singleton.getMainFrame().setCount(sls.findSpecimenCount())
+        Singleton.MainFrame.setCount(sls.findSpecimenCount())
         done()
     }
 
@@ -262,20 +262,20 @@ class JobAllImageFilesScan : AbstractFileScanJob {
         log!!.debug("Scanning directory: " + startPoint.path + " containing " + containedFiles.size + " files.")
         val localCounter = AtomicCounter()
         // limit number of parallel threads because we can. And to help Hibernate from dying
-        val concurrencyLevel: Int = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_CONCURRENCY_LEVEL, "16").toInt()
+        val concurrencyLevel: Int = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_CONCURRENCY_LEVEL, "16").toInt()
         val es: ExecutorService = Executors.newFixedThreadPool(concurrencyLevel)
         val locks: Array<Lock?> = arrayOfNulls<ReentrantLock?>(concurrencyLevel)
         for (i in locks.indices) {
             locks[i] = ReentrantLock()
         }
         // create thumbnails in a separate thread (if requested)
-        if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_GENERATE_THUMBNAILS) == "true") {
+        if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_GENERATE_THUMBNAILS) == "true") {
             es.execute(ThumbnailBuilderJob(startPoint, thumbnailCounter))
         }
         // loop files
         for (containedFile in containedFiles) {
             if (status != RunStatus.STATUS_TERMINATED) {
-                Singleton.getMainFrame().setStatusMessage("Scanning: " + containedFile.name)
+                Singleton.MainFrame.setStatusMessage("Scanning: " + containedFile.name)
                 log.debug("Scanning: " + containedFile.name)
                 if (containedFile.isDirectory) { // recursive read for all files: start anew for directories
                     if (containedFile.canRead()) { // Skip thumbs directories
@@ -288,22 +288,22 @@ class JobAllImageFilesScan : AbstractFileScanJob {
                         counter.incrementDirectoriesFailed()
                     }
                 } else { // check JPEG files for barcodes
-                    if (!containedFile.name.matches(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEREGEX))) {
-                        log.debug("Skipping file [" + containedFile.name + "], doesn't match expected filename pattern " + Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEREGEX))
+                    if (!containedFile.name.matches(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEREGEX))) {
+                        log.debug("Skipping file [" + containedFile.name + "], doesn't match expected filename pattern " + Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEREGEX))
                     } else { // images belonging to the same specimen creating the same specimen resp. looking for it
 // that's why we have here a rather ugly lock handling mechanism
                         es.execute(Runnable { checkFile(containedFile, localCounter, locks) })
                     }
                 }
                 // report progress
-                Singleton.getMainFrame().setStatusMessage("Scanned: " + containedFile.name)
-                val seen: Float = 0.0f + localCounter.getFilesSeen()
+                Singleton.MainFrame.setStatusMessage("Scanned: " + containedFile.name)
+                val seen: Float = 0.0f + localCounter.FilesSeen
                 val total = 0.0f + counter.total
                 // thumbPercentComplete = (int) ((seen/total)*100);
                 setPercentComplete((seen / total * 100).toInt())
                 log.debug("Setting percent complete: " + seen / total * 100 + " based on seen: " + seen + ", total: " + total)
             }
-            Singleton.getMainFrame().notifyListener(status, this)
+            Singleton.MainFrame.notifyListener(status, this)
         }
         // assemble all threads
         es.shutdown() // Disable new tasks from being submitted
@@ -345,7 +345,7 @@ class JobAllImageFilesScan : AbstractFileScanJob {
     protected fun setPercentComplete(aPercentage: Int) { //set value
         percentComplete = aPercentage
         //notify listeners
-        Singleton.getMainFrame().notifyListener(percentComplete, this)
+        Singleton.MainFrame.notifyListener(percentComplete, this)
         for (listener in listeners) {
             listener.notifyListener(percentComplete, this)
         }

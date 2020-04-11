@@ -469,7 +469,7 @@ class CollectorTableModel : AbstractDeleteableTableModel {
             return null
         }
         var returnvalue: Any? = null
-        returnvalue = (collectors!!.toTypedArray().get(rowIndex) as Collector).getCollectorName()
+        returnvalue = (collectors!!.toTypedArray().get(rowIndex) as Collector).CollectorName
         return returnvalue
     }
 

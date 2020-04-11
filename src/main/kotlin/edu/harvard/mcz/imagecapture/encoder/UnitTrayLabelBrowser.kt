@@ -86,9 +86,9 @@ class UnitTrayLabelBrowser : JFrame() {
     }
 
     fun center() {
-        val screenSize = Toolkit.getDefaultToolkit().screenSize
-        this.setLocation((screenSize!!.width - this.getWidth()) / 2,
-                (screenSize.height - this.getHeight()) / 2)
+        val screenSize = Toolkit.DefaultToolkit.screenSize
+        this.setLocation((screenSize!!.width - this.Width) / 2,
+                (screenSize.height - this.Height) / 2)
     }
 
     /**
@@ -180,15 +180,15 @@ class UnitTrayLabelBrowser : JFrame() {
     private fun addRow() {
         tableModel.addRow()
         // scroll to last row in table.  Make first cell modal in latest row editable.
-        jTable.scrollRectToVisible(jTable.getCellRect(jTable.getRowCount(), 1, false))
-        val lastRow: Int = jTable.getRowCount() - 1
-        jTable.getSelectionModel().setSelectionInterval(lastRow, lastRow)
+        jTable.scrollRectToVisible(jTable.getCellRect(jTable.RowCount, 1, false))
+        val lastRow: Int = jTable.RowCount - 1
+        jTable.SelectionModel.setSelectionInterval(lastRow, lastRow)
         val editColumn = 0
         jTable.editCellAt(lastRow, editColumn)
         // scroll to the editing field
         jTable.scrollRectToVisible(
                 jTable.getCellRect(lastRow, editColumn, true))
-        log!!.debug(jTable.getVisibleRect())
+        log!!.debug(jTable.VisibleRect)
     }
 
     /**
@@ -213,13 +213,13 @@ class UnitTrayLabelBrowser : JFrame() {
         var ok = false
         var message = ""
         try {
-            ok = LabelEncoder.Companion.printList(tableModel.getList())
+            ok = LabelEncoder.Companion.printList(tableModel.List)
         } catch (e1: PrintFailedException) {
             message = "PDF generation failed: " + e1.message
         }
         if (ok) {
             message = "File labels.pdf was generated."
-            (jTable.getModel() as AbstractTableModel).fireTableDataChanged()
+            (jTable.Model as AbstractTableModel).fireTableDataChanged()
         }
         JOptionPane.showMessageDialog(thisFrame, message, "PDF Generation", JOptionPane.OK_OPTION)
     }
@@ -375,17 +375,17 @@ class UnitTrayLabelBrowser : JFrame() {
             jMenuItemAddRow.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
                     addRow()
-                    //jTable.scrollRectToVisible(jTable.getCellRect(jTable.getRowCount(), 1, false));
-//jTable.editCellAt(jTable.getRowCount(), 1);
-//jScrollPane.getVerticalScrollBar().setValue(jScrollPane.getVerticalScrollBar().getMaximum());
-//jScrollPane.getViewport().invalidate();
-//jScrollPane.getViewport().validate();
-//jScrollPane.getVerticalScrollBar().setValue(jScrollPane.getVerticalScrollBar().getMaximum());
+                    //jTable.scrollRectToVisible(jTable.getCellRect(jTable.RowCount, 1, false));
+//jTable.editCellAt(jTable.RowCount, 1);
+//jScrollPane.VerticalScrollBar.setValue(jScrollPane.VerticalScrollBar.Maximum);
+//jScrollPane.Viewport.invalidate();
+//jScrollPane.Viewport.validate();
+//jScrollPane.VerticalScrollBar.setValue(jScrollPane.VerticalScrollBar.Maximum);
                     val newCell = Rectangle(
                             1,
-                            jTable.getRowHeight() * jTable.getRowCount(),
+                            jTable.RowHeight * jTable.RowCount,
                             10,
-                            jTable.getRowHeight()
+                            jTable.RowHeight
                     )
                     //jTable.scrollRectToVisible(newCell);
                 }
@@ -415,7 +415,7 @@ class UnitTrayLabelBrowser : JFrame() {
 
     protected inner class MyUndoableEditListener : UndoableEditListener {
         override fun undoableEditHappened(e: UndoableEditEvent) { //Remember the edit and update the menus
-            undo.addEdit(e.getEdit())
+            undo.addEdit(e.Edit)
             //undoAction.updateUndoState();
 //redoAction.updateRedoState();
         }

@@ -39,7 +39,7 @@ import org.hibernate.SessionException
 class ExternalHistoryLifeCycle {
     @Throws(SaveFailedException::class)
     fun persist(transientInstance: ExternalHistory) {
-        if (transientInstance.getExternalWorkflowProcess() !== "") {
+        if (transientInstance.ExternalWorkflowProcess !== "") {
             log!!.debug("persisting ExternalHistory instance")
             try {
                 val session = HibernateUtil.sessionFactory!!.currentSession

@@ -125,34 +125,34 @@ class LabelEncoder(aLabel: UnitTrayLabel?) {
                 var cellCounter = 0
                 while (i.hasNext()) { // Loop through all of the taxa (unit tray labels) found to print
                     label = i.next()
-                    for (toPrint in 0 until label.getNumberToPrint()) { // For each taxon, loop through the number of requested copies
+                    for (toPrint in 0 until label.NumberToPrint) { // For each taxon, loop through the number of requested copies
 // Generate a text and a barcode cell for each, and add to array for page
-                        log!!.debug("Label " + toPrint + " of " + label.getNumberToPrint())
+                        log!!.debug("Label " + toPrint + " of " + label.NumberToPrint)
                         cell = PdfPCell()
                         cell.setBorderColor(BaseColor.LIGHT_GRAY)
                         cell.setVerticalAlignment(PdfPCell.ALIGN_TOP)
                         cell.disableBorderSide(PdfPCell.RIGHT)
                         cell.setPaddingLeft(3f)
                         var higherNames = ""
-                        higherNames = if (label.getTribe().trim({ it <= ' ' }).length > 0) {
-                            label.getFamily() + ": " + label.getSubfamily() + ": " + label.getTribe()
+                        higherNames = if (label.Tribe.trim({ it <= ' ' }).length > 0) {
+                            label.Family + ": " + label.Subfamily + ": " + label.Tribe
                         } else {
-                            label.getFamily() + ": " + label.getSubfamily()
+                            label.Family + ": " + label.Subfamily
                         }
                         val higher = Paragraph()
                         higher.font = Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL)
                         higher.add(Chunk(higherNames))
                         cell.addElement(higher)
                         val name = Paragraph()
-                        val genus = Chunk(label.getGenus().trim({ it <= ' ' }) + " ")
+                        val genus = Chunk(label.Genus.trim({ it <= ' ' }) + " ")
                         genus.font = Font(Font.FontFamily.TIMES_ROMAN, 11, Font.ITALIC)
-                        var species = Chunk(label.getSpecificEpithet().trim({ it <= ' ' }))
+                        var species = Chunk(label.SpecificEpithet.trim({ it <= ' ' }))
                         var normal: Chunk? = null // normal font prefix to preceed specific epithet (nr. <i>epithet</i>)
-                        if (label.getSpecificEpithet().contains(".") || label.getSpecificEpithet().contains("[")) {
-                            if (label.getSpecificEpithet().startsWith("nr. ")) {
+                        if (label.SpecificEpithet.contains(".") || label.SpecificEpithet.contains("[")) {
+                            if (label.SpecificEpithet.startsWith("nr. ")) {
                                 normal = Chunk("nr. ")
                                 normal.font = Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL)
-                                species = Chunk(label.getSpecificEpithet().trim({ it <= ' ' }).substring(4))
+                                species = Chunk(label.SpecificEpithet.trim({ it <= ' ' }).substring(4))
                                 species.font = Font(Font.FontFamily.TIMES_ROMAN, 11, Font.ITALIC)
                             } else {
                                 species.font = Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL)
@@ -161,37 +161,37 @@ class LabelEncoder(aLabel: UnitTrayLabel?) {
                             species.font = Font(Font.FontFamily.TIMES_ROMAN, 11, Font.ITALIC)
                         }
                         var s = ""
-                        s = if (label.getSubspecificEpithet().trim({ it <= ' ' }).length > 0) {
+                        s = if (label.SubspecificEpithet.trim({ it <= ' ' }).length > 0) {
                             " "
                         } else {
                             ""
                         }
-                        val subspecies = Chunk(s + label.getSubspecificEpithet().trim({ it <= ' ' }))
-                        if (label.getSubspecificEpithet().contains(".") || label.getSubspecificEpithet().contains("[")) {
+                        val subspecies = Chunk(s + label.SubspecificEpithet.trim({ it <= ' ' }))
+                        if (label.SubspecificEpithet.contains(".") || label.SubspecificEpithet.contains("[")) {
                             subspecies.font = Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL)
                         } else {
                             subspecies.font = Font(Font.FontFamily.TIMES_ROMAN, 11, Font.ITALIC)
                         }
-                        s = if (label.getInfraspecificRank().trim({ it <= ' ' }).length > 0) {
+                        s = if (label.InfraspecificRank.trim({ it <= ' ' }).length > 0) {
                             " "
                         } else {
                             ""
                         }
-                        val infraRank = Chunk(s + label.getInfraspecificRank().trim({ it <= ' ' }))
+                        val infraRank = Chunk(s + label.InfraspecificRank.trim({ it <= ' ' }))
                         infraRank.font = Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL)
-                        s = if (label.getInfraspecificEpithet().trim({ it <= ' ' }).length > 0) {
+                        s = if (label.InfraspecificEpithet.trim({ it <= ' ' }).length > 0) {
                             " "
                         } else {
                             ""
                         }
-                        val infra = Chunk(s + label.getInfraspecificEpithet().trim({ it <= ' ' }))
+                        val infra = Chunk(s + label.InfraspecificEpithet.trim({ it <= ' ' }))
                         infra.font = Font(Font.FontFamily.TIMES_ROMAN, 11, Font.ITALIC)
-                        s = if (label.getUnNamedForm().trim({ it <= ' ' }).length > 0) {
+                        s = if (label.UnNamedForm.trim({ it <= ' ' }).length > 0) {
                             " "
                         } else {
                             ""
                         }
-                        val unNamed = Chunk(s + label.getUnNamedForm().trim({ it <= ' ' }))
+                        val unNamed = Chunk(s + label.UnNamedForm.trim({ it <= ' ' }))
                         unNamed.font = Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL)
                         name.add(genus)
                         if (normal != null) {
@@ -205,23 +205,23 @@ class LabelEncoder(aLabel: UnitTrayLabel?) {
                         cell.addElement(name)
                         val authorship = Paragraph()
                         authorship.font = Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)
-                        if (label.getAuthorship() != null && label.getAuthorship().length > 0) {
-                            val c_authorship = Chunk(label.getAuthorship())
+                        if (label.Authorship != null && label.Authorship.length > 0) {
+                            val c_authorship = Chunk(label.Authorship)
                             authorship.add(c_authorship)
                         }
                         cell.addElement(authorship)
                         //cell.addElement(new Paragraph(" "));
-                        if (label.getDrawerNumber() != null && label.getDrawerNumber().length > 0) {
+                        if (label.DrawerNumber != null && label.DrawerNumber.length > 0) {
                             val drawerNumber = Paragraph()
                             drawerNumber.font = Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)
-                            val c_drawerNumber = Chunk(label.getDrawerNumber())
+                            val c_drawerNumber = Chunk(label.DrawerNumber)
                             drawerNumber.add(c_drawerNumber)
                             cell.addElement(drawerNumber)
                         } else {
-                            if (label.getCollection() != null && label.getCollection().length > 0) {
+                            if (label.Collection != null && label.Collection.length > 0) {
                                 val collection = Paragraph()
                                 collection.font = Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL)
-                                val c_collection = Chunk(label.getCollection())
+                                val c_collection = Chunk(label.Collection)
                                 collection.add(c_collection)
                                 cell.addElement(collection)
                             }
@@ -311,8 +311,8 @@ class LabelEncoder(aLabel: UnitTrayLabel?) {
                     i = taxa.iterator()
                     while (i.hasNext()) {
                         label = i.next()
-                        for (toPrint in 0 until label.getNumberToPrint()) {
-                            label.setPrinted(label.getPrinted() + 1)
+                        for (toPrint in 0 until label.NumberToPrint) {
+                            label.setPrinted(label.Printed + 1)
                         }
                         label.setNumberToPrint(0)
                         try {

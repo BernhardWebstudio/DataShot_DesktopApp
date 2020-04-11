@@ -34,7 +34,7 @@ object HibernateUtil {
      *
      * Usage:
      * <pre>
-     * Session session = HibernateUtil.sessionFactory.getCurrentSession();
+     * Session session = HibernateUtil.sessionFactory.CurrentSession;
      * session.beginTransaction();
     </pre> *
      *
@@ -101,11 +101,11 @@ object HibernateUtil {
                         Singleton.mainFrame!!.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
                         Singleton.mainFrame!!.setStatusMessage("Connecting to database")
                     }
-                    this.properties.setProperty(ImageCaptureProperties.Companion.KEY_DB_PASSWORD, loginDialog.getDBPassword())
-                    this.properties.setProperty(ImageCaptureProperties.Companion.KEY_DB_USER, loginDialog.getDBUserName())
-                    this.properties.setProperty(ImageCaptureProperties.Companion.KEY_DB_URL, loginDialog.getConnection())
-                    this.properties.setProperty(ImageCaptureProperties.Companion.KEY_DB_DIALECT, loginDialog.getDialect())
-                    this.properties.setProperty(ImageCaptureProperties.Companion.KEY_DB_DRIVER, loginDialog.getDriver())
+                    this.properties.setProperty(ImageCaptureProperties.Companion.KEY_DB_PASSWORD, loginDialog.dBPassword)
+                    this.properties.setProperty(ImageCaptureProperties.Companion.KEY_DB_USER, loginDialog.dBUserName)
+                    this.properties.setProperty(ImageCaptureProperties.Companion.KEY_DB_URL, loginDialog.connection)
+                    this.properties.setProperty(ImageCaptureProperties.Companion.KEY_DB_DIALECT, loginDialog.dialect)
+                    this.properties.setProperty(ImageCaptureProperties.Companion.KEY_DB_DRIVER, loginDialog.driver)
                     configuration.setProperties(this.properties)
                     // Now create the SessionFactory from this configuration
                     this.log.debug(configuration.getProperty(ImageCaptureProperties.Companion.KEY_DB_URL))
@@ -204,7 +204,7 @@ object HibernateUtil {
      */
     private fun getLoginDialog(config: Configuration, status: String?): LoginDialog {
         val loginDialog = LoginDialog()
-        val settings: Properties = Singleton.getProperties().getProperties()
+        val settings: Properties = Singleton.Properties.Properties
         val keys: Enumeration<Any?> = settings.keys()
         // Detect usage of placeholders, replace with settings if available
         loginDialog.setConnection(this.getConfigOrSettingsValue(config, settings, ImageCaptureProperties.Companion.KEY_DB_URL, "URL_PLACEHOLDER"))

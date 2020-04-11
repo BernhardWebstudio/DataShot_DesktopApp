@@ -185,7 +185,7 @@ class ICImageLifeCycle : GenericLifeCycle<ICImage?>(ICImage::class.java, log) {
     }
 
     fun findOneBySpecimen(specimen: Specimen): ICImage? {
-        return super.findOneBy("SPECIMENID", specimen.getSpecimenId())
+        return super.findOneBy("SPECIMENID", specimen.SpecimenId)
     }
 
     fun findOneByPath(path: String?): ICImage? {
@@ -193,7 +193,7 @@ class ICImageLifeCycle : GenericLifeCycle<ICImage?>(ICImage::class.java, log) {
     }
 
     fun findBySpecimen(specimen: Specimen): MutableList<ICImage?>? {
-        return super.findBy("SPECIMENID", specimen.getSpecimenId())
+        return super.findBy("SPECIMENID", specimen.SpecimenId)
     }
 
     fun findByPath(path: String?): MutableList<ICImage?>? {
@@ -270,10 +270,10 @@ class ICImageLifeCycle : GenericLifeCycle<ICImage?>(ICImage::class.java, log) {
      * Example usage:
      * `
      * ICImageLifeCycle ils = new ICImageLifeCycle();
-     * JComboBox jComboPaths = new JComboBox(ils.getDistinctPaths());
+     * JComboBox jComboPaths = new JComboBox(ils.DistinctPaths);
      * jComboPaths.setEditable(true);
      * TableColumn pathColumn =
-     * jTableImages.getColumnModel().getColumn(ICImageListTableModel.COL_PATH);
+     * jTableImages.ColumnModel.getColumn(ICImageListTableModel.COL_PATH);
      * pathColumn.setCellEditor(new DefaultCellEditor(jComboPaths));
     ` *
      *

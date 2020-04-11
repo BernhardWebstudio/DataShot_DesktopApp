@@ -42,11 +42,7 @@ import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenPartsAttrTableModel
 import org.apache.commons.logging.Log
 import java.awt.BorderLayout
 import java.awt.FlowLayout
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
-import java.awt.event.KeyEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
+import java.awt.event.*
 import javax.swing.*
 import javax.swing.border.EmptyBorder
 import javax.swing.table.AbstractTableModel
@@ -468,7 +464,7 @@ class SpecimenPartAttributeDialog : JDialog {
         val spls = SpecimenPartLifeCycle()
         spls.merge(parentPart)
         //		SpecimenPartAttributeLifeCycle spals = new SpecimenPartAttributeLifeCycle();
-//		Iterator<SpecimenPartAttribute> i = parentPart.getAttributeCollection().iterator();
+//		Iterator<SpecimenPartAttribute> i = parentPart.AttributeCollection.iterator();
 //		while (i.hasNext()) {
 //			try {
 //				SpecimenPartAttribute attrib = i.next();
@@ -517,23 +513,23 @@ class SpecimenPartAttributeDialog : JDialog {
             comboBoxType.setModel(DefaultComboBoxModel<Any?>(arrayOf<String?>("caste", "scientific name", "sex", "life stage", "part association")))
             comboBoxType.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    val item: String = comboBoxType.getSelectedItem().toString()
+                    val item: String = comboBoxType.SelectedItem.toString()
                     if (item != null) {
                         comboBoxValue.setEditable(false)
                         if (item == "scientific name") {
                             comboBoxValue.setEditable(true)
                         }
                         if (item == "sex") {
-                            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Sex.getSexValues()))
+                            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Sex.SexValues))
                         }
                         if (item == "life stage") {
-                            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(LifeStage.Companion.getLifeStageValues()))
+                            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(LifeStage.Companion.LifeStageValues))
                         }
                         if (item == "caste") {
-                            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Caste.getCasteValues()))
+                            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Caste.CasteValues))
                         }
                         if (item == "part association") {
-                            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(PartAssociation.getPartAssociationValues()))
+                            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(PartAssociation.PartAssociationValues))
                         }
                     }
                 }
@@ -546,7 +542,7 @@ class SpecimenPartAttributeDialog : JDialog {
         }
         run {
             comboBoxValue = JComboBox<Any?>()
-            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Caste.getCasteValues()))
+            comboBoxValue.setModel(DefaultComboBoxModel<Any?>(Caste.CasteValues))
             panel.add(comboBoxValue, "4, 4, fill, default")
         }
         run {
@@ -574,26 +570,26 @@ class SpecimenPartAttributeDialog : JDialog {
             btnAdd.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
                     val newAttribs = SpecimenPartAttribute()
-                    newAttribs.setAttributeType(comboBoxType.getSelectedItem().toString())
-                    newAttribs.setAttributeValue(comboBoxValue.getSelectedItem().toString())
-                    newAttribs.setAttributeUnits(textFieldUnits.getText())
-                    newAttribs.setAttributeRemark(textFieldRemarks.getText())
+                    newAttribs.setAttributeType(comboBoxType.SelectedItem.toString())
+                    newAttribs.setAttributeValue(comboBoxValue.SelectedItem.toString())
+                    newAttribs.setAttributeUnits(textFieldUnits.Text)
+                    newAttribs.setAttributeRemark(textFieldRemarks.Text)
                     newAttribs.setSpecimenPart(parentPart)
-                    newAttribs.setAttributeDeterminer(Singleton.getUserFullName())
-                    parentPart.getAttributeCollection().add(newAttribs)
+                    newAttribs.setAttributeDeterminer(Singleton.UserFullName)
+                    parentPart.AttributeCollection.add(newAttribs)
                     val sls = SpecimenPartAttributeLifeCycle()
                     try {
                         sls.attachDirty(newAttribs)
                     } catch (e1: SaveFailedException) { // TODO Auto-generated catch block
                         e1.printStackTrace()
                     }
-                    (table.getModel() as AbstractTableModel).fireTableDataChanged()
+                    (table.Model as AbstractTableModel).fireTableDataChanged()
                 }
             })
             panel.add(btnAdd, "4, 10")
         }
         try {
-            val lblNewLabel = JLabel(parentPart.getSpecimen().getBarcode() + ":" + parentPart.getPartName() + " " + parentPart.getPreserveMethod() + " (" + parentPart.getLotCount() + ")    Right click on table to edit attributes.")
+            val lblNewLabel = JLabel(parentPart.Specimen.Barcode + ":" + parentPart.PartName + " " + parentPart.PreserveMethod + " (" + parentPart.LotCount + ")    Right click on table to edit attributes.")
             contentPanel.add(lblNewLabel, BorderLayout.NORTH)
         } catch (e: Exception) {
             val lblNewLabel = JLabel("No Specimen")
@@ -602,24 +598,24 @@ class SpecimenPartAttributeDialog : JDialog {
         val comboBox: JComboBox<*> = JComboBox<Any?>()
         comboBox.addItem("caste")
         val comboBox1: JComboBox<*> = JComboBox<Any?>()
-        for (i in Caste.getCasteValues().indices) {
-            comboBox1.addItem(Caste.getCasteValues().get(i))
+        for (i in Caste.CasteValues.indices) {
+            comboBox1.addItem(Caste.CasteValues.get(i))
         }
         val scrollPane = JScrollPane()
-        table = JTable(SpecimenPartsAttrTableModel(parentPart.getAttributeCollection()))
-        //table.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(comboBox));
+        table = JTable(SpecimenPartsAttrTableModel(parentPart.AttributeCollection))
+        //table.ColumnModel.getColumn(0).setCellEditor(new DefaultCellEditor(comboBox));
         table.addMouseListener(object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent) {
                 if (e.isPopupTrigger()) {
-                    clickedOnRow = (e.getComponent() as JTable).getSelectedRow()
-                    popupMenu.show(e.getComponent(), e.getX(), e.getY())
+                    clickedOnRow = (e.Component as JTable).SelectedRow
+                    popupMenu.show(e.Component, e.X, e.Y)
                 }
             }
 
             override fun mouseReleased(e: MouseEvent) {
                 if (e.isPopupTrigger()) {
-                    clickedOnRow = (e.getComponent() as JTable).getSelectedRow()
-                    popupMenu.show(e.getComponent(), e.getX(), e.getY())
+                    clickedOnRow = (e.Component as JTable).SelectedRow
+                    popupMenu.show(e.Component, e.X, e.Y)
                 }
             }
         })
@@ -629,7 +625,7 @@ class SpecimenPartAttributeDialog : JDialog {
         mntmCloneRow.addActionListener(object : ActionListener {
             override fun actionPerformed(e: ActionEvent?) {
                 try { // Launch a dialog to edit the selected row.
-                    val popup = SpecimenPartAttribEditDialog((table.getModel() as SpecimenPartsAttrTableModel).getRowObject(clickedOnRow))
+                    val popup = SpecimenPartAttribEditDialog((table.Model as SpecimenPartsAttrTableModel).getRowObject(clickedOnRow))
                     popup.setVisible(true)
                 } catch (ex: Exception) {
                     log.error(ex.message)
@@ -644,7 +640,7 @@ class SpecimenPartAttributeDialog : JDialog {
             override fun actionPerformed(e: ActionEvent?) {
                 try {
                     if (clickedOnRow >= 0) {
-                        (table.getModel() as SpecimenPartsAttrTableModel).deleteRow(clickedOnRow)
+                        (table.Model as SpecimenPartsAttrTableModel).deleteRow(clickedOnRow)
                     }
                 } catch (ex: Exception) {
                     log.error(ex.message)
@@ -654,7 +650,7 @@ class SpecimenPartAttributeDialog : JDialog {
         })
         popupMenu.add(mntmDeleteRow)
         // TODO: Enable controlled value editing of selected row.
-// table.getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(comboBox1));
+// table.ColumnModel.getColumn(1).setCellEditor(new DefaultCellEditor(comboBox1));
         scrollPane.setViewportView(table)
         contentPanel.add(scrollPane, BorderLayout.EAST)
         run {

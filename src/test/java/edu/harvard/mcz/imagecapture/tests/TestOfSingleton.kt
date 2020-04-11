@@ -35,8 +35,8 @@ class TestOfSingleton
      * Test method for [edu.harvard.mcz.imagecapture.Singleton.getSingletonInstance].
      */
     fun testGetSingletonInstance() {
-        val instance: Singleton = Singleton.getSingletonInstance()
-        assertEquals(instance, Singleton.getSingletonInstance())
+        val instance: Singleton = Singleton.SingletonInstance
+        assertEquals(instance, Singleton.SingletonInstance)
     }
 
     fun testGetSingletonInstanceThreadSafety() { // JUnit alone isn't able to handle multiple threads.

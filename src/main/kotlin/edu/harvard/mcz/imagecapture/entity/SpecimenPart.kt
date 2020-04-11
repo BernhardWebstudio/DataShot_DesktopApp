@@ -153,9 +153,9 @@ import edu.harvard.mcz.imagecapture.entity.SpecimenPartAttribute?>?
                 if (counter > 0) {
                     result.append(", ")
                 }
-                result.append(attribute.getAttributeType()).append(':').append(attribute.getAttributeValue())
-                if (attribute.getAttributeUnits() != null) {
-                    result.append(attribute.getAttributeUnits())
+                result.append(attribute.AttributeType).append(':').append(attribute.AttributeValue)
+                if (attribute.AttributeUnits != null) {
+                    result.append(attribute.AttributeUnits)
                 }
                 counter++
                 log!!.debug(counter)

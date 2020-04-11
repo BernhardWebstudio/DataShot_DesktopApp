@@ -164,7 +164,7 @@ class PositionTemplate {
     /**
      * Get the identifying name of this position template.  This name is fixed for an instance
      * during its construction.   This name corresponds to one of the strings returned by
-     * PositionTemplate.getTemplates();  Redundant with getTemplateIdentifier().
+     * PositionTemplate.Templates;  Redundant with getTemplateIdentifier().
      *
      * @return the identifier of the template in use in this instance of PositionTemplate.
      * @see edu.harvard.mcz.imagecapture.PositionTemplate.getTemplateIds
@@ -207,7 +207,7 @@ class PositionTemplate {
      * Create a new instance of PositionTemplate if you wish to use a different template.
      *
      *
-     * The list of available templateIds can be retrieved with PositionTemplate.getTemplates().
+     * The list of available templateIds can be retrieved with PositionTemplate.Templates.
      *
      * @param templateToUse the templateID of the template to use in this instance of PositionTemplate.
      * @throws NoSuchTemplateException when templateToUse doesn't exist.
@@ -277,7 +277,7 @@ class PositionTemplate {
     /**
      * Get the identifying name of this position template.  This name is fixed for an instance
      * during its construction.   This name corresponds to one of the strings returned by
-     * PositionTemplate.getTemplates();   Redundant with getTemplateId()
+     * PositionTemplate.Templates;   Redundant with getTemplateId()
      *
      * @return the identifier of the template in use in this instance of PositionTemplate.
      * @see edu.harvard.mcz.imagecapture.PositionTemplate.getTemplateIds
@@ -479,9 +479,9 @@ class PositionTemplate {
     val referenceImageFilePath: String
         get() {
             var result = ""
-            val base: String = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE)
-            if (referenceImage != null && referenceImage.getPath() != null && referenceImage.getFilename() != null) {
-                result = base + referenceImage.getPath() + referenceImage.getFilename()
+            val base: String = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE)
+            if (referenceImage != null && referenceImage.Path != null && referenceImage.Filename != null) {
+                result = base + referenceImage.Path + referenceImage.Filename
             }
             return result
         }
@@ -517,7 +517,7 @@ class PositionTemplate {
                 val templates = arrayOf(TEMPLATE_TEST_1, TEMPLATE_DEFAULT, TEMPLATE_NO_COMPONENT_PARTS)
                 val temp: MutableList<String?> = Arrays.asList(*templates)
                 val templateIdList = ArrayList<String?>()
-                val defaultTemplatesPropertiesVal: String = Singleton.getProperties().getProperties().getProperty(
+                val defaultTemplatesPropertiesVal: String = Singleton.Properties.Properties.getProperty(
                         ImageCaptureProperties.Companion.KEY_DEFAULT_TEMPLATES)
                 //allie: here load the props file: leave the default and config the other var.
 //template.default=Default template
@@ -581,14 +581,14 @@ class PositionTemplate {
         fun findTemplateForImage(image: ICImage): PositionTemplate? {
             var result: PositionTemplate? = null
             //TODO: stored path may need separator conversion for different systems.
-//String startPointName = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
-            var path: String = image.getPath()
+//String startPointName = Singleton.SingletonInstance.Properties.Properties.getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
+            var path: String = image.Path
             if (path == null) {
                 path = ""
             }
-            //File fileToCheck = new File(startPointName + path + image.getFilename());
-            val fileToCheck = File(assemblePathWithBase(path, image.getFilename()))
-            var templateId: String = image.getTemplateId()
+            //File fileToCheck = new File(startPointName + path + image.Filename);
+            val fileToCheck = File(assemblePathWithBase(path, image.Filename))
+            var templateId: String = image.TemplateId
             if (templateId == null || templateId == "") { // No template is defined in the database for this image file.
 // Check the image with a template detector.
                 val detector: PositionTemplateDetector = DefaultPositionTemplateDetector()

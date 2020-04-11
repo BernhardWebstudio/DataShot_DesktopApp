@@ -469,21 +469,21 @@ class DeterminationTableModel : AbstractTableModel {
     override fun getValueAt(rowIndex: Int, columnIndex: Int): Any? {
         var returnvalue: Any? = null
         when (columnIndex) {
-            SPECIES_NUMBER -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getSpeciesNumber()
-            1 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getGenus()
-            2 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getSpecificEpithet()
-            3 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getSubspecificEpithet()
-            4 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getInfraspecificEpithet()
-            5 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getInfraspecificRank()
-            6 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getAuthorship()
-            ROW_TYPESTATUS -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getTypeStatus()
-            ROW_IDENTIFIEDBY -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getIdentifiedBy()
-            9 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getUnNamedForm()
-            10 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getVerbatimText()
-            ROW_NATUREOFID -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getNatureOfId()
-            ROW_DATEIDENTIFIED -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getDateIdentified()
-            13 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getRemarks()
-            ROW_SPECIMEN -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).getSpecimen().getBarcode()
+            SPECIES_NUMBER -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).SpeciesNumber
+            1 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).Genus
+            2 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).SpecificEpithet
+            3 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).SubspecificEpithet
+            4 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).InfraspecificEpithet
+            5 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).InfraspecificRank
+            6 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).Authorship
+            ROW_TYPESTATUS -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).TypeStatus
+            ROW_IDENTIFIEDBY -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).IdentifiedBy
+            9 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).UnNamedForm
+            10 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).VerbatimText
+            ROW_NATUREOFID -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).NatureOfId
+            ROW_DATEIDENTIFIED -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).DateIdentified
+            13 -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).Remarks
+            ROW_SPECIMEN -> returnvalue = (determinations!!.toTypedArray().get(rowIndex) as Determination).Specimen.Barcode
         }
         return returnvalue
     }

@@ -481,14 +481,14 @@ class ChangePasswordDialog : JDialog {
     }
 
     private fun setValues() {
-        jTextField.setText(user.getFullname())
+        jTextField.setText(user.Fullname)
     }
 
     private fun setForDisplay() {
         this.pack()
-        val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize()
-        this.setLocation((screenSize.width - this.getWidth()) / 2,
-                (screenSize.height - this.getHeight()) / 2)
+        val screenSize: Dimension = Toolkit.DefaultToolkit.ScreenSize
+        this.setLocation((screenSize.width - this.Width) / 2,
+                (screenSize.height - this.Height) / 2)
     }
 
     /**
@@ -615,8 +615,8 @@ class ChangePasswordDialog : JDialog {
                         val hash2: String = LoginDialog.Companion.hashPassword(jPasswordField2)
                         // Check that new passwords are the same
                         if (hash1 == hash2) {
-                            if (Users.Companion.testProposedPassword(String(jPasswordField1.getPassword()), user.username)) { // check that old password is correct
-                                if (LoginDialog.Companion.hashPassword(jPasswordFieldOld) == user.getHash()) {
+                            if (Users.Companion.testProposedPassword(String(jPasswordField1.Password), user.username)) { // check that old password is correct
+                                if (LoginDialog.Companion.hashPassword(jPasswordFieldOld) == user.Hash) {
                                     try {
                                         user.setHash(LoginDialog.Companion.hashPassword(jPasswordField1))
                                         uls.attachDirty(user)
@@ -636,8 +636,8 @@ class ChangePasswordDialog : JDialog {
                         }
                     }
                     if (ok) {
-                        val aMessage = "Changed password for " + user.getFullname()
-                        Singleton.getMainFrame().setStatusMessage(aMessage)
+                        val aMessage = "Changed password for " + user.Fullname
+                        Singleton.MainFrame.setStatusMessage(aMessage)
                         setVisible(false)
                     }
                 }
@@ -658,7 +658,7 @@ class ChangePasswordDialog : JDialog {
             jButton1.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
                     val aMessage = "Password change canceled."
-                    Singleton.getMainFrame().setStatusMessage(aMessage)
+                    Singleton.MainFrame.setStatusMessage(aMessage)
                     setVisible(false)
                 }
             })

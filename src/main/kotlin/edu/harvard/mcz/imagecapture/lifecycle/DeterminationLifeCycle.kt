@@ -95,7 +95,7 @@ class DeterminationLifeCycle {
     @Throws(SaveFailedException::class)
     fun delete(persistentInstance: Determination) {
         log!!.debug("Deleting Determination instance with id " +
-                persistentInstance.getDeterminationId())
+                persistentInstance.DeterminationId)
         try {
             val session = HibernateUtil.sessionFactory!!.currentSession
             session!!.beginTransaction()

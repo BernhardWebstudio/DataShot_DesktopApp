@@ -74,7 +74,7 @@ class SpecimenPartAttributeLifeCycle {
     @Throws(SaveFailedException::class)
     fun persist(instance: SpecimenPartAttribute) {
         log!!.debug("persisting detatched SpecimenPartAttribute instance: " +
-                instance.getSpecimenPart().getSpecimenPartId())
+                instance.SpecimenPart.SpecimenPartId)
         try {
             val session = HibernateUtil.sessionFactory!!.currentSession
             session!!.beginTransaction()
@@ -109,7 +109,7 @@ class SpecimenPartAttributeLifeCycle {
                 val root: Root<SpecimenPartAttribute?> = criteria.from(SpecimenPartAttribute::class.java)
                 criteria.where(cb.equal(root.get("specimenPartId"), part))
                 val query: Query<SpecimenPartAttribute?> = session.createQuery<Any?>(criteria)
-                results = query.getResultList()
+                results = query.ResultList
                 log.debug("find by example successful, result size: " + results.size)
                 session.transaction.commit()
             } catch (e: HibernateException) {

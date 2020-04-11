@@ -143,13 +143,13 @@ class CandidateImageFile {
         }
         try {
             template = PositionTemplate(templateName)
-            log!!.info("template ID is " + template.getTemplateId())
+            log!!.info("template ID is " + template.TemplateId)
         } catch (e: NoSuchTemplateException) {
             log!!.error("Position template detector returned an unknown template name: $templateName.", e)
         }
         // check the file for an exif comment
         exifUserCommentText // scan for exif when handed file.
-        if (template.getTemplateId() != PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) {
+        if (template.TemplateId != PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) {
             try {
                 if (getTaxonLabelQRText(template) == null) {
                     getTaxonLabelOCRText(template)
@@ -202,24 +202,24 @@ class CandidateImageFile {
      * @return the text of the barcode found in the barcode portion of the position template, or an empty string.
      */
     fun getBarcodeTextFromImage(image: BufferedImage, positionTemplate: PositionTemplate, quickCheck: Boolean): String? {
-        log!!.debug(positionTemplate.getName())
+        log!!.debug(positionTemplate.Name)
         var returnValue: String? = ""
-        if (positionTemplate.getTemplateId() == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // Check the entire image for a barcode and return.
-            log.debug(image.getType())
+        if (positionTemplate.TemplateId == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // Check the entire image for a barcode and return.
+            log.debug(image.Type)
             val source: LuminanceSource = BufferedImageLuminanceSource(image)
             val temp = CandidateImageFile()
             val checkResult = temp.checkSourceForBarcode(source, true)
             returnValue = checkResult.text
         } else { // Check the part of the image specified by the template for the barcode.
             if (image != null) {
-                if (image.getWidth() > positionTemplate.getBarcodeULPosition().width) { // image might plausibly match template
-                    val left: Int = positionTemplate.getBarcodeULPosition().width //* @param left x coordinate of leftmost pixels to decode
-                    val top: Int = positionTemplate.getBarcodeULPosition().height //* @param top y coordinate of topmost pixels to decode
-                    val right: Int = left + positionTemplate.getBarcodeSize().width //* @param right one more than the x coordinate of rightmost pixels to decode. That is, we will decode
-                    val width: Int = positionTemplate.getBarcodeSize().width
+                if (image.Width > positionTemplate.BarcodeULPosition.width) { // image might plausibly match template
+                    val left: Int = positionTemplate.BarcodeULPosition.width //* @param left x coordinate of leftmost pixels to decode
+                    val top: Int = positionTemplate.BarcodeULPosition.height //* @param top y coordinate of topmost pixels to decode
+                    val right: Int = left + positionTemplate.BarcodeSize.width //* @param right one more than the x coordinate of rightmost pixels to decode. That is, we will decode
+                    val width: Int = positionTemplate.BarcodeSize.width
                     //*  pixels whose x coordinate is in [left,right)
-                    val bottom: Int = top + positionTemplate.getBarcodeSize().height //* @param bottom likewise, one more than the y coordinate of the bottommost pixels to decode
-                    val height: Int = positionTemplate.getBarcodeSize().height
+                    val bottom: Int = top + positionTemplate.BarcodeSize.height //* @param bottom likewise, one more than the y coordinate of the bottommost pixels to decode
+                    val height: Int = positionTemplate.BarcodeSize.height
                     returnValue = readBarcodeFromLocation(image, left, top, width, height, quickCheck)
                 }
             }
@@ -244,7 +244,7 @@ class CandidateImageFile {
      */
     fun getBarcodeUnitTrayTextFromImage(image: BufferedImage, positionTemplate: PositionTemplate): String? {
         var returnValue: String? = ""
-        if (positionTemplate.getTemplateId() == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // Check the entire image for a barcode and return.
+        if (positionTemplate.TemplateId == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // Check the entire image for a barcode and return.
             val source: LuminanceSource = BufferedImageLuminanceSource(image)
             var result: Result
             val bitmap = BinaryBitmap(HybridBinarizer(source))
@@ -255,14 +255,14 @@ class CandidateImageFile {
             }
         } else { // Check the part of the image specified by the template for the barcode.
             if (image != null) {
-                if (image.getWidth() > positionTemplate.getUtBarcodePosition().width) { // image might plausibly match template
-                    val left: Int = positionTemplate.getUtBarcodePosition().width //* @param left x coordinate of leftmost pixels to decode
-                    val top: Int = positionTemplate.getUtBarcodePosition().height //* @param top y coordinate of topmost pixels to decode
-                    val right: Int = left + positionTemplate.getUtBarcodeSize().width //* @param right one more than the x coordinate of rightmost pixels to decode. That is, we will decode
+                if (image.Width > positionTemplate.UtBarcodePosition.width) { // image might plausibly match template
+                    val left: Int = positionTemplate.UtBarcodePosition.width //* @param left x coordinate of leftmost pixels to decode
+                    val top: Int = positionTemplate.UtBarcodePosition.height //* @param top y coordinate of topmost pixels to decode
+                    val right: Int = left + positionTemplate.UtBarcodeSize.width //* @param right one more than the x coordinate of rightmost pixels to decode. That is, we will decode
                     //*  pixels whose x coordinate is in [left,right)
-                    val bottom: Int = top + positionTemplate.getUtBarcodeSize().height //* @param bottom likewise, one more than the y coordinate of the bottommost pixels to decode
-                    val width: Int = positionTemplate.getUtBarcodeSize().width
-                    val height: Int = positionTemplate.getUtBarcodeSize().height
+                    val bottom: Int = top + positionTemplate.UtBarcodeSize.height //* @param bottom likewise, one more than the y coordinate of the bottommost pixels to decode
+                    val width: Int = positionTemplate.UtBarcodeSize.width
+                    val height: Int = positionTemplate.UtBarcodeSize.height
                     returnValue = readBarcodeFromLocation(image, left, top, width, height, false)
                 }
             }
@@ -287,7 +287,7 @@ class CandidateImageFile {
             return ""
         }
         val fileName = if (file != null) file!!.name else ""
-        if (image.getWidth() >= left + width && image.getHeight() >= top + height) { // provided crop area falls within image.
+        if (image.Width >= left + width && image.Height >= top + height) { // provided crop area falls within image.
             log!!.debug("Attempting to detect barcode in TL: " + left + "x" + top + " +" + width + "x" + height)
             var source: LuminanceSource? = null
             try { // Create a crop of the image, test this cropped area
@@ -325,13 +325,13 @@ class CandidateImageFile {
                 return returnValue.text
             }
             // 4, try another barcode scanner, but this time "global"
-            returnValue = checkSourceForBarcodeAt(image, (top + height / 2.0).toInt(), (left + width / 2.0).toInt(), (Math.max(width, height) + 0.1 * Math.min(image.getWidth(), image.getHeight())) as Int)
+            returnValue = checkSourceForBarcodeAt(image, (top + height / 2.0).toInt(), (left + width / 2.0).toInt(), (Math.max(width, height) + 0.1 * Math.min(image.Width, image.Height)) as Int)
             if (returnValue.status == RESULT_BARCODE_SCANNED) {
                 log.debug("Successful preprocess barcode read of image '$fileName' from location using method #4")
                 return returnValue.text
             }
             // 5, try rescaling to configured scaling widths
-            val scaling: String = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGERESCALE)
+            val scaling: String = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGERESCALE)
             val scalingBits = ArrayList<String?>()
             if (scaling.contains(",")) {
                 scalingBits.addAll(Arrays.asList(*scaling.split(",".toRegex()).toTypedArray()))
@@ -351,7 +351,7 @@ class CandidateImageFile {
                 log.debug("Trying again with image sharpened.")
                 val kernel = Kernel(3, 3, matrix)
                 val convolver = ConvolveOp(kernel, ConvolveOp.EDGE_NO_OP, null)
-                var sharpened = BufferedImage(image.getWidth(), image.getHeight(), image.getType())
+                var sharpened = BufferedImage(image.Width, image.Height, image.Type)
                 sharpened = convolver.filter(image, sharpened)
                 source = BufferedImageLuminanceSource(sharpened, left, top, width, height)
                 returnValue = this.checkSourceForBarcode(source, true)
@@ -440,17 +440,17 @@ class CandidateImageFile {
                 val scaledHeight = (height * scale).toInt()
                 val scaledWidth = (width * scale).toInt()
                 val cropped: BufferedImage = image.getSubimage(left, top, width, height)
-                val initialH: Int = cropped.getHeight()
-                val initialW: Int = cropped.getWidth()
-                // BufferedImage scaled = new BufferedImage(initialW, initialH, cropped.getType());
-                var scaled = BufferedImage(scaledWidth, scaledHeight, cropped.getType())
+                val initialH: Int = cropped.Height
+                val initialW: Int = cropped.Width
+                // BufferedImage scaled = new BufferedImage(initialW, initialH, cropped.Type);
+                var scaled = BufferedImage(scaledWidth, scaledHeight, cropped.Type)
                 val rescaleTransform = AffineTransform()
                 rescaleTransform.scale(scale, scale)
                 val scaleOp = AffineTransformOp(rescaleTransform, AffineTransformOp.TYPE_BILINEAR)
                 scaled = scaleOp.filter(cropped, scaled)
                 if (sharpen) {
                     log.debug("Also sharpening the crop")
-                    val dest = BufferedImage(scaledWidth, scaledHeight, cropped.getType())
+                    val dest = BufferedImage(scaledWidth, scaledHeight, cropped.Type)
                     scaled = convolver.filter(scaled, dest)
                 }
                 if (brighter) {
@@ -520,9 +520,9 @@ class CandidateImageFile {
         val scaledHeight = (height * scale).toInt()
         val scaledWidth = (width * scale).toInt()
         val cropped: BufferedImage = image.getSubimage(left, top, width, height)
-        val initialH: Int = cropped.getHeight()
-        val initialW: Int = cropped.getWidth()
-        var scaled = BufferedImage(scaledWidth, scaledHeight, cropped.getType())
+        val initialH: Int = cropped.Height
+        val initialW: Int = cropped.Width
+        var scaled = BufferedImage(scaledWidth, scaledHeight, cropped.Type)
         val rescaleTransform = AffineTransform()
         rescaleTransform.scale(scale, scale)
         val scaleOp = AffineTransformOp(rescaleTransform, AffineTransformOp.TYPE_BILINEAR)
@@ -586,7 +586,7 @@ class CandidateImageFile {
         init()
         // check the file for an exif comment
         exifUserCommentText // scan for exif when handed file.
-        if (aTemplate.getTemplateId() != PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) {
+        if (aTemplate.TemplateId != PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) {
             try {
                 if (getTaxonLabelQRText(aTemplate) == null) {
                     getTaxonLabelOCRText(aTemplate)
@@ -612,17 +612,17 @@ class CandidateImageFile {
         val bitmap = BinaryBitmap(HybridBinarizer(source))
         if (generateDebugImage) {
             try {
-                val h: Int = bitmap.getBlackMatrix().getHeight()
-                val w: Int = bitmap.getBlackMatrix().getWidth()
+                val h: Int = bitmap.BlackMatrix.Height
+                val w: Int = bitmap.BlackMatrix.Width
                 val temp = BufferedImage(h, w, BufferedImage.TYPE_BYTE_GRAY)
-                val g: Graphics = temp.getGraphics()
+                val g: Graphics = temp.Graphics
                 g.color = Color.WHITE
                 g.drawRect(0, 0, w, h)
                 g.color = Color.BLACK
                 for (i in 0 until h) {
                     for (j in 0 until w) {
                         try {
-                            if (bitmap.getBlackMatrix().get(i, j)) {
+                            if (bitmap.BlackMatrix.get(i, j)) {
                                 g.color = Color.BLACK
                                 g.drawRect(i, j, 1, 1)
                             } else {
@@ -665,7 +665,7 @@ class CandidateImageFile {
             returnValue.status = RESULT_BARCODE_SCANNED
         } catch (e: ReaderException) {
             log!!.error(e.javaClass.toString() + " " + e.message)
-            if (!Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEZXINGALSOTRYHARDER).equals("true", ignoreCase = true)) {
+            if (!Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEZXINGALSOTRYHARDER).equals("true", ignoreCase = true)) {
                 returnValue.text = e.toString() + " " + e.message
                 returnValue.status = RESULT_ERROR
             } else {
@@ -708,8 +708,8 @@ class CandidateImageFile {
         val detector: QrCodeDetector<GrayU8?> = FactoryFiducial.qrcode(null, GrayU8::class.java)
         detector.process(gray)
         // Get's a list of all the qr codes it could successfully detect and decode
-        val detections: MutableList<QrCode?> = detector.getDetections()
-        log!!.debug("BoofCV QRScanner found " + detections.size + " barcodes. Success only if 1. Additionally, failures: " + detector.getFailures().size)
+        val detections: MutableList<QrCode?> = detector.Detections
+        log!!.debug("BoofCV QRScanner found " + detections.size + " barcodes. Success only if 1. Additionally, failures: " + detector.Failures.size)
         if (detections.size == 1) {
             for (detection in detections) {
                 return TextStatus(detection.message, RESULT_BARCODE_SCANNED)
@@ -731,8 +731,8 @@ class CandidateImageFile {
         val detector: QrCodeDetector<GrayU8?> = FactoryFiducial.qrcode(null, GrayU8::class.java)
         detector.process(gray)
         // Get's a list of all the qr codes it could successfully detect and decode
-        val detections: MutableList<QrCode?> = detector.getDetections()
-        log!!.debug("BoofCV QRScanner found " + detections.size + " barcodes. Will search for nearest. Additionally, failures: " + detector.getFailures().size)
+        val detections: MutableList<QrCode?> = detector.Detections
+        log!!.debug("BoofCV QRScanner found " + detections.size + " barcodes. Will search for nearest. Additionally, failures: " + detector.Failures.size)
         val toleranceBounds = Rectangle(fromTop, fromLeft, tol, tol)
         for (detection in detections) { //
             if (this.intersect(detection.bounds, toleranceBounds)) {
@@ -761,7 +761,7 @@ class CandidateImageFile {
      * @return null or a UnitTrayLabel containing the parsed text of the taxon label read from the barcode.
      */
     fun getTaxonLabelQRText(positionTemplate: PositionTemplate): UnitTrayLabel? {
-        log!!.info("2 template ID is.........." + positionTemplate.getTemplateId())
+        log!!.info("2 template ID is.........." + positionTemplate.TemplateId)
         log.debug(unitTrayLabel)
         log.debug(unitTrayTaxonLabelTextStatus)
         log.debug(labelText)
@@ -770,7 +770,7 @@ class CandidateImageFile {
         }
         var resultLabel: UnitTrayLabel? = null
         var returnValue: String? = ""
-        if (positionTemplate.getTemplateId() == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // Check the entire image for a barcode and return.
+        if (positionTemplate.TemplateId == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // Check the entire image for a barcode and return.
             returnValue = barcodeText
         } else { // Check the part of the image specified by the template for the barcode.
             var image: BufferedImage? = null
@@ -787,14 +787,14 @@ class CandidateImageFile {
                 returnValue = "Could not decode image. $error"
                 barcodeStatus = RESULT_ERROR
             } else { // Could read image.  Try reading barcode from templated location.
-                if (image.getWidth() >= positionTemplate.getUtBarcodePosition().width && image.getWidth().toLong() == Math.round(positionTemplate.getImageSize().getWidth())) { // image might plausibly match template
-                    val left: Int = positionTemplate.getUtBarcodePosition().width //* @param left x coordinate of leftmost pixels to decode
-                    val top: Int = positionTemplate.getUtBarcodePosition().height //* @param top y coordinate of topmost pixels to decode
-                    val right: Int = left + positionTemplate.getUtBarcodeSize().width //* @param right one more than the x coordinate of rightmost pixels to decode. That is, we will decode
-                    val width: Int = positionTemplate.getUtBarcodeSize().width
+                if (image.Width >= positionTemplate.UtBarcodePosition.width && image.Width.toLong() == Math.round(positionTemplate.ImageSize.Width)) { // image might plausibly match template
+                    val left: Int = positionTemplate.UtBarcodePosition.width //* @param left x coordinate of leftmost pixels to decode
+                    val top: Int = positionTemplate.UtBarcodePosition.height //* @param top y coordinate of topmost pixels to decode
+                    val right: Int = left + positionTemplate.UtBarcodeSize.width //* @param right one more than the x coordinate of rightmost pixels to decode. That is, we will decode
+                    val width: Int = positionTemplate.UtBarcodeSize.width
                     //*  pixels whose x coordinate is in [left,right)
-                    val bottom: Int = top + positionTemplate.getUtBarcodeSize().height //* @param bottom likewise, one more than the y coordinate of the bottommost pixels to decode
-                    val height: Int = positionTemplate.getUtBarcodeSize().height
+                    val bottom: Int = top + positionTemplate.UtBarcodeSize.height //* @param bottom likewise, one more than the y coordinate of the bottommost pixels to decode
+                    val height: Int = positionTemplate.UtBarcodeSize.height
                     returnValue = readBarcodeFromLocation(image, left, top, width, height, false)
                     if (returnValue!!.length > 0) {
                         barcodeStatus = RESULT_BARCODE_SCANNED
@@ -805,7 +805,7 @@ class CandidateImageFile {
                     log.debug(returnValue)
                     log.debug("barcodeStatus=$barcodeStatus")
                 } else { // image is narrower than templated area.
-                    log.debug("Skipping Template.  ImageWidth=" + image.getWidth() + "; TemplateWidth=" + Math.round(positionTemplate.getImageSize().getWidth()))
+                    log.debug("Skipping Template.  ImageWidth=" + image.Width + "; TemplateWidth=" + Math.round(positionTemplate.ImageSize.Width))
                 }
             } // image is readable
         }
@@ -847,16 +847,16 @@ class CandidateImageFile {
             }
             if (image != null) {
                 try {
-                    if (aTemplate != null && aTemplate.getTextPosition() != null) { //allie edit
-                        val x: Int = aTemplate.getTextPosition().width
-                        val y: Int = aTemplate.getTextPosition().height
-                        val w: Int = aTemplate.getTextSize().width
-                        val h: Int = aTemplate.getTextSize().height
+                    if (aTemplate != null && aTemplate.TextPosition != null) { //allie edit
+                        val x: Int = aTemplate.TextPosition.width
+                        val y: Int = aTemplate.TextPosition.height
+                        val w: Int = aTemplate.TextSize.width
+                        val h: Int = aTemplate.TextSize.height
                         // OCR and parse UnitTray Label
                         val o = ConvertTesseractOCR(image.getSubimage(x, y, w, h))
                         labelText = ""
                         try {
-                            labelText = o.getOCRText()
+                            labelText = o.OCRText
                         } catch (e: OCRReadException) {
                             log.error(e.message)
                             e.printStackTrace()
@@ -868,18 +868,18 @@ class CandidateImageFile {
                     log.trace(ex)
                     throw OCRReadException(ex.message)
                 }
-                if ((labelText == null || labelText == "") && aTemplate != null && aTemplate.getTextPosition() != null) { //this line throws an exception?!
+                if ((labelText == null || labelText == "") && aTemplate != null && aTemplate.TextPosition != null) { //this line throws an exception?!
                     try { // try again
-                        val x: Int = aTemplate.getTextPosition().width + 1
-                        val y: Int = aTemplate.getTextPosition().height + 1
-                        val w: Int = aTemplate.getTextSize().width + 1
-                        val h: Int = aTemplate.getTextSize().height + 1
+                        val x: Int = aTemplate.TextPosition.width + 1
+                        val y: Int = aTemplate.TextPosition.height + 1
+                        val w: Int = aTemplate.TextSize.width + 1
+                        val h: Int = aTemplate.TextSize.height + 1
                         log.debug("in getLabelOCRText() 10")
                         // OCR and parse UnitTray Label
                         val o = ConvertTesseractOCR(image.getSubimage(x, y, w, h))
                         labelText = ""
                         try {
-                            labelText = o.getOCRText()
+                            labelText = o.OCRText
                         } catch (e: OCRReadException) {
                             log.error(e.message)
                             e.printStackTrace()
@@ -919,7 +919,7 @@ class CandidateImageFile {
                     // [Exif] User Comment
                     val exifDirectory: Directory? = metadata.getFirstDirectoryOfType<ExifSubIFDDirectory?>(ExifSubIFDDirectory::class.java)
                     val descriptor = ExifSubIFDDescriptor(exifDirectory as ExifSubIFDDirectory?)
-                    exifComment = descriptor.getUserCommentDescription()
+                    exifComment = descriptor.UserCommentDescription
                     log!!.debug("Exif UserComment = $exifComment")
                 } catch (e2: JpegProcessingException) {
                     log!!.error("Error reading exif metadata.")
@@ -936,15 +936,15 @@ class CandidateImageFile {
                     try {
                         metadata = JpegMetadataReader.readMetadata(file, JpegMetadataReader.ALL_READERS)
                         val xmpDirectory: XmpDirectory? = metadata.getFirstDirectoryOfType<XmpDirectory?>(XmpDirectory::class.java)
-                        if (xmpDirectory != null && xmpDirectory.getXMPMeta() != null) {
-                            log!!.debug(xmpDirectory.getXMPMeta().dumpObject())
+                        if (xmpDirectory != null && xmpDirectory.XMPMeta != null) {
+                            log!!.debug(xmpDirectory.XMPMeta.dumpObject())
                             /*
                         http://purl.org/dc/elements/1.1/ = "dc:"	(0x80000000 : SCHEMA_NODE)
                             dc:description	(0x1e00 : ARRAY | ARRAY_ORDERED | ARRAY_ALTERNATE | ARRAY_ALT_TEXT)
                                 [1] = "MCZ-ENT00597110"	(0x50 : HAS_QUALIFIER | HAS_LANGUAGE)
                                     ?xml:lang = "x-default"	(0x20 : QUALIFIER)
                          */
-                            val xmpMeta: XMPMeta = xmpDirectory.getXMPMeta()
+                            val xmpMeta: XMPMeta = xmpDirectory.XMPMeta
                             try {
                                 val descriptionProp = xmpMeta.getArrayItem("http://purl.org/dc/elements/1.1/", "dc:description", 1)
                                 if (descriptionProp != null) {
@@ -992,7 +992,7 @@ class CandidateImageFile {
                 if (dateCreated == null) {
                     dateCreated = exifDirectory.getDate(ExifSubIFDDirectory.TAG_DATETIME_DIGITIZED)
                 }
-                log!!.debug("Exif DateTime = " + SimpleDateFormat.getDateInstance().format(dateCreated))
+                log!!.debug("Exif DateTime = " + SimpleDateFormat.DateInstance.format(dateCreated))
             } catch (e2: JpegProcessingException) {
                 log!!.error("Error reading exif metadata.")
                 log.error(e2.message)
@@ -1040,7 +1040,7 @@ class CandidateImageFile {
             return catalogNumberBarcodeText
         }
         var returnValue: String? = null
-        if (positionTemplate.getTemplateId() == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // Check the entire image for a barcode and return.
+        if (positionTemplate.TemplateId == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // Check the entire image for a barcode and return.
             returnValue = barcodeText
         } else { // Check the part of the image specified by the template for the barcode.
             var image: BufferedImage? = null
@@ -1055,12 +1055,12 @@ class CandidateImageFile {
                 barcodeStatus = RESULT_ERROR
                 log.error("Image null. Could not decode...")
             } else {
-                if (image.getWidth() > positionTemplate.getBarcodeULPosition().width && image.getWidth().toLong() == Math.round(positionTemplate.getImageSize().getWidth())) { // image might plausibly match template
-                    val left: Int = positionTemplate.getBarcodeULPosition().width //* @param left x coordinate of leftmost pixels to decode
-                    val top: Int = positionTemplate.getBarcodeULPosition().height //* @param top y coordinate of topmost pixels to decode
+                if (image.Width > positionTemplate.BarcodeULPosition.width && image.Width.toLong() == Math.round(positionTemplate.ImageSize.Width)) { // image might plausibly match template
+                    val left: Int = positionTemplate.BarcodeULPosition.width //* @param left x coordinate of leftmost pixels to decode
+                    val top: Int = positionTemplate.BarcodeULPosition.height //* @param top y coordinate of topmost pixels to decode
                     //*  pixels whose x coordinate is in [left,right)
-                    val width: Int = positionTemplate.getBarcodeSize().width
-                    val height: Int = positionTemplate.getBarcodeSize().height
+                    val width: Int = positionTemplate.BarcodeSize.width
+                    val height: Int = positionTemplate.BarcodeSize.height
                     returnValue = readBarcodeFromLocation(image, left, top, width, height, false)
                     if (returnValue != null && returnValue.length > 0) {
                         barcodeStatus = RESULT_BARCODE_SCANNED
@@ -1072,7 +1072,7 @@ class CandidateImageFile {
                     log.debug("barcodeStatus=$barcodeStatus")
                 } else { // image is narrower than templated area.
                     returnValue = "Image is different size from Template."
-                    log.debug("ImageWidth=" + image.getWidth() + "; TemplateWidth=" + Math.round(positionTemplate.getImageSize().getWidth()))
+                    log.debug("ImageWidth=" + image.Width + "; TemplateWidth=" + Math.round(positionTemplate.ImageSize.Width))
                 }
             }
         }
@@ -1229,8 +1229,8 @@ class CandidateImageFile {
                     var iWidth = 0
                     try {
                         val image: BufferedImage = ImageIO.read(aFile)
-                        iHeight = image.getHeight()
-                        iWidth = image.getWidth()
+                        iHeight = image.Height
+                        iWidth = image.Width
                         log.debug("Image Height:$iHeight")
                         log.debug("Image Width:$iWidth")
                     } catch (e: IOException) {
@@ -1242,8 +1242,8 @@ class CandidateImageFile {
                         val jpegDirectory: JpegDirectory? = metadata.getFirstDirectoryOfType<JpegDirectory?>(JpegDirectory::class.java)
                         try {
                             val orientation = directory!!.getInt(ExifIFD0Directory.TAG_ORIENTATION)
-                            val width: Int = jpegDirectory.getImageWidth()
-                            val height: Int = jpegDirectory.getImageHeight()
+                            val width: Int = jpegDirectory.ImageWidth
+                            val height: Int = jpegDirectory.ImageHeight
                             log.debug("Orientation: $orientation")
                             log.debug("Exif Height: $height")
                             log.debug("Exif Width: $width")
@@ -1342,8 +1342,8 @@ class CandidateImageFile {
                         exif
                     }
                 }
-                if (Singleton.getBarcodeMatcher().matchesPattern(barcode)) {
-                    result.setCatalogNumber(Singleton.getBarcodeBuilder().makeGuidFromBarcode(barcode))
+                if (Singleton.BarcodeMatcher.matchesPattern(barcode)) {
+                    result.setCatalogNumber(Singleton.BarcodeBuilder.makeGuidFromBarcode(barcode))
                 }
                 if (filename.startsWith("http://")) {
                     result.setMedia_URI(filename)

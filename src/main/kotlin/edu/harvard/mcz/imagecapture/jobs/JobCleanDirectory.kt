@@ -147,10 +147,10 @@ class JobCleanDirectory : RunnableJob, Runnable {
             var imagebase: File? = null // place to start the scan from, imagebase directory for SCAN_ALL
             var startPoint: File? = null
             // If it isn't null, retrieve the image base directory from properties, and test for read access.
-            if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE) == null) {
-                JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Can't start scan.  Don't know where images are stored.  Set imagbase property.", "Can't Scan.", JOptionPane.ERROR_MESSAGE)
+            if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE) == null) {
+                JOptionPane.showMessageDialog(Singleton.MainFrame, "Can't start scan.  Don't know where images are stored.  Set imagbase property.", "Can't Scan.", JOptionPane.ERROR_MESSAGE)
             } else {
-                imagebase = File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
+                imagebase = File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
                 if (imagebase != null) {
                     if (imagebase.canRead()) {
                         startPoint = imagebase
@@ -167,13 +167,13 @@ class JobCleanDirectory : RunnableJob, Runnable {
                     if (scan == SCAN_SELECT && startPointSpecific != null && startPointSpecific!!.canRead()) {
                         fileChooser.setCurrentDirectory(startPointSpecific)
                     } else {
-                        if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH) != null) {
-                            fileChooser.setCurrentDirectory(File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH)))
+                        if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH) != null) {
+                            fileChooser.setCurrentDirectory(File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH)))
                         }
                     }
-                    val returnValue: Int = fileChooser.showOpenDialog(Singleton.getMainFrame())
+                    val returnValue: Int = fileChooser.showOpenDialog(Singleton.MainFrame)
                     if (returnValue == JFileChooser.APPROVE_OPTION) {
-                        val file: File = fileChooser.getSelectedFile()
+                        val file: File = fileChooser.SelectedFile
                         log!!.debug("Selected base directory: " + file.name + ".")
                         startPoint = file
                     } else { //TODO: handle error condition
@@ -182,20 +182,20 @@ class JobCleanDirectory : RunnableJob, Runnable {
                 }
                 // Check that startPoint is or is within imagebase.
                 if (!ImageCaptureProperties.Companion.isInPathBelowBase(startPoint)) {
-                    val base: String = Singleton.getProperties().getProperties().getProperty(
+                    val base: String = Singleton.Properties.Properties.getProperty(
                             ImageCaptureProperties.Companion.KEY_IMAGEBASE)
                     log!!.error("Tried to scan directory (" + startPoint!!.path + ") outside of base image directory (" + base + ")")
                     val message = "Can't scan and cleanup files outside of base image directory ($base)"
-                    JOptionPane.showMessageDialog(Singleton.getMainFrame(), message, "Can't Scan outside image base directory.", JOptionPane.YES_NO_OPTION)
+                    JOptionPane.showMessageDialog(Singleton.MainFrame, message, "Can't Scan outside image base directory.", JOptionPane.YES_NO_OPTION)
                 } else if (ImageCaptureProperties.Companion.getPathBelowBase(startPoint).trim({ it <= ' ' }).length == 0) {
-                    val base: String = Singleton.getProperties().getProperties().getProperty(
+                    val base: String = Singleton.Properties.Properties.getProperty(
                             ImageCaptureProperties.Companion.KEY_IMAGEBASE)
                     log!!.error("Tried to scan directory (" + startPoint!!.path + ") which is the base image directory.")
                     val message = "Can only scan and cleanup files in a selected directory within the base directory  ($base).\nYou must select some subdirectory within the base directory to cleanup."
-                    JOptionPane.showMessageDialog(Singleton.getMainFrame(), message, "Can't Cleanup image base directory.", JOptionPane.YES_NO_OPTION)
+                    JOptionPane.showMessageDialog(Singleton.MainFrame, message, "Can't Cleanup image base directory.", JOptionPane.YES_NO_OPTION)
                 } else {
                     if (!startPoint!!.canRead()) {
-                        JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Can't start scan.  Unable to read selected directory: " + startPoint.path, "Can't Scan.", JOptionPane.YES_NO_OPTION)
+                        JOptionPane.showMessageDialog(Singleton.MainFrame, "Can't start scan.  Unable to read selected directory: " + startPoint.path, "Can't Scan.", JOptionPane.YES_NO_OPTION)
                     } else {
                         pathToCheck = ImageCaptureProperties.Companion.getPathBelowBase(startPoint)
                         // retrieve a list of image records in the selected directory
@@ -204,7 +204,7 @@ class JobCleanDirectory : RunnableJob, Runnable {
                         val iter: MutableIterator<ICImage?> = images.iterator()
                         while (iter.hasNext()) {
                             val image: ICImage? = iter.next()
-                            val imageFile = File(assemblePathWithBase(image.getPath(), image.getFilename()))
+                            val imageFile = File(assemblePathWithBase(image.Path, image.Filename))
                             files.add(imageFile)
                             counter!!.incrementFilesSeen()
                         }
@@ -234,10 +234,10 @@ class JobCleanDirectory : RunnableJob, Runnable {
             log.debug(images.size)
             while (iter.hasNext()) {
                 val image: ICImage? = iter.next()
-                log.debug(image.getPath())
-                log.debug(image.getFilename())
+                log.debug(image.Path)
+                log.debug(image.Filename)
                 try {
-                    val error = RunnableJobError(image.getPath(), image.getRawBarcode(), "Deleted while cleaning up.", Exception(), RunnableJobError.Companion.TYPE_UNKNOWN)
+                    val error = RunnableJobError(image.Path, image.RawBarcode, "Deleted while cleaning up.", Exception(), RunnableJobError.Companion.TYPE_UNKNOWN)
                     ils.delete(image)
                     counter!!.appendError(error)
                     counter!!.incrementFilesFailed()
@@ -253,7 +253,7 @@ class JobCleanDirectory : RunnableJob, Runnable {
      */
     override fun start() {
         startTime = Date()
-        Singleton.getJobList().addJob(this)
+        Singleton.JobList.addJob(this)
         counter = Counter()
         // Obtain a list of image file records for the selected directory.
         val files = fileList
@@ -271,7 +271,7 @@ class JobCleanDirectory : RunnableJob, Runnable {
         if (status != RunStatus.STATUS_TERMINATED) {
             setPercentComplete(100)
         }
-        Singleton.getMainFrame().notifyListener(status, this)
+        Singleton.MainFrame.notifyListener(status, this)
         report()
         done()
     }
@@ -279,7 +279,7 @@ class JobCleanDirectory : RunnableJob, Runnable {
     private fun setPercentComplete(aPercentage: Int) { //set value
         percentComplete = aPercentage
         //notify listeners
-        Singleton.getMainFrame().notifyListener(percentComplete, this)
+        Singleton.MainFrame.notifyListener(percentComplete, this)
         val i: MutableIterator<RunnerListener?> = listeners!!.iterator()
         while (i.hasNext()) {
             i.next().notifyListener(percentComplete, this)
@@ -290,7 +290,7 @@ class JobCleanDirectory : RunnableJob, Runnable {
      * Cleanup when job is complete.
      */
     private fun done() {
-        Singleton.getJobList().removeJob(this)
+        Singleton.JobList.removeJob(this)
     }
 
     /* (non-Javadoc)
@@ -312,8 +312,8 @@ class JobCleanDirectory : RunnableJob, Runnable {
         report += "Found  " + counter!!.filesSeen + " image file database records.\n"
         report += "Didn't remove " + counter!!.filesExisting + " image records where file exists.\n"
         report += "Removed " + counter!!.filesFailed + " image records where file does not exist.\n"
-        Singleton.getMainFrame().setStatusMessage("Directory cleanup complete.")
-        val errorReportDialog = RunnableJobReportDialog(Singleton.getMainFrame(), report, counter!!.errors, "Remove Deleted Image Results")
+        Singleton.MainFrame.setStatusMessage("Directory cleanup complete.")
+        val errorReportDialog = RunnableJobReportDialog(Singleton.MainFrame, report, counter!!.errors, "Remove Deleted Image Results")
         errorReportDialog.setVisible(true)
     }
 

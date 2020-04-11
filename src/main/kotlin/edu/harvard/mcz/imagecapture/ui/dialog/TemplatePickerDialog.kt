@@ -457,7 +457,7 @@ class TemplatePickerDialog : JDialog {
         val title = StringBuffer()
         title.append("Change Template")
         if (image != null) {
-            title.append(" for ").append(image.getFilename())
+            title.append(" for ").append(image.Filename)
         }
         this.setTitle(title.toString())
         getContentPane().setLayout(BorderLayout())
@@ -476,14 +476,14 @@ class TemplatePickerDialog : JDialog {
                     val defaultTemplate: PositionTemplate?
                     try {
                         defaultTemplate = PositionTemplate(
-                                comboBoxTemplatePicker.getSelectedItem() as String)
+                                comboBoxTemplatePicker.SelectedItem as String)
                         val fileToCheck = File(assemblePathWithBase(
-                                imageToTemplate.getPath(), imageToTemplate.getFilename()))
+                                imageToTemplate.Path, imageToTemplate.Filename))
                         val imagefile: BufferedImage = ImageIO.read(fileToCheck)
-                        val x: Int = defaultTemplate.getBarcodeULPosition().width
-                        val y: Int = defaultTemplate.getBarcodeULPosition().height
-                        val w: Int = defaultTemplate.getBarcodeSize().width
-                        val h: Int = defaultTemplate.getBarcodeSize().height
+                        val x: Int = defaultTemplate.BarcodeULPosition.width
+                        val y: Int = defaultTemplate.BarcodeULPosition.height
+                        val w: Int = defaultTemplate.BarcodeSize.width
+                        val h: Int = defaultTemplate.BarcodeSize.height
                         setBarcodeImage(imagefile.getSubimage(x, y, w, h))
                     } catch (e1: NullPointerException) {
                         log.error(e1.message)
@@ -522,7 +522,7 @@ class TemplatePickerDialog : JDialog {
                     override fun actionPerformed(e: ActionEvent?) { // TODO Auto-generated method stub
                         val ils = ICImageLifeCycle()
                         try {
-                            val newTemplateID = comboBoxTemplatePicker.getSelectedItem() as String
+                            val newTemplateID = comboBoxTemplatePicker.SelectedItem as String
                             if (newTemplateID != null) {
                                 imageToTemplate.setTemplateId(newTemplateID)
                                 ils.attachDirty(imageToTemplate)
@@ -562,39 +562,39 @@ class TemplatePickerDialog : JDialog {
         imageToTemplate = image
         val heading = StringBuffer()
         heading.append("Current Template:")
-        heading.append(" ").append(image.getTemplateId())
+        heading.append(" ").append(image.TemplateId)
         val filename = StringBuffer()
-        filename.append(image.getPath())
+        filename.append(image.Path)
                 .append(File.pathSeparator)
-                .append(image.getFilename())
+                .append(image.Filename)
         lblFileName.setText(filename.toString())
         lblTemplate.setText(heading.toString())
-        comboBoxTemplatePicker.addItem(image.getTemplateId())
+        comboBoxTemplatePicker.addItem(image.TemplateId)
         val imageFile = File(assemblePathWithBase(
-                image.getPath(), image.getFilename()))
+                image.Path, image.Filename))
         var bufImage: BufferedImage? = null
         var imageWidth = 0
         try {
             bufImage = ImageIO.read(imageFile)
-            imageWidth = bufImage.getWidth()
+            imageWidth = bufImage.Width
         } catch (e: IOException) {
             throw UnreadableFileException("IOException trying to read " +
-                    imageFile.getName())
+                    imageFile.Name)
         }
         if (imageFile.exists()) {
-            val templates: MutableList<PositionTemplate?> = PositionTemplate.Companion.getTemplates()
+            val templates: MutableList<PositionTemplate?> = PositionTemplate.Companion.Templates
             val i: MutableListIterator<PositionTemplate?> = templates.listIterator()
             while (i.hasNext()) {
                 val template: PositionTemplate? = i.next()
-                if (template.getTemplateId() != PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) {
+                if (template.TemplateId != PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) {
                     var templateWidth = -1
                     try {
-                        templateWidth = template.getImageSize().getWidth()
+                        templateWidth = template.ImageSize.Width
                     } catch (e: NullPointerException) {
                         log.debug(e.message)
                     }
                     if (imageWidth == templateWidth) {
-                        comboBoxTemplatePicker.addItem(template.getTemplateId())
+                        comboBoxTemplatePicker.addItem(template.TemplateId)
                     }
                 }
             }

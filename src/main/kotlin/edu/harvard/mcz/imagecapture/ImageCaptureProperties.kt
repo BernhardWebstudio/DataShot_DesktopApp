@@ -275,7 +275,7 @@ class ImageCaptureProperties : AbstractTableModel() {
         try {
             println("Saving properties file: " + propertiesFilePath.toString())
             propertiesStream = FileOutputStream(propertiesFilePath.toString())
-            properties.store(propertiesStream, ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion() + " Properties")
+            properties.store(propertiesStream, ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.AppVersion + " Properties")
             propertiesStream.close()
         } catch (e: Exception) {
             println("Error saving properties.")
@@ -480,7 +480,7 @@ class ImageCaptureProperties : AbstractTableModel() {
          */
         fun isInPathBelowBase(aFile: File): Boolean {
             var result = false
-            var base: String = Singleton.getProperties().getProperties().getProperty(
+            var base: String = Singleton.Properties.Properties.getProperty(
                     KEY_IMAGEBASE)
             var filePath = aFile.path
             if (aFile.isFile) {
@@ -516,7 +516,7 @@ class ImageCaptureProperties : AbstractTableModel() {
          */
         fun getPathBelowBase(aFilename: File, fileSeparator: String): String? {
             var result: String? = ""
-            var base: String = Singleton.getProperties().getProperties().getProperty(
+            var base: String = Singleton.Properties.Properties.getProperty(
                     KEY_IMAGEBASE) // this is what we are going to strip off aFilename
             //String filename = "";  // name of file if aFilename is a file rather than a directory
             result = aFilename.path
@@ -581,7 +581,7 @@ class ImageCaptureProperties : AbstractTableModel() {
         @JvmOverloads
         fun assemblePathWithBase(aDirectoryPath: String?, aFileName: String?, fileSeparator: String = File.separator): String {
             var result = ""
-            var base: String = Singleton.getProperties().getProperties().getProperty(
+            var base: String = Singleton.Properties.Properties.getProperty(
                     KEY_IMAGEBASE)
             var path = aDirectoryPath
             // First, correct the aDirectoryPath to the local file separator.

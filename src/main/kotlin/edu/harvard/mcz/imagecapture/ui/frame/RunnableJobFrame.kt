@@ -509,7 +509,7 @@ class RunnableJobFrame : JFrame() {
      */
     private fun getJTable(): JTable? {
         if (jTable == null) {
-            jTable = JTable(Singleton.getJobList())
+            jTable = JTable(Singleton.JobList)
             jTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS)
             jTable.getColumn(" ").setCellRenderer(ButtonRenderer("Cancel"))
             jTable.getColumn(" ").setCellEditor(ButtonEditor(ButtonEditor.Companion.ACTION_CANCEL_JOB, this))
@@ -517,8 +517,8 @@ class RunnableJobFrame : JFrame() {
 //jTable.setDefaultEditor(Integer.class, new ButtonEditor(ButtonEditor.ACTION_CANCEL_JOB,this));
 // jTable.setDefaultRenderer(int.class, new ProgressBarRenderer());
             jTable.getColumn("Progress").setCellRenderer(ProgressBarRenderer())
-            val characterWidth: Int = Singleton.getCharacterWidth()
-            jTable.getColumnModel().getColumn(0).setPreferredWidth(characterWidth * 6)
+            val characterWidth: Int = Singleton.CharacterWidth
+            jTable.ColumnModel.getColumn(0).setPreferredWidth(characterWidth * 6)
         }
         return jTable
     }

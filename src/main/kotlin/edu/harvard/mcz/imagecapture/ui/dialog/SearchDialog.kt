@@ -37,9 +37,7 @@ import edu.harvard.mcz.imagecapture.lifecycle.TrackingLifeCycle
 import edu.harvard.mcz.imagecapture.ui.field.JIntegerField
 import net.miginfocom.swing.MigLayout
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator
-import java.awt.BorderLayout
-import java.awt.GridBagConstraints
-import java.awt.GridBagLayout
+import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.awt.event.KeyEvent
@@ -47,11 +45,7 @@ import java.util.*
 import javax.swing.*
 import kotlin.collections.ArrayList
 
-java.awt.*
-import  java.awt.event.ActionEvent
-
-
-import java.awt.event.KeyEvent java.util.ArrayList
+java.util.ArrayList
 
 
 import javax.swing.JTextField 
@@ -524,8 +518,8 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
 // so we need to add an image to the search criteria.
 // Default specimen is created with valid distribution flag = true, etc. need to remove this
 // from the search criteria for a search by example.
-    /*if (jTextFieldPrimaryDivision.getText()!=null && jTextFieldPrimaryDivision.getText().length() > 0) {
-        searchCriteria.setPrimaryDivison(jTextFieldPrimaryDivision.getText());
+    /*if (jTextFieldPrimaryDivision.Text!=null && jTextFieldPrimaryDivision.Text.length() > 0) {
+        searchCriteria.setPrimaryDivison(jTextFieldPrimaryDivision.Text);
     }*/
     // TODO: Add higher geography
 
@@ -540,112 +534,112 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
                 jButton = JButton()
                 jButton.setText("Search")
                 jButton.setMnemonic(KeyEvent.VK_S)
-                this.getRootPane().setDefaultButton(jButton)
+                this.RootPane.setDefaultButton(jButton)
                 jButton.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
-                        Singleton.getMainFrame().setStatusMessage("Searching...")
+                        Singleton.MainFrame.setStatusMessage("Searching...")
                         val searchCriteria = Specimen()
                         // Default specimen is created with valid distribution flag = true, etc. need to remove this
 // from the search criteria for a search by example.
                         searchCriteria.clearDefaults()
-                        if (jTextFieldDrawerNumber.getText() != null && jTextFieldDrawerNumber.getText().length > 0) {
-                            searchCriteria.setDrawerNumber(jTextFieldDrawerNumber.getText())
+                        if (jTextFieldDrawerNumber.Text != null && jTextFieldDrawerNumber.Text.length > 0) {
+                            searchCriteria.setDrawerNumber(jTextFieldDrawerNumber.Text)
                         }
-                        if (jTextFieldBarcode.getText() != null && jTextFieldBarcode.getText().length > 0) {
-                            searchCriteria.setBarcode(jTextFieldBarcode.getText())
+                        if (jTextFieldBarcode.Text != null && jTextFieldBarcode.Text.length > 0) {
+                            searchCriteria.setBarcode(jTextFieldBarcode.Text)
                         }
-                        if (jTextFieldFamily.getText() != null && jTextFieldFamily.getText().length > 0) {
-                            searchCriteria.setFamily(jTextFieldFamily.getText())
+                        if (jTextFieldFamily.Text != null && jTextFieldFamily.Text.length > 0) {
+                            searchCriteria.setFamily(jTextFieldFamily.Text)
                         }
-                        if (jTextFieldSubfamily.getText() != null && jTextFieldSubfamily.getText().length > 0) {
-                            searchCriteria.setSubfamily(jTextFieldSubfamily.getText())
+                        if (jTextFieldSubfamily.Text != null && jTextFieldSubfamily.Text.length > 0) {
+                            searchCriteria.setSubfamily(jTextFieldSubfamily.Text)
                         }
-                        if (jTextFieldTribe.getText() != null && jTextFieldTribe.getText().length > 0) {
-                            searchCriteria.setTribe(jTextFieldTribe.getText())
+                        if (jTextFieldTribe.Text != null && jTextFieldTribe.Text.length > 0) {
+                            searchCriteria.setTribe(jTextFieldTribe.Text)
                         }
-                        if (jTextFieldGenus.getText() != null && jTextFieldGenus.getText().length > 0) {
-                            searchCriteria.setGenus(jTextFieldGenus.getText())
+                        if (jTextFieldGenus.Text != null && jTextFieldGenus.Text.length > 0) {
+                            searchCriteria.setGenus(jTextFieldGenus.Text)
                         }
-                        if (jTextFieldSpecies.getText() != null && jTextFieldSpecies.getText().length > 0) {
-                            searchCriteria.setSpecificEpithet(jTextFieldSpecies.getText())
+                        if (jTextFieldSpecies.Text != null && jTextFieldSpecies.Text.length > 0) {
+                            searchCriteria.setSpecificEpithet(jTextFieldSpecies.Text)
                         }
-                        if (jTextFieldSubspecies.getText() != null && jTextFieldSubspecies.getText().length > 0) {
-                            searchCriteria.setSubspecificEpithet(jTextFieldSubspecies.getText())
+                        if (jTextFieldSubspecies.Text != null && jTextFieldSubspecies.Text.length > 0) {
+                            searchCriteria.setSubspecificEpithet(jTextFieldSubspecies.Text)
                         }
-                        if (jTextFieldVerbatimLocality.getText() != null && jTextFieldVerbatimLocality.getText().length > 0) {
-                            searchCriteria.setVerbatimLocality(jTextFieldVerbatimLocality.getText())
+                        if (jTextFieldVerbatimLocality.Text != null && jTextFieldVerbatimLocality.Text.length > 0) {
+                            searchCriteria.setVerbatimLocality(jTextFieldVerbatimLocality.Text)
                         }
-                        /*if (jTextFieldPrimaryDivision.getText()!=null && jTextFieldPrimaryDivision.getText().length() > 0) {
-                            searchCriteria.setPrimaryDivison(jTextFieldPrimaryDivision.getText());
-                        }*/if (jComboBoxWorkflowStatus.getSelectedItem() != null) {
-                            if (jComboBoxWorkflowStatus.getSelectedItem().toString() != "") {
-                                searchCriteria.setWorkFlowStatus(jComboBoxWorkflowStatus.getSelectedItem().toString())
+                        /*if (jTextFieldPrimaryDivision.Text!=null && jTextFieldPrimaryDivision.Text.length() > 0) {
+                            searchCriteria.setPrimaryDivison(jTextFieldPrimaryDivision.Text);
+                        }*/if (jComboBoxWorkflowStatus.SelectedItem != null) {
+                            if (jComboBoxWorkflowStatus.SelectedItem.toString() != "") {
+                                searchCriteria.setWorkFlowStatus(jComboBoxWorkflowStatus.SelectedItem.toString())
                             }
                         }
                         // TODO: Add higher geography
-                        if (jComboBoxCountry.getSelectedItem() != null) {
-                            if (jComboBoxCountry.getSelectedItem().toString() != "") {
-                                searchCriteria.setCountry(jComboBoxCountry.getSelectedItem().toString())
+                        if (jComboBoxCountry.SelectedItem != null) {
+                            if (jComboBoxCountry.SelectedItem.toString() != "") {
+                                searchCriteria.setCountry(jComboBoxCountry.SelectedItem.toString())
                             }
                         }
-                        if (jComboBoxPrimaryDivision.getSelectedItem() != null) {
-                            if (jComboBoxPrimaryDivision.getSelectedItem().toString() != "") {
-                                searchCriteria.setPrimaryDivison(jComboBoxPrimaryDivision.getSelectedItem().toString())
+                        if (jComboBoxPrimaryDivision.SelectedItem != null) {
+                            if (jComboBoxPrimaryDivision.SelectedItem.toString() != "") {
+                                searchCriteria.setPrimaryDivison(jComboBoxPrimaryDivision.SelectedItem.toString())
                             }
                         }
-                        if (jTextFieldInterpretedDate.getText() != null && jTextFieldInterpretedDate.getText().length > 0) {
-                            searchCriteria.setIsoDate(jTextFieldInterpretedDate.getText())
+                        if (jTextFieldInterpretedDate.Text != null && jTextFieldInterpretedDate.Text.length > 0) {
+                            searchCriteria.setIsoDate(jTextFieldInterpretedDate.Text)
                         }
-                        if (jComboBoxCollector.getSelectedItem() != null) {
-                            if (jComboBoxCollector.getSelectedItem().toString() != "") {
+                        if (jComboBoxCollector.SelectedItem != null) {
+                            if (jComboBoxCollector.SelectedItem.toString() != "") {
                                 val c = Collector()
-                                c.setCollectorName(jComboBoxCollector.getSelectedItem().toString())
+                                c.setCollectorName(jComboBoxCollector.SelectedItem.toString())
                                 val collectors: MutableSet<Collector?> = HashSet<Collector?>()
                                 collectors.add(c)
                                 searchCriteria.setCollectors(collectors)
                             }
                         }
-                        if (jTextFieldImageFilename.getText() != null && jTextFieldImageFilename.getText().length > 0 ||
-                                jComboBoxEntryBy.getSelectedItem() != null) { // Either image filename or date imaged or both have content
+                        if (jTextFieldImageFilename.Text != null && jTextFieldImageFilename.Text.length > 0 ||
+                                jComboBoxEntryBy.SelectedItem != null) { // Either image filename or date imaged or both have content
 // so we need to add an image to the search criteria.
                             val i = ICImage()
-                            if (jTextFieldImageFilename.getText() != null && jTextFieldImageFilename.getText().length > 0) { // if filename has content, add it
-                                i.setFilename(jTextFieldImageFilename.getText())
+                            if (jTextFieldImageFilename.Text != null && jTextFieldImageFilename.Text.length > 0) { // if filename has content, add it
+                                i.setFilename(jTextFieldImageFilename.Text)
                             }
-                            if (jComboBoxPath.getSelectedItem() != null) {
-                                if (jComboBoxPath.getSelectedItem().toString() != "") { // it the path = date imaged has content, add it
-                                    i.setPath(jComboBoxPath.getSelectedItem().toString())
+                            if (jComboBoxPath.SelectedItem != null) {
+                                if (jComboBoxPath.SelectedItem.toString() != "") { // it the path = date imaged has content, add it
+                                    i.setPath(jComboBoxPath.SelectedItem.toString())
                                 }
                             }
                             val im: MutableSet<ICImage?> = HashSet<ICImage?>()
                             im.add(i)
                             searchCriteria.setICImages(im)
                         }
-                        if (jComboBoxCollection.getSelectedItem() != null) {
-                            if (jComboBoxCollection.getSelectedItem().toString() != "") {
-                                searchCriteria.setCollection(jComboBoxCollection.getSelectedItem().toString())
+                        if (jComboBoxCollection.SelectedItem != null) {
+                            if (jComboBoxCollection.SelectedItem.toString() != "") {
+                                searchCriteria.setCollection(jComboBoxCollection.SelectedItem.toString())
                             }
                         }
-                        if (jComboBoxEntryBy.getSelectedItem() != null) {
-                            if (jComboBoxEntryBy.getSelectedItem().toString() != "") {
+                        if (jComboBoxEntryBy.SelectedItem != null) {
+                            if (jComboBoxEntryBy.SelectedItem.toString() != "") {
                                 val tc = Tracking()
-                                tc.setUser(jComboBoxEntryBy.getSelectedItem().toString())
+                                tc.setUser(jComboBoxEntryBy.SelectedItem.toString())
                                 val trackings: MutableSet<Tracking?> = HashSet<Tracking?>()
                                 trackings.add(tc)
                                 searchCriteria.setTrackings(trackings)
                             }
                         }
-                        if (jComboBoxIdentifiedBy.getSelectedItem() != null) {
-                            if (jComboBoxIdentifiedBy.getSelectedItem().toString() != "") {
-                                searchCriteria.setIdentifiedBy(jComboBoxIdentifiedBy.getSelectedItem().toString())
+                        if (jComboBoxIdentifiedBy.SelectedItem != null) {
+                            if (jComboBoxIdentifiedBy.SelectedItem.toString() != "") {
+                                searchCriteria.setIdentifiedBy(jComboBoxIdentifiedBy.SelectedItem.toString())
                             }
                         }
-                        if (jComboBoxQuestions.getSelectedItem() != null) {
-                            if (jComboBoxQuestions.getSelectedItem().toString() != "") {
-                                searchCriteria.setQuestions(jComboBoxQuestions.getSelectedItem().toString())
+                        if (jComboBoxQuestions.SelectedItem != null) {
+                            if (jComboBoxQuestions.SelectedItem.toString() != "") {
+                                searchCriteria.setQuestions(jComboBoxQuestions.SelectedItem.toString())
                             }
                         }
-                        Singleton.getMainFrame().setSpecimenBrowseList(searchCriteria, jLimitNumberField.getIntValue(), jOffsetNumberField.getIntValue())
+                        Singleton.MainFrame.setSpecimenBrowseList(searchCriteria, jLimitNumberField.IntValue, jOffsetNumberField.IntValue)
                     }
                 })
             }
@@ -661,9 +655,9 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
         if (jPanel1 == null) { // set titles etc.
             jPanel1 = JPanel(MigLayout("wrap 2, fillx"))
             val jLabelInstructions = JLabel("Search for specimens. Use % as a wildcard.")
-            val f: Font = jLabelInstructions.getFont()
+            val f: Font = jLabelInstructions.Font
             // bold
-            jLabelInstructions.setFont(f.deriveFont(f.getStyle() or Font.BOLD))
+            jLabelInstructions.setFont(f.deriveFont(f.Style or Font.BOLD))
             jPanel1.add(jLabelInstructions, "span 2")
             // set fields
             val labels = arrayOf<String?>(
@@ -845,7 +839,7 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
             if (jComboBoxCollection == null) {
                 val sls = SpecimenLifeCycle()
                 jComboBoxCollection = JComboBox<String?>()
-                jComboBoxCollection.setModel(DefaultComboBoxModel<String?>(sls.getDistinctCollections()))
+                jComboBoxCollection.setModel(DefaultComboBoxModel<String?>(sls.DistinctCollections))
                 jComboBoxCollection.setEditable(true)
                 jComboBoxCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen::class.java, "Collection"))
                 jComboBoxCollection.setMaximumSize(maxComboBoxDims)
@@ -864,12 +858,12 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
             if (jComboBoxWorkflowStatus == null) {
                 val values = ArrayList<String?>()
                 values.add("")
-                val wfsv: Array<String?> = WorkFlowStatus.getWorkFlowStatusValues()
+                val wfsv: Array<String?> = WorkFlowStatus.WorkFlowStatusValues
                 for (x in wfsv.indices) {
                     values.add(wfsv[x])
                 }
                 jComboBoxWorkflowStatus = JComboBox<Any?>(values.toTypedArray())
-                jComboBoxWorkflowStatus.getModel().setSelectedItem("")
+                jComboBoxWorkflowStatus.Model.setSelectedItem("")
                 jComboBoxWorkflowStatus.setEditable(true)
                 jComboBoxWorkflowStatus.setMaximumSize(maxComboBoxDims)
                 AutoCompleteDecorator.decorate(jComboBoxWorkflowStatus)
@@ -899,7 +893,7 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
         private get() {
             if (jComboBoxPath == null) {
                 val ils = ICImageLifeCycle()
-                jComboBoxPath = JComboBox<Any?>(ils.getDistinctPaths())
+                jComboBoxPath = JComboBox<Any?>(ils.DistinctPaths)
                 jComboBoxPath.setEditable(true)
                 AutoCompleteDecorator.decorate(jComboBoxPath)
                 jComboBoxPath.setMaximumSize(maxComboBoxDims)
@@ -916,7 +910,7 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
         private get() {
             if (jComboBoxEntryBy == null) {
                 val tls = TrackingLifeCycle()
-                jComboBoxEntryBy = JComboBox<Any?>(tls.getDistinctUsers())
+                jComboBoxEntryBy = JComboBox<Any?>(tls.DistinctUsers)
                 jComboBoxEntryBy.setEditable(true)
                 AutoCompleteDecorator.decorate(jComboBoxEntryBy)
                 jComboBoxEntryBy.setMaximumSize(maxComboBoxDims)
@@ -933,7 +927,7 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
         private get() {
             if (jComboBoxIdentifiedBy == null) {
                 val sls = SpecimenLifeCycle()
-                jComboBoxIdentifiedBy = JComboBox<Any?>(sls.getDistinctDeterminers())
+                jComboBoxIdentifiedBy = JComboBox<Any?>(sls.DistinctDeterminers)
                 jComboBoxIdentifiedBy.setEditable(true)
                 AutoCompleteDecorator.decorate(jComboBoxIdentifiedBy)
                 jComboBoxIdentifiedBy.setMaximumSize(maxComboBoxDims)
@@ -1005,7 +999,7 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
         private get() {
             if (jComboBoxCollector == null) {
                 val cls = CollectorLifeCycle()
-                jComboBoxCollector = JComboBox<Any?>(cls.getDistinctCollectors())
+                jComboBoxCollector = JComboBox<Any?>(cls.DistinctCollectors)
                 jComboBoxCollector.setEditable(true)
                 AutoCompleteDecorator.decorate(jComboBoxCollector)
                 jComboBoxCollector.setMaximumSize(maxComboBoxDims)
@@ -1038,7 +1032,7 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
                 val values = ArrayList<String?>()
                 values.add("")
                 values.add("%_%")
-                val cv: Array<String?> = sls.getDistinctCountries()
+                val cv: Array<String?> = sls.DistinctCountries
                 for (x in cv.indices) {
                     values.add(cv[x])
                 }
@@ -1062,7 +1056,7 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
                 val values = ArrayList<String?>()
                 values.add("")
                 values.add("%_%")
-                val cv: Array<String?> = sls.getDistinctPrimaryDivisions()
+                val cv: Array<String?> = sls.DistinctPrimaryDivisions
                 for (x in cv.indices) {
                     values.add(cv[x])
                 }
@@ -1086,7 +1080,7 @@ class SearchDialog(owner: Frame?) : JDialog(owner) {
                 val values = ArrayList<String?>()
                 values.add("")
                 values.add("%_%")
-                val qv: Array<String?> = sls.getDistinctQuestions()
+                val qv: Array<String?> = sls.DistinctQuestions
                 for (x in qv.indices) {
                     values.add(qv[x])
                 }

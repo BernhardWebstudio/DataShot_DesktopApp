@@ -223,9 +223,9 @@ class ImageListBrowser : JPanel {
     private fun getJComboBox(): JComboBox<*>? {
         if (jComboBox == null) {
             val ils = ICImageLifeCycle()
-            jComboBox = JComboBox<Any?>(ils.getDistinctPaths())
+            jComboBox = JComboBox<Any?>(ils.DistinctPaths)
             jComboBox.setEditable(true)
-            val pathColumn: TableColumn = jTableImages.getColumnModel().getColumn(ICImageListTableModel.Companion.COL_PATH)
+            val pathColumn: TableColumn = jTableImages.ColumnModel.getColumn(ICImageListTableModel.Companion.COL_PATH)
             pathColumn.cellEditor = DefaultCellEditor(jComboBox)
             jComboBox.addItem("")
             jComboBox.setSelectedItem("")
@@ -243,15 +243,15 @@ class ImageListBrowser : JPanel {
         var rf: RowFilter<ICImageListTableModel?, Any?>? = null
         //If current expression doesn't parse, don't update.
         try {
-            if (jTextFieldFilename.getText() == "" && jTextFieldBarcode.getText() == "" && jTextFieldDrawerNumber.getText() == "") {
-                rf = RowFilter.regexFilter(jComboBox.getSelectedItem().toString(), ICImageListTableModel.Companion.COL_PATH)
+            if (jTextFieldFilename.Text == "" && jTextFieldBarcode.Text == "" && jTextFieldDrawerNumber.Text == "") {
+                rf = RowFilter.regexFilter(jComboBox.SelectedItem.toString(), ICImageListTableModel.Companion.COL_PATH)
             } else {
                 var rf_filename: RowFilter<ICImageListTableModel?, Any?>? = null
                 var rf_barcode: RowFilter<ICImageListTableModel?, Any?>? = null
                 var rf_drawer: RowFilter<ICImageListTableModel?, Any?>? = null
-                rf_filename = RowFilter.regexFilter(jTextFieldFilename.getText(), ICImageListTableModel.Companion.COL_FILENAME)
-                rf_barcode = RowFilter.regexFilter(jTextFieldBarcode.getText(), ICImageListTableModel.Companion.COL_BARCODE)
-                rf_drawer = RowFilter.regexFilter(jTextFieldDrawerNumber.getText(), ICImageListTableModel.Companion.COL_DRAWER)
+                rf_filename = RowFilter.regexFilter(jTextFieldFilename.Text, ICImageListTableModel.Companion.COL_FILENAME)
+                rf_barcode = RowFilter.regexFilter(jTextFieldBarcode.Text, ICImageListTableModel.Companion.COL_BARCODE)
+                rf_drawer = RowFilter.regexFilter(jTextFieldDrawerNumber.Text, ICImageListTableModel.Companion.COL_DRAWER)
                 val i: ArrayList<RowFilter<ICImageListTableModel?, Any?>?> = ArrayList<RowFilter<ICImageListTableModel?, Any?>?>()
                 i.add(rf_filename)
                 i.add(rf_barcode)
@@ -306,7 +306,7 @@ class ImageListBrowser : JPanel {
         get() {
             var result = 0
             if (jTableImages != null) {
-                result = jTableImages.getRowCount()
+                result = jTableImages.RowCount
             }
             return result
         }

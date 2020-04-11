@@ -88,7 +88,7 @@ class JobFileReconciliation : RunnableJob, Runnable {
     override fun start() {
         startTime = Date()
         status = RunStatus.STATUS_RUNNING
-        Singleton.getJobList().addJob(this)
+        Singleton.JobList.addJob(this)
         resultCounter = Counter()
         reconcileFiles()
         report(resultCounter!!)
@@ -99,10 +99,10 @@ class JobFileReconciliation : RunnableJob, Runnable {
         var imagebase: File? = null // place to start the scan from, imagebase directory for SCAN_ALL
         var startPoint: File? = null
         // If it isn't null, retrieve the image base directory from properties, and test for read access.
-        if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE) == null) {
-            JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Can't start scan.  Don't know where images are stored.  Set imagbase property.", "Can't Scan.", JOptionPane.ERROR_MESSAGE)
+        if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE) == null) {
+            JOptionPane.showMessageDialog(Singleton.MainFrame, "Can't start scan.  Don't know where images are stored.  Set imagbase property.", "Can't Scan.", JOptionPane.ERROR_MESSAGE)
         } else {
-            imagebase = File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
+            imagebase = File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
             if (imagebase != null) {
                 if (imagebase.canRead()) {
                     startPoint = imagebase
@@ -119,7 +119,7 @@ class JobFileReconciliation : RunnableJob, Runnable {
             for (i in containedFiles.indices) {
                 if (status != RunStatus.STATUS_TERMINATED) {
                     val fileToCheck = containedFiles[i]
-                    Singleton.getMainFrame().setStatusMessage("Reconciling: " + fileToCheck!!.name)
+                    Singleton.MainFrame.setStatusMessage("Reconciling: " + fileToCheck!!.name)
                     // Check to see if this is a directory
                     if (fileToCheck.isDirectory) {
                         if (fileToCheck.name == "thumbs") {
@@ -134,7 +134,7 @@ class JobFileReconciliation : RunnableJob, Runnable {
                         }
                     } else { // fileToCheck is a file.
 // does file to check match pattern of an image file.
-                        if (fileToCheck.name.matches(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEREGEX))) { // it is an image file.
+                        if (fileToCheck.name.matches(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEREGEX))) { // it is an image file.
                             counter.incrementFilesSeen()
                             // Check to see if this file is in the database.
                             val dbImage = ICImage()
@@ -149,7 +149,7 @@ class JobFileReconciliation : RunnableJob, Runnable {
                                 val ri: MutableIterator<ICImage?> = matches.iterator()
                                 while (ri.hasNext()) {
                                     val match: ICImage? = ri.next()
-                                    barcode.append(match.getSpecimen().getBarcode()).append(" ")
+                                    barcode.append(match.Specimen.Barcode).append(" ")
                                 }
                                 counter.incrementFilesDatabased()
                                 log!!.error("File with more than one database match by name and path")
@@ -164,7 +164,7 @@ class JobFileReconciliation : RunnableJob, Runnable {
                                     val ri: MutableIterator<ICImage?> = matches.iterator()
                                     while (ri.hasNext()) {
                                         val match: ICImage? = ri.next()
-                                        barcode.append(match.getSpecimen().getBarcode()).append(" ")
+                                        barcode.append(match.Specimen.Barcode).append(" ")
                                     }
                                 }
                                 counter.incrementFilesFailed()
@@ -187,8 +187,8 @@ class JobFileReconciliation : RunnableJob, Runnable {
         report += "Found  " + counter.filesSeen + " image files.\n"
         report += "Found  " + counter.filesDatabased + " image file database records.\n"
         report += "Found " + counter.filesFailed + " image files not in the database.\n"
-        Singleton.getMainFrame().setStatusMessage("File Reconciliation check complete")
-        val errorReportDialog = RunnableJobReportDialog(Singleton.getMainFrame(),
+        Singleton.MainFrame.setStatusMessage("File Reconciliation check complete")
+        val errorReportDialog = RunnableJobReportDialog(Singleton.MainFrame,
                 report,
                 counter.errors,
                 RunnableJobErrorTableModel.Companion.TYPE_FILE_RECONCILIATION,
@@ -214,7 +214,7 @@ class JobFileReconciliation : RunnableJob, Runnable {
      * Cleanup when job is complete.
      */
     private fun done() {
-        Singleton.getJobList().removeJob(this)
+        Singleton.JobList.removeJob(this)
     }
 
     /* (non-Javadoc)

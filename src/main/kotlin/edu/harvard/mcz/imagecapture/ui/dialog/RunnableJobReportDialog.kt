@@ -466,7 +466,7 @@ class RunnableJobReportDialog : JDialog {
         this.title = title
         thisDialog = this
         model = RunnableJobErrorTableModel(errors)
-        log.debug(model.getRowCount())
+        log.debug(model.RowCount)
         initialize()
         jTextArea.setText(resultsMessage)
         pack()
@@ -476,8 +476,8 @@ class RunnableJobReportDialog : JDialog {
         this.title = title
         thisDialog = this
         model = RunnableJobErrorTableModel(errors, listType)
-        log.debug(model.getRowCount())
-        log.debug(model.getColumnCount())
+        log.debug(model.RowCount)
+        log.debug(model.ColumnCount)
         log.debug(model.getColumnName(4))
         initialize()
         jTextArea.setText(resultsMessage)
@@ -502,9 +502,9 @@ class RunnableJobReportDialog : JDialog {
         this.setTitle(title)
         this.setContentPane(getJContentPane())
         this.pack()
-        val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize()
-        this.setLocation((screenSize.width - this.getWidth()) / 2,
-                (screenSize.height - this.getHeight()) / 2)
+        val screenSize: Dimension = Toolkit.DefaultToolkit.ScreenSize
+        this.setLocation((screenSize.width - this.Width) / 2,
+                (screenSize.height - this.Height) / 2)
     }
 
     /**
@@ -634,17 +634,17 @@ class RunnableJobReportDialog : JDialog {
         var out: PrintWriter? = null
         var writer: CSVPrinter? = null
         try {
-            val cols: Int = jTable.getModel().getColumnCount()
-            var csvFormat: CSVFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL).withHeaderComments(jTextArea.getText())
-            val model: TableModel = jTable.getModel()
-            csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL).withCommentMarker('*').withHeaderComments(jTextArea.getText())
+            val cols: Int = jTable.Model.ColumnCount
+            var csvFormat: CSVFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL).withHeaderComments(jTextArea.Text)
+            val model: TableModel = jTable.Model
+            csvFormat = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.ALL).withCommentMarker('*').withHeaderComments(jTextArea.Text)
             val titles = ArrayList<String?>()
             for (i in 0 until cols) {
                 titles.add(i, model.getColumnName(i))
             }
             csvFormat = csvFormat.withHeader(*titles.toTypedArray())
-            log.debug(jTextArea.getText())
-            log.debug(csvFormat.getHeaderComments())
+            log.debug(jTextArea.Text)
+            log.debug(csvFormat.HeaderComments)
             val now = Date()
             val dateFormat = SimpleDateFormat("yyyymmdd_HHmmss")
             val time: String = dateFormat.format(now)
@@ -652,17 +652,17 @@ class RunnableJobReportDialog : JDialog {
             out = PrintWriter(filename)
             writer = CSVPrinter(out, csvFormat)
             writer.flush()
-            val rows: Int = jTable.getModel().getRowCount()
+            val rows: Int = jTable.Model.RowCount
             for (i in 0 until rows) {
                 val values = ArrayList<String?>()
                 for (col in 0 until cols) {
-                    values.add(jTable.getModel().getValueAt(i, col) as String)
+                    values.add(jTable.Model.getValueAt(i, col) as String)
                 }
                 writer.printRecord(values)
             }
             writer.flush()
             writer.close()
-            JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Saved report to file: $filename", "Report to CSV file", JOptionPane.INFORMATION_MESSAGE)
+            JOptionPane.showMessageDialog(Singleton.MainFrame, "Saved report to file: $filename", "Report to CSV file", JOptionPane.INFORMATION_MESSAGE)
         } catch (e: IOException) {
             log.error(e)
         } finally {

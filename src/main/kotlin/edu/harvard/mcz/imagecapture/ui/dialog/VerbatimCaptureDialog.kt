@@ -476,34 +476,34 @@ class VerbatimCaptureDialog : JDialog, DataChangeListener {
     }
 
     protected fun setValues() {
-        lblBarcode.setText(specimen.getBarcode())
+        lblBarcode.setText(specimen.Barcode)
         lblCurrentid.setText(specimen.assembleScientificName())
-        textFieldVerbLocality.setText(specimen.getVerbatimLocality())
-        textFieldVerbDate.setText(specimen.getDateNos())
-        textFieldVerbCollector.setText(specimen.getVerbatimCollector())
-        textFieldVerbCollection.setText(specimen.getVerbatimCollection())
-        textFieldVerbNumbers.setText(specimen.getVerbatimNumbers())
-        textFieldVerbUnclassifiedText.setText(specimen.getVerbatimUnclassifiedText())
-        comboBoxWorkflowStatus.setSelectedItem(specimen.getWorkFlowStatus())
+        textFieldVerbLocality.setText(specimen.VerbatimLocality)
+        textFieldVerbDate.setText(specimen.DateNos)
+        textFieldVerbCollector.setText(specimen.VerbatimCollector)
+        textFieldVerbCollection.setText(specimen.VerbatimCollection)
+        textFieldVerbNumbers.setText(specimen.VerbatimNumbers)
+        textFieldVerbUnclassifiedText.setText(specimen.VerbatimUnclassifiedText)
+        comboBoxWorkflowStatus.setSelectedItem(specimen.WorkFlowStatus)
         try {
-            val i: MutableIterator<ICImage?> = specimen.getICImages().iterator()
+            val i: MutableIterator<ICImage?> = specimen.ICImages.iterator()
             var image: ICImage? = null
             var gotImg = false
             while (i.hasNext() && !gotImg) {
                 image = i.next()
                 gotImg = true
             }
-            var path: String = image.getPath()
+            var path: String = image.Path
             if (path == null) {
                 path = ""
             }
-            val anImageFile = File(assemblePathWithBase(path, image.getFilename()))
+            val anImageFile = File(assemblePathWithBase(path, image.Filename))
             val defaultTemplate: PositionTemplate = PositionTemplate.Companion.findTemplateForImage(image)
             val imagefile: BufferedImage = ImageIO.read(anImageFile)
-            val x: Int = defaultTemplate.getLabelPosition().width
-            val y: Int = defaultTemplate.getLabelPosition().height
-            val w: Int = defaultTemplate.getLabelSize().width
-            val h: Int = defaultTemplate.getLabelSize().height
+            val x: Int = defaultTemplate.LabelPosition.width
+            val y: Int = defaultTemplate.LabelPosition.height
+            val w: Int = defaultTemplate.LabelSize.width
+            val h: Int = defaultTemplate.LabelSize.height
             setPinLabelImage(imagefile.getSubimage(x, y, w, h))
             fitPinLabels()
         } catch (e: ImageLoadException) {
@@ -670,7 +670,7 @@ class VerbatimCaptureDialog : JDialog, DataChangeListener {
             gbc_lblWorkflowStatus.gridx = 0
             gbc_lblWorkflowStatus.gridy = 9
             panel.add(lblWorkflowStatus, gbc_lblWorkflowStatus)
-            comboBoxWorkflowStatus = JComboBox<String?>(WorkFlowStatus.getVerbatimWorkFlowStatusValues())
+            comboBoxWorkflowStatus = JComboBox<String?>(WorkFlowStatus.VerbatimWorkFlowStatusValues)
             val gbc_comboBoxWorkflowStatus = GridBagConstraints()
             gbc_comboBoxWorkflowStatus.insets = Insets(0, 0, 5, 0)
             gbc_comboBoxWorkflowStatus.gridwidth = 2
@@ -799,7 +799,7 @@ class VerbatimCaptureDialog : JDialog, DataChangeListener {
                 override fun actionPerformed(e: ActionEvent?) {
                     save()
                     if (specimenController.switchToPreviousSpecimenInTable()) {
-                        specimen = specimenController.getSpecimen()
+                        specimen = specimenController.Specimen
                         setValues()
                     }
                 }
@@ -814,7 +814,7 @@ class VerbatimCaptureDialog : JDialog, DataChangeListener {
                 override fun actionPerformed(e: ActionEvent?) {
                     save()
                     if (specimenController.switchToNextSpecimenInTable()) {
-                        specimen = specimenController.getSpecimen()
+                        specimen = specimenController.Specimen
                         setValues()
                     }
                 }
@@ -862,7 +862,7 @@ class VerbatimCaptureDialog : JDialog, DataChangeListener {
         imagePanelPinLabels.setImage(anImage as BufferedImage?)
         imagePanelPinLabels.zoomToFit()
         this.pack()
-        if (imagePanelPinLabels.getPreferredSize().height > 500 || imagePanelPinLabels.getPreferredSize().width > 500) {
+        if (imagePanelPinLabels.PreferredSize.height > 500 || imagePanelPinLabels.PreferredSize.width > 500) {
             imagePanelPinLabels.setPreferredSize(Dimension(500, 500))
         }
         imagePanelPinLabels.setMaximumSize(Dimension(500, 500))
@@ -871,20 +871,20 @@ class VerbatimCaptureDialog : JDialog, DataChangeListener {
     protected fun save(): Boolean {
         var result = false
         try {
-            specimen.setVerbatimLocality(textFieldVerbLocality.getText())
-            specimen.setDateNos(textFieldVerbDate.getText())
-            specimen.setVerbatimCollector(textFieldVerbCollector.getText())
-            specimen.setVerbatimCollection(textFieldVerbCollection.getText())
-            specimen.setVerbatimNumbers(textFieldVerbNumbers.getText())
-            specimen.setVerbatimUnclassifiedText(textFieldVerbUnclassifiedText.getText())
+            specimen.setVerbatimLocality(textFieldVerbLocality.Text)
+            specimen.setDateNos(textFieldVerbDate.Text)
+            specimen.setVerbatimCollector(textFieldVerbCollector.Text)
+            specimen.setVerbatimCollection(textFieldVerbCollection.Text)
+            specimen.setVerbatimNumbers(textFieldVerbNumbers.Text)
+            specimen.setVerbatimUnclassifiedText(textFieldVerbUnclassifiedText.Text)
             val questions = StringBuffer()
-            questions.append(specimen.getQuestions())
-            if (textFieldQuestions.getText() != null && textFieldQuestions.getText().trim({ it <= ' ' }).length > 0) {
-                if (!questions.toString().contains(textFieldQuestions.getText())) {
-                    questions.append(Verbatim.SEPARATOR).append(textFieldQuestions.getText())
+            questions.append(specimen.Questions)
+            if (textFieldQuestions.Text != null && textFieldQuestions.Text.trim({ it <= ' ' }).length > 0) {
+                if (!questions.toString().contains(textFieldQuestions.Text)) {
+                    questions.append(Verbatim.SEPARATOR).append(textFieldQuestions.Text)
                 }
             }
-            val workflowstatus = (comboBoxWorkflowStatus.getSelectedItem() as String)
+            val workflowstatus = (comboBoxWorkflowStatus.SelectedItem as String)
             specimen.setWorkFlowStatus(workflowstatus)
             specimen.setQuestions(questions.toString())
             specimenController.save()
@@ -897,9 +897,9 @@ class VerbatimCaptureDialog : JDialog, DataChangeListener {
     }
 
     protected fun appendToQuestions(newQuestion: String) {
-        if (!textFieldQuestions.getText().contains(newQuestion)) {
+        if (!textFieldQuestions.Text.contains(newQuestion)) {
             val questions = StringBuffer()
-            questions.append(textFieldQuestions.getText()).append(Verbatim.SEPARATOR).append(newQuestion)
+            questions.append(textFieldQuestions.Text).append(Verbatim.SEPARATOR).append(newQuestion)
             textFieldQuestions.setText(questions.toString())
         }
     }

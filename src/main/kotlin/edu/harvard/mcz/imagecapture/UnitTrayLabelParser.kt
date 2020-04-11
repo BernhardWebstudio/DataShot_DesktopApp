@@ -105,16 +105,16 @@ class UnitTrayLabelParser(private var text: String?) : TaxonNameReturner, Drawer
         val label: UnitTrayLabel = UnitTrayLabel.Companion.createFromJSONString(json)
         if (label != null) {
             result = true
-            family = label.getFamily()
-            subfamily = label.getSubfamily()
-            tribe = label.getTribe()
-            genus = label.getGenus()
-            specificEpithet = label.getSpecificEpithet()
-            subspecificEpithet = label.getSubspecificEpithet()
-            authorship = label.getAuthorship()
-            infraspecificEpithet = label.getInfraspecificEpithet()
-            infraspecificRank = label.getInfraspecificRank()
-            drawerNumber = label.getDrawerNumber()
+            family = label.Family
+            subfamily = label.Subfamily
+            tribe = label.Tribe
+            genus = label.Genus
+            specificEpithet = label.SpecificEpithet
+            subspecificEpithet = label.SubspecificEpithet
+            authorship = label.Authorship
+            infraspecificEpithet = label.InfraspecificEpithet
+            infraspecificRank = label.InfraspecificRank
+            drawerNumber = label.DrawerNumber
             isParsedFromJSON = true
         }
         return result
@@ -239,7 +239,7 @@ class UnitTrayLabelParser(private var text: String?) : TaxonNameReturner, Drawer
                 try {
                     setAuthorship(lines[lines.size - 2]!!.trim { it <= ' ' })
                     setDrawerNumber(lines[lines.size - 1]!!.trim { it <= ' ' })
-                    if (lines[lines.size - 2]!!.trim { it <= ' ' }.matches(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_REGEX_DRAWERNUMBER))) {
+                    if (lines[lines.size - 2]!!.trim { it <= ' ' }.matches(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_REGEX_DRAWERNUMBER))) {
                         setAuthorship(lines[lines.size - 3]!!.trim { it <= ' ' })
                         setDrawerNumber(lines[lines.size - 2]!!.trim { it <= ' ' })
                     }
@@ -261,7 +261,7 @@ class UnitTrayLabelParser(private var text: String?) : TaxonNameReturner, Drawer
                 var drawernumberOnLine = -1
                 var authorshipOnLine = -1
                 for (i in lines.indices) {
-                    if (lines[i]!!.trim { it <= ' ' }.matches(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_REGEX_DRAWERNUMBER))) {
+                    if (lines[i]!!.trim { it <= ' ' }.matches(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_REGEX_DRAWERNUMBER))) {
                         drawernumberOnLine = i
                     }
                     //   \(?[A-Za-z& ]*,[0-9]{4}\)?
@@ -423,7 +423,7 @@ class UnitTrayLabelParser(private var text: String?) : TaxonNameReturner, Drawer
      * `
      * Specimen s = new Specimen();
      * UnitTrayLabelParser p = new UnitTrayLabelParser(aStringFromOCR);
-     * s.setFamily(p.getFamily());
+     * s.setFamily(p.Family);
     ` *
      *
      * @param aStringToParse

@@ -98,24 +98,24 @@ class JobVerbatimFieldLoad : RunnableJob, Runnable {
      */
     override fun start() {
         startTime = Date()
-        Singleton.getJobList().addJob(this)
+        Singleton.JobList.addJob(this)
         status = RunStatus.STATUS_RUNNING
         var selectedFilename = ""
         if (file == null) {
             val fileChooser = JFileChooser()
             fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES)
-            if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTLOADPATH) != null) {
-                fileChooser.setCurrentDirectory(File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTLOADPATH)))
+            if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTLOADPATH) != null) {
+                fileChooser.setCurrentDirectory(File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTLOADPATH)))
             }
-            val returnValue: Int = fileChooser.showOpenDialog(Singleton.getMainFrame())
+            val returnValue: Int = fileChooser.showOpenDialog(Singleton.MainFrame)
             if (returnValue == JFileChooser.APPROVE_OPTION) {
-                file = fileChooser.getSelectedFile()
+                file = fileChooser.SelectedFile
             }
         }
         if (file != null) {
             log!!.debug("Selected file to load: " + file!!.name + ".")
             if (file!!.exists() && file!!.isFile && file!!.canRead()) { // Save location
-                Singleton.getProperties().getProperties().setProperty(ImageCaptureProperties.Companion.KEY_LASTLOADPATH, file!!.path)
+                Singleton.Properties.Properties.setProperty(ImageCaptureProperties.Companion.KEY_LASTLOADPATH, file!!.path)
                 selectedFilename = file!!.name
                 var headers = arrayOf<String?>()
                 var csvFormat = CSVFormat.DEFAULT.withHeader(*headers)
@@ -123,7 +123,7 @@ class JobVerbatimFieldLoad : RunnableJob, Runnable {
                 try {
                     rows = readRows(file!!, csvFormat)
                 } catch (e: FileNotFoundException) {
-                    JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Unable to load data, file not found: " + e.message, "Error: File Not Found", JOptionPane.OK_OPTION)
+                    JOptionPane.showMessageDialog(Singleton.MainFrame, "Unable to load data, file not found: " + e.message, "Error: File Not Found", JOptionPane.OK_OPTION)
                     errors!!.append("File not found ").append(e.message).append("\n")
                     log.error(e.message, e)
                 } catch (e: IOException) {
@@ -167,7 +167,7 @@ class JobVerbatimFieldLoad : RunnableJob, Runnable {
                                 && headerList.contains("questions") && headerList.contains("barcode")) {
                             log.debug("Input file matches case 1: Unclassified text only.")
                             // Allowed case 1a: unclassified text only
-                            val confirm: Int = JOptionPane.showConfirmDialog(Singleton.getMainFrame(),
+                            val confirm: Int = JOptionPane.showConfirmDialog(Singleton.MainFrame,
                                     "Confirm load from file $selectedFilename ($rows rows) with just barcode and verbatimUnclassifiedText", "Verbatim unclassified Field found for load", JOptionPane.OK_CANCEL_OPTION)
                             if (confirm == JOptionPane.OK_OPTION) {
                                 var barcode = ""
@@ -206,7 +206,7 @@ class JobVerbatimFieldLoad : RunnableJob, Runnable {
                                 && headerList.contains("verbatimClusterIdentifier")) {
                             log.debug("Input file matches case 1: Unclassified text only (with cluster identifier).")
                             // Allowed case 1b: unclassified text only (including cluster identifier)
-                            val confirm: Int = JOptionPane.showConfirmDialog(Singleton.getMainFrame(),
+                            val confirm: Int = JOptionPane.showConfirmDialog(Singleton.MainFrame,
                                     "Confirm load from file $selectedFilename ($rows rows) with just barcode and verbatimUnclassifiedText", "Verbatim unclassified Field found for load", JOptionPane.OK_CANCEL_OPTION)
                             if (confirm == JOptionPane.OK_OPTION) {
                                 var barcode = ""
@@ -246,7 +246,7 @@ class JobVerbatimFieldLoad : RunnableJob, Runnable {
                                 && headerList.contains("verbatimCollector") && headerList.contains("verbatimCollection")) { // Allowed case two, transcription into verbatim fields, must be exact list of all
 // verbatim fields, not including cluster identifier or other metadata.
                             log.debug("Input file matches case 2: Full list of verbatim fields.")
-                            val confirm: Int = JOptionPane.showConfirmDialog(Singleton.getMainFrame(),
+                            val confirm: Int = JOptionPane.showConfirmDialog(Singleton.MainFrame,
                                     "Confirm load from file $selectedFilename ($rows rows) with just barcode and verbatim fields.", "Verbatim Fields found for load", JOptionPane.OK_CANCEL_OPTION)
                             if (confirm == JOptionPane.OK_OPTION) {
                                 var barcode = ""
@@ -292,16 +292,16 @@ class JobVerbatimFieldLoad : RunnableJob, Runnable {
                             try {
                                 val headerCheck: HeaderCheckResult = fl.checkHeaderList(headerList)
                                 if (headerCheck.isResult()) {
-                                    val confirm: Int = JOptionPane.showConfirmDialog(Singleton.getMainFrame(),
-                                            "Confirm load from file " + selectedFilename + " (" + rows + " rows) with headers: \n" + headerCheck.getMessage().replace(":".toRegex(), ":\n"), "Fields found for load", JOptionPane.OK_CANCEL_OPTION)
+                                    val confirm: Int = JOptionPane.showConfirmDialog(Singleton.MainFrame,
+                                            "Confirm load from file " + selectedFilename + " (" + rows + " rows) with headers: \n" + headerCheck.Message.replace(":".toRegex(), ":\n"), "Fields found for load", JOptionPane.OK_CANCEL_OPTION)
                                     if (confirm == JOptionPane.OK_OPTION) {
                                         headersOK = true
                                     } else {
                                         errors!!.append("Load canceled by user.").append("\n")
                                     }
                                 } else {
-                                    val confirm: Int = JOptionPane.showConfirmDialog(Singleton.getMainFrame(),
-                                            "Problem found with headers in file, try to load anyway?\nHeaders: \n" + headerCheck.getMessage().replace(":".toRegex(), ":\n"), "Problem in fields for load", JOptionPane.OK_CANCEL_OPTION)
+                                    val confirm: Int = JOptionPane.showConfirmDialog(Singleton.MainFrame,
+                                            "Problem found with headers in file, try to load anyway?\nHeaders: \n" + headerCheck.Message.replace(":".toRegex(), ":\n"), "Problem in fields for load", JOptionPane.OK_CANCEL_OPTION)
                                     if (confirm == JOptionPane.OK_OPTION) {
                                         headersOK = true
                                     } else {
@@ -310,7 +310,7 @@ class JobVerbatimFieldLoad : RunnableJob, Runnable {
                                 }
                             } catch (e: LoadException) {
                                 errors!!.append("Error loading data: \n").append(e.message).append("\n")
-                                JOptionPane.showMessageDialog(Singleton.getMainFrame(), e.message!!.replace(":".toRegex(), ":\n"), "Error Loading Data: Problem Fields", JOptionPane.ERROR_MESSAGE)
+                                JOptionPane.showMessageDialog(Singleton.MainFrame, e.message!!.replace(":".toRegex(), ":\n"), "Error Loading Data: Problem Fields", JOptionPane.ERROR_MESSAGE)
                                 log.error(e.message, e)
                             }
                             if (headersOK) {
@@ -372,7 +372,7 @@ class JobVerbatimFieldLoad : RunnableJob, Runnable {
                     csvParser.close()
                     reader.close()
                 } catch (e: FileNotFoundException) {
-                    JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Unable to load data, file not found: " + e.message, "Error: File Not Found", JOptionPane.OK_OPTION)
+                    JOptionPane.showMessageDialog(Singleton.MainFrame, "Unable to load data, file not found: " + e.message, "Error: File Not Found", JOptionPane.OK_OPTION)
                     errors!!.append("File not found ").append(e.message).append("\n")
                     log.error(e.message, e)
                 } catch (e: IOException) {
@@ -429,7 +429,7 @@ class JobVerbatimFieldLoad : RunnableJob, Runnable {
     protected fun done() {
         status = RunStatus.STATUS_DONE
         notifyListeners(RunStatus.STATUS_DONE)
-        Singleton.getJobList().removeJob(this)
+        Singleton.JobList.removeJob(this)
     }
 
     private fun report(selectedFilename: String?) {
@@ -438,9 +438,9 @@ class JobVerbatimFieldLoad : RunnableJob, Runnable {
         report += "Examined " + counter!!.specimens + " specimens.\n"
         report += "Saved updated values for " + counter!!.specimensUpdated + " specimens.\n"
         report += errors.toString()
-        Singleton.getMainFrame().setStatusMessage("Load data from file complete.")
+        Singleton.MainFrame.setStatusMessage("Load data from file complete.")
         val errorReportDialog = RunnableJobReportDialog(
-                Singleton.getMainFrame(),
+                Singleton.MainFrame,
                 report, counter!!.errors,
                 RunnableJobErrorTableModel.Companion.TYPE_LOAD,
                 "Load Data from file Report"
@@ -449,7 +449,7 @@ class JobVerbatimFieldLoad : RunnableJob, Runnable {
     }
 
     protected fun notifyListeners(anEvent: Int) {
-        Singleton.getMainFrame().notifyListener(anEvent, this)
+        Singleton.MainFrame.notifyListener(anEvent, this)
         val i: MutableIterator<RunnerListener?> = listeners!!.iterator()
         while (i.hasNext()) {
             i.next().notifyListener(anEvent, this)

@@ -469,7 +469,7 @@ class JIntegerField : JTextField, ActionListener {
 
     private fun parseField() { // Parse field
         try {
-            setValue(this.getText())
+            setValue(this.Text)
         } catch (e: NumberFormatException) { // Reset field to previous value
             if (value != null) setValue(value.intValue()) else setValue(0)
         }
@@ -487,7 +487,7 @@ class JIntegerField : JTextField, ActionListener {
         if (lowerBound != -Int.MAX_VALUE && upperBound != Int.MAX_VALUE) {
             this.setColumns(1 + Math.max(Integer.toString(lowerBound).length, Integer.toString(upperBound).length))
         } else {
-            this.setColumns(1 + this.getText().length)
+            this.setColumns(1 + this.Text.length)
         }
     }
 

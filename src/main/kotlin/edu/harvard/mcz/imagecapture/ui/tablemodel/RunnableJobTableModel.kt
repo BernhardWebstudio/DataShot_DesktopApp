@@ -471,11 +471,11 @@ class RunnableJobTableModel : AbstractTableModel(), RunnerListener {
         try {
             when (columnIndex) {
                 0 -> returnvalue = rowIndex
-                1 -> returnvalue = (jobs!!.toTypedArray().get(rowIndex) as RunnableJob).getName()
-                2 -> returnvalue = if ((jobs!!.toTypedArray().get(rowIndex) as RunnableJob).getStartTime() == null) {
+                1 -> returnvalue = (jobs!!.toTypedArray().get(rowIndex) as RunnableJob).Name
+                2 -> returnvalue = if ((jobs!!.toTypedArray().get(rowIndex) as RunnableJob).StartTime == null) {
                     "----"
                 } else {
-                    DateFormat.getTimeInstance().format((jobs.toTypedArray().get(rowIndex) as RunnableJob).getStartTime())
+                    DateFormat.TimeInstance.format((jobs.toTypedArray().get(rowIndex) as RunnableJob).StartTime)
                 }
                 3 -> {
                     returnvalue = (jobs!!.toTypedArray().get(rowIndex) as RunnableJob).percentComplete()

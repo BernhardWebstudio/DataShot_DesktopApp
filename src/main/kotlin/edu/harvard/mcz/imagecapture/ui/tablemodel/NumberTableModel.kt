@@ -455,8 +455,8 @@ class NumberTableModel : AbstractDeleteableTableModel {
         }
         var returnvalue: Any? = null
         when (columnIndex) {
-            0 -> returnvalue = numbers!!.toTypedArray()[rowIndex].getNumber()
-            COLUMN_TYPE -> returnvalue = numbers!!.toTypedArray()[rowIndex].getNumberType()
+            0 -> returnvalue = numbers!!.toTypedArray()[rowIndex].Number
+            COLUMN_TYPE -> returnvalue = numbers!!.toTypedArray()[rowIndex].NumberType
         }
         return returnvalue
     }

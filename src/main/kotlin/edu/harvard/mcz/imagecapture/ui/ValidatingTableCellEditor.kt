@@ -424,13 +424,13 @@ import edu.harvard.mcz.imagecapture.ui.tablemodel.PositionTemplateTableModel
  * <pre>
  * JTextField field = new JTextField();
  * field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
- * jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));
+ * jTableCollectors.ColumnModel.getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));
 </pre> *
  */
 class ValidatingTableCellEditor(textField: JTextField) : DefaultCellEditor(textField) {
     private val field: JTextField?
     val cellEditorValue: Any?
-        get() = field.getText()
+        get() = field.Text
 
     //	/* (non-Javadoc)
 //	 * @see javax.swing.DefaultCellEditor#cancelCellEditing()
@@ -448,7 +448,7 @@ class ValidatingTableCellEditor(textField: JTextField) : DefaultCellEditor(textF
      * @see javax.swing.DefaultCellEditor#stopCellEditing()
      */
     override fun stopCellEditing(): Boolean {
-        return if (field.getInputVerifier().shouldYieldFocus(field)) {
+        return if (field.InputVerifier.shouldYieldFocus(field)) {
             field.setBackground(Color.WHITE)
             super.stopCellEditing()
         } else {

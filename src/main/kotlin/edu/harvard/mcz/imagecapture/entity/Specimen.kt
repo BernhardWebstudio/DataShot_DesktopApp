@@ -651,7 +651,7 @@ import edu.harvard.mcz.imagecapture.entity.LatLong?>?
 
     fun attachNewPart() {
         val newPart = SpecimenPart()
-        newPart.setPreserveMethod(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_DEFAULT_PREPARATION))
+        newPart.setPreserveMethod(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_DEFAULT_PREPARATION))
         newPart.setSpecimen(this)
         val spls = SpecimenPartLifeCycle()
         try {

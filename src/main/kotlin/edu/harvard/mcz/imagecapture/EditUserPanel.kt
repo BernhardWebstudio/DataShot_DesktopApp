@@ -69,11 +69,11 @@ class EditUserPanel : JPanel() {
         if (aUser != null) {
             user = aUser
             jTextFieldUsername.setText(user.username)
-            jTextFieldFullName.setText(user.getFullname())
-            jTextFieldAbout.setText(user.getDescription())
-            jComboBox.setSelectedItem(user.getRole())
+            jTextFieldFullName.setText(user.Fullname)
+            jTextFieldAbout.setText(user.Description)
+            jComboBox.setSelectedItem(user.Role)
         }
-        if (user.getUserid() == null) {
+        if (user.Userid == null) {
             jPasswordField.setVisible(true)
             jPasswordField1.setVisible(true)
             jPasswordField.setEnabled(true)
@@ -104,7 +104,7 @@ class EditUserPanel : JPanel() {
                 message = message + "Password and Password Again don't match.\n"
             }
             // Check for sufficiently complex password for new users.
-            val pw = String(jPasswordField.getPassword())
+            val pw = String(jPasswordField.Password)
             if (Users.Companion.testProposedPassword(pw, user.username)) {
                 user.setHash(HashUtility.getSHA1Hash(pw))
             } else {
@@ -117,35 +117,35 @@ class EditUserPanel : JPanel() {
 // admin when changing other aspects of a user.
 // This will become desirable, but not yet.
 // Are required fields populated?
-        if (jTextFieldUsername.getText() == "") {
+        if (jTextFieldUsername.Text == "") {
             okToSave = false
             message = message + "An email is required.\n"
         }
-        if (jTextFieldFullName.getText() == "") {
+        if (jTextFieldFullName.Text == "") {
             okToSave = false
             message = message + "A full name is required.\n"
         }
         if (!okToSave) { // warn
             message = "Error. Can't Save.\n$message"
-            JOptionPane.showMessageDialog(Singleton.getMainFrame(), message, "Error. Can't save.", JOptionPane.OK_OPTION)
+            JOptionPane.showMessageDialog(Singleton.MainFrame, message, "Error. Can't save.", JOptionPane.OK_OPTION)
         } else { // Save
             val uls = UsersLifeCycle()
-            user.setUsername(jTextFieldUsername.getText())
-            user.setFullname(jTextFieldFullName.getText())
-            user.setDescription(jTextFieldAbout.getText())
-            if (jComboBox.getSelectedIndex() == -1 && jComboBox.getSelectedItem() == null) {
+            user.setUsername(jTextFieldUsername.Text)
+            user.setFullname(jTextFieldFullName.Text)
+            user.setDescription(jTextFieldAbout.Text)
+            if (jComboBox.SelectedIndex == -1 && jComboBox.SelectedItem == null) {
                 user.setRole(Users.Companion.ROLE_DATAENTRY)
             } else {
-                user.setRole(jComboBox.getSelectedItem().toString())
+                user.setRole(jComboBox.SelectedItem.toString())
             }
             try {
-                if (user.getUserid() == null) {
+                if (user.Userid == null) {
                     uls.persist(user)
                 } else {
                     uls.attachDirty(user)
                 }
-                message = "Saved " + user.getFullname()
-                Singleton.getMainFrame().setStatusMessage(message)
+                message = "Saved " + user.Fullname
+                Singleton.MainFrame.setStatusMessage(message)
             } catch (e: SaveFailedException) { // TODO Auto-generated catch block
                 e.printStackTrace()
             }
@@ -358,11 +358,11 @@ class EditUserPanel : JPanel() {
                 jButtonSetPassword.setText("Set New Password")
                 jButtonSetPassword.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
-                        var suggestion: String = user.username + user.getFullname() + Math.random()
+                        var suggestion: String = user.username + user.Fullname + Math.random()
                         suggestion = HashUtility.getSHA1Hash(suggestion)
                         suggestion.substring(1, 15)
-                        val pw = (JOptionPane.showInputDialog(Singleton.getMainFrame(),
-                                "Set a new password for " + user.getFullname() + " (at least 10 characters)",
+                        val pw = (JOptionPane.showInputDialog(Singleton.MainFrame,
+                                "Set a new password for " + user.Fullname + " (at least 10 characters)",
                                 "Change password for " + user.username,
                                 JOptionPane.QUESTION_MESSAGE,
                                 null,
@@ -372,7 +372,7 @@ class EditUserPanel : JPanel() {
                             if (Users.Companion.testProposedPassword(pw, user.username)) {
                                 user.setHash(HashUtility.getSHA1Hash(pw))
                             } else {
-                                JOptionPane.showMessageDialog(Singleton.getMainFrame(),
+                                JOptionPane.showMessageDialog(Singleton.MainFrame,
                                         "Password is not complex enough" + Users.Companion.PASSWORD_RULES_MESSAGE, "Password Not Changed.",
                                         JOptionPane.ERROR_MESSAGE)
                             }

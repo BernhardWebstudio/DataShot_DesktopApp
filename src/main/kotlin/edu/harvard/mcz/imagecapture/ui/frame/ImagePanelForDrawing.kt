@@ -431,8 +431,8 @@ class ImagePanelForDrawing : ImagePanel(), Serializable {
      */
     fun drawBox(upperLeft: Dimension?, size: Dimension?, color: Color?) {
         if (upperLeft != null && size != null && color != null) {
-            val g: Graphics2D = super.getGraphics() as Graphics2D?
-            val z: Double = super.getZoom()
+            val g: Graphics2D = super.Graphics as Graphics2D?
+            val z: Double = super.Zoom
             val x = (upperLeft.width * z) as Int
             val y = (upperLeft.height * z) as Int
             val width = (size.width * z) as Int
@@ -454,8 +454,8 @@ class ImagePanelForDrawing : ImagePanel(), Serializable {
      */
     fun drawBox(upperLeft: Dimension?, size: Dimension?, color: Color?, stroke: Stroke?) {
         if (upperLeft != null && size != null && color != null) {
-            val g: Graphics2D = super.getGraphics() as Graphics2D?
-            val z: Double = super.getZoom()
+            val g: Graphics2D = super.Graphics as Graphics2D?
+            val z: Double = super.Zoom
             val x = (upperLeft.width * z) as Int
             val y = (upperLeft.height * z) as Int
             val width = (size.width * z) as Int

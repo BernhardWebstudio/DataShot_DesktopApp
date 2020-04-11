@@ -141,8 +141,8 @@ class PositionTemplateEditor : JFrame {
     fun setTemplate(aTemplateId: String) {
         template = PositionTemplate(aTemplateId)
         jTextFieldTemplateId.setText(aTemplateId)
-        jTextFieldName.setText(template.getName())
-        if (template.getImageSize() == null) {
+        jTextFieldName.setText(template.Name)
+        if (template.ImageSize == null) {
             jTextField2.setText("Any Size")
             controlBarcode.setText("No Value")
             controlText.setText("No Value")
@@ -151,11 +151,11 @@ class PositionTemplateEditor : JFrame {
             controlSpecimen.setText("No Value")
             controlUTBarcode.setText("No Value")
         } else {
-            jTextField2.setText("Width=" + template.getImageSize().width + " Height=" + template.getImageSize().height)
+            jTextField2.setText("Width=" + template.ImageSize.width + " Height=" + template.ImageSize.height)
             setButtonTexts()
-            if (template.getReferenceImage() != null) {
+            if (template.ReferenceImage != null) {
                 try {
-                    setImageFile(File(template.getReferenceImageFilePath()))
+                    setImageFile(File(template.ReferenceImageFilePath))
                 } catch (e: IOException) {
                     log!!.error("Failed to load default image for template.")
                     log.error(e)
@@ -440,14 +440,14 @@ class PositionTemplateEditor : JFrame {
                 override fun actionPerformed(e: ActionEvent?) {
                     jLabelFeedback.setText(" ")
                     if (template!!.isEditable()) {
-                        template.setTemplateId(jTextFieldTemplateId.getText())
-                        template.setTemplateName(jTextFieldName.getText())
-                        template.setImageSize(imagePanelForDrawing.getImageSize())
+                        template.setTemplateId(jTextFieldTemplateId.Text)
+                        template.setTemplateName(jTextFieldName.Text)
+                        template.setImageSize(imagePanelForDrawing.ImageSize)
                         try {
-                            if (template.getTemplateId().trim({ it <= ' ' }) == "") {
+                            if (template.TemplateId.trim({ it <= ' ' }) == "") {
                                 throw BadTemplateException("Template ID can't be blank.")
                             }
-                            if (template!!.getReferenceImage() == null) {
+                            if (template!!.ReferenceImage == null) {
                                 val ils = ICImageLifeCycle()
                                 val imageToFind = ICImage()
                                 imageToFind.setFilename(referenceImageFilename)
@@ -459,11 +459,11 @@ class PositionTemplateEditor : JFrame {
                                     newImage.setFilename(referenceImageFilename)
                                     // path should be relative to the base path
 // just substituting won't work for images off the base path.
-                                    val startPointName: String = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE)
+                                    val startPointName: String = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE)
                                     newImage.setPath(
                                             referenceImagePath!!.replace(startPointName.toRegex(), "").replace(referenceImageFilename + "$".toRegex(), "")
                                     )
-                                    newImage.setTemplateId(template.getTemplateId())
+                                    newImage.setTemplateId(template.TemplateId)
                                     ils.persist(newImage)
                                     if (referenceImageFilename != null) {
                                         jTextFieldImageFileName.setText(referenceImageFilename)
@@ -474,7 +474,7 @@ class PositionTemplateEditor : JFrame {
 //Test images IMG_00005.jpg and IMG_00001.jpg suggest that overlapping templates might
 //be needed - where all parameters except extent of barcode are the same.
                             template!!.persist()
-                            jLabelFeedback.setText("Saved " + template.getTemplateId())
+                            jLabelFeedback.setText("Saved " + template.TemplateId)
                         } catch (e1: BadTemplateException) {
                             JOptionPane.showMessageDialog(thisFrame,
                                     "Error. Unable to save template, invalid data. " + e1.message,
@@ -553,12 +553,12 @@ class PositionTemplateEditor : JFrame {
      * Set the text for each button as the position and size of the relevant portion of the template.
      */
     private fun setButtonTexts() {
-        controlBarcode.setText("UL=" + template.getBarcodePosition().width + "," + template.getBarcodePosition().height + " W/H=" + template.getBarcodeSize().width + "," + template.getBarcodeSize().height)
-        controlText.setText("UL=" + template.getTextPosition().width + "," + template.getTextPosition().height + " W/H=" + template.getTextSize().width + "," + template.getTextSize().height)
-        controlLabel.setText("UL=" + template.getLabelPosition().width + "," + template.getLabelPosition().height + " W/H=" + template.getLabelSize().width + "," + template.getLabelSize().height)
-        controlUTLabels.setText("UL=" + template.getUTLabelsPosition().width + "," + template.getUTLabelsPosition().height + " W/H=" + template.getUTLabelsSize().width + "," + template.getUTLabelsSize().height)
-        controlSpecimen.setText("UL=" + template.getSpecimenPosition().width + "," + template.getSpecimenPosition().height + " W/H=" + template.getSpecimenSize().width + "," + template.getSpecimenSize().height)
-        controlUTBarcode.setText("UL=" + template.getUtBarcodePosition().width + "," + template.getUtBarcodePosition().height + " W/H=" + template.getUtBarcodeSize().width + "," + template.getUtBarcodeSize().height)
+        controlBarcode.setText("UL=" + template.BarcodePosition.width + "," + template.BarcodePosition.height + " W/H=" + template.BarcodeSize.width + "," + template.BarcodeSize.height)
+        controlText.setText("UL=" + template.TextPosition.width + "," + template.TextPosition.height + " W/H=" + template.TextSize.width + "," + template.TextSize.height)
+        controlLabel.setText("UL=" + template.LabelPosition.width + "," + template.LabelPosition.height + " W/H=" + template.LabelSize.width + "," + template.LabelSize.height)
+        controlUTLabels.setText("UL=" + template.UTLabelsPosition.width + "," + template.UTLabelsPosition.height + " W/H=" + template.UTLabelsSize.width + "," + template.UTLabelsSize.height)
+        controlSpecimen.setText("UL=" + template.SpecimenPosition.width + "," + template.SpecimenPosition.height + " W/H=" + template.SpecimenSize.width + "," + template.SpecimenSize.height)
+        controlUTBarcode.setText("UL=" + template.UtBarcodePosition.width + "," + template.UtBarcodePosition.height + " W/H=" + template.UtBarcodeSize.width + "," + template.UtBarcodeSize.height)
     }
 
     /**
@@ -576,8 +576,8 @@ class PositionTemplateEditor : JFrame {
                 jMenuItem.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
                         template = PositionTemplate(true)
-                        template.setImageSize(imagePanelForDrawing.getImageSize())
-                        jTextField2.setText("Width=" + template.getImageSize().width + " Height=" + template.getImageSize().height)
+                        template.setImageSize(imagePanelForDrawing.ImageSize)
+                        jTextField2.setText("Width=" + template.ImageSize.width + " Height=" + template.ImageSize.height)
                         setButtonTexts()
                         drawLayers()
                         jButtonSave.setEnabled(template.isEditable())
@@ -608,7 +608,7 @@ class PositionTemplateEditor : JFrame {
                 jMenuItem1.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
                         jLabelFeedback.setText("")
-                        val imageFile: File = FileUtility.askForImageFile(File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH)))
+                        val imageFile: File = FileUtility.askForImageFile(File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH)))
                         if (imageFile != null) {
                             jLabelFeedback.setText("Loading...")
                             try {
@@ -682,14 +682,14 @@ class PositionTemplateEditor : JFrame {
                     override fun actionPerformed(e: ActionEvent?) {
                         try {
                             val dialog = PositionTemplateBoxDialog(
-                                    thisFrame, template.getImageSize(),
-                                    template.getBarcodeULPosition(),
-                                    template.getBarcodeSize(),
-                                    "Barcode in " + template.getTemplateId())
+                                    thisFrame, template.ImageSize,
+                                    template.BarcodeULPosition,
+                                    template.BarcodeSize,
+                                    "Barcode in " + template.TemplateId)
                             dialog.setVisible(true)
                             if (template!!.isEditable()) {
-                                template.setBarcodePosition(dialog.getUL())
-                                template.setBarcodeSize(dialog.getSize())
+                                template.setBarcodePosition(dialog.UL)
+                                template.setBarcodeSize(dialog.Size)
                                 setButtonTexts()
                             }
                         } catch (e1: BadTemplateException) {
@@ -720,14 +720,14 @@ class PositionTemplateEditor : JFrame {
                     override fun actionPerformed(e: ActionEvent?) {
                         try {
                             val dialog = PositionTemplateBoxDialog(
-                                    thisFrame, template.getImageSize(),
-                                    template.getTextPosition(),
-                                    template.getTextSize(),
-                                    "Taxon Name Label in " + template.getTemplateId())
+                                    thisFrame, template.ImageSize,
+                                    template.TextPosition,
+                                    template.TextSize,
+                                    "Taxon Name Label in " + template.TemplateId)
                             dialog.setVisible(true)
                             if (template!!.isEditable()) {
-                                template.setTextPosition(dialog.getUL())
-                                template.setTextSize(dialog.getSize())
+                                template.setTextPosition(dialog.UL)
+                                template.setTextSize(dialog.Size)
                                 setButtonTexts()
                             }
                         } catch (e1: BadTemplateException) {
@@ -758,14 +758,14 @@ class PositionTemplateEditor : JFrame {
                     override fun actionPerformed(e: ActionEvent?) {
                         try {
                             val dialog = PositionTemplateBoxDialog(
-                                    thisFrame, template.getImageSize(),
-                                    template.getLabelPosition(),
-                                    template.getLabelSize(),
-                                    "Pin Labels in " + template.getTemplateId())
+                                    thisFrame, template.ImageSize,
+                                    template.LabelPosition,
+                                    template.LabelSize,
+                                    "Pin Labels in " + template.TemplateId)
                             dialog.setVisible(true)
                             if (template!!.isEditable()) {
-                                template.setLabelPosition(dialog.getUL())
-                                template.setLabelSize(dialog.getSize())
+                                template.setLabelPosition(dialog.UL)
+                                template.setLabelSize(dialog.Size)
                                 setButtonTexts()
                             }
                         } catch (e1: BadTemplateException) {
@@ -796,14 +796,14 @@ class PositionTemplateEditor : JFrame {
                     override fun actionPerformed(e: ActionEvent?) {
                         try {
                             val dialog = PositionTemplateBoxDialog(
-                                    thisFrame, template.getImageSize(),
-                                    template.getUTLabelsPosition(),
-                                    template.getUTLabelsSize(),
-                                    "Unit Tray Labels in " + template.getTemplateId())
+                                    thisFrame, template.ImageSize,
+                                    template.UTLabelsPosition,
+                                    template.UTLabelsSize,
+                                    "Unit Tray Labels in " + template.TemplateId)
                             dialog.setVisible(true)
                             if (template!!.isEditable()) {
-                                template.setUTLabelsPosition(dialog.getUL())
-                                template.setUTLabelsSize(dialog.getSize())
+                                template.setUTLabelsPosition(dialog.UL)
+                                template.setUTLabelsSize(dialog.Size)
                                 setButtonTexts()
                             }
                         } catch (e1: BadTemplateException) {
@@ -834,14 +834,14 @@ class PositionTemplateEditor : JFrame {
                     override fun actionPerformed(e: ActionEvent?) {
                         try {
                             val dialog = PositionTemplateBoxDialog(
-                                    thisFrame, template.getImageSize(),
-                                    template.getSpecimenPosition(),
-                                    template.getSpecimenSize(),
-                                    "Specimen in " + template.getTemplateId())
+                                    thisFrame, template.ImageSize,
+                                    template.SpecimenPosition,
+                                    template.SpecimenSize,
+                                    "Specimen in " + template.TemplateId)
                             dialog.setVisible(true)
                             if (template!!.isEditable()) {
-                                template.setSpecimenPosition(dialog.getUL())
-                                template.setSpecimenSize(dialog.getSize())
+                                template.setSpecimenPosition(dialog.UL)
+                                template.setSpecimenSize(dialog.Size)
                                 setButtonTexts()
                             }
                         } catch (e1: BadTemplateException) {
@@ -913,7 +913,7 @@ class PositionTemplateEditor : JFrame {
     private fun getJTable(): JTable? {
         if (jTable == null) {
             jTable = JTable()
-            val templates: MutableList<PositionTemplate?> = PositionTemplate.Companion.getTemplates()
+            val templates: MutableList<PositionTemplate?> = PositionTemplate.Companion.Templates
             jTable.setModel(PositionTemplateTableModel(templates))
             jTable.getColumn("").setCellRenderer(ButtonRenderer())
             jTable.getColumn("").setCellEditor(ButtonEditor(ButtonEditor.Companion.OPEN_TEMPLATE, thisFrame))
@@ -992,14 +992,14 @@ class PositionTemplateEditor : JFrame {
     fun drawLayers() { // draw the image bounds in black.
         if (template != null) {
             imagePanelForDrawing.clearOverlay()
-            imagePanelForDrawing.drawBox(Dimension(0, 0), template.getImageSize(), Color.BLACK, BasicStroke(2f))
+            imagePanelForDrawing.drawBox(Dimension(0, 0), template.ImageSize, Color.BLACK, BasicStroke(2f))
             // draw each template layer in a distinct color (keyed to UI text).
-            imagePanelForDrawing.drawBox(template.getBarcodeULPosition(), template.getBarcodeSize(), Color.RED)
-            imagePanelForDrawing.drawBox(template.getTextPosition(), template.getTextSize(), Color.BLUE)
-            imagePanelForDrawing.drawBox(template.getSpecimenPosition(), template.getSpecimenSize(), Color.ORANGE)
-            imagePanelForDrawing.drawBox(template.getUTLabelsPosition(), template.getUTLabelsSize(), Color.CYAN)
-            imagePanelForDrawing.drawBox(template.getLabelPosition(), template.getLabelSize(), Color.MAGENTA)
-            imagePanelForDrawing.drawBox(template.getUtBarcodePosition(), template.getUtBarcodeSize(), Color.BLACK)
+            imagePanelForDrawing.drawBox(template.BarcodeULPosition, template.BarcodeSize, Color.RED)
+            imagePanelForDrawing.drawBox(template.TextPosition, template.TextSize, Color.BLUE)
+            imagePanelForDrawing.drawBox(template.SpecimenPosition, template.SpecimenSize, Color.ORANGE)
+            imagePanelForDrawing.drawBox(template.UTLabelsPosition, template.UTLabelsSize, Color.CYAN)
+            imagePanelForDrawing.drawBox(template.LabelPosition, template.LabelSize, Color.MAGENTA)
+            imagePanelForDrawing.drawBox(template.UtBarcodePosition, template.UtBarcodeSize, Color.BLACK)
         }
     }
 
@@ -1015,9 +1015,9 @@ class PositionTemplateEditor : JFrame {
             jButton.setMnemonic(KeyEvent.VK_C)
             jButton.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    if (template != null && imagePanelForDrawing.getImage() != null) {
+                    if (template != null && imagePanelForDrawing.Image != null) {
                         val candidateImageFile = CandidateImageFile()
-                        jTextFieldBarcodeScan.setText(candidateImageFile.getBarcodeTextFromImage(imagePanelForDrawing.getImage() as BufferedImage, template, false))
+                        jTextFieldBarcodeScan.setText(candidateImageFile.getBarcodeTextFromImage(imagePanelForDrawing.Image as BufferedImage, template, false))
                     }
                 }
             })
@@ -1051,7 +1051,7 @@ class PositionTemplateEditor : JFrame {
                 jButtonUnitTrayBarcode.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
                         val candidateImageFile = CandidateImageFile()
-                        jTextFieldUnitTrayBarcode.setText(candidateImageFile.getBarcodeUnitTrayTextFromImage(imagePanelForDrawing.getImage() as BufferedImage, template!!))
+                        jTextFieldUnitTrayBarcode.setText(candidateImageFile.getBarcodeUnitTrayTextFromImage(imagePanelForDrawing.Image as BufferedImage, template!!))
                     }
                 })
             }
@@ -1086,14 +1086,14 @@ class PositionTemplateEditor : JFrame {
                     override fun actionPerformed(e: ActionEvent?) {
                         try {
                             val dialog = PositionTemplateBoxDialog(
-                                    thisFrame, template.getImageSize(),
-                                    template.getUtBarcodePosition(),
-                                    template.getUtBarcodeSize(),
-                                    "UnitTray/Taxon Barcode in " + template.getTemplateId())
+                                    thisFrame, template.ImageSize,
+                                    template.UtBarcodePosition,
+                                    template.UtBarcodeSize,
+                                    "UnitTray/Taxon Barcode in " + template.TemplateId)
                             dialog.setVisible(true)
                             if (template!!.isEditable()) {
-                                template.setUtBarcodePosition(dialog.getUL())
-                                template.setUtBarcodeSize(dialog.getSize())
+                                template.setUtBarcodePosition(dialog.UL)
+                                template.setUtBarcodeSize(dialog.Size)
                                 setButtonTexts()
                             }
                         } catch (e1: BadTemplateException) {

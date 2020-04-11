@@ -57,8 +57,8 @@ object TestFieldLoader {
 //		} catch (LoadTargetRecordNotFoundException ex) {
 //			// expected exception
 //		} catch (LoadException e) {
-//			log.error(e.getMessage(),e);
-//			fail(e.getMessage());
+//			log.error(e.Message,e);
+//			fail(e.Message);
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
@@ -67,8 +67,8 @@ object TestFieldLoader {
 //		} catch (LoadTargetRecordNotFoundException ex) {
 //			// expected exception
 //		} catch (LoadException e) {
-//			log.error(e.getMessage(),e);
-//			fail(e.getMessage());
+//			log.error(e.Message,e);
+//			fail(e.Message);
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}

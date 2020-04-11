@@ -455,8 +455,8 @@ class CountValueTableModel : AbstractTableModel {
     override fun getValueAt(rowIndex: Int, columnIndex: Int): Any? {
         var result: Any? = null
         when (columnIndex) {
-            0 -> result = items!![rowIndex].getCount()
-            1 -> result = items!![rowIndex].getValue()
+            0 -> result = items!![rowIndex].Count
+            1 -> result = items!![rowIndex].Value
         }
         return result
     }

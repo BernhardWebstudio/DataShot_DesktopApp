@@ -55,7 +55,7 @@ class ConfiguredBarcodePositionTemplateDetector : PositionTemplateDetector {
 
     @Throws(UnreadableFileException::class)
     override fun detectTemplateForImage(scannableFile: CandidateImageFile): String? {
-        return detectTemplateForImage(scannableFile.getFile(), scannableFile, false)
+        return detectTemplateForImage(scannableFile.File, scannableFile, false)
     }
 
     @Throws(UnreadableFileException::class)
@@ -66,8 +66,8 @@ class ConfiguredBarcodePositionTemplateDetector : PositionTemplateDetector {
             throw UnreadableFileException("Unable to read " + anImageFile.name)
         }
         // skip all following intensive, unnecessary computation if possible
-        val defaultTemplate: String = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_DEFAULT_TEMPLATES)
-        if (Singleton.getProperties().testDefaultTemplate() && defaultTemplate !== PositionTemplate.Companion.TEMPLATE_DEFAULT) {
+        val defaultTemplate: String = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_DEFAULT_TEMPLATES)
+        if (Singleton.Properties.testDefaultTemplate() && defaultTemplate !== PositionTemplate.Companion.TEMPLATE_DEFAULT) {
             return defaultTemplate
         }
         var image: BufferedImage? = null
@@ -77,7 +77,7 @@ class ConfiguredBarcodePositionTemplateDetector : PositionTemplateDetector {
             throw UnreadableFileException("IOException trying to read " + anImageFile.name)
         }
         // iterate through templates and check until the first template where a barcode is found
-        val templates: MutableList<String?> = PositionTemplate.Companion.getTemplateIds()
+        val templates: MutableList<String?> = PositionTemplate.Companion.TemplateIds
         log!!.debug("Detecting template for file: " + anImageFile.absolutePath)
         log.debug("list of templates: $templates")
         val i = templates.listIterator()
@@ -85,10 +85,10 @@ class ConfiguredBarcodePositionTemplateDetector : PositionTemplateDetector {
         while (i.hasNext() && !found) {
             try { // get the next template from the list
                 val template = PositionTemplate(i.next()!!)
-                log.debug("Testing template: " + template.getTemplateId())
-                if (template.getTemplateId() == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // skip, this is the default result if no other is found.
+                log.debug("Testing template: " + template.TemplateId)
+                if (template.TemplateId == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // skip, this is the default result if no other is found.
                 } else {
-                    if (image.getWidth().toDouble() == template.getImageSize().getWidth()) { // Check to see if the barcode is in the part of the template
+                    if (image.Width.toDouble() == template.ImageSize.Width) { // Check to see if the barcode is in the part of the template
 // defined by getBarcodeULPosition and getBarcodeSize.
                         var text: String
                         text = if (scannableFile == null) {
@@ -100,20 +100,20 @@ class ConfiguredBarcodePositionTemplateDetector : PositionTemplateDetector {
                         if (text.length > 0) { // a barcode was scanned
 // Check to see if it matches the expected pattern.
 // Use the configured barcode matcher.
-                            if (Singleton.getBarcodeMatcher().matchesPattern(text)) {
+                            if (Singleton.BarcodeMatcher.matchesPattern(text)) {
                                 found = true
-                                log.debug("Match to:" + template.getTemplateId())
-                                result = template.getTemplateId()
+                                log.debug("Match to:" + template.TemplateId)
+                                result = template.TemplateId
                             }
                         }
                     } else {
-                        log.debug("Skipping as template " + template.getTemplateId() + " is not same size as image. ")
+                        log.debug("Skipping as template " + template.TemplateId + " is not same size as image. ")
                     }
                 }
             } catch (e: NoSuchTemplateException) { // Ending up here means a serious error in PositionTemplate
 // as the list of position templates returned by getTemplates() includes
 // an entry that isn't recognized as a valid template.
-                log.fatal("Fatal error.  PositionTemplate.getTemplates() includes an item that isn't a valid template.")
+                log.fatal("Fatal error.  PositionTemplate.Templates includes an item that isn't a valid template.")
                 log.trace(e)
                 ImageCaptureApp.exit(ImageCaptureApp.EXIT_ERROR)
             }

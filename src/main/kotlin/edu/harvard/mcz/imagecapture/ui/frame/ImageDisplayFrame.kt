@@ -40,9 +40,7 @@ import edu.harvard.mcz.imagecapture.ui.frame.ImageDisplayFrame
 import net.miginfocom.swing.MigLayout
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-import java.awt.BorderLayout
-import java.awt.GridBagConstraints
-import java.awt.GridBagLayout
+import java.awt.*
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import java.awt.event.ComponentEvent
@@ -57,8 +55,6 @@ import javax.imageio.ImageIO
 import javax.swing.*
 import javax.swing.plaf.basic.BasicSplitPaneDivider
 import javax.swing.plaf.basic.BasicSplitPaneUI
-
-java.awt.*import  java.awt.event.ActionEvent
 
 java.awt.event.ComponentAdapter
 import  java.io.File
@@ -526,21 +522,21 @@ class ImageDisplayFrame() : JFrame() {
         val fileCount = imageFiles.size
         while (i.hasNext()) {
             image = i.next()
-            jComboBoxImagePicker.addItem(image.getFilename())
-            log.debug("Adding image to picklist: " + image.getPath() + image.getFilename())
+            jComboBoxImagePicker.addItem(image.Filename)
+            log.debug("Adding image to picklist: " + image.Path + image.Filename)
         }
         //TODO: stored path may need separator conversion for different systems.
-//String startPointName = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
-        var path: String = image.getPath()
+//String startPointName = Singleton.SingletonInstance.Properties.Properties.getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
+        var path: String = image.Path
         if (path == null) {
             path = ""
         }
-        //File fileToCheck = new File(startPointName + path + image.getFilename());
-        val fileToCheck = File(assemblePathWithBase(path, image.getFilename()))
+        //File fileToCheck = new File(startPointName + path + image.Filename);
+        val fileToCheck = File(assemblePathWithBase(path, image.Filename))
         jLabelImageCountNr.setText("($fileCount)")
         jLabelImageCountNr.setForeground(if (fileCount > 1) Color.RED else Color.BLACK)
         jComboBoxImagePicker.setEnabled(fileCount > 1)
-        jComboBoxImagePicker.setSelectedItem(image.getFilename())
+        jComboBoxImagePicker.setSelectedItem(image.Filename)
         try {
             val defaultTemplate: PositionTemplate = PositionTemplate.Companion.findTemplateForImage(image)
             loadImagesFromFileSingle(fileToCheck, defaultTemplate, image)
@@ -563,15 +559,15 @@ class ImageDisplayFrame() : JFrame() {
      */
     @Throws(ImageLoadException::class, BadTemplateException::class)
     fun loadImagesFromFileSingle(anImageFile: File, defaultTemplate: PositionTemplate, image: ICImage?) {
-        log.debug(anImageFile.getName())
+        log.debug(anImageFile.Name)
         var templateProblem = false
         selectedImage = image
         //TODO: template detection?
         try {
             imagefile = ImageIO.read(anImageFile)
-            log.debug(anImageFile.getPath())
+            log.debug(anImageFile.Path)
             // Show the component parts of the image as defined by the position template.
-            if (defaultTemplate.getTemplateId() == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // clear component parts
+            if (defaultTemplate.TemplateId == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // clear component parts
                 val url: URL? = this.javaClass.getResource("/edu/harvard/mcz/imagecapture/resources/images/gnome-mime-image.png")
                 val anImage: BufferedImage = ImageIO.read(url)
                 setBarcodeImage(anImage)
@@ -580,30 +576,30 @@ class ImageDisplayFrame() : JFrame() {
                 setUnitTrayImage(anImage)
                 setUnitTrayLabelsImage(anImage)
             } else {
-                if (imagefile.getHeight() != defaultTemplate.getImageSize().height || imagefile.getWidth() != defaultTemplate.getImageSize().width) { // TODO: template strategy
-                    throw BadTemplateException("Template size doesn't match image size. " + defaultTemplate.getName())
+                if (imagefile.Height != defaultTemplate.ImageSize.height || imagefile.Width != defaultTemplate.ImageSize.width) { // TODO: template strategy
+                    throw BadTemplateException("Template size doesn't match image size. " + defaultTemplate.Name)
                 }
                 try {
-                    val x: Int = defaultTemplate.getBarcodeULPosition().width
-                    val y: Int = defaultTemplate.getBarcodeULPosition().height
-                    val w: Int = defaultTemplate.getBarcodeSize().width
-                    val h: Int = defaultTemplate.getBarcodeSize().height
+                    val x: Int = defaultTemplate.BarcodeULPosition.width
+                    val y: Int = defaultTemplate.BarcodeULPosition.height
+                    val w: Int = defaultTemplate.BarcodeSize.width
+                    val h: Int = defaultTemplate.BarcodeSize.height
                     setBarcodeImage(imagefile.getSubimage(x, y, w, h))
                 } catch (ex: Exception) {
                     try {
                         setBarcodeImage(imagefile)
                     } catch (ex2: Exception) {
                         println(ex.message)
-                        throw ImageLoadException("Unable to load images from " + anImageFile.getPath() + " " + ex2.message)
+                        throw ImageLoadException("Unable to load images from " + anImageFile.Path + " " + ex2.message)
                     }
                     templateProblem = true
                     println(ex.message)
                 }
                 try {
-                    val x: Int = defaultTemplate.getSpecimenPosition().width
-                    val y: Int = defaultTemplate.getSpecimenPosition().height
-                    val w: Int = defaultTemplate.getSpecimenSize().width
-                    val h: Int = defaultTemplate.getSpecimenSize().height
+                    val x: Int = defaultTemplate.SpecimenPosition.width
+                    val y: Int = defaultTemplate.SpecimenPosition.height
+                    val w: Int = defaultTemplate.SpecimenSize.width
+                    val h: Int = defaultTemplate.SpecimenSize.height
                     val img: BufferedImage = imagefile.getSubimage(x, y, w, h)
                     setSpecimenImage(img)
                 } catch (ex: Exception) {
@@ -611,30 +607,30 @@ class ImageDisplayFrame() : JFrame() {
                     println(ex.message)
                 }
                 try {
-                    val x: Int = defaultTemplate.getLabelPosition().width
-                    val y: Int = defaultTemplate.getLabelPosition().height
-                    val w: Int = defaultTemplate.getLabelSize().width
-                    val h: Int = defaultTemplate.getLabelSize().height
+                    val x: Int = defaultTemplate.LabelPosition.width
+                    val y: Int = defaultTemplate.LabelPosition.height
+                    val w: Int = defaultTemplate.LabelSize.width
+                    val h: Int = defaultTemplate.LabelSize.height
                     setPinLabelImage(imagefile.getSubimage(x, y, w, h))
                 } catch (ex: Exception) {
                     templateProblem = true
                     println(ex.message)
                 }
                 try {
-                    val x: Int = defaultTemplate.getTextPosition().width
-                    val y: Int = defaultTemplate.getTextPosition().height
-                    val w: Int = defaultTemplate.getTextSize().width
-                    val h: Int = defaultTemplate.getTextSize().height
+                    val x: Int = defaultTemplate.TextPosition.width
+                    val y: Int = defaultTemplate.TextPosition.height
+                    val w: Int = defaultTemplate.TextSize.width
+                    val h: Int = defaultTemplate.TextSize.height
                     setUnitTrayImage(imagefile.getSubimage(x, y, w, h))
                 } catch (ex: Exception) {
                     templateProblem = true
                     println(ex.message)
                 }
                 try {
-                    val x: Int = defaultTemplate.getUTLabelsPosition().width
-                    val y: Int = defaultTemplate.getUTLabelsPosition().height
-                    val w: Int = defaultTemplate.getUTLabelsSize().width
-                    val h: Int = defaultTemplate.getUTLabelsSize().height
+                    val x: Int = defaultTemplate.UTLabelsPosition.width
+                    val y: Int = defaultTemplate.UTLabelsPosition.height
+                    val w: Int = defaultTemplate.UTLabelsSize.width
+                    val h: Int = defaultTemplate.UTLabelsSize.height
                     setUnitTrayLabelsImage(imagefile.getSubimage(x, y, w, h))
                 } catch (ex: Exception) {
                     templateProblem = true
@@ -646,16 +642,16 @@ class ImageDisplayFrame() : JFrame() {
         } catch (e1: IOException) {
             log.debug("IOException!")
             println("Error reading image file: " + e1.message)
-            throw ImageLoadException("Unable to read image file " + anImageFile.getPath() + " " + e1.message)
+            throw ImageLoadException("Unable to read image file " + anImageFile.Path + " " + e1.message)
         } catch (e: Exception) {
             log.debug("Image loading exception")
             e.printStackTrace()
         }
         if (templateProblem) {
-            throw BadTemplateException("Template doesn't fit file " + anImageFile.getPath())
+            throw BadTemplateException("Template doesn't fit file " + anImageFile.Path)
         }
-        log.debug(anImageFile.getPath())
-        if (UsersLifeCycle.Companion.isUserChiefEditor(Singleton.getUser().getUserid())) {
+        log.debug(anImageFile.Path)
+        if (UsersLifeCycle.Companion.isUserChiefEditor(Singleton.User.Userid)) {
             updateTemplateList()
         }
     }
@@ -682,27 +678,27 @@ class ImageDisplayFrame() : JFrame() {
     }
 
     private fun setWindowLocationSize() {
-        val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize()
+        val screenSize: Dimension = Toolkit.DefaultToolkit.ScreenSize
         // set size of window
         val sizeDimensionWidth: Int = preferences.getInt("SizeDimensionWidth", Math.min(1600, screenSize.width))
         val sizeDimensionHeight: Int = prefs.getInt("SizeDimensionHeight", Math.min(1250, screenSize.height))
         log.debug("Setting width = $sizeDimensionWidth, height = $sizeDimensionHeight")
         this.setPreferredSize(Dimension(sizeDimensionWidth, sizeDimensionHeight))
         // set location of window
-        val locationX: Int = prefs.getInt("LocationX", (screenSize.width - this.getWidth()) / 2)
-        val locationY: Int = prefs.getInt("LocationY", (screenSize.height - this.getHeight()) / 2)
+        val locationX: Int = prefs.getInt("LocationX", (screenSize.width - this.Width) / 2)
+        val locationY: Int = prefs.getInt("LocationY", (screenSize.height - this.Height) / 2)
         this.setLocation(locationX, locationY)
     }
 
     private fun saveWindowLocation() {
-        prefs.putInt("LocationX", this.getLocation().x)
-        prefs.putInt("LocationY", this.getLocation().y)
+        prefs.putInt("LocationX", this.Location.x)
+        prefs.putInt("LocationY", this.Location.y)
     }
 
     private fun saveWindowSize() {
-        prefs.putInt("SizeDimensionWidth", this.getWidth())
-        prefs.putInt("SizeDimensionHeight", this.getHeight())
-        log.debug("Stored width = " + this.getWidth() + ", height = " + this.getHeight())
+        prefs.putInt("SizeDimensionWidth", this.Width)
+        prefs.putInt("SizeDimensionHeight", this.Height)
+        log.debug("Stored width = " + this.Width + ", height = " + this.Height)
         try {
             prefs.sync()
         } catch (e: BackingStoreException) {
@@ -721,9 +717,9 @@ class ImageDisplayFrame() : JFrame() {
         }
 
     fun center() {
-        val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize()
-        this.setLocation((screenSize.width - this.getWidth()) / 2,
-                (screenSize.height - this.getHeight()) / 2)
+        val screenSize: Dimension = Toolkit.DefaultToolkit.ScreenSize
+        this.setLocation((screenSize.width - this.Width) / 2,
+                (screenSize.height - this.Height) / 2)
     }
 
     /**
@@ -769,7 +765,7 @@ class ImageDisplayFrame() : JFrame() {
         splitPane.setUI(flatDividerSplitPaneUI)
         splitPane.setBorder(null)
         // set the sizes of the two panes
-        splitPane.setDividerLocation(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_EDITOR_IMPORTANCE, "0.6").toDouble())
+        splitPane.setDividerLocation(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_EDITOR_IMPORTANCE, "0.6").toDouble())
     }
 
     /**
@@ -807,7 +803,7 @@ class ImageDisplayFrame() : JFrame() {
     fun setSpecimenImage(anImage: BufferedImage?) {
         imagePanelSpecimen!!.setImage(anImage)
         imagePanelSpecimen!!.zoomToFit()
-        if (imagePanelSpecimen.getPreferredSize().height > 500 || imagePanelSpecimen.getPreferredSize().width > 500) {
+        if (imagePanelSpecimen.PreferredSize.height > 500 || imagePanelSpecimen.PreferredSize.width > 500) {
             imagePanelSpecimen.setPreferredSize(Dimension(1000, 900))
         }
     }
@@ -831,7 +827,7 @@ class ImageDisplayFrame() : JFrame() {
         imagePanelUnitTrayTaxon!!.zoomToFit()
         //		jLabelUnitTray.setIcon(new ImageIcon(anImage));
 //		this.pack();
-        if (imagePanelUnitTrayTaxon.getPreferredSize().height > 500 || imagePanelUnitTrayTaxon.getPreferredSize().width > 500) {
+        if (imagePanelUnitTrayTaxon.PreferredSize.height > 500 || imagePanelUnitTrayTaxon.PreferredSize.width > 500) {
             imagePanelUnitTrayTaxon.setPreferredSize(Dimension(500, 500))
         }
         //		jLabelUnitTray.setMaximumSize(new Dimension(500,500));
@@ -840,7 +836,7 @@ class ImageDisplayFrame() : JFrame() {
     fun setUnitTrayLabelsImage(anImage: Image?) {
         imagePanelTrayLabels!!.setImage(anImage as BufferedImage?)
         imagePanelTrayLabels!!.zoomToFit()
-        if (imagePanelTrayLabels.getPreferredSize().height > 500 || imagePanelTrayLabels.getPreferredSize().width > 500) {
+        if (imagePanelTrayLabels.PreferredSize.height > 500 || imagePanelTrayLabels.PreferredSize.width > 500) {
             imagePanelTrayLabels.setPreferredSize(Dimension(500, 500))
         }
     }
@@ -849,7 +845,7 @@ class ImageDisplayFrame() : JFrame() {
         imagePanelPinLabels!!.setImage(anImage as BufferedImage?)
         imagePanelPinLabels!!.zoomToFit()
         this.pack()
-        if (imagePanelPinLabels.getPreferredSize().height > 500 || imagePanelPinLabels.getPreferredSize().width > 500) {
+        if (imagePanelPinLabels.PreferredSize.height > 500 || imagePanelPinLabels.PreferredSize.width > 500) {
             imagePanelPinLabels.setPreferredSize(Dimension(500, 500))
         }
         imagePanelPinLabels.setMaximumSize(Dimension(500, 500))
@@ -858,7 +854,7 @@ class ImageDisplayFrame() : JFrame() {
     fun setBarcodeImage(anImage: Image) {
         imagePanelBarcode.setIcon(ImageIcon(anImage))
         this.pack()
-        if (imagePanelBarcode.getPreferredSize().height > 500 || imagePanelBarcode.getPreferredSize().width > 500) {
+        if (imagePanelBarcode.PreferredSize.height > 500 || imagePanelBarcode.PreferredSize.width > 500) {
             imagePanelBarcode.setPreferredSize(Dimension(500, 500))
         }
         imagePanelBarcode.setMaximumSize(Dimension(500, 500))
@@ -1083,9 +1079,9 @@ import  edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel?
         if (jComboBoxImagePicker == null) {
             jComboBoxImagePicker = JComboBox<Any?>()
             if (targetSpecimen != null) {
-                val i: MutableIterator<ICImage?> = targetSpecimen.getICImages().iterator()
+                val i: MutableIterator<ICImage?> = targetSpecimen.ICImages.iterator()
                 while (i.hasNext()) {
-                    val filename: String = i.next().getFilename()
+                    val filename: String = i.next().Filename
                     jComboBoxImagePicker.addItem(filename)
                     log.debug(filename)
                 }
@@ -1093,25 +1089,25 @@ import  edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel?
             jComboBoxImagePicker.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent) { // Intended to be fired when picklist item is selected, is
 // being fired on other events as well.
-                    log.debug(e.getActionCommand())
+                    log.debug(e.ActionCommand)
                     // If there is no selection, then we shouldn't be doing anything.
-                    if (jComboBoxImagePicker.getSelectedItem() == null) {
+                    if (jComboBoxImagePicker.SelectedItem == null) {
                         log.debug("No selected item")
                     } else {
                         try {
-                            val filename: String? = if (jComboBoxImagePicker.getSelectedItem() != null) jComboBoxImagePicker.getSelectedItem().toString() else null
+                            val filename: String? = if (jComboBoxImagePicker.SelectedItem != null) jComboBoxImagePicker.SelectedItem.toString() else null
                             if (filename != null && targetSpecimen != null) { // find matching images, set first one as the display image.
                                 val images: MutableSet<ICImage?>?
-                                if (targetSpecimen.getICImages() == null) {
+                                if (targetSpecimen.ICImages == null) {
                                     val ils = ICImageLifeCycle()
                                     images = HashSet<ICImage?>(ils.findBy(object : HashMap<String?, Any?>() {
                                         init {
                                             put("Filename", filename)
-                                            put("SPECIMENID", targetSpecimen.getSpecimenId())
+                                            put("SPECIMENID", targetSpecimen.SpecimenId)
                                         }
                                     }))
                                 } else {
-                                    images = targetSpecimen.getICImages()
+                                    images = targetSpecimen.ICImages
                                 }
                                 if (images != null && images.size > 0) {
                                     log.debug("Found images: " + images.size)
@@ -1120,20 +1116,20 @@ import  edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel?
                                     while (ii.hasNext() && !found) {
                                         val image: ICImage? = ii.next()
                                         log.debug("image is $image")
-                                        log.debug("image specimen is " + image.getSpecimen())
-                                        log.debug("image path is " + image.getPath())
-                                        log.debug("target specimen bar code is " + targetSpecimen.getBarcode())
-                                        log.debug("image specimen barcode is " + image.getSpecimen().getBarcode())
-                                        if (image.getFilename() != filename || image.getPath() == "" || image.getPath().toUpperCase().contains(".JPG") || image.getSpecimen() == null || image.getSpecimen().getBarcode() != targetSpecimen.getBarcode()) { // wrong path or filename
-                                            log.debug("WrongFile: " + image.getPath())
+                                        log.debug("image specimen is " + image.Specimen)
+                                        log.debug("image path is " + image.Path)
+                                        log.debug("target specimen bar code is " + targetSpecimen.Barcode)
+                                        log.debug("image specimen barcode is " + image.Specimen.Barcode)
+                                        if (image.Filename != filename || image.Path == "" || image.Path.toUpperCase().contains(".JPG") || image.Specimen == null || image.Specimen.Barcode != targetSpecimen.Barcode) { // wrong path or filename
+                                            log.debug("WrongFile: " + image.Path)
                                         } else {
                                             found = true
-                                            //String startPointName = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
-                                            var path: String = image.getPath()
+                                            //String startPointName = Singleton.SingletonInstance.Properties.Properties.getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
+                                            var path: String = image.Path
                                             if (path == null) {
                                                 path = ""
                                             }
-                                            val fileToCheck = File(assemblePathWithBase(path, image.getFilename()))
+                                            val fileToCheck = File(assemblePathWithBase(path, image.Filename))
                                             var defaultTemplate: PositionTemplate
                                             try {
                                                 defaultTemplate = PositionTemplate.Companion.findTemplateForImage(image)
@@ -1163,7 +1159,7 @@ import  edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel?
             templatePicker = JButton()
             var template = "No Template Selected"
             if (selectedImage != null) {
-                template = selectedImage.getTemplateId()
+                template = selectedImage.TemplateId
             }
             templatePicker.setText(template)
             log.debug(template)
@@ -1187,7 +1183,7 @@ import  edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel?
         getTemplatePicker()
         var template = "No Template Selected"
         if (selectedImage != null) {
-            template = selectedImage.getTemplateId()
+            template = selectedImage.TemplateId
         }
         templatePicker.setText(template)
         if (template == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) {
@@ -1208,7 +1204,7 @@ import  edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel?
             jPanelImagesPanel.setLayout(BorderLayout())
             jPanelImagesPanel.add(getJTabbedPane(), BorderLayout.CENTER)
             jPanelImagesPanel.add(getJPanelImagePicker(), BorderLayout.NORTH)
-            if (UsersLifeCycle.Companion.isUserChiefEditor(Singleton.getUser().getUserid())) {
+            if (UsersLifeCycle.Companion.isUserChiefEditor(Singleton.User.Userid)) {
                 jPanelImagesPanel.add(getTemplatePicker(), BorderLayout.SOUTH)
             }
         }
@@ -1226,7 +1222,7 @@ import  edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel?
                 }
             })
             btnVerbatimtranscription.setEnabled(false)
-            if (targetSpecimen != null && WorkFlowStatus.allowsVerbatimUpdate(targetSpecimen.getWorkFlowStatus())) {
+            if (targetSpecimen != null && WorkFlowStatus.allowsVerbatimUpdate(targetSpecimen.WorkFlowStatus)) {
                 btnVerbatimtranscription.setEnabled(true)
             }
         }

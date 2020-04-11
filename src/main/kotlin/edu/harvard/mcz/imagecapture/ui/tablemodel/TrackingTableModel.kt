@@ -60,10 +60,10 @@ class TrackingTableModel : AbstractTableModel {
     override fun getValueAt(rowIndex: Int, columnIndex: Int): Any? {
         var returnvalue: String? = null
         when (columnIndex) {
-            0 -> returnvalue = events!![rowIndex].getSpecimen().getBarcode()
-            1 -> returnvalue = events!![rowIndex].getUser()
-            2 -> returnvalue = events!![rowIndex].getEventType()
-            3 -> returnvalue = events!![rowIndex].getEventDateTime().toString()
+            0 -> returnvalue = events!![rowIndex].Specimen.Barcode
+            1 -> returnvalue = events!![rowIndex].User
+            2 -> returnvalue = events!![rowIndex].EventType
+            3 -> returnvalue = events!![rowIndex].EventDateTime.toString()
         }
         return returnvalue
     }

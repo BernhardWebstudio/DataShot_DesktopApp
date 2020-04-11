@@ -483,7 +483,7 @@ class JNumberField : JTextField, ActionListener {
 
     private fun parseField() { // Parse field
         try {
-            setValue(formatter.parse(this.getText()).doubleValue())
+            setValue(formatter.parse(this.Text).doubleValue())
         } catch (e: ParseException) { // Reset field to previous value
             if (value != null) setValue(value.doubleValue()) else setValue(0.0)
         }
@@ -500,7 +500,7 @@ class JNumberField : JTextField, ActionListener {
         // Write and resize field
         this.setText(formatter.format(value))
         if (lowerBound != -Double.MAX_VALUE && upperBound != Double.MAX_VALUE) this.setColumns(1 + Math.max(formatter.format(lowerBound).length,
-                formatter.format(upperBound).length)) else this.setColumns(1 + this.getText().length)
+                formatter.format(upperBound).length)) else this.setColumns(1 + this.Text.length)
     }
 
     // Constrain to admissibleValues

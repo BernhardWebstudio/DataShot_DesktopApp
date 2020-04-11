@@ -39,44 +39,44 @@ class TestOfSpecimen
         val s = Specimen()
         // "Familyname" contains 10 characters and 10 bytes
         s.setFamily("Familyname")
-        assertEquals(10, s.getFamily().length())
-        assertEquals(10, s.getFamily().codePointCount(0, s.getFamily().length()))
-        assertEquals(10, s.getFamily().getBytes().length)
+        assertEquals(10, s.Family.length())
+        assertEquals(10, s.Family.codePointCount(0, s.Family.length()))
+        assertEquals(10, s.Family.Bytes.length)
         // "FamilynameѦ" contains 11 characters and 12 bytes
         s.setFamily("FamilynameѦ")
-        assertEquals(11, s.getFamily().length())
-        assertEquals(12, s.getFamily().getBytes().length)
-        assertEquals(11, s.getFamily().codePointCount(0, s.getFamily().length()))
+        assertEquals(11, s.Family.length())
+        assertEquals(12, s.Family.Bytes.length)
+        assertEquals(11, s.Family.codePointCount(0, s.Family.length()))
         // test truncation with multi-byte characters
         var st39 = "ѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦ"
         assertEquals(39, st39.length)
         s.setFamily(st39)
-        assertEquals(st39, s.getFamily())
+        assertEquals(st39, s.Family)
         var st40 = "ѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦ"
         assertEquals(40, st40.length)
         s.setFamily(st40)
-        assertEquals(st40, s.getFamily())
+        assertEquals(st40, s.Family)
         // should truncate at 40 char.
         var st41 = "ѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦѦ"
         assertEquals(41, st41.length)
         s.setFamily(st41) // store 41 char
-        assertEquals(40, s.getFamily().length()) // returns just 40
-        assertEquals(st40, s.getFamily())
+        assertEquals(40, s.Family.length()) // returns just 40
+        assertEquals(st40, s.Family)
         // test truncation with single byte characters
         st39 = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
         assertEquals(39, st39.length)
         s.setFamily(st39)
-        assertEquals(st39, s.getFamily())
+        assertEquals(st39, s.Family)
         st40 = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
         assertEquals(40, st40.length)
         s.setFamily(st40)
-        assertEquals(st40, s.getFamily())
+        assertEquals(st40, s.Family)
         // should truncate at 40 char.
         st41 = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
         assertEquals(41, st41.length)
         s.setFamily(st41) // store 41 char
-        assertEquals(40, s.getFamily().length()) // returns just 40
-        assertEquals(st40, s.getFamily())
+        assertEquals(40, s.Family.length()) // returns just 40
+        assertEquals(st40, s.Family)
     }
 
     fun testSetDateCreated() {
@@ -85,27 +85,27 @@ class TestOfSpecimen
         val date = Date(startSeconds)
         s.setDateCreated(date)
         // date and s private date should now be different values
-        assertNotSame(date, s.getDateCreated())
-        assertEquals(date, s.getDateCreated())
-        assertTrue(s.getDateCreated().getYear() === Date(startSeconds).getYear())
-        assertTrue(s.getDateCreated().getDate() === Date(startSeconds).getDate())
-        assertEquals(s.getDateCreated().getYear(), Date(startSeconds).getYear())
-        assertEquals(s.getDateCreated().getDate(), Date(startSeconds).getDate())
+        assertNotSame(date, s.DateCreated)
+        assertEquals(date, s.DateCreated)
+        assertTrue(s.DateCreated.Year === Date(startSeconds).Year)
+        assertTrue(s.DateCreated.Date === Date(startSeconds).Date)
+        assertEquals(s.DateCreated.Year, Date(startSeconds).Year)
+        assertEquals(s.DateCreated.Date, Date(startSeconds).Date)
         val seconds = 900000
         // modify the date object, make sure change doesn't change private value inside specimen
 // both should be different objects with different values.
         date.date = seconds
-        assertFalse(date == s.getDateCreated())
-        assertNotSame(date, s.getDateCreated())
+        assertFalse(date == s.DateCreated)
+        assertNotSame(date, s.DateCreated)
         // try to modify the values of the private value inside specimen through the get
-        s.getDateCreated().setYear(1800)
-        s.getDateCreated().setDate(15)
-        assertFalse(date === s.getDateCreated())
-        assertNotSame(date, s.getDateCreated())
-        //assertFalse(s.getDateCreated().getYear()==1800);
-//assertFalse(s.getDateCreated().getDate()==15);
-        assertEquals(s.getDateCreated().getYear(), 1800)
-        assertEquals(s.getDateCreated().getDate(), 15)
+        s.DateCreated.setYear(1800)
+        s.DateCreated.setDate(15)
+        assertFalse(date === s.DateCreated)
+        assertNotSame(date, s.DateCreated)
+        //assertFalse(s.DateCreated.Year==1800);
+//assertFalse(s.DateCreated.Date==15);
+        assertEquals(s.DateCreated.Year, 1800)
+        assertEquals(s.DateCreated.Date, 15)
     }
 
     fun testSetDateDateLastUpdated() {
@@ -114,26 +114,26 @@ class TestOfSpecimen
         val date = Date(startSeconds)
         s.setDateLastUpdated(date)
         // date and s private date should now be different values
-        assertNotSame(date, s.getDateLastUpdated())
-        assertEquals(date, s.getDateLastUpdated())
-        assertTrue(s.getDateLastUpdated().getYear() === Date(startSeconds).getYear())
-        assertTrue(s.getDateLastUpdated().getDate() === Date(startSeconds).getDate())
-        assertEquals(s.getDateLastUpdated().getYear(), Date(startSeconds).getYear())
-        assertEquals(s.getDateLastUpdated().getDate(), Date(startSeconds).getDate())
+        assertNotSame(date, s.DateLastUpdated)
+        assertEquals(date, s.DateLastUpdated)
+        assertTrue(s.DateLastUpdated.Year === Date(startSeconds).Year)
+        assertTrue(s.DateLastUpdated.Date === Date(startSeconds).Date)
+        assertEquals(s.DateLastUpdated.Year, Date(startSeconds).Year)
+        assertEquals(s.DateLastUpdated.Date, Date(startSeconds).Date)
         val seconds = 900000
         // modify the date object, make sure change doesn't change private value inside specimen
 // both should be different objects with different values.
         date.date = seconds
-        assertFalse(date == s.getDateLastUpdated())
-        assertNotSame(date, s.getDateLastUpdated())
+        assertFalse(date == s.DateLastUpdated)
+        assertNotSame(date, s.DateLastUpdated)
         // try to modify the values of the private value inside specimen through the get
-        s.getDateLastUpdated().setYear(1800)
-        s.getDateLastUpdated().setDate(15)
-        assertFalse(date === s.getDateLastUpdated())
-        assertNotSame(date, s.getDateLastUpdated())
-        //assertFalse(s.getDateLastUpdated().getYear()==1800);
-//assertFalse(s.getDateLastUpdated().getDate()==15);
-        assertEquals(s.getDateLastUpdated().getYear(), 1800)
-        assertEquals(s.getDateLastUpdated().getDate(), 15)
+        s.DateLastUpdated.setYear(1800)
+        s.DateLastUpdated.setDate(15)
+        assertFalse(date === s.DateLastUpdated)
+        assertNotSame(date, s.DateLastUpdated)
+        //assertFalse(s.DateLastUpdated.Year==1800);
+//assertFalse(s.DateLastUpdated.Date==15);
+        assertEquals(s.DateLastUpdated.Year, 1800)
+        assertEquals(s.DateLastUpdated.Date, 15)
     }
 }

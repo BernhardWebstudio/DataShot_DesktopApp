@@ -497,9 +497,9 @@ class PositionTemplateBoxDialog : JDialog {
         jTextFieldDescription.setText(description)
         jLabelFeedback.setText("")
         this.pack()
-        val screenSize: Dimension = owner.getSize()
-        this.setLocation((screenSize.width - this.getWidth()) / 2,
-                (screenSize.height - this.getHeight()) / 2)
+        val screenSize: Dimension = owner.Size
+        this.setLocation((screenSize.width - this.Width) / 2,
+                (screenSize.height - this.Height) / 2)
     }
 
     /**
@@ -816,8 +816,8 @@ class PositionTemplateBoxDialog : JDialog {
             jButtonSave.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
                     try {
-                        uL = Dimension(Integer.valueOf(jTextFieldULX.getText()), Integer.valueOf(jTextFieldULY.getText()))
-                        setSize(Dimension(Integer.valueOf(jTextFieldSizeWidth.getText()), Integer.valueOf(jTextFieldSizeHeight.getText())))
+                        uL = Dimension(Integer.valueOf(jTextFieldULX.Text), Integer.valueOf(jTextFieldULY.Text))
+                        setSize(Dimension(Integer.valueOf(jTextFieldSizeWidth.Text), Integer.valueOf(jTextFieldSizeHeight.Text)))
                         if (validateValues()) {
                             result = RESULT_SAVE
                         }

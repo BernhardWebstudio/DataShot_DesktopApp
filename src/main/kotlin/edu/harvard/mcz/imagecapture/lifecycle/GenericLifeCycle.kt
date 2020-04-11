@@ -29,7 +29,7 @@ abstract class GenericLifeCycle<T>(private val tCLass: Class<T?>?, protected var
                 var cr: CriteriaQuery<*>? = cb.createQuery(tCLass.javaClass)
                 val root: Root<T?> = cr!!.from(tCLass.javaClass)
                 cr = cr.where(cb.equal(root.get(propertyPath), value))
-                instance = session.createQuery<Any?>(cr).getSingleResult()
+                instance = session.createQuery<Any?>(cr).SingleResult
                 if (instance == null) {
                     log!!.debug("get successful, no instance found")
                 } else {
@@ -114,15 +114,15 @@ abstract class GenericLifeCycle<T>(private val tCLass: Class<T?>?, protected var
      */
 /*private List<String> function getEntityAttributes(T instance, Session session) {
         // untested. other possible implementations: https://stackoverflow.com/questions/19418500/get-table-column-names-in-hibernate
-        MetamodelImplementor metamodel = (MetamodelImplementor) session.getMetamodel();
-        EntityTypeDescriptor descriptor = metamodel.getEntityDescriptor(instance.getClass());
-        List<NonIdPersistentAttribute> persistentAttributes = descriptor.getPersistentAttributes();
+        MetamodelImplementor metamodel = (MetamodelImplementor) session.Metamodel;
+        EntityTypeDescriptor descriptor = metamodel.getEntityDescriptor(instance.Class);
+        List<NonIdPersistentAttribute> persistentAttributes = descriptor.PersistentAttributes;
         int attributesSize = persistentAttributes.size();
         List<String> attributes = new ArrayList<>();
         for (int i = 0; i < attributesSize; i++) {
             NonIdPersistentAttribute attribute =  persistentAttributes.get( i );
             if (attribute.isUpdateable()){
-            attributes.add(attribute.getAttributeName());}
+            attributes.add(attribute.AttributeName);}
         }
         return attributes;
     }*/
@@ -138,7 +138,7 @@ abstract class GenericLifeCycle<T>(private val tCLass: Class<T?>?, protected var
      */
     private fun getEntityAttributes(instance: T, session: Session?): MutableList<String?> { // untested. other possible implementations: https://stackoverflow.com/questions/19418500/get-table-column-names-in-hibernate
         val classMetadata: ClassMetadata? = HibernateUtil.sessionFactory!!.getClassMetadata(instance.javaClass)
-        val propertyNames: Array<String?> = classMetadata.getPropertyNames()
+        val propertyNames: Array<String?> = classMetadata.PropertyNames
         return Arrays.asList(*propertyNames)
     }
 

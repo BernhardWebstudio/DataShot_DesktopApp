@@ -45,12 +45,12 @@ object LocationInCollection {
     val locationInCollectionValues: Array<String?>?
         get() { // TODO: make list available as configuration (or from a database table)
             val configuredcollection: String = Singleton
-                    .getProperties()
-                    .getProperties()
+                    .Properties
+                    .Properties
                     .getProperty(ImageCaptureProperties.Companion.KEY_SPECIFIC_COLLECTION)
             val coll: String = Singleton
-                    .getProperties()
-                    .getProperties()
+                    .Properties
+                    .Properties
                     .getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION)
             return if (configuredcollection == null ||
                     configuredcollection.trim { it <= ' ' }.length == 0) {
@@ -83,15 +83,15 @@ object LocationInCollection {
     val defaultLocation: String?
         get() {
             val value: String = Singleton
-                    .getProperties()
-                    .getProperties()
+                    .Properties
+                    .Properties
                     .getProperty(ImageCaptureProperties.Companion.KEY_SPECIFIC_COLLECTION)
             if (value != null && value.trim { it <= ' ' }.length > 0) {
                 return value
             }
             val coll: String = Singleton
-                    .getProperties()
-                    .getProperties()
+                    .Properties
+                    .Properties
                     .getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION)
             return if (coll == ImageCaptureProperties.Companion.COLLECTION_ETHZENT) {
                 PALEARCTIC

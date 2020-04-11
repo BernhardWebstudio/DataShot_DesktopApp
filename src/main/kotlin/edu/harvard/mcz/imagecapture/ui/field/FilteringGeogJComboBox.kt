@@ -466,13 +466,13 @@ class FilteringGeogJComboBox : JComboBox<MCZbaseGeogAuthRec?>, FocusListener {
         cachedModel = null
         lastTextLength = 0
         // listen for loss of focus on the text field
-        this.getEditor().getEditorComponent().addFocusListener(this)
+        this.Editor.EditorComponent.addFocusListener(this)
         this.setEditable(true)
-        val textfield: JTextField = this.getEditor().getEditorComponent() as JTextField
+        val textfield: JTextField = this.Editor.EditorComponent as JTextField
         textfield.addKeyListener(object : KeyAdapter() {
             override fun keyReleased(keyEvent: KeyEvent?) {
                 log.debug(keyEvent)
-                SwingUtilities.invokeLater(Runnable { filter(textfield.getText(), true) })
+                SwingUtilities.invokeLater(Runnable { filter(textfield.Text, true) })
             }
         })
     }
@@ -520,43 +520,43 @@ class FilteringGeogJComboBox : JComboBox<MCZbaseGeogAuthRec?>, FocusListener {
         if (changePopupState && !this.isPopupVisible()) {
             this.showPopup()
         }
-        val lengthThreshold: Int = Integer.valueOf(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_FILTER_LENGTH_THRESHOLD))
+        val lengthThreshold: Int = Integer.valueOf(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_FILTER_LENGTH_THRESHOLD))
         if (enteredText != null && enteredText.length >= lengthThreshold) {
             log.debug("Filtering on $enteredText")
             var isExactMatch = false
             val filterArray = HigherGeographyComboBoxModel()
             filterArray.removeAllElements()
-            log.debug("Model size: " + super.getModel().getSize())
-            for (i in 0 until super.getModel().getSize()) {
-                if ((super.getModel() as HigherGeographyComboBoxModel?)
+            log.debug("Model size: " + super.Model.Size)
+            for (i in 0 until super.Model.Size) {
+                if ((super.Model as HigherGeographyComboBoxModel?)
                                 .getDataElementAt(i).toString().toLowerCase()
                                 .contains(enteredText.toLowerCase())) {
                     filterArray.addElement((super
-                            .getModel() as HigherGeographyComboBoxModel?).getDataElementAt(i) as MCZbaseGeogAuthRec)
+                            .Model as HigherGeographyComboBoxModel?).getDataElementAt(i) as MCZbaseGeogAuthRec)
                 }
-                if ((super.getModel() as HigherGeographyComboBoxModel?)
+                if ((super.Model as HigherGeographyComboBoxModel?)
                                 .getDataElementAt(i).toString()
                                 .equals(enteredText, ignoreCase = true)) {
                     isExactMatch = true
-                    super.getModel().setSelectedItem(
-                            (super.getModel() as HigherGeographyComboBoxModel?)
+                    super.Model.setSelectedItem(
+                            (super.Model as HigherGeographyComboBoxModel?)
                                     .getDataElementAt(i))
                 }
             }
-            if (filterArray.getSize() > 0) {
+            if (filterArray.Size > 0) {
                 val model: HigherGeographyComboBoxModel = this
-                        .getModel() as HigherGeographyComboBoxModel?
+                        .Model as HigherGeographyComboBoxModel?
                 model.removeAllElements()
-                val i: MutableIterator<MCZbaseGeogAuthRec?> = filterArray.getModel().iterator()
+                val i: MutableIterator<MCZbaseGeogAuthRec?> = filterArray.Model.iterator()
                 while (i.hasNext()) {
                     model.addElement(i.next())
                 }
-                val textfield: JTextField = this.getEditor()
-                        .getEditorComponent() as JTextField
+                val textfield: JTextField = this.Editor
+                        .EditorComponent as JTextField
                 textfield.setText(enteredText)
                 super.setModel(model)
             }
-            log.debug("Filtered Model size: " + super.getModel().getSize())
+            log.debug("Filtered Model size: " + super.Model.Size)
             if (changePopupState) {
                 this.hidePopup()
                 if (isExactMatch) {
@@ -570,19 +570,19 @@ class FilteringGeogJComboBox : JComboBox<MCZbaseGeogAuthRec?>, FocusListener {
     }
 
     override fun focusGained(e: FocusEvent?) {
-        super.getModel().setSelectedItem("")
-        val textfield: JTextField = this.getEditor().getEditorComponent() as JTextField
+        super.Model.setSelectedItem("")
+        val textfield: JTextField = this.Editor.EditorComponent as JTextField
         textfield.setText("")
     }
 
     override fun focusLost(e: FocusEvent) { // when focus is lost on the text field (editor box part of the combo box),
 // set the value of the text field to the selected item on the list, if any.
         log.debug(e.toString())
-        if (super.getModel().getSelectedItem() != null) {
-            log.debug(super.getModel().getSelectedItem().toString())
-            //JTextField textfield = (JTextField) this.getEditor().getEditorComponent();
-//textfield.setText(super.getModel().getSelectedItem().toString());
-            this.getEditor().setItem(super.getModel().getSelectedItem().toString())
+        if (super.Model.SelectedItem != null) {
+            log.debug(super.Model.SelectedItem.toString())
+            //JTextField textfield = (JTextField) this.Editor.EditorComponent;
+//textfield.setText(super.Model.SelectedItem.toString());
+            this.Editor.setItem(super.Model.SelectedItem.toString())
         }
     }
 

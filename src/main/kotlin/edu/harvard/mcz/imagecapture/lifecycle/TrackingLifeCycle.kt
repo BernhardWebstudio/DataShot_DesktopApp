@@ -233,7 +233,7 @@ class TrackingLifeCycle {
                 val root: Root<Tracking?> = cr.from(Tracking::class.java)
                 cr.select(root)
                 cr.where(cb.equal(root.get("specimen"), specimenId))
-                results = session.createQuery<Any?>(cr).getResultList()
+                results = session.createQuery<Any?>(cr).ResultList
                 //        results = session
 //                      .createQuery("SELECT * From Tracking t where Specimen = " +
 //                                   Long.toString(specimenId) +

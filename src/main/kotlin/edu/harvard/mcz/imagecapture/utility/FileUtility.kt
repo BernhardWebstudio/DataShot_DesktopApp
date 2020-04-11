@@ -15,9 +15,9 @@ object FileUtility {
         if (startpoint != null && startpoint.canRead()) {
             fileChooser.setCurrentDirectory(startpoint)
         }
-        val returnValue: Int = fileChooser.showOpenDialog(Singleton.getMainFrame())
+        val returnValue: Int = fileChooser.showOpenDialog(Singleton.MainFrame)
         return if (returnValue == JFileChooser.APPROVE_OPTION) {
-            fileChooser.getSelectedFile()
+            fileChooser.SelectedFile
         } else {
             null
         }
@@ -30,9 +30,9 @@ object FileUtility {
         //FileNameExtensionFilter filter = new FileNameExtensionFilter("TIFF Images", "tif", "tiff");
         val filter = FileNameExtensionFilter("Image files", "tif", "tiff", "jpg", "jpeg", "png")
         fileChooser.setFileFilter(filter)
-        val returnValue: Int = fileChooser.showOpenDialog(Singleton.getMainFrame())
+        val returnValue: Int = fileChooser.showOpenDialog(Singleton.MainFrame)
         return if (returnValue == JFileChooser.APPROVE_OPTION) {
-            fileChooser.getSelectedFile()
+            fileChooser.SelectedFile
         } else null
     }
 }

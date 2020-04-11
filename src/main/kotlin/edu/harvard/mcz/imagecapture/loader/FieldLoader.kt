@@ -57,7 +57,7 @@ class FieldLoader {
         sls = SpecimenLifeCycle()
         // Key: lower case of field, Value actual case of Field.
         knownFields = HashMap()
-        val specimenMethods: Array<Method?> = Specimen::class.java.getDeclaredMethods()
+        val specimenMethods: Array<Method?> = Specimen::class.java.DeclaredMethods
         for (j in specimenMethods.indices) {
             if (specimenMethods[j]!!.name.startsWith("set") && specimenMethods[j]!!.parameterTypes.size == 1 && specimenMethods[j]!!.parameterTypes[0].name == String::class.java.name) {
                 knownFields[specimenMethods[j]!!.name.replace("^set".toRegex(), "").toLowerCase()] = specimenMethods[j]!!.name.replace("^set".toRegex(), "")
@@ -113,12 +113,12 @@ class FieldLoader {
         val matches: MutableList<Specimen?> = sls.findByBarcode(barcode)
         if (matches != null && matches.size == 1) {
             val match: Specimen? = matches[0]
-            if (!overwriteExisting && !WorkFlowStatus.allowsVerbatimUpdate(match.getWorkFlowStatus())
+            if (!overwriteExisting && !WorkFlowStatus.allowsVerbatimUpdate(match.WorkFlowStatus)
                     ||
-                    overwriteExisting && !WorkFlowStatus.allowsVerbatimUpdateOverwrite(match.getWorkFlowStatus())) {
+                    overwriteExisting && !WorkFlowStatus.allowsVerbatimUpdateOverwrite(match.WorkFlowStatus)) {
                 throw LoadTargetMovedOnException()
             } else {
-                if (match.getVerbatimUnclassifiedText() == null || match.getVerbatimUnclassifiedText().trim({ it <= ' ' }).length == 0 || overwriteExisting) {
+                if (match.VerbatimUnclassifiedText == null || match.VerbatimUnclassifiedText.trim({ it <= ' ' }).length == 0 || overwriteExisting) {
                     match.setVerbatimUnclassifiedText(verbatimUnclassifiedText)
                 } else {
                     throw LoadTargetPopulatedException()
@@ -126,7 +126,7 @@ class FieldLoader {
                 match.setVerbatimClusterIdentifier(verbatimClusterIdentifier)
                 // append any questions to current questions.
                 if (questions != null && questions.trim { it <= ' ' }.length > 0) {
-                    var currentQuestions: String = match.getQuestions()
+                    var currentQuestions: String = match.Questions
                     if (currentQuestions == null) {
                         currentQuestions = ""
                     }
@@ -172,40 +172,40 @@ class FieldLoader {
         val matches: MutableList<Specimen?> = sls.findByBarcode(barcode)
         if (matches != null && matches.size == 1) {
             val match: Specimen? = matches[0]
-            if (WorkFlowStatus.allowsVerbatimUpdate(match.getWorkFlowStatus())) {
-                if (match.getVerbatimLocality() == null || match.getVerbatimLocality().trim({ it <= ' ' }).length == 0) {
+            if (WorkFlowStatus.allowsVerbatimUpdate(match.WorkFlowStatus)) {
+                if (match.VerbatimLocality == null || match.VerbatimLocality.trim({ it <= ' ' }).length == 0) {
                     match.setVerbatimLocality(verbatimLocality)
                 } else {
                     throw LoadTargetPopulatedException()
                 }
-                if (match.getDateNos() == null || match.getDateNos().trim({ it <= ' ' }).length == 0) {
+                if (match.DateNos == null || match.DateNos.trim({ it <= ' ' }).length == 0) {
                     match.setDateNos(verbatimDate)
                 } else {
                     throw LoadTargetPopulatedException()
                 }
-                if (match.getVerbatimCollector() == null || match.getVerbatimCollector().trim({ it <= ' ' }).length == 0) {
+                if (match.VerbatimCollector == null || match.VerbatimCollector.trim({ it <= ' ' }).length == 0) {
                     match.setVerbatimCollector(verbatimCollector)
                 } else {
                     throw LoadTargetPopulatedException()
                 }
-                if (match.getVerbatimCollection() == null || match.getVerbatimCollection().trim({ it <= ' ' }).length == 0) {
+                if (match.VerbatimCollection == null || match.VerbatimCollection.trim({ it <= ' ' }).length == 0) {
                     match.setVerbatimCollection(verbatimCollection)
                 } else {
                     throw LoadTargetPopulatedException()
                 }
-                if (match.getVerbatimNumbers() == null || match.getVerbatimNumbers().trim({ it <= ' ' }).length == 0) {
+                if (match.VerbatimNumbers == null || match.VerbatimNumbers.trim({ it <= ' ' }).length == 0) {
                     match.setVerbatimNumbers(verbatimNumbers)
                 } else {
                     throw LoadTargetPopulatedException()
                 }
-                if (match.getVerbatimUnclassifiedText() == null || match.getVerbatimUnclassifiedText().trim({ it <= ' ' }).length == 0) {
+                if (match.VerbatimUnclassifiedText == null || match.VerbatimUnclassifiedText.trim({ it <= ' ' }).length == 0) {
                     match.setVerbatimUnclassifiedText(verbatimUnclassifiedText)
                 } else {
                     throw LoadTargetPopulatedException()
                 }
                 // append any questions to current questions.
                 if (questions != null && questions.trim { it <= ' ' }.length > 0) {
-                    var currentQuestions: String = match.getQuestions()
+                    var currentQuestions: String = match.Questions
                     if (currentQuestions == null) {
                         currentQuestions = ""
                     }
@@ -248,7 +248,7 @@ class FieldLoader {
         log!!.debug(barcode)
         val knownFields = ArrayList<String?>()
         val knownFieldsLowerUpper = HashMap<String?, String?>()
-        val specimenMethods: Array<Method?> = Specimen::class.java.getDeclaredMethods()
+        val specimenMethods: Array<Method?> = Specimen::class.java.DeclaredMethods
         for (j in specimenMethods.indices) {
             if (specimenMethods[j]!!.name.startsWith("set") && specimenMethods[j]!!.parameterTypes.size == 1 && specimenMethods[j]!!.parameterTypes[0].name == String::class.java.name) {
                 val actualCase = specimenMethods[j]!!.name.replace("^set".toRegex(), "")
@@ -270,10 +270,10 @@ class FieldLoader {
         val matches: MutableList<Specimen?> = sls.findByBarcode(barcode)
         if (matches != null && matches.size == 1) {
             val match: Specimen? = matches[0]
-            if (newWorkflowStatus == WorkFlowStatus.STAGE_VERBATIM && !WorkFlowStatus.allowsVerbatimUpdate(match.getWorkFlowStatus())
+            if (newWorkflowStatus == WorkFlowStatus.STAGE_VERBATIM && !WorkFlowStatus.allowsVerbatimUpdate(match.WorkFlowStatus)
                     ||
-                    newWorkflowStatus == WorkFlowStatus.STAGE_CLASSIFIED && !WorkFlowStatus.allowsClassifiedUpdate(match.getWorkFlowStatus())) { // The target Specimen record has moved on past the state where it can be altered by a data load.
-                throw LoadTargetMovedOnException(barcode + " is in state " + match.getWorkFlowStatus() + " and can't be altered by this data load (to " + newWorkflowStatus + ").")
+                    newWorkflowStatus == WorkFlowStatus.STAGE_CLASSIFIED && !WorkFlowStatus.allowsClassifiedUpdate(match.WorkFlowStatus)) { // The target Specimen record has moved on past the state where it can be altered by a data load.
+                throw LoadTargetMovedOnException(barcode + " is in state " + match.WorkFlowStatus + " and can't be altered by this data load (to " + newWorkflowStatus + ").")
             } else { // Target Specimen record is eligible to be updated by a data load.
                 var foundData = false
                 var hasChange = false
@@ -301,7 +301,7 @@ class FieldLoader {
                                     val collector = collectors[j]
                                     log.debug(collector)
                                     if (collector!!.trim { it <= ' ' }.length > 0) { // Check to see if Collector exists
-                                        val existingCollectors: MutableSet<Collector?> = match.getCollectors()
+                                        val existingCollectors: MutableSet<Collector?> = match.Collectors
                                         val ic = existingCollectors.iterator()
                                         var exists = false
                                         while (ic.hasNext()) {
@@ -316,7 +316,7 @@ class FieldLoader {
                                             col.collectorName = collector
                                             val cls = CollectorLifeCycle()
                                             cls.persist(col)
-                                            match.getCollectors().add(col)
+                                            match.Collectors.add(col)
                                             foundData = true
                                             hasChange = true
                                         }
@@ -339,7 +339,7 @@ class FieldLoader {
                                             }
                                         }
                                         // check to see if number exists
-                                        val existingNumbers: MutableSet<Number?> = match.getNumbers()
+                                        val existingNumbers: MutableSet<Number?> = match.Numbers
                                         val ic = existingNumbers.iterator()
                                         var exists = false
                                         while (ic.hasNext()) {
@@ -357,7 +357,7 @@ class FieldLoader {
                                             num.specimen = match
                                             nls.persist(num)
                                             hasChange = true
-                                            match.getNumbers().add(num)
+                                            match.Numbers.add(num)
                                             foundData = true
                                         }
                                     }
@@ -390,8 +390,8 @@ class FieldLoader {
                                     if (currentValue == null || currentValue.trim { it <= ' ' }.length == 0) { // Handle ISO date formatting variants
                                         if (key.equals("ISODate", ignoreCase = true)) {
                                             val parseResult: EventResult? = DateUtils.extractDateFromVerbatimER(datavalue)
-                                            if (parseResult.getResultState() == EventResult.EventQCResultState.DATE || parseResult.getResultState() == EventResult.EventQCResultState.RANGE) {
-                                                val correctISOFormat: String = parseResult.getResult()
+                                            if (parseResult.ResultState == EventResult.EventQCResultState.DATE || parseResult.ResultState == EventResult.EventQCResultState.RANGE) {
+                                                val correctISOFormat: String = parseResult.Result
                                                 // switch from correct ISO format to the internally stored incorrect format that switches - and /.
                                                 datavalue = correctISOFormat.replace("/", "^") // change / to placeholder
                                                 datavalue = datavalue.replace("-", "/") // change - to /
@@ -441,19 +441,19 @@ class FieldLoader {
                     try { // save the updated specimen record
                         match.setWorkFlowStatus(newWorkflowStatus)
                         // with the user running the load job and the current date as last update.
-                        match.setLastUpdatedBy(Singleton.getUserFullName())
+                        match.setLastUpdatedBy(Singleton.UserFullName)
                         match.setDateLastUpdated(Date())
-                        log.debug("Updating:" + match.getBarcode())
+                        log.debug("Updating:" + match.Barcode)
                         sls.attachDirty(match)
                         result = hasChange
                         // If we were provided
-                        var ewProcess = "ArbitraryFieldLoad:" + match.getWorkFlowStatus() + ":" + keys.toString()
+                        var ewProcess = "ArbitraryFieldLoad:" + match.WorkFlowStatus + ":" + keys.toString()
                         if (hasExternalWorkflowProcess) {
-                            ewProcess = match.getExternalWorkflowProcess()
+                            ewProcess = match.ExternalWorkflowProcess
                         }
                         var ewDate = Date()
                         if (hasExternalWorkflowDate) {
-                            ewDate = match.getExternalWorkflowDate()
+                            ewDate = match.ExternalWorkflowDate
                         }
                         logHistory(match, ewProcess, ewDate)
                     } catch (e: SaveFailedException) {
@@ -482,7 +482,7 @@ class FieldLoader {
         val result = HeaderCheckResult()
         val knownFields = ArrayList<String?>()
         val knownFieldsLowerUpper = HashMap<String?, String?>()
-        val specimenMethods: Array<Method?> = Specimen::class.java.getDeclaredMethods()
+        val specimenMethods: Array<Method?> = Specimen::class.java.DeclaredMethods
         for (j in specimenMethods.indices) {
             if (specimenMethods[j]!!.name.startsWith("set") && specimenMethods[j]!!.parameterTypes.size == 1 && specimenMethods[j]!!.parameterTypes[0].name == String::class.java.name) {
                 val actualCase = specimenMethods[j]!!.name.replace("^set".toRegex(), "")
@@ -522,13 +522,13 @@ class FieldLoader {
             }
         }
         if (!containsBarcode) {
-            throw LoadException("Header does not contain a barcode field.  \nFields:" + result.getMessage())
+            throw LoadException("Header does not contain a barcode field.  \nFields:" + result.Message)
         }
         if (!containsAField) {
-            throw LoadException("Header contains no recognized data fields. \nFields: " + result.getMessage())
+            throw LoadException("Header contains no recognized data fields. \nFields: " + result.Message)
         }
         if (containsUnknownField) {
-            throw LoadException("Header contains at least one unknown field. \nFields: " + result.getMessage())
+            throw LoadException("Header contains at least one unknown field. \nFields: " + result.Message)
         }
         result.setResult(true)
         return result

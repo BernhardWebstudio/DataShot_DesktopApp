@@ -82,52 +82,52 @@ class RunnableJobErrorTableModel : AbstractTableModel {
         var result: Any? = null
         when (type) {
             TYPE_PREPROCESS -> when (columnIndex) {
-                0 -> result = error!!.getFailureType()
-                1 -> result = error.getFilename()
-                2 -> result = error.getBarcode()
-                3 -> result = error.getQrBarcode()
-                4 -> result = error.getCommentBarcode()
-                5 -> result = error.getErrorMessage()
-                6 -> result = if (error.getException() != null) {
-                    error.getException().message
+                0 -> result = error!!.FailureType
+                1 -> result = error.Filename
+                2 -> result = error.Barcode
+                3 -> result = error.QrBarcode
+                4 -> result = error.CommentBarcode
+                5 -> result = error.ErrorMessage
+                6 -> result = if (error.Exception != null) {
+                    error.Exception.message
                 } else {
                     ""
                 }
-                7 -> result = if (error!!.getDrawerParser() != null) {
-                    error!!.getDrawerParser().getDrawerNumber()
+                7 -> result = if (error!!.DrawerParser != null) {
+                    error!!.DrawerParser.DrawerNumber
                 } else {
                     ""
                 }
-                8 -> result = if (error!!.getTaxonParser() != null) {
-                    error!!.getTaxonParser().getFamily()
+                8 -> result = if (error!!.TaxonParser != null) {
+                    error!!.TaxonParser.Family
                 } else {
                     ""
                 }
             }
             TYPE_MISSING_BARCODES -> when (columnIndex) {
-                0 -> result = error!!.getFailureType()
-                1 -> result = error.getBarcode()
-                2 -> result = error.getPrevious()
-                3 -> result = error.getPreviousPath()
+                0 -> result = error!!.FailureType
+                1 -> result = error.Barcode
+                2 -> result = error.Previous
+                3 -> result = error.PreviousPath
             }
             TYPE_LOAD -> when (columnIndex) {
-                0 -> result = error!!.getFailureType()
-                1 -> result = error.getFilename()
-                2 -> result = error.getLineNumber()
-                3 -> result = error.getBarcode()
-                4 -> result = error.getErrorMessage()
-                5 -> result = if (error.getException() != null) {
-                    error.getException().message
+                0 -> result = error!!.FailureType
+                1 -> result = error.Filename
+                2 -> result = error.LineNumber
+                3 -> result = error.Barcode
+                4 -> result = error.ErrorMessage
+                5 -> result = if (error.Exception != null) {
+                    error.Exception.message
                 } else {
                     ""
                 }
             }
             TYPE_FILE_RECONCILIATION -> when (columnIndex) {
-                0 -> result = error!!.getFailureType()
-                1 -> result = error.getQrBarcode() // overloaded, path to file
-                2 -> result = error.getFilename()
-                3 -> result = error.getBarcode()
-                4 -> result = error.getErrorMessage()
+                0 -> result = error!!.FailureType
+                1 -> result = error.QrBarcode // overloaded, path to file
+                2 -> result = error.Filename
+                3 -> result = error.Barcode
+                4 -> result = error.ErrorMessage
             }
         }
         return result

@@ -33,11 +33,7 @@ import edu.harvard.mcz.imagecapture.ui.frame.DeterminationFrame
 import edu.harvard.mcz.imagecapture.ui.tablemodel.DeterminationTableModel
 import org.apache.commons.logging.Log
 import java.awt.*
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
-import java.awt.event.KeyEvent
-import java.awt.event.MouseAdapter
-import java.awt.event.MouseEvent
+import java.awt.event.*
 import javax.swing.*
 
 org.apache.commons.logging.LogFactory
@@ -483,14 +479,14 @@ class DeterminationFrame : JFrame {
      * @param aSpecimen
      */
     constructor(aSpecimen: Specimen) : super() {
-        determinationsModel = DeterminationTableModel(aSpecimen.getDeterminations())
+        determinationsModel = DeterminationTableModel(aSpecimen.Determinations)
         specimen = aSpecimen
         initialize()
         jButtonAdd.setEnabled(true)
     }
 
     fun setSpecimen(aSpecimen: Specimen) {
-        determinationsModel = DeterminationTableModel(aSpecimen.getDeterminations())
+        determinationsModel = DeterminationTableModel(aSpecimen.Determinations)
         jTableDeterminations.setModel(determinationsModel)
         setTableColumnEditors()
         specimen = aSpecimen
@@ -508,13 +504,13 @@ class DeterminationFrame : JFrame {
         this.setContentPane(getJContentPane())
         var forSpecimen = ""
         if (specimen != null) {
-            forSpecimen = " for " + specimen.getBarcode()
+            forSpecimen = " for " + specimen.Barcode
         }
         this.setTitle("Enter and edit Determination history$forSpecimen")
         this.pack()
-        val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize()
-        this.setLocation((screenSize.width - this.getWidth()) / 2,
-                (screenSize.height - this.getHeight()) / 2)
+        val screenSize: Dimension = Toolkit.DefaultToolkit.ScreenSize
+        this.setLocation((screenSize.width - this.Width) / 2,
+                (screenSize.height - this.Height) / 2)
     }
 
     /**
@@ -547,7 +543,7 @@ class DeterminationFrame : JFrame {
     }// force removal as apparently the jTableDeterminationsModel is not reliable enough//allie change
 //here is where the select field is set for determiner!!!
 //FilteringAgentJComboBox field = new FilteringAgentJComboBox();
-//jTableDeterminations.getColumnModel().getColumn(DeterminationTableModel.ROW_IDENTIFIEDBY).setCellEditor(new ComboBoxCellEditor(field));
+//jTableDeterminations.ColumnModel.getColumn(DeterminationTableModel.ROW_IDENTIFIEDBY).setCellEditor(new ComboBoxCellEditor(field));
 
     /**
      * This method initializes jTable
@@ -562,21 +558,21 @@ class DeterminationFrame : JFrame {
                 //allie change
 //here is where the select field is set for determiner!!!
 //FilteringAgentJComboBox field = new FilteringAgentJComboBox();
-//jTableDeterminations.getColumnModel().getColumn(DeterminationTableModel.ROW_IDENTIFIEDBY).setCellEditor(new ComboBoxCellEditor(field));
+//jTableDeterminations.ColumnModel.getColumn(DeterminationTableModel.ROW_IDENTIFIEDBY).setCellEditor(new ComboBoxCellEditor(field));
                 setTableColumnEditors()
-                jTableDeterminations.setRowHeight(jTableDeterminations.getRowHeight() + 4)
+                jTableDeterminations.setRowHeight(jTableDeterminations.RowHeight + 4)
                 jTableDeterminations.addMouseListener(object : MouseAdapter() {
                     override fun mousePressed(e: MouseEvent) {
                         if (e.isPopupTrigger()) {
-                            clickedOnDetsRow = (e.getComponent() as JTable).getSelectedRow()
-                            jPopupDets.show(e.getComponent(), e.getX(), e.getY())
+                            clickedOnDetsRow = (e.Component as JTable).SelectedRow
+                            jPopupDets.show(e.Component, e.X, e.Y)
                         }
                     }
 
                     override fun mouseReleased(e: MouseEvent) {
                         if (e.isPopupTrigger()) {
-                            clickedOnDetsRow = (e.getComponent() as JTable).getSelectedRow()
-                            jPopupDets.show(e.getComponent(), e.getX(), e.getY())
+                            clickedOnDetsRow = (e.Component as JTable).SelectedRow
+                            jPopupDets.show(e.Component, e.X, e.Y)
                         }
                     }
                 })
@@ -590,7 +586,7 @@ class DeterminationFrame : JFrame {
                                 val ok: Int = JOptionPane.showConfirmDialog(thisFrame, "Delete the selected determination?", "Delete Determination", JOptionPane.OK_CANCEL_OPTION)
                                 if (ok == JOptionPane.OK_OPTION) {
                                     log.debug("deleting determination row $clickedOnDetsRow")
-                                    (jTableDeterminations.getModel() as DeterminationTableModel).deleteRow(clickedOnDetsRow)
+                                    (jTableDeterminations.Model as DeterminationTableModel).deleteRow(clickedOnDetsRow)
                                     // force removal as apparently the jTableDeterminationsModel is not reliable enough
                                 } else {
                                     log.debug("determination row delete canceled by user.")
@@ -610,14 +606,14 @@ class DeterminationFrame : JFrame {
         }
 
     private fun setTableColumnEditors() {
-        val comboBoxNatureOfId: JComboBox<String?> = JComboBox<String?>(NatureOfId.getNatureOfIdValues())
-        jTableDeterminations.getColumnModel().getColumn(DeterminationTableModel.Companion.ROW_NATUREOFID).setCellEditor(DefaultCellEditor(comboBoxNatureOfId))
-        val comboBoxTypeStatus: JComboBox<String?> = JComboBox<String?>(TypeStatus.Companion.getTypeStatusValues())
-        jTableDeterminations.getColumnModel().getColumn(DeterminationTableModel.Companion.ROW_TYPESTATUS).setCellEditor(DefaultCellEditor(comboBoxTypeStatus))
+        val comboBoxNatureOfId: JComboBox<String?> = JComboBox<String?>(NatureOfId.NatureOfIdValues)
+        jTableDeterminations.ColumnModel.getColumn(DeterminationTableModel.Companion.ROW_NATUREOFID).setCellEditor(DefaultCellEditor(comboBoxNatureOfId))
+        val comboBoxTypeStatus: JComboBox<String?> = JComboBox<String?>(TypeStatus.Companion.TypeStatusValues)
+        jTableDeterminations.ColumnModel.getColumn(DeterminationTableModel.Companion.ROW_TYPESTATUS).setCellEditor(DefaultCellEditor(comboBoxTypeStatus))
         val jTextFieldDateIdentified = JTextField()
         jTextFieldDateIdentified.setInputVerifier(
                 MetadataRetriever.getInputVerifier(Determination::class.java, "DateIdentified", jTextFieldDateIdentified))
-        jTableDeterminations.getColumnModel().getColumn(DeterminationTableModel.Companion.ROW_DATEIDENTIFIED).setCellEditor(ValidatingTableCellEditor(jTextFieldDateIdentified))
+        jTableDeterminations.ColumnModel.getColumn(DeterminationTableModel.Companion.ROW_DATEIDENTIFIED).setCellEditor(ValidatingTableCellEditor(jTextFieldDateIdentified))
     }
 
     /**
@@ -653,7 +649,7 @@ class DeterminationFrame : JFrame {
                     log.debug("getJButtonAdd: adding row.....")
                     if (specimen != null) {
                         if (jTableDeterminations.isEditing()) {
-                            jTableDeterminations.getCellEditor().stopCellEditing()
+                            jTableDeterminations.CellEditor.stopCellEditing()
                         }
                         val d = Determination()
                         d.setSpecimen(specimen)
@@ -679,7 +675,7 @@ class DeterminationFrame : JFrame {
                 override fun actionPerformed(e: ActionEvent?) { // Make sure changes in field that was modal before button
 // click are saved to the model.
                     if (jTableDeterminations.isEditing()) {
-                        jTableDeterminations.getCellEditor().stopCellEditing()
+                        jTableDeterminations.CellEditor.stopCellEditing()
                     }
                     //
                     setVisible(false)

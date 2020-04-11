@@ -82,13 +82,13 @@ class SpecimenPartsAttrTableModel : AbstractTableModel {
         var result: Any? = null
         when (columnIndex) {
             0 -> result = (specimenPartAttributes!!.toTypedArray().get(rowIndex) as SpecimenPartAttribute)
-                    .getAttributeType()
+                    .AttributeType
             1 -> result = (specimenPartAttributes!!.toTypedArray().get(rowIndex) as SpecimenPartAttribute)
-                    .getAttributeValue()
+                    .AttributeValue
             2 -> result = (specimenPartAttributes!!.toTypedArray().get(rowIndex) as SpecimenPartAttribute)
-                    .getAttributeUnits()
+                    .AttributeUnits
             3 -> result = (specimenPartAttributes!!.toTypedArray().get(rowIndex) as SpecimenPartAttribute)
-                    .getAttributeRemark()
+                    .AttributeRemark
         }
         return result
     }

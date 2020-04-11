@@ -417,11 +417,11 @@ class CopyRowButtonEditor : DefaultCellEditor {
     override fun getTableCellEditorComponent(table: JTable, value: Any?,
                                              isSelected: Boolean, row: Int, column: Int): Component? {
         if (isSelected) {
-            button.setForeground(table.getSelectionForeground())
-            button.setBackground(table.getSelectionBackground())
+            button.setForeground(table.SelectionForeground)
+            button.setBackground(table.SelectionBackground)
         } else {
-            button.setForeground(table.getForeground())
-            button.setBackground(table.getBackground())
+            button.setForeground(table.Foreground)
+            button.setBackground(table.Background)
         }
         label = value?.toString() ?: ""
         button.setText(label)
@@ -438,9 +438,9 @@ class CopyRowButtonEditor : DefaultCellEditor {
             if (isPushed) {
                 if (target != null) {
                     ImageCaptureApp.lastEditedSpecimenCache = target
-                    Singleton.getMainFrame().setStatusMessage("Copied specimen with id " + target.getSpecimenId() + ".")
+                    Singleton.MainFrame.setStatusMessage("Copied specimen with id " + target.SpecimenId + ".")
                 } else {
-                    Singleton.getMainFrame().setStatusMessage("Failed copying specimen.")
+                    Singleton.MainFrame.setStatusMessage("Failed copying specimen.")
                 }
             }
             isPushed = false

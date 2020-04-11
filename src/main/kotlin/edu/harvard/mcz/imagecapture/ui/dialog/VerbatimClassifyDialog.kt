@@ -494,14 +494,14 @@ class VerbatimClassifyDialog : JDialog {
     }
 
     protected fun setValues() {
-        lblCount.setText("Number of records with these verbatim values: " + verbatimData.getCount())
-        textFieldVerbLocality.setText(verbatimData.getVerbatimLocality())
-        textFieldVerbDate.setText(verbatimData.getVerbatimDate())
+        lblCount.setText("Number of records with these verbatim values: " + verbatimData.Count)
+        textFieldVerbLocality.setText(verbatimData.VerbatimLocality)
+        textFieldVerbDate.setText(verbatimData.VerbatimDate)
         textFieldVerbDate.setEditable(false)
-        textFieldVerbCollection.setText(verbatimData.getVerbatimCollection())
-        textFieldVerbCollector.setText(verbatimData.getVerbatimCollector())
-        textFieldVerbNumbers.setText(verbatimData.getVerbatimNumbers())
-        textFieldVerbUnclassifiedText.setText(verbatimData.getVerbatimUnclassfiedText())
+        textFieldVerbCollection.setText(verbatimData.VerbatimCollection)
+        textFieldVerbCollector.setText(verbatimData.VerbatimCollector)
+        textFieldVerbNumbers.setText(verbatimData.VerbatimNumbers)
+        textFieldVerbUnclassifiedText.setText(verbatimData.VerbatimUnclassfiedText)
     }
 
     protected fun init() {
@@ -586,8 +586,8 @@ class VerbatimClassifyDialog : JDialog {
             val btnCopyLocality = JButton(">")
             btnCopyLocality.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    if (textFieldSpecificLocality.getText().isEmpty()) {
-                        textFieldSpecificLocality.setText(textFieldVerbLocality.getText().replace("\n", "").trim({ it <= ' ' }))
+                    if (textFieldSpecificLocality.Text.isEmpty()) {
+                        textFieldSpecificLocality.setText(textFieldVerbLocality.Text.replace("\n", "").trim({ it <= ' ' }))
                     }
                 }
             })
@@ -662,8 +662,8 @@ class VerbatimClassifyDialog : JDialog {
             val btnCopyDate = JButton(">")
             btnCopyDate.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    if (textFieldISODate.getText().isEmpty()) {
-                        val extractResult: MutableMap<String?, String?> = DateUtils.extractDateFromVerbatim(textFieldVerbDate.getText().trim({ it <= ' ' }))
+                    if (textFieldISODate.Text.isEmpty()) {
+                        val extractResult: MutableMap<String?, String?> = DateUtils.extractDateFromVerbatim(textFieldVerbDate.Text.trim({ it <= ' ' }))
                         if (extractResult.containsKey("result")) {
                             textFieldISODate.setText(extractResult["result"])
                         }
@@ -735,7 +735,7 @@ class VerbatimClassifyDialog : JDialog {
             val btnAddCollector = JButton("+")
             btnAddCollector.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    (jTableCollectors.getModel() as CollectorTableModel).addCollector(Collector(null, ""))
+                    (jTableCollectors.Model as CollectorTableModel).addCollector(Collector(null, ""))
                 }
             })
             val gbc_btnAddCollector = GridBagConstraints()
@@ -812,7 +812,7 @@ class VerbatimClassifyDialog : JDialog {
             val btnAddNumber = JButton("+")
             btnAddNumber.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    (jTableNumbers.getModel() as NumberTableModel).addNumber(Number(null, "", ""))
+                    (jTableNumbers.Model as NumberTableModel).addNumber(Number(null, "", ""))
                 }
             })
             val gbc_btnAddNumber = GridBagConstraints()
@@ -828,7 +828,7 @@ class VerbatimClassifyDialog : JDialog {
             gbc_numberTable.gridy = 10
             gbc_numberTable.gridheight = 2
             gbc_numberTable.gridwidth = 5
-            panelVerbatimValues.add(this.getJScrollPaneNumbers(), gbc_numberTable)
+            panelVerbatimValues.add(this.JScrollPaneNumbers, gbc_numberTable)
             val lblVerbatimOtherText = JLabel("Verbatim Other Text")
             val gbc_lblVerbatimOtherText = GridBagConstraints()
             gbc_lblVerbatimOtherText.anchor = GridBagConstraints.EAST
@@ -885,7 +885,7 @@ class VerbatimClassifyDialog : JDialog {
             gbc_lblNewLabel_4.gridx = 3
             gbc_lblNewLabel_4.gridy = 15
             panelVerbatimValues.add(lblNewLabel_4, gbc_lblNewLabel_4)
-            comboBoxWorkflowStatus = JComboBox<Any?>(WorkFlowStatus.getVerbatimClassifiedWorkFlowStatusValues())
+            comboBoxWorkflowStatus = JComboBox<Any?>(WorkFlowStatus.VerbatimClassifiedWorkFlowStatusValues)
             comboBoxWorkflowStatus.setSelectedItem(WorkFlowStatus.STAGE_CLASSIFIED)
             val gbc_comboBoxWorkflowStatus = GridBagConstraints()
             gbc_comboBoxWorkflowStatus.gridwidth = 4
@@ -961,7 +961,7 @@ class VerbatimClassifyDialog : JDialog {
         if (jScrollPaneCollectors == null) {
             jScrollPaneCollectors = JScrollPane()
             jScrollPaneCollectors.setViewportView(getJTableCollectors())
-            jScrollPaneCollectors.setPreferredSize(Dimension(jScrollPaneCollectors.getWidth(), 150))
+            jScrollPaneCollectors.setPreferredSize(Dimension(jScrollPaneCollectors.Width, 150))
         }
         return jScrollPaneCollectors
     }
@@ -982,8 +982,8 @@ class VerbatimClassifyDialog : JDialog {
             jTableCollectors = JTable(CollectorTableModel())
             // Note: When setting the values, the table column editor needs to be reset there, as the model is replaced.
             val field = FilteringAgentJComboBox()
-            jTableCollectors.getColumnModel().getColumn(0).setCellEditor(ComboBoxCellEditor(field))
-            jTableCollectors.setRowHeight(jTableCollectors.getRowHeight() + 4)
+            jTableCollectors.ColumnModel.getColumn(0).setCellEditor(ComboBoxCellEditor(field))
+            jTableCollectors.setRowHeight(jTableCollectors.RowHeight + 4)
         }
         return jTableCollectors
     }
@@ -997,7 +997,7 @@ class VerbatimClassifyDialog : JDialog {
         if (jComboBoxCollection == null) {
             val sls = SpecimenLifeCycle()
             jComboBoxCollection = JComboBox<Any?>()
-            jComboBoxCollection.setModel(DefaultComboBoxModel<String?>(sls.getDistinctCollections()))
+            jComboBoxCollection.setModel(DefaultComboBoxModel<String?>(sls.DistinctCollections))
             jComboBoxCollection.setEditable(true)
             jComboBoxCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen::class.java, "Collection"))
             AutoCompleteDecorator.decorate(jComboBoxCollection)
@@ -1014,7 +1014,7 @@ class VerbatimClassifyDialog : JDialog {
         if (jScrollPaneNumbers == null) {
             jScrollPaneNumbers = JScrollPane()
             jScrollPaneNumbers.setViewportView(getJTableNumbers())
-            jScrollPaneNumbers.setPreferredSize(Dimension(jScrollPaneCollectors.getWidth(), 150))
+            jScrollPaneNumbers.setPreferredSize(Dimension(jScrollPaneCollectors.Width, 150))
         }
         return jScrollPaneNumbers
     }
@@ -1028,12 +1028,12 @@ class VerbatimClassifyDialog : JDialog {
         if (jTableNumbers == null) {
             jTableNumbers = JTable(NumberTableModel())
             val jComboNumberTypes: JComboBox<String?> = JComboBox<String?>()
-            jComboNumberTypes.setModel(DefaultComboBoxModel<String?>(NumberLifeCycle.Companion.getDistinctTypes()))
+            jComboNumberTypes.setModel(DefaultComboBoxModel<String?>(NumberLifeCycle.Companion.DistinctTypes))
             jComboNumberTypes.setEditable(true)
-            val typeColumn: TableColumn = jTableNumbers.getColumnModel().getColumn(NumberTableModel.Companion.COLUMN_TYPE)
+            val typeColumn: TableColumn = jTableNumbers.ColumnModel.getColumn(NumberTableModel.Companion.COLUMN_TYPE)
             val comboBoxEditor = DefaultCellEditor(jComboNumberTypes)
             //TODO: enable autocomplete for numbertypes picklist.
-//AutoCompleteDecorator.decorate((JComboBox) comboBoxEditor.getComponent());
+//AutoCompleteDecorator.decorate((JComboBox) comboBoxEditor.Component);
             typeColumn.cellEditor = comboBoxEditor
             val renderer = DefaultTableCellRenderer()
             renderer.setToolTipText("Click for pick list of number types.")
@@ -1044,69 +1044,69 @@ class VerbatimClassifyDialog : JDialog {
 
     protected fun saveChanges() {
         if (jTableCollectors.isEditing()) {
-            jTableCollectors.getCellEditor().stopCellEditing()
+            jTableCollectors.CellEditor.stopCellEditing()
         }
         if (jTableNumbers.isEditing()) {
-            jTableNumbers.getCellEditor().stopCellEditing()
+            jTableNumbers.CellEditor.stopCellEditing()
         }
         log.debug("Saving verbatim data changes to all records with shared verbatim data.")
-        log.debug("Should affect " + verbatimData.getCount() + " Specimen records.")
+        log.debug("Should affect " + verbatimData.Count + " Specimen records.")
         val sls = SpecimenLifeCycle()
         val specimens: MutableList<Specimen?> = sls.findSpecimensFromVerbatim(verbatimData)
         val i: MutableIterator<Specimen?> = specimens.iterator()
         while (i.hasNext()) {
             val specimen: Specimen? = i.next()
             // populate fields from parsed (10 fields, 2 lists)
-            if (comboBoxHigherGeog.getSelectedIndex() == -1 && comboBoxHigherGeog.getSelectedItem() == null) {
+            if (comboBoxHigherGeog.SelectedIndex == -1 && comboBoxHigherGeog.SelectedItem == null) {
                 specimen.setHigherGeography("")
             } else { // combo box contains a geography object, obtain the higher geography string.
-                specimen.setHigherGeography((comboBoxHigherGeog.getModel() as HigherGeographyComboBoxModel).getSelectedItemHigherGeography())
+                specimen.setHigherGeography((comboBoxHigherGeog.Model as HigherGeographyComboBoxModel).SelectedItemHigherGeography)
             }
-            specimen.setSpecificLocality(textFieldSpecificLocality.getText())
-            if (jTableCollectors.getModel().getRowCount() > 0) { // add collectors
-                val rows: Int = jTableCollectors.getModel().getRowCount()
+            specimen.setSpecificLocality(textFieldSpecificLocality.Text)
+            if (jTableCollectors.Model.RowCount > 0) { // add collectors
+                val rows: Int = jTableCollectors.Model.RowCount
                 for (row in 0 until rows) {
-                    val collector = (jTableCollectors.getModel().getValueAt(row, 1) as String)
-                    specimen.getCollectors().add(Collector(specimen, collector))
+                    val collector = (jTableCollectors.Model.getValueAt(row, 1) as String)
+                    specimen.Collectors.add(Collector(specimen, collector))
                 }
             }
-            if (jComboBoxCollection.getSelectedIndex() == -1 && jComboBoxCollection.getSelectedItem() == null) {
+            if (jComboBoxCollection.SelectedIndex == -1 && jComboBoxCollection.SelectedItem == null) {
                 specimen.setCollection("")
             } else {
-                specimen.setCollection(jComboBoxCollection.getSelectedItem().toString())
+                specimen.setCollection(jComboBoxCollection.SelectedItem.toString())
             }
             // Elevations
             var min_elev: Long?
-            min_elev = if (textFieldMinElevation.getText().trim({ it <= ' ' }).length == 0) {
+            min_elev = if (textFieldMinElevation.Text.trim({ it <= ' ' }).length == 0) {
                 null
             } else {
                 try {
-                    textFieldMinElevation.getText().toLong()
+                    textFieldMinElevation.Text.toLong()
                 } catch (e: NumberFormatException) {
                     null
                 }
             }
             specimen.setMinimum_elevation(min_elev)
             var max_elev: Long?
-            max_elev = if (textFieldMaxElevation.getText().trim({ it <= ' ' }).length == 0) {
+            max_elev = if (textFieldMaxElevation.Text.trim({ it <= ' ' }).length == 0) {
                 null
             } else {
                 try {
-                    textFieldMaxElevation.getText().toLong()
+                    textFieldMaxElevation.Text.toLong()
                 } catch (e: NumberFormatException) {
                     null
                 }
             }
             specimen.setMaximum_elevation(max_elev)
-            if (comboBoxElevUnits.getSelectedIndex() == -1 && comboBoxElevUnits.getSelectedItem() == null) {
+            if (comboBoxElevUnits.SelectedIndex == -1 && comboBoxElevUnits.SelectedItem == null) {
                 specimen.setElev_units("")
             } else {
-                specimen.setElev_units(comboBoxElevUnits.getSelectedItem().toString())
+                specimen.setElev_units(comboBoxElevUnits.SelectedItem.toString())
             }
-            specimen.setIsoDate(textFieldISODate.getText().trim({ it <= ' ' }))
-            specimen.setHabitat(textFieldHabitat.getText())
-            specimen.setMicrohabitat(textFieldMicrohabitat.getText())
-            specimen.setWorkFlowStatus(comboBoxWorkflowStatus.getSelectedItem() as String)
+            specimen.setIsoDate(textFieldISODate.Text.trim({ it <= ' ' }))
+            specimen.setHabitat(textFieldHabitat.Text)
+            specimen.setMicrohabitat(textFieldMicrohabitat.Text)
+            specimen.setWorkFlowStatus(comboBoxWorkflowStatus.SelectedItem as String)
             // store values for reuse
             storeLastEditedValues(specimen)
             try {
@@ -1122,9 +1122,9 @@ class VerbatimClassifyDialog : JDialog {
             lastEditedSpecimen = Specimen()
             lastEditedSpecimen.setDateCreated(Date())
         }
-        lastEditedSpecimen.setSpecificLocality(lastSpecimen.getSpecificLocality())
-        lastEditedSpecimen.setHigherGeography(lastSpecimen.getHigherGeography())
-        lastEditedSpecimen.setCollection(lastSpecimen.getCollection())
+        lastEditedSpecimen.setSpecificLocality(lastSpecimen.SpecificLocality)
+        lastEditedSpecimen.setHigherGeography(lastSpecimen.HigherGeography)
+        lastEditedSpecimen.setCollection(lastSpecimen.Collection)
     }
 
     companion object {

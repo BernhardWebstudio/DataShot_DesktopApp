@@ -38,7 +38,7 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
      * Cleanup when job is complete.
      */
     protected fun done() {
-        Singleton.getJobList().removeJob(this)
+        Singleton.JobList.removeJob(this)
     }
 
     companion object {
@@ -55,7 +55,7 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
          * @param log
          */
         fun logMismatch(counter: ScanCounterInterface, filename: String?, barcode: String?, exifComment: String?, parser: TaxonNameReturner?, barcodeInImageMetadata: Boolean, log: Log) {
-            if (barcodeInImageMetadata || Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_REDUNDANT_COMMENT_BARCODE) == "true") { // If so configured, or if image metadata contains a barcode that doesn't match the barcode in the image
+            if (barcodeInImageMetadata || Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_REDUNDANT_COMMENT_BARCODE) == "true") { // If so configured, or if image metadata contains a barcode that doesn't match the barcode in the image
 // report on barcode/comment missmatch as an error condition.
                 try {
                     val error = RunnableJobError(filename, barcode,
@@ -80,26 +80,26 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
          */
         fun extractFamilyToSpecimen(parser: TaxonNameReturner, s: Specimen) {
             val hls = HigherTaxonLifeCycle()
-            if (parser.getTribe().trim({ it <= ' ' }) == "") {
-                if (hls.isMatched(parser.getFamily(), parser.getSubfamily())) { // If there is a match, use it.
-                    val higher: Array<String?> = hls.findMatch(parser.getFamily(), parser.getSubfamily())
+            if (parser.Tribe.trim({ it <= ' ' }) == "") {
+                if (hls.isMatched(parser.Family, parser.Subfamily)) { // If there is a match, use it.
+                    val higher: Array<String?> = hls.findMatch(parser.Family, parser.Subfamily)
                     s.setFamily(higher[0])
                     s.setSubfamily(higher[1])
                 } else { // otherwise use the raw OCR output.
-                    s.setFamily(parser.getFamily())
-                    s.setSubfamily(parser.getSubfamily())
+                    s.setFamily(parser.Family)
+                    s.setSubfamily(parser.Subfamily)
                 }
                 s.setTribe("")
             } else {
-                if (hls.isMatched(parser.getFamily(), parser.getSubfamily(), parser.getTribe())) {
-                    val higher: Array<String?> = hls.findMatch(parser.getFamily(), parser.getSubfamily(), parser.getTribe())
+                if (hls.isMatched(parser.Family, parser.Subfamily, parser.Tribe)) {
+                    val higher: Array<String?> = hls.findMatch(parser.Family, parser.Subfamily, parser.Tribe)
                     s.setFamily(higher[0])
                     s.setSubfamily(higher[1])
                     s.setTribe(higher[2])
                 } else {
-                    s.setFamily(parser.getFamily())
-                    s.setSubfamily(parser.getSubfamily())
-                    s.setTribe(parser.getTribe())
+                    s.setFamily(parser.Family)
+                    s.setSubfamily(parser.Subfamily)
+                    s.setTribe(parser.Tribe)
                 }
             }
         }
@@ -113,7 +113,7 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
          * @param locks         the locks to use to prevent concurrency issues
          */
         protected fun checkFile(containedFile: File, counter: ScanCounterInterface, locks: Array<Lock?>?) {
-            Singleton.getProperties().getProperties().setProperty(ImageCaptureProperties.Companion.KEY_LASTPATH, containedFile.path)
+            Singleton.Properties.Properties.setProperty(ImageCaptureProperties.Companion.KEY_LASTPATH, containedFile.path)
             val filename = containedFile.name
             counter.incrementFilesSeen()
             log!!.debug("Checking image file: $filename")
@@ -134,7 +134,7 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                     }
                 })
                 log.debug((matches?.size ?: "no").toString() + " matches found for " + filename)
-                if (matches != null && matches.size == 1 && matches[0].getRawBarcode() == null && matches[0].getRawExifBarcode() == null && (matches[0].getDrawerNumber() == null || matches[0].getDrawerNumber().trim({ it <= ' ' }).length == 0)) { // likely case for a failure to read data out of the image file
+                if (matches != null && matches.size == 1 && matches[0].RawBarcode == null && matches[0].RawExifBarcode == null && (matches[0].DrawerNumber == null || matches[0].DrawerNumber.trim({ it <= ' ' }).length == 0)) { // likely case for a failure to read data out of the image file
 // try to update the image file record.
                     try {
                         existingTemplate = imageLifeCycle.merge(matches[0])
@@ -144,7 +144,7 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                     } catch (e: SaveFailedException) {
                         log.error(e.message, e)
                     }
-                } else if (matches != null && matches.size == 1 && matches[0].getSpecimen() == null) { // likely case for a failure to create a specimen record in a previous run
+                } else if (matches != null && matches.size == 1 && matches[0].Specimen == null) { // likely case for a failure to create a specimen record in a previous run
 // try to update the image file record
                     try {
                         existingTemplate = imageLifeCycle.merge(matches[0])
@@ -184,7 +184,7 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
             var reattach = reattach
             var isSpecimenImage = false
             var isDrawerImage = false
-            val matcher: BarcodeMatcher = Singleton.getBarcodeMatcher()
+            val matcher: BarcodeMatcher = Singleton.BarcodeMatcher
             // ** Identify the template.
 // String templateId = detector.detectTemplateForImage(fileToCheck);
 // log.debug("Detected Template: " + templateId);
@@ -194,17 +194,17 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
 // candidateImageFile = new CandidateImageFile(fileToCheck, template);
 // Construct a CandidateImageFile with constructor that self detects template
             val candidateImageFile = CandidateImageFile(containedFile)
-            val template: PositionTemplate = candidateImageFile.getTemplateUsed()
-            val templateId: String = template.getName()
+            val template: PositionTemplate = candidateImageFile.TemplateUsed
+            val templateId: String = template.Name
             log!!.debug("Detected Template: $templateId")
-            log.debug(candidateImageFile.getCatalogNumberBarcodeStatus())
-            var barcode: String = candidateImageFile.getBarcodeTextAtFoundTemplate()
-            if (candidateImageFile.getCatalogNumberBarcodeStatus() != CandidateImageFile.Companion.RESULT_BARCODE_SCANNED) {
+            log.debug(candidateImageFile.CatalogNumberBarcodeStatus)
+            var barcode: String = candidateImageFile.BarcodeTextAtFoundTemplate
+            if (candidateImageFile.CatalogNumberBarcodeStatus != CandidateImageFile.Companion.RESULT_BARCODE_SCANNED) {
                 log.error("Error scanning for barcode on file '" + containedFile.name + "': " + barcode)
                 barcode = ""
             }
             log.debug("Barcode: of file '" + containedFile.name + "':" + barcode)
-            val exifComment: String = candidateImageFile.getExifUserCommentText()
+            val exifComment: String = candidateImageFile.ExifUserCommentText
             log.debug("ExifComment: $exifComment")
             val labelRead: UnitTrayLabel = candidateImageFile.getTaxonLabelQRText(template)
             val parser: TaxonNameReturner?
@@ -222,7 +222,7 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                     log.error(e)
                     rawOCR = ""
                     log.error("Couldn't OCR file '" + containedFile.name + "':." + e.message)
-                    val error = RunnableJobError(image.getFilename(), "OCR Failed",
+                    val error = RunnableJobError(image.Filename, "OCR Failed",
                             barcode, exifComment, "Couldn't find text to OCR for taxon label.",
                             null, null,
                             e, RunnableJobError.Companion.TYPE_NO_TEMPLATE)
@@ -235,13 +235,13 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                 parser = UnitTrayLabelParser(rawOCR)
                 // Provide error message to distinguish between entirely OCR or
                 if ((parser as UnitTrayLabelParser?).isParsedFromJSON()) {
-                    val error = RunnableJobError(image.getFilename(), "OCR Failover found barcode.",
+                    val error = RunnableJobError(image.Filename, "OCR Failover found barcode.",
                             barcode, exifComment, "Couldn't read Taxon barcode, failed over to OCR, but OCR found taxon barcode.",
                             parser, null,
                             null, RunnableJobError.Companion.TYPE_FAILOVER_TO_OCR)
                     counter.appendError(error)
                 } else {
-                    val error = RunnableJobError(image.getFilename(), "TaxonLabel read failed.",
+                    val error = RunnableJobError(image.Filename, "TaxonLabel read failed.",
                             barcode, exifComment, "Couldn't read Taxon barcode, failed over to OCR only.",
                             parser, null,
                             null, RunnableJobError.Companion.TYPE_FAILOVER_TO_OCR)
@@ -269,12 +269,12 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                 isSpecimenImage = true
                 println(containedFile.name + " is a Specimen Image")
             } else {
-                if (exifComment != null && exifComment.matches(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_REGEX_DRAWERNUMBER))) {
+                if (exifComment != null && exifComment.matches(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_REGEX_DRAWERNUMBER))) {
                     isDrawerImage = true
                     println(containedFile.name + " is a Drawer Image")
                 } else { // no way we could continue from here on
                     val errorType: Int = if (templateId == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) RunnableJobError.Companion.TYPE_NO_TEMPLATE else RunnableJobError.Companion.TYPE_UNKNOWN
-                    val error = RunnableJobError(image.getFilename(), barcode,
+                    val error = RunnableJobError(image.Filename, barcode,
                             barcode, exifComment, "Image doesn't appear to contain a barcode in a templated position.",
                             null, null,
                             null, errorType)
@@ -293,11 +293,11 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                 image.setDrawerNumber(exifComment)
             } else {
                 image.setRawExifBarcode(exifComment)
-                image.setDrawerNumber((parser as DrawerNameReturner?).getDrawerNumber())
+                image.setDrawerNumber((parser as DrawerNameReturner?).DrawerNumber)
             }
             image.setRawOcr(rawOCR)
-            image.setTemplateId(template.getTemplateId())
-            image.setPath(image.getPath())
+            image.setTemplateId(template.TemplateId)
+            image.setPath(image.Path)
             // Create md5hash of image file, persist with image
             if (image.getMd5sum() == null || image.getMd5sum().length == 0) {
                 try {
@@ -320,15 +320,15 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                 log.error(e.message, e)
                 counter.incrementFilesFailed()
                 val failureMessage = "Failed to save image record for image " + containedFile.name + ".  " + e.message
-                val error = RunnableJobError(image.getFilename(), "Save Failed",
-                        image.getFilename(), image.getPath(), failureMessage,
+                val error = RunnableJobError(image.Filename, "Save Failed",
+                        image.Filename, image.Path, failureMessage,
                         null, null,
                         null, RunnableJobError.Companion.TYPE_SAVE_FAILED)
                 counter.appendError(error)
             }
             if (isSpecimenImage) {
-                if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_REDUNDANT_COMMENT_BARCODE) == "true") { // If so configured, log as error
-                    if (image.getRawBarcode() != image.getRawExifBarcode()) {
+                if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_REDUNDANT_COMMENT_BARCODE) == "true") { // If so configured, log as error
+                    if (image.RawBarcode != image.RawExifBarcode) {
                         log.error("Warning: Scanned Image '" + containedFile.name + "' has missmatch between barcode and comment.")
                     }
                 }
@@ -350,12 +350,12 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
          */
         protected fun createDatabaseRecordForSpecimen(containedFile: File, counter: ScanCounterInterface, image: ICImage, barcode: String?, exifComment: String?, parser: TaxonNameReturner, unitTrayLabel: UnitTrayLabel?, state: String, locks: Array<Lock?>?) {
             var barcode = barcode
-            val matcher: BarcodeMatcher = Singleton.getBarcodeMatcher()
+            val matcher: BarcodeMatcher = Singleton.BarcodeMatcher
             val rawBarcode = barcode
             if (rawBarcode != exifComment) { // Log the missmatch
-                logMismatch(counter, image.getFilename(), barcode, exifComment, parser, matcher.matchesPattern(exifComment), log!!)
+                logMismatch(counter, image.Filename, barcode, exifComment, parser, matcher.matchesPattern(exifComment), log!!)
             }
-            Singleton.getMainFrame().setStatusMessage("Creating new specimen record for file " + containedFile.name + ".")
+            Singleton.MainFrame.setStatusMessage("Creating new specimen record for file " + containedFile.name + ".")
             var s: Specimen? = Specimen()
             if (!matcher.matchesPattern(barcode)
                     && matcher.matchesPattern(exifComment)) { // special case: couldn't read QR code barcode from image, but it was present in exif comment.
@@ -376,34 +376,34 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
             lock!!.lock()
             try {
                 val specimenLifeCycle = SpecimenLifeCycle()
-                val existingSpecimens: MutableList<Specimen?> = specimenLifeCycle.findByBarcode(s.getBarcode())
+                val existingSpecimens: MutableList<Specimen?> = specimenLifeCycle.findByBarcode(s.Barcode)
                 if (existingSpecimens != null && existingSpecimens.size > 0) {
                     counter.incrementSpecimenExisting()
                     assert(existingSpecimens.size == 1)
                     for (specimen in existingSpecimens) {
                         image.setSpecimen(specimen)
-                        specimen.getICImages().add(image)
+                        specimen.ICImages.add(image)
                         try {
                             specimenLifeCycle.attachDirty(specimen)
                         } catch (e: SaveFailedException) {
-                            counter.appendError(RunnableJobError(containedFile.name, barcode, specimen.getSpecimenId().toString(), "Failed adding image to existing Specimen", e, RunnableJobError.Companion.TYPE_SAVE_FAILED))
+                            counter.appendError(RunnableJobError(containedFile.name, barcode, specimen.SpecimenId.toString(), "Failed adding image to existing Specimen", e, RunnableJobError.Companion.TYPE_SAVE_FAILED))
                         }
                     }
                     return
                 }
                 s.setWorkFlowStatus(state)
                 if (unitTrayLabel != null) { //  We got json data from a barcode.
-                    s.setFamily(parser.getFamily())
-                    s.setSubfamily(parser.getSubfamily())
-                    s.setTribe(parser.getTribe())
+                    s.setFamily(parser.Family)
+                    s.setSubfamily(parser.Subfamily)
+                    s.setTribe(parser.Tribe)
                 } else { // We failed over to OCR, try lookup in DB.
                     s.setFamily("") // make sure there's a a non-null value in family.
                     extractFamilyToSpecimen(parser, s)
                 }
                 if (state == WorkFlowStatus.STAGE_0) { // Look up likely matches for the OCR of the higher taxa in the HigherTaxon authority file.
-                    if (parser.getFamily() != "") { // check family against database (with a soundex match)
+                    if (parser.Family != "") { // check family against database (with a soundex match)
                         val hls = HigherTaxonLifeCycle()
-                        val match: String = hls.findMatch(parser.getFamily())
+                        val match: String = hls.findMatch(parser.Family)
                         if (match != null && match.trim { it <= ' ' } != "") {
                             s.setFamily(match)
                         }
@@ -414,11 +414,11 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                 setBasicSpecimenFromParser(parser, s)
                 s.setCreatingPath(ImageCaptureProperties.Companion.getPathBelowBase(containedFile))
                 s.setCreatingFilename(containedFile.name)
-                if (parser.getIdentifiedBy() != null && parser.getIdentifiedBy().length > 0) {
-                    s.setIdentifiedBy(parser.getIdentifiedBy())
+                if (parser.IdentifiedBy != null && parser.IdentifiedBy.length > 0) {
+                    s.setIdentifiedBy(parser.IdentifiedBy)
                 }
-                log!!.debug(s.getCollection())
-                s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion())
+                log!!.debug(s.Collection)
+                s.setCreatedBy(ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.AppVersion)
                 s.setDateCreated(Date())
                 try { // *** Save a database record of the specimen.
                     specimenLifeCycle.persist(s)
@@ -438,7 +438,7 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                     } catch (e2: Exception) {
                         s = null // so that saving the image record doesn't fail on trying to save linked transient specimen record.
                         val errorMessage = "Linking Error: \nFailed to link image to existing specimen record.\n"
-                        val error = RunnableJobError(image.getFilename(), barcode,
+                        val error = RunnableJobError(image.Filename, barcode,
                                 rawBarcode, exifComment, errorMessage,
                                 parser, parser as DrawerNameReturner,
                                 e2, RunnableJobError.Companion.TYPE_SAVE_FAILED)
@@ -455,16 +455,16 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                         }
                         // Drawer number with length limit (and specimen that fails to save at over this length makes
 // a good canary for labels that parse very badly.
-                        if ((parser as DrawerNameReturner).getDrawerNumber().length > MetadataRetriever.getFieldLength(Specimen::class.java, "DrawerNumber")) {
+                        if ((parser as DrawerNameReturner).DrawerNumber.length > MetadataRetriever.getFieldLength(Specimen::class.java, "DrawerNumber")) {
                             var badParse = ""
-                            badParse = "Parsing problem. \nDrawer number is too long: " + s.getDrawerNumber() + "\n"
-                            val error = RunnableJobError(image.getFilename(), barcode,
+                            badParse = "Parsing problem. \nDrawer number is too long: " + s.DrawerNumber + "\n"
+                            val error = RunnableJobError(image.Filename, barcode,
                                     rawBarcode, exifComment, badParse,
                                     parser, parser as DrawerNameReturner,
                                     e, RunnableJobError.Companion.TYPE_BAD_PARSE)
                             counter.appendError(error)
                         } else {
-                            val error = RunnableJobError(image.getFilename(), barcode,
+                            val error = RunnableJobError(image.Filename, barcode,
                                     rawBarcode, exifComment, e.message,
                                     parser, parser as DrawerNameReturner,
                                     e, RunnableJobError.Companion.TYPE_SAVE_FAILED)
@@ -475,17 +475,17 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                         var badParse = ""
                         // Drawer number with length limit (and specimen that fails to save at over this length makes
 // a good canary for labels that parse very badly.
-                        if (s.getDrawerNumber() == null) {
+                        if (s.DrawerNumber == null) {
                             badParse = "Parsing problem. \nDrawer number is null: \n"
                         } else {
-                            if (s.getDrawerNumber().length > MetadataRetriever.getFieldLength(Specimen::class.java, "DrawerNumber")) { // This was an OK test for testing OCR, but in production ends up in records not being
+                            if (s.DrawerNumber.length > MetadataRetriever.getFieldLength(Specimen::class.java, "DrawerNumber")) { // This was an OK test for testing OCR, but in production ends up in records not being
 // created for files, which ends up being a larger quality control problem than records
 // with bad OCR.
 // Won't fail this way anymore - drawer number is now enforced in Specimen.setDrawerNumber()
-                                badParse = "Parsing problem. \nDrawer number is too long: " + s.getDrawerNumber() + "\n"
+                                badParse = "Parsing problem. \nDrawer number is too long: " + s.DrawerNumber + "\n"
                             }
                         }
-                        val error = RunnableJobError(image.getFilename(), barcode,
+                        val error = RunnableJobError(image.Filename, barcode,
                                 rawBarcode, exifComment, badParse,
                                 parser, parser as DrawerNameReturner,
                                 err, RunnableJobError.Companion.TYPE_SAVE_FAILED)
@@ -495,7 +495,7 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
                     }
                 } catch (ex: Exception) {
                     log.error(ex)
-                    val error = RunnableJobError(image.getFilename(), barcode,
+                    val error = RunnableJobError(image.Filename, barcode,
                             rawBarcode, exifComment, ex.message,
                             parser, parser as DrawerNameReturner,
                             ex, RunnableJobError.Companion.TYPE_SAVE_FAILED)
@@ -510,18 +510,18 @@ abstract class AbstractFileScanJob : RunnableJob, Runnable {
         }
 
         protected fun setBasicSpecimenFromParser(parser: TaxonNameReturner?, s: Specimen): Specimen {
-            if (s.getFamily().length > 40) {
-                s.setFamily(s.getFamily().substring(0, 40))
+            if (s.Family.length > 40) {
+                s.setFamily(s.Family.substring(0, 40))
             }
             if (parser != null) {
-                s.setGenus(parser.getGenus())
-                s.setSpecificEpithet(parser.getSpecificEpithet())
-                s.setSubspecificEpithet(parser.getSubspecificEpithet())
-                s.setInfraspecificEpithet(parser.getInfraspecificEpithet())
-                s.setInfraspecificRank(parser.getInfraspecificRank())
-                s.setAuthorship(parser.getAuthorship())
-                s.setDrawerNumber((parser as DrawerNameReturner?).getDrawerNumber())
-                s.setCollection((parser as CollectionReturner?).getCollection())
+                s.setGenus(parser.Genus)
+                s.setSpecificEpithet(parser.SpecificEpithet)
+                s.setSubspecificEpithet(parser.SubspecificEpithet)
+                s.setInfraspecificEpithet(parser.InfraspecificEpithet)
+                s.setInfraspecificRank(parser.InfraspecificRank)
+                s.setAuthorship(parser.Authorship)
+                s.setDrawerNumber((parser as DrawerNameReturner?).DrawerNumber)
+                s.setCollection((parser as CollectionReturner?).Collection)
             }
             return s
         }

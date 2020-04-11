@@ -27,6 +27,7 @@ import edu.harvard.mcz.imagecapture.ImageCaptureApp
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties
 import edu.harvard.mcz.imagecapture.Singleton
 import edu.harvard.mcz.imagecapture.SpecimenController
+import edu.harvard.mcz.imagecapture.data.HibernateUtil
 import edu.harvard.mcz.imagecapture.data.LocationInCollection
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever
 import edu.harvard.mcz.imagecapture.entity.*
@@ -34,19 +35,9 @@ import edu.harvard.mcz.imagecapture.entity.Determination
 import edu.harvard.mcz.imagecapture.entity.Number
 import edu.harvard.mcz.imagecapture.entity.Specimen
 import edu.harvard.mcz.imagecapture.entity.SpecimenPart
-import edu.harvard.mcz.imagecapture.entity.fixed.Features
-import edu.harvard.mcz.imagecapture.entity.fixed.LifeStage
-import edu.harvard.mcz.imagecapture.entity.fixed.NatureOfId
-import edu.harvard.mcz.imagecapture.entity.fixed.Sex
-import edu.harvard.mcz.imagecapture.entity.fixed.TypeStatus
-import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus
+import edu.harvard.mcz.imagecapture.entity.fixed.*
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException
-import edu.harvard.mcz.imagecapture.lifecycle.CollectorLifeCycle
-import edu.harvard.mcz.imagecapture.lifecycle.HigherTaxonLifeCycle
-import edu.harvard.mcz.imagecapture.lifecycle.NumberLifeCycle
-import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle
-import edu.harvard.mcz.imagecapture.lifecycle.SpecimenPartLifeCycle
-import edu.harvard.mcz.imagecapture.lifecycle.TrackingLifeCycle
+import edu.harvard.mcz.imagecapture.lifecycle.*
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer
 import edu.harvard.mcz.imagecapture.ui.MouseWheelScrollListener
@@ -81,20 +72,7 @@ import javax.swing.table.DefaultTableCellRenderer
 import javax.swing.table.TableColumn
 import kotlin.collections.ArrayList
 
-edu.harvard.mcz.imagecapture.data .
-import HibernateUtil 
-import edu.harvard.mcz.imagecapture.entity.Collector 
-import edu.harvard.mcz.imagecapture.entity.Number 
-import edu.harvard.mcz.imagecapture.entity.fixed.Features 
-import org.apache.commons.logging.Log 
-import org.apache.commons.logging.LogFactory 
-import org.hibernate.TransactionException 
-import java.awt.Color 
-import java.awt.Cursor 
-import java.awt.Dimension 
-import java.awt.event.ActionEvent 
-import java.awt.event.ComponentAdapter 
-import java.awt.event.KeyAdapter java.awt.event.KeyEvent
+java.awt.event.KeyEvent
 import  java.lang.Exception
 
 
@@ -607,7 +585,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
         val scrollPane = JScrollPane(getJPanel(),
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED)
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16)
+        scrollPane.VerticalScrollBar.setUnitIncrement(16)
         scrollPane.setBorder(BorderFactory.createEmptyBorder())
         this.add(scrollPane, BorderLayout.CENTER)
         this.setMinimumSize(Dimension(100, 100))
@@ -620,23 +598,23 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
 
     private fun setWarnings() {
         log.debug("In set warnings")
-        if (specimen.getICImages() != null) {
+        if (specimen.ICImages != null) {
             log.debug("specimen.getICImages is not null")
-            val i: MutableIterator<ICImage?> = specimen.getICImages().iterator()
+            val i: MutableIterator<ICImage?> = specimen.ICImages.iterator()
             log.debug(i.hasNext())
             while (i.hasNext()) {
                 log.debug("Checking image $i")
                 val im: ICImage? = i.next()
                 var rbc = ""
-                if (im.getRawBarcode() != null) {
-                    rbc = im.getRawBarcode()
+                if (im.RawBarcode != null) {
+                    rbc = im.RawBarcode
                 }
                 var ebc = ""
-                if (im.getRawExifBarcode() != null) {
-                    ebc = im.getRawExifBarcode()
+                if (im.RawExifBarcode != null) {
+                    ebc = im.RawExifBarcode
                 }
                 if (rbc != ebc) { // warn of mismatch, but only if configured to expect both to be present.
-                    if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_REDUNDANT_COMMENT_BARCODE) == "true") {
+                    if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_REDUNDANT_COMMENT_BARCODE) == "true") {
                         setWarning("Warning: An image has mismatch between Comment and Barcode.")
                         log.debug("Setting: Warning: Image has mismatch between Comment and Barcode.")
                     }
@@ -656,141 +634,141 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
 
     private fun save() {
         try {
-            thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
+            thisPane.Parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
         } catch (ex: Exception) {
             log.error(ex)
         }
         try {
             setStatus("Saving")
             if (jTableCollectors.isEditing()) {
-                jTableCollectors.getCellEditor().stopCellEditing()
+                jTableCollectors.CellEditor.stopCellEditing()
             }
             if (jTableSpecimenParts.isEditing()) {
-                jTableSpecimenParts.getCellEditor().stopCellEditing()
+                jTableSpecimenParts.CellEditor.stopCellEditing()
             }
             if (jTableNumbers.isEditing()) {
-                jTableNumbers.getCellEditor().stopCellEditing()
+                jTableNumbers.CellEditor.stopCellEditing()
             }
-            if (cbTypeStatus.getSelectedIndex() == -1 && cbTypeStatus.getSelectedItem() == null) {
+            if (cbTypeStatus.SelectedIndex == -1 && cbTypeStatus.SelectedItem == null) {
                 specimen.setTypeStatus(Specimen.Companion.STATUS_NOT_A_TYPE)
             } else {
-                specimen.setTypeStatus(cbTypeStatus.getSelectedItem() as String)
+                specimen.setTypeStatus(cbTypeStatus.SelectedItem as String)
             }
-            specimen.setMicrohabitat(textFieldMicrohabitat.getText())
-            if (jComboBoxLocationInCollection.getSelectedItem() != null) {
-                specimen.setLocationInCollection(jComboBoxLocationInCollection.getSelectedItem().toString())
+            specimen.setMicrohabitat(textFieldMicrohabitat.Text)
+            if (jComboBoxLocationInCollection.SelectedItem != null) {
+                specimen.setLocationInCollection(jComboBoxLocationInCollection.SelectedItem.toString())
             }
-            specimen.setDrawerNumber(jTextFieldDrawerNumber.getText())
-            if (jComboBoxFamily.getSelectedIndex() == -1 && jComboBoxFamily.getSelectedItem() == null) {
+            specimen.setDrawerNumber(jTextFieldDrawerNumber.Text)
+            if (jComboBoxFamily.SelectedIndex == -1 && jComboBoxFamily.SelectedItem == null) {
                 specimen.setFamily("")
             } else {
-                specimen.setFamily(jComboBoxFamily.getSelectedItem().toString())
+                specimen.setFamily(jComboBoxFamily.SelectedItem.toString())
             }
-            if (jComboBoxSubfamily.getSelectedIndex() == -1 && jComboBoxSubfamily.getSelectedItem() == null) {
+            if (jComboBoxSubfamily.SelectedIndex == -1 && jComboBoxSubfamily.SelectedItem == null) {
                 specimen.setSubfamily("")
             } else {
-                specimen.setSubfamily(jComboBoxSubfamily.getSelectedItem().toString())
+                specimen.setSubfamily(jComboBoxSubfamily.SelectedItem.toString())
             }
-            specimen.setTribe(jTextFieldTribe.getText())
-            specimen.setGenus(jTextFieldGenus.getText())
-            specimen.setSpecificEpithet(jTextFieldSpecies.getText())
-            specimen.setSubspecificEpithet(jTextFieldSubspecies.getText())
-            specimen.setInfraspecificEpithet(jTextFieldInfraspecificEpithet.getText())
-            specimen.setInfraspecificRank(jTextFieldInfraspecificRank.getText())
-            specimen.setAuthorship(jTextFieldAuthorship.getText())
+            specimen.setTribe(jTextFieldTribe.Text)
+            specimen.setGenus(jTextFieldGenus.Text)
+            specimen.setSpecificEpithet(jTextFieldSpecies.Text)
+            specimen.setSubspecificEpithet(jTextFieldSubspecies.Text)
+            specimen.setInfraspecificEpithet(jTextFieldInfraspecificEpithet.Text)
+            specimen.setInfraspecificRank(jTextFieldInfraspecificRank.Text)
+            specimen.setAuthorship(jTextFieldAuthorship.Text)
             //TODO: handle the collectors set!
 //this returns TRUE for the copied item!!
-            log.debug("in save(). specimen numbers size: " + specimen.getNumbers().size)
-            log.debug("okok in save(), specimenid is " + specimen.getSpecimenId())
-            if (previousSpecimen != null && previousSpecimen.getNumbers() != null) {
-                log.debug("in save(). prev specimen numbers size: " + previousSpecimen.getNumbers().size)
-                //specimen.setNumbers(previousSpecimen.getNumbers()); - this gives hibernate exceptions here too!
-                log.debug("okok in save(), prev specimenid is " + previousSpecimen.getSpecimenId())
+            log.debug("in save(). specimen numbers size: " + specimen.Numbers.size)
+            log.debug("okok in save(), specimenid is " + specimen.SpecimenId)
+            if (previousSpecimen != null && previousSpecimen.Numbers != null) {
+                log.debug("in save(). prev specimen numbers size: " + previousSpecimen.Numbers.size)
+                //specimen.setNumbers(previousSpecimen.Numbers); - this gives hibernate exceptions here too!
+                log.debug("okok in save(), prev specimenid is " + previousSpecimen.SpecimenId)
             }
-            specimen.setIdentifiedBy(jCBDeterminer.getSelectedItem() as String)
-            specimen.setDateIdentified(jTextFieldDateDetermined.getText())
-            specimen.setIdentificationRemarks(jTextFieldIdRemarks.getText())
-            if (jComboBoxNatureOfId.getSelectedIndex() == -1 && jComboBoxNatureOfId.getSelectedItem() == null) { //specimen.setNatureOfId(NatureOfId.LEGACY);
+            specimen.setIdentifiedBy(jCBDeterminer.SelectedItem as String)
+            specimen.setDateIdentified(jTextFieldDateDetermined.Text)
+            specimen.setIdentificationRemarks(jTextFieldIdRemarks.Text)
+            if (jComboBoxNatureOfId.SelectedIndex == -1 && jComboBoxNatureOfId.SelectedItem == null) { //specimen.setNatureOfId(NatureOfId.LEGACY);
                 specimen.setNatureOfId(NatureOfId.EXPERT_ID)
             } else {
-                specimen.setNatureOfId(jComboBoxNatureOfId.getSelectedItem() as String)
+                specimen.setNatureOfId(jComboBoxNatureOfId.SelectedItem as String)
             }
-            specimen.setUnNamedForm(jTextFieldUnnamedForm.getText())
-            specimen.setVerbatimLocality(jTextFieldVerbatimLocality.getText())
-            specimen.setCountry(jComboBoxCountry.getSelectedItem() as String)
+            specimen.setUnNamedForm(jTextFieldUnnamedForm.Text)
+            specimen.setVerbatimLocality(jTextFieldVerbatimLocality.Text)
+            specimen.setCountry(jComboBoxCountry.SelectedItem as String)
             specimen.setValidDistributionFlag(jCheckBoxValidDistributionFlag.isSelected())
-            specimen.setPrimaryDivison(jComboBoxPrimaryDivision.getSelectedItem() as String)
-            specimen.setSpecificLocality(jTextFieldLocality.getText())
+            specimen.setPrimaryDivison(jComboBoxPrimaryDivision.SelectedItem as String)
+            specimen.setSpecificLocality(jTextFieldLocality.Text)
             // Elevations
             val min_elev: Long?
-            min_elev = if (jTextFieldMinElevation.getText().trim({ it <= ' ' }).length == 0) {
+            min_elev = if (jTextFieldMinElevation.Text.trim({ it <= ' ' }).length == 0) {
                 null
             } else {
                 try {
-                    jTextFieldMinElevation.getText().toLong()
+                    jTextFieldMinElevation.Text.toLong()
                 } catch (e: NumberFormatException) {
                     null
                 }
             }
             specimen.setMinimum_elevation(min_elev)
             val max_elev: Long?
-            max_elev = if (textFieldMaxElev.getText().trim({ it <= ' ' }).length == 0) {
+            max_elev = if (textFieldMaxElev.Text.trim({ it <= ' ' }).length == 0) {
                 null
             } else {
                 try {
-                    textFieldMaxElev.getText().toLong()
+                    textFieldMaxElev.Text.toLong()
                 } catch (e: NumberFormatException) {
                     null
                 }
             }
             specimen.setMaximum_elevation(max_elev)
-            if (comboBoxElevUnits.getSelectedIndex() == -1 && comboBoxElevUnits.getSelectedItem() == null) {
+            if (comboBoxElevUnits.SelectedIndex == -1 && comboBoxElevUnits.SelectedItem == null) {
                 specimen.setElev_units("")
             } else {
-                specimen.setElev_units(comboBoxElevUnits.getSelectedItem().toString())
+                specimen.setElev_units(comboBoxElevUnits.SelectedItem.toString())
             }
-            specimen.setCollectingMethod(jTextFieldCollectingMethod.getText())
-            specimen.setIsoDate(jTextFieldISODate.getText())
-            specimen.setDateNos(jTextFieldDateNos.getText())
-            specimen.setDateCollected(jTextFieldDateCollected.getText())
-            specimen.setDateEmerged(jTextFieldDateEmerged.getText())
-            specimen.setDateCollectedIndicator(jTextFieldDateCollectedIndicator.getText())
-            specimen.setDateEmergedIndicator(jTextFieldDateEmergedIndicator.getText())
-            if (jComboBoxCollection.getSelectedIndex() == -1 && jComboBoxCollection.getSelectedItem() == null) {
+            specimen.setCollectingMethod(jTextFieldCollectingMethod.Text)
+            specimen.setIsoDate(jTextFieldISODate.Text)
+            specimen.setDateNos(jTextFieldDateNos.Text)
+            specimen.setDateCollected(jTextFieldDateCollected.Text)
+            specimen.setDateEmerged(jTextFieldDateEmerged.Text)
+            specimen.setDateCollectedIndicator(jTextFieldDateCollectedIndicator.Text)
+            specimen.setDateEmergedIndicator(jTextFieldDateEmergedIndicator.Text)
+            if (jComboBoxCollection.SelectedIndex == -1 && jComboBoxCollection.SelectedItem == null) {
                 specimen.setCollection("")
             } else {
-                specimen.setCollection(jComboBoxCollection.getSelectedItem().toString())
+                specimen.setCollection(jComboBoxCollection.SelectedItem.toString())
             }
-            if (jComboBoxFeatures.getSelectedIndex() == -1 && jComboBoxFeatures.getSelectedItem() == null) {
+            if (jComboBoxFeatures.SelectedIndex == -1 && jComboBoxFeatures.SelectedItem == null) {
                 specimen.setFeatures("")
             } else {
-                specimen.setFeatures(jComboBoxFeatures.getSelectedItem().toString())
+                specimen.setFeatures(jComboBoxFeatures.SelectedItem.toString())
             }
-            if (jComboBoxLifeStage.getSelectedIndex() == -1 && jComboBoxLifeStage.getSelectedItem() == null) {
+            if (jComboBoxLifeStage.SelectedIndex == -1 && jComboBoxLifeStage.SelectedItem == null) {
                 specimen.setLifeStage("")
             } else {
-                specimen.setLifeStage(jComboBoxLifeStage.getSelectedItem().toString())
+                specimen.setLifeStage(jComboBoxLifeStage.SelectedItem.toString())
             }
-            if (jComboBoxSex.getSelectedIndex() == -1 && jComboBoxSex.getSelectedItem() == null) {
+            if (jComboBoxSex.SelectedIndex == -1 && jComboBoxSex.SelectedItem == null) {
                 specimen.setSex("")
             } else {
-                specimen.setSex(jComboBoxSex.getSelectedItem().toString())
-                log.debug("jComboBoxSex selectedIndex=" + jComboBoxSex.getSelectedIndex())
+                specimen.setSex(jComboBoxSex.SelectedItem.toString())
+                log.debug("jComboBoxSex selectedIndex=" + jComboBoxSex.SelectedIndex)
             }
-            log.debug("sex=" + specimen.getSex())
-            specimen.setCitedInPublication(jTextFieldCitedInPub.getText())
-            //specimen.setPreparationType(jTextFieldPreparationType.getText());
-            specimen.setAssociatedTaxon(jTextFieldAssociatedTaxon.getText())
-            specimen.setHabitat(jTextFieldHabitat.getText())
-            specimen.setMicrohabitat(textFieldMicrohabitat.getText())
-            specimen.setSpecimenNotes(jTextAreaSpecimenNotes.getText())
-            specimen.setInferences(jTextFieldInferences.getText())
-            specimen.setLastUpdatedBy(Singleton.getUserFullName())
+            log.debug("sex=" + specimen.Sex)
+            specimen.setCitedInPublication(jTextFieldCitedInPub.Text)
+            //specimen.setPreparationType(jTextFieldPreparationType.Text);
+            specimen.setAssociatedTaxon(jTextFieldAssociatedTaxon.Text)
+            specimen.setHabitat(jTextFieldHabitat.Text)
+            specimen.setMicrohabitat(textFieldMicrohabitat.Text)
+            specimen.setSpecimenNotes(jTextAreaSpecimenNotes.Text)
+            specimen.setInferences(jTextFieldInferences.Text)
+            specimen.setLastUpdatedBy(Singleton.UserFullName)
             specimen.setDateLastUpdated(Date())
-            specimen.setWorkFlowStatus(jComboBoxWorkflowStatus.getSelectedItem().toString())
-            specimen.setQuestions(jTextFieldQuestions.getText())
+            specimen.setWorkFlowStatus(jComboBoxWorkflowStatus.SelectedItem.toString())
+            specimen.setQuestions(jTextFieldQuestions.Text)
             try { // make sure specimen controller does not throw null pointer exception – whyever
-                if (specimenController.getSpecimen() == null) {
+                if (specimenController.Specimen == null) {
                     specimenController.setSpecimen(specimen)
                 }
                 specimenController.save() // save the record
@@ -798,14 +776,14 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                 setStatus("Saved") // inform the user
                 jTextFieldStatus.setForeground(Color.BLACK)
                 setWarnings()
-                jTextFieldLastUpdatedBy.setText(specimen.getLastUpdatedBy())
-                jTextFieldDateLastUpdated.setText(specimen.getDateLastUpdated().toString())
+                jTextFieldLastUpdatedBy.setText(specimen.LastUpdatedBy)
+                jTextFieldDateLastUpdated.setText(specimen.DateLastUpdated.toString())
             } catch (e: SaveFailedException) {
                 setStateToDirty() // disable the navigation buttons
                 setWarning("Error: " + e.message)
             }
             val sls = SpecimenLifeCycle()
-            Singleton.getMainFrame().setCount(sls.findSpecimenCount())
+            Singleton.MainFrame.setCount(sls.findSpecimenCount())
         } catch (e: OptimisticLockException) { // Oh, well. Issues with foreign keys already deleting items, which are not found afterwards.
 // We catch these here and silence them. TODO: resolve by changing database structure
 // We might also catch unwanted ones; böh, too bad – alert the user just in case.
@@ -819,7 +797,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
         }
         updateContentDependentLabels()
         try {
-            thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+            thisPane.Parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
         } catch (ex: Exception) {
             log.error(ex)
         }
@@ -831,11 +809,11 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
     private fun copyPreviousRecord() {
         log.debug("calling copyPreviousRecord()")
         //thisPane.setStateToDirty();
-        jTextFieldDateDetermined.setText(previousSpecimen.getDateIdentified())
-        jCBDeterminer.setSelectedItem(previousSpecimen.getIdentifiedBy())
-        jTextFieldVerbatimLocality.setText(previousSpecimen.getVerbatimLocality())
-        jComboBoxCountry.setSelectedItem(previousSpecimen.getCountry())
-        jComboBoxPrimaryDivision.setSelectedItem(previousSpecimen.getPrimaryDivison())
+        jTextFieldDateDetermined.setText(previousSpecimen.DateIdentified)
+        jCBDeterminer.setSelectedItem(previousSpecimen.IdentifiedBy)
+        jTextFieldVerbatimLocality.setText(previousSpecimen.VerbatimLocality)
+        jComboBoxCountry.setSelectedItem(previousSpecimen.Country)
+        jComboBoxPrimaryDivision.setSelectedItem(previousSpecimen.PrimaryDivison)
         // Elevations
         try {
             jTextFieldMinElevation.setText(java.lang.Long.toString(previousSpecimen.getMinimum_elevation()))
@@ -852,75 +830,75 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
         } else {
             comboBoxElevUnits.setSelectedItem("")
         }
-        jTextFieldLocality.setText(previousSpecimen.getSpecificLocality())
-        jComboBoxCollection.setSelectedItem(previousSpecimen.getCollection())
-        jTextFieldDateNos.setText(previousSpecimen.getDateNos())
-        jTextFieldISODate.setText(previousSpecimen.getIsoDate())
-        jTextFieldDateEmerged.setText(previousSpecimen.getDateEmerged())
-        jTextFieldDateCollectedIndicator.setText(previousSpecimen.getDateCollectedIndicator())
-        jTextFieldDateEmergedIndicator.setText(previousSpecimen.getDateEmergedIndicator())
-        jTextFieldDateCollected.setText(previousSpecimen.getDateCollected())
-        jComboBoxLifeStage.setSelectedItem(previousSpecimen.getLifeStage())
-        jComboBoxSex.setSelectedItem(previousSpecimen.getSex())
-        jTextFieldAssociatedTaxon.setText(previousSpecimen.getAssociatedTaxon())
-        jTextFieldHabitat.setText(previousSpecimen.getHabitat())
-        textFieldMicrohabitat.setText(previousSpecimen.getMicrohabitat())
-        jTextAreaSpecimenNotes.setText(previousSpecimen.getSpecimenNotes())
-        jTextFieldInferences.setText(previousSpecimen.getInferences())
+        jTextFieldLocality.setText(previousSpecimen.SpecificLocality)
+        jComboBoxCollection.setSelectedItem(previousSpecimen.Collection)
+        jTextFieldDateNos.setText(previousSpecimen.DateNos)
+        jTextFieldISODate.setText(previousSpecimen.IsoDate)
+        jTextFieldDateEmerged.setText(previousSpecimen.DateEmerged)
+        jTextFieldDateCollectedIndicator.setText(previousSpecimen.DateCollectedIndicator)
+        jTextFieldDateEmergedIndicator.setText(previousSpecimen.DateEmergedIndicator)
+        jTextFieldDateCollected.setText(previousSpecimen.DateCollected)
+        jComboBoxLifeStage.setSelectedItem(previousSpecimen.LifeStage)
+        jComboBoxSex.setSelectedItem(previousSpecimen.Sex)
+        jTextFieldAssociatedTaxon.setText(previousSpecimen.AssociatedTaxon)
+        jTextFieldHabitat.setText(previousSpecimen.Habitat)
+        textFieldMicrohabitat.setText(previousSpecimen.Microhabitat)
+        jTextAreaSpecimenNotes.setText(previousSpecimen.SpecimenNotes)
+        jTextFieldInferences.setText(previousSpecimen.Inferences)
         //+numbers
-        specimen.getNumbers().clear()
-        for (number in previousSpecimen.getNumbers()) { //specimen.getNumbers().add((Number.class)iter.next());
+        specimen.Numbers.clear()
+        for (number in previousSpecimen.Numbers) { //specimen.Numbers.add((Number.class)iter.next());
             val n = (number.clone() as Number)
             n.setSpecimen(specimen)
-            specimen.getNumbers().add(n)
+            specimen.Numbers.add(n)
         }
-        jTableNumbers.setModel(NumberTableModel(specimen.getNumbers()))
+        jTableNumbers.setModel(NumberTableModel(specimen.Numbers))
         setupNumberJTableRenderer()
         //+ verify the georeference data (we do want it all copied)
 //+ preparation type (the whole table!) = specimen parts
-        specimen.getSpecimenParts().clear()
-        for (specimenPart in previousSpecimen.getSpecimenParts()) {
+        specimen.SpecimenParts.clear()
+        for (specimenPart in previousSpecimen.SpecimenParts) {
             val part: SpecimenPart = specimenPart.clone() as SpecimenPart
             part.setSpecimen(specimen)
-            specimen.getSpecimenParts().add(part)
+            specimen.SpecimenParts.add(part)
         }
-        jTableSpecimenParts.setModel(SpecimenPartsTableModel(specimen.getSpecimenParts()))
+        jTableSpecimenParts.setModel(SpecimenPartsTableModel(specimen.SpecimenParts))
         setupSpecimenPartsJTableRenderer()
         //+collectors
-        specimen.getCollectors().clear()
-        for (collector in previousSpecimen.getCollectors()) {
+        specimen.Collectors.clear()
+        for (collector in previousSpecimen.Collectors) {
             val c: Collector = collector.clone() as Collector
             c.setSpecimen(specimen)
-            specimen.getCollectors().add(c)
+            specimen.Collectors.add(c)
         }
-        jTableCollectors.setModel(CollectorTableModel(specimen.getCollectors()))
+        jTableCollectors.setModel(CollectorTableModel(specimen.Collectors))
         setupCollectorJTableRenderer()
         //+determinations
-        specimen.getDeterminations().clear()
-        for (prevdet in previousSpecimen.getDeterminations()) {
+        specimen.Determinations.clear()
+        for (prevdet in previousSpecimen.Determinations) {
             val newdet: Determination = prevdet.clone()
             newdet.setSpecimen(specimen)
-            specimen.getDeterminations().add(newdet)
+            specimen.Determinations.add(newdet)
         }
         //+georeference
-        specimen.getLatLong().clear()
+        specimen.LatLong.clear()
         // prepare hash set as otherwise, in getLatLong(), an empty LatLong is returned
         val latLongs: HashSet<LatLong?> = HashSet<LatLong?>()
-        for (prevgeo in previousSpecimen.getLatLong()) {
+        for (prevgeo in previousSpecimen.LatLong) {
             val newgeo: LatLong = prevgeo.clone()
-            log.debug("Got newgeo with lat " + newgeo.getDecLat())
+            log.debug("Got newgeo with lat " + newgeo.DecLat)
             newgeo.setSpecimen(specimen)
             latLongs.add(newgeo)
         }
         specimen.setLatLong(latLongs)
         //new - verbatim locality
-        jTextFieldVerbatimLocality.setText(previousSpecimen.getVerbatimLocality())
+        jTextFieldVerbatimLocality.setText(previousSpecimen.VerbatimLocality)
         //new - publications
-        jTextFieldCitedInPub.setText(previousSpecimen.getCitedInPublication())
+        jTextFieldCitedInPub.setText(previousSpecimen.CitedInPublication)
         //new - features
-        jComboBoxFeatures.setSelectedItem(previousSpecimen.getFeatures())
+        jComboBoxFeatures.setSelectedItem(previousSpecimen.Features)
         //new - collecting method
-        jTextFieldCollectingMethod.setText(previousSpecimen.getCollectingMethod())
+        jTextFieldCollectingMethod.setText(previousSpecimen.CollectingMethod)
         updateContentDependentLabels()
     }
 
@@ -929,75 +907,75 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
      * TODO: refactor to unused: move to instantiation of fields, e.g.
      */
     private fun setValues() {
-        log.debug("okok setting values, specimenid is " + specimen.getSpecimenId())
+        log.debug("okok setting values, specimenid is " + specimen.SpecimenId)
         setStatus("Setting values")
-        jTextFieldBarcode.setText(specimen.getBarcode())
+        jTextFieldBarcode.setText(specimen.Barcode)
         //alliefix - set to value from properties
-//jComboBoxLocationInCollection.setSelectedItem(specimen.getLocationInCollection());
-        val locationInCollectionPropertiesVal: String = Singleton.getProperties().getProperties().getProperty(
+//jComboBoxLocationInCollection.setSelectedItem(specimen.LocationInCollection);
+        val locationInCollectionPropertiesVal: String = Singleton.Properties.Properties.getProperty(
                 ImageCaptureProperties.Companion.KEY_DISPLAY_COLLECTION)
         jComboBoxLocationInCollection.setSelectedItem(locationInCollectionPropertiesVal)
         //allie try
-/*Set<LatLong> georeferences = specimen.getLatLong();
+/*Set<LatLong> georeferences = specimen.LatLong;
 		log.debug("setvalues: georeferences size is : + " + georeferences.size());
 		LatLong georeference_pre = georeferences.iterator().next();
-		log.debug("lat is : + " + georeference_pre.getLatDegString());
-		log.debug("long is : + " + georeference_pre.getLongDegString());*/cbTypeStatus.setSelectedItem(specimen.getTypeStatus())
-        jTextFieldDrawerNumber.setText(specimen.getDrawerNumber())
-        jComboBoxFamily.setSelectedItem(specimen.getFamily())
-        jComboBoxSubfamily.setSelectedItem(specimen.getSubfamily())
-        jTextFieldTribe.setText(specimen.getTribe())
-        jTextFieldGenus.setText(specimen.getGenus())
-        jTextFieldSpecies.setText(specimen.getSpecificEpithet())
-        jTextFieldSubspecies.setText(specimen.getSubspecificEpithet())
-        jTextFieldInfraspecificEpithet.setText(specimen.getInfraspecificEpithet())
-        jTextFieldInfraspecificRank.setText(specimen.getInfraspecificRank())
-        jTextFieldAuthorship.setText(specimen.getAuthorship())
+		log.debug("lat is : + " + georeference_pre.LatDegString);
+		log.debug("long is : + " + georeference_pre.LongDegString);*/cbTypeStatus.setSelectedItem(specimen.TypeStatus)
+        jTextFieldDrawerNumber.setText(specimen.DrawerNumber)
+        jComboBoxFamily.setSelectedItem(specimen.Family)
+        jComboBoxSubfamily.setSelectedItem(specimen.Subfamily)
+        jTextFieldTribe.setText(specimen.Tribe)
+        jTextFieldGenus.setText(specimen.Genus)
+        jTextFieldSpecies.setText(specimen.SpecificEpithet)
+        jTextFieldSubspecies.setText(specimen.SubspecificEpithet)
+        jTextFieldInfraspecificEpithet.setText(specimen.InfraspecificEpithet)
+        jTextFieldInfraspecificRank.setText(specimen.InfraspecificRank)
+        jTextFieldAuthorship.setText(specimen.Authorship)
         //allie new - bugfix
-        textFieldMicrohabitat.setText(specimen.getMicrohabitat())
-        jTextFieldIdRemarks.setText(specimen.getIdentificationRemarks())
-        jTextFieldDateDetermined.setText(specimen.getDateIdentified())
+        textFieldMicrohabitat.setText(specimen.Microhabitat)
+        jTextFieldIdRemarks.setText(specimen.IdentificationRemarks)
+        jTextFieldDateDetermined.setText(specimen.DateIdentified)
         //allie change
-//log.debug("jComboBoxLifeStage here!!! specimen life stage is " + specimen.getLifeStage());
-        if (specimen.getLifeStage() == null || specimen.getLifeStage() == "") {
+//log.debug("jComboBoxLifeStage here!!! specimen life stage is " + specimen.LifeStage);
+        if (specimen.LifeStage == null || specimen.LifeStage == "") {
             specimen.setLifeStage("adult")
             jComboBoxLifeStage.setSelectedIndex(0)
         }
         //allie change - removed this
 //MCZbaseAuthAgentName selection = new MCZbaseAuthAgentName();
-//selection.setAgent_name(specimen.getIdentifiedBy());
-//((AgentNameComboBoxModel)jCBDeterminer.getModel()).setSelectedItem(selection);
-//jCBDeterminer.getEditor().setItem(jCBDeterminer.getModel().getSelectedItem());
+//selection.setAgent_name(specimen.IdentifiedBy);
+//((AgentNameComboBoxModel)jCBDeterminer.Model).setSelectedItem(selection);
+//jCBDeterminer.Editor.setItem(jCBDeterminer.Model.SelectedItem);
 //allie change - added this
-//jCBDeterminer.setText(specimen.getIdentifiedBy());
-        jCBDeterminer.setSelectedItem(specimen.getIdentifiedBy())
-        jComboBoxNatureOfId.setSelectedItem(specimen.getNatureOfId())
-        jTextFieldUnnamedForm.setText(specimen.getUnNamedForm())
-        jTextFieldVerbatimLocality.setText(specimen.getVerbatimLocality())
+//jCBDeterminer.setText(specimen.IdentifiedBy);
+        jCBDeterminer.setSelectedItem(specimen.IdentifiedBy)
+        jComboBoxNatureOfId.setSelectedItem(specimen.NatureOfId)
+        jTextFieldUnnamedForm.setText(specimen.UnNamedForm)
+        jTextFieldVerbatimLocality.setText(specimen.VerbatimLocality)
         // Specimen record contains a string, delegate handling of lookup of object to the combo box model.
 //allieremove
-// 		log.debug(specimen.getHigherGeography());
-// 		((HigherGeographyComboBoxModel)comboBoxHigherGeog.getModel()).setSelectedItem(specimen.getHigherGeography());
+// 		log.debug(specimen.HigherGeography);
+// 		((HigherGeographyComboBoxModel)comboBoxHigherGeog.Model).setSelectedItem(specimen.HigherGeography);
 // //TODO ? set model not notifying listeners?
 // 		higherGeogNotFoundWarning = new StringBuffer();
-// 		comboBoxHigherGeog.getEditor().setItem(comboBoxHigherGeog.getModel().getSelectedItem());
-// 		if (specimen.getHigherGeography()==null) {
+// 		comboBoxHigherGeog.Editor.setItem(comboBoxHigherGeog.Model.SelectedItem);
+// 		if (specimen.HigherGeography==null) {
 // 			comboBoxHigherGeog.setBackground(Color.YELLOW);
 // 		} else {
-// 			if (comboBoxHigherGeog.getModel().getSelectedItem()==null) {
+// 			if (comboBoxHigherGeog.Model.SelectedItem==null) {
 // 				comboBoxHigherGeog.setBackground(Color.RED);
-// 				higherGeogNotFoundWarning.append("Higher Geog: [").append(specimen.getHigherGeography()).append("] not found. Fix before saving.");
+// 				higherGeogNotFoundWarning.append("Higher Geog: [").append(specimen.HigherGeography).append("] not found. Fix before saving.");
 // 			}
 // 		}
-// 		jTextFieldCountry.setText(specimen.getCountry());
-        jComboBoxCountry.setSelectedItem(specimen.getCountry())
-        if (specimen.getValidDistributionFlag() != null) {
-            jCheckBoxValidDistributionFlag.setSelected(specimen.getValidDistributionFlag())
+// 		jTextFieldCountry.setText(specimen.Country);
+        jComboBoxCountry.setSelectedItem(specimen.Country)
+        if (specimen.ValidDistributionFlag != null) {
+            jCheckBoxValidDistributionFlag.setSelected(specimen.ValidDistributionFlag)
         } else {
             jCheckBoxValidDistributionFlag.setSelected(false)
         }
-        jComboBoxPrimaryDivision.setSelectedItem(specimen.getPrimaryDivison())
-        jTextFieldLocality.setText(specimen.getSpecificLocality())
+        jComboBoxPrimaryDivision.setSelectedItem(specimen.PrimaryDivison)
+        jTextFieldLocality.setText(specimen.SpecificLocality)
         // Elevations  **********************************************************************
         try {
             jTextFieldMinElevation.setText(java.lang.Long.toString(specimen.getMinimum_elevation()))
@@ -1014,51 +992,51 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
         } else {
             comboBoxElevUnits.setSelectedItem("")
         }
-        jTextFieldCollectingMethod.setText(specimen.getCollectingMethod())
-        jTextFieldISODate.setText(specimen.getIsoDate())
-        jTextFieldDateNos.setText(specimen.getDateNos())
-        jTextFieldDateCollected.setText(specimen.getDateCollected())
-        jTextFieldDateEmerged.setText(specimen.getDateEmerged())
-        jTextFieldDateCollectedIndicator.setText(specimen.getDateCollectedIndicator())
-        jTextFieldDateEmergedIndicator.setText(specimen.getDateEmergedIndicator())
-        jComboBoxCollection.setSelectedItem(specimen.getCollection())
-        //jTextFieldPreparationType.setText(specimen.getPreparationType());
-        jTextFieldAssociatedTaxon.setText(specimen.getAssociatedTaxon())
-        jTextFieldHabitat.setText(specimen.getHabitat())
-        textFieldMicrohabitat.setText(specimen.getMicrohabitat())
-        jTextAreaSpecimenNotes.setText(specimen.getSpecimenNotes())
-        jComboBoxFeatures.setSelectedItem(specimen.getFeatures())
-        jComboBoxLifeStage.setSelectedItem(specimen.getLifeStage())
-        jComboBoxSex.setSelectedItem(specimen.getSex())
-        jTextFieldCitedInPub.setText(specimen.getCitedInPublication())
-        jTextFieldQuestions.setText(specimen.getQuestions())
-        jComboBoxWorkflowStatus.setSelectedItem(specimen.getWorkFlowStatus())
+        jTextFieldCollectingMethod.setText(specimen.CollectingMethod)
+        jTextFieldISODate.setText(specimen.IsoDate)
+        jTextFieldDateNos.setText(specimen.DateNos)
+        jTextFieldDateCollected.setText(specimen.DateCollected)
+        jTextFieldDateEmerged.setText(specimen.DateEmerged)
+        jTextFieldDateCollectedIndicator.setText(specimen.DateCollectedIndicator)
+        jTextFieldDateEmergedIndicator.setText(specimen.DateEmergedIndicator)
+        jComboBoxCollection.setSelectedItem(specimen.Collection)
+        //jTextFieldPreparationType.setText(specimen.PreparationType);
+        jTextFieldAssociatedTaxon.setText(specimen.AssociatedTaxon)
+        jTextFieldHabitat.setText(specimen.Habitat)
+        textFieldMicrohabitat.setText(specimen.Microhabitat)
+        jTextAreaSpecimenNotes.setText(specimen.SpecimenNotes)
+        jComboBoxFeatures.setSelectedItem(specimen.Features)
+        jComboBoxLifeStage.setSelectedItem(specimen.LifeStage)
+        jComboBoxSex.setSelectedItem(specimen.Sex)
+        jTextFieldCitedInPub.setText(specimen.CitedInPublication)
+        jTextFieldQuestions.setText(specimen.Questions)
+        jComboBoxWorkflowStatus.setSelectedItem(specimen.WorkFlowStatus)
         if (specimen.isStateDone()) {
-            jTextFieldMigrationStatus.setText("http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" + specimen.getCatNum())
+            jTextFieldMigrationStatus.setText("http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" + specimen.CatNum)
         } else {
             jTextFieldMigrationStatus.setText("")
         }
-        jTextFieldInferences.setText(specimen.getInferences())
-        jTextFieldCreator.setText(specimen.getCreatedBy())
-        if (specimen.getDateCreated() != null) {
-            jTextFieldDateCreated.setText(specimen.getDateCreated().toString())
+        jTextFieldInferences.setText(specimen.Inferences)
+        jTextFieldCreator.setText(specimen.CreatedBy)
+        if (specimen.DateCreated != null) {
+            jTextFieldDateCreated.setText(specimen.DateCreated.toString())
         }
-        jTextFieldLastUpdatedBy.setText(specimen.getLastUpdatedBy())
-        if (specimen.getDateLastUpdated() != null) {
-            jTextFieldDateLastUpdated.setText(specimen.getDateLastUpdated().toString())
+        jTextFieldLastUpdatedBy.setText(specimen.LastUpdatedBy)
+        if (specimen.DateLastUpdated != null) {
+            jTextFieldDateLastUpdated.setText(specimen.DateLastUpdated.toString())
         }
         //allie change
-        if (specimen.getNatureOfId() == null || specimen.getNatureOfId() == "") {
+        if (specimen.NatureOfId == null || specimen.NatureOfId == "") {
             specimen.setLifeStage("expert ID")
             jComboBoxNatureOfId.setSelectedIndex(0)
         }
         //without this, it does save the 1st record, and it does not copy the next record!
-        log.debug("setValues calling jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));")
-        jTableNumbers.setModel(NumberTableModel(specimen.getNumbers()))
+        log.debug("setValues calling jTableNumbers.setModel(new NumberTableModel(specimen.Numbers));")
+        jTableNumbers.setModel(NumberTableModel(specimen.Numbers))
         setupNumberJTableRenderer()
-        jTableCollectors.setModel(CollectorTableModel(specimen.getCollectors()))
+        jTableCollectors.setModel(CollectorTableModel(specimen.Collectors))
         setupCollectorJTableRenderer()
-        jTableSpecimenParts.setModel(SpecimenPartsTableModel(specimen.getSpecimenParts()))
+        jTableSpecimenParts.setModel(SpecimenPartsTableModel(specimen.SpecimenParts))
         setupSpecimenPartsJTableRenderer()
         updateContentDependentLabels()
         setWarnings()
@@ -1067,10 +1045,10 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
     }
 
     private fun updateDeterminationCount() {
-        if (specimen.getDeterminations() == null) {
+        if (specimen.Determinations == null) {
             setDeterminationCount(0)
         } else {
-            setDeterminationCount(specimen.getDeterminations().size)
+            setDeterminationCount(specimen.Determinations.size)
         }
     }
 
@@ -1282,7 +1260,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
      * Update the field: data base ID to match the assigned specimen
      */
     private fun updateDBIdLabel() {
-        jLabelDBId.setText("DataBase ID: " + specimen.getSpecimenId())
+        jLabelDBId.setText("DataBase ID: " + specimen.SpecimenId)
     }
 
     private fun addBasicJLabel(target: JPanel, labelText: String) {
@@ -1397,7 +1375,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                 jButtonSave = JButton("Save")
                 if (specimen.isStateDone()) {
                     jButtonSave.setEnabled(false)
-                    jButtonSave.setText("Migrated " + specimen.getLoadFlags())
+                    jButtonSave.setText("Migrated " + specimen.LoadFlags)
                 }
                 jButtonSave.setMnemonic(KeyEvent.VK_S)
                 jButtonSave.setToolTipText("Save changes to this record to the database. No fields should have red backgrounds before you save.")
@@ -1421,7 +1399,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                 log.debug("init jComboBoxCollection")
                 val sls = SpecimenLifeCycle()
                 jComboBoxCollection = JComboBox<String?>()
-                jComboBoxCollection.setModel(DefaultComboBoxModel<String?>(sls.getDistinctCollections()))
+                jComboBoxCollection.setModel(DefaultComboBoxModel<String?>(sls.DistinctCollections))
                 jComboBoxCollection.setEditable(true)
                 //jComboBoxCollection.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Collection", jComboBoxCollection));
                 jComboBoxCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen::class.java, "Collection"))
@@ -1478,12 +1456,12 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
     private fun getJTableCollectors(): JTable? {
         if (jTableCollectors == null) {
             try {
-                jTableCollectors = JTableWithRowBorder(CollectorTableModel(specimen.getCollectors()))
+                jTableCollectors = JTableWithRowBorder(CollectorTableModel(specimen.Collectors))
             } catch (e: NullPointerException) {
                 jTableCollectors = JTableWithRowBorder(CollectorTableModel())
             }
             setupCollectorJTableRenderer()
-            jTableCollectors.setRowHeight(jTableCollectors.getRowHeight() + 5)
+            jTableCollectors.setRowHeight(jTableCollectors.RowHeight + 5)
             jTableCollectors.setObjectName("Collector")
             jTableCollectors.setParentPane(thisPane)
             jTableCollectors.addListener(object : ActionListener {
@@ -1501,10 +1479,10 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
      */
     private fun setupCollectorJTableRenderer() {
         val cls = CollectorLifeCycle()
-        val jComboBoxCollector: JComboBox<String?> = JComboBox<String?>(cls.getDistinctCollectors())
+        val jComboBoxCollector: JComboBox<String?> = JComboBox<String?>(cls.DistinctCollectors)
         jComboBoxCollector.setEditable(true)
         //field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
-        jTableCollectors.getColumnModel().getColumn(0).setCellEditor(ComboBoxCellEditor(jComboBoxCollector))
+        jTableCollectors.ColumnModel.getColumn(0).setCellEditor(ComboBoxCellEditor(jComboBoxCollector))
         AutoCompleteDecorator.decorate(jComboBoxCollector)
     }
 
@@ -1524,14 +1502,14 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
     private fun getJTableSpecimenParts(): JTable? {
         if (jTableSpecimenParts == null) {
             try {
-                jTableSpecimenParts = JTableWithRowBorder(SpecimenPartsTableModel(specimen.getSpecimenParts()))
+                jTableSpecimenParts = JTableWithRowBorder(SpecimenPartsTableModel(specimen.SpecimenParts))
             } catch (e: NullPointerException) {
                 jTableSpecimenParts = JTableWithRowBorder(SpecimenPartsTableModel())
             }
-            jTableSpecimenParts.getColumnModel().getColumn(0).setPreferredWidth(90)
-            jTableSpecimenParts.setRowHeight(jTableSpecimenParts.getRowHeight() + 5)
+            jTableSpecimenParts.ColumnModel.getColumn(0).setPreferredWidth(90)
+            jTableSpecimenParts.setRowHeight(jTableSpecimenParts.RowHeight + 5)
             setupSpecimenPartsJTableRenderer()
-            log.debug(specimen.getSpecimenParts().size)
+            log.debug(specimen.SpecimenParts.size)
             jTableSpecimenParts.setObjectName("Specimen Part")
             jTableSpecimenParts.setParentPane(thisPane)
             jTableSpecimenParts.addListener(object : ActionListener {
@@ -1547,11 +1525,11 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
     private fun setupSpecimenPartsJTableRenderer() {
         log.debug("Setting specimen part cell editors")
         val comboBoxPart: JComboBox<String?> = JComboBox<String?>(SpecimenPart.Companion.PART_NAMES)
-        getJTableSpecimenParts().getColumnModel().getColumn(0).setCellEditor(DefaultCellEditor(comboBoxPart))
+        getJTableSpecimenParts().ColumnModel.getColumn(0).setCellEditor(DefaultCellEditor(comboBoxPart))
         val comboBoxPrep: JComboBox<String?> = JComboBox<String?>(SpecimenPart.Companion.PRESERVATION_NAMES)
-        getJTableSpecimenParts().getColumnModel().getColumn(1).setCellEditor(DefaultCellEditor(comboBoxPrep))
-        getJTableSpecimenParts().getColumnModel().getColumn(4).setCellRenderer(ButtonRenderer())
-        getJTableSpecimenParts().getColumnModel().getColumn(4).setCellEditor(ButtonEditor(ButtonEditor.Companion.OPEN_SPECIMENPARTATTRIBUTES, this))
+        getJTableSpecimenParts().ColumnModel.getColumn(1).setCellEditor(DefaultCellEditor(comboBoxPrep))
+        getJTableSpecimenParts().ColumnModel.getColumn(4).setCellRenderer(ButtonRenderer())
+        getJTableSpecimenParts().ColumnModel.getColumn(4).setCellEditor(ButtonEditor(ButtonEditor.Companion.OPEN_SPECIMENPARTATTRIBUTES, this))
     }//jTextFieldDateLastUpdated.setEnabled(false);
 
     /**
@@ -1631,11 +1609,11 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
         private get() {
             if (jTableNumbers == null) {
                 try {
-                    jTableNumbers = JTableWithRowBorder(NumberTableModel(specimen.getNumbers()))
+                    jTableNumbers = JTableWithRowBorder(NumberTableModel(specimen.Numbers))
                 } catch (e: NullPointerException) {
                     jTableNumbers = JTableWithRowBorder(NumberTableModel())
                 }
-                jTableNumbers.setRowHeight(jTableNumbers.getRowHeight() + 5)
+                jTableNumbers.setRowHeight(jTableNumbers.RowHeight + 5)
                 setupNumberJTableRenderer()
                 jTableNumbers.setObjectName("Number")
                 jTableNumbers.setParentPane(thisPane)
@@ -1658,11 +1636,11 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
         val field1 = JTextField()
         field1.setInputVerifier(MetadataRetriever.getInputVerifier(Number::class.java, "Number", field1))
         field1.setVerifyInputWhenFocusTarget(true)
-        jTableNumbers.getColumnModel().getColumn(NumberTableModel.Companion.COLUMN_NUMBER).setCellEditor(ValidatingTableCellEditor(field1))
+        jTableNumbers.ColumnModel.getColumn(NumberTableModel.Companion.COLUMN_NUMBER).setCellEditor(ValidatingTableCellEditor(field1))
         // Then, setup the type field
-        val jComboNumberTypes: JComboBox<String?> = JComboBox<String?>(NumberLifeCycle.Companion.getDistinctTypes())
+        val jComboNumberTypes: JComboBox<String?> = JComboBox<String?>(NumberLifeCycle.Companion.DistinctTypes)
         jComboNumberTypes.setEditable(true)
-        val typeColumn: TableColumn = jTableNumbers.getColumnModel().getColumn(NumberTableModel.Companion.COLUMN_TYPE)
+        val typeColumn: TableColumn = jTableNumbers.ColumnModel.getColumn(NumberTableModel.Companion.COLUMN_TYPE)
         val comboBoxEditor = ComboBoxCellEditor(jComboNumberTypes)
         AutoCompleteDecorator.decorate(jComboNumberTypes)
         typeColumn.setCellEditor(ComboBoxCellEditor(jComboNumberTypes))
@@ -1686,7 +1664,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                 jButtonNumbersAdd.setIcon(ImageIcon(iconFile))
                 jButtonNumbersAdd.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
-                        (jTableNumbers.getModel() as NumberTableModel).addNumber(Number(specimen, "", ""))
+                        (jTableNumbers.Model as NumberTableModel).addNumber(Number(specimen, "", ""))
                         thisPane!!.setStateToDirty()
                     }
                 })
@@ -1695,23 +1673,23 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
             }
         }
         return jButtonNumbersAdd
-    }//log.debug("the lat long is : " + specimen.getLatLong().);
+    }//log.debug("the lat long is : " + specimen.LatLong.);
 
     //allie add
 /*try {
-				Set<LatLong> georeferences = specimen.getLatLong();
+				Set<LatLong> georeferences = specimen.LatLong;
 				log.debug("getJButtonGeoreference georeferences size is : + " + georeferences.size());
 				LatLong georeference_pre = georeferences.iterator().next();
-				log.debug("lat is : + " + georeference_pre.getLatDegString());
-				log.debug("long is : + " + georeference_pre.getLongDegString());
-				if ((!("").equals(georeference_pre.getLatDegString())) ||
-					(!("").equals(georeference_pre.getLongDegString()))){
+				log.debug("lat is : + " + georeference_pre.LatDegString);
+				log.debug("long is : + " + georeference_pre.LongDegString);
+				if ((!("").equals(georeference_pre.LatDegString)) ||
+					(!("").equals(georeference_pre.LongDegString))){
 					jButtonGeoreference.setText("1.0 Georeference");
 				}else{
 					jButtonGeoreference.setText("0.0 Georeference");
 				}
 	        } catch (Exception e) {
-	        	log.error(e.getMessage(), e);
+	        	log.error(e.Message, e);
 	        }	*/
     private val jButtonGeoreference: JButton?
         private get() {
@@ -1719,26 +1697,26 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                 jButtonGeoReference = JButton()
                 //allie add
 /*try {
-				Set<LatLong> georeferences = specimen.getLatLong();
+				Set<LatLong> georeferences = specimen.LatLong;
 				log.debug("getJButtonGeoreference georeferences size is : + " + georeferences.size());
 				LatLong georeference_pre = georeferences.iterator().next();
-				log.debug("lat is : + " + georeference_pre.getLatDegString());
-				log.debug("long is : + " + georeference_pre.getLongDegString());
-				if ((!("").equals(georeference_pre.getLatDegString())) ||
-					(!("").equals(georeference_pre.getLongDegString()))){
+				log.debug("lat is : + " + georeference_pre.LatDegString);
+				log.debug("long is : + " + georeference_pre.LongDegString);
+				if ((!("").equals(georeference_pre.LatDegString)) ||
+					(!("").equals(georeference_pre.LongDegString))){
 					jButtonGeoreference.setText("1.0 Georeference");
 				}else{
 					jButtonGeoreference.setText("0.0 Georeference");
 				}
 	        } catch (Exception e) {
-	        	log.error(e.getMessage(), e);
+	        	log.error(e.Message, e);
 	        }	*/try {
                     updateJButtonGeoreference()
                     jButtonGeoReference.addActionListener(object : ActionListener {
                         override fun actionPerformed(e: ActionEvent?) {
                             thisPane!!.setStateToDirty()
-                            val georeferences: MutableSet<LatLong?> = specimen.getLatLong()
-                            //log.debug("the lat long is : " + specimen.getLatLong().);
+                            val georeferences: MutableSet<LatLong?> = specimen.LatLong
+                            //log.debug("the lat long is : " + specimen.LatLong.);
                             val georeference: LatLong? = georeferences.iterator().next()
                             georeference.setSpecimen(specimen)
                             val georefDialog = GeoreferenceDialog(georeference)
@@ -1760,7 +1738,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
         }
 
     private fun updateJButtonGeoreference() {
-        if (specimen.getLatLong() != null && !specimen.getLatLong().isEmpty() && !specimen.getLatLong().iterator().next().isEmpty()) {
+        if (specimen.LatLong != null && !specimen.LatLong.isEmpty() && !specimen.LatLong.iterator().next().isEmpty()) {
             jButtonGeoReference.setText("✅ Georeference (1)")
         } else {
             jButtonGeoReference.setText("❔ Georeference (0)")
@@ -1784,7 +1762,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                 jButtonCollectorAdd.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
                         log.debug("adding a new collector........")
-                        (jTableCollectors.getModel() as CollectorTableModel).addCollector(Collector(specimen, ""))
+                        (jTableCollectors.Model as CollectorTableModel).addCollector(Collector(specimen, ""))
                         thisPane!!.setStateToDirty()
                     }
                 })
@@ -1871,7 +1849,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                 val sls = SpecimenLifeCycle()
                 jComboBoxCountry = JComboBox<String?>()
                 //jComboBoxCountry.setModel(new DefaultComboBoxModel<String>(HigherTaxonLifeCycle.selectDistinctSubfamily("")));
-                jComboBoxCountry.setModel(DefaultComboBoxModel<String?>(sls.getDistinctCountries()))
+                jComboBoxCountry.setModel(DefaultComboBoxModel<String?>(sls.DistinctCountries))
                 jComboBoxCountry.setEditable(true)
                 jComboBoxCountry.setToolTipText(MetadataRetriever.getFieldHelp(Specimen::class.java, "Country"))
                 jComboBoxCountry.addKeyListener(object : KeyAdapter() {
@@ -1912,7 +1890,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                 jComboBoxPrimaryDivision.setEditable(true)
                 //jComboBoxPrimaryDivision.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "primaryDivison", jTextFieldPrimaryDivision));
                 val sls = SpecimenLifeCycle()
-                jComboBoxPrimaryDivision.setModel(DefaultComboBoxModel<String?>(sls.getDistinctPrimaryDivisions()))
+                jComboBoxPrimaryDivision.setModel(DefaultComboBoxModel<String?>(sls.DistinctPrimaryDivisions))
                 jComboBoxPrimaryDivision.setToolTipText(MetadataRetriever.getFieldHelp(Specimen::class.java, "primaryDivison"))
                 jComboBoxPrimaryDivision.addKeyListener(object : KeyAdapter() {
                     override fun keyTyped(e: KeyEvent?) {
@@ -1997,7 +1975,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
     private fun getJComboBoxSex(): JComboBox<String?>? {
         if (jComboBoxSex == null) {
             jComboBoxSex = JComboBox<String?>()
-            jComboBoxSex.setModel(DefaultComboBoxModel<String?>(Sex.getSexValues()))
+            jComboBoxSex.setModel(DefaultComboBoxModel<String?>(Sex.SexValues))
             jComboBoxSex.setEditable(true)
             jComboBoxSex.setToolTipText(MetadataRetriever.getFieldHelp(Specimen::class.java, "Sex"))
             jComboBoxSex.addKeyListener(object : KeyAdapter() {
@@ -2018,7 +1996,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
     private fun getJComboBoxFeatures(): JComboBox<String?>? {
         if (jComboBoxFeatures == null) {
             jComboBoxFeatures = JComboBox<String?>()
-            jComboBoxFeatures.setModel(DefaultComboBoxModel<String?>(Features.getFeaturesValues()))
+            jComboBoxFeatures.setModel(DefaultComboBoxModel<String?>(Features.FeaturesValues))
             jComboBoxFeatures.setEditable(true)
             jComboBoxFeatures.setToolTipText(MetadataRetriever.getFieldHelp(Specimen::class.java, "Features"))
             jComboBoxFeatures.addKeyListener(object : KeyAdapter() {
@@ -2035,7 +2013,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
     private fun getJComboBoxNatureOfId(): JComboBox<String?>? {
         if (jComboBoxNatureOfId == null) {
             jComboBoxNatureOfId = JComboBox<String?>()
-            jComboBoxNatureOfId.setModel(DefaultComboBoxModel<String?>(NatureOfId.getNatureOfIdValues()))
+            jComboBoxNatureOfId.setModel(DefaultComboBoxModel<String?>(NatureOfId.NatureOfIdValues))
             jComboBoxNatureOfId.setEditable(false)
             jComboBoxNatureOfId.setToolTipText(MetadataRetriever.getFieldHelp(Determination::class.java, "NatureOfId"))
             jComboBoxNatureOfId.addKeyListener(object : KeyAdapter() {
@@ -2058,7 +2036,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
     private fun getJComboBoxLifeStage(): JComboBox<String?>? {
         if (jComboBoxLifeStage == null) {
             jComboBoxLifeStage = JComboBox<String?>()
-            jComboBoxLifeStage.setModel(DefaultComboBoxModel<String?>(LifeStage.Companion.getLifeStageValues()))
+            jComboBoxLifeStage.setModel(DefaultComboBoxModel<String?>(LifeStage.Companion.LifeStageValues))
             jComboBoxLifeStage.setEditable(true)
             jComboBoxLifeStage.setToolTipText(MetadataRetriever.getFieldHelp(Specimen::class.java, "Lifestage"))
             jComboBoxLifeStage.addKeyListener(object : KeyAdapter() {
@@ -2368,14 +2346,14 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                     override fun actionPerformed(e: ActionEvent?) {
                         log.debug("Adding new SpecimenPart")
                         val newPart = SpecimenPart()
-                        newPart.setPreserveMethod(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_DEFAULT_PREPARATION))
+                        newPart.setPreserveMethod(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_DEFAULT_PREPARATION))
                         newPart.setSpecimen(specimen)
                         val spls = SpecimenPartLifeCycle()
                         log.debug("Attaching new SpecimenPart")
                         try {
                             spls.persist(newPart)
-                            specimen.getSpecimenParts().add(newPart)
-                            (jTableSpecimenParts.getModel() as AbstractTableModel).fireTableDataChanged()
+                            specimen.SpecimenParts.add(newPart)
+                            (jTableSpecimenParts.Model as AbstractTableModel).fireTableDataChanged()
                             log.debug("Added new SpecimenPart")
                         } catch (e1: SaveFailedException) { // TODO Auto-generated catch block
                             e1.printStackTrace()
@@ -2434,7 +2412,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
     private fun getJComboBoxWorkflowStatus(): JComboBox<String?>? {
         if (jComboBoxWorkflowStatus == null) {
             jComboBoxWorkflowStatus = JComboBox<String?>()
-            jComboBoxWorkflowStatus.setModel(DefaultComboBoxModel<String?>(WorkFlowStatus.getWorkFlowStatusValues()))
+            jComboBoxWorkflowStatus.setModel(DefaultComboBoxModel<String?>(WorkFlowStatus.WorkFlowStatusValues))
             jComboBoxWorkflowStatus.setEditable(false)
             jComboBoxWorkflowStatus.setBackground(MainFrame.Companion.BG_COLOR_QC_FIELD)
             jComboBoxWorkflowStatus.setToolTipText(MetadataRetriever.getFieldHelp(Specimen::class.java, "WorkflowStatus"))
@@ -2453,7 +2431,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
         private get() {
             if (jComboBoxLocationInCollection == null) {
                 jComboBoxLocationInCollection = JComboBox<String?>()
-                jComboBoxLocationInCollection.setModel(DefaultComboBoxModel<String?>(LocationInCollection.getLocationInCollectionValues()))
+                jComboBoxLocationInCollection.setModel(DefaultComboBoxModel<String?>(LocationInCollection.LocationInCollectionValues))
                 jComboBoxLocationInCollection.setEditable(false)
                 jComboBoxLocationInCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen::class.java, "LocationInCollection"))
                 //alliefix - set default from properties file
@@ -2511,7 +2489,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                         val tls = TrackingLifeCycle()
                         //Request by specimen doesn't work with Oracle.  Why?
 //EventLogFrame logViewer = new EventLogFrame(new ArrayList<Tracking>(tls.findBySpecimen(specimen)));
-                        val logViewer = EventLogFrame(ArrayList<Tracking?>(tls.findBySpecimenId(specimen.getSpecimenId())))
+                        val logViewer = EventLogFrame(ArrayList<Tracking?>(tls.findBySpecimenId(specimen.SpecimenId)))
                         logViewer.pack()
                         logViewer.setVisible(true)
                     }
@@ -2567,7 +2545,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                         thisPane!!.save()
                         // TODO: rather clone the specimen to prevent external/later changes
                         ImageCaptureApp.lastEditedSpecimenCache = thisPane!!.specimen
-                        thisPane!!.setStatus("Saved & copied specimen with id " + thisPane!!.specimen.getSpecimenId())
+                        thisPane!!.setStatus("Saved & copied specimen with id " + thisPane!!.specimen.SpecimenId)
                     }
                 })
             }
@@ -2605,7 +2583,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                         e1.printStackTrace()
                     } finally {
                         try {
-                            thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+                            thisPane.Parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
                         } catch (ex: Exception) {
                             log.error(ex)
                         }
@@ -2613,7 +2591,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                 }
             })
         }
-        log.debug("SpecimenDetailsViewPane.getJButtonNext(): 9")
+        log.debug("SpecimenDetailsViewPane.JButtonNext: 9")
         return jButtonNext
     }
 
@@ -2769,7 +2747,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
         private get() {
             val pane = JScrollPane()
             pane.addMouseWheelListener(MouseWheelScrollListener(pane))
-            val maxHeight: Int = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_MAX_FIELD_HEIGHT).toInt()
+            val maxHeight: Int = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_MAX_FIELD_HEIGHT).toInt()
             pane.setMaximumSize(Dimension(1000, maxHeight))
             return pane
         }
@@ -2801,10 +2779,10 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                 dateEmergedButton.setToolTipText("Fill date emerged with data from verbatim date")
                 dateEmergedButton.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
-                        if (jTextFieldDateNos.getText() == "") {
-                            jTextFieldDateNos.setText(jTextFieldDateEmerged.getText())
+                        if (jTextFieldDateNos.Text == "") {
+                            jTextFieldDateNos.setText(jTextFieldDateEmerged.Text)
                         } else {
-                            jTextFieldDateEmerged.setText(jTextFieldDateNos.getText())
+                            jTextFieldDateEmerged.setText(jTextFieldDateNos.Text)
                         }
                     }
                 })
@@ -2825,10 +2803,10 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
                 dateCollectedButton.setToolTipText("Fill date collected with data from verbatim date")
                 dateCollectedButton.addActionListener(object : ActionListener {
                     override fun actionPerformed(e: ActionEvent?) {
-                        if (jTextFieldDateNos.getText() == "") {
-                            jTextFieldDateNos.setText(jTextFieldDateCollected.getText())
+                        if (jTextFieldDateNos.Text == "") {
+                            jTextFieldDateNos.setText(jTextFieldDateCollected.Text)
                         } else {
-                            jTextFieldDateCollected.setText(jTextFieldDateNos.getText())
+                            jTextFieldDateCollected.setText(jTextFieldDateNos.Text)
                         }
                     }
                 })
@@ -2848,13 +2826,13 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
             jButtonSpecificLocality.setToolTipText("Fill specific locality with data from verbatim locality")
             jButtonSpecificLocality.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    if (jTextFieldVerbatimLocality.getText() == "") {
-                        if (jTextFieldLocality.getText() == "") { // If both are blank, set the blank value string.
+                    if (jTextFieldVerbatimLocality.Text == "") {
+                        if (jTextFieldLocality.Text == "") { // If both are blank, set the blank value string.
                             jTextFieldLocality.setText("[no specific locality data]")
                         }
-                        jTextFieldVerbatimLocality.setText(jTextFieldLocality.getText())
+                        jTextFieldVerbatimLocality.setText(jTextFieldLocality.Text)
                     } else {
-                        jTextFieldLocality.setText(jTextFieldVerbatimLocality.getText())
+                        jTextFieldLocality.setText(jTextFieldVerbatimLocality.Text)
                     }
                 }
             })
@@ -2870,7 +2848,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
             jTextFieldMigrationStatus.setEditable(false)
             jTextFieldMigrationStatus.setText("")
             if (specimen.isStateDone()) {
-                val uri = "http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" + specimen.getCatNum()
+                val uri = "http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" + specimen.CatNum
                 jTextFieldMigrationStatus.setText(uri)
             }
         }
@@ -2899,8 +2877,8 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
      */
     private fun updateImageCount() {
         var imageCount = 0
-        if (specimen.getICImages() != null) {
-            imageCount = specimen.getICImages().size
+        if (specimen.ICImages != null) {
+            imageCount = specimen.ICImages.size
         }
         jTextFieldImageCount.setText(Integer.toString(imageCount))
         if (imageCount > 1) {
@@ -2933,22 +2911,22 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
     }
 
     private fun autocompleteGeoDataFromGeoreference() {
-        val georeff: LatLong = specimen.getLatLong().iterator().next()
-        if (georeff.getDecLat() != null && georeff.getDecLong() != null) { // do it async as the request could take longer than desired
+        val georeff: LatLong = specimen.LatLong.iterator().next()
+        if (georeff.DecLat != null && georeff.DecLong != null) { // do it async as the request could take longer than desired
             Thread(Runnable {
                 log.debug("Fetching address from openstreetmap")
-                val data: MutableMap<String?, Any?> = OpenStreetMapUtility.Companion.getInstance().reverseSearchValues(georeff.getDecLat(), georeff.getDecLong(), ArrayList<String?>(Arrays.asList(
+                val data: MutableMap<String?, Any?> = OpenStreetMapUtility.Companion.Instance.reverseSearchValues(georeff.DecLat, georeff.DecLong, ArrayList<String?>(Arrays.asList(
                         "address.state",
                         "address.country"
                 )))
                 if (data != null) {
                     log.debug("Got address from openstreetmap: $data")
-                    if (countryJTextField.getSelectedItem() == "") {
+                    if (countryJTextField.SelectedItem == "") {
                         countryJTextField.setSelectedItem(data["address.country"])
                     } else {
-                        log.debug("Won't set country as is '" + countryJTextField.getSelectedItem() + "'.")
+                        log.debug("Won't set country as is '" + countryJTextField.SelectedItem + "'.")
                     }
-                    if (primaryDivisionJTextField.getSelectedItem() == "") {
+                    if (primaryDivisionJTextField.SelectedItem == "") {
                         primaryDivisionJTextField.setSelectedItem(data["address.state"])
                     }
                 }
@@ -2987,7 +2965,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
             log.debug("init jCBDeterminer determiner null, making a new one")
             val sls = SpecimenLifeCycle()
             jCBDeterminer = JComboBox<String?>()
-            jCBDeterminer.setModel(DefaultComboBoxModel<String?>(sls.getDistinctDeterminers()))
+            jCBDeterminer.setModel(DefaultComboBoxModel<String?>(sls.DistinctDeterminers))
             jCBDeterminer.setEditable(true)
             //jComboBoxCollection.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Collection", jComboBoxCollection));
 //jCBDeterminer.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Collection"));
@@ -3008,8 +2986,8 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
      */
     private fun getCbTypeStatus(): JComboBox<String?>? {
         if (cbTypeStatus == null) {
-            cbTypeStatus = JComboBox<String?>(TypeStatus.Companion.getTypeStatusValues())
-            // cbTypeStatus = new JComboBox(TypeStatus.getTypeStatusValues());  // for visual editor
+            cbTypeStatus = JComboBox<String?>(TypeStatus.Companion.TypeStatusValues)
+            // cbTypeStatus = new JComboBox(TypeStatus.TypeStatusValues);  // for visual editor
             cbTypeStatus.setEditable(true)
             cbTypeStatus.setToolTipText(MetadataRetriever.getFieldHelp(Specimen::class.java, "TypeStatus"))
             cbTypeStatus.addKeyListener(object : KeyAdapter() {
@@ -3064,15 +3042,15 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
         val s = SpecimenLifeCycle()
         setStateToClean()
         //		SpecimenPartAttributeLifeCycle spals = new SpecimenPartAttributeLifeCycle();
-//		Iterator<SpecimenPart> i = specimen.getSpecimenParts().iterator();
+//		Iterator<SpecimenPart> i = specimen.SpecimenParts.iterator();
 //		while (i.hasNext()) {
-//			Iterator<SpecimenPartAttribute> ia = i.next().getAttributeCollection().iterator();
+//			Iterator<SpecimenPartAttribute> ia = i.next().AttributeCollection.iterator();
 //			while (ia.hasNext()) {
 //				try {
 //					SpecimenPartAttribute spa = ia.next();
-//					log.debug(spa.getSpecimenPartAttributeId());
+//					log.debug(spa.SpecimenPartAttributeId);
 //					spals.attachDirty(spa);
-//					log.debug(spa.getSpecimenPartAttributeId());
+//					log.debug(spa.SpecimenPartAttributeId);
 //				} catch (SaveFailedException e) {
 //					// TODO Auto-generated catch block
 //					e.printStackTrace();
@@ -3093,7 +3071,7 @@ class SpecimenDetailsViewPane(aSpecimenInstance: Specimen?, aController: Specime
             } else if (e is OptimisticLockException) {
                 status = "Error: last edited entry has been modified externally. Try again."
             }
-            Singleton.getMainFrame().setStatusMessage(status)
+            Singleton.MainFrame.setStatusMessage(status)
             log.debug(e.message, e)
             HibernateUtil.restartSessionFactory()
             this.setVisible(false)

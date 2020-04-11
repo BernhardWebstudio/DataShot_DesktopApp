@@ -23,11 +23,7 @@
 package edu.harvard.mcz.imagecapture.ui.frame
 
 
-import edu.harvard.mcz.imagecapture.CandidateImageFile
-import edu.harvard.mcz.imagecapture.ImageCaptureProperties
-import edu.harvard.mcz.imagecapture.PropertiesEditor
-import edu.harvard.mcz.imagecapture.Singleton
-import edu.harvard.mcz.imagecapture.ThumbnailBuilder
+import edu.harvard.mcz.imagecapture.*
 import edu.harvard.mcz.imagecapture.data.BulkMedia
 import edu.harvard.mcz.imagecapture.ui.frame.BulkMediaFrame
 import org.apache.commons.csv.CSVFormat
@@ -503,8 +499,8 @@ class BulkMediaFrame : JFrame(), PropertyChangeListener {
         textField.setEditable(false)
         textField.setText(
                 Singleton
-                        .getProperties()
-                        .getProperties()
+                        .Properties
+                        .Properties
                         .getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASEURI))
         panel.add(textField)
         textField.setColumns(10)
@@ -515,8 +511,8 @@ class BulkMediaFrame : JFrame(), PropertyChangeListener {
         textField_1 = JTextField()
         textField_1.setEditable(false)
         textField_1.setText(Singleton
-                .getProperties()
-                .getProperties()
+                .Properties
+                .Properties
                 .getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
         panel.add(textField_1)
         textField_1.setColumns(10)
@@ -550,9 +546,9 @@ class BulkMediaFrame : JFrame(), PropertyChangeListener {
      *     java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
      */
     override fun propertyChange(evt: PropertyChangeEvent) {
-        log.debug(evt.getPropertyName())
-        if (evt.getPropertyName() === "progress") {
-            val progress = (evt.getNewValue() as Int)
+        log.debug(evt.PropertyName)
+        if (evt.PropertyName === "progress") {
+            val progress = (evt.NewValue as Int)
             progressBar.setValue(progress)
             progressBar.setStringPainted(true)
             log.debug(progress)
@@ -579,8 +575,8 @@ class BulkMediaFrame : JFrame(), PropertyChangeListener {
             var startAt: File? = null
             try {
                 startAt = File(Singleton
-                        .getProperties()
-                        .getProperties()
+                        .Properties
+                        .Properties
                         .getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
             } catch (e: Exception) {
                 log.debug(e.message)
@@ -589,10 +585,10 @@ class BulkMediaFrame : JFrame(), PropertyChangeListener {
             fileChooser.setDialogTitle(
                     "Pick a directory of image files to check for barcodes.")
             val returnValue: Int = fileChooser.showOpenDialog(
-                    Singleton.getMainFrame())
+                    Singleton.MainFrame)
             if (returnValue == JFileChooser.APPROVE_OPTION) {
-                val directory: File = fileChooser.getSelectedFile()
-                log.debug("Selected base directory: " + directory.getName() + ".")
+                val directory: File = fileChooser.SelectedFile
+                log.debug("Selected base directory: " + directory.Name + ".")
                 val files: Array<File?> = directory.listFiles()
                 val fileCount = files.size
                 var matchCount = 0
@@ -602,13 +598,13 @@ class BulkMediaFrame : JFrame(), PropertyChangeListener {
                 if (fileCount > 0) {
                     var position = 0
                     var okToRun = false
-                    val output = File(directory.getAbsolutePath() + File.separatorChar +
+                    val output = File(directory.AbsolutePath + File.separatorChar +
                             BULKFILENAME)
-                    log.debug(output.getPath())
+                    log.debug(output.Path)
                     if (output.exists()) {
                         val option: Int = JOptionPane.showConfirmDialog(
                                 thisFrame,
-                                "Output file " + output.getName() +
+                                "Output file " + output.Name +
                                         " already exists in selected directory.  Overwrite it?.",
                                 "File Exists.  Overwrite?", JOptionPane.WARNING_MESSAGE)
                         if (option == JOptionPane.OK_OPTION) { // no need to take action to truncate output file, PrintWriter
@@ -626,22 +622,22 @@ class BulkMediaFrame : JFrame(), PropertyChangeListener {
                                     .withQuoteMode(QuoteMode.ALL)
                             val writer = PrintWriter(output)
                             val printer = CSVPrinter(writer, format)
-                            printer.printRecord(BulkMedia.Companion.getHeaders())
+                            printer.printRecord(BulkMedia.Companion.Headers)
                             for (candidate in files) {
                                 progress = Math.round(position.toFloat() / fileCount.toFloat() * 100.0f)
                                 log.debug(progress)
                                 setProgress(progress)
-                                if (candidate.getName().matches(
+                                if (candidate.Name.matches(
                                                 Singleton
-                                                        .getProperties()
-                                                        .getProperties()
+                                                        .Properties
+                                                        .Properties
                                                         .getProperty(
                                                                 ImageCaptureProperties.Companion.KEY_IMAGEREGEX))) {
                                     try {
                                         val line: BulkMedia = CandidateImageFile.Companion.parseOneFileToBulkMedia(
-                                                candidate.getCanonicalPath())
-                                        log.debug(line.getData())
-                                        printer.printRecord(line.getData())
+                                                candidate.CanonicalPath)
+                                        log.debug(line.Data)
+                                        printer.printRecord(line.Data)
                                         matchCount++
                                     } catch (e: IOException) {
                                         e.printStackTrace()
@@ -654,14 +650,14 @@ class BulkMediaFrame : JFrame(), PropertyChangeListener {
                         } catch (e1: FileNotFoundException) {
                             JOptionPane.showMessageDialog(
                                     thisFrame,
-                                    "Output file " + output.getName() +
+                                    "Output file " + output.Name +
                                             " was not writable or could not be created.",
                                     "File Not writable.", JOptionPane.ERROR_MESSAGE)
                             log.error(e1.message)
                         } catch (e1: IOException) {
                             JOptionPane.showMessageDialog(
                                     thisFrame,
-                                    "Error writing to file " + output.getName() + ". " +
+                                    "Error writing to file " + output.Name + ". " +
                                             e1.message,
                                     "File write error.", JOptionPane.ERROR_MESSAGE)
                             log.error(e1.message, e1)
@@ -670,7 +666,7 @@ class BulkMediaFrame : JFrame(), PropertyChangeListener {
                         log.error(output.exists())
                         JOptionPane.showMessageDialog(
                                 thisFrame,
-                                "Output file " + output.getName() +
+                                "Output file " + output.Name +
                                         " already exists in selected directory.",
                                 "File Exists", JOptionPane.ERROR_MESSAGE)
                     }

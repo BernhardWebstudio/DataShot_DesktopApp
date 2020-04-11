@@ -148,10 +148,10 @@ class JobRecheckForTemplates : RunnableJob, Runnable {
                 var imagebase: File? = null // place to start the scan from, imagebase directory for SCAN_ALL
                 var startPoint: File? = null
                 // If it isn't null, retrieve the image base directory from properties, and test for read access.
-                if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE) == null) {
-                    JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Can't start scan.  Don't know where images are stored.  Set imagbase property.", "Can't Scan.", JOptionPane.ERROR_MESSAGE)
+                if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE) == null) {
+                    JOptionPane.showMessageDialog(Singleton.MainFrame, "Can't start scan.  Don't know where images are stored.  Set imagbase property.", "Can't Scan.", JOptionPane.ERROR_MESSAGE)
                 } else {
-                    imagebase = File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
+                    imagebase = File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE))
                     if (imagebase != null) {
                         if (imagebase.canRead()) {
                             startPoint = imagebase
@@ -168,13 +168,13 @@ class JobRecheckForTemplates : RunnableJob, Runnable {
                         if (scan == SCAN_SELECT && startPointSpecific != null && startPointSpecific!!.canRead()) {
                             fileChooser.setCurrentDirectory(startPointSpecific)
                         } else {
-                            if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH) != null) {
-                                fileChooser.setCurrentDirectory(File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH)))
+                            if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH) != null) {
+                                fileChooser.setCurrentDirectory(File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH)))
                             }
                         }
-                        val returnValue: Int = fileChooser.showOpenDialog(Singleton.getMainFrame())
+                        val returnValue: Int = fileChooser.showOpenDialog(Singleton.MainFrame)
                         if (returnValue == JFileChooser.APPROVE_OPTION) {
-                            val file: File = fileChooser.getSelectedFile()
+                            val file: File = fileChooser.SelectedFile
                             log!!.debug("Selected base directory: " + file.name + ".")
                             startPoint = file
                         } else { //TODO: handle error condition
@@ -183,14 +183,14 @@ class JobRecheckForTemplates : RunnableJob, Runnable {
                     }
                     // Check that startPoint is or is within imagebase.
                     if (!ImageCaptureProperties.Companion.isInPathBelowBase(startPoint)) {
-                        val base: String = Singleton.getProperties().getProperties().getProperty(
+                        val base: String = Singleton.Properties.Properties.getProperty(
                                 ImageCaptureProperties.Companion.KEY_IMAGEBASE)
                         log!!.error("Tried to scan directory (" + startPoint!!.path + ") outside of base image directory (" + base + ")")
                         val message = "Can't scan and database files outside of base image directory ($base)"
-                        JOptionPane.showMessageDialog(Singleton.getMainFrame(), message, "Can't Scan outside image base directory.", JOptionPane.YES_NO_OPTION)
+                        JOptionPane.showMessageDialog(Singleton.MainFrame, message, "Can't Scan outside image base directory.", JOptionPane.YES_NO_OPTION)
                     } else {
                         if (!startPoint!!.canRead()) {
-                            JOptionPane.showMessageDialog(Singleton.getMainFrame(), "Can't start scan.  Unable to read selected directory: " + startPoint.path, "Can't Scan.", JOptionPane.YES_NO_OPTION)
+                            JOptionPane.showMessageDialog(Singleton.MainFrame, "Can't start scan.  Unable to read selected directory: " + startPoint.path, "Can't Scan.", JOptionPane.YES_NO_OPTION)
                         } else {
                             pathToCheck = ImageCaptureProperties.Companion.getPathBelowBase(startPoint)
                             // retrieve a list of image records in the selected directory
@@ -216,7 +216,7 @@ class JobRecheckForTemplates : RunnableJob, Runnable {
                     log!!.error(e.message)
                     status = RunStatus.STATUS_FAILED
                     val message = "Error loading the list of images with no templates. " + e.message
-                    JOptionPane.showMessageDialog(Singleton.getMainFrame(), message, "Error loading image records.", JOptionPane.YES_NO_OPTION)
+                    JOptionPane.showMessageDialog(Singleton.MainFrame, message, "Error loading image records.", JOptionPane.YES_NO_OPTION)
                 }
             }
             log!!.debug("Found " + files.size + " Image files without templates in directory to check.")
@@ -224,8 +224,8 @@ class JobRecheckForTemplates : RunnableJob, Runnable {
         }
 
     private fun recheckForTemplates(image: ICImage) {
-        if (image.getSpecimen() != null) {
-            val imageFile = File(assemblePathWithBase(image.getPath(), image.getFilename()))
+        if (image.Specimen != null) {
+            val imageFile = File(assemblePathWithBase(image.Path, image.Filename))
             counter!!.incrementFilesSeen()
             val detector = ConfiguredBarcodePositionTemplateDetector()
             try {
@@ -236,29 +236,29 @@ class JobRecheckForTemplates : RunnableJob, Runnable {
                     ils.attachDirty(image)
                     counter!!.incrementFilesUpdated()
                 } else if (templateName != null && templateName == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) {
-                    val error = RunnableJobError(image.getFilename(), image.getRawBarcode(),
-                            "", image.getRawExifBarcode(), "No Template Found.",
+                    val error = RunnableJobError(image.Filename, image.RawBarcode,
+                            "", image.RawExifBarcode, "No Template Found.",
                             null, null,
                             null, RunnableJobError.Companion.TYPE_NO_TEMPLATE)
                     counter!!.appendError(error)
                 }
             } catch (e: UnreadableFileException) {
                 log!!.error(e.message)
-                val error = RunnableJobError(image.getFilename(), image.getRawBarcode(),
-                        "", image.getRawExifBarcode(), "Unreadable File Exception checking for template.",
+                val error = RunnableJobError(image.Filename, image.RawBarcode,
+                        "", image.RawExifBarcode, "Unreadable File Exception checking for template.",
                         null, null,
                         null, RunnableJobError.Companion.TYPE_NO_TEMPLATE)
                 counter!!.appendError(error)
             } catch (e: SaveFailedException) {
                 log!!.error(e.message, e)
-                val error = RunnableJobError(image.getFilename(), image.getRawBarcode(),
-                        "", image.getRawExifBarcode(), "Save Failed Exception saving new template.",
+                val error = RunnableJobError(image.Filename, image.RawBarcode,
+                        "", image.RawExifBarcode, "Save Failed Exception saving new template.",
                         null, null,
                         null, RunnableJobError.Companion.TYPE_SAVE_FAILED)
                 counter!!.appendError(error)
             }
         } else {
-            log!!.debug(image.getPath() + image.getFilename() + " Has no attached image.")
+            log!!.debug(image.Path + image.Filename + " Has no attached image.")
         }
     }
 
@@ -267,7 +267,7 @@ class JobRecheckForTemplates : RunnableJob, Runnable {
      */
     override fun start() {
         startTime = Date()
-        Singleton.getJobList().addJob(this)
+        Singleton.JobList.addJob(this)
         counter = Counter()
         // Obtain a list of image file records for the selected directory.
         val files: MutableList<ICImage?> = fileList!!
@@ -285,7 +285,7 @@ class JobRecheckForTemplates : RunnableJob, Runnable {
         if (status != RunStatus.STATUS_TERMINATED) {
             setPercentComplete(100)
         }
-        Singleton.getMainFrame().notifyListener(status, this)
+        Singleton.MainFrame.notifyListener(status, this)
         report()
         done()
     }
@@ -293,7 +293,7 @@ class JobRecheckForTemplates : RunnableJob, Runnable {
     private fun setPercentComplete(aPercentage: Int) { //set value
         percentComplete = aPercentage
         //notify listeners
-        Singleton.getMainFrame().notifyListener(percentComplete, this)
+        Singleton.MainFrame.notifyListener(percentComplete, this)
         val i: MutableIterator<RunnerListener?> = listeners!!.iterator()
         while (i.hasNext()) {
             i.next().notifyListener(percentComplete, this)
@@ -304,7 +304,7 @@ class JobRecheckForTemplates : RunnableJob, Runnable {
      * Cleanup when job is complete.
      */
     private fun done() {
-        Singleton.getJobList().removeJob(this)
+        Singleton.JobList.removeJob(this)
     }
 
     /* (non-Javadoc)
@@ -325,8 +325,8 @@ class JobRecheckForTemplates : RunnableJob, Runnable {
         var report = "Results of template check on Image files missing templates (WholeImageOnly).\n"
         report += "Found  " + counter!!.filesSeen + " image file database records without templates.\n"
         report += "Updated " + counter!!.filesUpdated + " image records to a template.\n"
-        Singleton.getMainFrame().setStatusMessage("Check for templates complete.")
-        val errorReportDialog = RunnableJobReportDialog(Singleton.getMainFrame(), report, counter!!.errors, "Recheck Files for Templates Results")
+        Singleton.MainFrame.setStatusMessage("Check for templates complete.")
+        val errorReportDialog = RunnableJobReportDialog(Singleton.MainFrame, report, counter!!.errors, "Recheck Files for Templates Results")
         errorReportDialog.setVisible(true)
     }
 

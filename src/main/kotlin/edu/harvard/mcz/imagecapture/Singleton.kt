@@ -49,7 +49,8 @@ object Singleton {
      *
      * @param aMainFrame sole instance of MainFrame to be referenced
      */
-    var mainFrame: MainFrame? = null
+    var mainFrame: MainFrame = MainFrame()
+
     private var user: Users? = null
 
     /**

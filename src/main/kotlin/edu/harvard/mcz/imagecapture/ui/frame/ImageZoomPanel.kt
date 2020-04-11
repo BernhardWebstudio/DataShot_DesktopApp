@@ -26,14 +26,8 @@ package edu.harvard.mcz.imagecapture.ui.frame
 import edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
-import java.awt.BorderLayout
-import java.awt.GridBagConstraints
-import java.awt.GridBagLayout
-import java.awt.event.ActionEvent
-import java.awt.event.ActionListener
-import java.awt.event.KeyEvent
-import java.awt.event.MouseEvent
-import java.awt.event.MouseListener
+import java.awt.*
+import java.awt.event.*
 import java.awt.image.BufferedImage
 import java.io.IOException
 import javax.imageio.ImageIO
@@ -41,12 +35,7 @@ import javax.swing.JButton
 import javax.swing.JPanel
 import javax.swing.JScrollPane
 
-java.awt.*
-import  java.awt.event.ActionEvent
-
-
-import java.awt.event.KeyEvent 
-import java.awt.event.MouseEvent java.net.URL
+java.net.URL
 
 
 import javax.swing.JTextField 
@@ -476,13 +465,13 @@ class ImageZoomPanel : JPanel, MouseListener {
         image = anImage
         jLabel!!.setImage(image)
         //		//jLabel.setText("");
-//		Dimension size = new Dimension(image.getWidth(),
-// image.getHeight());
+//		Dimension size = new Dimension(image.Width,
+// image.Height);
 //        // Center image in this component.
-//        int x = (jLabel.getWidth() - size.width)/2;
-//        int y = (jLabel.getHeight() - size.height)/2;
+//        int x = (jLabel.Width - size.width)/2;
+//        int y = (jLabel.Height - size.height)/2;
 //		jLabel.prepareImage(anImage, observer);
-//		Graphics2D g2 = (Graphics2D) jLabel.getGraphics();
+//		Graphics2D g2 = (Graphics2D) jLabel.Graphics;
 //		g2.drawImage(image, x, y, observer);
 //		jLabel.paint(g2);
         jLabel.repaint()
@@ -501,7 +490,7 @@ class ImageZoomPanel : JPanel, MouseListener {
         zoomCursor = try {
             val zoomCursorImage: Image = ImageIO.read(cursorFile)
             val hotPoint = Point(5, 5)
-            Toolkit.getDefaultToolkit().createCustomCursor(
+            Toolkit.DefaultToolkit.createCustomCursor(
                     zoomCursorImage, hotPoint, "ZoomCursor")
         } catch (e: IOException) {
             log.error("Unable to load ZoomCursor")
@@ -650,7 +639,7 @@ class ImageZoomPanel : JPanel, MouseListener {
     }
 
     fun zoomToFit() {
-        jLabel!!.zoomToFit(jScrollPane.getWidth() - 1, jScrollPane.getHeight() - 1)
+        jLabel!!.zoomToFit(jScrollPane.Width - 1, jScrollPane.Height - 1)
         jLabel.repaint()
         jLabel.doLayout()
         jScrollPane.doLayout()
@@ -660,14 +649,14 @@ class ImageZoomPanel : JPanel, MouseListener {
         jLabel!!.zoomIn()
         jLabel.repaint()
         jLabel.doLayout()
-        val yval: Int = jScrollPane.getVerticalScrollBar().getValue()
-        jScrollPane.getVerticalScrollBar().setValue(
-                (yval + jScrollPane.getHeight() * 0.1) as Int)
-        val xval: Int = jScrollPane.getHorizontalScrollBar().getValue()
-        jScrollPane.getHorizontalScrollBar().setValue(
-                (xval + jScrollPane.getWidth() * 0.1) as Int)
+        val yval: Int = jScrollPane.VerticalScrollBar.Value
+        jScrollPane.VerticalScrollBar.setValue(
+                (yval + jScrollPane.Height * 0.1) as Int)
+        val xval: Int = jScrollPane.HorizontalScrollBar.Value
+        jScrollPane.HorizontalScrollBar.setValue(
+                (xval + jScrollPane.Width * 0.1) as Int)
         jScrollPane.revalidate()
-        jScrollPane.getParent().validate()
+        jScrollPane.Parent.validate()
         jScrollPane.setVisible(false)
         jScrollPane.setVisible(true)
         jScrollPane.validate()
@@ -678,12 +667,12 @@ class ImageZoomPanel : JPanel, MouseListener {
         jLabel!!.zoomOut()
         jLabel.repaint()
         jLabel.doLayout()
-        val yval: Int = jScrollPane.getVerticalScrollBar().getValue()
-        jScrollPane.getVerticalScrollBar().setValue(
-                (yval - jScrollPane.getHeight() * 0.1) as Int)
-        val xval: Int = jScrollPane.getHorizontalScrollBar().getValue()
-        jScrollPane.getHorizontalScrollBar().setValue(
-                (xval - jScrollPane.getWidth() * 0.1) as Int)
+        val yval: Int = jScrollPane.VerticalScrollBar.Value
+        jScrollPane.VerticalScrollBar.setValue(
+                (yval - jScrollPane.Height * 0.1) as Int)
+        val xval: Int = jScrollPane.HorizontalScrollBar.Value
+        jScrollPane.HorizontalScrollBar.setValue(
+                (xval - jScrollPane.Width * 0.1) as Int)
         jScrollPane.setVisible(false)
         jScrollPane.setVisible(true)
         jScrollPane.validate()
@@ -720,24 +709,24 @@ class ImageZoomPanel : JPanel, MouseListener {
      * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
      */
     override fun mouseClicked(e: MouseEvent) {
-        if (e.getButton() == MouseEvent.BUTTON1) {
-            val clickAt: Point = e.getPoint()
-            val size: Dimension = jLabel.getSize()
+        if (e.Button == MouseEvent.BUTTON1) {
+            val clickAt: Point = e.Point
+            val size: Dimension = jLabel.Size
             jLabel!!.zoomIn()
             jLabel.repaint()
             jLabel.doLayout()
             jLabel!!.centerOn(clickAt)
             jLabel.invalidate()
             jScrollPane.revalidate()
-            jScrollPane.getParent().validate()
+            jScrollPane.Parent.validate()
             jScrollPane.setVisible(false)
             jScrollPane.setVisible(true)
             jScrollPane.validate()
             jScrollPane.doLayout()
             zoomIn()
             zoomOut()
-        } else if (e.getButton() == MouseEvent.BUTTON3) {
-            val clickAt: Point = e.getPoint()
+        } else if (e.Button == MouseEvent.BUTTON3) {
+            val clickAt: Point = e.Point
             zoomOut()
             jLabel!!.centerOn(clickAt)
         }
@@ -747,7 +736,7 @@ class ImageZoomPanel : JPanel, MouseListener {
      * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
      */
     override fun mouseEntered(e: MouseEvent?) { // TODO Auto-generated method stub
-        originalCursor = jLabel.getCursor()
+        originalCursor = jLabel.Cursor
         if (zoomCursor != null) {
             jLabel.setCursor(zoomCursor)
         }

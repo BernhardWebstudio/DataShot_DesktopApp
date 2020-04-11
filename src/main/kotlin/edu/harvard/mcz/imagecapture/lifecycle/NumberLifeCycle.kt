@@ -190,10 +190,10 @@ class NumberLifeCycle {
          * Example usage:
          * `
          * JComboBox jComboNumberTypes = new
-         * JComboBox(NumberLifeCycle.getDistinctTypes());
+         * JComboBox(NumberLifeCycle.DistinctTypes);
          * jComboNumberTypes.setEditable(true);
          * TableColumn typeColumn =
-         * jTableNumbers.getColumnModel().getColumn(NumberTableModel.COLUMN_TYPE);
+         * jTableNumbers.ColumnModel.getColumn(NumberTableModel.COLUMN_TYPE);
          * typeColumn.setCellEditor(new
          * DefaultCellEditor(jComboNumberTypes));
         ` *
@@ -205,11 +205,11 @@ class NumberLifeCycle {
             get() {
                 var types = ArrayList<String?>()
                 if (Singleton
-                                .getProperties()
-                                .getProperties()
+                                .Properties
+                                .Properties
                                 .getProperty(ImageCaptureProperties.Companion.KEY_SHOW_ALL_NUMBER_TYPES)
                         == "false") {
-                    return Number.Companion.getNumberTypeValues().toArray(arrayOf<String?>())
+                    return Number.Companion.NumberTypeValues.toArray(arrayOf<String?>())
                 } else {
                     types.add("") // put blank at top of list.
                     types.add("Unknown") // follow with "Unknown", see below.

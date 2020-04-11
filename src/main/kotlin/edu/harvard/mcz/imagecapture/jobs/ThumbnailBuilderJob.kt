@@ -41,8 +41,8 @@ internal class ThumbnailBuilderJob : Runnable, RunnableJob {
     constructor(aStartPoint: File?, counter: AtomicInteger?) {
         thumbnailCounter = counter
         startPoint = aStartPoint
-        thumbHeight = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_THUMBNAIL_HEIGHT)
-        thumbWidth = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_THUMBNAIL_WIDTH)
+        thumbHeight = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_THUMBNAIL_HEIGHT)
+        thumbWidth = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_THUMBNAIL_WIDTH)
         thumbInit()
     }
 
@@ -52,10 +52,10 @@ internal class ThumbnailBuilderJob : Runnable, RunnableJob {
         thumbHeight = Integer.toString(thumbHeightPixels)
         thumbWidth = Integer.toString(thumbWidthPixels)
         if (thumbHeightPixels < 10) {
-            thumbHeight = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_THUMBNAIL_HEIGHT)
+            thumbHeight = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_THUMBNAIL_HEIGHT)
         }
         if (thumbWidthPixels < 10) {
-            thumbWidth = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_THUMBNAIL_WIDTH)
+            thumbWidth = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_THUMBNAIL_WIDTH)
         }
         thumbInit()
     }
@@ -68,14 +68,14 @@ internal class ThumbnailBuilderJob : Runnable, RunnableJob {
         startTime = Date()
         status = RunStatus.STATUS_RUNNING
         setThumbPercentComplete(0)
-        Singleton.getJobList().addJob(this)
+        Singleton.JobList.addJob(this)
         // mkdir thumbs ; mogrify -path thumbs -resize 80x120 *.JPG
         if (startPoint!!.isDirectory && startPoint!!.name != "thumbs") {
             val thumbsDir = File(startPoint!!.path + File.separator + "thumbs")
             log!!.debug(thumbsDir.path)
             if (!thumbsDir.exists()) {
                 thumbsDir.mkdir()
-                Singleton.getMainFrame().setStatusMessage("Creating " + thumbsDir.path)
+                Singleton.MainFrame.setStatusMessage("Creating " + thumbsDir.path)
             }
             // Runtime executes mogrify directly, not through a shell, thus expand list of files to pass
 // rather than passing *.JPG
@@ -90,12 +90,12 @@ internal class ThumbnailBuilderJob : Runnable, RunnableJob {
             }
             if (filesToThumbCount > 0) {
                 var makeWithJava = false
-                val mogrify: String = Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_MOGRIFY_EXECUTABLE)
+                val mogrify: String = Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_MOGRIFY_EXECUTABLE)
                 if (mogrify == null || mogrify.trim { it <= ' ' }.length > 0) {
                     makeWithJava = true
                 } else {
                     val runCommand = mogrify + " -path thumbs -resize " + thumbWidth + "x" + thumbHeight + " " + filesToThumb.toString()
-                    val r = Runtime.getRuntime()
+                    val r = Runtime.Runtime
                     log.debug(runCommand)
                     try {
                         val env = arrayOf<String?>("")
@@ -112,7 +112,7 @@ internal class ThumbnailBuilderJob : Runnable, RunnableJob {
                         if (exitVal == 0) {
                             thumbnailCounter.incrementAndGet()
                             val message = "Finished creating thumbnails in: " + startPoint!!.path
-                            Singleton.getMainFrame().setStatusMessage(message)
+                            Singleton.MainFrame.setStatusMessage(message)
                             log.debug(message)
                         } else {
                             log.error("Error returned running $runCommand")
@@ -121,7 +121,7 @@ internal class ThumbnailBuilderJob : Runnable, RunnableJob {
                     } catch (e: IOException) {
                         log.error("Error running: $runCommand")
                         e.printStackTrace()
-                        Singleton.getMainFrame().setStatusMessage("Error creating thumbnails " + e.message)
+                        Singleton.MainFrame.setStatusMessage("Error creating thumbnails " + e.message)
                         makeWithJava = true
                     } catch (e: InterruptedException) {
                         log.error("Mogrify process interupted")
@@ -141,7 +141,7 @@ internal class ThumbnailBuilderJob : Runnable, RunnableJob {
                             while (it.hasNext() && status != RunStatus.STATUS_CANCEL_REQUESTED) {
                                 val file = it.next()
                                 if (!file!!.isDirectory && file.exists() && file.canRead()) { // file must exist and be readable to make thumbnail
-                                    if (file.name.matches(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_IMAGEREGEX))) { // only try to make thumbnails of files that match the image file pattern.
+                                    if (file.name.matches(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_IMAGEREGEX))) { // only try to make thumbnails of files that match the image file pattern.
                                         makeFrom.add(file.path)
                                         log.debug(file.path)
                                         val target = File(thumbsDir.path + File.separatorChar + file.name)
@@ -158,7 +158,7 @@ internal class ThumbnailBuilderJob : Runnable, RunnableJob {
                             }
                             if (creationCounter > 0) {
                                 val message = "Finished creating thumbnails (" + creationCounter + ") in: " + startPoint!!.path
-                                Singleton.getMainFrame().setStatusMessage(message)
+                                Singleton.MainFrame.setStatusMessage(message)
                             }
                         } catch (e: IOException) {
                             log.error("Thumbnail generation with thumbnailator library failed")
@@ -168,13 +168,13 @@ internal class ThumbnailBuilderJob : Runnable, RunnableJob {
                 }
             } else {
                 val message = "No *.JPG files found in " + startPoint!!.path
-                Singleton.getMainFrame().setStatusMessage(message)
+                Singleton.MainFrame.setStatusMessage(message)
                 log.debug(message)
             }
         }
         val message = "Thumbnail Generation Complete."
-        Singleton.getMainFrame().setStatusMessage(message)
-        Singleton.getJobList().removeJob(this)
+        Singleton.MainFrame.setStatusMessage(message)
+        Singleton.JobList.removeJob(this)
     }
 
     /**

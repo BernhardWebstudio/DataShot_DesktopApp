@@ -456,7 +456,7 @@ class UnitTrayLabelTableModel : AbstractTableModel {
             labels!!.add(newLabel)
             this.fireTableDataChanged()
         } catch (e1: SaveFailedException) {
-            JOptionPane.showMessageDialog(Singleton.getMainFrame(),
+            JOptionPane.showMessageDialog(Singleton.MainFrame,
                     "Save of new record failed.\n" + e1.message,
                     "Save Failed",
                     JOptionPane.ERROR_MESSAGE)
@@ -481,21 +481,21 @@ class UnitTrayLabelTableModel : AbstractTableModel {
     override fun getValueAt(rowIndex: Int, columnIndex: Int): Any? {
         var returnvalue: String? = null
         when (columnIndex) {
-            0 -> returnvalue = labels!![rowIndex].getFamily()
-            1 -> returnvalue = labels!![rowIndex].getSubfamily()
-            2 -> returnvalue = labels!![rowIndex].getTribe()
-            3 -> returnvalue = labels!![rowIndex].getGenus()
-            4 -> returnvalue = labels!![rowIndex].getSpecificEpithet()
-            5 -> returnvalue = labels!![rowIndex].getSubspecificEpithet()
-            6 -> returnvalue = labels!![rowIndex].getInfraspecificRank()
-            7 -> returnvalue = labels!![rowIndex].getInfraspecificEpithet()
-            8 -> returnvalue = labels!![rowIndex].getAuthorship()
-            9 -> returnvalue = labels!![rowIndex].getUnNamedForm()
-            10 -> returnvalue = labels!![rowIndex].getDrawerNumber()
-            11 -> returnvalue = labels!![rowIndex].getCollection()
-            12 -> returnvalue = Integer.toString(labels!![rowIndex].getOrdinal())
-            COLUMN_TO_PRINT -> returnvalue = Integer.toString(labels!![rowIndex].getNumberToPrint())
-            COLUMN_PRINTED -> returnvalue = Integer.toString(labels!![rowIndex].getPrinted())
+            0 -> returnvalue = labels!![rowIndex].Family
+            1 -> returnvalue = labels!![rowIndex].Subfamily
+            2 -> returnvalue = labels!![rowIndex].Tribe
+            3 -> returnvalue = labels!![rowIndex].Genus
+            4 -> returnvalue = labels!![rowIndex].SpecificEpithet
+            5 -> returnvalue = labels!![rowIndex].SubspecificEpithet
+            6 -> returnvalue = labels!![rowIndex].InfraspecificRank
+            7 -> returnvalue = labels!![rowIndex].InfraspecificEpithet
+            8 -> returnvalue = labels!![rowIndex].Authorship
+            9 -> returnvalue = labels!![rowIndex].UnNamedForm
+            10 -> returnvalue = labels!![rowIndex].DrawerNumber
+            11 -> returnvalue = labels!![rowIndex].Collection
+            12 -> returnvalue = Integer.toString(labels!![rowIndex].Ordinal)
+            COLUMN_TO_PRINT -> returnvalue = Integer.toString(labels!![rowIndex].NumberToPrint)
+            COLUMN_PRINTED -> returnvalue = Integer.toString(labels!![rowIndex].Printed)
         }
         return returnvalue
     }
@@ -569,7 +569,7 @@ class UnitTrayLabelTableModel : AbstractTableModel {
             uls.attachDirty(labels!![rowIndex])
         } catch (e: SaveFailedException) {
             log.error(e)
-            JOptionPane.showMessageDialog(Singleton.getMainFrame(),
+            JOptionPane.showMessageDialog(Singleton.MainFrame,
                     "Save failed for a unit tray label." + "\n" + e.message,
                     "Save Failed",
                     JOptionPane.ERROR_MESSAGE)

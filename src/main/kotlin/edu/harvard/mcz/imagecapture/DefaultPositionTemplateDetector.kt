@@ -47,7 +47,7 @@ class DefaultPositionTemplateDetector : PositionTemplateDetector {
 
     @Throws(UnreadableFileException::class)
     override fun detectTemplateForImage(scannableFile: CandidateImageFile): String? {
-        return detectTemplateForImage(scannableFile.getFile(), scannableFile)
+        return detectTemplateForImage(scannableFile.File, scannableFile)
     }
 
     @Throws(UnreadableFileException::class)
@@ -60,32 +60,32 @@ class DefaultPositionTemplateDetector : PositionTemplateDetector {
         if (scannableFile == null) {
             scannableFile = CandidateImageFile(anImageFile, PositionTemplate())
         }
-        val templates: MutableList<String?> = PositionTemplate.Companion.getTemplateIds()
+        val templates: MutableList<String?> = PositionTemplate.Companion.TemplateIds
         // iterate through templates and check until the first template where a barcode is found
         val i = templates.listIterator()
         var found = false
         while (i.hasNext() && !found) {
             try { // get the next template from the list
                 val template = PositionTemplate(i.next()!!)
-                log!!.debug("Testing template: " + template.getTemplateId())
-                if (template.getTemplateId() == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // skip, this is the default result if no other is found.
+                log!!.debug("Testing template: " + template.TemplateId)
+                if (template.TemplateId == PositionTemplate.Companion.TEMPLATE_NO_COMPONENT_PARTS) { // skip, this is the default result if no other is found.
                 } else { // Check to see if the barcode is in the part of the template
 // defined by getBarcodeULPosition and getBarcodeSize.
                     val text: String = scannableFile.getBarcodeText(template)
-                    log.debug("Found:[" + text + "] status=" + scannableFile.getCatalogNumberBarcodeStatus())
-                    if (scannableFile.getCatalogNumberBarcodeStatus() == CandidateImageFile.Companion.RESULT_BARCODE_SCANNED) { // RESULT_BARCODE_SCANNED is only returned if the reader read a QR code barcode inside
+                    log.debug("Found:[" + text + "] status=" + scannableFile.CatalogNumberBarcodeStatus)
+                    if (scannableFile.CatalogNumberBarcodeStatus == CandidateImageFile.Companion.RESULT_BARCODE_SCANNED) { // RESULT_BARCODE_SCANNED is only returned if the reader read a QR code barcode inside
 // the area defined by the template for containing the barcode.
 // If we got here, we found a barcode in the expected place and know which template
 // to return.
                         found = true
-                        log.debug("Match to:" + template.getTemplateId())
-                        result = template.getTemplateId()
+                        log.debug("Match to:" + template.TemplateId)
+                        result = template.TemplateId
                     }
                 }
             } catch (e: NoSuchTemplateException) { // Ending up here means a serious error in PositionTemplate
 // as the list of position templates returned by getTemplates() includes
 // an entry that isn't recognized as a valid template.
-                log!!.fatal("Fatal error.  PositionTemplate.getTemplates() includes an item that isn't a valid template.")
+                log!!.fatal("Fatal error.  PositionTemplate.Templates includes an item that isn't a valid template.")
                 log.trace(e)
                 ImageCaptureApp.exit(ImageCaptureApp.EXIT_ERROR)
             }

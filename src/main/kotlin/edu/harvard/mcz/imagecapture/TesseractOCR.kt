@@ -41,7 +41,7 @@ import java.nio.charset.StandardCharsets
  * try {
  * TesseractOCR t = new TesseractOCR();
  * t.setTarget("filenameToOCR.tif");
- * output = t.getOCRText();
+ * output = t.OCRText;
  * } catch (OCRReadException e) {
  * // handle exception
  * }
@@ -101,27 +101,27 @@ class TesseractOCR : OCR {
         get() {
             var result = StringBuffer()
             var resultReader: BufferedReader? = null
-            log!!.debug("in TesseractOCR.getOCRText() 1")
+            log!!.debug("in TesseractOCR.OCRText 1")
             try {
-                log.debug("in TesseractOCR.getOCRText() 2")
-                val r = Runtime.getRuntime()
-                log.debug("in TesseractOCR.getOCRText() 3")
+                log.debug("in TesseractOCR.OCRText 2")
+                val r = Runtime.Runtime
+                log.debug("in TesseractOCR.OCRText 3")
                 // Run tesseract to OCR the target file.
-                val runCommand: String = (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_TESSERACT_EXECUTABLE)
+                val runCommand: String = (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_TESSERACT_EXECUTABLE)
                         + target + " " + tempFileBase + " " + language)
-                log.debug("in TesseractOCR.getOCRText() 4")
+                log.debug("in TesseractOCR.OCRText 4")
                 val proc = r!!.exec(runCommand)
-                log.debug("in TesseractOCR.getOCRText() 5")
+                log.debug("in TesseractOCR.OCRText 5")
                 println(runCommand)
-                log.debug("in TesseractOCR.getOCRText() 6 runCommand is $runCommand")
+                log.debug("in TesseractOCR.OCRText 6 runCommand is $runCommand")
                 // Create and start a reader for the error stream
                 val errorReader = StreamReader(proc!!.errorStream, "ERROR")
                 errorReader.run()
-                log.debug("in TesseractOCR.getOCRText() 7")
+                log.debug("in TesseractOCR.OCRText 7")
                 // run the process and wait for the exit value
                 val exitVal = proc.waitFor()
                 println("Tesseract Exit Value: $exitVal")
-                log.debug("in TesseractOCR.getOCRText() 8 exitVal is $exitVal")
+                log.debug("in TesseractOCR.OCRText 8 exitVal is $exitVal")
                 if (exitVal == 0) {
                     resultReader = BufferedReader(
                             InputStreamReader(
@@ -137,7 +137,7 @@ class TesseractOCR : OCR {
                 } else {
                     throw OCRReadException("OCR process failed (exit value>0).")
                 }
-                log.debug("in TesseractOCR.getOCRText() 9")
+                log.debug("in TesseractOCR.OCRText 9")
                 if (result.length > 0) {
                     val resString = result.toString()
                     // $ is returned by tesseract to indicate italics
@@ -161,7 +161,7 @@ class TesseractOCR : OCR {
                     }
                 }
             }
-            log.debug("in TesseractOCR.getOCRText() 10 result is $result")
+            log.debug("in TesseractOCR.OCRText 10 result is $result")
             log.debug(result.toString())
             return result.toString()
         }

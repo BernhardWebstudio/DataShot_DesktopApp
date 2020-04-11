@@ -138,8 +138,8 @@ object ImageCaptureApp {
     fun main(args: Array<String>) {
         try {
             UIManager.setLookAndFeel( // Use cross platform if native uses space on forms much too inefficiently
-// UIManager.getCrossPlatformLookAndFeelClassName());
-                    UIManager.getSystemLookAndFeelClassName())
+// UIManager.CrossPlatformLookAndFeelClassName);
+                    UIManager.SystemLookAndFeelClassName)
         } catch (e: UnsupportedLookAndFeelException) {
             log!!.error(e)
         } catch (e: ClassNotFoundException) {
@@ -149,7 +149,7 @@ object ImageCaptureApp {
         } catch (e: IllegalAccessException) {
             log!!.error(e)
         }
-        log!!.debug(UIManager.getLookAndFeel().getID())
+        log!!.debug(UIManager.LookAndFeel.ID)
         println("Starting $APP_NAME $appVersion")
         println(APP_COPYRIGHT)
         println(APP_LICENSE)
@@ -162,12 +162,12 @@ object ImageCaptureApp {
         Singleton.unsetCurrentUser()
         log.debug("User interface started")
         // Set up a barcode (text read from barcode label for pin) matcher/builder
-        if (Singleton.getProperties().getProperties()
+        if (Singleton.Properties.Properties
                         .getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION) == ImageCaptureProperties.Companion.COLLECTION_MCZENT) { // ** Configured for the MCZ Entomology Collection, use MCZ assumptions.
             val barcodeTextBuilderMatcher = MCZENTBarcode()
             Singleton.setBarcodeBuilder(barcodeTextBuilderMatcher)
             Singleton.setBarcodeMatcher(barcodeTextBuilderMatcher)
-        } else if (Singleton.getProperties().getProperties()
+        } else if (Singleton.Properties.Properties
                         .getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION) == ImageCaptureProperties.Companion.COLLECTION_ETHZENT) { // ** Configured for the ETHZ Entomology Collection, use MCZ assumptions.
             val barcodeTextBuilderMatcher = ETHZBarcode()
             Singleton.setBarcodeBuilder(barcodeTextBuilderMatcher)
@@ -179,7 +179,7 @@ object ImageCaptureApp {
         // Force a login dialog by connecting to obtain record count;
         val sls = SpecimenLifeCycle()
         try {
-            Singleton.getMainFrame().setCount(sls.findSpecimenCountThrows())
+            Singleton.MainFrame.setCount(sls.findSpecimenCountThrows())
             doStartUp()
         } catch (e: ConnectionException) {
             log.error(e.message)
@@ -209,7 +209,7 @@ object ImageCaptureApp {
          * connection.start(); while (true) { Message m = subscriber.receive(1); if (m
          * != null) { if (m instanceof TextMessage) { TextMessage message =
          * (TextMessage) m; String originator = message.getStringProperty("Originator");
-         * String text = message.getText(); System.out.println("Message: " + originator
+         * String text = message.Text; System.out.println("Message: " + originator
          * + ": " + text); } else { break; } } } } catch (NamingException e) { // TODO
          * Auto-generated catch block e.printStackTrace(); } catch (JMSException e) { //
          * TODO Auto-generated catch block e.printStackTrace(); } } }
@@ -235,9 +235,9 @@ object ImageCaptureApp {
      * Carry out actions to set user interface into nobody logged in yet state.
      */
     fun doStartUpNot() {
-        Singleton.getMainFrame().setStatusMessage("Select File/Change User to login.")
-        Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
-        Singleton.getMainFrame().setState(MainFrame.Companion.STATE_RESET)
+        Singleton.MainFrame.setStatusMessage("Select File/Change User to login.")
+        Singleton.MainFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+        Singleton.MainFrame.setState(MainFrame.Companion.STATE_RESET)
     }
 
     /**
@@ -251,9 +251,9 @@ object ImageCaptureApp {
             log!!.error(e.message, e)
             val allowed: String = AllowedVersionLifeCycle.Companion.listAllowedVersions()
             if (allowed == null || allowed.trim { it <= ' ' }.length == 0) {
-                Singleton.getMainFrame()
+                Singleton.MainFrame
                         .setStatusMessage("Database does not support this version, schema update needed.")
-                JOptionPane.showMessageDialog(Singleton.getMainFrame(),
+                JOptionPane.showMessageDialog(Singleton.MainFrame,
                         "The database does not support" + APP_NAME + " version " + APP_VERSION
                                 + ".  A database schema update to version 1.3 is required.",
                         "Schema Update Required", JOptionPane.OK_OPTION)
@@ -263,12 +263,12 @@ object ImageCaptureApp {
             }
         }
         if (isCurrentAllowed) {
-            Singleton.getMainFrame().setStatusMessage("$APP_VERSION OK")
+            Singleton.MainFrame.setStatusMessage("$APP_VERSION OK")
         } else {
             val allowed: String = AllowedVersionLifeCycle.Companion.listAllowedVersions()
-            Singleton.getMainFrame()
+            Singleton.MainFrame
                     .setStatusMessage("Database does not support version, update needed.")
-            val response: Int = JOptionPane.showConfirmDialog(Singleton.getMainFrame(),
+            val response: Int = JOptionPane.showConfirmDialog(Singleton.MainFrame,
                     "The database does not support" + APP_NAME + " version " + APP_VERSION
                             + ".  A software (or database) update from " + allowed + " is required. "
                             + "Are you ready to try the upgrade of the database? Make sure no one else will need the old version.",
@@ -279,10 +279,10 @@ object ImageCaptureApp {
             if (response == JOptionPane.YES_OPTION) { // try to upgrade the database scheme
                 try {
                     AllowedVersionLifeCycle.Companion.upgrade()
-                    Singleton.getMainFrame().setStatusMessage("DB Upgrade OK")
+                    Singleton.MainFrame.setStatusMessage("DB Upgrade OK")
                 } catch (e: Exception) {
                     log.error("Upgrade failed", e)
-                    JOptionPane.showMessageDialog(Singleton.getMainFrame(),
+                    JOptionPane.showMessageDialog(Singleton.MainFrame,
                             "Upgrade failed with error: " + e.message, "DB Upgrade failed.",
                             JOptionPane.ERROR_MESSAGE)
                 }
@@ -292,8 +292,8 @@ object ImageCaptureApp {
         // Setup to store a list of running RunnableJobs.
         Singleton.setJobList(RunnableJobTableModel())
         log!!.debug("Set runnable job table.")
-        Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
-        Singleton.getMainFrame().setState(MainFrame.Companion.STATE_RUNNING)
+        Singleton.MainFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+        Singleton.MainFrame.setState(MainFrame.Companion.STATE_RUNNING)
     }
 
     /**
@@ -301,7 +301,7 @@ object ImageCaptureApp {
      */
     fun cleanUp() {
         try {
-            Singleton.getProperties().saveProperties()
+            Singleton.Properties.saveProperties()
         } catch (e: Exception) {
             println("Properties file save failed.  " + e.localizedMessage)
         }

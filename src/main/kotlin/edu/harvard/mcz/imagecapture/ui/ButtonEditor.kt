@@ -23,11 +23,7 @@
 package edu.harvard.mcz.imagecapture.ui
 
 
-import edu.harvard.mcz.imagecapture.PositionTemplateEditor
-import edu.harvard.mcz.imagecapture.Singleton
-import edu.harvard.mcz.imagecapture.SpecimenBrowser
-import edu.harvard.mcz.imagecapture.SpecimenController
-import edu.harvard.mcz.imagecapture.UserListBrowser
+import edu.harvard.mcz.imagecapture.*
 import edu.harvard.mcz.imagecapture.entity.Specimen
 import edu.harvard.mcz.imagecapture.entity.SpecimenPart
 import edu.harvard.mcz.imagecapture.entity.Users
@@ -529,16 +525,16 @@ class ButtonEditor : AbstractCellEditor, TableCellEditor, ActionListener {
      * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
      */
     override fun actionPerformed(e: ActionEvent) { // Action might not be event_button_pressed on all systems.
-        log.debug("Button event actionCommand: " + e.getActionCommand())
-        if (e.getActionCommand() == EVENT_PRESSED) { // Event is a click on the cell
+        log.debug("Button event actionCommand: " + e.ActionCommand)
+        if (e.ActionCommand == EVENT_PRESSED) { // Event is a click on the cell
 // Identify the row that was clicked on.
-            val table: JTable = (e.getSource() as JButton).getParent() as JTable
-            log.debug(e.getSource())
+            val table: JTable = (e.Source as JButton).Parent as JTable
+            log.debug(e.Source)
             log.debug(table)
-            val row: Int = table.getEditingRow()
+            val row: Int = table.EditingRow
             // Stop editing - note, we need to have gotten e.getSource.getParent and getEditingRow first.
             fireEditingStopped() //Make the renderer reappear.
-            Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
+            Singleton.MainFrame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR))
             when (formToOpen) {
                 OPEN_SPECIMEN_DETAILS ->  // Load the selected specimen record from its ID (the data value behind the button).
 //SpecimenLifeCycle sls = new SpecimenLifeCycle();
@@ -546,26 +542,26 @@ class ButtonEditor : AbstractCellEditor, TableCellEditor, ActionListener {
 //if (specimen!=null) {
                     if (cellEditorValue != null) { // a specimen with this ID exists, bring up the details editor.
                         try { //SpecimenControler sc = new SpecimenControler(specimen);
-                            if ((cellEditorValue as Specimen?).getSpecimenId() != null) {
+                            if ((cellEditorValue as Specimen?).SpecimenId != null) {
                                 if ((cellEditorValue as Specimen?).isStateDone()) { // Specimens in state_done are no longer editable
                                     JOptionPane.showMessageDialog(
-                                            Singleton.getMainFrame(),
+                                            Singleton.MainFrame,
                                             "This Specimen record has been migrated and can no longer be edited here [" +
-                                                    (cellEditorValue as Specimen?).getLoadFlags() + "].\nSee: http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" +
-                                                    (cellEditorValue as Specimen?).getCatNum(),
+                                                    (cellEditorValue as Specimen?).LoadFlags + "].\nSee: http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" +
+                                                    (cellEditorValue as Specimen?).CatNum,
                                             "Migrated Specimen", JOptionPane.WARNING_MESSAGE)
                                 } else { // Specimen is still editable
                                     if (table != null) { // Pass the specimen object for the row, the table model, and the row number on to the specimen controler.
                                         try {
-                                            val sc = SpecimenController(cellEditorValue as Specimen?, table.getModel() as SpecimenListTableModel, table, row)
-                                            if (table.getParent().getParent().getParent().getParent().javaClass == SpecimenBrowser::class.java) {
-                                                sc.addListener(table.getParent() as DataChangeListener)
+                                            val sc = SpecimenController(cellEditorValue as Specimen?, table.Model as SpecimenListTableModel, table, row)
+                                            if (table.Parent.Parent.Parent.Parent.javaClass == SpecimenBrowser::class.java) {
+                                                sc.addListener(table.Parent as DataChangeListener)
                                             } else {
                                                 var x: Component = table
                                                 var done = false
                                                 while (!done) {
-                                                    log.debug(x.getParent())
-                                                    x = x.getParent()
+                                                    log.debug(x.Parent)
+                                                    x = x.Parent
                                                     if (x.javaClass == SpecimenBrowser::class.java) {
                                                         sc.addListener(x as DataChangeListener)
                                                         done = true
@@ -579,14 +575,14 @@ class ButtonEditor : AbstractCellEditor, TableCellEditor, ActionListener {
                                             sc.displayInEditor()
                                         }
                                     } else {
-                                        log.debug(e.getSource())
+                                        log.debug(e.Source)
                                         //SpecimenControler sc = new SpecimenControler((Specimen)targetId);
 //sc.displayInEditor();
                                     }
                                 }
                             } else {
                                 log.debug("User clicked on table row containing a new Specimen()")
-                                JOptionPane.showMessageDialog(Singleton.getMainFrame(), "No Specimen for this image", "Load Specimen Failed", JOptionPane.WARNING_MESSAGE)
+                                JOptionPane.showMessageDialog(Singleton.MainFrame, "No Specimen for this image", "Load Specimen Failed", JOptionPane.WARNING_MESSAGE)
                             }
                         } catch (e1: NoSuchRecordException) {
                             log.error("Tested for specimen!=null, but SpecimenControler threw null specimen exception")
@@ -595,7 +591,7 @@ class ButtonEditor : AbstractCellEditor, TableCellEditor, ActionListener {
                     } else {
                         log.debug("No matches found to specimen id=" + cellEditorValue)
                         // TODO: Create new specimen record and bring up dialog
-                        JOptionPane.showMessageDialog(Singleton.getMainFrame(), "No specimen record.")
+                        JOptionPane.showMessageDialog(Singleton.MainFrame, "No specimen record.")
                     }
                 OPEN_TEMPLATE ->  // Load the selected specimen record from its ID (the data value behind the button).
                     try { // a template with this targetID exists, display it.
@@ -608,12 +604,12 @@ class ButtonEditor : AbstractCellEditor, TableCellEditor, ActionListener {
                 OPEN_USER -> {
                     //TODO: tie to user
                     log.debug("Open user")
-                    (parentComponent as UserListBrowser?).getEditUserPanel().setUser(cellEditorValue as Users?)
+                    (parentComponent as UserListBrowser?).EditUserPanel.setUser(cellEditorValue as Users?)
                 }
                 OPEN_SPECIMEN_VERBATIM -> {
                     log.debug("Open Verbatim Transcription")
                     val sls = SpecimenLifeCycle()
-                    val toTranscribe: MutableList<Specimen?> = sls.findForVerbatim((cellEditorValue as GenusSpeciesCount?).getGenus(), (cellEditorValue as GenusSpeciesCount?).getSpecificEpithet(), WorkFlowStatus.STAGE_1)
+                    val toTranscribe: MutableList<Specimen?> = sls.findForVerbatim((cellEditorValue as GenusSpeciesCount?).Genus, (cellEditorValue as GenusSpeciesCount?).SpecificEpithet, WorkFlowStatus.STAGE_1)
                     log.debug(toTranscribe.size)
                     val stm = SpecimenListTableModel(toTranscribe)
                     val stable = JTable()
@@ -630,7 +626,7 @@ class ButtonEditor : AbstractCellEditor, TableCellEditor, ActionListener {
                 OPEN_VERBATIM_CLASSIFY -> {
                     log.debug("Open Verbatim Classify dialog")
                     try {
-                        val dialog = VerbatimClassifyDialog(table.getModel().getValueAt(row, 0) as VerbatimCount)
+                        val dialog = VerbatimClassifyDialog(table.Model.getValueAt(row, 0) as VerbatimCount)
                         dialog.setVisible(true)
                     } catch (e1: ClassCastException) {
                         log.error(e1.message, e1)
@@ -638,14 +634,14 @@ class ButtonEditor : AbstractCellEditor, TableCellEditor, ActionListener {
                 }
                 ACTION_CANCEL_JOB -> {
                     log.debug("Action Cancel requested on job " + cellEditorValue)
-                    Singleton.getJobList().getJobAt(cellEditorValue as Int?).cancel()
+                    Singleton.JobList.getJobAt(cellEditorValue as Int?).cancel()
                 }
                 OPEN_SPECIMENPARTATTRIBUTES -> {
                     val attrDialog = SpecimenPartAttributeDialog(cellEditorValue as SpecimenPart?)
                     attrDialog.setVisible(true)
                 }
             }
-            Singleton.getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
+            Singleton.MainFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR))
             System.gc()
         }
     }

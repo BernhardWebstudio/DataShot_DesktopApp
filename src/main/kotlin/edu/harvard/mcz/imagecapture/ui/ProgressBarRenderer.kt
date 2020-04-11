@@ -435,7 +435,7 @@ class ProgressBarRenderer : TableCellRenderer {
                 log.error(e.message)
             }
         }
-        log.debug(progressBar.getValue())
+        log.debug(progressBar.Value)
         return progressBar
     }
 

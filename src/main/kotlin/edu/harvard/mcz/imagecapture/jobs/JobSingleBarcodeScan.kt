@@ -110,30 +110,30 @@ class JobSingleBarcodeScan : AbstractFileScanJob {
      */
     fun start() {
         startTime = Date()
-        Singleton.getJobList().addJob(this)
+        Singleton.JobList.addJob(this)
         setPercentComplete(0)
-        Singleton.getMainFrame().setStatusMessage("Selecting file to check.")
+        Singleton.MainFrame.setStatusMessage("Selecting file to check.")
         // ask for the file to parse
-        val fileToCheck: File = FileUtility.askForImageFile(File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH)))
+        val fileToCheck: File = FileUtility.askForImageFile(File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTPATH)))
         setPercentComplete(10)
-        Singleton.getMainFrame().setStatusMessage("Scanning file for barcode.")
+        Singleton.MainFrame.setStatusMessage("Scanning file for barcode.")
         if (fileToCheck != null) {
-            Singleton.getProperties().getProperties().setProperty(ImageCaptureProperties.Companion.KEY_LASTPATH, fileToCheck.path)
+            Singleton.Properties.Properties.setProperty(ImageCaptureProperties.Companion.KEY_LASTPATH, fileToCheck.path)
             val filename = fileToCheck.name
             log!!.debug("Selected file $filename to scan for barcodes")
             val counter = Counter()
             val locks: Array<Lock?> = arrayOfNulls<ReentrantLock?>(1)
             checkFile(fileToCheck, counter, locks)
-            val errorReportDialog = RunnableJobReportDialog(Singleton.getMainFrame(), counter.toString(), counter.errors, "Preprocess Result")
+            val errorReportDialog = RunnableJobReportDialog(Singleton.MainFrame, counter.toString(), counter.errors, "Preprocess Result")
             errorReportDialog.setVisible(true)
         } else {
             log!!.error("No file selected from dialog.")
         }
         setPercentComplete(100)
-        Singleton.getMainFrame().setStatusMessage("")
+        Singleton.MainFrame.setStatusMessage("")
         val sls = SpecimenLifeCycle()
-        Singleton.getMainFrame().setCount(sls.findSpecimenCount())
-        Singleton.getJobList().removeJob(this)
+        Singleton.MainFrame.setCount(sls.findSpecimenCount())
+        Singleton.JobList.removeJob(this)
     }
 
     /* (non-Javadoc)
@@ -155,7 +155,7 @@ class JobSingleBarcodeScan : AbstractFileScanJob {
     protected fun setPercentComplete(aPercentage: Int) { //set value
         percentComplete = aPercentage
         //notify listeners
-        Singleton.getMainFrame().notifyListener(percentComplete, this)
+        Singleton.MainFrame.notifyListener(percentComplete, this)
         for (listener in listeners) {
             listener.notifyListener(percentComplete, this)
         }

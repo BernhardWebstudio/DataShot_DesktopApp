@@ -65,9 +65,9 @@ class PositionTemplateTableModel : AbstractTableModel {
     override fun getValueAt(rowIndex: Int, columnIndex: Int): Any? {
         var returnvalue: Any? = null
         when (columnIndex) {
-            0 -> returnvalue = (templates!!.toTypedArray().get(rowIndex) as PositionTemplate).getTemplateId()
-            1 -> returnvalue = (templates!!.toTypedArray().get(rowIndex) as PositionTemplate).getTemplateId()
-            2 -> returnvalue = (templates!!.toTypedArray().get(rowIndex) as PositionTemplate).getName()
+            0 -> returnvalue = (templates!!.toTypedArray().get(rowIndex) as PositionTemplate).TemplateId
+            1 -> returnvalue = (templates!!.toTypedArray().get(rowIndex) as PositionTemplate).TemplateId
+            2 -> returnvalue = (templates!!.toTypedArray().get(rowIndex) as PositionTemplate).Name
         }
         return returnvalue
     }

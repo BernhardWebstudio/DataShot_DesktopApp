@@ -51,7 +51,7 @@ class TestOfTemplateDetection
             val template: String = detector.detectTemplateForImage(File(this.javaClass.getResource(AllTests.FILE_EMPTY).file))
             assertEquals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS, template)
         } catch (e: UnreadableFileException) {
-            fail("Threw unexpected UnreadableFileException.  " + e.getMessage())
+            fail("Threw unexpected UnreadableFileException.  " + e.Message)
         }
         // TODO: Test templates with example images here.
     }

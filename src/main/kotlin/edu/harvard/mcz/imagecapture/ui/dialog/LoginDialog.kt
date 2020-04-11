@@ -449,19 +449,19 @@ class LoginDialog : JDialog() {
         this.setContentPane(getJPanel())
         this.setTitle("DataShot Login Dialog: Configured For: " +
                 Singleton
-                        .getProperties()
-                        .getProperties()
+                        .Properties
+                        .Properties
                         .getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION))
         val iconFile = this.javaClass.getResource(
                 "/edu/harvard/mcz/imagecapture/resources/images/icon.png")
         try {
-            setIconImage(ImageIcon(iconFile).getImage())
+            setIconImage(ImageIcon(iconFile).Image)
         } catch (e: Exception) {
             log.error(e)
         }
         if (Singleton
-                        .getProperties()
-                        .getProperties()
+                        .Properties
+                        .Properties
                         .getProperty(ImageCaptureProperties.Companion.KEY_LOGIN_SHOW_ADVANCED)
                         .equals("false", ignoreCase = true)) {
             jPanelAdvanced.setVisible(false)
@@ -470,10 +470,10 @@ class LoginDialog : JDialog() {
             jPanelAdvanced.setVisible(true)
             this.setSize(Dimension(650, 355))
         }
-        this.getRootPane().setDefaultButton(jButtonLogin)
-        val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize()
-        this.setLocation((screenSize.width - this.getWidth()) / 2,
-                (screenSize.height - this.getHeight()) / 2)
+        this.RootPane.setDefaultButton(jButtonLogin)
+        val screenSize: Dimension = Toolkit.DefaultToolkit.ScreenSize
+        this.setLocation((screenSize.width - this.Width) / 2,
+                (screenSize.height - this.Height) / 2)
         //    this.pack();
     }
 
@@ -489,7 +489,7 @@ class LoginDialog : JDialog() {
             val keyImageLabel = JLabel()
             val iconFile = this.javaClass.getResource(
                     "/edu/harvard/mcz/imagecapture/resources/images/key_small.png")
-            try { // this.setIconImage(new ImageIcon(iconFile).getImage());
+            try { // this.setIconImage(new ImageIcon(iconFile).Image);
                 keyImageLabel.setIcon(ImageIcon(iconFile))
             } catch (e: Exception) {
                 println("Can't open icon file: $iconFile")
@@ -497,9 +497,9 @@ class LoginDialog : JDialog() {
             // row
             jPanel.add(keyImageLabel)
             val loginPrompt = JLabel("Login & connect to database")
-            val f: Font = loginPrompt.getFont()
+            val f: Font = loginPrompt.Font
             // bold
-            loginPrompt.setFont(f.deriveFont(f.getStyle() or Font.BOLD))
+            loginPrompt.setFont(f.deriveFont(f.Style or Font.BOLD))
             jPanel.add(loginPrompt)
             // row
             val emailLabel = JLabel("E-Mail/Username")
@@ -638,17 +638,17 @@ class LoginDialog : JDialog() {
         get() = hashPassword(jPasswordFieldUser)
 
     val username: String?
-        get() = jTextFieldEmail.getText()
+        get() = jTextFieldEmail.Text
 
     var dBUserName: String?
-        get() = jTextFieldDBUsername.getText()
+        get() = jTextFieldDBUsername.Text
         set(aDBSchemaName) {
             jTextFieldDBUsername.setText(aDBSchemaName)
         }
 
     // Force advanced panel to open if no database password is stored.
     var dBPassword: String?
-        get() = String(jPasswordFieldDB.getPassword())
+        get() = String(jPasswordFieldDB.Password)
         set(aDBPassword) {
             jPasswordFieldDB.setText(aDBPassword)
             // Force advanced panel to open if no database password is stored.
@@ -661,7 +661,7 @@ class LoginDialog : JDialog() {
      * @param textFieldDriver the jTextFieldDriver to set
      */
     var driver: String?
-        get() = jTextFieldDriver.getText()
+        get() = jTextFieldDriver.Text
         set(textFieldDriver) {
             jTextFieldDriver.setText(textFieldDriver)
         }
@@ -670,7 +670,7 @@ class LoginDialog : JDialog() {
      * @param textFieldConnection the jTextFieldConnection to set
      */
     var connection: String?
-        get() = jTextFieldConnection.getText()
+        get() = jTextFieldConnection.Text
         set(textFieldConnection) {
             jTextFieldConnection.setText(textFieldConnection)
         }
@@ -679,7 +679,7 @@ class LoginDialog : JDialog() {
      * @param textFieldDialect the jTextFieldDialect to set
      */
     var dialect: String?
-        get() = jTextFieldDialect.getText()
+        get() = jTextFieldDialect.Text
         set(textFieldDialect) {
             jTextFieldDialect.setText(textFieldDialect)
         }
@@ -840,7 +840,7 @@ class LoginDialog : JDialog() {
         private const val serialVersionUID = -2016769537635603794L
         private val log: Log = LogFactory.getLog(LoginDialog::class.java)
         fun hashPassword(ajPasswordField: JPasswordField): String? {
-            return HashUtility.getSHA1Hash(String(ajPasswordField.getPassword()))
+            return HashUtility.getSHA1Hash(String(ajPasswordField.Password))
         }
     }
 

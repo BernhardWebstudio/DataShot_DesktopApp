@@ -471,10 +471,10 @@ class SpecimenPartsTableModel : AbstractDeleteableTableModel {
         }
         var result: Any? = null
         when (columnIndex) {
-            0 -> result = (specimenParts!!.toTypedArray().get(rowIndex) as SpecimenPart).getPartName()
-            1 -> result = (specimenParts!!.toTypedArray().get(rowIndex) as SpecimenPart).getPreserveMethod()
-            2 -> result = (specimenParts!!.toTypedArray().get(rowIndex) as SpecimenPart).getLotCount()
-            3 -> result = (specimenParts!!.toTypedArray().get(rowIndex) as SpecimenPart).getPartAttributeValuesConcat()
+            0 -> result = (specimenParts!!.toTypedArray().get(rowIndex) as SpecimenPart).PartName
+            1 -> result = (specimenParts!!.toTypedArray().get(rowIndex) as SpecimenPart).PreserveMethod
+            2 -> result = (specimenParts!!.toTypedArray().get(rowIndex) as SpecimenPart).LotCount
+            3 -> result = (specimenParts!!.toTypedArray().get(rowIndex) as SpecimenPart).PartAttributeValuesConcat
             4 -> result = specimenParts!!.toTypedArray().get(rowIndex)
             else -> log.warn("Undefined column with index $columnIndex")
         }

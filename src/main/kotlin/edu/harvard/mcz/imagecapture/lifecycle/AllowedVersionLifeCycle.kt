@@ -88,8 +88,8 @@ class AllowedVersionLifeCycle {
                 val allowedVersions: MutableList<AllowedVersion?>? = als.findAll()
                 val i: MutableIterator<AllowedVersion?> = allowedVersions!!.iterator()
                 while (i.hasNext()) {
-                    val version: String = i.next().getVersion()
-                    val currentVersion: String = ImageCaptureApp.getAppVersion()
+                    val version: String = i.next().Version
+                    val currentVersion: String = ImageCaptureApp.AppVersion
                     if (version != null && currentVersion != null && version.length <= currentVersion.length &&
                             currentVersion.startsWith(version)) {
                         result = true
@@ -112,7 +112,7 @@ class AllowedVersionLifeCycle {
                 val i: MutableIterator<AllowedVersion?> = allowedVersions!!.iterator()
                 var separator = ""
                 while (i.hasNext()) {
-                    allowed.append(separator).append(i.next().getVersion())
+                    allowed.append(separator).append(i.next().Version)
                     separator = ", "
                 }
             } catch (e: Exception) {
@@ -127,11 +127,11 @@ class AllowedVersionLifeCycle {
         fun upgrade() { // Load the Configuration from hibernate.cfg.xml
 /*SessionFactoryImpl sessionFactory =
                 (SessionFactoryImpl) HibernateUtil.sessionFactory;
-        Map<String, Object> properties = sessionFactory.getProperties();
+        Map<String, Object> properties = sessionFactory.Properties;
         String url = (String) properties.get("connection.url");
         String username = (String) properties.get("connection.username");
         String password = (String) properties.get("connection.password");*/
-            val properties = HibernateUtil.getProperties()
+            val properties = HibernateUtil.Properties
             val url = properties.getProperty("hibernate.connection.url")
             val username = properties.getProperty("hibernate.connection.username")
             val password = properties.getProperty("hibernate.connection.username")

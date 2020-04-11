@@ -64,9 +64,9 @@ class UsersTableModel : AbstractTableModel {
         when (columnIndex) {
             0 -> result = users!![rowIndex]
             1 -> result = users!![rowIndex].username
-            2 -> result = users!![rowIndex].getFullname()
-            3 -> result = users!![rowIndex].getDescription()
-            4 -> result = users!![rowIndex].getRole()
+            2 -> result = users!![rowIndex].Fullname
+            3 -> result = users!![rowIndex].Description
+            4 -> result = users!![rowIndex].Role
         }
         return result
     }

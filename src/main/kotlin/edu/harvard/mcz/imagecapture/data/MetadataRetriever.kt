@@ -101,7 +101,7 @@ object MetadataRetriever {
                 override fun verify(comp: JComponent?): Boolean {
                     var returnValue = true
                     val textField: JTextField = comp as JTextField?
-                    val content: String = textField.getText()
+                    val content: String = textField.Text
                     if (content.length > getFieldLength(aTableClass, fieldname)) {
                         returnValue = false
                     } else {
@@ -128,7 +128,7 @@ object MetadataRetriever {
                 override fun verify(comp: JComponent?): Boolean {
                     var returnValue = true
                     val textField: JTextField = comp as JTextField?
-                    val content: String = textField.getText()
+                    val content: String = textField.Text
                     if (content.length > getFieldLength(aTableClass, fieldname)) {
                         returnValue = false
                     }

@@ -459,8 +459,8 @@ class GenusSpeciesCountTableModel : AbstractTableModel {
         var returnvalue: Any? = null
         when (columnIndex) {
             0 -> returnvalue = genusSpeciesCounts!![rowIndex]
-            1 -> returnvalue = genusSpeciesCounts!![rowIndex].getCount().toString()
-            2 -> returnvalue = genusSpeciesCounts!![rowIndex].getGenus() + " " + genusSpeciesCounts!![rowIndex].getSpecificEpithet()
+            1 -> returnvalue = genusSpeciesCounts!![rowIndex].Count.toString()
+            2 -> returnvalue = genusSpeciesCounts!![rowIndex].Genus + " " + genusSpeciesCounts!![rowIndex].SpecificEpithet
         }
         return returnvalue
     }

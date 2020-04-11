@@ -475,43 +475,43 @@ class GeoreferenceDialog : JDialog {
 
     private fun loadData() {
         lblErrorLabel.setText("")
-        textFieldDecimalLat.setText(georeference.getDecLatString())
-        textFieldDecimalLong.setText(georeference.getDecLongString())
-        log.debug("load geo data: lat: " + georeference.getDecLatString() +
-                ", long: " + georeference.getDecLongString())
-        if (georeference.getDatum() != "") {
-            cbDatum.setSelectedItem(georeference.getDatum())
+        textFieldDecimalLat.setText(georeference.DecLatString)
+        textFieldDecimalLong.setText(georeference.DecLongString)
+        log.debug("load geo data: lat: " + georeference.DecLatString +
+                ", long: " + georeference.DecLongString)
+        if (georeference.Datum != "") {
+            cbDatum.setSelectedItem(georeference.Datum)
         }
-        cbMethod.setSelectedItem(georeference.getGeorefmethod())
-        txtGPSAccuracy.setText(georeference.getGpsaccuracyString())
-        comboBoxOrigUnits.setSelectedItem(georeference.getOrigLatLongUnits())
-        txtLatDegrees.setText(georeference.getLatDegString())
-        txtLatDecMin.setText(georeference.getDecLatMinString())
-        txtLatMin.setText(georeference.getLatMinString())
-        txtLatSec.setText(georeference.getLatSecString())
-        cbLatDir.setSelectedItem(georeference.getLatDir())
-        txtLongDegrees.setText(georeference.getLongDegString())
-        txtLongDecMin.setText(georeference.getDecLongMinString())
-        txtLongMin.setText(georeference.getLongMinString())
-        txtLongSec.setText(georeference.getLongSecString())
-        cbLongDir.setSelectedItem(georeference.getLongDir())
-        txtErrorRadius.setText(georeference.getMaxErrorDistanceString())
-        comboBoxErrorUnits.setSelectedItem(georeference.getMaxErrorUnits())
-        textFieldDetBy.setText(georeference.getDeterminedByAgent())
+        cbMethod.setSelectedItem(georeference.Georefmethod)
+        txtGPSAccuracy.setText(georeference.GpsaccuracyString)
+        comboBoxOrigUnits.setSelectedItem(georeference.OrigLatLongUnits)
+        txtLatDegrees.setText(georeference.LatDegString)
+        txtLatDecMin.setText(georeference.DecLatMinString)
+        txtLatMin.setText(georeference.LatMinString)
+        txtLatSec.setText(georeference.LatSecString)
+        cbLatDir.setSelectedItem(georeference.LatDir)
+        txtLongDegrees.setText(georeference.LongDegString)
+        txtLongDecMin.setText(georeference.DecLongMinString)
+        txtLongMin.setText(georeference.LongMinString)
+        txtLongSec.setText(georeference.LongSecString)
+        cbLongDir.setSelectedItem(georeference.LongDir)
+        txtErrorRadius.setText(georeference.MaxErrorDistanceString)
+        comboBoxErrorUnits.setSelectedItem(georeference.MaxErrorUnits)
+        textFieldDetBy.setText(georeference.DeterminedByAgent)
         textDetDate.setValue(SimpleDateFormat("yyyy-MM-dd")
-                .format(georeference.getDeterminedDate()))
-        textRefSource.setText(georeference.getLatLongRefSource())
-        textFieldRemarks.setText(georeference.getLatLongRemarks())
+                .format(georeference.DeterminedDate))
+        textRefSource.setText(georeference.LatLongRefSource)
+        textFieldRemarks.setText(georeference.LatLongRemarks)
     }
 
     private fun setState() {
-        val acc: String = cbMethod.getSelectedItem().toString()
+        val acc: String = cbMethod.SelectedItem.toString()
         if (acc == "GPS") {
             txtGPSAccuracy.setEnabled(true)
         } else {
             txtGPSAccuracy.setEnabled(false)
         }
-        val state: String = comboBoxOrigUnits.getSelectedItem().toString()
+        val state: String = comboBoxOrigUnits.SelectedItem.toString()
         when (state) {
             "degrees dec. minutes" -> {
                 textFieldDecimalLat.setEnabled(false)
@@ -575,9 +575,9 @@ class GeoreferenceDialog : JDialog {
     private fun saveData(): Boolean {
         var result = true
         okButton.grabFocus()
-        if (textFieldDecimalLat.getText().length > 0) {
+        if (textFieldDecimalLat.Text.length > 0) {
             try {
-                georeference.setDecLat(BigDecimal.valueOf(textFieldDecimalLat.getText().toDouble()))
+                georeference.setDecLat(BigDecimal.valueOf(textFieldDecimalLat.Text.toDouble()))
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: Latitude number format")
                 result = false
@@ -585,9 +585,9 @@ class GeoreferenceDialog : JDialog {
         } else {
             georeference.setDecLat(null)
         }
-        if (textFieldDecimalLong.getText().length > 0) {
+        if (textFieldDecimalLong.Text.length > 0) {
             try {
-                georeference.setDecLong(BigDecimal.valueOf(textFieldDecimalLong.getText().toDouble()))
+                georeference.setDecLong(BigDecimal.valueOf(textFieldDecimalLong.Text.toDouble()))
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: Longitude number format")
                 result = false
@@ -595,121 +595,121 @@ class GeoreferenceDialog : JDialog {
         } else {
             georeference.setDecLong(null)
         }
-        if (cbDatum.getSelectedItem() != null) {
-            georeference.setDatum(cbDatum.getSelectedItem().toString())
+        if (cbDatum.SelectedItem != null) {
+            georeference.setDatum(cbDatum.SelectedItem.toString())
         }
-        if (cbMethod.getSelectedItem() != null) {
-            georeference.setGeorefmethod(cbMethod.getSelectedItem().toString())
+        if (cbMethod.SelectedItem != null) {
+            georeference.setGeorefmethod(cbMethod.SelectedItem.toString())
         }
-        if (txtGPSAccuracy.getText().length > 0) {
+        if (txtGPSAccuracy.Text.length > 0) {
             try {
                 georeference.setGpsaccuracy(
-                        BigDecimal.valueOf(txtGPSAccuracy.getText().toDouble()))
+                        BigDecimal.valueOf(txtGPSAccuracy.Text.toDouble()))
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: GPS Accuracy number format")
                 result = false
             }
         }
-        if (comboBoxOrigUnits.getSelectedItem() != null) {
+        if (comboBoxOrigUnits.SelectedItem != null) {
             georeference.setOrigLatLongUnits(
-                    comboBoxOrigUnits.getSelectedItem().toString())
+                    comboBoxOrigUnits.SelectedItem.toString())
         }
-        if (txtLatDegrees.getText().length > 0) {
+        if (txtLatDegrees.Text.length > 0) {
             try {
-                georeference.setLatDeg(txtLatDegrees.getText().toInt())
+                georeference.setLatDeg(txtLatDegrees.Text.toInt())
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: Lat Degrees number format")
                 result = false
             }
         }
-        if (txtLatDecMin.getText().length > 0) {
+        if (txtLatDecMin.Text.length > 0) {
             try {
                 georeference.setDecLatMin(
-                        BigDecimal.valueOf(txtLatDecMin.getText().toDouble()))
+                        BigDecimal.valueOf(txtLatDecMin.Text.toDouble()))
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: Lat Dec Min number format")
                 result = false
             }
         }
-        if (txtLatMin.getText().length > 0) {
+        if (txtLatMin.Text.length > 0) {
             try {
-                georeference.setLatMin(txtLatMin.getText().toInt())
+                georeference.setLatMin(txtLatMin.Text.toInt())
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: Lat Min number format")
                 result = false
             }
         }
-        if (txtLatSec.getText().length > 0) {
+        if (txtLatSec.Text.length > 0) {
             try {
                 georeference.setLatSec(
-                        BigDecimal.valueOf(txtLatSec.getText().toDouble()))
+                        BigDecimal.valueOf(txtLatSec.Text.toDouble()))
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: Lat Degrees number format")
                 result = false
             }
         }
-        if (cbLatDir.getSelectedItem() != null) {
-            georeference.setLatDir(cbLatDir.getSelectedItem().toString())
+        if (cbLatDir.SelectedItem != null) {
+            georeference.setLatDir(cbLatDir.SelectedItem.toString())
         }
-        if (txtLongDegrees.getText().length > 0) {
+        if (txtLongDegrees.Text.length > 0) {
             try {
-                georeference.setLongDeg(txtLongDegrees.getText().toInt())
+                georeference.setLongDeg(txtLongDegrees.Text.toInt())
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: Long Degrees number format")
                 result = false
             }
         }
-        if (txtLongDecMin.getText().length > 0) {
+        if (txtLongDecMin.Text.length > 0) {
             try {
                 georeference.setDecLongMin(
-                        BigDecimal.valueOf(txtLongDecMin.getText().toDouble()))
+                        BigDecimal.valueOf(txtLongDecMin.Text.toDouble()))
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: Long Dec Min number format")
                 result = false
             }
         }
-        if (txtLongMin.getText().length > 0) {
+        if (txtLongMin.Text.length > 0) {
             try {
-                georeference.setLongMin(txtLongMin.getText().toInt())
+                georeference.setLongMin(txtLongMin.Text.toInt())
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: Long Min number format")
                 result = false
             }
         }
-        if (txtLongSec.getText().length > 0) {
+        if (txtLongSec.Text.length > 0) {
             try {
                 georeference.setLongSec(
-                        BigDecimal.valueOf(txtLongSec.getText().toDouble()))
+                        BigDecimal.valueOf(txtLongSec.Text.toDouble()))
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: Long Degrees number format")
                 result = false
             }
         }
-        if (cbLongDir.getSelectedItem() != null) {
-            georeference.setLongDir(cbLongDir.getSelectedItem().toString())
+        if (cbLongDir.SelectedItem != null) {
+            georeference.setLongDir(cbLongDir.SelectedItem.toString())
         }
-        if (txtErrorRadius.getText().length > 0) {
+        if (txtErrorRadius.Text.length > 0) {
             try {
-                georeference.setMaxErrorDistance(txtErrorRadius.getText().toInt())
+                georeference.setMaxErrorDistance(txtErrorRadius.Text.toInt())
             } catch (e: NumberFormatException) {
                 lblErrorLabel.setText("Error: Error radius number format")
                 result = false
             }
         }
-        if (comboBoxErrorUnits.getSelectedItem() != null) {
+        if (comboBoxErrorUnits.SelectedItem != null) {
             georeference.setMaxErrorUnits(
-                    comboBoxErrorUnits.getSelectedItem().toString())
+                    comboBoxErrorUnits.SelectedItem.toString())
         }
-        georeference.setDeterminedByAgent(textFieldDetBy.getText())
+        georeference.setDeterminedByAgent(textFieldDetBy.Text)
         try {
             georeference.setDeterminedDate(
-                    SimpleDateFormat("yyyy-MM-dd").parse(textDetDate.getText()))
+                    SimpleDateFormat("yyyy-MM-dd").parse(textDetDate.Text))
         } catch (e: ParseException) {
             lblErrorLabel.setText("Error: Error date determined format")
             result = false
         }
-        georeference.setLatLongRefSource(textRefSource.getText())
-        georeference.setLatLongRemarks(textFieldRemarks.getText())
+        georeference.setLatLongRefSource(textRefSource.Text)
+        georeference.setLatLongRemarks(textFieldRemarks.Text)
         return result
     }
 
@@ -736,7 +736,7 @@ class GeoreferenceDialog : JDialog {
         val lblMethod = JLabel("Method")
         lblMethod.setHorizontalAlignment(SwingConstants.RIGHT)
         contentPanel.add(lblMethod)
-        val methodModel: ComboBoxModel<String?> = ListComboBoxModel<String?>(LatLong.Companion.getGeorefMethodValues())
+        val methodModel: ComboBoxModel<String?> = ListComboBoxModel<String?>(LatLong.Companion.GeorefMethodValues)
         cbMethod = JComboBox<String?>(DefaultComboBoxModel<String?>(arrayOf<String?>(
                 "not recorded", "unknown", "GEOLocate", "Geoportal", "Google Earth",
                 "Google Maps", "Gazeteer", "GPS", "Label Data", "Wikipedia",
@@ -750,7 +750,7 @@ class GeoreferenceDialog : JDialog {
         val lblDatum = JLabel("Datum")
         lblDatum.setHorizontalAlignment(SwingConstants.RIGHT)
         contentPanel.add(lblDatum)
-        val datumModel: ComboBoxModel<String?> = ListComboBoxModel<String?>(LatLong.Companion.getDatumValues())
+        val datumModel: ComboBoxModel<String?> = ListComboBoxModel<String?>(LatLong.Companion.DatumValues)
         cbDatum = JComboBox<String?>(datumModel)
         // set default
         cbDatum.setSelectedItem("WGS84")

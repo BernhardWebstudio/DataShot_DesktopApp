@@ -434,21 +434,21 @@ class SpecimenListTableModel(specimenList: MutableList<Specimen?>?) : AbstractTa
         val s: Specimen? = specimens!![rowIndex]
         var result: Any? = null
         when (columnIndex) {
-            COL_ID ->  //result = s.getSpecimenId();
+            COL_ID ->  //result = s.SpecimenId;
                 result = s
             COL_COPY -> result = s
-            COL_BARCODE -> result = s.getBarcode()
-            COL_WORKFLOW -> result = s.getWorkFlowStatus()
-            COL_FAMILY -> result = s.getFamily()
-            COL_SUBFAMILY -> result = s.getSubfamily()
-            COL_TRIBE -> result = s.getTribe()
-            COL_GENUS -> result = s.getGenus()
-            COL_SPECIFIC -> result = s.getSpecificEpithet()
-            COL_SUBSPECIFIC -> result = s.getSubspecificEpithet()
-            COL_VERBLOCALITY -> result = s.getVerbatimLocality()
-            COL_COUNTRY -> result = s.getCountry()
-            COL_DIVISION ->  //result = s.getDrawerNumber();
-                result = s.getPrimaryDivison()
+            COL_BARCODE -> result = s.Barcode
+            COL_WORKFLOW -> result = s.WorkFlowStatus
+            COL_FAMILY -> result = s.Family
+            COL_SUBFAMILY -> result = s.Subfamily
+            COL_TRIBE -> result = s.Tribe
+            COL_GENUS -> result = s.Genus
+            COL_SPECIFIC -> result = s.SpecificEpithet
+            COL_SUBSPECIFIC -> result = s.SubspecificEpithet
+            COL_VERBLOCALITY -> result = s.VerbatimLocality
+            COL_COUNTRY -> result = s.Country
+            COL_DIVISION ->  //result = s.DrawerNumber;
+                result = s.PrimaryDivison
         }
         return result
     }

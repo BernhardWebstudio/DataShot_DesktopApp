@@ -23,23 +23,23 @@ class MouseWheelScrollListener(pane: JScrollPane) : MouseWheelListener {
     private val pane: JScrollPane
     private var previousValue: Int
     override fun mouseWheelMoved(e: MouseWheelEvent) {
-        var parent: Component? = pane.getParent()
+        var parent: Component? = pane.Parent
         while (parent !is JScrollPane) {
             if (parent == null) {
                 return
             }
             parent = parent.parent
         }
-        val bar: JScrollBar = pane.getVerticalScrollBar()
-        val limit = if (e.getWheelRotation() < 0) 0 else bar.getMaximum() - bar.getVisibleAmount()
-        if (previousValue == limit && bar.getValue() == limit) {
+        val bar: JScrollBar = pane.VerticalScrollBar
+        val limit = if (e.WheelRotation < 0) 0 else bar.Maximum - bar.VisibleAmount
+        if (previousValue == limit && bar.Value == limit) {
             parent!!.dispatchEvent(SwingUtilities.convertMouseEvent(pane, e, parent))
         }
-        previousValue = bar.getValue()
+        previousValue = bar.Value
     }
 
     init {
         this.pane = pane
-        previousValue = pane.getVerticalScrollBar().getValue()
+        previousValue = pane.VerticalScrollBar.Value
     }
 }

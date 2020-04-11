@@ -467,7 +467,7 @@ class VerbatimListDialog : JDialog(), DataChangeListener {
      * @see edu.harvard.mcz.imagecapture.interfaces.DataChangeListener#notifyDataHasChanged()
      */
     override fun notifyDataHasChanged() {
-        (table.getModel() as VerbatimCountTableModel).fireDataHasChanged()
+        (table.Model as VerbatimCountTableModel).fireDataHasChanged()
     }
 
     companion object {

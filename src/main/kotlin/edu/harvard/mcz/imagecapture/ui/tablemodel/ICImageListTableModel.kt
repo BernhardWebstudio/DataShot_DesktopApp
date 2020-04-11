@@ -52,24 +52,24 @@ class ICImageListTableModel(anImageList: MutableList<ICImage?>?) : AbstractTable
         val image: ICImage? = images!![rowIndex]
         var result: Any? = null
         when (columnIndex) {
-            COL_ID -> if (image.getSpecimen() != null) { // result = image.getSpecimen().getSpecimenId();
-                result = image.getSpecimen()
+            COL_ID -> if (image.Specimen != null) { // result = image.Specimen.SpecimenId;
+                result = image.Specimen
             } else { // Kludge - work around for images not bound to specimens.
 // result = -1L;
                 result = Specimen()
             }
-            COL_PATH -> result = image.getPath()
-            COL_FILENAME -> result = image.getFilename()
-            3 -> result = image.getRawBarcode()
-            4 -> result = image.getRawExifBarcode()
-            5 -> result = image.getRawOcr()
-            COL_BARCODE -> result = if (image.getSpecimen() != null) {
-                image.getSpecimen().getBarcode()
+            COL_PATH -> result = image.Path
+            COL_FILENAME -> result = image.Filename
+            3 -> result = image.RawBarcode
+            4 -> result = image.RawExifBarcode
+            5 -> result = image.RawOcr
+            COL_BARCODE -> result = if (image.Specimen != null) {
+                image.Specimen.Barcode
             } else {
                 ""
             }
-            7 -> result = image.getTemplateId()
-            COL_DRAWER -> result = image.getDrawerNumber()
+            7 -> result = image.TemplateId
+            COL_DRAWER -> result = image.DrawerNumber
         }
         return result
     }

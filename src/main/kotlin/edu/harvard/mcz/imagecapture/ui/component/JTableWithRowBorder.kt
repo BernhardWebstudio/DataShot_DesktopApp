@@ -69,7 +69,7 @@ class JTableWithRowBorder(tableModel: AbstractDeleteableTableModel?) : JTable(ta
                             val ok: Int = JOptionPane.showConfirmDialog(parentPane, "Delete the selected $objectName?", "Delete $objectName", JOptionPane.OK_CANCEL_OPTION)
                             if (ok == JOptionPane.OK_OPTION) {
                                 log.debug("deleting " + objectName + "s row " + clickedRow)
-                                (tableWithRowBorder.getModel() as AbstractDeleteableTableModel?).deleteRow(clickedRow)
+                                (tableWithRowBorder.Model as AbstractDeleteableTableModel?).deleteRow(clickedRow)
                                 tableWithRowBorder.emitEvent(e)
                             } else {
                                 log.debug("$objectName row delete canceled by user.")
@@ -87,21 +87,21 @@ class JTableWithRowBorder(tableModel: AbstractDeleteableTableModel?) : JTable(ta
             this.addMouseListener(object : MouseAdapter() {
                 override fun mousePressed(e: MouseEvent) {
                     if (e.isPopupTrigger()) {
-                        clickedRow = (e.getComponent() as JTable).getSelectedRow()
-                        jPopupDeletor.show(e.getComponent(), e.getX(), e.getY())
+                        clickedRow = (e.Component as JTable).SelectedRow
+                        jPopupDeletor.show(e.Component, e.X, e.Y)
                     }
                 }
 
                 override fun mouseReleased(e: MouseEvent) {
                     if (e.isPopupTrigger()) {
-                        clickedRow = (e.getComponent() as JTable).getSelectedRow()
-                        jPopupDeletor.show(e.getComponent(), e.getX(), e.getY())
+                        clickedRow = (e.Component as JTable).SelectedRow
+                        jPopupDeletor.show(e.Component, e.X, e.Y)
                     }
                 }
             })
             this.addKeyListener(object : KeyAdapter() {
                 override fun keyTyped(e: KeyEvent) {
-                    tableWithRowBorder.emitEvent(ActionEvent(e, e.getID(), e.toString()))
+                    tableWithRowBorder.emitEvent(ActionEvent(e, e.ID, e.toString()))
                 }
             })
         }

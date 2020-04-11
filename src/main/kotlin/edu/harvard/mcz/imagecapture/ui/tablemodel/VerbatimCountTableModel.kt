@@ -452,13 +452,13 @@ class VerbatimCountTableModel : AbstractTableModel {
         var result: Any? = null
         when (columnIndex) {
             0 -> result = verbatimCounts!![rowIndex]
-            1 -> result = verbatimCounts!![rowIndex].getCount()
-            2 -> result = verbatimCounts!![rowIndex].getVerbatimLocality()
-            3 -> result = verbatimCounts!![rowIndex].getVerbatimDate()
-            4 -> result = verbatimCounts!![rowIndex].getVerbatimCollector()
-            5 -> result = verbatimCounts!![rowIndex].getVerbatimCollection()
-            6 -> result = verbatimCounts!![rowIndex].getVerbatimNumbers()
-            7 -> result = verbatimCounts!![rowIndex].getVerbatimUnclassfiedText()
+            1 -> result = verbatimCounts!![rowIndex].Count
+            2 -> result = verbatimCounts!![rowIndex].VerbatimLocality
+            3 -> result = verbatimCounts!![rowIndex].VerbatimDate
+            4 -> result = verbatimCounts!![rowIndex].VerbatimCollector
+            5 -> result = verbatimCounts!![rowIndex].VerbatimCollection
+            6 -> result = verbatimCounts!![rowIndex].VerbatimNumbers
+            7 -> result = verbatimCounts!![rowIndex].VerbatimUnclassfiedText
         }
         return result
     }

@@ -445,12 +445,12 @@ class BulkMedia {
     protected fun init() {
         media_labels = ArrayList()
         fileBase = Singleton
-                .getProperties()
-                .getProperties()
+                .Properties
+                .Properties
                 .getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASE)
         urlBase = Singleton
-                .getProperties()
-                .getProperties()
+                .Properties
+                .Properties
                 .getProperty(ImageCaptureProperties.Companion.KEY_IMAGEBASEURI)
     }
 
@@ -470,18 +470,18 @@ class BulkMedia {
 // urlBase and fileBase
     fun setURI(file: File): Boolean {
         var result = false
-        val location: Int = file.getPath().indexOf(fileBase)
-        log.debug(file.getPath())
+        val location: Int = file.Path.indexOf(fileBase)
+        log.debug(file.Path)
         log.debug(fileBase)
         log.debug(location)
         if (location != -1) {
             var rest = ""
             rest = if (File.separator == "\\") { // on windows, convert file path to uri path.
-                file.getPath()
+                file.Path
                         .substring(location + fileBase!!.length)
                         .replace('\\', '/')
             } else {
-                file.getPath().substring(location + fileBase!!.length)
+                file.Path.substring(location + fileBase!!.length)
             }
             if (rest.startsWith("/") && urlBase!!.endsWith("/")) { // strip off leading separator to prevent occurrence of duplicated
 // separators
@@ -495,18 +495,18 @@ class BulkMedia {
 
     fun setPreviewURI(file: File): Boolean {
         var result = false
-        val location: Int = file.getPath().indexOf(fileBase)
-        log.debug(file.getPath())
+        val location: Int = file.Path.indexOf(fileBase)
+        log.debug(file.Path)
         log.debug(fileBase)
         log.debug(location)
         if (location != -1) {
             var rest = ""
             rest = if (File.separator == "\\") { // on windows, convert file path to uri path.
-                file.getPath()
+                file.Path
                         .substring(location + fileBase!!.length)
                         .replace('\\', '/')
             } else {
-                file.getPath().substring(location + fileBase!!.length)
+                file.Path.substring(location + fileBase!!.length)
             }
             if (rest.startsWith("/") && urlBase!!.endsWith("/")) { // strip off leading separator to prevent occurrence of duplicated
 // separators

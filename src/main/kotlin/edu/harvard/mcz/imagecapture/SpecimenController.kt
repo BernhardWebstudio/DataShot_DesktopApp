@@ -210,7 +210,7 @@ class SpecimenController {
     //		public boolean hasNextSpecimenInTable() {
 //			boolean result = false;
 //			if (inTable && model!=null && currentRow > -1) {
-//				result = model.getRowCount() > currentRow;
+//				result = model.RowCount > currentRow;
 //			}
 //			return result;
 //		}
@@ -263,9 +263,9 @@ class SpecimenController {
     fun save(): Boolean {
         val result = false
         val s = SpecimenLifeCycle()
-        log!!.debug("in SpecimenControler.save: specimenId is " + specimen.getSpecimenId())
-        log.debug("in SpecimenControler.save: specimen barcode is " + specimen.getBarcode())
-        if (specimen.getSpecimenId() != null) {
+        log!!.debug("in SpecimenControler.save: specimenId is " + specimen.SpecimenId)
+        log.debug("in SpecimenControler.save: specimen barcode is " + specimen.Barcode)
+        if (specimen.SpecimenId != null) {
             log.debug("before attachDirty")
             s.attachDirty(specimen)
             log.debug("after attachDirty")
@@ -281,7 +281,7 @@ class SpecimenController {
         // reload the specimen
 // Why??? Because we can. Also, to kinda show if more than one
 // user edited the same species
-        val updatedSpecimen: Specimen = s.findById(specimen.getSpecimenId())
+        val updatedSpecimen: Specimen = s.findById(specimen.SpecimenId)
         if (updatedSpecimen != null) {
             specimen = updatedSpecimen
         }
@@ -293,7 +293,7 @@ class SpecimenController {
         specimen = copiedSpecimen
         val result = false
         val s = SpecimenLifeCycle()
-        if (specimen.getSpecimenId() != null) {
+        if (specimen.SpecimenId != null) {
             s.attachDirty(specimen)
         } //else {
         try {
@@ -305,7 +305,7 @@ class SpecimenController {
         notifyListeners()
         // reload the specimen
 // Why???
-//specimen = s.findById(specimen.getSpecimenId());
+//specimen = s.findById(specimen.SpecimenId);
         return result
     }
 
@@ -320,8 +320,8 @@ class SpecimenController {
         // Add images of the specimen and labels to the details editor.
 // TODO: Add box and drawer level images
         var drawerNumber: String? = null
-        if (specimen.getDrawerNumber() != null) {
-            drawerNumber = specimen.getDrawerNumber()
+        if (specimen.DrawerNumber != null) {
+            drawerNumber = specimen.DrawerNumber
         }
         var drawerImages: MutableList<ICImage?>? = null
         if (drawerNumber != null && drawerNumber.trim { it <= ' ' } != "") {
@@ -330,14 +330,14 @@ class SpecimenController {
 // for drawer (115.12) and unit tray (115.12a) level images.
         }
         if (drawerImages == null || drawerImages.isEmpty()) { // Specimen has multiple images, but no drawer images
-            log!!.debug("Specimen with no drawer images: " + specimen.getBarcode())
-            if (specimen.getICImages().size == 0) {
-                log.error("Specimen with no images: " + specimen.getBarcode())
+            log!!.debug("Specimen with no drawer images: " + specimen.Barcode)
+            if (specimen.ICImages.size == 0) {
+                log.error("Specimen with no images: " + specimen.Barcode)
             } else {
-                resultFrame.loadImagesFromFiles(specimen.getICImages())
+                resultFrame.loadImagesFromFiles(specimen.ICImages)
             }
         } else {
-            val images: MutableSet<ICImage?> = specimen.getICImages()
+            val images: MutableSet<ICImage?> = specimen.ICImages
             images.addAll(drawerImages)
             resultFrame.loadImagesFromFiles(images)
         }

@@ -447,7 +447,7 @@ class UserDialog : JDialog {
     /**
      * Default constructor.  Dialog is built as modal off of MainFrame.
      */
-    constructor() : super(Singleton.getMainFrame(), true) // construct as modal dialog
+    constructor() : super(Singleton.MainFrame, true) // construct as modal dialog
     {
         thisDialog = this
         userToEdit = Users()
@@ -459,7 +459,7 @@ class UserDialog : JDialog {
     /**
      * Constructor specifying a user to edit.  Dialog is built as modal off of MainFrame.
      */
-    constructor(aUser: Users?) : super(Singleton.getMainFrame(), true) // construct as modal dialog
+    constructor(aUser: Users?) : super(Singleton.MainFrame, true) // construct as modal dialog
     {
         thisDialog = this
         userToEdit = aUser
@@ -477,8 +477,8 @@ class UserDialog : JDialog {
     private fun setValues() {
         if (userToEdit != null) {
             jTextFieldUsername.setText(userToEdit.username)
-            jTextFieldFullname.setText(userToEdit.getFullname())
-            jTextFieldDescription.setText(userToEdit.getDescription())
+            jTextFieldFullname.setText(userToEdit.Fullname)
+            jTextFieldDescription.setText(userToEdit.Description)
         }
     }
 
@@ -491,9 +491,9 @@ class UserDialog : JDialog {
         this.setPreferredSize(Dimension(504, 188))
         this.setTitle("Details about a person")
         this.setContentPane(getJPanel())
-        val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize()
-        this.setLocation((screenSize.width - this.getWidth()) / 2,
-                (screenSize.height - this.getHeight()) / 2)
+        val screenSize: Dimension = Toolkit.DefaultToolkit.ScreenSize
+        this.setLocation((screenSize.width - this.Width) / 2,
+                (screenSize.height - this.Height) / 2)
     }
 
     /**
@@ -542,16 +542,16 @@ class UserDialog : JDialog {
             jButtonSave.setText("Save")
             jButtonSave.addActionListener(object : ActionListener {
                 override fun actionPerformed(e: ActionEvent?) {
-                    userToEdit.setFullname(jTextFieldFullname.getText())
-                    userToEdit.setUsername(jTextFieldUsername.getText())
-                    userToEdit.setDescription(jTextFieldDescription.getText())
+                    userToEdit.setFullname(jTextFieldFullname.Text)
+                    userToEdit.setUsername(jTextFieldUsername.Text)
+                    userToEdit.setDescription(jTextFieldDescription.Text)
                     userToEdit.setRole("undefined")
                     val u = UsersLifeCycle()
                     // find out if a matching record exists, if it does, update it, if it doesn't add one.
                     val check = Users()
                     check.setUsername(userToEdit.username)
                     try {
-                        val usersToCheck: MutableList<Users?> = u.findByNames(check.username, check.getFullname())
+                        val usersToCheck: MutableList<Users?> = u.findByNames(check.username, check.Fullname)
                         if (usersToCheck.isEmpty()) {
                             u.persist(userToEdit)
                         } else {

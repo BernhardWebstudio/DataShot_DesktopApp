@@ -41,7 +41,7 @@ class TestOfImageCaptureProperties
     override fun setUp() {
         super.setUp()
         // store the pre-existing value of KEY_IMAGEBASE
-        imageBase = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE)
+        imageBase = Singleton.SingletonInstance.Properties.Properties.getProperty(ImageCaptureProperties.KEY_IMAGEBASE)
     }
 
     /* (non-Javadoc)
@@ -51,7 +51,7 @@ class TestOfImageCaptureProperties
     override fun tearDown() {
         super.tearDown()
         // restore the pre-existing value of KEY_IMAGEBASE
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(ImageCaptureProperties.KEY_IMAGEBASE, imageBase)
+        Singleton.SingletonInstance.Properties.Properties.setProperty(ImageCaptureProperties.KEY_IMAGEBASE, imageBase)
     }
 
     /**
@@ -69,7 +69,7 @@ class TestOfImageCaptureProperties
         val fullstring = full.path
         // Create a base path from the actual path to this file, leaving out one directory
         val base = File(full.parent).parent
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals(AllTests.FILE_VALID_BARCODE_PATH, ImageCaptureProperties.getPathBelowBase(full, "/"))
@@ -89,7 +89,7 @@ class TestOfImageCaptureProperties
     fun testGetPathBelowBase() { // Uses ImageCaptureProperties.getPathBelowBase(file, separator) which is intended only
 // for use here in unit testing.
 // Goal is to retrieve:
-// File imageFile = new File(IMAGEBASE + image.getPath() + image.getFilename());
+// File imageFile = new File(IMAGEBASE + image.Path + image.Filename);
 // So, given absolute path to a file, need to remove the filename and IMAGEBASE, leaving just
 // a path to store in ICImage.Path.
 // IMAGEBASE should end in a separator, image.getPath should not start with a separator, but end with one,
@@ -100,7 +100,7 @@ class TestOfImageCaptureProperties
         var base = "/mount/images/"
         var fullstring = "/mount/images/test_files/test/"
         var full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals(result, ImageCaptureProperties.getPathBelowBase(full, "/"))
@@ -108,21 +108,21 @@ class TestOfImageCaptureProperties
         base = "/mount/images"
         fullstring = "/mount/images/test_files/test/"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals(result, ImageCaptureProperties.getPathBelowBase(full, "/"))
         base = "/mount/images/"
         fullstring = "/mount/images/test_files/test/"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals(result, ImageCaptureProperties.getPathBelowBase(full, "/"))
         base = "/mount/images"
         fullstring = "/mount/images/test_files/test"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals(result, ImageCaptureProperties.getPathBelowBase(full, "/"))
@@ -130,7 +130,7 @@ class TestOfImageCaptureProperties
         base = "/mount/images/dir name/"
         fullstring = "/mount/images/dir name/test_files/test/"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals(result, ImageCaptureProperties.getPathBelowBase(full, "/"))
@@ -138,7 +138,7 @@ class TestOfImageCaptureProperties
         base = "/mount/images/dir name/"
         fullstring = "/mount/images/dir name/test files/test/"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals("test files/test/", ImageCaptureProperties.getPathBelowBase(full, "/"))
@@ -146,7 +146,7 @@ class TestOfImageCaptureProperties
         base = "/mount/images/../images/"
         fullstring = "/mount/images/../images/test_files/test/"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals(result, ImageCaptureProperties.getPathBelowBase(full, "/"))
@@ -154,7 +154,7 @@ class TestOfImageCaptureProperties
         base = "/home/mole/stuff/MCZ/mcz/insects/testImages/base/"
         fullstring = "/home/mole/stuff/MCZ/mcz/insects/testImages/base/"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals("", ImageCaptureProperties.getPathBelowBase(full, "/"))
@@ -162,14 +162,14 @@ class TestOfImageCaptureProperties
         base = "Z:\\images\\"
         fullstring = "Z:\\images\\test_files\\test\\"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals("test_files\\test\\", ImageCaptureProperties.getPathBelowBase(full, "\\"))
         base = "Z:\\images\\test_files\\test\\"
         fullstring = "Z:\\images\\test_files\\test\\"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals("", ImageCaptureProperties.getPathBelowBase(full, "\\"))
@@ -180,7 +180,7 @@ class TestOfImageCaptureProperties
  		base = "Z:\\images\\";
 		fullstring = "Z:\\images\\test_files\\test\\image.img";
 		full = new File(fullstring);
-		Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+		Singleton.SingletonInstance.Properties.Properties.setProperty(
 				ImageCaptureProperties.KEY_IMAGEBASE,
 				base);
 		assertEquals("test_files\\test\\", ImageCaptureProperties.getPathBelowBase(full, "\\"));
@@ -190,7 +190,7 @@ class TestOfImageCaptureProperties
         base = "Z:\\images\\"
         fullstring = "Z:\\images\\test_files\\test\\"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         // first, generate the path below base as windows path
@@ -200,7 +200,7 @@ class TestOfImageCaptureProperties
         base = "/media/images"
         fullstring = "/media/images/test_files/test/"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals(fullstring + AllTests.FILE_VALID_BARCODE_FILENAME,
@@ -210,7 +210,7 @@ class TestOfImageCaptureProperties
         base = "/media/images/"
         fullstring = "/media/images/test_files/test/"
         full = File(fullstring)
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         // first, generate the path below base as unix path
@@ -220,7 +220,7 @@ class TestOfImageCaptureProperties
         base = "Z:\\images\\"
         fullstring = "Z:\\images\\test_files\\test\\"
         //full = new File(fullstring);
-        Singleton.getSingletonInstance().getProperties().getProperties().setProperty(
+        Singleton.SingletonInstance.Properties.Properties.setProperty(
                 ImageCaptureProperties.KEY_IMAGEBASE,
                 base)
         assertEquals(fullstring + AllTests.FILE_VALID_BARCODE_FILENAME,

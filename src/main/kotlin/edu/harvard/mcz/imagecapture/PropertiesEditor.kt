@@ -56,7 +56,7 @@ class PropertiesEditor : JFrame() {
         this.setSize(669, 347)
         this.setContentPane(getJContentPane())
         this.setTitle(ImageCaptureApp.APP_NAME + " Preferences")
-        jTextField.setText(Singleton.getProperties().getPropertiesSource())
+        jTextField.setText(Singleton.Properties.PropertiesSource)
     }
 
     /**
@@ -143,24 +143,24 @@ class PropertiesEditor : JFrame() {
                 override fun actionPerformed(e: ActionEvent?) {
                     try {
                         if (jTable.isEditing()) {
-                            jTable.getCellEditor().stopCellEditing()
+                            jTable.CellEditor.stopCellEditing()
                         }
-                        Singleton.setProperties(jTable.getModel() as ImageCaptureProperties)
-                        Singleton.getProperties().saveProperties()
+                        Singleton.setProperties(jTable.Model as ImageCaptureProperties)
+                        Singleton.Properties.saveProperties()
                         // Set up a barcode (text read from barcode label for pin) matcher/builder
-                        if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION) == ImageCaptureProperties.Companion.COLLECTION_MCZENT) { // ** Configured for the MCZ Entomology Collection, use MCZ assumptions.
+                        if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION) == ImageCaptureProperties.Companion.COLLECTION_MCZENT) { // ** Configured for the MCZ Entomology Collection, use MCZ assumptions.
                             val barcodeTextBuilderMatcher = MCZENTBarcode()
                             Singleton.setBarcodeBuilder(barcodeTextBuilderMatcher)
                             Singleton.setBarcodeMatcher(barcodeTextBuilderMatcher)
-                        } else if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION) == ImageCaptureProperties.Companion.COLLECTION_ETHZENT) { // ** Configured for the ETHZ Entomology Collection, use MCZ assumptions.
+                        } else if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_COLLECTION) == ImageCaptureProperties.Companion.COLLECTION_ETHZENT) { // ** Configured for the ETHZ Entomology Collection, use MCZ assumptions.
                             val barcodeTextBuilderMatcher = ETHZBarcode()
                             Singleton.setBarcodeBuilder(barcodeTextBuilderMatcher)
                             Singleton.setBarcodeMatcher(barcodeTextBuilderMatcher)
                         } else {
                             throw Exception("Configured collection not recognized.")
                         }
-                        //Singleton.getSingletonInstance().getMainFrame().updateTitle();
-                        Singleton.getMainFrame().updateForPropertiesChange()
+                        //Singleton.SingletonInstance.MainFrame.updateTitle();
+                        Singleton.MainFrame.updateForPropertiesChange()
                         thisEditor.dispose()
                     } catch (e1: Exception) {
                         println("Save Failed")

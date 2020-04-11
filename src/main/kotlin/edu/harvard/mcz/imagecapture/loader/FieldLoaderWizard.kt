@@ -42,12 +42,12 @@ class FieldLoaderWizard : JDialog() {
     protected fun pickFile() {
         val fileChooser = JFileChooser()
         fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES)
-        if (Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTLOADPATH) != null) {
-            fileChooser.setCurrentDirectory(File(Singleton.getProperties().getProperties().getProperty(ImageCaptureProperties.Companion.KEY_LASTLOADPATH)))
+        if (Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTLOADPATH) != null) {
+            fileChooser.setCurrentDirectory(File(Singleton.Properties.Properties.getProperty(ImageCaptureProperties.Companion.KEY_LASTLOADPATH)))
         }
-        val returnValue: Int = fileChooser.showOpenDialog(Singleton.getMainFrame())
+        val returnValue: Int = fileChooser.showOpenDialog(Singleton.MainFrame)
         if (returnValue == JFileChooser.APPROVE_OPTION) {
-            selectedFile = fileChooser.getSelectedFile()
+            selectedFile = fileChooser.SelectedFile
         }
     }
 

@@ -42,7 +42,7 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
      */
     protected fun track(specimen: Specimen) {
         val t = Tracking(
-                specimen, Singleton.getUserFullName(), specimen.getWorkFlowStatus(), Date()
+                specimen, Singleton.UserFullName, specimen.WorkFlowStatus, Date()
         )
         val tls = TrackingLifeCycle()
         try {
@@ -87,10 +87,10 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
                 val existsPattern = "^Duplicate entry '.*' for key 'Barcode'$"
                 if (message.matches(existsPattern) || pmessage.matches(existsPattern) || e is ConstraintViolationException) {
                     log!!.debug("specimen exists")
-                    throw SpecimenExistsException("Specimen record exists for " + transientInstance.getBarcode())
+                    throw SpecimenExistsException("Specimen record exists for " + transientInstance.Barcode)
                 } else {
                     log!!.debug("specimen save failed")
-                    throw SaveFailedException("Unable to save specimen " + transientInstance.getBarcode())
+                    throw SaveFailedException("Unable to save specimen " + transientInstance.Barcode)
                 }
             }
             try {
@@ -117,7 +117,7 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
      */
     @Throws(SaveFailedException::class)
     fun attachDirty(instance: Specimen) {
-        log!!.debug("attaching dirty Specimen instance with id " + instance.getSpecimenId())
+        log!!.debug("attaching dirty Specimen instance with id " + instance.SpecimenId)
         try {
             val session = HibernateUtil.sessionFactory!!.currentSession
             session!!.beginTransaction()
@@ -129,7 +129,7 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
             } catch (e: HibernateException) {
                 session.transaction.rollback()
                 log!!.error("attach failed", e)
-                throw SaveFailedException("Unable to save specimen " + instance.getBarcode())
+                throw SaveFailedException("Unable to save specimen " + instance.Barcode)
             }
             try {
                 session.close()
@@ -148,8 +148,8 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
      */
     fun attachClean(instance: Specimen) {
         try {
-            log!!.debug(instance.getSpecimenParts().size)
-            log!!.debug((instance.getSpecimenParts().toTypedArray().get(0) as SpecimenPart).getPartAttributeValuesConcat())
+            log!!.debug(instance.SpecimenParts.size)
+            log!!.debug((instance.SpecimenParts.toTypedArray().get(0) as SpecimenPart).PartAttributeValuesConcat)
         } catch (e: Exception) {
             log!!.debug(e.message)
         }
@@ -162,7 +162,7 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
                 session.flush()
                 session.transaction.commit()
                 log!!.debug("attach successful")
-                log!!.debug(instance.getSpecimenParts().size)
+                log!!.debug(instance.SpecimenParts.size)
             } catch (e: HibernateException) {
                 session.transaction.rollback()
                 log!!.debug(e.message, e)
@@ -183,8 +183,8 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
             throw re
         }
         try {
-            log!!.debug(instance.getSpecimenParts().size)
-            log!!.debug((instance.getSpecimenParts().toTypedArray().get(0) as SpecimenPart).getPartAttributeValuesConcat())
+            log!!.debug(instance.SpecimenParts.size)
+            log!!.debug((instance.SpecimenParts.toTypedArray().get(0) as SpecimenPart).PartAttributeValuesConcat)
         } catch (e: Exception) {
             log!!.debug(e.message)
         }
@@ -261,7 +261,7 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
                     log!!.debug("get successful, no instance found")
                 } else {
                     log!!.debug("get successful, instance found")
-                    log!!.debug(instance.getSpecimenParts().size)
+                    log!!.debug(instance.SpecimenParts.size)
                 }
             } catch (e: HibernateException) {
                 session.transaction.rollback()
@@ -597,12 +597,12 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
                         + "   and s.verbatimCollector = ? and s.verbatimCollection = ? "
                         + "   and s.verbatimNumbers = ? and s.verbatimUnclassifiedText = ? "
                 )
-                query!!.setParameter(0, verbatim.getVerbatimLocality())
-                query.setParameter(1, verbatim.getVerbatimDate())
-                query.setParameter(2, verbatim.getVerbatimCollector())
-                query.setParameter(3, verbatim.getVerbatimCollection())
-                query.setParameter(4, verbatim.getVerbatimNumbers())
-                query.setParameter(5, verbatim.getVerbatimUnclassfiedText())
+                query!!.setParameter(0, verbatim.VerbatimLocality)
+                query.setParameter(1, verbatim.VerbatimDate)
+                query.setParameter(2, verbatim.VerbatimCollector)
+                query.setParameter(3, verbatim.VerbatimCollection)
+                query.setParameter(4, verbatim.VerbatimNumbers)
+                query.setParameter(5, verbatim.VerbatimUnclassfiedText)
                 val i = query.list().iterator()
                 while (i.hasNext()) {
                     val row = i.next() as Array<Any?>?
@@ -649,12 +649,12 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
                         + "   and s.verbatimNumbers = ? and s.verbatimUnclassifiedText = ? "
                         + "   and s.workFlowStatus = '" + WorkFlowStatus.STAGE_VERBATIM + "' "
                 )
-                query!!.setParameter(0, verbatim.getVerbatimLocality())
-                query.setParameter(1, verbatim.getVerbatimDate())
-                query.setParameter(2, verbatim.getVerbatimCollector())
-                query.setParameter(3, verbatim.getVerbatimCollection())
-                query.setParameter(4, verbatim.getVerbatimNumbers())
-                query.setParameter(5, verbatim.getVerbatimUnclassfiedText())
+                query!!.setParameter(0, verbatim.VerbatimLocality)
+                query.setParameter(1, verbatim.VerbatimDate)
+                query.setParameter(2, verbatim.VerbatimCollector)
+                query.setParameter(3, verbatim.VerbatimCollection)
+                query.setParameter(4, verbatim.VerbatimNumbers)
+                query.setParameter(5, verbatim.VerbatimUnclassfiedText)
                 result = query.list()
                 log!!.debug("specimen query successful, result size: " + result.size)
                 session.transaction.commit()
@@ -676,14 +676,14 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
     fun getFieldSize(fieldName: String?): Int {
         //		Specimen s = new Specimen();
 // ClassMetadata specimenMetadata = HibernateUtil.sessionFactory.getClassMetadata(Specimen.class);
-// String[] p = specimenMetadata.getPropertyNames();
+// String[] p = specimenMetadata.PropertyNames;
 // for (int i=0; i < p.length; i++ ) {
 // 	System.out.println(p[i]);
 // 	specimenMetadata.getPropertyValue(p[i], "length", EntityMode.MAP);
 // }
 //		Object[] propertyValues = specimenMetadata.getPropertyValues(s, EntityMode.POJO);
-//		String[] propertyNames = specimenMetadata.getPropertyNames();
-//		Type[] propertyTypes = specimenMetadata.getPropertyTypes();
+//		String[] propertyNames = specimenMetadata.PropertyNames;
+//		Type[] propertyTypes = specimenMetadata.PropertyTypes;
 //
 //		// get a Map of all properties which are not collections or associations
 //		Map namedValues = new HashMap();
@@ -717,7 +717,7 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
             val specimen: Specimen? = specimens[0]
             //this does not work - need to do it manually as below!!
 //this.delete(specimen);
-            val specimenId: Long = specimen.getSpecimenId()
+            val specimenId: Long = specimen.SpecimenId
             try {
                 val session = HibernateUtil.sessionFactory!!.currentSession
                 session!!.beginTransaction()
@@ -888,17 +888,17 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
                 val example: Example = Example.create(instance).enableLike().ignoreCase()
                 // Note: Criteria in example instance can be excluded here, or by setting their
 // values to null.  See the invocation of Specimen.clearDefaults in
-// SearchDialog.getJButtonSearch()'s actionPerformed method.
+// SearchDialog.JButtonSearch's actionPerformed method.
 //example.excludeProperty("flagInBulkloader");
                 criteria.add(example)
-                if (instance.getTrackings() != null && instance.getTrackings().size > 0) {
-                    criteria.createCriteria("trackings", Criteria.INNER_JOIN).add(Example.create(instance.getTrackings().toTypedArray().get(0)).enableLike())
+                if (instance.Trackings != null && instance.Trackings.size > 0) {
+                    criteria.createCriteria("trackings", Criteria.INNER_JOIN).add(Example.create(instance.Trackings.toTypedArray().get(0)).enableLike())
                 }
-                if (instance.getICImages() != null && instance.getICImages().size > 0) {
-                    criteria.createCriteria("ICImages", Criteria.INNER_JOIN).add(Example.create(instance.getICImages().toTypedArray().get(0)).enableLike().ignoreCase())
+                if (instance.ICImages != null && instance.ICImages.size > 0) {
+                    criteria.createCriteria("ICImages", Criteria.INNER_JOIN).add(Example.create(instance.ICImages.toTypedArray().get(0)).enableLike().ignoreCase())
                 }
-                if (instance.getCollectors() != null && instance.getCollectors().size > 0) {
-                    criteria.createCriteria("collectors", Criteria.INNER_JOIN).add(Example.create(instance.getCollectors().toTypedArray().get(0)).enableLike().ignoreCase())
+                if (instance.Collectors != null && instance.Collectors.size > 0) {
+                    criteria.createCriteria("collectors", Criteria.INNER_JOIN).add(Example.create(instance.Collectors.toTypedArray().get(0)).enableLike().ignoreCase())
                 }
                 if (offset != 0) {
                     criteria.setFirstResult(offset)
@@ -930,11 +930,11 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
             }
             if (results != null) {
                 for (i in results.indices) { /* try {
-                        log.debug("Parts: " + results.get(i).getSpecimenParts().size());
-                        log.debug("Parts: " + ((SpecimenPart) results.get(i).getSpecimenParts().toArray()[0]).getPartAttributeValuesConcat());
-                        log.debug("Part Attribute: " + ((SpecimenPartAttribute) ((SpecimenPart) results.get(i).getSpecimenParts().toArray()[0]).getAttributeCollection().toArray()[0]).getSpecimenPartAttributeId());
+                        log.debug("Parts: " + results.get(i).SpecimenParts.size());
+                        log.debug("Parts: " + ((SpecimenPart) results.get(i).SpecimenParts.toArray()[0]).PartAttributeValuesConcat);
+                        log.debug("Part Attribute: " + ((SpecimenPartAttribute) ((SpecimenPart) results.get(i).SpecimenParts.toArray()[0]).AttributeCollection.toArray()[0]).SpecimenPartAttributeId);
                     } catch (Exception e) {
-                        log.debug(e.getMessage());
+                        log.debug(e.Message);
                     }*/
                 }
             } else {
@@ -968,11 +968,11 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
             try {
                 val criteria: Criteria = session.createCriteria(Specimen::class.java)
                 criteria.add(Example.create(instance))
-                if (instance.getTrackings() != null && instance.getTrackings().size > 0) {
-                    criteria.createCriteria("trackings").add(Example.create(instance.getTrackings().toTypedArray().get(0)))
+                if (instance.Trackings != null && instance.Trackings.size > 0) {
+                    criteria.createCriteria("trackings").add(Example.create(instance.Trackings.toTypedArray().get(0)))
                 }
-                if (instance.getICImages() != null && instance.getICImages().size > 0) {
-                    criteria.createCriteria("ICImages").add(Example.create(instance.getICImages().toTypedArray().get(0)))
+                if (instance.ICImages != null && instance.ICImages.size > 0) {
+                    criteria.createCriteria("ICImages").add(Example.create(instance.ICImages.toTypedArray().get(0)))
                 }
                 if (offset != 0) {
                     criteria.setFirstResult(offset)
@@ -1030,7 +1030,7 @@ class SpecimenLifeCycle : GenericLifeCycle<Specimen?>(Specimen::class.java, log)
                         val i = results!!.iterator()
                         while (i.hasNext()) {
                             val value: BigDecimal = i.next() as BigDecimal?
-                            val builder: BarcodeBuilder = Singleton.getBarcodeBuilder()
+                            val builder: BarcodeBuilder = Singleton.BarcodeBuilder
                             missing.add(builder.makeFromNumber(value.toBigInteger().intValue()))
                             log!!.debug(value)
                         }

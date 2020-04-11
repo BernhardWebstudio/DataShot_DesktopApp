@@ -30,7 +30,7 @@ package edu.harvard.mcz.imagecapture.interfaces
  * included in the instantiation of a concrete instance of a parser class, for
  * example:
  * TaxonNameReturner parser = new ConcreteTaxonNameParser(aStringToParse);
- * String authorship = parser.getAuthorship();
+ * String authorship = parser.Authorship;
  */
 interface TaxonNameReturner {
     /**

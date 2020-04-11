@@ -448,9 +448,9 @@ class AboutDialog : JDialog() {
         this.setSize(Dimension(694, 530))
         this.setTitle("About" + ImageCaptureApp.APP_NAME)
         this.setContentPane(getJPanel())
-        val screenSize: Dimension = Toolkit.getDefaultToolkit().getScreenSize()
-        this.setLocation((screenSize.width - this.getWidth()) / 2,
-                (screenSize.height - this.getHeight()) / 2)
+        val screenSize: Dimension = Toolkit.DefaultToolkit.ScreenSize
+        this.setLocation((screenSize.width - this.Width) / 2,
+                (screenSize.height - this.Height) / 2)
     }
 
     /**
@@ -562,7 +562,7 @@ class AboutDialog : JDialog() {
      */
     private fun getJTextFieldVersion(): JTextField? {
         if (jTextFieldVersion == null) {
-            jTextFieldVersion = JTextField(ImageCaptureApp.getAppVersion())
+            jTextFieldVersion = JTextField(ImageCaptureApp.AppVersion)
             jTextFieldVersion.setEditable(false)
         }
         return jTextFieldVersion

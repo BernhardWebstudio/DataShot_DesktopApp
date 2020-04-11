@@ -169,19 +169,19 @@ class Counter : ScanCounterInterface {
      * @param counter the counter to merge with
      */
     fun mergeIn(counter: ScanCounterInterface): Counter {
-        total += counter.getTotal()
-        filesSeen += counter.getFilesSeen()
-        filesDatabased += counter.getFilesDatabased()
-        filesExisting += counter.getFilesExisting()
-        filesFailed += counter.getFilesFailed()
-        directories += counter.getDirectories()
-        directoriesFailed += counter.getDirectoriesFailed()
-        specimensExisting += counter.getSpecimensExisting()
-        specimensUpdated += counter.getSpecimensUpdated()
-        specimens += counter.getSpecimens()
-        filesUpdated += counter.getFilesUpdated()
-        errorReport.append(counter.getErrorReport())
-        errors.addAll(counter.getErrors())
+        total += counter.Total
+        filesSeen += counter.FilesSeen
+        filesDatabased += counter.FilesDatabased
+        filesExisting += counter.FilesExisting
+        filesFailed += counter.FilesFailed
+        directories += counter.Directories
+        directoriesFailed += counter.DirectoriesFailed
+        specimensExisting += counter.SpecimensExisting
+        specimensUpdated += counter.SpecimensUpdated
+        specimens += counter.Specimens
+        filesUpdated += counter.FilesUpdated
+        errorReport.append(counter.ErrorReport)
+        errors.addAll(counter.Errors)
         return this
     }
 

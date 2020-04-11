@@ -26,7 +26,7 @@ class OpenStreetMapUtility {
         con.requestMethod = "GET"
         con.setRequestProperty("Content-Type", "application/json")
         // OpenStreetMap requires a personal User Agent: https://operations.osmfoundation.org/policies/nominatim/
-        con.setRequestProperty("User-Agent", "Datashot/Imagecapture App " + ImageCaptureApp.getAppVersion() + ", Education, https://github.com/BernhardWebstudio/DataShot_DesktopApp/")
+        con.setRequestProperty("User-Agent", "Datashot/Imagecapture App " + ImageCaptureApp.AppVersion + ", Education, https://github.com/BernhardWebstudio/DataShot_DesktopApp/")
         val `in` = BufferedReader(InputStreamReader(con.inputStream))
         var inputLine: String?
         val response = StringBuilder()

@@ -48,14 +48,14 @@ class TestBarcodeScanning
             val testFile = File(this.javaClass.getResource(AllTests.FILE_VALID_BARCODE).file)
             println(testFile.path)
             file = CandidateImageFile(testFile, PositionTemplate())
-            assertEquals(AllTests.BARCODE_IN_FILE_VALID_BARCODE, file.getBarcodeText())
-            assertEquals(CandidateImageFile.RESULT_BARCODE_SCANNED, file.getBarcodeStatus())
-            assertEquals(CandidateImageFile.RESULT_ERROR, file.getUnitTrayTaxonLabelTextStatus())
-            assertEquals(CandidateImageFile.RESULT_NOT_CHECKED, file.getCatalogNumberBarcodeStatus())
-            file.getBarcodeText()
-            assertEquals(CandidateImageFile.RESULT_NOT_CHECKED, file.getCatalogNumberBarcodeStatus())
+            assertEquals(AllTests.BARCODE_IN_FILE_VALID_BARCODE, file.BarcodeText)
+            assertEquals(CandidateImageFile.RESULT_BARCODE_SCANNED, file.BarcodeStatus)
+            assertEquals(CandidateImageFile.RESULT_ERROR, file.UnitTrayTaxonLabelTextStatus)
+            assertEquals(CandidateImageFile.RESULT_NOT_CHECKED, file.CatalogNumberBarcodeStatus)
+            file.BarcodeText
+            assertEquals(CandidateImageFile.RESULT_NOT_CHECKED, file.CatalogNumberBarcodeStatus)
         } catch (e: UnreadableFileException) {
-            fail("Threw unexpected UnreadableFileException. " + e.getMessage())
+            fail("Threw unexpected UnreadableFileException. " + e.Message)
         }
     }
 
@@ -67,11 +67,11 @@ class TestBarcodeScanning
         val file: CandidateImageFile
         try {
             file = CandidateImageFile(File(this.javaClass.getResource(AllTests.FILE_EMPTY).file), PositionTemplate())
-            assertEquals(CandidateImageFile.RESULT_ERROR, file.getBarcodeStatus())
-            assertEquals(CandidateImageFile.RESULT_NOT_CHECKED, file.getCatalogNumberBarcodeStatus())
-            assertEquals(CandidateImageFile.RESULT_NOT_CHECKED, file.getCatalogNumberBarcodeStatus())
+            assertEquals(CandidateImageFile.RESULT_ERROR, file.BarcodeStatus)
+            assertEquals(CandidateImageFile.RESULT_NOT_CHECKED, file.CatalogNumberBarcodeStatus)
+            assertEquals(CandidateImageFile.RESULT_NOT_CHECKED, file.CatalogNumberBarcodeStatus)
         } catch (e: UnreadableFileException) {
-            fail("Threw unexpected UnreadableFileException. " + e.getMessage())
+            fail("Threw unexpected UnreadableFileException. " + e.Message)
         }
     }
 

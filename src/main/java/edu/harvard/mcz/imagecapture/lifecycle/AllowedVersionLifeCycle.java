@@ -19,6 +19,7 @@
 package edu.harvard.mcz.imagecapture.lifecycle;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.AllowedVersion;
 import org.apache.commons.logging.Log;
@@ -28,6 +29,7 @@ import org.flywaydb.core.api.FlywayException;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
+import org.hibernate.Transaction;
 
 import java.util.Iterator;
 import java.util.List;
@@ -102,9 +104,9 @@ public class AllowedVersionLifeCycle {
         String username = (String) properties.get("connection.username");
         String password = (String) properties.get("connection.password");*/
         Properties properties = HibernateUtil.getProperties();
-        String url = properties.getProperty("hibernate.connection.url");
-        String username = properties.getProperty("hibernate.connection.username");
-        String password = properties.getProperty("hibernate.connection.username");
+        String url = properties.getProperty(ImageCaptureProperties.KEY_DB_URL);
+        String username = properties.getProperty(ImageCaptureProperties.KEY_DB_USER);
+        String password = properties.getProperty(ImageCaptureProperties.KEY_DB_PASSWORD);
         // Create the Flyway instance and point it to the database
         Flyway flyway =
                 Flyway.configure().dataSource(url, username, password).load();
@@ -113,9 +115,21 @@ public class AllowedVersionLifeCycle {
             flyway.migrate();
         } catch (FlywayException e) {
             log.error(e);
-            // not the nice way, ok.
+            // not the nice way, ok. Might throw again.
             flyway.repair();
             flyway.migrate();
+        }
+        // finally, remember that we migrated
+        String currentVersion = ImageCaptureApp.getAppVersion();
+        AllowedVersion allowedVersion = new AllowedVersion();
+        allowedVersion.setVersion(currentVersion);
+        try {
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Transaction transaction = session.beginTransaction();
+            session.save(allowedVersion);
+            transaction.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

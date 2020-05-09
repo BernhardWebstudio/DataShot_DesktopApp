@@ -19,12 +19,18 @@
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
 import edu.harvard.mcz.imagecapture.entity.LatLong;
+import edu.harvard.mcz.imagecapture.utility.InputUtility;
+import net.miginfocom.swing.MigLayout;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jdesktop.swingx.combobox.ListComboBoxModel;
+import org.jxmapviewer.JXMapViewer;
+import org.jxmapviewer.OSMTileFactoryInfo;
+import org.jxmapviewer.painter.CompoundPainter;
+import org.jxmapviewer.painter.Painter;
+import org.jxmapviewer.viewer.*;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -32,6 +38,10 @@ import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  *
@@ -42,7 +52,7 @@ public class GeoreferenceDialog extends JDialog {
 
     private static final Log log = LogFactory.getLog(GeoreferenceDialog.class);
 
-    private final JPanel contentPanel = new JPanel();
+    private final JPanel contentPanel;
 
     private JComboBox<String> comboBoxOrigUnits;
     private JComboBox<String> comboBoxErrorUnits;
@@ -71,19 +81,15 @@ public class GeoreferenceDialog extends JDialog {
     private JTextField textFieldDetBy;
     private JFormattedTextField textDetDate;
     private JTextField textRefSource;
-
-    /**
-     * Create the dialog.
-     */
-    public GeoreferenceDialog() {
-        init();
-    }
+    private JXMapViewer mapViewer;
 
     public GeoreferenceDialog(LatLong georeference) {
         this.georeference = georeference;
+        this.contentPanel = new JPanel(new MigLayout("wrap 1, fill"));
         init();
         loadData();
         setState();
+        updateMap();
     }
 
     private void loadData() {
@@ -338,36 +344,41 @@ public class GeoreferenceDialog extends JDialog {
         return result;
     }
 
-    private void init() {
-        setBounds(100, 100, 450, 560);
-        getContentPane().setLayout(new BorderLayout());
-        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        getContentPane().add(contentPanel, BorderLayout.CENTER);
-        contentPanel.setLayout(new GridLayout(0, 2, 0, 0));
-        {
-            JLabel lblLatitude = new JLabel("Latitude");
-            lblLatitude.setHorizontalAlignment(SwingConstants.RIGHT);
-            contentPanel.add(lblLatitude);
+    /**
+     * Update the marker on the map
+     */
+    private void updateMap() {
+        try {
+            GeoPosition address = new GeoPosition(Double.parseDouble(textFieldDecimalLat.getText()), Double.parseDouble(textFieldDecimalLong.getText()));
+            mapViewer.setAddressLocation(address);
+            // Create a waypoint painter that takes all the waypoints
+            WaypointPainter<Waypoint> waypointPainter = new WaypointPainter<Waypoint>();
+            waypointPainter.setWaypoints(new HashSet<Waypoint>(Arrays.asList(
+                    new DefaultWaypoint(address)
+            )));
+
+            // Create a compound painter that uses both the route-painter and the waypoint-painter
+            List<Painter<JXMapViewer>> painters = new ArrayList<Painter<JXMapViewer>>();
+            painters.add(waypointPainter);
+
+            CompoundPainter<JXMapViewer> painter = new CompoundPainter<JXMapViewer>(painters);
+            mapViewer.setOverlayPainter(painter);
+            mapViewer.setZoom(5);
+        } catch (Exception e) {
+            log.error(e);
         }
+    }
 
+    private void init() {
+        // init the pane
+        getContentPane().add(contentPanel);
+        JPanel fieldsPanel = new JPanel(new MigLayout("wrap 2, fillx, insets 0"));
+
+        // instantiate input fields
         textFieldDecimalLat = new JTextField();
-        contentPanel.add(textFieldDecimalLat);
-        textFieldDecimalLat.setColumns(10);
-
-        JLabel lblLongitude = new JLabel("Longitude");
-        lblLongitude.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblLongitude);
-
+        InputUtility.addChangeListener(textFieldDecimalLat, e -> updateMap());
         textFieldDecimalLong = new JTextField();
-        contentPanel.add(textFieldDecimalLong);
-        textFieldDecimalLong.setColumns(10);
-
-        JLabel lblMethod = new JLabel("Method");
-        lblMethod.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblMethod);
-
-        ComboBoxModel<String> methodModel =
-                new ListComboBoxModel<String>(LatLong.getGeorefMethodValues());
+        InputUtility.addChangeListener(textFieldDecimalLong, e -> updateMap());
         cbMethod =
                 new JComboBox<String>(new DefaultComboBoxModel<String>(new String[]{
                         "not recorded", "unknown", "GEOLocate", "Geoportal", "Google Earth",
@@ -378,32 +389,12 @@ public class GeoreferenceDialog extends JDialog {
                 setState();
             }
         });
-        contentPanel.add(cbMethod);
-
-        JLabel lblDatum = new JLabel("Datum");
-        lblDatum.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblDatum);
-
         ComboBoxModel<String> datumModel =
                 new ListComboBoxModel<String>(LatLong.getDatumValues());
         cbDatum = new JComboBox<String>(datumModel);
         // set default
         cbDatum.setSelectedItem("WGS84");
-
-        contentPanel.add(cbDatum);
-
-        JLabel lblAccuracy = new JLabel("GPS Accuracy");
-        lblAccuracy.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblAccuracy);
-
         txtGPSAccuracy = new JTextField();
-        txtGPSAccuracy.setColumns(10);
-        contentPanel.add(txtGPSAccuracy);
-
-        JLabel lblNewLabel_1 = new JLabel("Original Units");
-        lblNewLabel_1.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblNewLabel_1);
-
         comboBoxOrigUnits = new JComboBox<String>();
         comboBoxOrigUnits.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -413,180 +404,141 @@ public class GeoreferenceDialog extends JDialog {
         comboBoxOrigUnits.setModel(new DefaultComboBoxModel<String>(
                 new String[]{"decimal degrees", "deg. min. sec.",
                         "degrees dec. minutes", "unknown"}));
-        contentPanel.add(comboBoxOrigUnits);
-
-        lblErrorRadius = new JLabel("Error Radius");
-        lblErrorRadius.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblErrorRadius);
-
         txtErrorRadius = new JTextField();
-        txtErrorRadius.setColumns(10);
-        contentPanel.add(txtErrorRadius);
-
-        JLabel lblErrorRadiusUnits = new JLabel("Error Radius Units");
-        lblErrorRadiusUnits.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblErrorRadiusUnits);
-
         comboBoxErrorUnits = new JComboBox<String>();
         comboBoxErrorUnits.setModel(new DefaultComboBoxModel<String>(
                 new String[]{"m", "ft", "km", "mi", "yd"}));
         contentPanel.add(comboBoxErrorUnits);
-
-        JLabel lblLatDegrees = new JLabel("Lat Degrees");
-        lblLatDegrees.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblLatDegrees);
-
         txtLatDegrees = new JTextField();
-        txtLatDegrees.setColumns(4);
-        contentPanel.add(txtLatDegrees);
-
-        JLabel lblLatDecMin = new JLabel("Lat Dec Min");
-        lblLatDecMin.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblLatDecMin);
-
         txtLatDecMin = new JTextField();
-        txtLatDecMin.setColumns(6);
-        contentPanel.add(txtLatDecMin);
-
-        JLabel lblLatMin = new JLabel("Lat Min");
-        lblLatMin.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblLatMin);
-
         txtLatMin = new JTextField();
-        txtLatMin.setColumns(6);
-        contentPanel.add(txtLatMin);
-
-        JLabel lblLatSec = new JLabel("Lat Sec");
-        lblLatSec.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblLatSec);
-
         txtLatSec = new JTextField();
-        txtLatSec.setColumns(6);
-        contentPanel.add(txtLatSec);
-
-        JLabel lblLatDir = new JLabel("Lat N/S");
-        lblLatDir.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblLatDir);
-
         cbLatDir = new JComboBox<String>();
         cbLatDir.setModel(
                 new DefaultComboBoxModel<String>(new String[]{"N", "S"}));
-        contentPanel.add(cbLatDir);
-
-        JLabel lblLongDegrees = new JLabel("Long Degrees");
-        lblLongDegrees.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblLongDegrees);
-
         txtLongDegrees = new JTextField();
-        txtLongDegrees.setColumns(4);
-        contentPanel.add(txtLongDegrees);
-
-        JLabel lblLongDecMin = new JLabel("Long Dec Min");
-        lblLongDecMin.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblLongDecMin);
-
         txtLongDecMin = new JTextField();
-        txtLongDecMin.setColumns(6);
-        contentPanel.add(txtLongDecMin);
-
-        JLabel lblLongMin = new JLabel("Long Min");
-        lblLongMin.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblLongMin);
-
         txtLongMin = new JTextField();
-        txtLongMin.setColumns(6);
-        contentPanel.add(txtLongMin);
-
-        JLabel lblLongSec = new JLabel("Long Sec");
-        lblLongSec.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblLongSec);
-
         txtLongSec = new JTextField();
-        txtLongSec.setColumns(6);
-        contentPanel.add(txtLongSec);
-
-        JLabel lblLongDir = new JLabel("Long E/W");
-        lblLongDir.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblLongDir);
-
         cbLongDir = new JComboBox<String>();
         cbLongDir.setModel(
                 new DefaultComboBoxModel<String>(new String[]{"E", "W"}));
-        contentPanel.add(cbLongDir);
-
-        JLabel lblDetBy = new JLabel("Determined By");
-        lblDetBy.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblDetBy);
-
         textFieldDetBy = new JTextField();
-        contentPanel.add(textFieldDetBy);
-        textFieldDetBy.setColumns(10);
-
-        JLabel lblDetDate = new JLabel("Date Determined");
-        lblDetDate.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblDetDate);
-
         try {
             textDetDate = new JFormattedTextField(new MaskFormatter("####-##-##"));
         } catch (ParseException e1) {
             textDetDate = new JFormattedTextField();
         }
         textDetDate.setToolTipText(
-                "Date on which georeference was made yyyy-mm-dd");
-        contentPanel.add(textDetDate);
-
-        JLabel lblRef = new JLabel("Reference Source");
-        lblRef.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblRef);
-
+                "Date on which georeference was made, yyyy-mm-dd");
         textRefSource = new JTextField();
-        contentPanel.add(textRefSource);
-        textRefSource.setColumns(10);
-
-        lblNewLabel = new JLabel("Remarks");
-        lblNewLabel.setHorizontalAlignment(SwingConstants.RIGHT);
-        contentPanel.add(lblNewLabel);
-
         textFieldRemarks = new JTextField();
-        contentPanel.add(textFieldRemarks);
-        textFieldRemarks.setColumns(10);
 
-        {
-            JPanel buttonPane = new JPanel();
-            buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-            getContentPane().add(buttonPane, BorderLayout.SOUTH);
-            {
-                lblErrorLabel = new JLabel("Message");
-                buttonPane.add(lblErrorLabel);
-            }
-            {
-                okButton = new JButton("OK");
-                okButton.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
+        Component[] fields = {
+                textFieldDecimalLat,
+                textFieldDecimalLong,
+                cbMethod,
+                cbDatum,
+                txtGPSAccuracy,
+                comboBoxOrigUnits,
+                txtErrorRadius,
+                comboBoxErrorUnits,
+                txtLatDegrees,
+                txtLatDecMin,
+                txtLatMin,
+                txtLatSec,
+                cbLatDir,
+                txtLongDegrees,
+                txtLongDecMin,
+                txtLongMin,
+                txtLongSec,
+                cbLongDir,
+                textFieldDetBy,
+                textDetDate,
+                textRefSource,
+                textFieldRemarks
+        };
 
-                        lblErrorLabel.setText("");
+        String[] labels = {
+                "Latitude",
+                "Longitude",
+                "Method",
+                "Datum",
+                "GPS Accuracy",
+                "Original Units",
+                "Error Radius",
+                "Error Radius Units",
+                "Lat Degrees",
+                "Lat Dec Min",
+                "Lat Min",
+                "Lat Sec",
+                "Lat N/S",
+                "Long Degrees",
+                "Long Dec Min",
+                "Long Min",
+                "Long Sec",
+                "Long E/W",
+                "Determined By",
+                "Date Determined",
+                "Reference Source",
+                "Remarks"
+        };
 
-                        if (saveData()) {
-                            setVisible(false);
-                        }
-                    }
-                });
-                okButton.setActionCommand("OK");
-                buttonPane.add(okButton);
-                getRootPane().setDefaultButton(okButton);
-            }
-            {
-                JButton cancelButton = new JButton("Cancel");
-                cancelButton.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-
-                        loadData();
-                        setVisible(false);
-                    }
-                });
-                cancelButton.setActionCommand("Cancel");
-                buttonPane.add(cancelButton);
-            }
+        for (int i = 0; i < labels.length; i++) {
+            JLabel label = new JLabel();
+            label.setText(labels[i].concat(":"));
+            fieldsPanel.add(label, "right"); //"align label");
+            fieldsPanel.add(fields[i], "grow");
         }
+
+        contentPanel.add(fieldsPanel); // "grow");
+
+        JPanel mapPanel = new JPanel(new MigLayout("wrap 1, fill, insets 0"));
+        mapViewer = new JXMapViewer();
+        // Create a TileFactoryInfo for OpenStreetMap
+        TileFactoryInfo info = new OSMTileFactoryInfo();
+        DefaultTileFactory tileFactory = new DefaultTileFactory(info);
+        mapViewer.setTileFactory(tileFactory);
+        // Use 8 threads in parallel to load the tiles
+        tileFactory.setThreadPoolSize(8);
+        mapPanel.add(mapViewer, "grow");
+//        mapViewer.setPreferredSize(new Dimension(200, 100));
+        contentPanel.add(mapPanel, "grow, span 2, hmin 150");
+
+        JPanel buttonPane = new JPanel();
+        buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        getContentPane().add(buttonPane, BorderLayout.SOUTH);
+
+        lblErrorLabel = new JLabel("Message");
+        buttonPane.add(lblErrorLabel);
+
+        okButton = new JButton("OK");
+        okButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+                lblErrorLabel.setText("");
+
+                if (saveData()) {
+                    setVisible(false);
+                }
+            }
+        });
+        okButton.setActionCommand("OK");
+        buttonPane.add(okButton);
+        getRootPane().setDefaultButton(okButton);
+
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+
+                loadData();
+                setVisible(false);
+            }
+        });
+        cancelButton.setActionCommand("Cancel");
+        buttonPane.add(cancelButton);
+
+        // recalc
+        this.pack();
     }
 }

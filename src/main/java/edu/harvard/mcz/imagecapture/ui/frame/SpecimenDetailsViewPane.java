@@ -1083,9 +1083,9 @@ public class SpecimenDetailsViewPane extends JPanel {
     }
 
     /**
-     * This method initializes jTextField1
+     * This method initializes the collection field
      *
-     * @return javax.swing.JTextField
+     * @return javax.swing.JComboBox
      */
     private JComboBox<String> getJTextFieldCollection() {
         if (jComboBoxCollection == null) {

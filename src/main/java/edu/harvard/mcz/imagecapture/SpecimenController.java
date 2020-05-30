@@ -190,44 +190,52 @@ public class SpecimenController {
      *
      * @return true if there is a table model and the current position isn't the last.
      */
+//    public boolean hasNextSpecimenInTable() {
+//        boolean result = false;
+//        if (inTable && model != null && currentRow > -1) {
+//            try {
+//                Specimen temp = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow + 1), 0);
+//                if (temp != null) {
+//                    result = true;
+//                }
+//            } catch (IndexOutOfBoundsException e) {
+//                log.debug(e);
+//            }
+//        }
+//        return result;
+//    }
     public boolean hasNextSpecimenInTable() {
         boolean result = false;
         if (inTable && model != null && currentRow > -1) {
-            try {
-                Specimen temp = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow + 1), 0);
-                if (temp != null) {
-                    result = true;
-                }
-            } catch (IndexOutOfBoundsException e) {
-                log.debug(e);
-            }
+            log.debug("Current row: " + currentRow + " while row count: " + model.getRowCount());
+            result = model.getRowCount() > (currentRow + 1);
         }
         return result;
     }
-//		public boolean hasNextSpecimenInTable() {
-//			boolean result = false;
-//			if (inTable && model!=null && currentRow > -1) {
-//				result = model.getRowCount() > currentRow;
-//			}
-//			return result;
-//		}
 
     /**
      * Is there a previous specimen in the table model?
      *
      * @return true if there is a table model and the current position isn't the first.
      */
+//    public boolean hasPreviousSpecimenInTable() {
+//        boolean result = false;
+//        if (inTable && model != null && currentRow > 0) {
+//            try {
+//                Specimen temp = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow - 1), 0);
+//                if (temp != null) {
+//                    result = true;
+//                }
+//            } catch (IndexOutOfBoundsException e) {
+//                log.debug(e);
+//            }
+//        }
+//        return result;
+//    }
     public boolean hasPreviousSpecimenInTable() {
         boolean result = false;
-        if (inTable && model != null && currentRow > -1 && currentRow > 0) {
-            try {
-                Specimen temp = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow - 1), 0);
-                if (temp != null) {
-                    result = true;
-                }
-            } catch (IndexOutOfBoundsException e) {
-                log.debug(e);
-            }
+        if (inTable && model != null && currentRow > 0) {
+            result = currentRow > 0;
         }
         return result;
     }

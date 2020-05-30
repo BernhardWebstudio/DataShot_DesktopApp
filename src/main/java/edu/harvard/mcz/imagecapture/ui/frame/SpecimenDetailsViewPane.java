@@ -2247,6 +2247,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             }
             jButtonNext.setMnemonic(KeyEvent.VK_N);
             jButtonNext.setEnabled(specimenController.hasNextSpecimenInTable());
+            log.debug("next button enabled: " + specimenController.hasNextSpecimenInTable());
             jButtonNext.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     try {
@@ -2271,7 +2272,6 @@ public class SpecimenDetailsViewPane extends JPanel {
                 }
             });
         }
-        log.debug("SpecimenDetailsViewPane.getJButtonNext(): 9");
         return jButtonNext;
     }
 
@@ -2322,10 +2322,10 @@ public class SpecimenDetailsViewPane extends JPanel {
                 log.debug("Controller is in table");
                 // test to make sure the buttons have been created before trying to enable them.
                 if (jButtonNext != null) {
-                    jButtonNext.setEnabled(true);
+                    jButtonNext.setEnabled(specimenController.hasNextSpecimenInTable());
                 }
                 if (jButtonPrevious != null) {
-                    jButtonPrevious.setEnabled(true);
+                    jButtonPrevious.setEnabled(specimenController.hasPreviousSpecimenInTable());
                 }
             }
         }

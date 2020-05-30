@@ -122,7 +122,7 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.13</version>
+			<version>1.14</version>
 		</dependency>
 		<dependency>
 			<groupId>com.adobe.xmp</groupId>
@@ -147,7 +147,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<version>1.4.199</version>
+			<version>1.4.200</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.miglayout/miglayout-swing -->
 		<dependency>
@@ -173,13 +173,13 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
-			<version>1.7</version>
+			<version>1.8</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.boofcv/boofcv-core -->
 		<dependency>
 			<groupId>org.boofcv</groupId>
 			<artifactId>boofcv-core</artifactId>
-			<version>0.34</version>
+			<version>0.36.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.filteredpush</groupId>
@@ -189,7 +189,7 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
-			<version>6.0.4</version>
+			<version>6.4.3</version>
 		</dependency>
 		<dependency>
 			<groupId>javassist</groupId>
@@ -204,18 +204,18 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.13-beta-3</version>
+			<version>4.13</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.drewnoakes</groupId>
 			<artifactId>metadata-extractor</artifactId>
-			<version>2.12.0</version>
+			<version>2.14.0</version>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.17</version>
+			<version>8.0.20</version>
 		</dependency>
 		<dependency>
 			<groupId>org.swinglabs</groupId>
@@ -232,7 +232,7 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.12.1</version>
+			<version>2.13.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -245,28 +245,28 @@
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<!--<version>6.0.0.Alpha2</version>-->
-			<version>5.4.11.Final</version>
+			<version>5.4.16.Final</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20190722</version>
+			<version>20200518</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.12.1</version>
+			<version>2.13.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
-			<version>2.12.1</version>
+			<version>2.13.3</version>
 		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>2.0.0-alpha0</version>
+			<version>2.0.0-alpha1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jxmapviewer</groupId>

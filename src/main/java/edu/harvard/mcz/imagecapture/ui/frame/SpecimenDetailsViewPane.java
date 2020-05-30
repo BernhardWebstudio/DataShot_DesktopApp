@@ -40,6 +40,7 @@ import edu.harvard.mcz.imagecapture.ui.field.FilteringGeogJComboBox;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.CollectorTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.NumberTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenPartsTableModel;
+import edu.harvard.mcz.imagecapture.utility.InputUtility;
 import edu.harvard.mcz.imagecapture.utility.OpenStreetMapUtility;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.logging.Log;
@@ -1736,6 +1737,21 @@ public class SpecimenDetailsViewPane extends JPanel {
                     thisPane.setStateToDirty();
                 }
             });
+            InputUtility.addChangeListener(jTextFieldDateNos, e -> {
+                // co-update the ISO-date field
+                // TODO: note that this could be unwanted. possibly. On the other hand,
+                //  more possibilities for formats could be automatically set.
+                //  To be sure that we do not update unwanted, we only apply it to certain forms only
+                //  Possible pitfalls of other forms: not knowing if 19.., 18.., ...
+                String verbatimDate = jTextFieldDateNos.getText().trim();
+                if (verbatimDate.matches("\\d{1,2}\\.\\s*\\d{1,2}\\.\\s*\\d{4}")) { // assume dd.mm.yyyy resp. dd. mm. yyyy
+                    String[] parts = verbatimDate.split("\\.");
+                    jTextFieldISODate.setText(parts[2].trim() + "/" + parts[1].trim() + "/" + parts[0].trim()); // yyyy/mm/dd
+                } else if (verbatimDate.matches("\\d{4}/\\d{1,2}/\\d{1,2}")) {
+                    jTextFieldISODate.setText(verbatimDate);
+                }
+            });
+
         }
         return jTextFieldDateNos;
     }
@@ -1755,6 +1771,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                     thisPane.setStateToDirty();
                 }
             });
+
         }
         return jTextFieldDateEmerged;
     }

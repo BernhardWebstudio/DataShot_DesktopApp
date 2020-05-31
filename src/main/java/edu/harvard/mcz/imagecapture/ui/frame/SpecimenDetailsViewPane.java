@@ -58,6 +58,7 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
+import java.security.Key;
 import java.util.*;
 
 /**
@@ -2021,7 +2022,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JButton getJButtonAddPrep() {
         if (jButtonAddPreparationType == null) {
             jButtonAddPreparationType = new JButton("Add Prep");
-            jButtonAddPreparationType.setMnemonic(KeyEvent.VK_P);
+            jButtonAddPreparationType.setMnemonic(KeyEvent.VK_A);
 
             jButtonAddPreparationType.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
@@ -2188,7 +2189,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             jButtonPaste.setText("Paste");
             jButtonPaste.setToolTipText("Paste previous record values into this screen");
             //TODO: decide on keyboard shortcut
-            //jButtonPaste.setMnemonic(KeyEvent.VK_H);
+            jButtonPaste.setMnemonic(KeyEvent.VK_V);
             jButtonPaste.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     //populate the fields with the data.
@@ -2216,7 +2217,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             jButtonCopy.setText("Save & Copy");
             jButtonCopy.setToolTipText("Copy the values of this record after saving it");
             //TODO: decide on keyboard shortcut
-            //jButtonCopy.setMnemonic(KeyEvent.VK_H);
+            jButtonCopy.setMnemonic(KeyEvent.VK_K);
             jButtonCopy.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     thisPane.save();

@@ -136,6 +136,7 @@ public class ImageCaptureApp {
                     // Use cross platform if native uses space on forms much too inefficiently
                     // UIManager.getCrossPlatformLookAndFeelClassName());
                     UIManager.getSystemLookAndFeelClassName());
+//            System.setProperty("apple.laf.useScreenMenuBar", "true");
         } catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             log.error(e);
         }

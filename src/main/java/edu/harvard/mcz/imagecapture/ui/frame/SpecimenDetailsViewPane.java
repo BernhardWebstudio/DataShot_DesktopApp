@@ -18,10 +18,7 @@
  */
 package edu.harvard.mcz.imagecapture.ui.frame;
 
-import edu.harvard.mcz.imagecapture.ImageCaptureApp;
-import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
-import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.SpecimenController;
+import edu.harvard.mcz.imagecapture.*;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.data.LocationInCollection;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
@@ -58,7 +55,6 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
-import java.security.Key;
 import java.util.*;
 
 /**
@@ -75,12 +71,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     private static final int STATE_CLEAN = 0;
     private static final int STATE_DIRTY = 1;
+    KeyboardShortcutManager manager = KeyboardShortcutManager.getInstance();
     private Specimen previousSpecimen = null;
     private Specimen specimen;  //  @jve:decl-index=0:
     private SpecimenController specimenController = null;
     private int state;   // dirty if data in controls has been changed and not saved to specimen.
-
-
     // private JTextField jTextFieldPreparationType = null;
     //allie change
     //private JTextField jTextFieldCountry = null;
@@ -231,12 +226,6 @@ public class SpecimenDetailsViewPane extends JPanel {
         this.setLayout(borderLayout);
         this.add(getJTextFieldStatus(), BorderLayout.SOUTH);
 
-        // Un-comment this line to use design tool.
-        //    this.add(getJPanel(), BorderLayout.CENTER);
-
-        // Comment this block out to use design tool.
-        //   see also getCbTypeStatus
-
         JScrollPane scrollPane = new JScrollPane(getJPanel(),
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -244,6 +233,49 @@ public class SpecimenDetailsViewPane extends JPanel {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         this.add(scrollPane, BorderLayout.CENTER);
         this.setMinimumSize(new Dimension(100, 100));
+
+        // add keyboard listeners
+        // with all the shortcuts
+        registerShortcut("specimen.save", "ctrl S", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                save();
+            }
+        });
+        registerShortcut("specimen.next", "ctrl RIGHT", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                gotoNextSpecimen();
+            }
+        });
+        registerShortcut("specimen.previous", "ctrl LEFT", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                gotoPreviousSpecimen();
+            }
+        });
+        registerShortcut("specimen.copyThis", "ctrl alt C", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                ImageCaptureApp.lastEditedSpecimenCache = thisPane.specimen;
+                thisPane.setStatus("Copied specimen with id " + thisPane.specimen.getSpecimenId());
+            }
+        });
+        registerShortcut("specimen.paste", "ctrl alt V", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                previousSpecimen = ImageCaptureApp.lastEditedSpecimenCache;
+                pastePreviousRecord();
+            }
+        });
+    }
+
+    void registerShortcut(String name, String defaultStroke, Action action) {
+        InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        ActionMap actionMap = this.getActionMap();
+        inputMap.put(manager.getShortcut(name, defaultStroke), name);
+        actionMap.put(name, action);
+        log.debug("Registered shortcut: " + name + " as " + manager.getShortcut(name, defaultStroke));
     }
 
     public void setWarning(String warning) {
@@ -480,8 +512,8 @@ public class SpecimenDetailsViewPane extends JPanel {
     /**
      * Set the fields values to the ones of the previous specimen
      */
-    private void copyPreviousRecord() {
-        log.debug("calling copyPreviousRecord()");
+    private void pastePreviousRecord() {
+        log.debug("calling pastePreviousRecord()");
         //thisPane.setStateToDirty();
         jTextFieldDateDetermined.setText(previousSpecimen.getDateIdentified());
         jCBDeterminer.setSelectedItem(previousSpecimen.getIdentifiedBy());
@@ -584,6 +616,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         jTextFieldCollectingMethod.setText(previousSpecimen.getCollectingMethod());
 
         updateContentDependentLabels();
+        thisPane.setStatus("Pasted specimen with id " + thisPane.previousSpecimen.getSpecimenId());
     }
 
     /**
@@ -1081,6 +1114,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                 }
             });
         }
+
         return jButtonSave;
     }
 
@@ -2194,7 +2228,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     //populate the fields with the data.
                     previousSpecimen = ImageCaptureApp.lastEditedSpecimenCache;
-                    copyPreviousRecord();
+                    pastePreviousRecord();
                 }
             });
             this.updateJButtonPaste();
@@ -2251,29 +2285,33 @@ public class SpecimenDetailsViewPane extends JPanel {
             log.debug("next button enabled: " + specimenController.hasNextSpecimenInTable());
             jButtonNext.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    try {
-                        // try to move to the next specimen in the table.
-                        thisPane.setStatus("Switching to next specimen...");
-                        if (thisPane.specimenController.openNextSpecimenInTable()) {
-                            thisPane.setVisible(false);
-                            thisPane.invalidate();
-                        } else {
-                            thisPane.setWarning("No next specimen available.");
-                        }
-                    } catch (Exception e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    } finally {
-                        try {
-                            thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                        } catch (Exception ex) {
-                            log.error(ex);
-                        }
-                    }
+                    thisPane.gotoNextSpecimen();
                 }
             });
         }
         return jButtonNext;
+    }
+
+    private void gotoNextSpecimen() {
+        try {
+            // try to move to the next specimen in the table.
+            thisPane.setStatus("Switching to next specimen...");
+            if (thisPane.specimenController.openNextSpecimenInTable()) {
+                thisPane.setVisible(false);
+                thisPane.invalidate();
+            } else {
+                thisPane.setWarning("No next specimen available.");
+            }
+        } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        } finally {
+            try {
+                thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            } catch (Exception ex) {
+                log.error(ex);
+            }
+        }
     }
 
     /**
@@ -2295,23 +2333,27 @@ public class SpecimenDetailsViewPane extends JPanel {
             jButtonPrevious.setEnabled(specimenController.hasPreviousSpecimenInTable());
             jButtonPrevious.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    try {
-                        // try to move to the previous specimen in the table.
-                        thisPane.setStatus("Switching to previous specimen...");
-                        if (thisPane.specimenController.openPreviousSpecimenInTable()) {
-                            thisPane.setVisible(false);
-                            thisPane.invalidate();
-                        } else {
-                            thisPane.setWarning("No previous specimen available.");
-                        }
-                    } catch (Exception e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    }
+                    thisPane.gotoPreviousSpecimen();
                 }
             });
         }
         return jButtonPrevious;
+    }
+
+    private void gotoPreviousSpecimen() {
+        try {
+            // try to move to the previous specimen in the table.
+            thisPane.setStatus("Switching to previous specimen...");
+            if (thisPane.specimenController.openPreviousSpecimenInTable()) {
+                thisPane.setVisible(false);
+                thisPane.invalidate();
+            } else {
+                thisPane.setWarning("No previous specimen available.");
+            }
+        } catch (Exception e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
     }
 
     private void setStateToClean() {

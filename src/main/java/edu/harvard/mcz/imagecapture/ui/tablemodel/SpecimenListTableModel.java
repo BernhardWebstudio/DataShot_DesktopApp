@@ -32,23 +32,22 @@ import java.util.List;
 public class SpecimenListTableModel extends AbstractTableModel {
 
     public static final int COL_ID = 0;
-    public static final int COL_COPY = 1;
-    public static final int COL_BARCODE = 2;
-    public static final int COL_WORKFLOW = 3;
-    public static final int COL_FAMILY = 4;
-    public static final int COL_SUBFAMILY = 5;
-    public static final int COL_TRIBE = 6;
-    public static final int COL_GENUS = 7;
-    public static final int COL_SPECIFIC = 8;
-    public static final int COL_SUBSPECIFIC = 9;
-    public static final int COL_COUNTRY = 10;
-    public static final int COL_DIVISION = 11;
-    public static final int COL_VERBLOCALITY = 12;
-    public static final int COLUMCOUNT = 13;
+//    public static final int COL_COPY = 1;
+    public static final int COL_BARCODE = 2 - 1;
+    public static final int COL_WORKFLOW = 3 - 1;
+    public static final int COL_FAMILY = 4 - 1;
+    public static final int COL_SUBFAMILY = 5 - 1;
+    public static final int COL_TRIBE = 6 - 1;
+    public static final int COL_GENUS = 7 - 1;
+    public static final int COL_SPECIFIC = 8 - 1;
+    public static final int COL_SUBSPECIFIC = 9 - 1;
+    public static final int COL_COUNTRY = 10 - 1;
+    public static final int COL_DIVISION = 11 - 1;
+    public static final int COL_VERBLOCALITY = 12 - 1;
+    public static final int COLUMCOUNT = 13 - 1;
     private static final Log log = LogFactory.getLog(SpecimenListTableModel.class);
     private static final long serialVersionUID = -8394267503927374758L;
     private List<Specimen> specimens = null;
-    private JButton copyBtn = null;
 
     public SpecimenListTableModel(List<Specimen> specimenList) {
         specimens = specimenList;
@@ -82,9 +81,9 @@ public class SpecimenListTableModel extends AbstractTableModel {
                 //result = s.getSpecimenId();
                 result = s;
                 break;
-            case COL_COPY:
-                result = s;
-                break;
+//            case COL_COPY:
+//                result = s;
+//                break;
             case COL_BARCODE:
                 result = s.getBarcode();
                 break;
@@ -154,9 +153,9 @@ public class SpecimenListTableModel extends AbstractTableModel {
             case COL_ID:
                 result = "Edit";
                 break;
-            case COL_COPY:
-                result = "Copy";
-                break;
+//            case COL_COPY:
+//                result = "Copy";
+//                break;
             case COL_BARCODE:
                 result = "Barcode";
                 break;
@@ -205,7 +204,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         boolean result = false;
-        if (columnIndex == COL_ID || columnIndex == COL_COPY) {
+        if (columnIndex == COL_ID){ //|| columnIndex == COL_COPY) {
             result = true;
         }
         return result;

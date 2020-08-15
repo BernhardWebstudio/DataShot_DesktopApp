@@ -156,8 +156,8 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             jTable.setRowSorter(sorter);
             jTable.setDefaultRenderer(Specimen.class, new ButtonRenderer());
             jTable.setDefaultEditor(Specimen.class, new ButtonEditor());
-            jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY)).setCellRenderer(new ButtonRenderer("Copy"));
-            jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY)).setCellEditor(new CopyRowButtonEditor(new JCheckBox()));
+//            jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY)).setCellRenderer(new ButtonRenderer("Copy"));
+//            jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY)).setCellEditor(new CopyRowButtonEditor(new JCheckBox()));
             // set some column widths
             int characterWidth = Singleton.getSingletonInstance().getCharacterWidth();
             jTable.getColumnModel().getColumn(0).setPreferredWidth(characterWidth *

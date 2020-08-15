@@ -2237,7 +2237,8 @@ public class SpecimenDetailsViewPane extends JPanel {
     }
 
     private void updateJButtonPaste() {
-        jButtonPaste.setEnabled(!(this.previousSpecimen == null && ImageCaptureApp.lastEditedSpecimenCache == null));
+        if (jButtonPaste != null){
+        jButtonPaste.setEnabled(!(this.previousSpecimen == null && ImageCaptureApp.lastEditedSpecimenCache == null));}
     }
 
     /**

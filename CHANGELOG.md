@@ -3,19 +3,14 @@
 ## v1.11.1
 * [[`876635ba6c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/876635ba6c)] - Remove copy button from specimen list (Tim Bernhard)
 * [[`8c9f651849`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8c9f651849)] - Pseudo-disable paste previous action (Tim Bernhard)
-* [[`41fc96d9dc`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/41fc96d9dc)] - Slighly improve stability of file chooser (Tim Bernhard)
+* [[`41fc96d9dc`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/41fc96d9dc)] - Slightly improve stability of file chooser (Tim Bernhard)
 * [[`f460b2882b`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f460b2882b)] - Add rudimentary custom shortcut functionality (Tim Bernhard)
 * [[`9ebb3ca864`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/9ebb3ca864)] - Add more mnemonics as shortcuts in specimen edit view (Tim Bernhard)
 * [[`8a88a6c778`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8a88a6c778)] - Get the next/prev arrows working as intended (Tim Bernhard)
-* [[`c51ca5c5a2`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c51ca5c5a2)] - Partially auto-complete iso date from dateNOS where applicable (risky) (Tim Bernhard)
+* [[`c51ca5c5a2`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c51ca5c5a2)] - Partially auto-complete ISO date from dateNOS where applicable (risky) (Tim Bernhard)
 * [[`58712f33b2`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/58712f33b2)] - Explicitly load english location names from OpenStreetMap (Tim Bernhard)
 * [[`be05ddb58c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/be05ddb58c)] - Update dependencies (Tim Bernhard)
 * [[`46311021e9`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/46311021e9)] - Refactor Georeference dialog to Miglayout including a little map (Tim Bernhard)
-* [[`efaaa1d9cb`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/efaaa1d9cb)] - Fix typo in README (Tim Bernhard)
-* [[`22a788ccdb`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/22a788ccdb)] - Fix (hopefully) GitHub Action to extract changelog automatically (Tim Bernhard)
-* [[`fc9ac60b22`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/fc9ac60b22)] - Increment version number for pre-realeases (Tim Bernhard)
-* [[`45a15449c9`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/45a15449c9)] - Update changelog to publish Version v1.11.0 (Tim Bernhard)
-
 
 ## v1.11.0
 * [[`b3b7c7de6a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/056a3a0dc9)] - Change travis to GitHub actions (Tim Bernhard)

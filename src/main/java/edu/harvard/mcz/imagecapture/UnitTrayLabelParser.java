@@ -35,6 +35,7 @@ public class UnitTrayLabelParser implements TaxonNameReturner, DrawerNameReturne
     private String drawerNumber;
     private String collection;  // collection from which the material came
     private String identifiedBy;
+    private String sex;
     private boolean parsedFromJSON;
 
     /**
@@ -81,6 +82,7 @@ public class UnitTrayLabelParser implements TaxonNameReturner, DrawerNameReturne
             infraspecificEpithet = label.getInfraspecificEpithet();
             infraspecificRank = label.getInfraspecificRank();
             drawerNumber = label.getDrawerNumber();
+            sex = label.getSex();
             parsedFromJSON = true;
         }
         return result;
@@ -491,6 +493,24 @@ public class UnitTrayLabelParser implements TaxonNameReturner, DrawerNameReturne
      */
     public void setIdentifiedBy(String identifiedBy) {
         this.identifiedBy = identifiedBy;
+    }
+
+    /**
+     * Get the gender (male, female, worker)
+     *
+     * @return the gender of the object
+     */
+    public String getSex() {
+        return sex;
+    }
+
+    /**
+     * Set the gender of the entity
+     *
+     * @param sex
+     */
+    public void setSex(String sex) {
+        this.sex = sex;
     }
 
     /**

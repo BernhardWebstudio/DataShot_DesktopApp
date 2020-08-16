@@ -17,3 +17,5 @@ git commit -am "Update changelog to publish Version v$MVN_VERSION"
 
 git tag -a "v$MVN_VERSION" -m "Version $MVN_VERSION" #\n\nChanges:\n$GIT_HISTORY"
 git push --follow-tags
+
+echo "Remember to run ./prepare-{major|minor|patch}.sh to increment the version"

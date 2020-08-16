@@ -79,4 +79,9 @@ public interface TaxonNameReturner {
      */
     String getIdentifiedBy();
 
+    /**
+     * @return the sex (male, female, worker)
+     */
+    String getSex();
+
 }

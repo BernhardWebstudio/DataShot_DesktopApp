@@ -2,9 +2,7 @@ package edu.harvard.mcz.imagecapture.jobs;
 
 import edu.harvard.mcz.imagecapture.*;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
-import edu.harvard.mcz.imagecapture.entity.ICImage;
-import edu.harvard.mcz.imagecapture.entity.Specimen;
-import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
+import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.OCRReadException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
@@ -411,6 +409,17 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                 s.setFamily(parser.getFamily());
                 s.setSubfamily(parser.getSubfamily());
                 s.setTribe(parser.getTribe());
+                // set sex
+                String sex = parser.getSex();
+                if (sex.equalsIgnoreCase("worker")) {
+                    s.setSex("female");
+                    SpecimenPart worker = new SpecimenPart();
+                    SpecimenPartAttribute workerCaste = new SpecimenPartAttribute(worker, "caste", "worker", "", "", "", new Date());
+                    worker.getAttributeCollection().add(workerCaste);
+                    s.getSpecimenParts().add(worker);
+                } else {
+                    s.setSex(sex);
+                }
             } else {
                 // We failed over to OCR, try lookup in DB.
                 s.setFamily("");  // make sure there's a a non-null value in family.

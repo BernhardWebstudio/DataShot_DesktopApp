@@ -22,7 +22,6 @@ import edu.harvard.mcz.imagecapture.entity.Specimen;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.util.List;
 
@@ -32,7 +31,7 @@ import java.util.List;
 public class SpecimenListTableModel extends AbstractTableModel {
 
     public static final int COL_ID = 0;
-//    public static final int COL_COPY = 1;
+    //    public static final int COL_COPY = 1;
     public static final int COL_BARCODE = 2 - 1;
     public static final int COL_WORKFLOW = 3 - 1;
     public static final int COL_FAMILY = 4 - 1;
@@ -204,7 +203,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         boolean result = false;
-        if (columnIndex == COL_ID){ //|| columnIndex == COL_COPY) {
+        if (columnIndex == COL_ID) { //|| columnIndex == COL_COPY) {
             result = true;
         }
         return result;

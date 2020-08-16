@@ -224,26 +224,7 @@ public class LabelEncoder {
                     // in two columns, filling left column first, then right
                     if (cellCounter == 12) {
                         // add a page of 12 cells in columns of two.
-                        for (int x = 0; x < 6; x++) {
-                            if (cells.get(x) == null) {
-                                PdfPCell c = new PdfPCell();
-                                c.setBorder(0);
-                                table.addCell(c);
-                                table.addCell(c);
-                            } else {
-                                table.addCell(cells.get(x));
-                                table.addCell(cells_barcode.get(x));
-                            }
-                            if (cells.get(x + 6) == null) {
-                                PdfPCell c = new PdfPCell();
-                                c.setBorder(0);
-                                table.addCell(c);
-                                table.addCell(c);
-                            } else {
-                                table.addCell(cells.get(x + 6));
-                                table.addCell(cells_barcode.get(x + 6));
-                            }
-                        }
+                        addPageWithColCells(table, cells, cells_barcode);
                         // Reset to begin next page
                         cellCounter = 0;
                         document.add(table);
@@ -259,26 +240,7 @@ public class LabelEncoder {
                 counter++;
             } // end while results has next (for all taxa requested)
             // get any remaining cells in pairs
-            for (int x = 0; x < 6; x++) {
-                if (cells.get(x) == null) {
-                    PdfPCell c = new PdfPCell();
-                    c.setBorder(0);
-                    table.addCell(c);
-                    table.addCell(c);
-                } else {
-                    table.addCell(cells.get(x));
-                    table.addCell(cells_barcode.get(x));
-                }
-                if (cells.get(x + 6) == null) {
-                    PdfPCell c = new PdfPCell();
-                    c.setBorder(0);
-                    table.addCell(c);
-                    table.addCell(c);
-                } else {
-                    table.addCell(cells.get(x + 6));
-                    table.addCell(cells_barcode.get(x + 6));
-                }
-            }
+            addPageWithColCells(table, cells, cells_barcode);
             // add any remaining cells
             document.add(table);
             try {
@@ -322,6 +284,29 @@ public class LabelEncoder {
             throw new PrintFailedException("Ran out of memory, too many labels at once.");
         }
         return result;
+    }
+
+    private static void addPageWithColCells(PdfPTable table, ArrayList<PdfPCell> cells, ArrayList<PdfPCell> cells_barcode) {
+        for (int x = 0; x < 6; x++) {
+            if (cells.get(x) == null) {
+                PdfPCell c = new PdfPCell();
+                c.setBorder(0);
+                table.addCell(c);
+                table.addCell(c);
+            } else {
+                table.addCell(cells.get(x));
+                table.addCell(cells_barcode.get(x));
+            }
+            if (cells.get(x + 6) == null) {
+                PdfPCell c = new PdfPCell();
+                c.setBorder(0);
+                table.addCell(c);
+                table.addCell(c);
+            } else {
+                table.addCell(cells.get(x + 6));
+                table.addCell(cells_barcode.get(x + 6));
+            }
+        }
     }
 
     public static void main(String[] args) {

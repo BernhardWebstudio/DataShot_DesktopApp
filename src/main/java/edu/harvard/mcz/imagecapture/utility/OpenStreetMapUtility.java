@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 // TODO: refactor into https://github.com/westnordost/osmapi-overpass
@@ -38,11 +39,12 @@ public class OpenStreetMapUtility {
 
         con.setRequestMethod("GET");
         con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("Accept-Charset", "UTF-8");
         // OpenStreetMap requires a personal User Agent: https://operations.osmfoundation.org/policies/nominatim/
         con.setRequestProperty("User-Agent", "Datashot/Imagecapture App " + ImageCaptureApp.getAppVersion() + ", Education, https://github.com/BernhardWebstudio/DataShot_DesktopApp/");
         con.setRequestProperty("Accept-Language", "en, de-CH;q=0.8, de;q=0.7");
 
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
         String inputLine;
         StringBuilder response = new StringBuilder();
 

@@ -264,8 +264,14 @@ public class SpecimenController {
         return specimen;
     }
 
-    public boolean save() throws SaveFailedException {
-        boolean result = false;
+    /**
+     * Save the specimen.
+     * Note that this method does not check permissions
+     *
+     * @return
+     * @throws SaveFailedException
+     */
+    public void save() throws SaveFailedException {
         SpecimenLifeCycle s = new SpecimenLifeCycle();
         log.debug("in SpecimenControler.save: specimenId is " + specimen.getSpecimenId());
         log.debug("in SpecimenControler.save: specimen barcode is " + specimen.getBarcode());
@@ -290,12 +296,10 @@ public class SpecimenController {
         if (updatedSpecimen != null) {
             specimen = updatedSpecimen;
         }
-        return result;
     }
 
-    public boolean save(Specimen copiedSpecimen) throws SaveFailedException {
+    public void save(Specimen copiedSpecimen) throws SaveFailedException {
         specimen = copiedSpecimen;
-        boolean result = false;
         SpecimenLifeCycle s = new SpecimenLifeCycle();
         if (specimen.getSpecimenId() != null) {
             s.attachDirty(specimen);
@@ -311,7 +315,6 @@ public class SpecimenController {
         // reload the specimen
         // Why???
         //specimen = s.findById(specimen.getSpecimenId());
-        return result;
     }
 
     public void displayInEditor() {

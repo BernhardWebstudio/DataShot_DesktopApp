@@ -541,6 +541,12 @@ public class VerbatimCaptureDialog extends JDialog implements DataChangeListener
     }
 
     protected boolean save() {
+        if (specimen.isExported()) {
+            JOptionPane.showMessageDialog(this,
+                    "This Specimen is already exported. No edit will be saved.",
+                    "Warning", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
         boolean result = false;
 
         try {

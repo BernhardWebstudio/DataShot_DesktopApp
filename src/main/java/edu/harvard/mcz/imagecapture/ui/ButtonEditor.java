@@ -175,6 +175,11 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor,
                                                     ((Specimen) targetId).getLoadFlags() + "].\nSee: http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" +
                                                     ((Specimen) targetId).getCatNum(),
                                             "Migrated Specimen", JOptionPane.WARNING_MESSAGE);
+//                                } else if (!((Specimen) targetId).isEditable()) {
+//                                    JOptionPane.showMessageDialog(
+//                                            Singleton.getSingletonInstance().getMainFrame(),
+//                                            "This Specimen record cannot be edited by you.",
+//                                            "Non-editable Specimen", JOptionPane.WARNING_MESSAGE);
                                 } else {
                                     // Specimen is still editable
                                     if (table != null) {

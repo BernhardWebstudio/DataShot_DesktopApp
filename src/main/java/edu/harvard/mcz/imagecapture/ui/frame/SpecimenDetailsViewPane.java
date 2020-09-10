@@ -37,7 +37,6 @@ import edu.harvard.mcz.imagecapture.ui.field.FilteringGeogJComboBox;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.CollectorTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.NumberTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenPartsTableModel;
-import edu.harvard.mcz.imagecapture.utility.InputUtility;
 import edu.harvard.mcz.imagecapture.utility.OpenStreetMapUtility;
 import net.miginfocom.swing.MigLayout;
 import org.apache.commons.logging.Log;
@@ -268,6 +267,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 //                pastePreviousRecord();
 //            }
 //        });
+        if (specimen.isExported()) {
+            JOptionPane.showMessageDialog(thisPane,
+                    "This Specimen is already exported. No edit will be saved.",
+                    "Warning: not saveable", JOptionPane.WARNING_MESSAGE);
+        }
     }
 
     void registerShortcut(String name, String defaultStroke, Action action) {
@@ -321,6 +325,12 @@ public class SpecimenDetailsViewPane extends JPanel {
     }
 
     private void save() {
+        if (specimen.isExported()) {
+            JOptionPane.showMessageDialog(thisPane,
+                    "This Specimen is already exported. No edit will be saved.",
+                    "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
         try {
             thisPane.getParent().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         } catch (Exception ex) {
@@ -1026,6 +1036,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getGenusJTextField() {
         if (jTextFieldGenus == null) {
             jTextFieldGenus = new JTextField();
+            jTextFieldGenus.setEditable(specimen.isEditable());
             jTextFieldGenus.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Genus", jTextFieldGenus));
             jTextFieldGenus.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Genus"));
             jTextFieldGenus.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1045,6 +1056,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getSpecificEpithetJTextField() {
         if (jTextFieldSpecies == null) {
             jTextFieldSpecies = new JTextField();
+            jTextFieldSpecies.setEditable(specimen.isEditable());
             jTextFieldSpecies.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "SpecificEpithet", jTextFieldSpecies));
             jTextFieldSpecies.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "SpecificEpithet"));
             jTextFieldSpecies.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1064,6 +1076,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getSubspecifcEpithetJTextField() {
         if (jTextFieldSubspecies == null) {
             jTextFieldSubspecies = new JTextField();
+            jTextFieldSubspecies.setEditable(specimen.isEditable());
             jTextFieldSubspecies.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "SubspecificEpithet", jTextFieldSubspecies));
             jTextFieldSubspecies.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "SubspecificEpithet"));
             jTextFieldSubspecies.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1083,6 +1096,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getSpecificLocalityJTextField() {
         if (jTextFieldLocality == null) {
             jTextFieldLocality = new JTextField();
+            jTextFieldLocality.setEditable(specimen.isEditable());
             jTextFieldLocality.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "SpecificLocality", jTextFieldLocality));
             jTextFieldLocality.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "SpecificLocality"));
             jTextFieldLocality.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1102,6 +1116,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JButton getSaveJButton() {
         if (jButtonSave == null) {
             jButtonSave = new JButton("Save");
+            jButtonSave.setEnabled(specimen.isEditable());
             if (specimen.isStateDone()) {
                 jButtonSave.setEnabled(false);
                 jButtonSave.setText("Migrated " + specimen.getLoadFlags());
@@ -1129,7 +1144,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
             jComboBoxCollection = new JComboBox<String>();
             jComboBoxCollection.setModel(new DefaultComboBoxModel<String>(sls.getDistinctCollections()));
-            jComboBoxCollection.setEditable(true);
+            jComboBoxCollection.setEditable(specimen.isEditable());
             //jComboBoxCollection.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Collection", jComboBoxCollection));
             jComboBoxCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Collection"));
             jComboBoxCollection.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1150,6 +1165,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getLastUpdatedByJTextField() {
         if (jTextFieldLastUpdatedBy == null) {
             jTextFieldLastUpdatedBy = new JTextField();
+            jTextFieldLastUpdatedBy.setEditable(specimen.isEditable());
             jTextFieldLastUpdatedBy.setEditable(false);
             jTextFieldLastUpdatedBy.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "LastUpdatedBy"));
             //jTextFieldLastUpdatedBy.setEnabled(false);
@@ -1211,7 +1227,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private void setupCollectorJTableRenderer() {
         CollectorLifeCycle cls = new CollectorLifeCycle();
         JComboBox<String> jComboBoxCollector = new JComboBox<>(cls.getDistinctCollectors());
-        jComboBoxCollector.setEditable(true);
+        jComboBoxCollector.setEditable(specimen.isEditable());
         //field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class, "CollectorName", field));
         jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(jComboBoxCollector));
         AutoCompleteDecorator.decorate(jComboBoxCollector);
@@ -1259,8 +1275,10 @@ public class SpecimenDetailsViewPane extends JPanel {
     private void setupSpecimenPartsJTableRenderer() {
         log.debug("Setting specimen part cell editors");
         JComboBox<String> comboBoxPart = new JComboBox<>(SpecimenPart.PART_NAMES);
+        comboBoxPart.setEditable(specimen.isEditable());
         getJTableSpecimenParts().getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(comboBoxPart));
         JComboBox<String> comboBoxPrep = new JComboBox<>(SpecimenPart.PRESERVATION_NAMES);
+        comboBoxPrep.setEditable(specimen.isEditable());
         getJTableSpecimenParts().getColumnModel().getColumn(1).setCellEditor(new DefaultCellEditor(comboBoxPrep));
 
         getJTableSpecimenParts().getColumnModel().getColumn(4).setCellRenderer(new ButtonRenderer());
@@ -1368,12 +1386,13 @@ public class SpecimenDetailsViewPane extends JPanel {
     private void setupNumberJTableRenderer() {
         // First, setup the number field
         JTextField field1 = new JTextField();
+        field1.setEditable(specimen.isEditable());
         field1.setInputVerifier(MetadataRetriever.getInputVerifier(Number.class, "Number", field1));
         field1.setVerifyInputWhenFocusTarget(true);
         jTableNumbers.getColumnModel().getColumn(NumberTableModel.COLUMN_NUMBER).setCellEditor(new ValidatingTableCellEditor(field1));
         // Then, setup the type field
         JComboBox<String> jComboNumberTypes = new JComboBox<String>(NumberLifeCycle.getDistinctTypes());
-        jComboNumberTypes.setEditable(true);
+        jComboNumberTypes.setEditable(specimen.isEditable());
         TableColumn typeColumn = jTableNumbers.getColumnModel().getColumn(NumberTableModel.COLUMN_TYPE);
         ComboBoxCellEditor comboBoxEditor = new ComboBoxCellEditor(jComboNumberTypes);
         AutoCompleteDecorator.decorate(jComboNumberTypes);
@@ -1502,6 +1521,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getDrawerNumberJTextField() {
         if (jTextFieldDrawerNumber == null) {
             jTextFieldDrawerNumber = new JTextField();
+            jTextFieldDrawerNumber.setEditable(specimen.isEditable());
             jTextFieldDrawerNumber.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "DrawerNumber", jTextFieldDrawerNumber));
             jTextFieldDrawerNumber.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "DrawerNumber"));
@@ -1522,6 +1542,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getVerbatimLocalityJTextField() {
         if (jTextFieldVerbatimLocality == null) {
             jTextFieldVerbatimLocality = new JTextField();
+            jTextFieldVerbatimLocality.setEditable(specimen.isEditable());
             jTextFieldVerbatimLocality.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "VerbatimLocality", jTextFieldVerbatimLocality));
             jTextFieldVerbatimLocality.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "VerbatimLocality"));
@@ -1542,6 +1563,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JComboBox<String> getCountryJTextField() {
         //if (jTextFieldCountry == null) {
 			/*jTextFieldCountry = new JTextField();
+jTextFieldCountry.setEditable(specimen.isEditable());
 			jTextFieldCountry.setInputVerifier(
 					MetadataRetriever.getInputVerifier(Specimen.class, "Country", jTextFieldCountry));
 			jTextFieldCountry.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Country"));
@@ -1557,7 +1579,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             jComboBoxCountry = new JComboBox<String>();
             //jComboBoxCountry.setModel(new DefaultComboBoxModel<String>(HigherTaxonLifeCycle.selectDistinctSubfamily("")));
             jComboBoxCountry.setModel(new DefaultComboBoxModel<String>(sls.getDistinctCountries()));
-            jComboBoxCountry.setEditable(true);
+            jComboBoxCountry.setEditable(specimen.isEditable());
             jComboBoxCountry.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Country"));
             jComboBoxCountry.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
@@ -1578,6 +1600,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	/*private JTextField getJTextField23() {
 		if (jTextFieldPrimaryDivision == null) {
 			jTextFieldPrimaryDivision = new JTextField();
+jTextFieldPrimaryDivision.setEditable(specimen.isEditable());
 			jTextFieldPrimaryDivision.setInputVerifier(
 					MetadataRetriever.getInputVerifier(Specimen.class, "primaryDivison", jTextFieldPrimaryDivision));
 			jTextFieldPrimaryDivision.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "primaryDivison"));
@@ -1593,7 +1616,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JComboBox<String> getPrimaryDivisionJTextField() {
         if (jComboBoxPrimaryDivision == null) {
             jComboBoxPrimaryDivision = new JComboBox<>();
-            jComboBoxPrimaryDivision.setEditable(true);
+            jComboBoxPrimaryDivision.setEditable(specimen.isEditable());
             //jComboBoxPrimaryDivision.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "primaryDivison", jTextFieldPrimaryDivision));
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
             jComboBoxPrimaryDivision.setModel(new DefaultComboBoxModel<String>(sls.getDistinctPrimaryDivisions()));
@@ -1617,7 +1640,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (jComboBoxFamily == null) {
             jComboBoxFamily = new JComboBox<String>();
             jComboBoxFamily.setModel(new DefaultComboBoxModel<String>(HigherTaxonLifeCycle.selectDistinctFamily()));
-            jComboBoxFamily.setEditable(true);
+            jComboBoxFamily.setEditable(specimen.isEditable());
             //jTextFieldFamily.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Family", jTextFieldFamily));
             jComboBoxFamily.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Family"));
             jComboBoxFamily.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1639,7 +1662,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (jComboBoxSubfamily == null) {
             jComboBoxSubfamily = new JComboBox<String>();
             jComboBoxSubfamily.setModel(new DefaultComboBoxModel<String>(HigherTaxonLifeCycle.selectDistinctSubfamily("")));
-            jComboBoxSubfamily.setEditable(true);
+            jComboBoxSubfamily.setEditable(specimen.isEditable());
             //jTextFieldSubfamily.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Subfamily", jTextFieldSubfamily));
             jComboBoxSubfamily.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Subfamily"));
             jComboBoxSubfamily.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1660,6 +1683,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldTribe() {
         if (jTextFieldTribe == null) {
             jTextFieldTribe = new JTextField();
+            jTextFieldTribe.setEditable(specimen.isEditable());
             jTextFieldTribe.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Tribe", jTextFieldTribe));
             jTextFieldTribe.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Tribe"));
             jTextFieldTribe.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1680,7 +1704,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (jComboBoxSex == null) {
             jComboBoxSex = new JComboBox<String>();
             jComboBoxSex.setModel(new DefaultComboBoxModel<String>(Sex.getSexValues()));
-            jComboBoxSex.setEditable(true);
+            jComboBoxSex.setEditable(specimen.isEditable());
             jComboBoxSex.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Sex"));
             jComboBoxSex.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
@@ -1701,7 +1725,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (jComboBoxFeatures == null) {
             jComboBoxFeatures = new JComboBox<String>();
             jComboBoxFeatures.setModel(new DefaultComboBoxModel<String>(Features.getFeaturesValues()));
-            jComboBoxFeatures.setEditable(true);
+            jComboBoxFeatures.setEditable(specimen.isEditable());
             jComboBoxFeatures.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Features"));
             jComboBoxFeatures.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
@@ -1718,7 +1742,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (jComboBoxNatureOfId == null) {
             jComboBoxNatureOfId = new JComboBox<String>();
             jComboBoxNatureOfId.setModel(new DefaultComboBoxModel<String>(NatureOfId.getNatureOfIdValues()));
-            jComboBoxNatureOfId.setEditable(false);
+            jComboBoxNatureOfId.setEditable(specimen.isEditable());
             jComboBoxNatureOfId.setToolTipText(MetadataRetriever.getFieldHelp(Determination.class, "NatureOfId"));
             jComboBoxNatureOfId.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
@@ -1742,7 +1766,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (jComboBoxLifeStage == null) {
             jComboBoxLifeStage = new JComboBox<String>();
             jComboBoxLifeStage.setModel(new DefaultComboBoxModel<String>(LifeStage.getLifeStageValues()));
-            jComboBoxLifeStage.setEditable(true);
+            jComboBoxLifeStage.setEditable(specimen.isEditable());
             jComboBoxLifeStage.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Lifestage"));
             jComboBoxLifeStage.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
@@ -1764,6 +1788,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldVerbatimDate() {
         if (jTextFieldDateNos == null) {
             jTextFieldDateNos = new JTextField();
+            jTextFieldDateNos.setEditable(specimen.isEditable());
             //jTextFieldDateNos.setToolTipText("Date found on labels where date might be either date collected or date emerged, or some other date");
             jTextFieldDateNos.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "DateNOS", jTextFieldDateNos));
             jTextFieldDateNos.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "DateNOS"));
@@ -1799,6 +1824,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldDateEmerged() {
         if (jTextFieldDateEmerged == null) {
             jTextFieldDateEmerged = new JTextField();
+            jTextFieldDateEmerged.setEditable(specimen.isEditable());
             jTextFieldDateEmerged.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "DateEmerged", jTextFieldDateEmerged));
             jTextFieldDateEmerged.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "DateEmerged"));
             jTextFieldDateEmerged.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1819,6 +1845,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldDateEmergedIndicator() {
         if (jTextFieldDateEmergedIndicator == null) {
             jTextFieldDateEmergedIndicator = new JTextField();
+            jTextFieldDateEmergedIndicator.setEditable(specimen.isEditable());
             jTextFieldDateEmergedIndicator.setToolTipText("Verbatim text indicating that this is a date emerged.");
             jTextFieldDateEmergedIndicator.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "DateEmergedIndicator", jTextFieldDateEmergedIndicator));
@@ -1840,6 +1867,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldDateCollected() {
         if (jTextFieldDateCollected == null) {
             jTextFieldDateCollected = new JTextField();
+            jTextFieldDateCollected.setEditable(specimen.isEditable());
             jTextFieldDateCollected.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "DateCollected"));
             jTextFieldDateCollected.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
@@ -1858,6 +1886,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldDateCollectedIndicator() {
         if (jTextFieldDateCollectedIndicator == null) {
             jTextFieldDateCollectedIndicator = new JTextField();
+            jTextFieldDateCollectedIndicator.setEditable(specimen.isEditable());
             jTextFieldDateCollectedIndicator.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "DateCollectedIndicator", jTextFieldDateCollectedIndicator));
             jTextFieldDateCollectedIndicator.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "DateCollectedIndicator"));
@@ -1879,6 +1908,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldInfraspecificName() {
         if (jTextFieldInfraspecificEpithet == null) {
             jTextFieldInfraspecificEpithet = new JTextField();
+            jTextFieldInfraspecificEpithet.setEditable(specimen.isEditable());
             jTextFieldInfraspecificEpithet.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "InfraspecificEpithet", jTextFieldInfraspecificEpithet));
             jTextFieldInfraspecificEpithet.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "InfraspecificEpithet"));
@@ -1899,6 +1929,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldInfraspecificRank() {
         if (jTextFieldInfraspecificRank == null) {
             jTextFieldInfraspecificRank = new JTextField();
+            jTextFieldInfraspecificRank.setEditable(specimen.isEditable());
             jTextFieldInfraspecificRank.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "InfraspecificRank", jTextFieldInfraspecificRank));
             jTextFieldInfraspecificRank.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "InfraspecificRank"));
@@ -1919,6 +1950,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldAuthorship() {
         if (jTextFieldAuthorship == null) {
             jTextFieldAuthorship = new JTextField();
+            jTextFieldAuthorship.setEditable(specimen.isEditable());
             jTextFieldAuthorship.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Authorship", jTextFieldAuthorship));
             jTextFieldAuthorship.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Authorship"));
             jTextFieldAuthorship.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1938,6 +1970,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldUnnamedForm() {
         if (jTextFieldUnnamedForm == null) {
             jTextFieldUnnamedForm = new JTextField();
+            jTextFieldUnnamedForm.setEditable(specimen.isEditable());
             jTextFieldUnnamedForm.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "UnnamedForm", jTextFieldUnnamedForm));
             jTextFieldUnnamedForm.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "UnnamedForm"));
             jTextFieldUnnamedForm.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -1957,6 +1990,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getVerbatimElevationJTextField() {
         if (jTextFieldMinElevation == null) {
             jTextFieldMinElevation = new JTextField();
+            jTextFieldMinElevation.setEditable(specimen.isEditable());
             jTextFieldMinElevation.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "VerbatimElevation", jTextFieldMinElevation));
             jTextFieldMinElevation.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "VerbatimElevation"));
@@ -1977,6 +2011,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldCollectingMethod() {
         if (jTextFieldCollectingMethod == null) {
             jTextFieldCollectingMethod = new JTextField();
+            jTextFieldCollectingMethod.setEditable(specimen.isEditable());
             jTextFieldCollectingMethod.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "CollectingMethod", jTextFieldCollectingMethod));
             jTextFieldCollectingMethod.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "CollectingMethod"));
@@ -2035,6 +2070,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getQuestionsJTextField() {
         if (jTextFieldQuestions == null) {
             jTextFieldQuestions = new JTextField();
+            jTextFieldQuestions.setEditable(specimen.isEditable());
             jTextFieldQuestions.setBackground(MainFrame.BG_COLOR_QC_FIELD);
             jTextFieldQuestions.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "Questions", jTextFieldQuestions));
@@ -2089,6 +2125,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getAssociatedTaxonJTextField() {
         if (jTextFieldAssociatedTaxon == null) {
             jTextFieldAssociatedTaxon = new JTextField();
+            jTextFieldAssociatedTaxon.setEditable(specimen.isEditable());
             jTextFieldAssociatedTaxon.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "AssociatedTaxon", jTextFieldAssociatedTaxon));
             jTextFieldAssociatedTaxon.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "AssociatedTaxon"));
@@ -2109,6 +2146,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldHabitat() {
         if (jTextFieldHabitat == null) {
             jTextFieldHabitat = new JTextField();
+            jTextFieldHabitat.setEditable(specimen.isEditable());
             jTextFieldHabitat.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Habitat", jTextFieldHabitat));
             jTextFieldHabitat.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Habitat"));
             jTextFieldHabitat.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -2170,6 +2208,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldInferences() {
         if (jTextFieldInferences == null) {
             jTextFieldInferences = new JTextField();
+            jTextFieldInferences.setEditable(specimen.isEditable());
             jTextFieldInferences.setBackground(MainFrame.BG_COLOR_ENT_FIELD);
             jTextFieldInferences.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Inferences", jTextFieldInferences));
             jTextFieldInferences.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Inferences"));
@@ -2408,6 +2447,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldISODate() {
         if (jTextFieldISODate == null) {
             jTextFieldISODate = new JTextField();
+            jTextFieldISODate.setEditable(specimen.isEditable());
             jTextFieldISODate.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "ISODate", jTextFieldISODate));
             jTextFieldISODate.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "ISODate"));
@@ -2457,6 +2497,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getCitedInPublicationJTextField() {
         if (jTextFieldCitedInPub == null) {
             jTextFieldCitedInPub = new JTextField();
+            jTextFieldCitedInPub.setEditable(specimen.isEditable());
             jTextFieldCitedInPub.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "CitedInPublication", jTextFieldCitedInPub));
             jTextFieldCitedInPub.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "CitedInPublication"));
@@ -2567,6 +2608,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldMigrationStatus() {
         if (jTextFieldMigrationStatus == null) {
             jTextFieldMigrationStatus = new JTextField();
+            jTextFieldMigrationStatus.setEditable(specimen.isEditable());
             //jLabelMigrationStatus.setBackground(null);
             //jLabelMigrationStatus.setBorder(null);
             jTextFieldMigrationStatus.setEditable(false);
@@ -2587,6 +2629,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldImgCount() {
         if (jTextFieldImageCount == null) {
             jTextFieldImageCount = new JTextField();
+            jTextFieldImageCount.setEditable(specimen.isEditable());
             jTextFieldImageCount.setForeground(Color.BLACK);
             jTextFieldImageCount.setEnabled(false);
             updateImageCount();
@@ -2614,6 +2657,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getTextFieldMaxElev() {
         if (textFieldMaxElev == null) {
             textFieldMaxElev = new JTextField();
+            textFieldMaxElev.setEditable(specimen.isEditable());
         }
         return textFieldMaxElev;
     }
@@ -2629,6 +2673,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getTextFieldMicrohabitat() {
         if (textFieldMicrohabitat == null) {
             textFieldMicrohabitat = new JTextField();
+            textFieldMicrohabitat.setEditable(specimen.isEditable());
         }
         return textFieldMicrohabitat;
     }
@@ -2645,13 +2690,15 @@ public class SpecimenDetailsViewPane extends JPanel {
                 )));
                 if (data != null) {
                     log.debug("Got address from openstreetmap: " + data.toString());
-                    if (this.getCountryJTextField().getSelectedItem().equals("")) {
+                    if (this.getCountryJTextField().getSelectedItem() == null || this.getCountryJTextField().getSelectedItem().equals("")) {
                         this.getCountryJTextField().setSelectedItem(data.get("address.country"));
                     } else {
-                        log.debug("Won't set country as is '" + this.getCountryJTextField().getSelectedItem() + "'.");
+                        log.debug("Won't automatically set country as is '" + this.getCountryJTextField().getSelectedItem() + "'.");
                     }
-                    if (this.getPrimaryDivisionJTextField().getSelectedItem().equals("")) {
+                    if (this.getPrimaryDivisionJTextField().getSelectedItem() == null || this.getPrimaryDivisionJTextField().getSelectedItem().equals("")) {
                         this.getPrimaryDivisionJTextField().setSelectedItem(data.get("address.state"));
+                    } else {
+                        log.debug("Won't automatically set primary division as is '" + this.getCountryJTextField().getSelectedItem() + "'.");
                     }
                 }
             }).start();
@@ -2666,6 +2713,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldDateDetermined() {
         if (jTextFieldDateDetermined == null) {
             jTextFieldDateDetermined = new JTextField();
+            jTextFieldDateDetermined.setEditable(specimen.isEditable());
             jTextFieldDateDetermined.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "ISODate", jTextFieldDateDetermined));
             jTextFieldDateDetermined.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "DateIdentified"));
@@ -2690,7 +2738,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
             jCBDeterminer = new JComboBox<String>();
             jCBDeterminer.setModel(new DefaultComboBoxModel<String>(sls.getDistinctDeterminers()));
-            jCBDeterminer.setEditable(true);
+            jCBDeterminer.setEditable(specimen.isEditable());
             //jComboBoxCollection.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class, "Collection", jComboBoxCollection));
             //jCBDeterminer.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Collection"));
             jCBDeterminer.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -2713,7 +2761,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (cbTypeStatus == null) {
             cbTypeStatus = new JComboBox<String>(TypeStatus.getTypeStatusValues());
             // cbTypeStatus = new JComboBox(TypeStatus.getTypeStatusValues());  // for visual editor
-            cbTypeStatus.setEditable(true);
+            cbTypeStatus.setEditable(specimen.isEditable());
             cbTypeStatus.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "TypeStatus"));
             cbTypeStatus.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {
@@ -2732,6 +2780,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getJTextFieldIdRemarks() {
         if (jTextFieldIdRemarks == null) {
             jTextFieldIdRemarks = new JTextField();
+            jTextFieldIdRemarks.setEditable(specimen.isEditable());
             jTextFieldIdRemarks.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "IdentificationRemarks"));
             jTextFieldIdRemarks.addKeyListener(new java.awt.event.KeyAdapter() {
                 public void keyTyped(java.awt.event.KeyEvent e) {

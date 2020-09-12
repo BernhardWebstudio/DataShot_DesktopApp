@@ -56,6 +56,7 @@ public class UnitTrayLabel
     private String collection; // collection from which the material came
     private Integer ordinal;   // order in which to print
     private String identifiedBy;
+    private String identifiedDate;
     private String sex;
 
     public UnitTrayLabel() {
@@ -75,6 +76,7 @@ public class UnitTrayLabel
         this.collection = "";
         this.sex = "";
         this.ordinal = 1;
+        this.identifiedDate = "";
         this.dateCreated = new Date();
         this.dateLastUpdated = new Date();
     }
@@ -324,6 +326,9 @@ public class UnitTrayLabel
                             log.debug(result.getCollection());
                         }
                         if (key.equals("id")) {
+                            result.setIdentifiedBy(value);
+                        }
+                        if (key.equals("idD")) {
                             result.setIdentifiedBy(value);
                         }
                         if (key.equals("x")) {
@@ -627,6 +632,15 @@ public class UnitTrayLabel
 
     public void setDateLastUpdated(Date dateLastUpdated) {
         this.dateLastUpdated = dateLastUpdated;
+    }
+
+    public void setIdentifiedDate(String identifiedDate) {
+        this.identifiedDate = identifiedDate;
+    }
+
+    @Override
+    public String getIdentifiedDate() {
+        return identifiedDate;
     }
 
     public String getSex() {

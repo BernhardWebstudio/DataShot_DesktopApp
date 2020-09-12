@@ -35,6 +35,7 @@ public class UnitTrayLabelParser implements TaxonNameReturner, DrawerNameReturne
     private String drawerNumber;
     private String collection;  // collection from which the material came
     private String identifiedBy;
+    private String identifiedDate;
     private String sex;
     private boolean parsedFromJSON;
 
@@ -103,6 +104,7 @@ public class UnitTrayLabelParser implements TaxonNameReturner, DrawerNameReturne
         infraspecificEpithet = "";
         infraspecificRank = "";
         drawerNumber = "";
+        identifiedDate = "";
 
         // Can't parse text if it is null.
         if (text != null) {
@@ -511,6 +513,15 @@ public class UnitTrayLabelParser implements TaxonNameReturner, DrawerNameReturne
      */
     public void setSex(String sex) {
         this.sex = sex;
+    }
+
+    public void setIdentifiedDate(String identifiedDate) {
+        this.identifiedDate = identifiedDate;
+    }
+
+    @Override
+    public String getIdentifiedDate() {
+        return identifiedDate;
     }
 
     /**

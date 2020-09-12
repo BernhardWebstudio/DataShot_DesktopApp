@@ -420,6 +420,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                 } else {
                     s.setSex(sex);
                 }
+                s.setDateIdentified(parser.getIdentifiedDate());
             } else {
                 // We failed over to OCR, try lookup in DB.
                 s.setFamily("");  // make sure there's a a non-null value in family.

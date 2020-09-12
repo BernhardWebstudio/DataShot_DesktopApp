@@ -80,6 +80,11 @@ public interface TaxonNameReturner {
     String getIdentifiedBy();
 
     /**
+     * @return the determiner
+     */
+    String getIdentifiedDate();
+
+    /**
      * @return the sex (male, female, worker)
      */
     String getSex();

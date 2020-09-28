@@ -18,6 +18,8 @@
  */
 package edu.harvard.mcz.imagecapture.encoder;
 
+import boofcv.alg.fiducial.qrcode.QrCode;
+import boofcv.alg.fiducial.qrcode.QrCodeEncoder;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;

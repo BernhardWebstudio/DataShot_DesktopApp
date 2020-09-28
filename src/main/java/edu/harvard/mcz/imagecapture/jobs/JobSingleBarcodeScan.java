@@ -54,6 +54,7 @@ public class JobSingleBarcodeScan extends AbstractFileScanJob {
     private boolean persist = false;
     private Date startDate = null;
     private int runStatus = RunStatus.STATUS_NEW;
+    protected File fileToCheck;
 
     /**
      * Default constructor, creates a single image job with persist=false, allows examination of image
@@ -80,6 +81,9 @@ public class JobSingleBarcodeScan extends AbstractFileScanJob {
 
     private void init() {
         listeners = new ArrayList<RunnerListener>();
+        // need to ask in main thread
+        Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Selecting file to check.");
+        fileToCheck = FileUtility.askForImageFile(new File(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_LASTPATH)));
     }
 
     /* (non-Javadoc)
@@ -118,9 +122,7 @@ public class JobSingleBarcodeScan extends AbstractFileScanJob {
         startDate = new Date();
         Singleton.getSingletonInstance().getJobList().addJob(this);
         setPercentComplete(0);
-        Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Selecting file to check.");
         // ask for the file to parse
-        File fileToCheck = FileUtility.askForImageFile(new File(Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_LASTPATH)));
         setPercentComplete(10);
         Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Scanning file for barcode.");
         if (fileToCheck != null) {

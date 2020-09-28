@@ -358,7 +358,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         BarcodeMatcher matcher = Singleton.getSingletonInstance().getBarcodeMatcher();
         final String rawBarcode = barcode;
         if (!rawBarcode.equals(exifComment)) {
-            // Log the missmatch
+            // Log the mismatch
             logMismatch(counter, image.getFilename(), barcode, exifComment, parser, matcher.matchesPattern(exifComment), log);
         }
 

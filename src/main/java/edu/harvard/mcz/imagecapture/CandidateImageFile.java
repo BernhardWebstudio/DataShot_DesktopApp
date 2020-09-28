@@ -48,6 +48,7 @@ import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 import edu.harvard.mcz.imagecapture.exceptions.OCRReadException;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
 import edu.harvard.mcz.imagecapture.ui.frame.BulkMediaFrame;
+import edu.harvard.mcz.imagecapture.utility.GZipCompressor;
 import georegression.struct.shapes.Polygon2D_F64;
 import org.apache.commons.cli.*;
 import org.apache.commons.logging.Log;
@@ -776,10 +777,10 @@ public class CandidateImageFile {
             if (candidateFile == null) {
                 throw new UnreadableFileException("No such file. CandidateImageFile given null for a filename.");
             }
-            if (candidateFile.exists() == false) {
+            if (!candidateFile.exists()) {
                 throw new UnreadableFileException("No such file as: " + candidateFile.getAbsolutePath());
             }
-            if (candidateFile.canRead() == false) {
+            if (!candidateFile.canRead()) {
                 throw new UnreadableFileException("Can't read file: " + candidateFile.getAbsolutePath());
             }
         } catch (SecurityException e) {
@@ -987,11 +988,32 @@ public class CandidateImageFile {
         for (QrCode detection : detections) {
             //
             if (this.intersect(detection.bounds, toleranceBounds)) {
-                return new TextStatus(detection.message, RESULT_BARCODE_SCANNED);
+                return new TextStatus(decompressMessageIfNecessary(detection), RESULT_BARCODE_SCANNED);
             }
         }
 
         return new TextStatus("", RESULT_ERROR);
+    }
+
+    /**
+     * Decompress using GZipCompressor Utility in case a QrCode contains compressed data
+     * @param detection
+     * @return
+     */
+    private String decompressMessageIfNecessary(QrCode detection) {
+        String result = "";
+        byte[] dataBytes = detection.corrected;
+        if (GZipCompressor.isCompressed(dataBytes)) {
+            try {
+                // try decompress
+                result = GZipCompressor.decompress(dataBytes);
+            } catch (IOException e) {
+                log.error("GZipDecompression failed: " + e.getMessage());
+            }
+        } else {
+            result = detection.message;
+        }
+        return result;
     }
 
     private boolean intersect(Polygon2D_F64 first, Rectangle second) {

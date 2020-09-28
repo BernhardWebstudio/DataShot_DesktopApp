@@ -46,7 +46,7 @@ public class ConvertTesseractOCR implements OCR {
 
     private static final Log log = LogFactory.getLog(ConvertTesseractOCR.class);
     private BufferedImage subimage = null;
-    private boolean debug = false;
+    private final boolean debug = false;
 
     public ConvertTesseractOCR(BufferedImage anImageToOCR) {
         subimage = anImageToOCR;

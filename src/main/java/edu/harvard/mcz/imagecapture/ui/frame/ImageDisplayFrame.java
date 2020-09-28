@@ -799,11 +799,7 @@ public class ImageDisplayFrame extends JFrame {
             templatePicker.setText(template);
             log.debug(template);
             log.debug(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS);
-            if (template.equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
-                templatePicker.setEnabled(true);
-            } else {
-                templatePicker.setEnabled(false);
-            }
+            templatePicker.setEnabled(template.equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS));
             templatePicker.addActionListener(new ActionListener() {
 
                 @Override
@@ -825,11 +821,7 @@ public class ImageDisplayFrame extends JFrame {
             template = selectedImage.getTemplateId();
         }
         templatePicker.setText(template);
-        if (template.equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
-            templatePicker.setEnabled(true);
-        } else {
-            templatePicker.setEnabled(false);
-        }
+        templatePicker.setEnabled(template.equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS));
     }
 
     /**

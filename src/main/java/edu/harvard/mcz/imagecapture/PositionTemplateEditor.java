@@ -83,7 +83,7 @@ public class PositionTemplateEditor extends JFrame {
     private JScrollPane jScrollPane = null;
     private JTable jTable = null;
     private ImagePanelForDrawing imagePanelForDrawing = null;
-    private PositionTemplateEditor thisFrame;
+    private final PositionTemplateEditor thisFrame;
     private boolean runningFromMain = false;
     private JPanel jPanel1 = null;
     private PositionTemplate template = null;  //  @jve:decl-index=0:

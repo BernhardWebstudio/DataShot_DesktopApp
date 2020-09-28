@@ -31,7 +31,7 @@ public class HibernateUtil {
 
     private static final Log log = LogFactory.getLog(HibernateUtil.class);
     private static SessionFactory sessionFactory = null;
-    private static Properties properties = new Properties();
+    private static final Properties properties = new Properties();
 
     public static void terminateSessionFactory() {
         try {

@@ -38,7 +38,7 @@ public class RunnableJobTableModel extends AbstractTableModel implements RunnerL
 
     private static final Log log = LogFactory.getLog(RunnableJobTableModel.class);
 
-    private Set<RunnableJob> jobs;
+    private final Set<RunnableJob> jobs;
 
     /**
      *

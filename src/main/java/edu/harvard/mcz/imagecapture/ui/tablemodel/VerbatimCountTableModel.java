@@ -35,7 +35,7 @@ public class VerbatimCountTableModel extends AbstractTableModel {
 
     private static final Log log = LogFactory.getLog(VerbatimCountTableModel.class);
 
-    private List<VerbatimCount> verbatimCounts;
+    private final List<VerbatimCount> verbatimCounts;
 
     public VerbatimCountTableModel() {
         verbatimCounts = new ArrayList<VerbatimCount>();

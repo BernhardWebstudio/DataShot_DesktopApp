@@ -40,7 +40,7 @@ public class AtomicCounter implements ScanCounterInterface {
     private AtomicInteger specimensUpdated = new AtomicInteger(0);
     private AtomicInteger specimensDatabased = new AtomicInteger(0);
     private AtomicInteger filesUpdated = new AtomicInteger(0);
-    private StringBuffer errorReport;
+    private final StringBuffer errorReport;
     private List<RunnableJobError> errors = null;
 
     public AtomicCounter() {

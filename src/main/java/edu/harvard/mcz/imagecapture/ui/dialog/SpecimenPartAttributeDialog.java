@@ -58,7 +58,7 @@ public class SpecimenPartAttributeDialog extends JDialog {
 
     private JButton okButton;
 
-    private SpecimenPart parentPart;
+    private final SpecimenPart parentPart;
     private JComboBox comboBoxType;
     private JComboBox comboBoxValue;
     private JTextField textFieldUnits;

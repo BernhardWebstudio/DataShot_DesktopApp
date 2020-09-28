@@ -45,7 +45,7 @@ public class TesseractOCR implements OCR {
 
     private static final Log log = LogFactory.getLog(TesseractOCR.class);
     private String target = "/home/mole/stuff/MCZ/mcz/insects/testImages/text.tif";
-    private String tempFileBase = "tempOCRtextOutput";
+    private final String tempFileBase = "tempOCRtextOutput";
     //private String language = "-l eng";
     //private String language = "-l spa";
     private String language = "-l lepid";  // Lepidoptera training set

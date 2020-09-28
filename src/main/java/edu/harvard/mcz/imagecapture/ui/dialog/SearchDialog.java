@@ -76,7 +76,7 @@ public class SearchDialog extends JDialog {
     private JTextField textFieldHigherGeog;
     private JLabel lblHigherGeography;
     private JTextField jTextFieldInterpretedDate;
-    private Dimension maxComboBoxDims = new Dimension(350, 250);
+    private final Dimension maxComboBoxDims = new Dimension(350, 250);
 
     /**
      * @param owner

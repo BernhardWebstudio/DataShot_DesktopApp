@@ -35,7 +35,7 @@ public class SpecimenPartsTableModel extends AbstractDeleteableTableModel {
 
     private static final long serialVersionUID = -4139892019645663114L;
     private static final Log log = LogFactory.getLog(SpecimenPartsTableModel.class);
-    private Set<SpecimenPart> specimenParts;
+    private final Set<SpecimenPart> specimenParts;
 
     public SpecimenPartsTableModel() {
         super();

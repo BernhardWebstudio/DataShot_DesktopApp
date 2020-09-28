@@ -42,7 +42,7 @@ public class VerbatimToTranscribeDialog extends JDialog {
     private static final Log log = LogFactory.getLog(VerbatimToTranscribeDialog.class);
 
     private final JPanel contentPanel = new JPanel();
-    private JTable table;
+    private final JTable table;
 
     /**
      * Create the dialog.

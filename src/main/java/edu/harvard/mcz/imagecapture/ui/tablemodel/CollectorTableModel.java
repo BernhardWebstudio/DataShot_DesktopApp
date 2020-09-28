@@ -36,7 +36,7 @@ public class CollectorTableModel extends AbstractDeleteableTableModel {
 
     private static final Log log = LogFactory.getLog(CollectorTableModel.class);
 
-    private Set<Collector> collectors;
+    private final Set<Collector> collectors;
 
     public CollectorTableModel() {
         collectors = new HashSet<>();

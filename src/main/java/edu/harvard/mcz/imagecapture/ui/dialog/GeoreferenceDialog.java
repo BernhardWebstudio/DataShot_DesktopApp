@@ -71,7 +71,7 @@ public class GeoreferenceDialog extends JDialog {
     private JComboBox<String> cbLongDir;
     private JComboBox<String> cbDatum;
     private JComboBox<String> cbMethod;
-    private LatLong georeference;
+    private final LatLong georeference;
     private JButton okButton;
     private JLabel lblErrorLabel;
     private JLabel lblNewLabel;
@@ -134,11 +134,7 @@ public class GeoreferenceDialog extends JDialog {
 
     private void setState() {
         String acc = this.cbMethod.getSelectedItem().toString();
-        if (acc.equals("GPS")) {
-            this.txtGPSAccuracy.setEnabled(true);
-        } else {
-            this.txtGPSAccuracy.setEnabled(false);
-        }
+        this.txtGPSAccuracy.setEnabled(acc.equals("GPS"));
 
         String state = this.comboBoxOrigUnits.getSelectedItem().toString();
         switch (state) {

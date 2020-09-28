@@ -51,10 +51,10 @@ public class JobSingleBarcodeScan extends AbstractFileScanJob {
     private static final Log log = LogFactory.getLog(JobSingleBarcodeScan.class);
     protected int percentComplete = 0;
     protected ArrayList<RunnerListener> listeners = new ArrayList<>();
+    protected File fileToCheck;
     private boolean persist = false;
     private Date startDate = null;
     private int runStatus = RunStatus.STATUS_NEW;
-    protected File fileToCheck;
 
     /**
      * Default constructor, creates a single image job with persist=false, allows examination of image

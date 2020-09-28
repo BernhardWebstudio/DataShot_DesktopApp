@@ -33,9 +33,9 @@ public class FieldLoaderWizard extends JDialog {
     private static final long serialVersionUID = 6643976186857446662L;
 
     private final JPanel contentPanel = new JPanel();
-    private JTextField filenameField;
-    private JTable table;
-    private JTextField textFieldOKToLoad;
+    private final JTextField filenameField;
+    private final JTable table;
+    private final JTextField textFieldOKToLoad;
 
     private File selectedFile;
 

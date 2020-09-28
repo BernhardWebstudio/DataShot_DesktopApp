@@ -45,7 +45,7 @@ public class ImagePanel extends JPanel {
     // more than 1 for an enlarged image.
     private double zoom = 1.0;
     // proportion to zoom in or out in one step
-    private double zoomFactor = 0.1;  // 10% by default
+    private final double zoomFactor = 0.1;  // 10% by default
 
     public ImagePanel(Image anImage) {
         image = anImage;

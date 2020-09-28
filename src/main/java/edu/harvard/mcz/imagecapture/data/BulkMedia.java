@@ -35,8 +35,8 @@ public class BulkMedia {
     private static final Log log = LogFactory.getLog(BulkMedia.class);
 
     private String media_uri;
-    private String mime_type;
-    private String media_type;
+    private final String mime_type;
+    private final String media_type;
     private String media_relationships;
     private List<String> media_labels;
     private String preview_uri;

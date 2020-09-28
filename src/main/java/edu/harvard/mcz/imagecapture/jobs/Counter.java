@@ -39,7 +39,7 @@ public class Counter implements ScanCounterInterface {
     private int specimensUpdated = 0;
     private int specimensDatabased = 0;
     private int filesUpdated = 0;
-    private StringBuffer errorReport;
+    private final StringBuffer errorReport;
     private List<RunnableJobError> errors = null;
 
 

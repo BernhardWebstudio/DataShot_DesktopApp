@@ -41,7 +41,7 @@ public class RunnableJobErrorTableModel extends AbstractTableModel {
     public static final int TYPE_LOAD = 2;
     public static final int TYPE_FILE_RECONCILIATION = 3;
     private static final long serialVersionUID = 3407074726845800411L;
-    private List<RunnableJobError> errors;
+    private final List<RunnableJobError> errors;
     private int type;
 
     public RunnableJobErrorTableModel(List<RunnableJobError> errorList) {

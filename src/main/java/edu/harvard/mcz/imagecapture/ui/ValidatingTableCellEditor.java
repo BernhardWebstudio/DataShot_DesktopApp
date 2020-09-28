@@ -39,7 +39,7 @@ public class ValidatingTableCellEditor extends DefaultCellEditor {
 
     private static final long serialVersionUID = -4777010317672887845L;
 
-    private JTextField field;
+    private final JTextField field;
 
     /**
      * @param textField (with an inputVerifier already set)

@@ -39,7 +39,7 @@ public class PicklistTableCellEditor extends ComboBoxCellEditor {
 
     private static final long serialVersionUID = -4777010317672887845L;
 
-    private JComboBox field;
+    private final JComboBox field;
 
     /**
      * Constructor

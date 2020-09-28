@@ -72,7 +72,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private static final int STATE_DIRTY = 1;
     KeyboardShortcutManager manager = KeyboardShortcutManager.getInstance();
     private Specimen previousSpecimen = null;
-    private Specimen specimen;  //  @jve:decl-index=0:
+    private final Specimen specimen;  //  @jve:decl-index=0:
     private SpecimenController specimenController = null;
     private int state;   // dirty if data in controls has been changed and not saved to specimen.
     // private JTextField jTextFieldPreparationType = null;
@@ -111,7 +111,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JComboBox<String> jComboBoxWorkflowStatus = null;
     private JLabel jLabelDBId = null;
     private JPanel jPanel = null;
-    private JPanel jPanel1 = null;   // panel for navigation buttons
+    private final JPanel jPanel1 = null;   // panel for navigation buttons
     private JPopupMenu jPopupCollectors;
     private JPopupMenu jPopupNumbers;
     private JPopupMenu jPopupSpecimenParts;
@@ -160,7 +160,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField textFieldMaxElev = null;
     private JTextField textFieldMicrohabitat = null;
     private SpecimenDetailsViewPane thisPane = null;
-    private StringBuffer higherGeogNotFoundWarning = new StringBuffer();
+    private final StringBuffer higherGeogNotFoundWarning = new StringBuffer();
     private int clickedOnCollsRow;
     private int clickedOnNumsRow;
     private int clickedOnPartsRow;

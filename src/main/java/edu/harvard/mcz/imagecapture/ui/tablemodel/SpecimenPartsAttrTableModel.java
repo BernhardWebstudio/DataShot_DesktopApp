@@ -33,7 +33,7 @@ public class SpecimenPartsAttrTableModel extends AbstractTableModel {
 
     private static final long serialVersionUID = -4139892019645663114L;
 
-    private Collection<SpecimenPartAttribute> specimenPartAttributes;
+    private final Collection<SpecimenPartAttribute> specimenPartAttributes;
 
     public SpecimenPartsAttrTableModel() {
         super();

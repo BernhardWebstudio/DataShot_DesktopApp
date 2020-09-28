@@ -18,8 +18,6 @@
  */
 package edu.harvard.mcz.imagecapture.encoder;
 
-import boofcv.alg.fiducial.qrcode.QrCode;
-import boofcv.alg.fiducial.qrcode.QrCodeEncoder;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
@@ -54,7 +52,7 @@ public class LabelEncoder {
 
     private static final Log log = LogFactory.getLog(LabelEncoder.class);
 
-    private UnitTrayLabel label;
+    private final UnitTrayLabel label;
 
     public LabelEncoder(UnitTrayLabel aLabel) {
         label = aLabel;

@@ -997,6 +997,7 @@ public class CandidateImageFile {
 
     /**
      * Decompress using GZipCompressor Utility in case a QrCode contains compressed data
+     *
      * @param detection
      * @return
      */

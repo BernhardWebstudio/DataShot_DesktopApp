@@ -41,7 +41,7 @@ public class Singleton {
     private static final Log log = LogFactory.getLog(Singleton.class);
 
     // Eagerly create for thread safety.
-    private static Singleton singletonInstance = new Singleton();
+    private static final Singleton singletonInstance = new Singleton();
 
     private ImageCaptureProperties properties = null;
     private MainFrame mainFrame;

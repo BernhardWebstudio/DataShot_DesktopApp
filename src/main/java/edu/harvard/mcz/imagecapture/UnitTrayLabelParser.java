@@ -515,13 +515,13 @@ public class UnitTrayLabelParser implements TaxonNameReturner, DrawerNameReturne
         this.sex = sex;
     }
 
-    public void setIdentifiedDate(String identifiedDate) {
-        this.identifiedDate = identifiedDate;
-    }
-
     @Override
     public String getIdentifiedDate() {
         return identifiedDate;
+    }
+
+    public void setIdentifiedDate(String identifiedDate) {
+        this.identifiedDate = identifiedDate;
     }
 
     /**

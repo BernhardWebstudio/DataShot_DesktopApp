@@ -74,10 +74,10 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor,
     protected static final String EVENT_PRESSED = "event_button_pressed";
     private static final long serialVersionUID = -2999614267588538934L;
     private static final Log log = LogFactory.getLog(ButtonEditor.class);
-    private JButton button;  // the button to display
+    private final JButton button;  // the button to display
     private Object targetId = null;    // value for the cell (primary key value for tuple displayed in row).
     private int formToOpen = OPEN_SPECIMEN_DETAILS;
-    private Component parentComponent;
+    private final Component parentComponent;
 
     /**
      * Default constructor,  creates a button for the cell,  Expects to be in a list

@@ -329,7 +329,7 @@ public class UnitTrayLabel
                             result.setIdentifiedBy(value);
                         }
                         if (key.equals("idD")) {
-                            result.setIdentifiedBy(value);
+                            result.setIdentifiedDate(value);
                         }
                         if (key.equals("x")) {
                             result.setSex(value);
@@ -634,13 +634,13 @@ public class UnitTrayLabel
         this.dateLastUpdated = dateLastUpdated;
     }
 
-    public void setIdentifiedDate(String identifiedDate) {
-        this.identifiedDate = identifiedDate;
-    }
-
     @Override
     public String getIdentifiedDate() {
         return identifiedDate;
+    }
+
+    public void setIdentifiedDate(String identifiedDate) {
+        this.identifiedDate = identifiedDate;
     }
 
     public String getSex() {

@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -17,7 +18,7 @@ public class GZipCompressor {
         }
         ByteArrayOutputStream obj = new ByteArrayOutputStream();
         GZIPOutputStream gzip = new GZIPOutputStream(obj);
-        gzip.write(str.getBytes("UTF-8"));
+        gzip.write(str.getBytes(StandardCharsets.UTF_8));
         gzip.flush();
         gzip.close();
         return obj.toByteArray();
@@ -30,7 +31,7 @@ public class GZipCompressor {
         }
         if (isCompressed(compressed)) {
             final GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(compressed));
-            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(gis, "UTF-8"));
+            final BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(gis, StandardCharsets.UTF_8));
 
             String line;
             while ((line = bufferedReader.readLine()) != null) {

@@ -64,7 +64,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     private static final long serialVersionUID = 536567118673854270L;
     private static final Log log = LogFactory.getLog(MainFrame.class);  //  @jve:decl-index=0:
     private static final int STATE_INIT = 0;     // initial state of application - most menu items disabled
-    private MainFrame thisMainFrame;
+    private final MainFrame thisMainFrame;
     private int state = STATE_INIT;
     private ImageListBrowser ilb = null;
     private SpecimenBrowser slb = null;

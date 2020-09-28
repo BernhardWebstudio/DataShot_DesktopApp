@@ -48,13 +48,13 @@ public class RunnableJobError {
     private TaxonNameReturner taxonParser;
     private DrawerNameReturner drawerParser;
     private Exception exception;
-    private int failureType;
+    private final int failureType;
     private String previous;
     private String previousPath;
     /**
      * The line number: used for failure of the VerbatimFieldLoad Job to know which field/line it failed on
      */
-    private String lineNumber;
+    private final String lineNumber;
 
     /**
      * Constructor for errors in the expected form for Barcode number QC Checks.

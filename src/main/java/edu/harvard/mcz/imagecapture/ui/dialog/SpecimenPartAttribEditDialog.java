@@ -43,9 +43,9 @@ public class SpecimenPartAttribEditDialog extends JDialog {
 
     private static final Log log = LogFactory.getLog(SpecimenPartAttribEditDialog.class);
 
-    private SpecimenPartAttribEditDialog thisDialog;
-    private SpecimenPartAttribute targetAttribute;
-    private JPanel contentPanel = new JPanel();
+    private final SpecimenPartAttribEditDialog thisDialog;
+    private final SpecimenPartAttribute targetAttribute;
+    private final JPanel contentPanel = new JPanel();
     private JButton okButton;
     private JComboBox<String> comboBoxType;
     private JComboBox<String> comboBoxValue;

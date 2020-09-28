@@ -390,7 +390,7 @@ public class CandidateImageFile {
         String returnValue;
         QRCodeReader reader = new QRCodeReader();
         Hashtable<DecodeHintType, Object> hints = null;
-        hints = new Hashtable<DecodeHintType, Object>(3);
+        hints = new Hashtable<DecodeHintType, Object>();
         hints.put(DecodeHintType.TRY_HARDER, Boolean.TRUE);
         result = reader.decode(bitmap, hints);
         returnValue = result.getText();
@@ -617,7 +617,7 @@ public class CandidateImageFile {
             }
         }
 
-        return returnValue.getText();
+        return ""; // returnValue.getText();
     }
 
     /**

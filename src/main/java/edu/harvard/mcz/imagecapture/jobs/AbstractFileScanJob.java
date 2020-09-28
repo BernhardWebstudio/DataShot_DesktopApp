@@ -388,9 +388,10 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         // but make sure you are the only to try.
         Lock lock = locks[barcode.hashCode() & (locks.length - 1)];
         if (lock == null) {
-            log.debug("Lock null, fetched from " + barcode.hashCode() + ", " + locks.length + " and " + (barcode.hashCode() & (locks.length - 1)));
+            log.warn("Lock null, fetched from " + barcode.hashCode() + ", " + locks.length + " and " + (barcode.hashCode() & (locks.length - 1)));
+        } else {
+            lock.lock();
         }
-        lock.lock();
         try {
             SpecimenLifeCycle specimenLifeCycle = new SpecimenLifeCycle();
             List<Specimen> existingSpecimens = specimenLifeCycle.findByBarcode(s.getBarcode());
@@ -544,7 +545,9 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                 counter.appendError(error);
             }
         } finally {
-            lock.unlock();
+            if (lock != null) {
+                lock.unlock();
+            }
         }
         if (s != null) {
             image.setSpecimen(s);

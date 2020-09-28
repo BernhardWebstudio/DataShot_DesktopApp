@@ -226,8 +226,10 @@ public class ImageCaptureApp {
                 privateProperties.load(ImageCaptureApp.class.getClassLoader().getResourceAsStream("imagecapture.private.properties"));
                 APP_VERSION = privateProperties.getProperty("project.version");
                 try {
-                    String buildTimestamp = privateProperties.getProperty("timestamp");
-                    APP_VERSION += " " + buildTimestamp;
+                    String buildTimestamp = privateProperties.getProperty("buildTimestamp");
+                    if (buildTimestamp != null) {
+                        APP_VERSION += " " + buildTimestamp;
+                    }
                 } catch (Exception e) {
                     log.warn(e);
                 }

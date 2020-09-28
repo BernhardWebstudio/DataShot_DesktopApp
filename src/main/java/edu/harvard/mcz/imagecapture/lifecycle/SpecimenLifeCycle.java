@@ -60,17 +60,17 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             String sql = "select " +
                     "        (cast(substr(a.barcode,-8) as decimal(8,0)) + 1) " +
                     "        from Specimen a " +
-                    "        where " +
+                    "        WHERE " +
                     "        not exists " +
                     "        (" +
                     "            select 1 from Specimen b " +
-                    "            where " +
+                    "            WHERE " +
                     "            cast(substr(b.barcode,-8) as decimal(8,0)) = (cast(substr(a.barcode,-8) as decimal(8,0)) + 1)" +
                     "        ) " +
                     "        and " +
                     "        cast(substr(a.barcode,-8) as decimal(8,0)) not in " +
                     "        ( " +
-                    "          select max(cast(substr(c.barcode,-8) as decimal(8,0))) from Specimen c where cast(substr(a.barcode,-8) as decimal(8,0)) > 49999 " +
+                    "          select max(cast(substr(c.barcode,-8) as decimal(8,0))) from Specimen c WHERE cast(substr(a.barcode,-8) as decimal(8,0)) > 49999 " +
                     "        ) " +
                     "        order by 1";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -357,8 +357,8 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             session.beginTransaction();
             List<Specimen> results = null;
             try {
-                Query query = session.createQuery("From Specimen as s where s.barcode = ?1");
-                query.setParameter(1, barcode);
+                Query query = session.createQuery("From Specimen s WHERE s.barcode LIKE :barcode");
+                query.setParameter("barcode", barcode);
                 results = (List<Specimen>) query.list();
                 log.debug("find query successful, result size: " + results.size());
                 session.getTransaction().commit();
@@ -435,7 +435,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
     }
 
-    //Select distinct path from ICImage im where im.path is not null order by im.path
+    //Select distinct path from ICImage im WHERE im.path is not null order by im.path
 
     public List<ICImage> findImagesByPath(String path) {
         log.debug("finding images by path " + path);
@@ -448,12 +448,12 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                 //this works
                 String sql = "";
                 if (path.contains("\\")) {
-                    sql = "From ICImage im where im.path='" + path + "\\' order by imageId";
+                    sql = "From ICImage im WHERE im.path='" + path + "\\' order by imageId";
                 } else {
-                    sql = "From ICImage im where im.path='" + path + "' order by imageId";
+                    sql = "From ICImage im WHERE im.path='" + path + "' order by imageId";
                 }
 
-                //String sql = "From ICImage im where im.path='"+path+"\\\' order by imageId";
+                //String sql = "From ICImage im WHERE im.path='"+path+"\\\' order by imageId";
                 Query query = session.createQuery(sql);
                 results = (List<ICImage>) query.list();
                 //log.debug("found images, result size: " + results.size());
@@ -561,7 +561,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     public List<GenusSpeciesCount> countSpecimensForVerbatim() {
         ArrayList<GenusSpeciesCount> result = new ArrayList<GenusSpeciesCount>();
         try {
-            String sql = "Select count(S), genus, specificEpithet from Specimen S where S.workFlowStatus = 'Taxon Entered' group by S.genus, S.specificEpithet ";
+            String sql = "Select count(S), genus, specificEpithet from Specimen S WHERE S.workFlowStatus = 'Taxon Entered' group by S.genus, S.specificEpithet ";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
@@ -640,7 +640,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             List<Specimen> results = null;
             try {
                 session.beginTransaction();
-                Query query = session.createQuery("From Specimen as s where s.genus = ? and s.specificEpithet = ? and s.workFlowStatus = ? ");
+                Query query = session.createQuery("From Specimen as s WHERE s.genus = ? and s.specificEpithet = ? and s.workFlowStatus = ? ");
                 query.setParameter(0, genus);
                 query.setParameter(1, specificEpithet);
                 query.setParameter(2, workflowStatus);
@@ -783,7 +783,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add("");    // put blank at top of list.
         try {
-            String sql = "Select distinct country from Specimen spe where spe.country is not null order by spe.country  ";
+            String sql = "Select distinct country from Specimen spe WHERE spe.country is not null order by spe.country  ";
             return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error(re);
@@ -802,37 +802,37 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             //this does not work - need to do it manually as below!!
             //this.delete(specimen);
 
-            long specimenId = specimen.getSpecimenId();
+            Long specimenId = specimen.getSpecimenId();
             try {
                 Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-                session.beginTransaction();
+                Transaction transaction = session.beginTransaction();
                 try {
-                    Query query = session.createQuery("delete from Tracking where Tracking.specimen =?");
-                    query.setParameter(0, specimenId);
+                    Query query = session.createQuery("DELETE FROM Tracking WHERE specimen = :specimen");
+                    query.setParameter("specimen", specimen);
                     query.executeUpdate();
 
-                    query = session.createQuery("delete from LatLong where LatLong.specimenId =?");
-                    query.setParameter(0, specimenId);
+                    query = session.createQuery("DELETE FROM LatLong WHERE specimenId = :specimen");
+                    query.setParameter("specimen", specimen);
                     query.executeUpdate();
 
-                    query = session.createQuery("delete from ICImage where ICImage.specimen =?");
-                    query.setParameter(0, specimenId);
+                    query = session.createQuery("DELETE FROM ICImage WHERE specimen = :specimen");
+                    query.setParameter("specimen", specimen);
                     query.executeUpdate();
 
-                    query = session.createQuery("delete from SpecimenPart where SpecimenPart.specimenId =?");
-                    query.setParameter(0, specimenId);
+                    query = session.createQuery("DELETE FROM SpecimenPart WHERE specimenId = :specimen");
+                    query.setParameter("specimen", specimen);
                     query.executeUpdate();
 
-                    query = session.createQuery("delete from Specimen where Specimen.id =?");
-                    query.setParameter(0, specimenId);
+                    query = session.createQuery("DELETE FROM Specimen WHERE specimenId = :specimenId");
+                    query.setParameter("specimenId", specimenId);
                     query.executeUpdate();
 
-                    session.getTransaction().commit();
+                    transaction.commit();
                 } catch (HibernateException e) {
-                    session.getTransaction().rollback();
+                    transaction.rollback();
                     log.error("DeleteByBarcode failed Hibernate Exception", e);
                 } catch (Exception e) {
-                    session.getTransaction().rollback();
+                    transaction.rollback();
                     log.error("findByBarcode failed general Exception", e);
                 }
                 try {
@@ -856,7 +856,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add("");    // put blank at top of list.
         try {
-            String sql = "Select distinct collection from Specimen spe where spe.collection is not null order by spe.collection  ";
+            String sql = "Select distinct collection from Specimen spe WHERE spe.collection is not null order by spe.collection  ";
             return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error(re);
@@ -868,7 +868,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add("");    // put blank at top of list.
         try {
-            String sql = "Select distinct identifiedBy from Specimen spe where spe.identifiedBy is not null order by spe.identifiedBy  ";
+            String sql = "Select distinct identifiedBy from Specimen spe WHERE spe.identifiedBy is not null order by spe.identifiedBy  ";
             //String sql = "Select distinct identifiedby from Specimen";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
@@ -905,7 +905,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add("");    // put blank at top of list.
         try {
-            String sql = "Select distinct primaryDivison from Specimen spe where spe.primaryDivison is not null order by spe.primaryDivison  ";
+            String sql = "Select distinct primaryDivison from Specimen spe WHERE spe.primaryDivison is not null order by spe.primaryDivison  ";
             //String sql = "Select distinct identifiedby from Specimen";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
@@ -942,7 +942,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add("");    // put blank at top of list.
         try {
-            String sql = "Select distinct questions from Specimen spe where spe.questions is not null order by spe.questions  ";
+            String sql = "Select distinct questions from Specimen spe WHERE spe.questions is not null order by spe.questions  ";
             return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error(re);

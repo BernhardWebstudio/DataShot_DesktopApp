@@ -30,7 +30,7 @@ jobs:
       run: mvn -B package --file pom.xml -P dist
     - name: Determine Prerelease Name
       id: name_determiner
-      run: echo "##[set-output name=name;]DataShot-$(date +'%Y%m%d')-beta"
+      run: echo "##[set-output name=name;]DataShot-$(date +'%Y%m%d-%H%M')-beta"
     - name: Create Pre-release
       id: create_prerelease
       if: success()

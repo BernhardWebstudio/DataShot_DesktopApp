@@ -274,12 +274,19 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                 isDrawerImage = true;
                 System.out.println(containedFile.getName() + " is a Drawer Image");
             } else {
+                RunnableJobError error;
                 // no way we could continue from here on
-                int errorType = templateId.equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS) ? RunnableJobError.TYPE_NO_TEMPLATE : RunnableJobError.TYPE_UNKNOWN;
-                RunnableJobError error = new RunnableJobError(image.getFilename(), barcode,
-                        barcode, exifComment, "Image doesn't appear to contain a barcode in a templated position.",
-                        null, null,
-                        null, errorType);
+                if (templateId.equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
+                    error = new RunnableJobError(image.getFilename(), barcode,
+                            barcode, exifComment, "Image does not appear to contain a barcode in a templated position",
+                            null, null,
+                            null, RunnableJobError.TYPE_NO_TEMPLATE);
+                } else {
+                    error = new RunnableJobError(image.getFilename(), barcode,
+                            barcode, exifComment, "Neither comment '" + exifComment + "' nor barcode '" + barcode + "' did " + "match known patterns.",
+                            null, null,
+                            null, RunnableJobError.TYPE_MISMATCH);
+                }
                 counter.appendError(error);
                 counter.incrementFilesFailed();
                 return;

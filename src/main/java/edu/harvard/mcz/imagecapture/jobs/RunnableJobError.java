@@ -337,6 +337,9 @@ public class RunnableJobError {
             case TYPE_FILE_READ:
                 result = "Data not read";
                 break;
+            case TYPE_UNKNOWN:
+                result = "Unknown error";
+                break;
             default:
                 result = "Unhandled case";
         }

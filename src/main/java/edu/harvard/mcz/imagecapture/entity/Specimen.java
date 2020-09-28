@@ -220,6 +220,9 @@ public class Specimen implements Serializable {
     }
 
     public Boolean isExported() {
+        if (this.getNahimaExported() == null) {
+            return false;
+        }
         return this.getNahimaExported();
     }
 

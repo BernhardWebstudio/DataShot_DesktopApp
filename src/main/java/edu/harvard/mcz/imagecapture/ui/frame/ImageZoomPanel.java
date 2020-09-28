@@ -109,8 +109,8 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
             Point hotPoint = new Point(5, 5);
             zoomCursor = Toolkit.getDefaultToolkit().createCustomCursor(
                     zoomCursorImage, hotPoint, "ZoomCursor");
-        } catch (IOException e) {
-            log.error("Unable to load ZoomCursor");
+        } catch (IOException|IllegalArgumentException e) {
+            log.error("Unable to load ZoomCursor. ", e);
             zoomCursor = null;
         }
         jLabel.addMouseListener(this);

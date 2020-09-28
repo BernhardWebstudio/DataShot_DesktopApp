@@ -267,7 +267,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 //                pastePreviousRecord();
 //            }
 //        });
-        if (specimen.isExported()) {
+        if (specimen.isExported() == null || specimen.isExported()) {
             JOptionPane.showMessageDialog(thisPane,
                     "This Specimen is already exported. No edit will be saved.",
                     "Warning: not saveable", JOptionPane.WARNING_MESSAGE);
@@ -2629,7 +2629,9 @@ jTextFieldPrimaryDivision.setEditable(specimen.isEditable());
     private JTextField getJTextFieldImgCount() {
         if (jTextFieldImageCount == null) {
             jTextFieldImageCount = new JTextField();
-            jTextFieldImageCount.setEditable(specimen.isEditable());
+            if (specimen != null) {
+                jTextFieldImageCount.setEditable(specimen.isEditable());
+            }
             jTextFieldImageCount.setForeground(Color.BLACK);
             jTextFieldImageCount.setEnabled(false);
             updateImageCount();

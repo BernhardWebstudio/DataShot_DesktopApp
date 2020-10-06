@@ -93,20 +93,20 @@ public class OpenStreetMapUtility {
         Map<String, Object> res = new HashMap<String, Object>();
         StringBuffer query;
         String[] split = search.split(" ");
-        String url = "http://nominatim.openstreetmap.org/search?q=";
+        StringBuilder url = new StringBuilder("http://nominatim.openstreetmap.org/search?q=");
 
         if (split.length == 0) {
             return null;
         }
 
         for (int i = 0; i < split.length; i++) {
-            url += split[i];
+            url.append(split[i]);
             if (i < (split.length - 1)) {
-                url += "+";
+                url.append("+");
             }
         }
-        url += "&format=json&addressdetails=1&limit=1";
-        return this.fetchValues(url, keys);
+        url.append("&format=json&addressdetails=1&limit=1");
+        return this.fetchValues(url.toString(), keys);
     }
 
     /**

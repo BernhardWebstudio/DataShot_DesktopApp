@@ -253,20 +253,20 @@ public class SpecimenDetailsViewPane extends JPanel {
                 gotoPreviousSpecimen();
             }
         });
-//        registerShortcut("specimen.copyThis", "ctrl alt C", new AbstractAction() {
-//            @Override
-//            public void actionPerformed(ActionEvent actionEvent) {
-//                ImageCaptureApp.lastEditedSpecimenCache = thisPane.specimen;
-//                thisPane.setStatus("Copied specimen with id " + thisPane.specimen.getSpecimenId());
-//            }
-//        });
-//        registerShortcut("specimen.paste", "ctrl alt V", new AbstractAction() {
-//            @Override
-//            public void actionPerformed(ActionEvent actionEvent) {
-//                previousSpecimen = ImageCaptureApp.lastEditedSpecimenCache;
-//                pastePreviousRecord();
-//            }
-//        });
+        registerShortcut("specimen.copyThis", "ctrl alt C", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                ImageCaptureApp.lastEditedSpecimenCache = thisPane.specimen;
+                thisPane.setStatus("Copied specimen with id " + thisPane.specimen.getSpecimenId());
+            }
+        });
+        registerShortcut("specimen.paste", "ctrl alt V", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                previousSpecimen = ImageCaptureApp.lastEditedSpecimenCache;
+                pastePreviousRecord();
+            }
+        });
         if (specimen.isExported() == null || specimen.isExported()) {
             JOptionPane.showMessageDialog(thisPane,
                     "This Specimen is already exported. No edit will be saved.",
@@ -978,11 +978,11 @@ public class SpecimenDetailsViewPane extends JPanel {
             this.addBasicJLabel(jPanel, "Questions");
             jPanel.add(this.getQuestionsJTextField(), "grow, span 3");
             // section: controls
-            //jPanel.add(this.getJButtonPaste(), "span, split 6"); //, sizegroup controls");
-            jPanel.add(this.getJButtonHistory(), "span, split 4");//, "sizegroup controls");
+            jPanel.add(this.getJButtonPaste(), "span, split 6"); //, sizegroup controls");
+            jPanel.add(this.getJButtonHistory()); //, "span, split 4");//, "sizegroup controls");
             jPanel.add(this.getJButtonPrevious(), "tag back");
             jPanel.add(this.getJButtonNext(), "tag next");
-            //jPanel.add(this.getJButtonCopySave(), "tag apply");//, "sizegroup controls");
+            jPanel.add(this.getJButtonCopySave(), "tag apply");//, "sizegroup controls");
             jPanel.add(this.getSaveJButton(), "tag apply");//, "sizegroup controls");
         }
         return jPanel;

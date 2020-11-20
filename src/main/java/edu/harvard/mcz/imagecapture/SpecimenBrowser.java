@@ -25,6 +25,7 @@ import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
+import edu.harvard.mcz.imagecapture.ui.CopyRowButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -155,8 +156,8 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             jTable.setRowSorter(sorter);
             jTable.setDefaultRenderer(Specimen.class, new ButtonRenderer());
             jTable.setDefaultEditor(Specimen.class, new ButtonEditor());
-//            jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY)).setCellRenderer(new ButtonRenderer("Copy"));
-//            jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY)).setCellEditor(new CopyRowButtonEditor(new JCheckBox()));
+            jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY)).setCellRenderer(new ButtonRenderer("Copy"));
+            jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY)).setCellEditor(new CopyRowButtonEditor(new JCheckBox()));
             // set some column widths
             int characterWidth = Singleton.getSingletonInstance().getCharacterWidth();
             jTable.getColumnModel().getColumn(0).setPreferredWidth(characterWidth *

@@ -55,6 +55,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * JPanel for editing a record of a Specimen in a details view for that specimen.
@@ -587,8 +588,15 @@ public class SpecimenDetailsViewPane extends JPanel {
         this.setupSpecimenPartsJTableRenderer();
 
         //+collectors
+        // trying not to remove & add one of same name to counter sql constraints
         specimen.getCollectors().clear();
-        for (Collector collector : previousSpecimen.getCollectors()) {
+        Set<Collector> followingCollectors = previousSpecimen.getCollectors();
+        // the collectors to be added:
+        Set<Collector> newCollectors = followingCollectors.stream().filter(collector -> !specimen.getCollectors().contains(collector)).collect(Collectors.toSet());
+        // the collectors to be removed:
+        Set<Collector> collectorsToRemove = specimen.getCollectors().stream().filter(collector -> !followingCollectors.contains(collector)).collect(Collectors.toSet());
+        specimen.getCollectors().removeAll(collectorsToRemove);
+        for (Collector collector : newCollectors) {
             Collector c = (Collector) collector.clone();
             c.setSpecimen(specimen);
             specimen.getCollectors().add(c);

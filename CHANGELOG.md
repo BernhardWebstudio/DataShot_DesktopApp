@@ -1,5 +1,30 @@
 # Changelog
 
+## v1.12.0
+* [[`319906c5fb`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/319906c5fb)] - Prevent creation of same named Collector for same specimen when copying (Tim Bernhard)
+* [[`88586698ac`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/88586698ac)] - Re-Enable Copy-Paste functionality (Tim Bernhard)
+* [[`ca0dcdf1f0`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/ca0dcdf1f0)] - Use c3po for connection pooling (Tim Bernhard)
+* [[`4b2aceb649`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4b2aceb649)] - Use c3po for connection pooling (Tim Bernhard)
+* [[`3806e22873`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/3806e22873)] - Force utf8 in hibernate connection (Tim Bernhard)
+* [[`47ddf363eb`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/47ddf363eb)] - Setup JDK in codeql analysis (Tim Bernhard)
+* [[`1dcba1afe6`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/1dcba1afe6)] - Fix build in codeql analysis (Tim Bernhard)
+* [[`4ad56c76e1`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4ad56c76e1)] - Create codeql-analysis.yml (Tim Bernhard)
+* [[`8766ef59eb`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8766ef59eb)] - Fix deleting a Specimen (Tim Bernhard)
+* [[`8e86296539`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8e86296539)] - Fix build timestamp in version info (Tim Bernhard)
+* [[`53620a0586`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/53620a0586)] - Fix issue where specimen fields would not show up (Tim Bernhard)
+* [[`e35ce80df2`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e35ce80df2)] - Reformat code (Tim Bernhard)
+* [[`2c541bf5e9`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/2c541bf5e9)] - Add hour & minute to GitHub Prerelease (Tim Bernhard)
+* [[`e4f4d5422d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e4f4d5422d)] - Improve resilience of file scan (Tim Bernhard)
+* [[`621ba1ca08`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/621ba1ca08)] - Improve error messages when scanning barcodes (Tim Bernhard)
+* [[`f956bc6fdb`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f956bc6fdb)] - Fix issue where scanOneBarcode would not work (Tim Bernhard)
+* [[`d37c0ec04e`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d37c0ec04e)] - Implement possiblity to scan id date field in QR Code (Tim Bernhard)
+* [[`b85d50750b`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b85d50750b)] - Introduce nahimaExported field and disable editing (for everyone) on exported records (Tim Bernhard)
+* [[`47f75a82df`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/47f75a82df)] - Deactivate verbatim date vs. nos date auto-fill (Tim Bernhard)
+* [[`f18aae364b`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f18aae364b)] - Force UTF-8 stream reader when fetching Map data (Tim Bernhard)
+* [[`955d502d7f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/955d502d7f)] - Add (untested) reader capability for sex (Tim Bernhard)
+* [[`f953f0ad22`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f953f0ad22)] - Update changelog to publish Version v1.11.1 (Tim Bernhard)
+
+
 ## v1.11.1
 * [[`876635ba6c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/876635ba6c)] - Remove copy button from specimen list (Tim Bernhard)
 * [[`8c9f651849`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8c9f651849)] - Pseudo-disable paste previous action (Tim Bernhard)

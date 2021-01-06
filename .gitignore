@@ -22,5 +22,6 @@ dependency-reduced-pom.xml
 DataShot.iml
 DataShot-*.jar
 imagecapture*.log
+datashot*.log
 cleanupLog.regex
 imagecapture-shortcuts.properties

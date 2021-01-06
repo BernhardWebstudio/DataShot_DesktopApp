@@ -4,7 +4,7 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %l - %msg%n"/>
         </Console>
-        <File name="ImageCaptureLog" fileName="imagecapture.log" append="false">
+        <File name="ImageCaptureLog" fileName="datashot.log" append="false">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %l - %msg%n"/>
         </File>
     </Appenders>

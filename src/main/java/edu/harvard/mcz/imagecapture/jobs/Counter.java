@@ -205,13 +205,13 @@ public class Counter implements ScanCounterInterface {
         report += "Created  " + this.getFilesDatabased() + " new image records.\n";
         if (this.getFilesUpdated() > 0) {
             report += "Updated  " + this.getFilesUpdated() + " image records.\n";
-
         }
+        report += "Skipped " + this.getSpecimensExisting() + " already existing Specimen.\n";
         report += "Created  " + this.getSpecimens() + " new specimen records.\n";
         if (this.getSpecimensUpdated() > 0) {
             report += "Updated  " + this.getSpecimensUpdated() + " specimen records.\n";
-
         }
+        report += "Skipped " + this.getFilesExisting() + " already existing Files.\n";
         report += "Found " + this.getFilesFailed() + " files with problems.\n";
         return report;
     }

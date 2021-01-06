@@ -57,7 +57,8 @@ public class AllowedVersionLifeCycle {
         List<AllowedVersion> allowedVersions = als.findAll();
         Iterator<AllowedVersion> i = allowedVersions.iterator();
         while (i.hasNext()) {
-            String version = i.next().getVersion();
+            // cut away build nr. etc.
+            String version = i.next().getVersion().split("[ \\-]")[0];
             String currentVersion = ImageCaptureApp.getAppVersion();
             if (version != null && currentVersion != null &&
                     version.length() <= currentVersion.length() &&

@@ -28,14 +28,15 @@ import edu.harvard.mcz.imagecapture.lifecycle.AllowedVersionLifeCycle;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.RunnableJobTableModel;
+import java.awt.Cursor;
+import java.io.IOException;
+import java.util.Properties;
+import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
-
-import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
-import java.util.Properties;
 
 /**
  * for experimental chat support
@@ -280,7 +281,7 @@ public class ImageCaptureApp {
                     .setStatusMessage("Database does not support version, update needed.");
             int response = JOptionPane.showConfirmDialog(Singleton.getSingletonInstance().getMainFrame(),
                     "The database does not support" + APP_NAME + " version " + APP_VERSION
-                            + ".  A software (or database) update from " + allowed + " is required. "
+                            + "." + System.lineSeparator() + "  A software (or database) update from " + allowed + " is required. " + System.lineSeparator()
                             + "Are you ready to try the upgrade of the database? Make sure no one else will need the old version.",
                     "Update Required", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
             log.error("Database does not allow version " + ImageCaptureApp.APP_VERSION + ". Upgrade will "

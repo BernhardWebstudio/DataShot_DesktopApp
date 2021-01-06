@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.12.1
+* [[`196f6efcc5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/196f6efcc5)] - Use elder log4j version to improve stability (Tim Bernhard)
+* [[`cb72e45ace`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/cb72e45ace)] - Prepare patch (Tim Bernhard)
+* [[`8a89709a95`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8a89709a95)] - Update changelog to publish Version v1.12.0 (Tim Bernhard)
+
+
 ## v1.12.0
 * [[`319906c5fb`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/319906c5fb)] - Prevent creation of same named Collector for same specimen when copying (Tim Bernhard)
 * [[`88586698ac`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/88586698ac)] - Re-Enable Copy-Paste functionality (Tim Bernhard)

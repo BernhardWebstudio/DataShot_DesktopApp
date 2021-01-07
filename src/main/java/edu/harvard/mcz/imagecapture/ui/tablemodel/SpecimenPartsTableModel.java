@@ -21,168 +21,175 @@ package edu.harvard.mcz.imagecapture.ui.tablemodel;
 import edu.harvard.mcz.imagecapture.entity.SpecimenPart;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenPartLifeCycle;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.HashSet;
 import java.util.Set;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class SpecimenPartsTableModel extends AbstractDeleteableTableModel {
 
-    private static final long serialVersionUID = -4139892019645663114L;
-    private static final Log log = LogFactory.getLog(SpecimenPartsTableModel.class);
-    private final Set<SpecimenPart> specimenParts;
+  private static final long serialVersionUID = -4139892019645663114L;
+  private static final Logger log =
+      LoggerFactory.getLogger(SpecimenPartsTableModel.class);
+  private final Set<SpecimenPart> specimenParts;
 
-    public SpecimenPartsTableModel() {
-        super();
-        this.specimenParts = new HashSet<SpecimenPart>();
+  public SpecimenPartsTableModel() {
+    super();
+    this.specimenParts = new HashSet<SpecimenPart>();
+  }
+
+  /**
+   * @param specimenParts
+   */
+  public SpecimenPartsTableModel(Set<SpecimenPart> specimenParts) {
+    super();
+    this.specimenParts = specimenParts;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.swing.table.TableModel#getRowCount()
+   */
+  @Override
+  public int getRowCount() {
+    // TODO Auto-generated method stub
+    return specimenParts.size();
+  }
+
+  /* (non-Javadoc)
+   * @see javax.swing.table.TableModel#getColumnCount()
+   */
+  @Override
+  public int getColumnCount() {
+    // TODO Auto-generated method stub
+    return 5;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.swing.table.AbstractTableModel#getColumnName(int)
+   */
+  @Override
+  public String getColumnName(int columnIndex) {
+    String returnvalue = null;
+    switch (columnIndex) {
+    case 0:
+      returnvalue = "Part";
+      break;
+    case 1:
+      returnvalue = "Prep.";
+      break;
+    case 2:
+      returnvalue = "Count";
+      break;
+    case 3:
+      returnvalue = "Attributes";
+      break;
+    case 4:
+      returnvalue = "";
+      break;
     }
+    return returnvalue;
+  }
 
-    /**
-     * @param specimenParts
-     */
-    public SpecimenPartsTableModel(Set<SpecimenPart> specimenParts) {
-        super();
-        this.specimenParts = specimenParts;
+  /* (non-Javadoc)
+   * @see javax.swing.table.TableModel#getValueAt(int, int)
+   */
+  @Override
+  public Object getValueAt(int rowIndex, int columnIndex) {
+    if (rowIndex >= specimenParts.size()) {
+      log.warn("Cannot get value at row, col: " + rowIndex + ", " +
+               columnIndex + " due to size " + specimenParts.size() +
+               " in SpecimenPartsTable");
+      return null;
     }
-
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getRowCount()
-     */
-    @Override
-    public int getRowCount() {
-        // TODO Auto-generated method stub
-        return specimenParts.size();
+    Object result = null;
+    switch (columnIndex) {
+    case 0:
+      result = ((SpecimenPart)specimenParts.toArray()[rowIndex]).getPartName();
+      break;
+    case 1:
+      result =
+          ((SpecimenPart)specimenParts.toArray()[rowIndex]).getPreserveMethod();
+      break;
+    case 2:
+      result = ((SpecimenPart)specimenParts.toArray()[rowIndex]).getLotCount();
+      break;
+    case 3:
+      result = ((SpecimenPart)specimenParts.toArray()[rowIndex])
+                   .getPartAttributeValuesConcat();
+      break;
+    case 4:
+      result = specimenParts.toArray()[rowIndex];
+      break;
+    default:
+      log.warn("Undefined column with index " + columnIndex);
+      break;
     }
+    return result;
+  }
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getColumnCount()
-     */
-    @Override
-    public int getColumnCount() {
-        // TODO Auto-generated method stub
-        return 5;
+  /* (non-Javadoc)
+   * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object, int,
+   *     int)
+   */
+  @Override
+  public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+    if (rowIndex >= specimenParts.size()) {
+      log.warn("Cannot set value " + aValue.toString() + " due to size " +
+               specimenParts.size() + " in SpecimenPartsTable at row, col: " +
+               rowIndex + ", " + columnIndex);
+      return;
     }
-
-    /* (non-Javadoc)
-     * @see javax.swing.table.AbstractTableModel#getColumnName(int)
-     */
-    @Override
-    public String getColumnName(int columnIndex) {
-        String returnvalue = null;
-        switch (columnIndex) {
-            case 0:
-                returnvalue = "Part";
-                break;
-            case 1:
-                returnvalue = "Prep.";
-                break;
-            case 2:
-                returnvalue = "Count";
-                break;
-            case 3:
-                returnvalue = "Attributes";
-                break;
-            case 4:
-                returnvalue = "";
-                break;
-        }
-        return returnvalue;
+    switch (columnIndex) {
+    case 0:
+      ((SpecimenPart)specimenParts.toArray()[rowIndex])
+          .setPartName((String)aValue);
+      break;
+    case 1:
+      ((SpecimenPart)specimenParts.toArray()[rowIndex])
+          .setPreserveMethod((String)aValue);
+      break;
+    case 2:
+      ((SpecimenPart)specimenParts.toArray()[rowIndex])
+          .setLotCount(Integer.parseInt((String)aValue));
+      break;
+    case 3:
+      break;
+    case 4:
+      break;
+    default:
+      log.warn("Undefined column with index " + columnIndex);
+      break;
     }
+  }
 
-
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getValueAt(int, int)
-     */
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        if (rowIndex >= specimenParts.size()) {
-            log.warn("Cannot get value at row, col: " + rowIndex + ", " + columnIndex + " due to size " + specimenParts.size() + " in SpecimenPartsTable");
-            return null;
-        }
-        Object result = null;
-        switch (columnIndex) {
-            case 0:
-                result = ((SpecimenPart) specimenParts.toArray()[rowIndex]).getPartName();
-                break;
-            case 1:
-                result = ((SpecimenPart) specimenParts.toArray()[rowIndex]).getPreserveMethod();
-                break;
-            case 2:
-                result = ((SpecimenPart) specimenParts.toArray()[rowIndex]).getLotCount();
-                break;
-            case 3:
-                result = ((SpecimenPart) specimenParts.toArray()[rowIndex]).getPartAttributeValuesConcat();
-                break;
-            case 4:
-                result = specimenParts.toArray()[rowIndex];
-                break;
-            default:
-                log.warn("Undefined column with index " + columnIndex);
-                break;
-        }
-        return result;
+  /* (non-Javadoc)
+   * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
+   */
+  @Override
+  public boolean isCellEditable(int rowIndex, int columnIndex) {
+    boolean result = true;
+    if (columnIndex == 3) {
+      result = false;
     }
+    return result;
+  }
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.AbstractTableModel#setValueAt(java.lang.Object, int, int)
-     */
-    @Override
-    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        if (rowIndex >= specimenParts.size()) {
-            log.warn("Cannot set value " + aValue.toString() + " due to size " + specimenParts.size() + " in SpecimenPartsTable at row, col: " + rowIndex + ", " + columnIndex);
-            return;
-        }
-        switch (columnIndex) {
-            case 0:
-                ((SpecimenPart) specimenParts.toArray()[rowIndex]).setPartName((String) aValue);
-                break;
-            case 1:
-                ((SpecimenPart) specimenParts.toArray()[rowIndex]).setPreserveMethod((String) aValue);
-                break;
-            case 2:
-                ((SpecimenPart) specimenParts.toArray()[rowIndex]).setLotCount(Integer.parseInt((String) aValue));
-                break;
-            case 3:
-                break;
-            case 4:
-                break;
-            default:
-                log.warn("Undefined column with index " + columnIndex);
-                break;
-        }
+  /**
+   * @param rowIndex row to be deleted
+   */
+  public void deleteRow(int rowIndex) {
+    SpecimenPart toRemove = ((SpecimenPart)specimenParts.toArray()[rowIndex]);
+    SpecimenPartLifeCycle spals = new SpecimenPartLifeCycle();
+    try {
+      spals.remove(toRemove);
+      specimenParts.remove(toRemove);
+      fireTableDataChanged();
+    } catch (SaveFailedException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
     }
-
-    /* (non-Javadoc)
-     * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
-     */
-    @Override
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean result = true;
-        if (columnIndex == 3) {
-            result = false;
-        }
-        return result;
-    }
-
-    /**
-     * @param rowIndex row to be deleted
-     */
-    public void deleteRow(int rowIndex) {
-        SpecimenPart toRemove = ((SpecimenPart) specimenParts.toArray()[rowIndex]);
-        SpecimenPartLifeCycle spals = new SpecimenPartLifeCycle();
-        try {
-            spals.remove(toRemove);
-            specimenParts.remove(toRemove);
-            fireTableDataChanged();
-        } catch (SaveFailedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
+  }
 }

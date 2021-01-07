@@ -20,85 +20,84 @@ package edu.harvard.mcz.imagecapture.lifecycle;
 
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.MCZbaseGeogAuthRec;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.List;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
-
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class MCZbaseGeogAuthRecLifeCycle {
-    private static final Log log =
-            LogFactory.getLog(MCZbaseGeogAuthRecLifeCycle.class);
+  private static final Logger log =
+      LoggerFactory.getLogger(MCZbaseGeogAuthRecLifeCycle.class);
 
-    /**
-     * @return
-     */
-    public List<MCZbaseGeogAuthRec> findAll() {
-        log.debug("finding all Higher geographies");
-        try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            session.beginTransaction();
-            List<MCZbaseGeogAuthRec> results = null;
-            try {
-                results =
-                        (List<MCZbaseGeogAuthRec>) session
-                                .createQuery("from MCZbaseGeogAuthRec h order by h.higher_geog")
-                                .setReadOnly(true)
-                                .list();
-                log.debug("find all successful, result size: " + results.size());
-                session.getTransaction().commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error("find all failed", e);
-            }
-            try {
-                session.close();
-            } catch (SessionException e) {
-            }
-            return results;
-        } catch (RuntimeException re) {
-            log.error("Find all failed.  ", re);
-            throw re;
-        }
+  /**
+   * @return
+   */
+  public List<MCZbaseGeogAuthRec> findAll() {
+    log.debug("finding all Higher geographies");
+    try {
+      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+      session.beginTransaction();
+      List<MCZbaseGeogAuthRec> results = null;
+      try {
+        results =
+            (List<MCZbaseGeogAuthRec>)session
+                .createQuery("from MCZbaseGeogAuthRec h order by h.higher_geog")
+                .setReadOnly(true)
+                .list();
+        log.debug("find all successful, result size: " + results.size());
+        session.getTransaction().commit();
+      } catch (HibernateException e) {
+        session.getTransaction().rollback();
+        log.error("find all failed", e);
+      }
+      try {
+        session.close();
+      } catch (SessionException e) {
+      }
+      return results;
+    } catch (RuntimeException re) {
+      log.error("Find all failed.  ", re);
+      throw re;
     }
+  }
 
-    /**
-     * @param pattern
-     * @return
-     */
-    public List<MCZbaseGeogAuthRec> findByExample(MCZbaseGeogAuthRec pattern) {
-        log.debug("finding Higher Geographies by example");
-        try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            session.beginTransaction();
-            List<MCZbaseGeogAuthRec> results = null;
-            try {
-                CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
-                CriteriaQuery cr =
-                        criteriaBuilder.createQuery(MCZbaseGeogAuthRec.class);
-                // TODO: refactor to use reflection
+  /**
+   * @param pattern
+   * @return
+   */
+  public List<MCZbaseGeogAuthRec> findByExample(MCZbaseGeogAuthRec pattern) {
+    log.debug("finding Higher Geographies by example");
+    try {
+      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+      session.beginTransaction();
+      List<MCZbaseGeogAuthRec> results = null;
+      try {
+        CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
+        CriteriaQuery cr =
+            criteriaBuilder.createQuery(MCZbaseGeogAuthRec.class);
+        // TODO: refactor to use reflection
 
-                log.debug("find by example successful, result size: " + results.size());
-                session.getTransaction().commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error("find by example failed", e);
-            }
-            try {
-                session.close();
-            } catch (SessionException e) {
-            }
-            return results;
-        } catch (RuntimeException re) {
-            log.error("find by example failed", re);
-            throw re;
-        }
+        log.debug("find by example successful, result size: " + results.size());
+        session.getTransaction().commit();
+      } catch (HibernateException e) {
+        session.getTransaction().rollback();
+        log.error("find by example failed", e);
+      }
+      try {
+        session.close();
+      } catch (SessionException e) {
+      }
+      return results;
+    } catch (RuntimeException re) {
+      log.error("find by example failed", re);
+      throw re;
     }
+  }
 }

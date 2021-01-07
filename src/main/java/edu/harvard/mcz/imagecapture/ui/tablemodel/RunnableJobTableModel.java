@@ -20,187 +20,188 @@ package edu.harvard.mcz.imagecapture.ui.tablemodel;
 
 import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
 import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.swing.table.AbstractTableModel;
 import java.text.DateFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import javax.swing.table.AbstractTableModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JobTableModel
  */
-public class RunnableJobTableModel extends AbstractTableModel implements RunnerListener {
+public class RunnableJobTableModel
+    extends AbstractTableModel implements RunnerListener {
 
-    private static final long serialVersionUID = 2701547555516905743L;
+  private static final long serialVersionUID = 2701547555516905743L;
 
-    private static final Log log = LogFactory.getLog(RunnableJobTableModel.class);
+  private static final Logger log =
+      LoggerFactory.getLogger(RunnableJobTableModel.class);
 
-    private final Set<RunnableJob> jobs;
+  private final Set<RunnableJob> jobs;
 
-    /**
-     *
-     */
-    public RunnableJobTableModel() {
-        jobs = new HashSet<RunnableJob>();
+  /**
+   *
+   */
+  public RunnableJobTableModel() { jobs = new HashSet<RunnableJob>(); }
+
+  /* (non-Javadoc)
+   * @see javax.swing.table.TableModel#getColumnCount()
+   */
+  @Override
+  public int getColumnCount() {
+    return 4;
+  }
+
+  /**
+   * Must be implemented for ButtonEditor to work.  Needs to return Integer for
+   * row number column that is to contain button to work with ButtonEditor.
+   */
+  public Class getColumnClass(int columnIndex) {
+    // Given current implementation of button in SpecimenBrowser,
+    // needs to return Long for ID column that is to contain button
+    // and ** Must Not ** return Long for any other column).
+    Class result = String.class; // Default value to return when table is empty.
+    switch (columnIndex) {
+    case 0:
+      result = Integer.class;
+      break;
+    case 1:
+      result = String.class;
+      break;
+    case 2:
+      result = String.class;
+      break;
+    case 3:
+      result = int.class;
+      break;
     }
+    return result;
+  }
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getColumnCount()
-     */
-    @Override
-    public int getColumnCount() {
-        return 4;
+  /*
+  (non-Javadoc)
+   * @see javax.swing.table.TableModel#getRowCount()
+   */
+  @Override
+  public int getRowCount() {
+    return jobs.size();
+  }
+
+  public String getColumnName(int columnIndex) {
+    String returnvalue = null;
+    switch (columnIndex) {
+    case 0:
+      returnvalue = " ";
+      break;
+    case 1:
+      returnvalue = "Job";
+      break;
+    case 2:
+      returnvalue = "Started";
+      break;
+    case 3:
+      returnvalue = "Progress";
+      break;
     }
+    return returnvalue;
+  }
 
-    /**
-     * Must be implemented for ButtonEditor to work.  Needs to return Integer for
-     * row number column that is to contain button to work with ButtonEditor.
-     */
-    public Class getColumnClass(int columnIndex) {
-        // Given current implementation of button in SpecimenBrowser,
-        // needs to return Long for ID column that is to contain button
-        // and ** Must Not ** return Long for any other column).
-        Class result = String.class;  // Default value to return when table is empty.
-        switch (columnIndex) {
-            case 0:
-                result = Integer.class;
-                break;
-            case 1:
-                result = String.class;
-                break;
-            case 2:
-                result = String.class;
-                break;
-            case 3:
-                result = int.class;
-                break;
+  /*
+  (non-Javadoc)
+   * @see javax.swing.table.TableModel#getValueAt(int, int)
+   */
+  @Override
+  public Object getValueAt(int rowIndex, int columnIndex) {
+    Object returnvalue = null;
+    try {
+      switch (columnIndex) {
+      case 0:
+        returnvalue = rowIndex;
+        break;
+      case 1:
+        returnvalue = ((RunnableJob)jobs.toArray()[rowIndex]).getName();
+        break;
+      case 2:
+        if (((RunnableJob)jobs.toArray()[rowIndex]).getStartTime() == null) {
+          returnvalue = "----";
+        } else {
+          returnvalue = DateFormat.getTimeInstance().format(
+              ((RunnableJob)jobs.toArray()[rowIndex]).getStartTime());
         }
-        return result;
+        break;
+      case 3:
+        returnvalue = ((RunnableJob)jobs.toArray()[rowIndex]).percentComplete();
+        log.debug("Debug", returnvalue);
+        break;
+      }
+    } catch (ArrayIndexOutOfBoundsException e) {
+      log.debug("Debug", e.getMessage());
+      fireTableDataChanged();
+    } catch (NullPointerException e) {
+      log.debug("Debug", e.getMessage());
+      fireTableDataChanged();
     }
+    return returnvalue;
+  }
 
-    /*
-    (non-Javadoc)
-     * @see javax.swing.table.TableModel#getRowCount()
-     */
-    @Override
-    public int getRowCount() {
-        return jobs.size();
+  public boolean isCellEditable(int rowIndex, int columnIndex) {
+    boolean returnvalue = false;
+    switch (columnIndex) {
+    case 0:
+      returnvalue = true;
+      break;
+    case 1:
+      returnvalue = false;
+      break;
+    case 2:
+      returnvalue = false;
+      break;
+    case 3:
+      returnvalue = false;
+      break;
     }
+    return returnvalue;
+  }
 
-    public String getColumnName(int columnIndex) {
-        String returnvalue = null;
-        switch (columnIndex) {
-            case 0:
-                returnvalue = " ";
-                break;
-            case 1:
-                returnvalue = "Job";
-                break;
-            case 2:
-                returnvalue = "Started";
-                break;
-            case 3:
-                returnvalue = "Progress";
-                break;
-        }
-        return returnvalue;
+  public RunnableJob getJobAt(Integer rowIndex) {
+    RunnableJob returnvalue = null;
+    returnvalue = (RunnableJob)jobs.toArray()[rowIndex];
+    return returnvalue;
+  }
+
+  /**
+   * addJob adds a RunnableJob to this model as a new row
+   *
+   * @param aJob the RunnableJob to add to the table model.
+   */
+  public void addJob(RunnableJob aJob) {
+    jobs.add(aJob);
+    aJob.registerListener(this);
+    this.fireTableDataChanged();
+  }
+
+  public void removeJob(RunnableJob aJob) {
+    jobs.remove(aJob);
+    this.fireTableDataChanged();
+  }
+
+  public void registerListener(RunnerListener listener) {
+    Iterator<RunnableJob> i = jobs.iterator();
+    while (i.hasNext()) {
+      i.next().registerListener(listener);
     }
+  }
 
-    /*
-    (non-Javadoc)
-     * @see javax.swing.table.TableModel#getValueAt(int, int)
-     */
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        Object returnvalue = null;
-        try {
-            switch (columnIndex) {
-                case 0:
-                    returnvalue = rowIndex;
-                    break;
-                case 1:
-                    returnvalue = ((RunnableJob) jobs.toArray()[rowIndex]).getName();
-                    break;
-                case 2:
-                    if (((RunnableJob) jobs.toArray()[rowIndex]).getStartTime() == null) {
-                        returnvalue = "----";
-                    } else {
-                        returnvalue = DateFormat.getTimeInstance().format(((RunnableJob) jobs.toArray()[rowIndex]).getStartTime());
-                    }
-                    break;
-                case 3:
-                    returnvalue = ((RunnableJob) jobs.toArray()[rowIndex]).percentComplete();
-                    log.debug(returnvalue);
-                    break;
-            }
-        } catch (ArrayIndexOutOfBoundsException e) {
-            log.debug(e.getMessage());
-            fireTableDataChanged();
-        } catch (NullPointerException e) {
-            log.debug(e.getMessage());
-            fireTableDataChanged();
-        }
-        return returnvalue;
-    }
-
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean returnvalue = false;
-        switch (columnIndex) {
-            case 0:
-                returnvalue = true;
-                break;
-            case 1:
-                returnvalue = false;
-                break;
-            case 2:
-                returnvalue = false;
-                break;
-            case 3:
-                returnvalue = false;
-                break;
-        }
-        return returnvalue;
-    }
-
-    public RunnableJob getJobAt(Integer rowIndex) {
-        RunnableJob returnvalue = null;
-        returnvalue = (RunnableJob) jobs.toArray()[rowIndex];
-        return returnvalue;
-    }
-
-    /**
-     * addJob adds a RunnableJob to this model as a new row
-     *
-     * @param aJob the RunnableJob to add to the table model.
-     */
-    public void addJob(RunnableJob aJob) {
-        jobs.add(aJob);
-        aJob.registerListener(this);
-        this.fireTableDataChanged();
-    }
-
-    public void removeJob(RunnableJob aJob) {
-        jobs.remove(aJob);
-        this.fireTableDataChanged();
-    }
-
-    public void registerListener(RunnerListener listener) {
-        Iterator<RunnableJob> i = jobs.iterator();
-        while (i.hasNext()) {
-            i.next().registerListener(listener);
-        }
-    }
-
-    /* (non-Javadoc)
-     * @see edu.harvard.mcz.imagecapture.interfaces.RunnerListener#notifyListener(int, edu.harvard.mcz.imagecapture.interfaces.RunnableJob)
-     */
-    @Override
-    public void notifyListener(int anEvent, RunnableJob notifyingJob) {
-        log.debug(anEvent);
-        this.fireTableDataChanged();
-    }
-
+  /* (non-Javadoc)
+   * @see
+   *     edu.harvard.mcz.imagecapture.interfaces.RunnerListener#notifyListener(int,
+   *     edu.harvard.mcz.imagecapture.interfaces.RunnableJob)
+   */
+  @Override
+  public void notifyListener(int anEvent, RunnableJob notifyingJob) {
+    log.debug("Debug", anEvent);
+    this.fireTableDataChanged();
+  }
 }

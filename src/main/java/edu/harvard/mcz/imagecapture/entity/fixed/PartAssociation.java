@@ -18,29 +18,19 @@
  */
 package edu.harvard.mcz.imagecapture.entity.fixed;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
  *
  */
 public class PartAssociation {
-    private static final Log log = LogFactory.getLog(PartAssociation.class);
+  private static final Logger log =
+      LoggerFactory.getLogger(PartAssociation.class);
 
-    public static String[] getPartAssociationValues() {
-        String[] values = {
-                "seeds",
-                "inquiline",
-                "attendant ant",
-                "host",
-                "host plant",
-                "host ant",
-                "parasite",
-                "parasitoid",
-                "slave"
-        };
-        return values;
-    }
-
-
+  public static String[] getPartAssociationValues() {
+    String[] values = {"seeds",    "inquiline",  "attendant ant",
+                       "host",     "host plant", "host ant",
+                       "parasite", "parasitoid", "slave"};
+    return values;
+  }
 }

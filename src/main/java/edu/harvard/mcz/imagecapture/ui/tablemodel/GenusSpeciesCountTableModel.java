@@ -19,91 +19,91 @@
 package edu.harvard.mcz.imagecapture.ui.tablemodel;
 
 import edu.harvard.mcz.imagecapture.entity.fixed.GenusSpeciesCount;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.table.AbstractTableModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class GenusSpeciesCountTableModel extends AbstractTableModel {
 
-    private static final long serialVersionUID = 1907248383164693796L;
+  private static final long serialVersionUID = 1907248383164693796L;
 
-    private static final Log log = LogFactory.getLog(GenusSpeciesCountTableModel.class);
+  private static final Logger log =
+      LoggerFactory.getLogger(GenusSpeciesCountTableModel.class);
 
-    private List<GenusSpeciesCount> genusSpeciesCounts = null;
+  private List<GenusSpeciesCount> genusSpeciesCounts = null;
 
-    public GenusSpeciesCountTableModel() {
-        genusSpeciesCounts = new ArrayList<GenusSpeciesCount>();
+  public GenusSpeciesCountTableModel() {
+    genusSpeciesCounts = new ArrayList<GenusSpeciesCount>();
+  }
+
+  public GenusSpeciesCountTableModel(
+      List<GenusSpeciesCount> genusSpeciesCounts) {
+    this.genusSpeciesCounts = genusSpeciesCounts;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.swing.table.TableModel#getRowCount()
+   */
+  @Override
+  public int getRowCount() {
+    return genusSpeciesCounts.size();
+  }
+
+  /* (non-Javadoc)
+   * @see javax.swing.table.TableModel#getColumnCount()
+   */
+  @Override
+  public int getColumnCount() {
+    return 3;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
+   */
+  @Override
+  public boolean isCellEditable(int rowIndex, int columnIndex) {
+    boolean result = false;
+    if (columnIndex == 0) {
+      result = true;
     }
+    return result;
+  }
 
-    public GenusSpeciesCountTableModel(List<GenusSpeciesCount> genusSpeciesCounts) {
-        this.genusSpeciesCounts = genusSpeciesCounts;
+  /* (non-Javadoc)
+   * @see javax.swing.table.TableModel#getValueAt(int, int)
+   */
+  @Override
+  public Object getValueAt(int rowIndex, int columnIndex) {
+    Object returnvalue = null;
+    switch (columnIndex) {
+    case 0:
+      returnvalue = genusSpeciesCounts.get(rowIndex);
+      break;
+    case 1:
+      returnvalue = genusSpeciesCounts.get(rowIndex).getCount().toString();
+      break;
+    case 2:
+      returnvalue = genusSpeciesCounts.get(rowIndex).getGenus() + " " +
+                    genusSpeciesCounts.get(rowIndex).getSpecificEpithet();
+      break;
     }
+    return returnvalue;
+  }
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getRowCount()
-     */
-    @Override
-    public int getRowCount() {
-        return genusSpeciesCounts.size();
+  /* (non-Javadoc)
+   * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
+   */
+  @Override
+  public Class<?> getColumnClass(int columnIndex) {
+    if (columnIndex == 0) {
+      return GenusSpeciesCount.class;
+    } else {
+      return String.class;
     }
-
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getColumnCount()
-     */
-    @Override
-    public int getColumnCount() {
-        return 3;
-    }
-
-
-    /* (non-Javadoc)
-     * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
-     */
-    @Override
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean result = false;
-        if (columnIndex == 0) {
-            result = true;
-        }
-        return result;
-    }
-
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getValueAt(int, int)
-     */
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        Object returnvalue = null;
-        switch (columnIndex) {
-            case 0:
-                returnvalue = genusSpeciesCounts.get(rowIndex);
-                break;
-            case 1:
-                returnvalue = genusSpeciesCounts.get(rowIndex).getCount().toString();
-                break;
-            case 2:
-                returnvalue = genusSpeciesCounts.get(rowIndex).getGenus() + " " + genusSpeciesCounts.get(rowIndex).getSpecificEpithet();
-                break;
-        }
-        return returnvalue;
-
-    }
-
-    /* (non-Javadoc)
-     * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
-     */
-    @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        if (columnIndex == 0) {
-            return GenusSpeciesCount.class;
-        } else {
-            return String.class;
-        }
-    }
+  }
 }

@@ -23,63 +23,69 @@ import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.GenusSpeciesCountTableModel;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.border.EmptyBorder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class VerbatimToTranscribeDialog extends JDialog {
 
-    private static final long serialVersionUID = 1871411835203004797L;
+  private static final long serialVersionUID = 1871411835203004797L;
 
-    private static final Log log = LogFactory.getLog(VerbatimToTranscribeDialog.class);
+  private static final Logger log =
+      LoggerFactory.getLogger(VerbatimToTranscribeDialog.class);
 
-    private final JPanel contentPanel = new JPanel();
-    private final JTable table;
+  private final JPanel contentPanel = new JPanel();
+  private final JTable table;
 
-    /**
-     * Create the dialog.
-     */
-    public VerbatimToTranscribeDialog() {
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setBounds(100, 100, 726, 557);
-        getContentPane().setLayout(new BorderLayout());
-        contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
-        getContentPane().add(contentPanel, BorderLayout.CENTER);
-        contentPanel.setLayout(new BorderLayout(0, 0));
-        {
-            table = new JTable();
-            SpecimenLifeCycle sls = new SpecimenLifeCycle();
-            GenusSpeciesCountTableModel model = new GenusSpeciesCountTableModel(sls.countSpecimensForVerbatim());
-            table.setModel(model);
-            table.setDefaultRenderer(GenusSpeciesCount.class, new ButtonRenderer("Transcribe"));
-            table.setDefaultEditor(GenusSpeciesCount.class, new ButtonEditor(ButtonEditor.OPEN_SPECIMEN_VERBATIM, this));
-            contentPanel.add(table, BorderLayout.CENTER);
-        }
-        {
-            JPanel buttonPane = new JPanel();
-            buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-            getContentPane().add(buttonPane, BorderLayout.SOUTH);
-            {
-                JButton cancelButton = new JButton("Close");
-                cancelButton.setActionCommand("Close");
-                cancelButton.addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        setVisible(false);
-                    }
-
-                });
-                buttonPane.add(cancelButton);
-            }
-        }
+  /**
+   * Create the dialog.
+   */
+  public VerbatimToTranscribeDialog() {
+    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+    setBounds(100, 100, 726, 557);
+    getContentPane().setLayout(new BorderLayout());
+    contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+    getContentPane().add(contentPanel, BorderLayout.CENTER);
+    contentPanel.setLayout(new BorderLayout(0, 0));
+    {
+      table = new JTable();
+      SpecimenLifeCycle sls = new SpecimenLifeCycle();
+      GenusSpeciesCountTableModel model =
+          new GenusSpeciesCountTableModel(sls.countSpecimensForVerbatim());
+      table.setModel(model);
+      table.setDefaultRenderer(GenusSpeciesCount.class,
+                               new ButtonRenderer("Transcribe"));
+      table.setDefaultEditor(
+          GenusSpeciesCount.class,
+          new ButtonEditor(ButtonEditor.OPEN_SPECIMEN_VERBATIM, this));
+      contentPanel.add(table, BorderLayout.CENTER);
     }
+    {
+      JPanel buttonPane = new JPanel();
+      buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+      getContentPane().add(buttonPane, BorderLayout.SOUTH);
+      {
+        JButton cancelButton = new JButton("Close");
+        cancelButton.setActionCommand("Close");
+        cancelButton.addActionListener(new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            setVisible(false);
+          }
+        });
+        buttonPane.add(cancelButton);
+      }
+    }
+  }
 }

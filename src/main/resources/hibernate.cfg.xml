@@ -30,22 +30,22 @@
         <property name="hibernate.connection.characterEncoding">utf8</property>
         <property name="hibernate.connection.useUnicode">true</property>
         <!-- entities -->
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/Number.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/Specimen.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/SpecimenPart.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/SpecimenPartAttribute.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/Tracking.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/Determination.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/Collector.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/Image.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/Users.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/Template.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/HigherTaxon.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/UnitTrayLabel.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/MCZbaseGeogAuthRec.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/MCZbaseAuthAgentName.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/LatLong.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/AllowedVersion.hbm.xml"/>
-        <mapping resource="edu/harvard/mcz/imagecapture/entity/ExternalHistory.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Number.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Specimen.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/SpecimenPart.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/SpecimenPartAttribute.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Tracking.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Determination.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Collector.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Image.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Users.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Template.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/HigherTaxon.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/UnitTrayLabel.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/MCZbaseGeogAuthRec.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/MCZbaseAuthAgentName.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/LatLong.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/AllowedVersion.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/ExternalHistory.hbm.xml"/>
     </session-factory>
 </hibernate-configuration>

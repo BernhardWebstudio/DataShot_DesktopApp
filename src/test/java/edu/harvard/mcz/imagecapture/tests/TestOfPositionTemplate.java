@@ -197,7 +197,8 @@ public class TestOfPositionTemplate extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         // Create an instance of MainFrame to support database connection
-        ImageCaptureApp.main(null);
+        ImageCaptureApp app = new ImageCaptureApp();
+        app.main(null);
         // hide it so user can't see it.
         Singleton.getSingletonInstance().getMainFrame().setVisible(false);
     }

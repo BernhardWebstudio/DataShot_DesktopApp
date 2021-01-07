@@ -18,56 +18,44 @@
  */
 package edu.harvard.mcz.imagecapture.entity.fixed;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 /**
- * Data Structure to hold counts and values for arbitrary select count(*), field from table queries
- * for arbitrary fields.
+ * Data Structure to hold counts and values for arbitrary select count(*), field
+ * from table queries for arbitrary fields.
  */
 public class CountValue {
-    private static final Log log = LogFactory.getLog(CountValue.class);
+  private static final Logger log = LoggerFactory.getLogger(CountValue.class);
 
-    private Integer count;
-    private String value;
+  private Integer count;
+  private String value;
 
+  /**
+   * @param count
+   * @param value
+   */
+  public CountValue(Integer count, String value) {
+    this.count = count;
+    this.value = value;
+  }
 
-    /**
-     * @param count
-     * @param value
-     */
-    public CountValue(Integer count, String value) {
-        this.count = count;
-        this.value = value;
-    }
+  /**
+   * @return the count
+   */
+  public Integer getCount() { return count; }
 
-    /**
-     * @return the count
-     */
-    public Integer getCount() {
-        return count;
-    }
+  /**
+   * @param count the count to set
+   */
+  public void setCount(Integer count) { this.count = count; }
 
-    /**
-     * @param count the count to set
-     */
-    public void setCount(Integer count) {
-        this.count = count;
-    }
+  /**
+   * @return the value
+   */
+  public String getValue() { return value; }
 
-    /**
-     * @return the value
-     */
-    public String getValue() {
-        return value;
-    }
-
-    /**
-     * @param value the value to set
-     */
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-
+  /**
+   * @param value the value to set
+   */
+  public void setValue(String value) { this.value = value; }
 }

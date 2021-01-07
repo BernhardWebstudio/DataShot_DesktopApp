@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.metadata.ClassMetadata;
+import org.slf4j.Logger;
 
 import javax.persistence.Query;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -19,10 +20,10 @@ import java.util.*;
 public abstract class GenericLifeCycle<T> {
 
     private final Class<T> tCLass;
-    protected Log log;
+    protected Logger log;
 
 
-    public GenericLifeCycle(Class<T> tClass, Log log) {
+    public GenericLifeCycle(Class<T> tClass, Logger log) {
         this.tCLass = tClass;
         this.log = log;
     }

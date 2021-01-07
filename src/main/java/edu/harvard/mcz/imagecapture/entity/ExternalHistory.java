@@ -18,76 +18,66 @@
  */
 package edu.harvard.mcz.imagecapture.entity;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class ExternalHistory {
 
-    private static final Log log = LogFactory.getLog(ExternalHistory.class);
+  private static final Logger log =
+      LoggerFactory.getLogger(ExternalHistory.class);
 
-    private Long externalHistoryId;
-    private Specimen specimen;
-    private String externalWorkflowProcess;
-    private Date externalWorkflowDate;
+  private Long externalHistoryId;
+  private Specimen specimen;
+  private String externalWorkflowProcess;
+  private Date externalWorkflowDate;
 
-    /**
-     * @return the externalHistoryId
-     */
-    public Long getExternalHistoryId() {
-        return externalHistoryId;
-    }
+  /**
+   * @return the externalHistoryId
+   */
+  public Long getExternalHistoryId() { return externalHistoryId; }
 
-    /**
-     * @param externalHistoryId the externalHistoryId to set
-     */
-    public void setExternalHistoryId(Long externalHistoryId) {
-        this.externalHistoryId = externalHistoryId;
-    }
+  /**
+   * @param externalHistoryId the externalHistoryId to set
+   */
+  public void setExternalHistoryId(Long externalHistoryId) {
+    this.externalHistoryId = externalHistoryId;
+  }
 
-    /**
-     * @return the externalWorkflowProcess
-     */
-    public String getExternalWorkflowProcess() {
-        return externalWorkflowProcess;
-    }
+  /**
+   * @return the externalWorkflowProcess
+   */
+  public String getExternalWorkflowProcess() { return externalWorkflowProcess; }
 
-    /**
-     * @param externalWorkflowProcess the externalWorkflowProcess to set
-     */
-    public void setExternalWorkflowProcess(String externalWorkflowProcess) {
-        this.externalWorkflowProcess = externalWorkflowProcess;
-    }
+  /**
+   * @param externalWorkflowProcess the externalWorkflowProcess to set
+   */
+  public void setExternalWorkflowProcess(String externalWorkflowProcess) {
+    this.externalWorkflowProcess = externalWorkflowProcess;
+  }
 
-    /**
-     * @return the externalWorkflowDate
-     */
-    public Date getExternalWorkflowDate() {
-        return externalWorkflowDate;
-    }
+  /**
+   * @return the externalWorkflowDate
+   */
+  public Date getExternalWorkflowDate() { return externalWorkflowDate; }
 
-    /**
-     * @param externalWorkflowDate the externalWorkflowDate to set
-     */
-    public void setExternalWorkflowDate(Date externalWorkflowDate) {
-        this.externalWorkflowDate = externalWorkflowDate;
-    }
+  /**
+   * @param externalWorkflowDate the externalWorkflowDate to set
+   */
+  public void setExternalWorkflowDate(Date externalWorkflowDate) {
+    this.externalWorkflowDate = externalWorkflowDate;
+  }
 
-    /**
-     * @return the specimen
-     */
-    public Specimen getSpecimen() {
-        return specimen;
-    }
+  /**
+   * @return the specimen
+   */
+  public Specimen getSpecimen() { return specimen; }
 
-    /**
-     * @param specimen the specimen to set
-     */
-    public void setSpecimen(Specimen specimen) {
-        this.specimen = specimen;
-    }
+  /**
+   * @param specimen the specimen to set
+   */
+  public void setSpecimen(Specimen specimen) { this.specimen = specimen; }
 }

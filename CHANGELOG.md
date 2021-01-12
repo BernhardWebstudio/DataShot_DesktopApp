@@ -1,5 +1,17 @@
 # Changelog
 
+## v1.12.2
+* [[`f267428fe2`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f267428fe2)] - Re-enable 'Whats this image' prompt for single barcode files (Tim Bernhard)
+* [[`499cadaf86`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/499cadaf86)] - Include date in log (Tim Bernhard)
+* [[`8c622402d4`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8c622402d4)] - Improve name of jobreport to actually include month (Tim Bernhard)
+* [[`390cf46b09`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/390cf46b09)] - Fix issue where search would return less Specimen than specified in Limit (Tim Bernhard)
+* [[`bfc3455f7d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/bfc3455f7d)] - Temporarily revert change to log target (Tim Bernhard)
+* [[`13667334d0`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/13667334d0)] - Load imageCaptureProperties from different paths if not found. Write log to user home (Tim Bernhard)
+* [[`992631105e`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/992631105e)] - Huge refactor: using different logger in hope to get logging working at ETH (Tim Bernhard)
+* [[`88eb3601b0`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/88eb3601b0)] - Show existing Specimen & Files in Log (Tim Bernhard)
+* [[`5097f2485e`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/5097f2485e)] - Update changelog to publish Version v1.12.1 (Tim Bernhard)
+
+
 ## v1.12.1
 * [[`196f6efcc5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/196f6efcc5)] - Use elder log4j version to improve stability (Tim Bernhard)
 * [[`cb72e45ace`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/cb72e45ace)] - Prepare patch (Tim Bernhard)

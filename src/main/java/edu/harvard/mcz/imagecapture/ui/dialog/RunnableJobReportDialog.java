@@ -18,9 +18,6 @@
  */
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
-import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.jobs.RunnableJobError;
-import edu.harvard.mcz.imagecapture.jobs.RunnableJobErrorTableModel;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
@@ -34,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -43,11 +41,16 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.TableModel;
+
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.jobs.RunnableJobError;
+import edu.harvard.mcz.imagecapture.jobs.RunnableJobErrorTableModel;
 
 /**
  * RunnableJobReportDialog
@@ -283,7 +286,7 @@ public class RunnableJobReportDialog extends JDialog {
       log.debug("Debug", csvFormat.getHeaderComments());
 
       Date now = new Date();
-      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyymmdd_HHmmss");
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss");
       String time = dateFormat.format(now);
       String filename = "jobreport_" + time + ".csv";
       out = new PrintWriter(filename);

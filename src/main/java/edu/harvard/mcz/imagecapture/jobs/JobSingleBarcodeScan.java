@@ -146,7 +146,7 @@ public class JobSingleBarcodeScan extends AbstractFileScanJob {
       log.debug("Selected file " + filename + " to scan for barcodes");
       Counter counter = new Counter();
       final Lock[] locks = new ReentrantLock[1];
-      checkFile(fileToCheck, counter, locks);
+      checkFile(fileToCheck, counter, locks, true);
       RunnableJobReportDialog errorReportDialog = new RunnableJobReportDialog(
           Singleton.getSingletonInstance().getMainFrame(), counter.toString(),
           counter.getErrors(), "Preprocess Result");

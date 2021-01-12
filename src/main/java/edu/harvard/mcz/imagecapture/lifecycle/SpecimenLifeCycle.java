@@ -1064,7 +1064,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         if (maxResults != 0) {
           criteria.setMaxResults(maxResults);
         }
-        criteria.setProjection(Projections.id());
+        criteria.setProjection(Projections.distinct(Projections.id()));
         List<?> ids = criteria.list();
         if (ids.size() > 0) {
           criteria = session.createCriteria(Specimen.class)

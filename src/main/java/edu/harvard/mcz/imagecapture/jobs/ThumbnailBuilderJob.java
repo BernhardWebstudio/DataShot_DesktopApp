@@ -85,7 +85,7 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
     if (startPoint.isDirectory() && (!startPoint.getName().equals("thumbs"))) {
       File thumbsDir =
           new File(startPoint.getPath() + File.separator + "thumbs");
-      log.debug("Debug", thumbsDir.getPath());
+      // log.debug("Debug", thumbsDir.getPath());
       if (!thumbsDir.exists()) {
         thumbsDir.mkdir();
         Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
@@ -117,7 +117,7 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
                               "x" + thumbHeight + " " + filesToThumb.toString();
 
           Runtime r = Runtime.getRuntime();
-          log.debug("Debug", runCommand);
+          // log.debug("Debug", runCommand);
           try {
             String[] env = {""};
             Process proc = r.exec(runCommand, env, startPoint);
@@ -179,10 +179,10 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
                     // only try to make thumbnails of files that match the image
                     // file pattern.
                     makeFrom.add(file.getPath());
-                    log.debug("Debug", file.getPath());
+                    // log.debug("Debug", file.getPath());
                     File target = new File(thumbsDir.getPath() +
                                            File.separatorChar + file.getName());
-                    log.debug("Debug", target.getPath());
+                    // log.debug("Debug", target.getPath());
                     if (!target.exists()) {
                       BufferedImage img =
                           new BufferedImage(Integer.parseInt(thumbWidth),
@@ -220,7 +220,7 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
         String message = "No *.JPG files found in " + startPoint.getPath();
         Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
             message);
-        log.debug("Debug", message);
+        log.debug("Message: " + message);
       }
     }
     String message = "Thumbnail Generation Complete.";

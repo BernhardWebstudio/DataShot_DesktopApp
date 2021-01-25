@@ -36,7 +36,11 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -71,6 +75,7 @@ public class SearchDialog extends JDialog {
     private JIntegerField jOffsetNumberField = null;
     private JIntegerField jLimitNumberField = null;
     private JTextField jTextFieldTribe = null;
+    private JFormattedTextField jTextFieldDateModified = null;
     //private JTextField jTextFieldPrimaryDivision = null;
     private JComboBox<String> jComboBoxPrimaryDivision = null;
     private JTextField textFieldHigherGeog;
@@ -177,6 +182,17 @@ public class SearchDialog extends JDialog {
                     }
                     if (jTextFieldVerbatimLocality.getText() != null && jTextFieldVerbatimLocality.getText().length() > 0) {
                         searchCriteria.setVerbatimLocality(jTextFieldVerbatimLocality.getText());
+                    }
+                    if (jTextFieldDateModified.getText() != null && jTextFieldDateModified.getText().length() > 0) {
+                        Date date = null;
+                        try {
+                            date = (new SimpleDateFormat("dd.MM.yyyy")).parse(jTextFieldDateModified.getText());
+                        } catch (ParseException parseException) {
+                            parseException.printStackTrace();
+                        }
+                        if (date != null) {
+                            searchCriteria.setDateLastUpdated(date);
+                        }
                     }
 					/*if (jTextFieldPrimaryDivision.getText()!=null && jTextFieldPrimaryDivision.getText().length() > 0) { 
 						searchCriteria.setPrimaryDivison(jTextFieldPrimaryDivision.getText());
@@ -302,6 +318,7 @@ public class SearchDialog extends JDialog {
                     "Questions",
                     "Entry By",
                     "Identified By",
+                    "Date Last Updated",
                     "Limit",
                     "Offset"
             };
@@ -327,6 +344,7 @@ public class SearchDialog extends JDialog {
                     this.getQuestionJComboBox(),
                     this.getUsersJComboBox(),
                     this.getIdentifiedByComboBox(),
+                    this.getLastUpdatedJTextField(),
                     this.getLimitJIntegerField(),
                     this.getOffsetJIntegerField()
             };
@@ -354,6 +372,14 @@ public class SearchDialog extends JDialog {
             //jPanel1.add(getTextFieldHigherGeog(), gbc_textFieldHigherGeog);
         }
         return jPanel1;
+    }
+
+    private Component getLastUpdatedJTextField() {
+        if (jTextFieldDateModified == null) {
+            DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
+            jTextFieldDateModified = new JFormattedTextField(df);
+        }
+        return jTextFieldDateModified;
     }
 
     private GridBagConstraints initializeBasicGridBag() {

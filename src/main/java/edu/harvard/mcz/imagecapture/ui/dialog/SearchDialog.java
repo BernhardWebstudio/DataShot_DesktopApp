@@ -318,7 +318,7 @@ public class SearchDialog extends JDialog {
                     "Questions",
                     "Entry By",
                     "Identified By",
-                    "Date Last Updated",
+                    "Date Last Updated (dd.mm.yyyy)",
                     "Limit",
                     "Offset"
             };
@@ -378,6 +378,9 @@ public class SearchDialog extends JDialog {
         if (jTextFieldDateModified == null) {
             DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
             jTextFieldDateModified = new JFormattedTextField(df);
+            // Fixes issue where when emptying the field, the value would come back.
+            // Note though this is only a workaround
+            jTextFieldDateModified.setFocusLostBehavior(JFormattedTextField.PERSIST);
         }
         return jTextFieldDateModified;
     }

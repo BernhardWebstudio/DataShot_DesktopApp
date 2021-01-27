@@ -177,7 +177,7 @@ public class SpecimenPartAttribute implements Cloneable {
   @Override
   public Object clone() {
     SpecimenPartAttribute newAttr = new SpecimenPartAttribute(
-        (SpecimenPart)specimenPartId.clone(), attributeType, attributeValue,
+        null, attributeType, attributeValue,
         attributeUnits, attributeRemark, attributeDeterminer,
         (Date)attributeDate.clone());
     return newAttr;

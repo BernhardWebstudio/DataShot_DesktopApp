@@ -1411,6 +1411,10 @@ public class SpecimenDetailsViewPane extends JPanel {
     return jScrollPaneSpecimenParts;
   }
 
+  public void fireSpecimenPartsTableUpdate() {
+    ((AbstractTableModel)this.getJTableSpecimenParts().getModel()).fireTableDataChanged();
+  }
+
   private JTable getJTableSpecimenParts() {
     if (jTableSpecimenParts == null) {
       try {

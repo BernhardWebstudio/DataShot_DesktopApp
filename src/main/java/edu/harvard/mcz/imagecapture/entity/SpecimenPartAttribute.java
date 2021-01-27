@@ -179,7 +179,7 @@ public class SpecimenPartAttribute implements Cloneable {
     SpecimenPartAttribute newAttr = new SpecimenPartAttribute(
         null, attributeType, attributeValue,
         attributeUnits, attributeRemark, attributeDeterminer,
-        (Date)attributeDate.clone());
+        attributeDate == null ? null : (Date)attributeDate.clone());
     return newAttr;
   }
 }

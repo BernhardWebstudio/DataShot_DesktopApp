@@ -275,11 +275,7 @@ public class ButtonEditor
           ((PositionTemplateEditor)parentComponent)
               .setTemplate((String)targetId);
         } catch (NoSuchTemplateException e1) {
-          log.error("No such template on button press on a template in list.");
-          log.error("Error", e1);
-          ;
-          log.trace("Trace", e1);
-          ;
+          log.error("No such template on button press on a template in list.", e1);
         }
 
         break;
@@ -332,7 +328,7 @@ public class ButtonEditor
         break;
       case OPEN_SPECIMENPARTATTRIBUTES:
         SpecimenPartAttributeDialog attrDialog =
-            new SpecimenPartAttributeDialog((SpecimenPart)targetId);
+            new SpecimenPartAttributeDialog((SpecimenPart)targetId, parentComponent);
         attrDialog.setVisible(true);
         break;
       }

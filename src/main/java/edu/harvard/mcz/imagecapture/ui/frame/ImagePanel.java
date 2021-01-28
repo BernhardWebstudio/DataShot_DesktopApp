@@ -32,7 +32,8 @@ import java.awt.*;
 public class ImagePanel extends JPanel {
 
     private static final long serialVersionUID = 8827456895472324699L;
-
+    // proportion to zoom in or out in one step
+    private final double zoomFactor = 0.1;  // 10% by default
     //image object
     protected Image image;
     // position of top left of underlying image in window,
@@ -44,8 +45,6 @@ public class ImagePanel extends JPanel {
     // less than 1 for a reduced size image,
     // more than 1 for an enlarged image.
     private double zoom = 1.0;
-    // proportion to zoom in or out in one step
-    private final double zoomFactor = 0.1;  // 10% by default
 
     public ImagePanel(Image anImage) {
         image = anImage;

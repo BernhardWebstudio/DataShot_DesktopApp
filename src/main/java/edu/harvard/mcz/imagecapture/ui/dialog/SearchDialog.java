@@ -52,6 +52,7 @@ import java.util.Set;
 public class SearchDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
+    private final Dimension maxComboBoxDims = new Dimension(350, 250);
     private JPanel jContentPane = null;
     private JPanel jPanel = null;
     private JButton jButton = null;
@@ -83,7 +84,6 @@ public class SearchDialog extends JDialog {
     private JTextField textFieldHigherGeog;
     private JLabel lblHigherGeography;
     private JTextField jTextFieldInterpretedDate;
-    private final Dimension maxComboBoxDims = new Dimension(350, 250);
 
     /**
      * @param owner

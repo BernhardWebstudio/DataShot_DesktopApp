@@ -370,6 +370,10 @@ public class SpecimenController {
       // check
       // for drawer (115.12) and unit tray (115.12a) level images.
     }
+    // make visible before loading images as those take time
+    resultFrame.pack();
+    resultFrame.setVisible(true);
+
     if (drawerImages == null || drawerImages.isEmpty()) {
       // Specimen has multiple images, but no drawer images
       log.debug("Specimen with no drawer images: " + specimen.getBarcode());
@@ -387,7 +391,6 @@ public class SpecimenController {
     resultFrame.pack();
     resultFrame.centerSpecimen(); // Specimen is expected to be at the center of
                                   // the specimen part of the image.
-    resultFrame.setVisible(true);
   }
 
   /**

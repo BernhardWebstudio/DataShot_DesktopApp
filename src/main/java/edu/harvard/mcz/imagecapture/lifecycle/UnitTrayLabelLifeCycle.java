@@ -247,7 +247,7 @@ public class UnitTrayLabelLifeCycle {
           // of Integer.
           String temp = queryResult.get(0).toString();
           result = Integer.valueOf(temp);
-          log.debug("Debug", result);
+          log.debug("Debug {}", result);
         }
       } catch (HibernateException e) {
         session.getTransaction().rollback();

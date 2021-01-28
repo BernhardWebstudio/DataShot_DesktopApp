@@ -192,12 +192,12 @@ public class BulkMediaFrame extends JFrame implements PropertyChangeListener {
    */
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
-    log.debug("Debug", evt.getPropertyName());
+    log.debug("Debug {}", evt.getPropertyName());
     if (evt.getPropertyName() == "progress") {
       int progress = (Integer)evt.getNewValue();
       progressBar.setValue(progress);
       progressBar.setStringPainted(true);
-      log.debug("Debug", progress);
+      log.debug("Debug {}", progress);
     }
   }
 
@@ -227,7 +227,7 @@ public class BulkMediaFrame extends JFrame implements PropertyChangeListener {
                          .getProperties()
                          .getProperty(ImageCaptureProperties.KEY_IMAGEBASE));
       } catch (Exception e) {
-        log.debug("Debug", e.getMessage());
+        log.debug("Debug {}", e.getMessage());
       }
       fileChooser.setCurrentDirectory(startAt);
       fileChooser.setDialogTitle(
@@ -250,7 +250,7 @@ public class BulkMediaFrame extends JFrame implements PropertyChangeListener {
           File output =
               new File(directory.getAbsolutePath() + File.separatorChar +
                        BulkMediaFrame.BULKFILENAME);
-          log.debug("Debug", output.getPath());
+          log.debug("Debug {}", output.getPath());
           if (output.exists()) {
             int option = JOptionPane.showConfirmDialog(
                 thisFrame,
@@ -277,7 +277,7 @@ public class BulkMediaFrame extends JFrame implements PropertyChangeListener {
               for (File candidate : files) {
                 progress =
                     Math.round((float)position / (float)fileCount * 100.0f);
-                log.debug("Debug", progress);
+                log.debug("Debug {}", progress);
                 setProgress(progress);
                 if (candidate.getName().matches(
                         Singleton.getSingletonInstance()
@@ -288,7 +288,7 @@ public class BulkMediaFrame extends JFrame implements PropertyChangeListener {
                   try {
                     BulkMedia line = CandidateImageFile.parseOneFileToBulkMedia(
                         candidate.getCanonicalPath());
-                    log.debug("Debug", line.getData());
+                    log.debug("Debug {}", line.getData());
                     printer.printRecord(line.getData());
                     matchCount++;
                   } catch (IOException e) {

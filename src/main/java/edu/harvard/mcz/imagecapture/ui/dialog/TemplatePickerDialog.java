@@ -223,7 +223,7 @@ public class TemplatePickerDialog extends JDialog {
           try {
             templateWidth = (int)template.getImageSize().getWidth();
           } catch (NullPointerException e) {
-            log.debug("Debug", e.getMessage());
+            log.debug("Debug {}", e.getMessage());
           }
           if (imageWidth == templateWidth) {
             comboBoxTemplatePicker.addItem(template.getTemplateId());

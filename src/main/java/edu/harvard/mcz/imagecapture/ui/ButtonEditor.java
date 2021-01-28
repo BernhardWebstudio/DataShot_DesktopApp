@@ -164,8 +164,8 @@ public class ButtonEditor
       // Event is a click on the cell
       // Identify the row that was clicked on.
       JTable table = (JTable)((JButton)e.getSource()).getParent();
-      log.debug("Debug", e.getSource());
-      log.debug("Debug", table);
+      log.debug("Debug {}", e.getSource());
+      log.debug("Debug {}", table);
       int row = table.getEditingRow();
       // Stop editing - note, we need to have gotten e.getSource.getParent and
       // getEditingRow first.
@@ -222,7 +222,7 @@ public class ButtonEditor
                       Component x = table;
                       boolean done = false;
                       while (!done) {
-                        log.debug("Debug", x.getParent());
+                        log.debug("Debug {}", x.getParent());
                         x = x.getParent();
                         if (x.getClass() == SpecimenBrowser.class) {
                           sc.addListener((DataChangeListener)x);
@@ -239,7 +239,7 @@ public class ButtonEditor
                     sc.displayInEditor();
                   }
                 } else {
-                  log.debug("Debug", e.getSource());
+                  log.debug("Debug {}", e.getSource());
                   // SpecimenControler sc = new
                   // SpecimenControler((Specimen)targetId);
                   // sc.displayInEditor();
@@ -275,7 +275,8 @@ public class ButtonEditor
           ((PositionTemplateEditor)parentComponent)
               .setTemplate((String)targetId);
         } catch (NoSuchTemplateException e1) {
-          log.error("No such template on button press on a template in list.", e1);
+          log.error("No such template on button press on a template in list.",
+                    e1);
         }
 
         break;
@@ -293,7 +294,7 @@ public class ButtonEditor
             ((GenusSpeciesCount)targetId).getGenus(),
             ((GenusSpeciesCount)targetId).getSpecificEpithet(),
             WorkFlowStatus.STAGE_1);
-        log.debug("Debug", toTranscribe.size());
+        log.debug("Debug {}", toTranscribe.size());
         SpecimenListTableModel stm = new SpecimenListTableModel(toTranscribe);
         JTable stable = new JTable();
         stable.setModel(stm);
@@ -328,7 +329,8 @@ public class ButtonEditor
         break;
       case OPEN_SPECIMENPARTATTRIBUTES:
         SpecimenPartAttributeDialog attrDialog =
-            new SpecimenPartAttributeDialog((SpecimenPart)targetId, parentComponent);
+            new SpecimenPartAttributeDialog((SpecimenPart)targetId,
+                                            parentComponent);
         attrDialog.setVisible(true);
         break;
       }

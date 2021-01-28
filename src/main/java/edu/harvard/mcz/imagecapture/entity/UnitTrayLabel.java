@@ -250,7 +250,7 @@ public class UnitTrayLabel
             "JSON for UnitTrayLabel contains unexpected nesting { { } }.  JSON is: " +
             originalJsonEncodedLabel);
       } else {
-        log.debug("Debug", jsonEncodedLabel);
+        log.debug("Debug {}", jsonEncodedLabel);
         result = new UnitTrayLabel();
         // Beginning and end are special case for split on '", "'
         // remove leading quotes and spaces (e.g. either trailing '" ' or
@@ -265,7 +265,7 @@ public class UnitTrayLabel
             "\"$", ""); // Strip off trailing quote
         // Convert any ", " into "," then split on ","
         jsonEncodedLabel = jsonEncodedLabel.replaceAll("\",\\s\"", "\",\"");
-        log.debug("Debug", jsonEncodedLabel);
+        log.debug("Debug {}", jsonEncodedLabel);
         // split into key value parts by '","'
         String[] pairs = jsonEncodedLabel.split("\",\"");
         for (int x = 0; x < pairs.length; x++) {
@@ -323,7 +323,7 @@ public class UnitTrayLabel
             }
             if (key.equals("c")) {
               result.setCollection(value);
-              log.debug("Debug", result.getCollection());
+              log.debug("Debug {}", result.getCollection());
             }
             if (key.equals("id")) {
               result.setIdentifiedBy(value);
@@ -336,7 +336,7 @@ public class UnitTrayLabel
             }
           }
         }
-        log.debug("Debug", result.toJSONString());
+        log.debug("Debug {}", result.toJSONString());
       }
     } else {
       log.debug("JSON not matched to { }");

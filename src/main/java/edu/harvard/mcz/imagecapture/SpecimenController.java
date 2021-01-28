@@ -157,7 +157,7 @@ public class SpecimenController {
         currentRow = currentRow + 1;
         result = true;
       } catch (IndexOutOfBoundsException e) {
-        log.debug("Debug", e);
+        log.debug("Debug {}", e);
       }
     }
     return result;
@@ -201,7 +201,7 @@ public class SpecimenController {
         currentRow = currentRow - 1;
         result = true;
       } catch (IndexOutOfBoundsException e) {
-        log.debug("Debug", e);
+        log.debug("Debug {}", e);
       }
     }
     return result;
@@ -223,7 +223,7 @@ public class SpecimenController {
   //                    result = true;
   //                }
   //            } catch (IndexOutOfBoundsException e) {
-  //                log.debug("Debug", e);
+  //                log.debug("Debug {}", e);
   //            }
   //        }
   //        return result;
@@ -254,7 +254,7 @@ public class SpecimenController {
   //                    result = true;
   //                }
   //            } catch (IndexOutOfBoundsException e) {
-  //                log.debug("Debug", e);
+  //                log.debug("Debug {}", e);
   //            }
   //        }
   //        return result;

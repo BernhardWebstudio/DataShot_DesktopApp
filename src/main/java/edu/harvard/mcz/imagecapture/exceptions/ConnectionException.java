@@ -34,7 +34,7 @@ public class ConnectionException extends Exception {
    *
    */
   public ConnectionException() {
-    log.debug("Debug", ConnectionException.class.getName());
+    log.debug("Debug {}", ConnectionException.class.getName());
   }
 
   /**
@@ -42,7 +42,7 @@ public class ConnectionException extends Exception {
    */
   public ConnectionException(String message) {
     super(message);
-    log.debug("Debug", message);
+    log.debug("Debug {}", message);
   }
 
   /**
@@ -50,7 +50,7 @@ public class ConnectionException extends Exception {
    */
   public ConnectionException(Throwable cause) {
     super(cause);
-    log.debug("Debug", cause.toString());
+    log.debug("Debug {}", cause.toString());
   }
 
   /**
@@ -59,6 +59,6 @@ public class ConnectionException extends Exception {
    */
   public ConnectionException(String message, Throwable cause) {
     super(message, cause);
-    log.debug("Debug", message);
+    log.debug("Debug {}", message);
   }
 }

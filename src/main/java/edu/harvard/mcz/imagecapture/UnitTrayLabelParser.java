@@ -57,7 +57,7 @@ public class UnitTrayLabelParser
   public UnitTrayLabelParser(String aStringToParse) {
     parsedFromJSON = false;
     text = aStringToParse;
-    log.debug("Debug", aStringToParse);
+    log.debug("Debug {}", aStringToParse);
     boolean done = false;
     // allie edit
     if (aStringToParse != null && aStringToParse.endsWith("}") &&
@@ -253,7 +253,7 @@ public class UnitTrayLabelParser
           }
         } catch (ArrayIndexOutOfBoundsException e) {
           // unexpected, but possible if elements are missing
-          log.debug("Debug", e);
+          log.debug("Debug {}", e);
         }
         if (lines.length > 1) {
           try {

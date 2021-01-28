@@ -48,7 +48,7 @@ public class ProgressBarRenderer implements TableCellRenderer {
   public Component
   getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                                 boolean hasFocus, int row, int column) {
-    log.debug("Debug", value);
+    log.debug("Debug {}", value);
     if (value != null) {
       try {
         progressBar.setValue((int)value);
@@ -56,7 +56,7 @@ public class ProgressBarRenderer implements TableCellRenderer {
         log.error(e.getMessage());
       }
     }
-    log.debug("Debug", progressBar.getValue());
+    log.debug("Debug {}", progressBar.getValue());
     return progressBar;
   }
 }

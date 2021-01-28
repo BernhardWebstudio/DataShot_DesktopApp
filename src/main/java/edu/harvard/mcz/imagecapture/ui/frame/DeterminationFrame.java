@@ -215,7 +215,7 @@ public class DeterminationFrame extends JFrame {
       mntmDeleteRow.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
           try {
-            log.debug("Debug", clickedOnDetsRow);
+            log.debug("Debug {}", clickedOnDetsRow);
             if (clickedOnDetsRow >= 0) {
               int ok = JOptionPane.showConfirmDialog(
                   thisFrame, "Delete the selected determination?",

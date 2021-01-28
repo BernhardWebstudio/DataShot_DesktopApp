@@ -278,11 +278,11 @@ public class JobCleanDirectory implements RunnableJob, Runnable {
   }
 
   private void cleanupFile(File file) {
-    log.debug("Debug", file);
+    log.debug("Debug {}", file);
     String filename = file.getName();
 
     if (file.exists()) {
-      log.debug("Debug", file);
+      log.debug("Debug {}", file);
       counter.incrementFilesExisting();
     } else {
       String targetPath =
@@ -291,15 +291,15 @@ public class JobCleanDirectory implements RunnableJob, Runnable {
       ICImage pattern = new ICImage();
       pattern.setPath(targetPath);
       pattern.setFilename(file.getName());
-      log.debug("Debug", targetPath);
-      log.debug("Debug", file.getName());
+      log.debug("Debug {}", targetPath);
+      log.debug("Debug {}", file.getName());
       List<ICImage> images = ils.findByExample(pattern);
       Iterator<ICImage> iter = images.iterator();
-      log.debug("Debug", images.size());
+      log.debug("Debug {}", images.size());
       while (iter.hasNext()) {
         ICImage image = iter.next();
-        log.debug("Debug", image.getPath());
-        log.debug("Debug", image.getFilename());
+        log.debug("Debug {}", image.getPath());
+        log.debug("Debug {}", image.getFilename());
         try {
           RunnableJobError error = new RunnableJobError(
               image.getPath(), image.getRawBarcode(),

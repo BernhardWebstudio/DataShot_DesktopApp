@@ -62,7 +62,7 @@ public class ThumbnailBuilder implements Runnable {
     if (startPoint.isDirectory() && (!startPoint.getName().equals("thumbs"))) {
       File thumbsDir =
           new File(startPoint.getPath() + File.separator + "thumbs");
-      log.debug("Debug", thumbsDir.getPath());
+      log.debug("Debug {}", thumbsDir.getPath());
       if (!thumbsDir.exists()) {
         thumbsDir.mkdir();
         thumbsDir.setWritable(true);
@@ -110,7 +110,7 @@ public class ThumbnailBuilder implements Runnable {
 
       } else {
         String message = "No *.JPG files found in " + startPoint.getPath();
-        log.debug("Debug", message);
+        log.debug("Debug {}", message);
       }
     }
     String exists = "";

@@ -94,7 +94,7 @@ public class FieldLoader {
     if (log.isDebugEnabled()) {
       Iterator<String> i = knownFields.keySet().iterator();
       while (i.hasNext()) {
-        log.debug("Debug", i.next());
+        log.debug("Debug {}", i.next());
       }
     }
   }
@@ -318,7 +318,7 @@ public class FieldLoader {
                              boolean allowUpdateExistingVerbatim)
       throws LoadException {
     boolean result = false;
-    log.debug("Debug", barcode);
+    log.debug("Debug {}", barcode);
 
     ArrayList<String> knownFields = new ArrayList<String>();
     HashMap<String, String> knownFieldsLowerUpper =
@@ -392,10 +392,10 @@ public class FieldLoader {
                 // Special case, parse collectors to associated Collector table.
                 datavalue = datavalue + "|";
                 String[] collectors = datavalue.split("\\|", 0);
-                log.debug("Debug", collectors.length);
+                log.debug("Debug {}", collectors.length);
                 for (int j = 0; j < collectors.length; j++) {
                   String collector = collectors[j];
-                  log.debug("Debug", collector);
+                  log.debug("Debug {}", collector);
                   if (collector.trim().length() > 0) {
                     // Check to see if Collector exists
                     Set<Collector> existingCollectors = match.getCollectors();
@@ -639,7 +639,7 @@ public class FieldLoader {
         String actualCase = specimenMethods[j].getName().replaceAll("^set", "");
         knownFields.add(specimenMethods[j].getName().replaceAll("^set", ""));
         knownFieldsLowerUpper.put(actualCase.toLowerCase(), actualCase);
-        log.debug("Debug", actualCase);
+        log.debug("Debug {}", actualCase);
       }
     }
     // List of input fields that will need to be parsed into relational tables

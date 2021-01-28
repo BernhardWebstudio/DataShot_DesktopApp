@@ -114,7 +114,7 @@ public class WhatsThisImageDialog extends JDialog {
       this.setImage(image);
     } catch (IOException e) {
       log.error("Unable to open selected image " + imageFileToShow.getName());
-      log.debug("Debug", e);
+      log.debug("Debug {}", e);
       URL errorFilename = this.getClass().getResource(
           "/edu/harvard/mcz/imagecapture/resources/images/unableToLoadImage.jpg");
       try {

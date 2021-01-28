@@ -122,12 +122,14 @@ public class SpecimenDetailsViewPane extends JPanel {
 
   private static final int STATE_CLEAN = 0;
   private static final int STATE_DIRTY = 1;
+  private final Specimen specimen;     //  @jve:decl-index=0:
+  private final JPanel jPanel1 = null; // panel for navigation buttons
+  private final StringBuffer higherGeogNotFoundWarning = new StringBuffer();
   KeyboardShortcutManager manager = KeyboardShortcutManager.getInstance();
   private Specimen previousSpecimen = null;
-  private final Specimen specimen; //  @jve:decl-index=0:
   private SpecimenController specimenController = null;
   private int state; // dirty if data in controls has been changed and not saved
-                     // to specimen.
+  // to specimen.
   // private JTextField jTextFieldPreparationType = null;
   // allie change
   // private JTextField jTextFieldCountry = null;
@@ -164,7 +166,6 @@ public class SpecimenDetailsViewPane extends JPanel {
   private JComboBox<String> jComboBoxWorkflowStatus = null;
   private JLabel jLabelDBId = null;
   private JPanel jPanel = null;
-  private final JPanel jPanel1 = null; // panel for navigation buttons
   private JPopupMenu jPopupCollectors;
   private JPopupMenu jPopupNumbers;
   private JPopupMenu jPopupSpecimenParts;
@@ -213,7 +214,6 @@ public class SpecimenDetailsViewPane extends JPanel {
   private JTextField textFieldMaxElev = null;
   private JTextField textFieldMicrohabitat = null;
   private SpecimenDetailsViewPane thisPane = null;
-  private final StringBuffer higherGeogNotFoundWarning = new StringBuffer();
   private int clickedOnCollsRow;
   private int clickedOnNumsRow;
   private int clickedOnPartsRow;
@@ -238,9 +238,10 @@ public class SpecimenDetailsViewPane extends JPanel {
     // { try { 					SpecimenPartAttribute spa =
     // ia.next();
     //					log.debug("Debug",
-    //spa.getSpecimenPartAttributeId()); 					spals.attachDirty(spa);
-    //					log.debug("Debug",
-    //spa.getSpecimenPartAttributeId()); 				} catch (SaveFailedException e) {
+    // spa.getSpecimenPartAttributeId());
+    // spals.attachDirty(spa); 					log.debug("Debug",
+    // spa.getSpecimenPartAttributeId()); 				} catch (SaveFailedException e)
+    // {
     //					// TODO Auto-generated catch block
     //					e.printStackTrace();
     //				}
@@ -352,7 +353,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     if (specimen.getICImages() != null) {
       log.debug("specimen.getICImages is not null");
       java.util.Iterator<ICImage> i = specimen.getICImages().iterator();
-      log.debug("Debug", i.hasNext());
+      log.debug("Debug {}", i.hasNext());
       while (i.hasNext()) {
         log.debug("Checking image " + i);
         ICImage im = i.next();
@@ -393,19 +394,18 @@ public class SpecimenDetailsViewPane extends JPanel {
     jTextFieldStatus.setForeground(Color.BLACK);
   }
 
-  private void save() {
+  private boolean save() {
     if (specimen.isExported()) {
       JOptionPane.showMessageDialog(
           thisPane, "This Specimen is already exported. No edit will be saved.",
           "Warning", JOptionPane.WARNING_MESSAGE);
-      return;
+      return false;
     }
     try {
       thisPane.getParent().setCursor(
           Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
     } catch (Exception ex) {
       log.error("Error", ex);
-      ;
     }
     try {
       this.setStatus("Saving");
@@ -590,6 +590,7 @@ public class SpecimenDetailsViewPane extends JPanel {
       } catch (SaveFailedException e) {
         setStateToDirty(); // disable the navigation buttons
         this.setWarning("Error: " + e.getMessage());
+        return false;
       }
       SpecimenLifeCycle sls = new SpecimenLifeCycle();
       Singleton.getSingletonInstance().getMainFrame().setCount(
@@ -601,12 +602,14 @@ public class SpecimenDetailsViewPane extends JPanel {
       // ones; böh, too bad – alert the user just in case.
       log.error("Error", e);
       this.setWarning("Error: " + e.getMessage());
+      return false;
     } catch (Exception e) {
       // trap any exception and notify the user
       setStateToDirty(); // disable the navigation buttons
       this.setWarning("Error: " + e.getMessage());
       log.error("Error", e);
       throw e;
+//      return false;
     }
     updateContentDependentLabels();
 
@@ -615,8 +618,8 @@ public class SpecimenDetailsViewPane extends JPanel {
           Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
     } catch (Exception ex) {
       log.error("Error", ex);
-      ;
     }
+    return true;
   }
 
   /**
@@ -681,8 +684,17 @@ public class SpecimenDetailsViewPane extends JPanel {
     //+ verify the georeference data (we do want it all copied)
 
     //+ preparation type (the whole table!) = specimen parts
-    specimen.getSpecimenParts().clear();
-    for (SpecimenPart specimenPart : previousSpecimen.getSpecimenParts()) {
+    // trying not to remove & add one of same name to counter sql constraints
+    Set<SpecimenPart> followingParts = previousSpecimen.getSpecimenParts();
+    Set<SpecimenPart> newParts =
+        followingParts.stream()
+            .filter(part -> !specimen.getSpecimenParts().contains(part))
+            .collect(Collectors.toSet());
+    log.debug("Collectors: {}, {}, {}", followingParts, newParts,
+              specimen.getSpecimenParts());
+    specimen.getSpecimenParts().removeIf(
+        part -> !followingParts.contains(part));
+    for (SpecimenPart specimenPart : newParts) {
       SpecimenPart part = (SpecimenPart)specimenPart.clone();
       part.setSpecimen(specimen);
       specimen.getSpecimenParts().add(part);
@@ -693,7 +705,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     //+collectors
     // trying not to remove & add one of same name to counter sql constraints
-    specimen.getCollectors().clear();
     Set<Collector> followingCollectors = previousSpecimen.getCollectors();
     // the collectors to be added:
     Set<Collector> newCollectors =
@@ -701,12 +712,8 @@ public class SpecimenDetailsViewPane extends JPanel {
             .filter(collector -> !specimen.getCollectors().contains(collector))
             .collect(Collectors.toSet());
     // the collectors to be removed:
-    Set<Collector> collectorsToRemove =
-        specimen.getCollectors()
-            .stream()
-            .filter(collector -> !followingCollectors.contains(collector))
-            .collect(Collectors.toSet());
-    specimen.getCollectors().removeAll(collectorsToRemove);
+    specimen.getCollectors().removeIf(
+        collector -> !followingCollectors.contains(collector));
     for (Collector collector : newCollectors) {
       Collector c = (Collector)collector.clone();
       c.setSpecimen(specimen);
@@ -820,7 +827,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     // Specimen record contains a string, delegate handling of lookup of object
     // to the combo box model.
     // allieremove
-    // 		log.debug("Debug", specimen.getHigherGeography());
+    // 		log.debug("Debug {}", specimen.getHigherGeography());
     // 		((HigherGeographyComboBoxModel)comboBoxHigherGeog.getModel()).setSelectedItem(specimen.getHigherGeography());
     // //TODO ? set model not notifying listeners?
     // 		higherGeogNotFoundWarning = new StringBuffer();
@@ -1126,7 +1133,7 @@ public class SpecimenDetailsViewPane extends JPanel {
       jPanel.add(this.getJButtonPaste(),
                  "span, split 6");          //, sizegroup controls");
       jPanel.add(this.getJButtonHistory()); //, "span, split 4");//, "sizegroup
-                                            // controls");
+      // controls");
       jPanel.add(this.getJButtonPrevious(), "tag back");
       jPanel.add(this.getJButtonNext(), "tag next");
       jPanel.add(this.getJButtonCopySave(),
@@ -1283,7 +1290,9 @@ public class SpecimenDetailsViewPane extends JPanel {
       jButtonSave.setToolTipText(
           "Save changes to this record to the database. No fields should have red backgrounds before you save.");
       jButtonSave.addActionListener(new java.awt.event.ActionListener() {
-        public void actionPerformed(java.awt.event.ActionEvent e) { save(); }
+        public void actionPerformed(java.awt.event.ActionEvent e) { 
+          thisPane.save(); 
+        }
       });
     }
 
@@ -1412,7 +1421,8 @@ public class SpecimenDetailsViewPane extends JPanel {
   }
 
   public void fireSpecimenPartsTableUpdate() {
-    ((AbstractTableModel)this.getJTableSpecimenParts().getModel()).fireTableDataChanged();
+    ((AbstractTableModel)this.getJTableSpecimenParts().getModel())
+        .fireTableDataChanged();
   }
 
   private JTable getJTableSpecimenParts() {
@@ -1428,7 +1438,8 @@ public class SpecimenDetailsViewPane extends JPanel {
       jTableSpecimenParts.setRowHeight(jTableSpecimenParts.getRowHeight() + 5);
       setupSpecimenPartsJTableRenderer();
 
-      log.debug("Debug: Specimen parts size", specimen.getSpecimenParts().size());
+      log.debug("Debug: Specimen parts size: {}",
+                specimen.getSpecimenParts().size());
 
       jTableSpecimenParts.setObjectName("Specimen Part");
       jTableSpecimenParts.setParentPane(thisPane);
@@ -2589,11 +2600,12 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
       jButtonCopy.setMnemonic(KeyEvent.VK_K);
       jButtonCopy.addActionListener(new java.awt.event.ActionListener() {
         public void actionPerformed(java.awt.event.ActionEvent e) {
-          thisPane.save();
-          // TODO: rather clone the specimen to prevent external/later changes
-          ImageCaptureApp.lastEditedSpecimenCache = thisPane.specimen;
-          thisPane.setStatus("Saved & copied specimen with id " +
-                             thisPane.specimen.getSpecimenId());
+          if (thisPane.save()) {
+            // TODO: rather clone the specimen to prevent external/later changes
+            ImageCaptureApp.lastEditedSpecimenCache = thisPane.specimen;
+            thisPane.setStatus("Saved & copied specimen with id " +
+                    thisPane.specimen.getSpecimenId());
+          }
         }
       });
     }
@@ -2733,7 +2745,7 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
    * data was loaded.
    *
    * @return true if the data as displayed in the forms hasn't changed since the
-   *     data was last loaded from
+   * data was last loaded from
    * or saved to the specimen, otherwise false indicating a dirty record.
    */
   private boolean isClean() {

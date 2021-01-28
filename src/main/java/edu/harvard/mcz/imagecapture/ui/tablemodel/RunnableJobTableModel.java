@@ -133,14 +133,14 @@ public class RunnableJobTableModel
         break;
       case 3:
         returnvalue = ((RunnableJob)jobs.toArray()[rowIndex]).percentComplete();
-        log.debug("Debug", returnvalue);
+        log.debug("Debug {}", returnvalue);
         break;
       }
     } catch (ArrayIndexOutOfBoundsException e) {
-      log.debug("Debug", e.getMessage());
+      log.debug("Debug {}", e.getMessage());
       fireTableDataChanged();
     } catch (NullPointerException e) {
-      log.debug("Debug", e.getMessage());
+      log.debug("Debug {}", e.getMessage());
       fireTableDataChanged();
     }
     return returnvalue;
@@ -201,7 +201,7 @@ public class RunnableJobTableModel
    */
   @Override
   public void notifyListener(int anEvent, RunnableJob notifyingJob) {
-    log.debug("Debug", anEvent);
+    log.debug("Debug {}", anEvent);
     this.fireTableDataChanged();
   }
 }

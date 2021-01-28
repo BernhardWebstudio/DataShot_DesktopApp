@@ -187,12 +187,12 @@ public class TesseractOCR implements OCR {
         try {
           resultReader.close();
         } catch (IOException e) {
-          log.debug("Debug", e);
+          log.debug("Debug {}", e);
         }
       }
     }
     log.debug("in TesseractOCR.getOCRText() 10 result is " + result.toString());
-    log.debug("Debug", result.toString());
+    log.debug("Debug {}", result.toString());
     return result.toString();
   }
 }

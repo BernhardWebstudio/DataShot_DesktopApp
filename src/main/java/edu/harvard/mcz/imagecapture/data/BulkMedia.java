@@ -95,9 +95,9 @@ public class BulkMedia {
     boolean result = false;
 
     int location = file.getPath().indexOf(fileBase);
-    log.debug("Debug", file.getPath());
-    log.debug("Debug", fileBase);
-    log.debug("Debug", location);
+    log.debug("Debug {}", file.getPath());
+    log.debug("Debug {}", fileBase);
+    log.debug("Debug {}", location);
     if (location != -1) {
       String rest = "";
       if (java.io.File.separator.equals("\\")) {
@@ -123,9 +123,9 @@ public class BulkMedia {
     boolean result = false;
 
     int location = file.getPath().indexOf(fileBase);
-    log.debug("Debug", file.getPath());
-    log.debug("Debug", fileBase);
-    log.debug("Debug", location);
+    log.debug("Debug {}", file.getPath());
+    log.debug("Debug {}", fileBase);
+    log.debug("Debug {}", location);
     if (location != -1) {
       String rest = "";
       if (java.io.File.separator.equals("\\")) {

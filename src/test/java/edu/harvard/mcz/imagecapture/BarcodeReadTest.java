@@ -52,7 +52,7 @@ public class BarcodeReadTest {
       String filename = args[0];
       File file = new File(filename);
       try {
-        log.debug("Debug", file.getCanonicalPath());
+        log.debug("Debug {}", file.getCanonicalPath());
         BufferedImage image = ImageIO.read(file);
         System.out.println(checkForBarcode(image));
       } catch (IOException e) {

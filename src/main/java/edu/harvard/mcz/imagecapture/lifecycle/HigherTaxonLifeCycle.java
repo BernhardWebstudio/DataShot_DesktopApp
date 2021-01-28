@@ -411,7 +411,7 @@ public class HigherTaxonLifeCycle {
           result = (String)results.next();
           // store the family and subfamily from that row in the array to
           // return.
-          log.debug("Debug", result);
+          log.debug("Debug {}", result);
         }
         session.getTransaction().commit();
       } catch (HibernateException e) {

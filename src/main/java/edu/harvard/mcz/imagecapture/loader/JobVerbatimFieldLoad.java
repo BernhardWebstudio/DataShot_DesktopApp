@@ -88,7 +88,7 @@ public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
    */
   @Override
   public void run() {
-    log.debug("Debug", this.toString());
+    log.debug("Debug {}", this.toString());
     start();
   }
 
@@ -153,7 +153,7 @@ public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
           errors.append("Error loading csv format, trying tab delimited: ")
               .append(e.getMessage())
               .append("\n");
-          log.debug("Debug", e.getMessage());
+          log.debug("Debug {}", e.getMessage());
           try {
             // try reading as tab delimited format, if successful, use that
             // format.
@@ -181,7 +181,7 @@ public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
           int i = 0;
           for (String header : csvHeader.keySet()) {
             headers[i++] = header;
-            log.debug("Debug", header);
+            log.debug("Debug {}", header);
           }
 
           boolean okToRun = true;
@@ -635,7 +635,7 @@ public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
   protected void setPercentComplete(int aPercentage) {
     // set value
     percentComplete = aPercentage;
-    log.debug("Debug", percentComplete);
+    log.debug("Debug {}", percentComplete);
     // notify listeners
     notifyListeners(percentComplete);
   }

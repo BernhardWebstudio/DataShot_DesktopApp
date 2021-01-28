@@ -181,7 +181,7 @@ public class ImageDisplayFrame extends JFrame {
    * @throws BadTemplateException
    */
   public void loadImagesFromFiles(Set<ICImage> imageFiles) {
-    log.debug("Debug", imageFiles.size());
+    log.debug("Debug {}", imageFiles.size());
     jComboBoxImagePicker.removeAllItems();
     Iterator<ICImage> i = imageFiles.iterator();
     ICImage image = null;
@@ -231,7 +231,7 @@ public class ImageDisplayFrame extends JFrame {
                                        PositionTemplate defaultTemplate,
                                        ICImage image)
       throws ImageLoadException, BadTemplateException {
-    log.debug("Debug", anImageFile.getName());
+    log.debug("Debug {}", anImageFile.getName());
     boolean templateProblem = false;
     selectedImage = image;
     // TODO: template detection?
@@ -239,7 +239,7 @@ public class ImageDisplayFrame extends JFrame {
     try {
       imagefile = ImageIO.read(anImageFile);
 
-      log.debug("Debug", anImageFile.getPath());
+      log.debug("Debug {}", anImageFile.getPath());
       // Show the component parts of the image as defined by the position
       // template.
       if (defaultTemplate.getTemplateId().equals(
@@ -337,7 +337,7 @@ public class ImageDisplayFrame extends JFrame {
       throw new BadTemplateException("Template doesn't fit file " +
                                      anImageFile.getPath());
     }
-    log.debug("Debug", anImageFile.getPath());
+    log.debug("Debug {}", anImageFile.getPath());
     if (UsersLifeCycle.isUserChiefEditor(
             Singleton.getSingletonInstance().getUser().getUserid())) {
       updateTemplateList();
@@ -782,7 +782,7 @@ public class ImageDisplayFrame extends JFrame {
         while (i.hasNext()) {
           String filename = i.next().getFilename();
           jComboBoxImagePicker.addItem(filename);
-          log.debug("Debug", filename);
+          log.debug("Debug {}", filename);
         }
       }
       jComboBoxImagePicker.addActionListener(
@@ -790,7 +790,7 @@ public class ImageDisplayFrame extends JFrame {
             public void actionPerformed(java.awt.event.ActionEvent e) {
               // Intended to be fired when picklist item is selected, is
               // being fired on other events as well.
-              log.debug("Debug", e.getActionCommand());
+              log.debug("Debug {}", e.getActionCommand());
               // If there is no selection, then we shouldn't be doing anything.
               if (jComboBoxImagePicker.getSelectedItem() == null) {
                 log.debug("No selected item");
@@ -882,7 +882,7 @@ public class ImageDisplayFrame extends JFrame {
         template = selectedImage.getTemplateId();
       }
       templatePicker.setText(template);
-      log.debug("Debug", template);
+      log.debug("Debug {}", template);
       log.debug(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS);
       templatePicker.setEnabled(
           template.equals(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS));

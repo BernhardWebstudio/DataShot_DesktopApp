@@ -216,7 +216,7 @@ public class UnitTrayLabelBrowser extends JFrame {
     // scroll to the editing field
     jTable.scrollRectToVisible(jTable.getCellRect(lastRow, editColumn, true));
 
-    log.debug("Debug", jTable.getVisibleRect());
+    log.debug("Debug {}", jTable.getVisibleRect());
   }
 
   /**

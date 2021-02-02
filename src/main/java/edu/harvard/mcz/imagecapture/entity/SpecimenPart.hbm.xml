@@ -25,11 +25,11 @@
         <property name="lotCountModifier" type="string">
             <column name="Lot_Count_Modifier" length="5"/>
         </property>
-        <!--        <set name="specimenPartAttributes" inverse="true" cascade="all" fetch="subselect">-->
-        <!--            <key>-->
-        <!--                <column name="SpecimenPartId"/>-->
-        <!--            </key>-->
-        <!--            <one-to-many class="edu.harvard.mcz.imagecapture.entity.SpecimenPartAttribute"/>-->
-        <!--        </set>-->
+        <set name="specimenPartAttributes" cascade="all" fetch="subselect">
+            <key>
+                <column name="SpecimenPartId"/>
+            </key>
+            <one-to-many class="edu.harvard.mcz.imagecapture.entity.SpecimenPartAttribute"/>
+        </set>
     </class>
 </hibernate-mapping>

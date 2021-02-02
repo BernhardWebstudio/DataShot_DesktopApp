@@ -307,14 +307,12 @@ public class ImageDisplayFrame extends JFrame {
             // Display the full image (also packs!)
             this.setFullImage();
         } catch (IOException e1) {
-            log.debug("IOException!");
-            System.out.println("Error reading image file: " + e1.getMessage());
+            log.error("IOException reading image file!", e1);
             throw new ImageLoadException("Unable to read image file " +
                     anImageFile.getPath() + " " +
                     e1.getMessage());
         } catch (Exception e) {
-            log.debug("Image loading exception");
-            e.printStackTrace();
+            log.error("Image loading exception", e);
         }
         if (templateProblem) {
             throw new BadTemplateException("Template doesn't fit file " +

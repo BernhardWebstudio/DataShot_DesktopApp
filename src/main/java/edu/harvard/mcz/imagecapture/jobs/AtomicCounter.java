@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class AtomicCounter implements ScanCounterInterface {
 
+    private final StringBuffer errorReport;
     private AtomicInteger totalCount = new AtomicInteger(0);
     private AtomicInteger filesSeen = new AtomicInteger(0);
     private AtomicInteger filesDatabased = new AtomicInteger(0);
@@ -40,7 +41,6 @@ public class AtomicCounter implements ScanCounterInterface {
     private AtomicInteger specimensUpdated = new AtomicInteger(0);
     private AtomicInteger specimensDatabased = new AtomicInteger(0);
     private AtomicInteger filesUpdated = new AtomicInteger(0);
-    private final StringBuffer errorReport;
     private List<RunnableJobError> errors = null;
 
     public AtomicCounter() {

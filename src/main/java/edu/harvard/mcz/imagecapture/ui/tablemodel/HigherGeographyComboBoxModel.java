@@ -19,176 +19,183 @@
 package edu.harvard.mcz.imagecapture.ui.tablemodel;
 
 import edu.harvard.mcz.imagecapture.entity.MCZbaseGeogAuthRec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
+import javax.swing.event.ListDataEvent;
+import javax.swing.event.ListDataListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import javax.swing.ComboBoxModel;
-import javax.swing.event.ListDataEvent;
-import javax.swing.event.ListDataListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class HigherGeographyComboBoxModel
-    implements ComboBoxModel<MCZbaseGeogAuthRec> {
-  private static final long serialVersionUID = -4856432985354519476L;
+        implements ComboBoxModel<MCZbaseGeogAuthRec> {
+    private static final long serialVersionUID = -4856432985354519476L;
 
-  private static final Logger log =
-      LoggerFactory.getLogger(HigherGeographyComboBoxModel.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(HigherGeographyComboBoxModel.class);
 
-  ArrayList<MCZbaseGeogAuthRec> model;
-  ArrayList<ListDataListener> dataListeners;
-  MCZbaseGeogAuthRec selectedItem = null;
+    ArrayList<MCZbaseGeogAuthRec> model;
+    ArrayList<ListDataListener> dataListeners;
+    MCZbaseGeogAuthRec selectedItem = null;
 
-  public HigherGeographyComboBoxModel() {
-    model = new ArrayList<MCZbaseGeogAuthRec>();
-    // add a blank row
-    model.add(new MCZbaseGeogAuthRec());
-    dataListeners = new ArrayList<ListDataListener>();
-  }
-
-  /**
-   * @param model
-   */
-  public HigherGeographyComboBoxModel(List<MCZbaseGeogAuthRec> model) {
-    super();
-    if (model.isEmpty()) {
-      model = new ArrayList<MCZbaseGeogAuthRec>();
+    public HigherGeographyComboBoxModel() {
+        model = new ArrayList<MCZbaseGeogAuthRec>();
+        // add a blank row
+        model.add(new MCZbaseGeogAuthRec());
+        dataListeners = new ArrayList<ListDataListener>();
     }
-    this.model = (ArrayList<MCZbaseGeogAuthRec>)model;
-    if (model == null) {
-      model = new ArrayList<MCZbaseGeogAuthRec>();
-      // add a blank row.
-      model.add(0, new MCZbaseGeogAuthRec());
-    }
-    dataListeners = new ArrayList<ListDataListener>();
-  }
 
-  /* (non-Javadoc)
-   * @see javax.swing.ListModel#getSize()
-   */
-  @Override
-  public int getSize() {
-    return model.size();
-  }
-
-  /* (non-Javadoc)
-   * @see javax.swing.ListModel#getElementAt(int)
-   */
-  @Override
-  public MCZbaseGeogAuthRec getElementAt(int index) {
-    return this.model.get(index);
-  }
-
-  /* (non-Javadoc)
-   * @see
-   *     javax.swing.ListModel#addListDataListener(javax.swing.event.ListDataListener)
-   */
-  @Override
-  public void addListDataListener(ListDataListener l) {
-    this.dataListeners.add(l);
-  }
-
-  /* (non-Javadoc)
-   * @see
-   *     javax.swing.ListModel#removeListDataListener(javax.swing.event.ListDataListener)
-   */
-  @Override
-  public void removeListDataListener(ListDataListener l) {
-    this.dataListeners.remove(l);
-  }
-
-  private void notifyListeners() {
-    Iterator<ListDataListener> i = dataListeners.iterator();
-    while (i.hasNext()) {
-      i.next().contentsChanged(new ListDataEvent(
-          this, ListDataEvent.CONTENTS_CHANGED, 0, model.size()));
-    }
-  }
-
-  /* (non-Javadoc)
-   * @see javax.swing.ComboBoxModel#getSelectedItem()
-   */
-  @Override
-  public Object getSelectedItem() {
-    if (this.selectedItem == null) {
-      return null;
-    }
-    // return this.selectedItem.getHigher_geog();
-    return this.selectedItem;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.swing.ComboBoxModel#setSelectedItem(java.lang.Object)
-   */
-  @Override
-  public void setSelectedItem(Object anItem) {
-    log.debug("Trying to set selected item: " + anItem);
-    if (anItem != null) {
-      Iterator<MCZbaseGeogAuthRec> i = model.iterator();
-      boolean done = false;
-      while (i.hasNext() && !done) {
-        MCZbaseGeogAuthRec higher = i.next();
-        try {
-          if (higher.getHigher_geog() != null &&
-              higher.getHigher_geog().equals(
-                  ((MCZbaseGeogAuthRec)anItem).getHigher_geog())) {
-            log.debug("Selected higher is: " + higher.getHigher_geog());
-            selectedItem = higher;
-            done = true;
-            notifyListeners();
-          }
-        } catch (ClassCastException e) {
-          // Selected item is a string, we need to match to the corresponding
-          // object's higher geography value.
-          if (higher.getHigher_geog() != null &&
-              higher.getHigher_geog().equals(anItem)) {
-            log.debug("Selected higher is: " + higher.getHigher_geog());
-            selectedItem = higher;
-            done = true;
-            notifyListeners();
-          }
+    /**
+     * @param model
+     */
+    public HigherGeographyComboBoxModel(List<MCZbaseGeogAuthRec> model) {
+        super();
+        if (model.isEmpty()) {
+            model = new ArrayList<MCZbaseGeogAuthRec>();
         }
-      }
+        this.model = (ArrayList<MCZbaseGeogAuthRec>) model;
+        if (model == null) {
+            model = new ArrayList<MCZbaseGeogAuthRec>();
+            // add a blank row.
+            model.add(0, new MCZbaseGeogAuthRec());
+        }
+        dataListeners = new ArrayList<ListDataListener>();
     }
-  }
 
-  /**
-   * Obtain the higher geography string for the currently selected geography
-   * authority record object.
-   *
-   * @return a string representation of the higher geography from the
-   * currently selected item, or null if there is no currently selected item.
-   */
-  public String getSelectedItemHigherGeography() {
-    if (this.selectedItem == null) {
-      return null;
+    /* (non-Javadoc)
+     * @see javax.swing.ListModel#getSize()
+     */
+    @Override
+    public int getSize() {
+        return model.size();
     }
-    return this.selectedItem.getHigher_geog();
-  }
 
-  /**
-   *
-   */
-  public void removeAllElements() { this.model.clear(); }
+    /* (non-Javadoc)
+     * @see javax.swing.ListModel#getElementAt(int)
+     */
+    @Override
+    public MCZbaseGeogAuthRec getElementAt(int index) {
+        return this.model.get(index);
+    }
 
-  /**
-   * @param i
-   * @return
-   */
-  public Object getDataElementAt(int i) { return model.get(i); }
+    /* (non-Javadoc)
+     * @see
+     *     javax.swing.ListModel#addListDataListener(javax.swing.event.ListDataListener)
+     */
+    @Override
+    public void addListDataListener(ListDataListener l) {
+        this.dataListeners.add(l);
+    }
 
-  /**
-   * @param dataElementAt
-   */
-  public void addElement(MCZbaseGeogAuthRec dataElementAt) {
-    model.add(dataElementAt);
-  }
+    /* (non-Javadoc)
+     * @see
+     *     javax.swing.ListModel#removeListDataListener(javax.swing.event.ListDataListener)
+     */
+    @Override
+    public void removeListDataListener(ListDataListener l) {
+        this.dataListeners.remove(l);
+    }
 
-  /**
-   * @return
-   */
-  public List<MCZbaseGeogAuthRec> getModel() { return this.model; }
+    private void notifyListeners() {
+        Iterator<ListDataListener> i = dataListeners.iterator();
+        while (i.hasNext()) {
+            i.next().contentsChanged(new ListDataEvent(
+                    this, ListDataEvent.CONTENTS_CHANGED, 0, model.size()));
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see javax.swing.ComboBoxModel#getSelectedItem()
+     */
+    @Override
+    public Object getSelectedItem() {
+        if (this.selectedItem == null) {
+            return null;
+        }
+        // return this.selectedItem.getHigher_geog();
+        return this.selectedItem;
+    }
+
+    /* (non-Javadoc)
+     * @see javax.swing.ComboBoxModel#setSelectedItem(java.lang.Object)
+     */
+    @Override
+    public void setSelectedItem(Object anItem) {
+        log.debug("Trying to set selected item: " + anItem);
+        if (anItem != null) {
+            Iterator<MCZbaseGeogAuthRec> i = model.iterator();
+            boolean done = false;
+            while (i.hasNext() && !done) {
+                MCZbaseGeogAuthRec higher = i.next();
+                try {
+                    if (higher.getHigher_geog() != null &&
+                            higher.getHigher_geog().equals(
+                                    ((MCZbaseGeogAuthRec) anItem).getHigher_geog())) {
+                        log.debug("Selected higher is: " + higher.getHigher_geog());
+                        selectedItem = higher;
+                        done = true;
+                        notifyListeners();
+                    }
+                } catch (ClassCastException e) {
+                    // Selected item is a string, we need to match to the corresponding
+                    // object's higher geography value.
+                    if (higher.getHigher_geog() != null &&
+                            higher.getHigher_geog().equals(anItem)) {
+                        log.debug("Selected higher is: " + higher.getHigher_geog());
+                        selectedItem = higher;
+                        done = true;
+                        notifyListeners();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Obtain the higher geography string for the currently selected geography
+     * authority record object.
+     *
+     * @return a string representation of the higher geography from the
+     * currently selected item, or null if there is no currently selected item.
+     */
+    public String getSelectedItemHigherGeography() {
+        if (this.selectedItem == null) {
+            return null;
+        }
+        return this.selectedItem.getHigher_geog();
+    }
+
+    /**
+     *
+     */
+    public void removeAllElements() {
+        this.model.clear();
+    }
+
+    /**
+     * @param i
+     * @return
+     */
+    public Object getDataElementAt(int i) {
+        return model.get(i);
+    }
+
+    /**
+     * @param dataElementAt
+     */
+    public void addElement(MCZbaseGeogAuthRec dataElementAt) {
+        model.add(dataElementAt);
+    }
+
+    /**
+     * @return
+     */
+    public List<MCZbaseGeogAuthRec> getModel() {
+        return this.model;
+    }
 }

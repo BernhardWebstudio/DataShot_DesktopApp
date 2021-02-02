@@ -39,7 +39,11 @@ public class RunnableJobError {
     public static final int TYPE_LOAD_NOCHANGE = 8;
     public static final int TYPE_FILE_READ = 9;
     public static final int TYPE_UNKNOWN = 10;
-
+    private final int failureType;
+    /**
+     * The line number: used for failure of the VerbatimFieldLoad Job to know which field/line it failed on
+     */
+    private final String lineNumber;
     private String filename;
     private String barcode;
     private String qrBarcode;
@@ -48,13 +52,8 @@ public class RunnableJobError {
     private TaxonNameReturner taxonParser;
     private DrawerNameReturner drawerParser;
     private Exception exception;
-    private final int failureType;
     private String previous;
     private String previousPath;
-    /**
-     * The line number: used for failure of the VerbatimFieldLoad Job to know which field/line it failed on
-     */
-    private final String lineNumber;
 
     /**
      * Constructor for errors in the expected form for Barcode number QC Checks.

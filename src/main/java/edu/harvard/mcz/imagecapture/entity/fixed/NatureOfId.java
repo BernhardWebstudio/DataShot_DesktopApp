@@ -25,20 +25,20 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class NatureOfId {
-  public static final String LEGACY = "legacy";
-  public static final String EXPERT_ID = "expert ID";
-  private static final Logger log = LoggerFactory.getLogger(NatureOfId.class);
+    public static final String LEGACY = "legacy";
+    public static final String EXPERT_ID = "expert ID";
+    private static final Logger log = LoggerFactory.getLogger(NatureOfId.class);
 
-  public static String[] getNatureOfIdValues() {
-    String[] values = {EXPERT_ID,
-                       "type ID",
-                       LEGACY,
-                       "ID based on molecular data",
-                       "ID to species group",
-                       "erroneous citation",
-                       "field ID",
-                       "non-expert ID",
-                       "taxonomic revision"};
-    return values;
-  }
+    public static String[] getNatureOfIdValues() {
+        String[] values = {EXPERT_ID,
+                "type ID",
+                LEGACY,
+                "ID based on molecular data",
+                "ID to species group",
+                "erroneous citation",
+                "field ID",
+                "non-expert ID",
+                "taxonomic revision"};
+        return values;
+    }
 }

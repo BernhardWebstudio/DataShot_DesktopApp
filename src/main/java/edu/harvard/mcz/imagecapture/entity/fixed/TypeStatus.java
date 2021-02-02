@@ -19,28 +19,28 @@
 package edu.harvard.mcz.imagecapture.entity.fixed;
 
 import edu.harvard.mcz.imagecapture.interfaces.ValueLister;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Controled Vocabulary for type status of specimens/names
  */
 public class TypeStatus implements ValueLister {
-  private static final Logger log = LoggerFactory.getLogger(TypeStatus.class);
+    private static final Logger log = LoggerFactory.getLogger(TypeStatus.class);
 
-  public static String[] getTypeStatusValues() {
-    String[] lifestages = {"Not a Type", "Holotype",      "Paratype",
-                           "Lectotype",  "Allotype",      "Syntype",
-                           "Neotype",    "Paralectotype", "Topotype",
-                           "Cotype",     "Type"};
-    return lifestages;
-  }
+    public static String[] getTypeStatusValues() {
+        String[] lifestages = {"Not a Type", "Holotype", "Paratype",
+                "Lectotype", "Allotype", "Syntype",
+                "Neotype", "Paralectotype", "Topotype",
+                "Cotype", "Type"};
+        return lifestages;
+    }
 
-  /* (non-Javadoc)
-   * @see edu.harvard.mcz.imagecapture.interfaces.ValueLister#getValues()
-   */
-  @Override
-  public String[] getValues() {
-    return getTypeStatusValues();
-  }
+    /* (non-Javadoc)
+     * @see edu.harvard.mcz.imagecapture.interfaces.ValueLister#getValues()
+     */
+    @Override
+    public String[] getValues() {
+        return getTypeStatusValues();
+    }
 }

@@ -25,53 +25,63 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class GenusSpeciesCount {
-  private static final Logger log =
-      LoggerFactory.getLogger(GenusSpeciesCount.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(GenusSpeciesCount.class);
 
-  private Long count;
-  private String genus;
-  private String specificEpithet;
+    private Long count;
+    private String genus;
+    private String specificEpithet;
 
-  /**
-   * @param count
-   * @param genus
-   * @param specificEpithet
-   */
-  public GenusSpeciesCount(Long count, String genus, String specificEpithet) {
-    this.count = count;
-    this.genus = genus;
-    this.specificEpithet = specificEpithet;
-  }
+    /**
+     * @param count
+     * @param genus
+     * @param specificEpithet
+     */
+    public GenusSpeciesCount(Long count, String genus, String specificEpithet) {
+        this.count = count;
+        this.genus = genus;
+        this.specificEpithet = specificEpithet;
+    }
 
-  /**
-   * @return the count
-   */
-  public Long getCount() { return count; }
+    /**
+     * @return the count
+     */
+    public Long getCount() {
+        return count;
+    }
 
-  /**
-   * @param count the count to set
-   */
-  public void setCount(Long count) { this.count = count; }
+    /**
+     * @param count the count to set
+     */
+    public void setCount(Long count) {
+        this.count = count;
+    }
 
-  /**
-   * @return the genus
-   */
-  public String getGenus() { return genus; }
+    /**
+     * @return the genus
+     */
+    public String getGenus() {
+        return genus;
+    }
 
-  /**
-   * @param genus the genus to set
-   */
-  public void setGenus(String genus) { this.genus = genus; }
+    /**
+     * @param genus the genus to set
+     */
+    public void setGenus(String genus) {
+        this.genus = genus;
+    }
 
-  /**
-   * @return the specificEpithet
-   */
-  public String getSpecificEpithet() { return specificEpithet; }
+    /**
+     * @return the specificEpithet
+     */
+    public String getSpecificEpithet() {
+        return specificEpithet;
+    }
 
-  /**
-   * @param specificEpithet the specificEpithet to set
-   */
-  public void setSpecificEpithet(String specificEpithet) {
-    this.specificEpithet = specificEpithet;
-  }
+    /**
+     * @param specificEpithet the specificEpithet to set
+     */
+    public void setSpecificEpithet(String specificEpithet) {
+        this.specificEpithet = specificEpithet;
+    }
 }

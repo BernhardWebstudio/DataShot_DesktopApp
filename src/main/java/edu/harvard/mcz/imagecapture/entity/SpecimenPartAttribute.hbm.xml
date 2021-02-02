@@ -10,12 +10,12 @@
                 <param name="sequence">SPECIMEN_PART_ATTRIBUTE_SEQ</param>
             </generator>
         </id>
-        <property name="attributeDate" type="timestamp">
-            <column name="Attribute_Date" default="CURRENT_TIMESTAMP"/>
-        </property>
         <many-to-one name="specimenPartId" class="edu.harvard.mcz.imagecapture.entity.SpecimenPart">
             <column name="SpecimenPartId" not-null="true"/>
         </many-to-one>
+        <property name="attributeDate" type="timestamp">
+            <column name="Attribute_Date" default="CURRENT_TIMESTAMP"/>
+        </property>
         <property name="attributeType" type="string">
             <column name="Attribute_Type" not-null="true" length="30" default="caste"/>
         </property>

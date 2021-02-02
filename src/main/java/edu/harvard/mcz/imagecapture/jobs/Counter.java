@@ -28,6 +28,7 @@ import java.util.List;
  */
 public class Counter implements ScanCounterInterface {
 
+    private final StringBuffer errorReport;
     private int totalCount = 0;
     private int filesSeen = 0;
     private int filesDatabased = 0;
@@ -39,7 +40,6 @@ public class Counter implements ScanCounterInterface {
     private int specimensUpdated = 0;
     private int specimensDatabased = 0;
     private int filesUpdated = 0;
-    private final StringBuffer errorReport;
     private List<RunnableJobError> errors = null;
 
 

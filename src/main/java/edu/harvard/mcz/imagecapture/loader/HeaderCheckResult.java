@@ -20,53 +20,58 @@ package edu.harvard.mcz.imagecapture.loader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  *
  */
 public class HeaderCheckResult {
 
-  private static final Logger log =
-      LoggerFactory.getLogger(HeaderCheckResult.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(HeaderCheckResult.class);
 
-  private boolean result;
-  private StringBuilder message;
+    private boolean result;
+    private StringBuilder message;
 
-  public HeaderCheckResult() {
-    result = false;
-    message = new StringBuilder();
-  }
-
-  /**
-   * @return the result
-   */
-  public boolean isResult() { return result; }
-
-  /**
-   * @param result the result to set
-   */
-  public void setResult(boolean result) { this.result = result; }
-
-  /**
-   * @return the message as a string.
-   */
-  public String getMessage() {
-    if (message == null) {
-      message = new StringBuilder();
+    public HeaderCheckResult() {
+        result = false;
+        message = new StringBuilder();
     }
-    return message.toString();
-  }
 
-  /**
-   * @param message the message to append to the message for this
-   *                HeaderCheckResult
-   */
-  public void addToMessage(String message) {
-    if (this.message == null) {
-      this.message = new StringBuilder();
+    /**
+     * @return the result
+     */
+    public boolean isResult() {
+        return result;
     }
-    if (this.message.length() > 0) {
-      this.message.append(":");
+
+    /**
+     * @param result the result to set
+     */
+    public void setResult(boolean result) {
+        this.result = result;
     }
-    this.message.append(message);
-  }
+
+    /**
+     * @return the message as a string.
+     */
+    public String getMessage() {
+        if (message == null) {
+            message = new StringBuilder();
+        }
+        return message.toString();
+    }
+
+    /**
+     * @param message the message to append to the message for this
+     *                HeaderCheckResult
+     */
+    public void addToMessage(String message) {
+        if (this.message == null) {
+            this.message = new StringBuilder();
+        }
+        if (this.message.length() > 0) {
+            this.message.append(":");
+        }
+        this.message.append(message);
+    }
 }

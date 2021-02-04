@@ -19,8 +19,6 @@
 package edu.harvard.mcz.imagecapture.ui.tablemodel;
 
 import edu.harvard.mcz.imagecapture.entity.SpecimenPart;
-import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import edu.harvard.mcz.imagecapture.lifecycle.SpecimenPartLifeCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,14 +181,13 @@ public class SpecimenPartsTableModel extends AbstractDeleteableTableModel {
      */
     public void deleteRow(int rowIndex) {
         SpecimenPart toRemove = ((SpecimenPart) specimenParts.toArray()[rowIndex]);
-        SpecimenPartLifeCycle spals = new SpecimenPartLifeCycle();
+//        SpecimenPartLifeCycle spals = new SpecimenPartLifeCycle();
         try {
-            spals.remove(toRemove);
+//            spals.remove(toRemove);
             specimenParts.remove(toRemove);
             fireTableDataChanged();
-        } catch (SaveFailedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("Failed to remove specimen part", e);
         }
     }
 }

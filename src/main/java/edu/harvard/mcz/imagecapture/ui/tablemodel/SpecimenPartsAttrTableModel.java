@@ -19,8 +19,8 @@
 package edu.harvard.mcz.imagecapture.ui.tablemodel;
 
 import edu.harvard.mcz.imagecapture.entity.SpecimenPartAttribute;
-import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import edu.harvard.mcz.imagecapture.lifecycle.SpecimenPartAttributeLifeCycle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.table.AbstractTableModel;
 import java.util.Collection;
@@ -32,21 +32,25 @@ import java.util.HashSet;
 public class SpecimenPartsAttrTableModel extends AbstractTableModel {
 
     private static final long serialVersionUID = -4139892019645663114L;
-
+    private static final Logger log =
+            LoggerFactory.getLogger(SpecimenPartsAttrTableModel.class);
     private final Collection<SpecimenPartAttribute> specimenPartAttributes;
 
     public SpecimenPartsAttrTableModel() {
-        super();
-        this.specimenPartAttributes = new HashSet<SpecimenPartAttribute>();
+        this(null);
     }
 
     /**
-     * @param specimenParts
+     * @param specimenPartAttributes
      */
     public SpecimenPartsAttrTableModel(
             Collection<SpecimenPartAttribute> specimenPartAttributes) {
         super();
-        this.specimenPartAttributes = specimenPartAttributes;
+        if (specimenPartAttributes != null) {
+            this.specimenPartAttributes = specimenPartAttributes;
+        } else {
+            this.specimenPartAttributes = new HashSet<SpecimenPartAttribute>();
+        }
     }
 
     /* (non-Javadoc)
@@ -162,14 +166,13 @@ public class SpecimenPartsAttrTableModel extends AbstractTableModel {
     public void deleteRow(int rowIndex) {
         SpecimenPartAttribute toRemove =
                 ((SpecimenPartAttribute) specimenPartAttributes.toArray()[rowIndex]);
-        SpecimenPartAttributeLifeCycle spals = new SpecimenPartAttributeLifeCycle();
+//        SpecimenPartAttributeLifeCycle spals = new SpecimenPartAttributeLifeCycle();
         try {
-            spals.remove(toRemove);
+//            spals.remove(toRemove);
             specimenPartAttributes.remove(toRemove);
             fireTableDataChanged();
-        } catch (SaveFailedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("Failed to remove specimen part attr", e);
         }
     }
 

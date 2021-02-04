@@ -19,8 +19,6 @@
 package edu.harvard.mcz.imagecapture.ui.tablemodel;
 
 import edu.harvard.mcz.imagecapture.entity.Collector;
-import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import edu.harvard.mcz.imagecapture.lifecycle.CollectorLifeCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -151,13 +149,13 @@ public class CollectorTableModel extends AbstractDeleteableTableModel {
      */
     public void deleteRow(int rowIndex) {
         Collector toRemove = ((Collector) collectors.toArray()[rowIndex]);
-        CollectorLifeCycle spals = new CollectorLifeCycle();
+//        CollectorLifeCycle spals = new CollectorLifeCycle();
         try {
-            spals.delete(toRemove);
+//            spals.delete(toRemove);
             collectors.remove(toRemove);
             fireTableDataChanged();
-        } catch (SaveFailedException e) {
-            log.error(e.getMessage());
+        } catch (Exception e) {
+            log.error("Failed to remove collector", e);
         }
     }
 }

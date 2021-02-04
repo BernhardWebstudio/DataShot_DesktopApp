@@ -1627,18 +1627,31 @@ georeference_pre.getLongDegString()); if
     }
 
     public void setLocationData(String verbatimLoc, String specificLoc, String country, String stateProvince) {
-        if (this.getVerbatimLocalityJTextField().getText().equals("")) {
-            this.getVerbatimLocalityJTextField().setText(verbatimLoc);
-        }
-        if (this.getSpecificLocalityJTextField().getText().equals("")) {
-            this.getSpecificLocalityJTextField().setText(specificLoc);
-        }
-        if (this.getCountryJTextField().getSelectedItem().equals("")) {
-            this.getCountryJTextField().setSelectedItem(country);
-        }
-        if (this.getPrimaryDivisionJTextField().getSelectedItem().equals("")) {
-            this.getPrimaryDivisionJTextField().setSelectedItem(stateProvince);
-        }
+        Map<Component, String> defaultsMapImmutable = Map.ofEntries(
+                Map.entry(this.getVerbatimLocalityJTextField(), verbatimLoc),
+                Map.entry(this.getSpecificLocalityJTextField(), specificLoc),
+                Map.entry(this.getCountryJTextField(), country),
+                Map.entry(this.getPrimaryDivisionJTextField(), stateProvince)
+        );
+
+        Properties settings = Singleton.getSingletonInstance().getProperties().getProperties();
+        defaultsMapImmutable.forEach((field, value) -> {
+            try {
+                if (field instanceof JTextField) {
+                    if (((JTextField) field).getText().trim().equals("") || settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
+                        ((JTextField) field).setText(value);
+                    }
+                } else if (field instanceof JComboBox) {
+                    if (((JComboBox<?>) field).getSelectedItem().toString().trim().equals("") || settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
+                        ((JComboBox<?>) field).setSelectedItem(value);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to set value for location field", e);
+            }
+        });
+
+        this.updateJButtonGeoreference();
     }
 
     private void updateJButtonGeoreference() {

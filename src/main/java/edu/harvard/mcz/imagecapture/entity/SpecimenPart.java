@@ -186,7 +186,11 @@ public class SpecimenPart implements Cloneable {
      * @return the attributeCollection
      */
     public Collection<SpecimenPartAttribute> getAttributeCollection() {
-        return attributeCollection;
+        if (attributeCollection == null) {
+            return new HashSet<SpecimenPartAttribute>();
+        } else {
+            return attributeCollection;
+        }
     }
 
     /**
@@ -215,8 +219,12 @@ public class SpecimenPart implements Cloneable {
      * If attribute collection is empty, returns an empty string.
      */
     public String getPartAttributeValuesConcat() {
-        StringBuffer result = new StringBuffer();
-        Iterator<SpecimenPartAttribute> i = getAttributeCollection().iterator();
+        StringBuilder result = new StringBuilder();
+        Collection<SpecimenPartAttribute> attributeCollection = getAttributeCollection();
+        if (attributeCollection == null) {
+            return "";
+        }
+        Iterator<SpecimenPartAttribute> i = attributeCollection.iterator();
         int counter = 0;
         while (i.hasNext()) {
             SpecimenPartAttribute attribute = i.next();
@@ -242,11 +250,9 @@ public class SpecimenPart implements Cloneable {
                         lotCountModifier, new HashSet<>());
         Set<SpecimenPartAttribute> newAttributeCollection = new HashSet<>();
         if (this.attributeCollection != null) {
-            Iterator<SpecimenPartAttribute> iterator =
-                    this.attributeCollection.iterator();
-            while (iterator.hasNext()) {
+            for (SpecimenPartAttribute specimenPartAttribute : this.attributeCollection) {
                 SpecimenPartAttribute newSpecPartAttr =
-                        (SpecimenPartAttribute) iterator.next().clone();
+                        (SpecimenPartAttribute) specimenPartAttribute.clone();
                 newSpecPartAttr.setSpecimenPart(newPart);
                 newAttributeCollection.add(newSpecPartAttr);
             }

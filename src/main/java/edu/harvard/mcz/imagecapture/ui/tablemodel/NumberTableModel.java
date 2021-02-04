@@ -1,8 +1,6 @@
 package edu.harvard.mcz.imagecapture.ui.tablemodel;
 
 import edu.harvard.mcz.imagecapture.entity.Number;
-import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import edu.harvard.mcz.imagecapture.lifecycle.NumberLifeCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,13 +132,13 @@ public class NumberTableModel extends AbstractDeleteableTableModel {
      */
     public void deleteRow(int rowIndex) {
         Number toRemove = ((Number) numbers.toArray()[rowIndex]);
-        NumberLifeCycle spals = new NumberLifeCycle();
+//        NumberLifeCycle spals = new NumberLifeCycle();
         try {
-            spals.delete(toRemove);
+//            spals.delete(toRemove);
             numbers.remove(toRemove);
             fireTableDataChanged();
-        } catch (SaveFailedException e) {
-            log.error(e.getMessage());
+        } catch (Exception e) {
+            log.error("Failed to remove number", e);
         }
     }
 }

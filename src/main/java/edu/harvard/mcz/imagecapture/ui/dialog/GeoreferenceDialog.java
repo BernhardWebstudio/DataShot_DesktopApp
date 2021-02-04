@@ -562,7 +562,7 @@ public class GeoreferenceDialog extends JDialog {
             // Set the long value to long only
             pasteValues.set(Integer.parseInt(settings.getProperty(ImageCaptureProperties.KEY_EXCEL_COL_LAT)), latLongValues[0]);
             // Set the lat value at a new position
-            pasteValues.add(latLongValues[latLongValues.length-1]);
+            pasteValues.add(latLongValues[latLongValues.length - 1]);
             // then, add this new position to the map we use
             // this is ugly and brings a bit of technical dept, see below
             defaultsMap.put(String.valueOf(pasteValues.size() - 1), textFieldDecimalLong);
@@ -585,11 +585,11 @@ public class GeoreferenceDialog extends JDialog {
                     return;
                 }
                 if (field instanceof JTextField) {
-                    if (((JTextField) field).getText().trim().equals("")) {
+                    if (((JTextField) field).getText().trim().equals("") || settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
                         ((JTextField) field).setText(pasteValues.get(intKey));
                     }
                 } else if (field instanceof JComboBox) {
-                    if (((JComboBox<String>) field).getSelectedItem().equals("") || ((JComboBox<?>) field).getSelectedItem().equals("unknown")){
+                    if ((((JComboBox<String>) field).getSelectedItem().equals("") || ((JComboBox<?>) field).getSelectedItem().equals("unknown")) || settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
                         ((JComboBox<?>) field).setSelectedItem(pasteValues.get(intKey));
                     }
                 }

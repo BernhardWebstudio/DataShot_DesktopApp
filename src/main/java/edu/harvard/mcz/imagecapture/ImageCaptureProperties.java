@@ -26,6 +26,7 @@ import java.io.FileOutputStream;
 import java.net.URISyntaxException;
 import java.security.CodeSource;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.Properties;
 import javax.swing.table.AbstractTableModel;
 import org.slf4j.Logger;
@@ -205,6 +206,20 @@ public class ImageCaptureProperties extends AbstractTableModel {
   public static final String KEY_DB_DIALECT = "hibernate.dialect";
   public static final String KEY_DB_DRIVER =
       "hibernate.connection.driver_class";
+
+  /**
+   * The keys for setting the columns to read for the Excel Georeference import
+   *
+   * @see edu.harvard.mcz.imagecapture.ui.dialog.GeoreferenceDialog#pasteFromExcel(String)
+   */
+  public static String KEY_EXCEL_COL_LAT = "georef.import.lat.col";
+  public static String KEY_EXCEL_COL_LONG = "georef.import.long.col";
+  public static String KEY_EXCEL_COL_ERR_RAD = "georef.import.err_rad.col";
+  public static String KEY_EXCEL_COL_METHOD = "georef.import.method.col";
+  public static String KEY_EXCEL_COL_VERBATIM_LOC = "georef.import.verbatim_loc.col";
+  public static String KEY_EXCEL_COL_COUNTRY = "georef.import.country.col";
+  public static String KEY_EXCEL_COL_STATE_PROVINCE = "georef.import.state_province.col";
+  public static String KEY_EXCEL_COL_SPECIFIC_LOC = "georef.import.specific_loc.col";
 
   private static final Logger log =
       LoggerFactory.getLogger(ImageCaptureProperties.class);
@@ -633,14 +648,13 @@ public class ImageCaptureProperties extends AbstractTableModel {
       properties.setProperty(KEY_THUMBNAIL_HEIGHT, "120");
     }
     if (!properties.containsKey(KEY_THUMBNAIL_WIDTH)) {
-      // default value is 120 pixels.
+      // default value is 80 pixels.
       properties.setProperty(KEY_THUMBNAIL_WIDTH, "80");
     }
     if (!properties.containsKey(KEY_GENERATE_THUMBNAILS)) {
       properties.setProperty(KEY_GENERATE_THUMBNAILS, "true");
     }
     if (!properties.containsKey(KEY_REGEX_DRAWERNUMBER)) {
-      // default value is 120 pixels.
       properties.setProperty(KEY_REGEX_DRAWERNUMBER,
                              ImageCaptureApp.REGEX_DRAWERNUMBER);
     }
@@ -666,6 +680,22 @@ public class ImageCaptureProperties extends AbstractTableModel {
     if (!properties.containsKey(KEY_CONCURRENCY_LEVEL)) {
       properties.setProperty(KEY_CONCURRENCY_LEVEL, "16");
     }
+    // the Excel ...
+    Map<String, String> defaultsMap = Map.ofEntries(
+            Map.entry(KEY_EXCEL_COL_LAT, "6"),
+            Map.entry(KEY_EXCEL_COL_LONG, "6"),
+            Map.entry(KEY_EXCEL_COL_COUNTRY, "3"),
+            Map.entry(KEY_EXCEL_COL_ERR_RAD, "7"),
+            Map.entry(KEY_EXCEL_COL_METHOD, "8"),
+            Map.entry(KEY_EXCEL_COL_STATE_PROVINCE, "4"),
+            Map.entry(KEY_EXCEL_COL_VERBATIM_LOC, "0"),
+            Map.entry(KEY_EXCEL_COL_SPECIFIC_LOC, "5")
+    );
+    defaultsMap.forEach((key, value) -> {
+      if (!properties.containsKey(key)) {
+        properties.setProperty(key, value);
+      }
+    });
   }
 
   /* Place where properties in this instance are persisted.

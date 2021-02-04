@@ -18,7 +18,10 @@
  */
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.entity.LatLong;
+import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.utility.InputUtility;
 import net.miginfocom.swing.MigLayout;
 import org.jdesktop.swingx.combobox.ListComboBoxModel;
@@ -33,15 +36,15 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -52,11 +55,12 @@ public class GeoreferenceDialog extends JDialog {
 
     private static final Logger log =
             LoggerFactory.getLogger(GeoreferenceDialog.class);
-
     private final JPanel contentPanel;
     private final LatLong georeference;
+    private SpecimenDetailsViewPane parent;
     private JComboBox<String> comboBoxOrigUnits;
     private JComboBox<String> comboBoxErrorUnits;
+    private JButton pasteExcelButton;
     private JTextField txtGPSAccuracy;
     private JTextField textFieldDecimalLat;
     private JTextField textFieldDecimalLong;
@@ -82,6 +86,11 @@ public class GeoreferenceDialog extends JDialog {
     private JFormattedTextField textDetDate;
     private JTextField textRefSource;
     private JXMapViewer mapViewer;
+
+    public GeoreferenceDialog(LatLong georeference, SpecimenDetailsViewPane parent) {
+        this(georeference);
+        this.parent = parent;
+    }
 
     public GeoreferenceDialog(LatLong georeference) {
         this.georeference = georeference;
@@ -435,7 +444,9 @@ public class GeoreferenceDialog extends JDialog {
         textRefSource = new JTextField();
         textFieldRemarks = new JTextField();
 
-        Component[] fields = {textFieldDecimalLat,
+        Component[] fields = {
+                this.getPasteExcelButton(),
+                textFieldDecimalLat,
                 textFieldDecimalLong,
                 cbMethod,
                 cbDatum,
@@ -458,7 +469,9 @@ public class GeoreferenceDialog extends JDialog {
                 textRefSource,
                 textFieldRemarks};
 
-        String[] labels = {"Latitude", "Longitude",
+        String[] labels = {
+                "Util",
+                "Latitude", "Longitude",
                 "Method", "Datum",
                 "GPS Accuracy", "Original Units",
                 "Error Radius", "Error Radius Units",
@@ -526,5 +539,99 @@ public class GeoreferenceDialog extends JDialog {
 
         // recalc
         this.pack();
+    }
+
+    private void pasteFromExcel(String pasteValue) {
+        Properties settings = Singleton.getSingletonInstance().getProperties().getProperties();
+
+        String[] pasteValuesStr = pasteValue.split("\t");
+        ArrayList<String> pasteValues = new ArrayList<String>(Arrays.asList(pasteValuesStr));
+        // handle values
+        Map<String, Component> defaultsMapImmutable = Map.ofEntries(
+                Map.entry(ImageCaptureProperties.KEY_EXCEL_COL_ERR_RAD, txtErrorRadius),
+                Map.entry(ImageCaptureProperties.KEY_EXCEL_COL_METHOD, cbMethod)
+        );
+        // make it mutable
+        Map<String, Component> defaultsMap = new HashMap<>(defaultsMapImmutable);
+
+        // lat / long are exceptions, as they may need to be split
+        defaultsMap.put(ImageCaptureProperties.KEY_EXCEL_COL_LAT, textFieldDecimalLat);
+        if (settings.getProperty(ImageCaptureProperties.KEY_EXCEL_COL_LAT).equals(settings.getProperty(ImageCaptureProperties.KEY_EXCEL_COL_LONG))) {
+            String[] latLongValues = pasteValues.get(Integer.parseInt(settings.getProperty(ImageCaptureProperties.KEY_EXCEL_COL_LAT))).trim().split("[,; ]+");
+            log.debug("Split latLong into {} values: {}", latLongValues.length, latLongValues);
+            // Set the long value to long only
+            pasteValues.set(Integer.parseInt(settings.getProperty(ImageCaptureProperties.KEY_EXCEL_COL_LAT)), latLongValues[0]);
+            // Set the lat value at a new position
+            pasteValues.add(latLongValues[latLongValues.length-1]);
+            // then, add this new position to the map we use
+            // this is ugly and brings a bit of technical dept, see below
+            defaultsMap.put(String.valueOf(pasteValues.size() - 1), textFieldDecimalLong);
+        } else {
+            // no problem if not need to split
+            defaultsMap.put(ImageCaptureProperties.KEY_EXCEL_COL_LONG, textFieldDecimalLong);
+        }
+
+        // set all the values as applicable
+        defaultsMap.forEach((key, field) -> {
+            try {
+                int intKey = 0;
+                if (settings.getProperty(key, "unset").equals("unset")) {
+                    // necessity: see above
+                    intKey = Integer.parseInt(key);
+                } else {
+                    intKey = Integer.parseInt(settings.getProperty(key));
+                }
+                if (pasteValues.size() <= intKey) {
+                    return;
+                }
+                if (field instanceof JTextField) {
+                    if (((JTextField) field).getText().trim().equals("")) {
+                        ((JTextField) field).setText(pasteValues.get(intKey));
+                    }
+                } else if (field instanceof JComboBox) {
+                    if (((JComboBox<String>) field).getSelectedItem().equals("") || ((JComboBox<?>) field).getSelectedItem().equals("unknown")){
+                        ((JComboBox<?>) field).setSelectedItem(pasteValues.get(intKey));
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to set field when pasting, key: " + key, e);
+            }
+        });
+
+        // also propagate changes to other screen
+        if (parent != null) {
+            parent.setLocationData(
+                    getIndexIfAvailable(settings, pasteValues, ImageCaptureProperties.KEY_EXCEL_COL_VERBATIM_LOC),
+                    getIndexIfAvailable(settings, pasteValues, ImageCaptureProperties.KEY_EXCEL_COL_SPECIFIC_LOC),
+                    getIndexIfAvailable(settings, pasteValues, ImageCaptureProperties.KEY_EXCEL_COL_COUNTRY),
+                    getIndexIfAvailable(settings, pasteValues, ImageCaptureProperties.KEY_EXCEL_COL_STATE_PROVINCE)
+            );
+        }
+    }
+
+    private String getIndexIfAvailable(Properties settings, List<String> values, String key) {
+        int intKey = Integer.parseInt(settings.getProperty(key));
+        if (values.size() > intKey) {
+            return values.get(intKey);
+        }
+        return "";
+    }
+
+    private JButton getPasteExcelButton() {
+        if (pasteExcelButton == null) {
+            pasteExcelButton = new JButton("Paste Excel");
+            pasteExcelButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    try {
+                        pasteFromExcel((String) clipboard.getData(DataFlavor.stringFlavor));
+                    } catch (Exception e) {
+                        log.error("Failed to paste clipboard data from excel", e);
+                    }
+                }
+            });
+        }
+        return pasteExcelButton;
     }
 }

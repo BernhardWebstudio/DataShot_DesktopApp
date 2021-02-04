@@ -1607,7 +1607,7 @@ georeference_pre.getLongDegString()); if
                                 LatLong georeference = georeferences.iterator().next();
                                 georeference.setSpecimen(specimen);
                                 GeoreferenceDialog georefDialog =
-                                        new GeoreferenceDialog(georeference);
+                                        new GeoreferenceDialog(georeference, thisPane);
                                 georefDialog.setVisible(true);
                                 georefDialog.addComponentListener(new ComponentAdapter() {
                                     @Override
@@ -1624,6 +1624,21 @@ georeference_pre.getLongDegString()); if
             }
         }
         return jButtonGeoReference;
+    }
+
+    public void setLocationData(String verbatimLoc, String specificLoc, String country, String stateProvince) {
+        if (this.getVerbatimLocalityJTextField().getText().equals("")) {
+            this.getVerbatimLocalityJTextField().setText(verbatimLoc);
+        }
+        if (this.getSpecificLocalityJTextField().getText().equals("")) {
+            this.getSpecificLocalityJTextField().setText(specificLoc);
+        }
+        if (this.getCountryJTextField().getSelectedItem().equals("")) {
+            this.getCountryJTextField().setSelectedItem(country);
+        }
+        if (this.getPrimaryDivisionJTextField().getSelectedItem().equals("")) {
+            this.getPrimaryDivisionJTextField().setSelectedItem(stateProvince);
+        }
     }
 
     private void updateJButtonGeoreference() {

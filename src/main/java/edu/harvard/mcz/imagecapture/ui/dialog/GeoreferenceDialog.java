@@ -589,7 +589,8 @@ public class GeoreferenceDialog extends JDialog {
                         ((JTextField) field).setText(pasteValues.get(intKey));
                     }
                 } else if (field instanceof JComboBox) {
-                    if ((((JComboBox<String>) field).getSelectedItem().equals("") || ((JComboBox<?>) field).getSelectedItem().equals("unknown")) || settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
+                    JComboBox<String> comboBox = (JComboBox<String>) field;
+                    if ((comboBox.getSelectedItem().equals("") || comboBox.getSelectedItem().equals("unknown") || comboBox.getSelectedItem().equals("not recorded")) || settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
                         ((JComboBox<?>) field).setSelectedItem(pasteValues.get(intKey));
                     }
                 }

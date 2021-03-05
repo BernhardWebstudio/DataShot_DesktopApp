@@ -19,6 +19,7 @@
 package edu.harvard.mcz.imagecapture.ui.tablemodel;
 
 import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
      */
     @Override
     public int getColumnCount() {
-        return COLUMCOUNT;
+        return SpecimenDetailsViewPane.copyPasteActivated ? COLUMCOUNT : COLUMCOUNT - 1;
     }
 
     /* (non-Javadoc)
@@ -76,51 +77,54 @@ public class SpecimenListTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         Specimen s = specimens.get(rowIndex);
         Object result = null;
-        switch (columnIndex) {
-            case COL_ID:
-                // result = s.getSpecimenId();
-                result = s;
-                break;
-            case COL_COPY:
-                result = s;
-                break;
-            case COL_BARCODE:
-                result = s.getBarcode();
-                break;
-            case COL_WORKFLOW:
-                result = s.getWorkFlowStatus();
-                break;
-            case COL_FAMILY:
-                result = s.getFamily();
-                break;
-            case COL_SUBFAMILY:
-                result = s.getSubfamily();
-                break;
-            case COL_TRIBE:
-                result = s.getTribe();
-                break;
-            case COL_GENUS:
-                result = s.getGenus();
-                break;
-            case COL_SPECIFIC:
-                result = s.getSpecificEpithet();
-                break;
-            case COL_SUBSPECIFIC:
-                result = s.getSubspecificEpithet();
-                break;
-      /*case COL_HIGHERGEOG:
-              result = s.getHigherGeography();
-              break;*/
-            case COL_VERBLOCALITY:
-                result = s.getVerbatimLocality();
-                break;
-            case COL_COUNTRY:
-                result = s.getCountry();
-                break;
-            case COL_DIVISION:
-                // result = s.getDrawerNumber();
-                result = s.getPrimaryDivison();
-                break;
+        if (columnIndex == COL_ID) {
+            result = s;
+        } else {
+            if (!SpecimenDetailsViewPane.copyPasteActivated) {
+                columnIndex += 1;
+            }
+            switch (columnIndex) {
+                case COL_ID:
+                    // result = s.getSpecimenId();
+                    result = s;
+                    break;
+                case COL_COPY:
+                    result = s;
+                    break;
+                case COL_BARCODE:
+                    result = s.getBarcode();
+                    break;
+                case COL_WORKFLOW:
+                    result = s.getWorkFlowStatus();
+                    break;
+                case COL_FAMILY:
+                    result = s.getFamily();
+                    break;
+                case COL_SUBFAMILY:
+                    result = s.getSubfamily();
+                    break;
+                case COL_TRIBE:
+                    result = s.getTribe();
+                    break;
+                case COL_GENUS:
+                    result = s.getGenus();
+                    break;
+                case COL_SPECIFIC:
+                    result = s.getSpecificEpithet();
+                    break;
+                case COL_SUBSPECIFIC:
+                    result = s.getSubspecificEpithet();
+                    break;
+                case COL_VERBLOCALITY:
+                    result = s.getVerbatimLocality();
+                    break;
+                case COL_COUNTRY:
+                    result = s.getCountry();
+                    break;
+                case COL_DIVISION:
+                    result = s.getPrimaryDivison();
+                    break;
+            }
         }
         return result;
     }
@@ -149,49 +153,50 @@ public class SpecimenListTableModel extends AbstractTableModel {
     @Override
     public String getColumnName(int columnIndex) {
         String result = null;
-        switch (columnIndex) {
-            case COL_ID:
-                result = "Edit";
-                break;
-            case COL_COPY:
-                result = "Copy";
-                break;
-            case COL_BARCODE:
-                result = "Barcode";
-                break;
-            case COL_WORKFLOW:
-                result = "Workflow";
-                break;
-            case COL_FAMILY:
-                result = "Family";
-                break;
-            case COL_SUBFAMILY:
-                result = "Subfamily";
-                break;
-            case COL_TRIBE:
-                result = "Tribe";
-                break;
-            case COL_GENUS:
-                result = "Genus";
-                break;
-            case COL_SPECIFIC:
-                result = "Species";
-                break;
-            case COL_SUBSPECIFIC:
-                result = "Subspecies";
-                break;
-      /*case COL_HIGHERGEOG:
-              result = "Higher Geography-";
-              break;*/
-            case COL_VERBLOCALITY:
-                result = "Verbatim Locality";
-                break;
-            case COL_COUNTRY:
-                result = "Country";
-                break;
-            case COL_DIVISION:
-                result = "State/Province";
-                break;
+        if (columnIndex == COL_ID) {
+            result = "Edit";
+        } else {
+            if (!SpecimenDetailsViewPane.copyPasteActivated) {
+                columnIndex += 1;
+            }
+            switch (columnIndex) {
+                case COL_COPY:
+                    result = "Copy";
+                    break;
+                case COL_BARCODE:
+                    result = "Barcode";
+                    break;
+                case COL_WORKFLOW:
+                    result = "Workflow";
+                    break;
+                case COL_FAMILY:
+                    result = "Family";
+                    break;
+                case COL_SUBFAMILY:
+                    result = "Subfamily";
+                    break;
+                case COL_TRIBE:
+                    result = "Tribe";
+                    break;
+                case COL_GENUS:
+                    result = "Genus";
+                    break;
+                case COL_SPECIFIC:
+                    result = "Species";
+                    break;
+                case COL_SUBSPECIFIC:
+                    result = "Subspecies";
+                    break;
+                case COL_VERBLOCALITY:
+                    result = "Verbatim Locality";
+                    break;
+                case COL_COUNTRY:
+                    result = "Country";
+                    break;
+                case COL_DIVISION:
+                    result = "State/Province";
+                    break;
+            }
         }
         return result;
     }
@@ -204,7 +209,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         boolean result = false;
-        if (columnIndex == COL_ID || columnIndex == COL_COPY) {
+        if (columnIndex == COL_ID || (SpecimenDetailsViewPane.copyPasteActivated && columnIndex == COL_COPY)) {
             result = true;
         }
         return result;

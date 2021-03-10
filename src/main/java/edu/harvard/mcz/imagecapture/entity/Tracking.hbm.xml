@@ -19,6 +19,9 @@
         <property name="user" type="string">
             <column name="USERNAME"/>
         </property>
+        <property name="datashotVersion" type="string">
+            <column name="datashotVersion"/>
+        </property>
         <property name="eventType" type="string">
             <column name="eventType" length="40"/>
         </property>

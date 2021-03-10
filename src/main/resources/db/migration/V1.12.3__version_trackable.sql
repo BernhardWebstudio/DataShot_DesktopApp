@@ -1,0 +1,1 @@
+ALTER TABLE Tracking ADD `datashotVersion` VARCHAR (255) NULL DEFAULT NULL;

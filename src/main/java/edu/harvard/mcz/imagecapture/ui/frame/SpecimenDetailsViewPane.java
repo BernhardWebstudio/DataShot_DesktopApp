@@ -18,15 +18,88 @@
  */
 package edu.harvard.mcz.imagecapture.ui.frame;
 
-import edu.harvard.mcz.imagecapture.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.KeyEvent;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.persistence.OptimisticLockException;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultCellEditor;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.ImageIcon;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumn;
+
+import org.hibernate.SessionException;
+import org.hibernate.TransactionException;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import edu.harvard.mcz.imagecapture.ImageCaptureApp;
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.KeyboardShortcutManager;
+import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.SpecimenController;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.data.LocationInCollection;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
+import edu.harvard.mcz.imagecapture.entity.Collector;
+import edu.harvard.mcz.imagecapture.entity.Determination;
+import edu.harvard.mcz.imagecapture.entity.ICImage;
+import edu.harvard.mcz.imagecapture.entity.LatLong;
 import edu.harvard.mcz.imagecapture.entity.Number;
-import edu.harvard.mcz.imagecapture.entity.*;
-import edu.harvard.mcz.imagecapture.entity.fixed.*;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.SpecimenPart;
+import edu.harvard.mcz.imagecapture.entity.Tracking;
+import edu.harvard.mcz.imagecapture.entity.fixed.Features;
+import edu.harvard.mcz.imagecapture.entity.fixed.LifeStage;
+import edu.harvard.mcz.imagecapture.entity.fixed.NatureOfId;
+import edu.harvard.mcz.imagecapture.entity.fixed.Sex;
+import edu.harvard.mcz.imagecapture.entity.fixed.TypeStatus;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import edu.harvard.mcz.imagecapture.lifecycle.*;
+import edu.harvard.mcz.imagecapture.lifecycle.CollectorLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.HigherTaxonLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.NumberLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenPartLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.TrackingLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.MouseWheelScrollListener;
@@ -39,23 +112,6 @@ import edu.harvard.mcz.imagecapture.ui.tablemodel.NumberTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenPartsTableModel;
 import edu.harvard.mcz.imagecapture.utility.OpenStreetMapUtility;
 import net.miginfocom.swing.MigLayout;
-import org.hibernate.SessionException;
-import org.hibernate.TransactionException;
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
-import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.persistence.OptimisticLockException;
-import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableColumn;
-import java.awt.*;
-import java.awt.event.*;
-import java.net.URL;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * JPanel for editing a record of a Specimen in a details view for that
@@ -2997,6 +3053,16 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
     }
 
     private void autocompleteGeoDataFromGeoreference() {
+        // initialize hash map; todo: memoize, load from file
+        HashMap<String, String> primaryDivisionMapping = new HashMap<String, String>();
+        primaryDivisionMapping.put("Grisons", "Graubünden");
+        primaryDivisionMapping.put("St. Gallen", "Sankt Gallen");
+        primaryDivisionMapping.put("Tessin", "Ticino");
+        primaryDivisionMapping.put("Wallis", "Valais");
+        primaryDivisionMapping.put("Zurich", "Zürich");
+        primaryDivisionMapping.put("Occitania", "Occitanie");
+
+        // query data
         LatLong georeff = this.specimen.getLatLong().iterator().next();
         if (georeff.getDecLat() != null && georeff.getDecLong() != null) {
             // do it async as the request could take longer than desired
@@ -3020,8 +3086,14 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
                     if (this.getPrimaryDivisionJTextField().getSelectedItem() == null ||
                             this.getPrimaryDivisionJTextField().getSelectedItem().equals(
                                     "")) {
-                        this.getPrimaryDivisionJTextField().setSelectedItem(
-                                data.get("address.state"));
+                        String primaryDivision = (String)data.get("address.state");
+						if(primaryDivisionMapping.containsKey(primaryDivision)) 
+						{
+							this.getPrimaryDivisionJTextField().setSelectedItem(primaryDivisionMapping.get(primaryDivision));
+						}
+						else {
+							this.getPrimaryDivisionJTextField().setSelectedItem(primaryDivision);
+						}
                     } else {
                         log.debug("Won't automatically set primary division as is '" +
                                 this.getCountryJTextField().getSelectedItem() + "'.");

@@ -25,5 +25,8 @@
         <property name="hash" type="string">
             <column name="HASH" length="41"/>
         </property>
+        <property name="canCopyPaste" type="boolean">
+            <column name="canCopyPaste" />
+        </property>
     </class>
 </hibernate-mapping>

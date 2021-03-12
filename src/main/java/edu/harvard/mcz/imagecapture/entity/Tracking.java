@@ -1,6 +1,7 @@
 package edu.harvard.mcz.imagecapture.entity;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
+import edu.harvard.mcz.imagecapture.Singleton;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -18,6 +19,15 @@ public class Tracking implements Serializable {
   private String eventType;
   private Date eventDateTime;
   private String datashotVersion;
+  private boolean couldCopyPaste;
+
+  public boolean isCouldCopyPaste() {
+    return couldCopyPaste;
+  }
+
+  public void setCouldCopyPaste(boolean couldCopyPaste) {
+    this.couldCopyPaste = couldCopyPaste;
+  }
 
   /**
    * Utility constructor if no date is needed
@@ -25,6 +35,7 @@ public class Tracking implements Serializable {
   public Tracking() {
     try {
       this.datashotVersion = ImageCaptureApp.getAppVersion();
+      this.couldCopyPaste = Singleton.getSingletonInstance().getUser() != null && Singleton.getSingletonInstance().getUser().canCopyPaste();
     } catch (Exception e) {
     }
   }

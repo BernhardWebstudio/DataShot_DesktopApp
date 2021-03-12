@@ -25,5 +25,8 @@
         <property name="eventType" type="string">
             <column name="eventType" length="40"/>
         </property>
+        <property name="couldCopyPaste" type="boolean">
+            <column name="couldCopyPaste" />
+        </property>
     </class>
 </hibernate-mapping>

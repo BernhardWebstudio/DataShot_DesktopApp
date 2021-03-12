@@ -65,14 +65,13 @@ import java.util.stream.Collectors;
  */
 public class SpecimenDetailsViewPane extends JPanel {
 
-    public static final boolean copyPasteActivated = false;
+    public static final boolean copyPasteActivated = Singleton.getSingletonInstance().getUser() != null && Singleton.getSingletonInstance().getUser().canCopyPaste();
     private static final Logger log =
             LoggerFactory.getLogger(SpecimenDetailsViewPane.class);
     private static final long serialVersionUID = 3716072190995030749L;
     private static final int STATE_CLEAN = 0;
     private static final int STATE_DIRTY = 1;
     private final Specimen specimen;     //  @jve:decl-index=0:
-    private final JPanel jPanel1 = null; // panel for navigation buttons
     private final StringBuffer higherGeogNotFoundWarning = new StringBuffer();
     KeyboardShortcutManager manager = KeyboardShortcutManager.getInstance();
     private Specimen previousSpecimen = null;

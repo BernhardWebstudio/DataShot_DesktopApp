@@ -4,10 +4,12 @@ package edu.harvard.mcz.imagecapture.entity;
 
 import edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycle;
 
+import java.io.Serializable;
+
 /**
  * Users, modified from generated class.
  */
-public class Users implements java.io.Serializable {
+public class Users implements Serializable {
 
     /**
      * All rights, including editing/creating users (equivalent to DBA)
@@ -47,6 +49,18 @@ public class Users implements java.io.Serializable {
     private String description;
     private String role;
     private String hash;
+    private boolean canCopyPaste;
+
+    public boolean isCanCopyPaste() {
+        return canCopyPaste;
+    }
+    public boolean canCopyPaste() {
+        return (isCanCopyPaste() == true);
+    }
+
+    public void setCanCopyPaste(boolean canCopyPaste) {
+        this.canCopyPaste = canCopyPaste;
+    }
 
     public Users() {
     }

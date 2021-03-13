@@ -21,6 +21,7 @@ import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.utility.HashUtility;
 import net.miginfocom.swing.MigLayout;
+import org.jasypt.util.text.AES256TextEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,7 @@ public class LoginDialog extends JDialog {
     public static final int RESULT_CANCEL = 0;
     public static final int RESULT_LOGIN = 1;
     private static final long serialVersionUID = -2016769537635603794L;
+    public static final String encryptPassword = "tmpPW-13.3.2021";
     private static final Logger log = LoggerFactory.getLogger(LoginDialog.class);
     private JDialog self = null;
     private int result = RESULT_LOGIN;
@@ -282,7 +284,10 @@ public class LoginDialog extends JDialog {
     }
 
     public String getDBPassword() {
-        return String.valueOf(jPasswordFieldDB.getPassword());
+        AES256TextEncryptor textEncryptor = new AES256TextEncryptor();
+        textEncryptor.setPassword(encryptPassword);
+        String passwordValue = String.valueOf(jPasswordFieldDB.getPassword());
+        return textEncryptor.decrypt(passwordValue);
     }
 
     public void setDBPassword(String aDBPassword) {

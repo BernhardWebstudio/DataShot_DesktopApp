@@ -3015,7 +3015,7 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
                         OpenStreetMapUtility.getInstance().reverseSearchValues(
                                 georeff.getDecLat(), georeff.getDecLong(),
                                 new ArrayList<>(
-                                        Arrays.asList("address.state", "address.country")));
+                                        Arrays.asList("address.county", "address.state", "address.country")));
                 if (data != null) {
                     log.debug("Got address from openstreetmap: " + data.toString());
                     if (this.getCountryJTextField().getSelectedItem() == null ||
@@ -3030,11 +3030,10 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
                             this.getPrimaryDivisionJTextField().getSelectedItem().equals(
                                     "")) {
                         String primaryDivision = (String) data.get("address.state");
-                        if (primaryDivisionMapping.containsKey(primaryDivision)) {
-                            this.getPrimaryDivisionJTextField().setSelectedItem(primaryDivisionMapping.get(primaryDivision));
-                        } else {
-                            this.getPrimaryDivisionJTextField().setSelectedItem(primaryDivision);
+                        if (primaryDivision == null || primaryDivision == "") {
+                            primaryDivision = (String) data.get("address.county");
                         }
+                        this.getPrimaryDivisionJTextField().setSelectedItem(primaryDivisionMapping.getOrDefault(primaryDivision, primaryDivision));
                     } else {
                         log.debug("Won't automatically set primary division as is '" +
                                 this.getCountryJTextField().getSelectedItem() + "'.");

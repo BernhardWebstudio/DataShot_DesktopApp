@@ -31,6 +31,7 @@
         <property name="hibernate.connection.useUnicode">true</property>
         <!-- entities -->
         <mapping resource="/edu/harvard/mcz/imagecapture/entity/Number.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/ISO3166.hbm.xml"/>
         <mapping resource="/edu/harvard/mcz/imagecapture/entity/Specimen.hbm.xml"/>
         <mapping resource="/edu/harvard/mcz/imagecapture/entity/SpecimenPart.hbm.xml"/>
         <mapping resource="/edu/harvard/mcz/imagecapture/entity/SpecimenPartAttribute.hbm.xml"/>

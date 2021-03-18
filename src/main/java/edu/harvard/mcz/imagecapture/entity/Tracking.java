@@ -11,90 +11,106 @@ import java.util.Date;
  */
 public class Tracking implements Serializable {
 
-  private static final long serialVersionUID = 3045144335474980280L;
+    private static final long serialVersionUID = 3045144335474980280L;
 
-  private Long trackingId;
-  private Specimen specimen;
-  private String user;
-  private String eventType;
-  private Date eventDateTime;
-  private String datashotVersion;
-  private boolean couldCopyPaste;
+    private Long trackingId;
+    private Specimen specimen;
+    private String user;
+    private String eventType;
+    private Date eventDateTime;
+    private String datashotVersion;
+    private boolean couldCopyPaste;
 
-  public boolean isCouldCopyPaste() {
-    return couldCopyPaste;
-  }
-
-  public void setCouldCopyPaste(boolean couldCopyPaste) {
-    this.couldCopyPaste = couldCopyPaste;
-  }
-
-  /**
-   * Utility constructor if no date is needed
-   */
-  public Tracking() {
-    try {
-      this.datashotVersion = ImageCaptureApp.getAppVersion();
-      this.couldCopyPaste = Singleton.getSingletonInstance().getUser() != null && Singleton.getSingletonInstance().getUser().canCopyPaste();
-    } catch (Exception e) {
+    /**
+     * Utility constructor if no date is needed
+     */
+    public Tracking() {
+        try {
+            this.datashotVersion = ImageCaptureApp.getAppVersion();
+            this.couldCopyPaste = Singleton.getSingletonInstance().getUser() != null && Singleton.getSingletonInstance().getUser().canCopyPaste();
+        } catch (Exception e) {
+        }
     }
-  }
 
-  public Tracking(Specimen specimen, Date eventDateTime) {
-    this();
-    this.specimen = specimen;
-    if (eventDateTime == null) {
-      this.eventDateTime = new Date();
-    } else {
-      this.eventDateTime = (Date)eventDateTime.clone();
+    public Tracking(Specimen specimen, Date eventDateTime) {
+        this();
+        this.specimen = specimen;
+        if (eventDateTime == null) {
+            this.eventDateTime = new Date();
+        } else {
+            this.eventDateTime = (Date) eventDateTime.clone();
+        }
     }
-  }
 
-  public Tracking(Specimen specimen, String user, String eventType) {
-    this(specimen, user, eventType, null);
-  }
-
-  public Tracking(Specimen specimen, String user, String eventType,
-                  Date eventDateTime) {
-    this(specimen, eventDateTime);
-    this.user = user;
-    this.eventType = eventType;
-  }
-
-  public Long getTrackingId() { return this.trackingId; }
-
-  public void setTrackingId(Long trackingId) { this.trackingId = trackingId; }
-
-  public Specimen getSpecimen() { return this.specimen; }
-
-  public void setSpecimen(Specimen specimen) { this.specimen = specimen; }
-
-  public String getUser() { return this.user; }
-
-  public void setUser(String user) { this.user = user; }
-
-  public String getEventType() { return this.eventType; }
-
-  public void setEventType(String eventType) { this.eventType = eventType; }
-
-  public String getDatashotVersion() {
-    return datashotVersion;
-  }
-
-  public void setDatashotVersion(String datashotVersion) {
-    this.datashotVersion = datashotVersion;
-  }
-
-  public Date getEventDateTime() {
-    Date result = this.eventDateTime;
-    return result;
-  }
-
-  public void setEventDateTime(Date eventDateTime) {
-    if (eventDateTime == null) {
-      this.eventDateTime = null;
-    } else {
-      this.eventDateTime = (Date)eventDateTime.clone();
+    public Tracking(Specimen specimen, String user, String eventType) {
+        this(specimen, user, eventType, null);
     }
-  }
+
+    public Tracking(Specimen specimen, String user, String eventType,
+                    Date eventDateTime) {
+        this(specimen, eventDateTime);
+        this.user = user;
+        this.eventType = eventType;
+    }
+
+    public boolean isCouldCopyPaste() {
+        return couldCopyPaste;
+    }
+
+    public void setCouldCopyPaste(boolean couldCopyPaste) {
+        this.couldCopyPaste = couldCopyPaste;
+    }
+
+    public Long getTrackingId() {
+        return this.trackingId;
+    }
+
+    public void setTrackingId(Long trackingId) {
+        this.trackingId = trackingId;
+    }
+
+    public Specimen getSpecimen() {
+        return this.specimen;
+    }
+
+    public void setSpecimen(Specimen specimen) {
+        this.specimen = specimen;
+    }
+
+    public String getUser() {
+        return this.user;
+    }
+
+    public void setUser(String user) {
+        this.user = user;
+    }
+
+    public String getEventType() {
+        return this.eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
+    public String getDatashotVersion() {
+        return datashotVersion;
+    }
+
+    public void setDatashotVersion(String datashotVersion) {
+        this.datashotVersion = datashotVersion;
+    }
+
+    public Date getEventDateTime() {
+        Date result = this.eventDateTime;
+        return result;
+    }
+
+    public void setEventDateTime(Date eventDateTime) {
+        if (eventDateTime == null) {
+            this.eventDateTime = null;
+        } else {
+            this.eventDateTime = (Date) eventDateTime.clone();
+        }
+    }
 }

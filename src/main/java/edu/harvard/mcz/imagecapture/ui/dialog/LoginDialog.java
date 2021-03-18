@@ -38,8 +38,8 @@ public class LoginDialog extends JDialog {
 
     public static final int RESULT_CANCEL = 0;
     public static final int RESULT_LOGIN = 1;
-    private static final long serialVersionUID = -2016769537635603794L;
     public static final String encryptPassword = "tmpPW-13.3.2021";
+    private static final long serialVersionUID = -2016769537635603794L;
     private static final Logger log = LoggerFactory.getLogger(LoginDialog.class);
     private JDialog self = null;
     private int result = RESULT_LOGIN;

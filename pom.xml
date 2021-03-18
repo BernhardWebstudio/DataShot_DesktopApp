@@ -256,6 +256,12 @@
 			<artifactId>jasypt</artifactId>
 			<version>1.9.3</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.geonames/geonames -->
+		<dependency>
+			<groupId>org.geonames</groupId>
+			<artifactId>geonames</artifactId>
+			<version>1.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.jxmapviewer</groupId>
 			<artifactId>jxmapviewer2</artifactId>

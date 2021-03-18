@@ -37,6 +37,7 @@ import edu.harvard.mcz.imagecapture.ui.field.FilteringGeogJComboBox;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.CollectorTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.NumberTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenPartsTableModel;
+import edu.harvard.mcz.imagecapture.utility.GeoNamesUtility;
 import edu.harvard.mcz.imagecapture.utility.OpenStreetMapUtility;
 import net.miginfocom.swing.MigLayout;
 import org.hibernate.SessionException;
@@ -3010,6 +3011,38 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
         if (georeff.getDecLat() != null && georeff.getDecLong() != null) {
             // do it async as the request could take longer than desired
             new Thread(() -> {
+                // first, try GeoNames.
+                log.debug("Fetching address from GeoNames");
+                GeoNamesUtility geoNamesUtility = new GeoNamesUtility();
+                try {
+                    Map<String, Object> data = geoNamesUtility.reverseSearchValues(georeff.getDecLat(), georeff.getDecLong(),
+                            new ArrayList<>(
+                                    Arrays.asList("countryCode", "countryName", "adminName1")));
+                    if (data != null) {
+                        log.debug("Got address from GeoNames: " + data.toString());
+                        if (this.getCountryJTextField().getSelectedItem() == null ||
+                                this.getCountryJTextField().getSelectedItem().equals("")) {
+                            String countryName = (new ISO3166LifeCycle()).findByCountryCode((String) data.get("countryCode")).getCountryName();
+                            // data.get("countryName")
+                            this.getCountryJTextField().setSelectedItem(countryName);
+                        } else {
+                            log.debug("Won't automatically set country as is '" +
+                                    this.getCountryJTextField().getSelectedItem() + "'.");
+                        }
+                        if (this.getPrimaryDivisionJTextField().getSelectedItem() == null ||
+                                this.getPrimaryDivisionJTextField().getSelectedItem().equals("")) {
+                            this.getPrimaryDivisionJTextField().setSelectedItem(data.get("adminName1"));
+                        } else {
+                            log.debug("Won't automatically set primary division as is '" +
+                                    this.getCountryJTextField().getSelectedItem() + "'.");
+                        }
+                        return;
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to fetch geodata using GeoNames", e);
+                }
+
+                // if it fails, continue with openstreetmap
                 log.debug("Fetching address from openstreetmap");
                 Map<String, Object> data =
                         OpenStreetMapUtility.getInstance().reverseSearchValues(

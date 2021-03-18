@@ -28,15 +28,15 @@ public abstract class GenericLifeCycle<T> {
     }
 
     public T findOneBy(String propertyPath, Object value) {
-        log.debug("getting one " + this.tCLass.getClass().toGenericString() + " by " + propertyPath);
+        log.debug("getting one " + this.tCLass.toGenericString() + " by " + propertyPath);
         try {
             T instance = null;
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
                 CriteriaBuilder cb = session.getCriteriaBuilder();
-                CriteriaQuery cr = cb.createQuery(this.tCLass.getClass());
-                Root<T> root = cr.from(this.tCLass.getClass());
+                CriteriaQuery cr = cb.createQuery(this.tCLass);
+                Root<T> root = cr.from(this.tCLass);
                 cr = cr.where(cb.equal(root.get(propertyPath), value));
                 instance = (T) session.createQuery(cr).getSingleResult();
                 if (instance == null) {

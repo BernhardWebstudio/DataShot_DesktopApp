@@ -51,17 +51,6 @@ public class Users implements Serializable {
     private String hash;
     private boolean canCopyPaste;
 
-    public boolean isCanCopyPaste() {
-        return canCopyPaste;
-    }
-    public boolean canCopyPaste() {
-        return (isCanCopyPaste() == true);
-    }
-
-    public void setCanCopyPaste(boolean canCopyPaste) {
-        this.canCopyPaste = canCopyPaste;
-    }
-
     public Users() {
     }
 
@@ -101,6 +90,18 @@ public class Users implements Serializable {
             }
         }
         return result;
+    }
+
+    public boolean isCanCopyPaste() {
+        return canCopyPaste;
+    }
+
+    public void setCanCopyPaste(boolean canCopyPaste) {
+        this.canCopyPaste = canCopyPaste;
+    }
+
+    public boolean canCopyPaste() {
+        return (isCanCopyPaste() == true);
     }
 
     public Integer getUserid() {

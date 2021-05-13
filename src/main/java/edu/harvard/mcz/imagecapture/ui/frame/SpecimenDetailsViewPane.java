@@ -1648,7 +1648,11 @@ georeference_pre.getLongDegString()); if
                         ((JTextField) field).setText(value);
                     }
                 } else if (field instanceof JComboBox) {
-                    if (((JComboBox<?>) field).getSelectedItem().toString().trim().equals("") || settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
+                    String content = "";
+                    if (((JComboBox<?>) field).getSelectedItem() != null) {
+                        content = ((JComboBox<?>) field).getSelectedItem().toString();
+                    }
+                    if (content.trim().equals("") || settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
                         ((JComboBox<?>) field).setSelectedItem(value);
                     }
                 }

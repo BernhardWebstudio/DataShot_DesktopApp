@@ -16,6 +16,7 @@ public class EncryptPassword {
         String passwordToEncrypt = in.nextLine();
         System.out.println("Please enter the password for the encryption");
         String encryptPassword = in.nextLine();
+        in.close();
         AES256TextEncryptor textEncryptor = new AES256TextEncryptor();
         textEncryptor.setPassword(encryptPassword);
         System.out.println(textEncryptor.encrypt(passwordToEncrypt));

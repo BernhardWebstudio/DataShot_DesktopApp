@@ -19,7 +19,7 @@ public class Tracking implements Serializable {
     private String eventType;
     private Date eventDateTime;
     private String datashotVersion;
-    private boolean couldCopyPaste;
+    private Boolean couldCopyPaste;
 
     /**
      * Utility constructor if no date is needed
@@ -53,11 +53,11 @@ public class Tracking implements Serializable {
         this.eventType = eventType;
     }
 
-    public boolean isCouldCopyPaste() {
+    public Boolean isCouldCopyPaste() {
         return couldCopyPaste;
     }
 
-    public void setCouldCopyPaste(boolean couldCopyPaste) {
+    public void setCouldCopyPaste(Boolean couldCopyPaste) {
         this.couldCopyPaste = couldCopyPaste;
     }
 

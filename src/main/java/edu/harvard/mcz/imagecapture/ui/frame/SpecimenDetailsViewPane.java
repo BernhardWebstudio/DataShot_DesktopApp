@@ -1358,9 +1358,9 @@ public class SpecimenDetailsViewPane extends JPanel {
         jComboBoxCollector.setEditable(specimen.isEditable());
         // field.setInputVerifier(MetadataRetriever.getInputVerifier(Collector.class,
         // "CollectorName", field));
+        AutoCompleteDecorator.decorate(jComboBoxCollector);
         jTableCollectors.getColumnModel().getColumn(0).setCellEditor(
                 new ComboBoxCellEditor(jComboBoxCollector));
-        AutoCompleteDecorator.decorate(jComboBoxCollector);
     }
 
     private JScrollPane getJScrollPaneSpecimenParts() {

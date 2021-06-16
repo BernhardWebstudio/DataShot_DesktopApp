@@ -516,29 +516,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     }
 
     private String[] loadStringsBySQL(ArrayList<String> collections, String sql) {
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        try {
-            session.beginTransaction();
-            Query q = session.createQuery(sql);
-            Iterator i = q.iterate();
-            while (i.hasNext()) {
-                String value = (String) i.next();
-                // add, only if value isn't the "" put at top of list above.
-                if (!value.equals("")) {
-                    collections.add(value.trim());
-                }
-            }
-            session.getTransaction().commit();
-        } catch (HibernateException e) {
-            session.getTransaction().rollback();
-            log.error(e.getMessage());
-        }
-        try {
-            session.close();
-        } catch (SessionException e) {
-        }
-        String[] result = collections.toArray(new String[]{});
-        return result;
+        return runQueryToGetStrings(collections, sql, log);
     }
 
     public String findSpecimenCount() {

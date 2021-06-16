@@ -259,6 +259,8 @@ public class SearchDialog extends JDialog {
                         if (!jComboBoxEntryBy.getSelectedItem().toString().equals("")) {
                             Tracking tc = new Tracking();
                             tc.setUser(jComboBoxEntryBy.getSelectedItem().toString());
+                            tc.setDatashotVersion(null);
+                            tc.setCouldCopyPaste(null);
                             Set<Tracking> trackings = new HashSet<Tracking>();
                             trackings.add(tc);
                             searchCriteria.setTrackings(trackings);
@@ -275,7 +277,6 @@ public class SearchDialog extends JDialog {
                         }
                     }
                     Singleton.getSingletonInstance().getMainFrame().setSpecimenBrowseList(searchCriteria, jLimitNumberField.getIntValue(), jOffsetNumberField.getIntValue());
-
                 }
             });
         }

@@ -1,6 +1,7 @@
 /target
 /not_vcs
 /build
+/lib
 .settings
 TempBarcodeCrop.png
 TempBarcodeCrop*.png

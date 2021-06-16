@@ -26,10 +26,14 @@ import java.util.List;
  *
  * @see Tracking
  */
-public class TrackingLifeCycle {
+public class TrackingLifeCycle extends GenericLifeCycle {
 
     private static final Logger log =
             LoggerFactory.getLogger(TrackingLifeCycle.class);
+
+    public TrackingLifeCycle() {
+        super(TrackingLifeCycle.class, log);
+    }
 
     public void persist(Tracking transientInstance) throws SaveFailedException {
         log.debug("persisting Tracking instance");
@@ -309,30 +313,8 @@ public class TrackingLifeCycle {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct user from Tracking t where t.user is not null order by t.user  ";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            try {
-                session.beginTransaction();
-                Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    // add, only if value isn't the "" put at top of list above.
-                    if (!value.equals("")) {
-                        collections.add(value.trim());
-                    }
-                }
-                session.getTransaction().commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error(e.getMessage());
-            }
-            try {
-                session.close();
-            } catch (SessionException e) {
-            }
-            String[] result = collections.toArray(new String[]{});
-            return result;
+                    "Select distinct user from Tracking t where t.user is not null order by t.user";
+            return runQueryToGetStrings(collections, sql, log);
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};

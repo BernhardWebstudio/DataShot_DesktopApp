@@ -3,6 +3,7 @@ package edu.harvard.mcz.imagecapture.lifecycle;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.SessionException;
 import org.hibernate.metadata.ClassMetadata;
 import org.slf4j.Logger;
 
@@ -216,5 +217,33 @@ public abstract class GenericLifeCycle<T> {
      */
     public List<T> findByExampleLike(T instance, int maxResults, int offset) {
         return this.findByExample(instance, maxResults, offset);
+    }
+
+
+
+    public String[] runQueryToGetStrings(ArrayList<String> collections, String sql, Logger log) {
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        try {
+            session.beginTransaction();
+            Query q = session.createQuery(sql);
+            Iterator i = q.getResultList().iterator();
+            while (i.hasNext()) {
+                String value = (String) i.next();
+                // add, only if value isn't the "" put at top of list above.
+                if (!value.equals("")) {
+                    collections.add(value.trim());
+                }
+            }
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            log.error(e.getMessage());
+        }
+        try {
+            session.close();
+        } catch (SessionException e) {
+        }
+        String[] result = collections.toArray(new String[]{});
+        return result;
     }
 }

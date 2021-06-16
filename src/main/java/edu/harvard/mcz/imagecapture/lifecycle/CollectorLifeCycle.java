@@ -21,10 +21,14 @@ import java.util.Iterator;
  *
  * @see Collector
  */
-public class CollectorLifeCycle {
+public class CollectorLifeCycle extends GenericLifeCycle {
 
     private static final Logger log =
             LoggerFactory.getLogger(CollectorLifeCycle.class);
+
+    public CollectorLifeCycle() {
+        super(CollectorLifeCycle.class, log);
+    }
 
     public void persist(Collector transientInstance) throws SaveFailedException {
         if (transientInstance.getCollectorName() != "") {
@@ -189,30 +193,8 @@ public class CollectorLifeCycle {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct collectorName from Collector col where col.collectorName is not null order by col.collectorName ";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            try {
-                session.beginTransaction();
-                Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    // add, only if value isn't the "" put at top of list above.
-                    if (!value.equals("")) {
-                        collections.add(value.trim());
-                    }
-                }
-                session.getTransaction().commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error(e.getMessage());
-            }
-            try {
-                session.close();
-            } catch (SessionException e) {
-            }
-            String[] result = collections.toArray(new String[]{});
-            return result;
+                    "Select distinct collectorName from Collector col where col.collectorName is not null order by col.collectorName";
+            return runQueryToGetStrings(collections, sql, log);
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};

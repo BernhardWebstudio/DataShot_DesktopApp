@@ -76,11 +76,11 @@ public class CollectorTableModel extends AbstractDeleteableTableModel {
      */
     @Override
     public int getRowCount() {
-        // allie fix
-        if (collectors == null)
+        if (collectors == null) {
             return 0;
-        else
+        } else {
             return collectors.size();
+        }
     }
 
     /* (non-Javadoc)

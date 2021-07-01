@@ -988,7 +988,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             this.addBasicJLabel(jPanel, "Collectors");
             jPanel.add(this.getJScrollPaneCollectors(), "span 2 2, grow");
             this.addBasicJLabel(jPanel, "Collecting Method");
-            jPanel.add(this.getJButtonCollectorAdd());
+            jPanel.add(this.getJButtonCollectorAdd(), "right");
             jPanel.add(this.getJTextFieldCollectingMethod(), "growx, top");
             // row
             this.addBasicJLabel(jPanel, "Verbatim date");
@@ -1022,7 +1022,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             // double row:
             this.addBasicJLabel(jPanel, "Specimen Parts");
             jPanel.add(this.getJScrollPaneSpecimenParts(), "span 3 2, grow");
-            jPanel.add(this.getJButtonAddPrep());
+            jPanel.add(this.getJButtonAddPrep(), "right");
             // row
             this.addBasicJLabel(jPanel, "Publications");
             jPanel.add(this.getCitedInPublicationJTextField(), "grow");
@@ -1034,7 +1034,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             // double row
             this.addBasicJLabel(jPanel, "Numbers & more");
             jPanel.add(this.getNumbersJScrollPane(), "span 3 2, grow");
-            jPanel.add(this.getJButtonNumbersAdd());
+            jPanel.add(this.getJButtonNumbersAdd(), "right");
             // section: other fields
             // row
             // TODO

@@ -57,6 +57,7 @@ public class SearchDialog extends JDialog {
     private JPanel jPanel = null;
     private JButton jButton = null;
     private JPanel jPanel1 = null;
+    private JScrollPane scrollPane = null;
     private JTextField jTextFieldDrawerNumber = null;
     private JTextField jTextFieldBarcode = null;
     private JTextField jTextFieldFamily = null;
@@ -115,8 +116,8 @@ public class SearchDialog extends JDialog {
         if (jContentPane == null) {
             jContentPane = new JPanel();
             jContentPane.setLayout(new BorderLayout());
-            jContentPane.add(getJPanel(), BorderLayout.SOUTH);
-            jContentPane.add(getJPanel1(), BorderLayout.CENTER);
+            jContentPane.add(getJPanelWithButtons(), BorderLayout.SOUTH);
+            jContentPane.add(getJPanelWithFields(), BorderLayout.CENTER);
         }
         return jContentPane;
     }
@@ -126,7 +127,7 @@ public class SearchDialog extends JDialog {
      *
      * @return javax.swing.JPanel
      */
-    private JPanel getJPanel() {
+    private JPanel getJPanelWithButtons() {
         if (jPanel == null) {
             GridBagConstraints gridBagConstraints17 = new GridBagConstraints();
             gridBagConstraints17.gridx = 1;
@@ -286,10 +287,10 @@ public class SearchDialog extends JDialog {
     /**
      * This method initializes the main JPanel
      *
-     * @return javax.swing.JPanel
+     * @return
      */
-    private JPanel getJPanel1() {
-        if (jPanel1 == null) {
+    private JScrollPane getJPanelWithFields() {
+        if (scrollPane == null) {
             // set titles etc.
 
             jPanel1 = new JPanel(new MigLayout("wrap 2, fillx"));
@@ -373,8 +374,10 @@ public class SearchDialog extends JDialog {
 						gbc_textFieldHigherGeog.gridy = 12;
 						*/
             //jPanel1.add(getTextFieldHigherGeog(), gbc_textFieldHigherGeog);
+            scrollPane = new JScrollPane(jPanel1);
+            scrollPane.setBorder(BorderFactory.createEmptyBorder());
         }
-        return jPanel1;
+        return scrollPane;
     }
 
     private Component getLastUpdatedJTextField() {

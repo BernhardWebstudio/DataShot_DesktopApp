@@ -45,7 +45,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
-
 /**
  *
  */
@@ -381,7 +380,9 @@ public class GeoreferenceDialog extends JDialog {
 
     private void init() {
         // init the pane
-        getContentPane().add(contentPanel);
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        getContentPane().add(scrollPane);
         JPanel fieldsPanel = new JPanel(new MigLayout("wrap 2, fillx, insets 0"));
 
         // instantiate input fields

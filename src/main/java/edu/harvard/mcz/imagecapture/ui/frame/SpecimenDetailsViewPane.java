@@ -31,6 +31,7 @@ import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.MouseWheelScrollListener;
 import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor;
+import edu.harvard.mcz.imagecapture.ui.component.JAccordionPanel;
 import edu.harvard.mcz.imagecapture.ui.component.JTableWithRowBorder;
 import edu.harvard.mcz.imagecapture.ui.dialog.GeoreferenceDialog;
 import edu.harvard.mcz.imagecapture.ui.field.FilteringGeogJComboBox;
@@ -86,6 +87,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private FilteringGeogJComboBox comboBoxHigherGeog;
     private JButton dateEmergedButton = null;
     private JButton dateCollectedButton = null;
+    private JAccordionPanel accordionDetailsPanel = null;
     private JButton jButtonAddPreparationType;
     private JButton jButtonCollectorAdd = null;
     private JButton jButtonCopy = null;
@@ -928,15 +930,18 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (jPanel == null) {
             jPanel = new JPanel(new MigLayout("wrap 4, fillx")); // 4 col layout
             // section: top information
+            // row
             this.addBasicJLabel(jPanel, "Barcode");
             jPanel.add(this.getBarcodeJTextField(), "grow");
-            this.addBasicJLabel(jPanel, "Collection");
-            jPanel.add(this.getLocationInCollectionJComboBox());
+            this.addBasicJLabel(jPanel, "ID by");
+            jPanel.add(this.getJCBDeterminer());
+            // section: identification/determination
             // row
-            this.addBasicJLabel(jPanel, "Number of Images");
-            jPanel.add(this.getJTextFieldImgCount(), "grow");
-            this.addBasicJLabel(jPanel, "Migration Status");
-            jPanel.add(this.getJTextFieldMigrationStatus(), "grow");
+            this.addBasicJLabel(jPanel, "Nature of ID");
+            jPanel.add(this.getJComboBoxNatureOfId());
+            this.addBasicJLabel(jPanel, "ID Date", "tag label, right, spawn 2, split 3, sizegroup datedet");
+            jPanel.add(this.getJTextFieldDateDetermined(), "grow, sizegroup datedet");
+            jPanel.add(this.getDetsJButton(), "sizegroup datedet");
             // section: family, classification
             // row
             this.addBasicJLabel(jPanel, "Family");
@@ -958,20 +963,6 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPanel.add(this.getJTextFieldInfraspecificName(), "grow");
             this.addBasicJLabel(jPanel, "Infrasubspecific Rank");
             jPanel.add(this.getJTextFieldInfraspecificRank(), "grow");
-            // section: identification/determination
-            // row
-            this.addBasicJLabel(jPanel, "ID by");
-            jPanel.add(this.getJCBDeterminer());
-            this.addBasicJLabel(jPanel, "Nature of ID");
-            jPanel.add(this.getJComboBoxNatureOfId());
-            // row
-            this.addBasicJLabel(jPanel, "ID Date");
-            jPanel.add(this.getJTextFieldDateDetermined(), "grow");
-            jPanel.add(this.getDetsJButton());
-            jPanel.add(this.getDBIdLabel());
-            // row
-            this.addBasicJLabel(jPanel, "ID Remark");
-            jPanel.add(this.getJTextFieldIdRemarks(), "grow, span 3");
             // row
             this.addBasicJLabel(jPanel, "Author");
             jPanel.add(this.getJTextFieldAuthorship(), "grow");
@@ -986,8 +977,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             // row
             this.addBasicJLabel(jPanel, "State/Province");
             jPanel.add(this.getPrimaryDivisionJTextField(), "grow");
-            this.addBasicJLabel(jPanel, "Valid Dist.");
-            jPanel.add(this.getValidDistributionJCheckBox());
+            // TODO
             // row
             jPanel.add(this.getJButtonSpecificLocality(), "align label");
             jPanel.add(this.getSpecificLocalityJTextField(), "grow, span 2");
@@ -1058,8 +1048,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPanel.add(this.getJButtonNumbersAdd());
             // section: other fields
             // row
-            this.addBasicJLabel(jPanel, "Drawer Number");
-            jPanel.add(this.getDrawerNumberJTextField(), "grow");
+            // TODO
             this.addBasicJLabel(jPanel, "Inferences");
             jPanel.add(this.getJTextFieldInferences(), "grow");
             // row
@@ -1080,6 +1069,8 @@ public class SpecimenDetailsViewPane extends JPanel {
             // row
             this.addBasicJLabel(jPanel, "Questions");
             jPanel.add(this.getQuestionsJTextField(), "grow, span 3");
+            // row
+            jPanel.add(this.getAccordionDetailsPanel(), "grow, span 4");
             // section: controls
             int splitSize = copyPasteActivated ? 6 : 4;
             jPanel.add(this.getJButtonHistory(),
@@ -1097,6 +1088,34 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPanel.add(this.getSaveJButton(), "tag apply"); //, "sizegroup controls");
         }
         return jPanel;
+    }
+
+    private JPanel getAccordionDetailsPanel() {
+        if (accordionDetailsPanel == null) {
+            JPanel accordionContent = new JPanel(new MigLayout("wrap 4, fillx"));
+
+            // row
+            this.addBasicJLabel(accordionContent, "Number of Images");
+            accordionContent.add(this.getJTextFieldImgCount(), "grow");
+            this.addBasicJLabel(accordionContent, "Migration Status");
+            accordionContent.add(this.getJTextFieldMigrationStatus(), "grow");
+            // row
+            this.addBasicJLabel(accordionContent, "Collection");
+            accordionContent.add(this.getLocationInCollectionJComboBox());
+            accordionContent.add(this.getDBIdLabel(), "span 2");
+            // row
+            this.addBasicJLabel(accordionContent, "ID Remark");
+            accordionContent.add(this.getJTextFieldIdRemarks(), "grow, span 3");
+
+            // row
+            this.addBasicJLabel(accordionContent, "Valid Dist.");
+            accordionContent.add(this.getValidDistributionJCheckBox());
+            this.addBasicJLabel(jPanel, "Drawer Number");
+            jPanel.add(this.getDrawerNumberJTextField(), "grow");
+
+            accordionDetailsPanel = new JAccordionPanel("More Details", accordionDetailsPanel);
+        }
+        return accordionDetailsPanel;
     }
 
     /**
@@ -1120,10 +1139,13 @@ public class SpecimenDetailsViewPane extends JPanel {
     }
 
     private void addBasicJLabel(JPanel target, String labelText) {
+        addBasicJLabel(target, labelText, "tag label, right"); //"align label" was removed as requested
+    }
+
+    private void addBasicJLabel(JPanel target, String labelText, String constraints) {
         JLabel label = new JLabel();
         label.setText(labelText.concat(":"));
-        target.add(label,
-                "tag label, right"); //"align label" was removed as requested
+        target.add(label, constraints);
     }
 
     /**

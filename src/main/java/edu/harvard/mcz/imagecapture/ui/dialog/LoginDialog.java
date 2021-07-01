@@ -21,6 +21,7 @@ import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.utility.HashUtility;
 import net.miginfocom.swing.MigLayout;
+import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 import org.jasypt.util.text.AES256TextEncryptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -287,7 +288,12 @@ public class LoginDialog extends JDialog {
         AES256TextEncryptor textEncryptor = new AES256TextEncryptor();
         textEncryptor.setPassword(encryptPassword);
         String passwordValue = String.valueOf(jPasswordFieldDB.getPassword());
-        return textEncryptor.decrypt(passwordValue);
+        try {
+            return textEncryptor.decrypt(passwordValue);
+        } catch(EncryptionOperationNotPossibleException exception) {
+            log.error("Failed to decrypt db password", exception);
+            return passwordValue;
+        }
     }
 
     public void setDBPassword(String aDBPassword) {

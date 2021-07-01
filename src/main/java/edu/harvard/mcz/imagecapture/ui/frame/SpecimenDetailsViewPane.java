@@ -718,65 +718,54 @@ public class SpecimenDetailsViewPane extends JPanel {
     private void setValues() {
         log.debug("okok setting values, specimenid is " + specimen.getSpecimenId());
         this.setStatus("Setting values");
-        jTextFieldBarcode.setText(specimen.getBarcode());
+        getBarcodeJTextField().setText(specimen.getBarcode());
 
-        // alliefix - set to value from properties
+        // set to value from properties
         // jComboBoxLocationInCollection.setSelectedItem(specimen.getLocationInCollection());
         String locationInCollectionPropertiesVal =
                 Singleton.getSingletonInstance()
                         .getProperties()
                         .getProperties()
                         .getProperty(ImageCaptureProperties.KEY_DISPLAY_COLLECTION);
-        jComboBoxLocationInCollection.setSelectedItem(
+        getLocationInCollectionJComboBox().setSelectedItem(
                 locationInCollectionPropertiesVal);
 
-        // allie try
     /*Set<LatLong> georeferences = specimen.getLatLong();
     log.debug("setvalues: georeferences size is : + " + georeferences.size());
     LatLong georeference_pre = georeferences.iterator().next();
     log.debug("lat is : + " + georeference_pre.getLatDegString());
     log.debug("long is : + " + georeference_pre.getLongDegString());*/
 
-        cbTypeStatus.setSelectedItem(specimen.getTypeStatus());
-        jTextFieldDrawerNumber.setText(specimen.getDrawerNumber());
-        jComboBoxFamily.setSelectedItem(specimen.getFamily());
-        jComboBoxSubfamily.setSelectedItem(specimen.getSubfamily());
-        jTextFieldTribe.setText(specimen.getTribe());
-        jTextFieldGenus.setText(specimen.getGenus());
-        jTextFieldSpecies.setText(specimen.getSpecificEpithet());
-        jTextFieldSubspecies.setText(specimen.getSubspecificEpithet());
-        jTextFieldInfraspecificEpithet.setText(specimen.getInfraspecificEpithet());
-        jTextFieldInfraspecificRank.setText(specimen.getInfraspecificRank());
-        jTextFieldAuthorship.setText(specimen.getAuthorship());
+        getCbTypeStatus().setSelectedItem(specimen.getTypeStatus());
+        getDrawerNumberJTextField().setText(specimen.getDrawerNumber());
+        getFamilyJTextField().setSelectedItem(specimen.getFamily());
+        getJTextFieldSubfamily().setSelectedItem(specimen.getSubfamily());
+        getJTextFieldTribe().setText(specimen.getTribe());
+        getGenusJTextField().setText(specimen.getGenus());
+        getSpecificEpithetJTextField().setText(specimen.getSpecificEpithet());
+        getSubspecifcEpithetJTextField().setText(specimen.getSubspecificEpithet());
+        getJTextFieldInfraspecificName().setText(specimen.getInfraspecificEpithet());
+        getJTextFieldInfraspecificRank().setText(specimen.getInfraspecificRank());
+        getJTextFieldAuthorship().setText(specimen.getAuthorship());
+        getTextFieldMicrohabitat().setText(specimen.getMicrohabitat());
 
-        // allie new - bugfix
-        textFieldMicrohabitat.setText(specimen.getMicrohabitat());
+        getJTextFieldIdRemarks().setText(specimen.getIdentificationRemarks());
+        getJTextFieldDateDetermined().setText(specimen.getDateIdentified());
 
-        jTextFieldIdRemarks.setText(specimen.getIdentificationRemarks());
-        jTextFieldDateDetermined.setText(specimen.getDateIdentified());
-
-        // allie change
         // log.debug("jComboBoxLifeStage here!!! specimen life stage is " +
         // specimen.getLifeStage());
         if (specimen.getLifeStage() == null || specimen.getLifeStage().equals("")) {
             specimen.setLifeStage("adult");
-            jComboBoxLifeStage.setSelectedIndex(0);
+            getJComboBoxLifeStage().setSelectedIndex(0);
         }
 
-        // allie change - removed this
-        // MCZbaseAuthAgentName selection = new MCZbaseAuthAgentName();
-        // selection.setAgent_name(specimen.getIdentifiedBy());
-        //((AgentNameComboBoxModel)jCBDeterminer.getModel()).setSelectedItem(selection);
-        // jCBDeterminer.getEditor().setItem(jCBDeterminer.getModel().getSelectedItem());
-
-        // allie change - added this
         // jCBDeterminer.setText(specimen.getIdentifiedBy());
-        jCBDeterminer.setSelectedItem(specimen.getIdentifiedBy());
+        getJCBDeterminer().setSelectedItem(specimen.getIdentifiedBy());
 
-        jComboBoxNatureOfId.setSelectedItem(specimen.getNatureOfId());
+        getJComboBoxNatureOfId().setSelectedItem(specimen.getNatureOfId());
 
-        jTextFieldUnnamedForm.setText(specimen.getUnNamedForm());
-        jTextFieldVerbatimLocality.setText(specimen.getVerbatimLocality());
+        getJTextFieldUnnamedForm().setText(specimen.getUnNamedForm());
+        getVerbatimLocalityJTextField().setText(specimen.getVerbatimLocality());
         // Specimen record contains a string, delegate handling of lookup of object
         // to the combo box model.
         // allieremove
@@ -797,15 +786,15 @@ public class SpecimenDetailsViewPane extends JPanel {
         // 			}
         // 		}
         // 		jTextFieldCountry.setText(specimen.getCountry());
-        jComboBoxCountry.setSelectedItem(specimen.getCountry());
+        getCountryJTextField().setSelectedItem(specimen.getCountry());
         if (specimen.getValidDistributionFlag() != null) {
-            jCheckBoxValidDistributionFlag.setSelected(
+            getValidDistributionJCheckBox().setSelected(
                     specimen.getValidDistributionFlag());
         } else {
-            jCheckBoxValidDistributionFlag.setSelected(false);
+            getValidDistributionJCheckBox().setSelected(false);
         }
-        jComboBoxPrimaryDivision.setSelectedItem(specimen.getPrimaryDivison());
-        jTextFieldLocality.setText(specimen.getSpecificLocality());
+        getPrimaryDivisionJTextField().setSelectedItem(specimen.getPrimaryDivison());
+        getSpecificLocalityJTextField().setText(specimen.getSpecificLocality());
 
         // Elevations
         // **********************************************************************
@@ -826,41 +815,41 @@ public class SpecimenDetailsViewPane extends JPanel {
             comboBoxElevUnits.setSelectedItem("");
         }
 
-        jTextFieldCollectingMethod.setText(specimen.getCollectingMethod());
-        jTextFieldISODate.setText(specimen.getIsoDate());
-        jTextFieldDateNos.setText(specimen.getDateNos());
-        jTextFieldDateCollected.setText(specimen.getDateCollected());
-        jTextFieldDateEmerged.setText(specimen.getDateEmerged());
-        jTextFieldDateCollectedIndicator.setText(
+        getJTextFieldCollectingMethod().setText(specimen.getCollectingMethod());
+        getJTextFieldISODate().setText(specimen.getIsoDate());
+        getJTextFieldVerbatimDate().setText(specimen.getDateNos());
+        getJTextFieldDateCollected().setText(specimen.getDateCollected());
+        getJTextFieldDateCollectedIndicator().setText(
                 specimen.getDateCollectedIndicator());
-        jTextFieldDateEmergedIndicator.setText(specimen.getDateEmergedIndicator());
-        jComboBoxCollection.setSelectedItem(specimen.getCollection());
+        getJTextFieldDateEmerged().setText(specimen.getDateEmerged());
+        getJTextFieldDateEmergedIndicator().setText(specimen.getDateEmergedIndicator());
+        getJTextFieldCollection().setSelectedItem(specimen.getCollection());
         // jTextFieldPreparationType.setText(specimen.getPreparationType());
-        jTextFieldAssociatedTaxon.setText(specimen.getAssociatedTaxon());
-        jTextFieldHabitat.setText(specimen.getHabitat());
-        textFieldMicrohabitat.setText(specimen.getMicrohabitat());
-        jTextAreaSpecimenNotes.setText(specimen.getSpecimenNotes());
-        jComboBoxFeatures.setSelectedItem(specimen.getFeatures());
-        jComboBoxLifeStage.setSelectedItem(specimen.getLifeStage());
-        jComboBoxSex.setSelectedItem(specimen.getSex());
-        jTextFieldCitedInPub.setText(specimen.getCitedInPublication());
-        jTextFieldQuestions.setText(specimen.getQuestions());
-        jComboBoxWorkflowStatus.setSelectedItem(specimen.getWorkFlowStatus());
+        getAssociatedTaxonJTextField().setText(specimen.getAssociatedTaxon());
+        getJTextFieldHabitat().setText(specimen.getHabitat());
+        getTextFieldMicrohabitat().setText(specimen.getMicrohabitat());
+        getJTextAreaNotes().setText(specimen.getSpecimenNotes());
+        getJComboBoxFeatures().setSelectedItem(specimen.getFeatures());
+        getJComboBoxLifeStage().setSelectedItem(specimen.getLifeStage());
+        getJComboBoxSex().setSelectedItem(specimen.getSex());
+        getCitedInPublicationJTextField().setText(specimen.getCitedInPublication());
+        getQuestionsJTextField().setText(specimen.getQuestions());
+        getJComboBoxWorkflowStatus().setSelectedItem(specimen.getWorkFlowStatus());
         if (specimen.isStateDone()) {
-            jTextFieldMigrationStatus.setText(
+            getJTextFieldMigrationStatus().setText(
                     "http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" +
                             specimen.getCatNum());
         } else {
-            jTextFieldMigrationStatus.setText("");
+            getJTextFieldMigrationStatus().setText("");
         }
-        jTextFieldInferences.setText(specimen.getInferences());
-        jTextFieldCreator.setText(specimen.getCreatedBy());
+        getJTextFieldInferences().setText(specimen.getInferences());
+        getCreatorJTextField().setText(specimen.getCreatedBy());
         if (specimen.getDateCreated() != null) {
-            jTextFieldDateCreated.setText(specimen.getDateCreated().toString());
+            getDateCreatedJTextField().setText(specimen.getDateCreated().toString());
         }
-        jTextFieldLastUpdatedBy.setText(specimen.getLastUpdatedBy());
+        getLastUpdatedByJTextField().setText(specimen.getLastUpdatedBy());
         if (specimen.getDateLastUpdated() != null) {
-            jTextFieldDateLastUpdated.setText(
+            getLastUpdatedByJTextField().setText(
                     specimen.getDateLastUpdated().toString());
         }
 
@@ -868,21 +857,21 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (specimen.getNatureOfId() == null ||
                 specimen.getNatureOfId().equals("")) {
             specimen.setLifeStage("expert ID");
-            jComboBoxNatureOfId.setSelectedIndex(0);
+            getJComboBoxNatureOfId().setSelectedIndex(0);
         }
 
         // without this, it does save the 1st record, and it does not copy the next
         // record!
         log.debug(
                 "setValues calling jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));");
-        jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));
+        getNumberJTable().setModel(new NumberTableModel(specimen.getNumbers()));
         this.setupNumberJTableRenderer();
 
-        jTableCollectors.setModel(
+        getJTableCollectors().setModel(
                 new CollectorTableModel(specimen.getCollectors()));
         this.setupCollectorJTableRenderer();
 
-        jTableSpecimenParts.setModel(
+        getJTableSpecimenParts().setModel(
                 new SpecimenPartsTableModel(specimen.getSpecimenParts()));
         setupSpecimenPartsJTableRenderer();
 
@@ -903,8 +892,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     private void setDeterminationCount(int count) {
         String detSuffix = count == 1 ? "s" : "";
-        jButtonDeterminations.setText(count + " Det" + detSuffix + ".");
-        jButtonDeterminations.updateUI();
+        getDetsJButton().setText(count + " Det" + detSuffix + ".");
+        getDetsJButton().updateUI();
     }
 
     /**
@@ -939,7 +928,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             // row
             this.addBasicJLabel(jPanel, "Nature of ID");
             jPanel.add(this.getJComboBoxNatureOfId());
-            this.addBasicJLabel(jPanel, "ID Date", "tag label, right, spawn 2, split 3, sizegroup datedet");
+            this.addBasicJLabel(jPanel, "ID Date", "tag label, right, span 2, split 3, sizegroup datedet");
             jPanel.add(this.getJTextFieldDateDetermined(), "grow, sizegroup datedet");
             jPanel.add(this.getDetsJButton(), "sizegroup datedet");
             // section: family, classification
@@ -1110,10 +1099,10 @@ public class SpecimenDetailsViewPane extends JPanel {
             // row
             this.addBasicJLabel(accordionContent, "Valid Dist.");
             accordionContent.add(this.getValidDistributionJCheckBox());
-            this.addBasicJLabel(jPanel, "Drawer Number");
-            jPanel.add(this.getDrawerNumberJTextField(), "grow");
+            this.addBasicJLabel(accordionContent, "Drawer Number");
+            accordionContent.add(this.getDrawerNumberJTextField(), "grow");
 
-            accordionDetailsPanel = new JAccordionPanel("More Details", accordionDetailsPanel);
+            accordionDetailsPanel = new JAccordionPanel("More Details", accordionContent);
         }
         return accordionDetailsPanel;
     }

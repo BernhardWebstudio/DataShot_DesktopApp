@@ -1037,7 +1037,6 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPanel.add(this.getJButtonNumbersAdd(), "right");
             // section: other fields
             // row
-            // TODO
             this.addBasicJLabel(jPanel, "Inferences");
             jPanel.add(this.getJTextFieldInferences(), "grow");
             // row

@@ -55,7 +55,7 @@ public class GeoreferenceDialog extends JDialog {
     private static final Logger log =
             LoggerFactory.getLogger(GeoreferenceDialog.class);
     private final JPanel contentPanel;
-    private final LatLong georeference;
+    private LatLong geoReference;
     private SpecimenDetailsViewPane parent;
     private JComboBox<String> comboBoxOrigUnits;
     private JComboBox<String> comboBoxErrorUnits;
@@ -77,22 +77,20 @@ public class GeoreferenceDialog extends JDialog {
     private JComboBox<String> cbMethod;
     private JButton okButton;
     private JLabel lblErrorLabel;
-    private JLabel lblNewLabel;
     private JTextField textFieldRemarks;
-    private JLabel lblErrorRadius;
     private JTextField txtErrorRadius;
     private JTextField textFieldDetBy;
     private JFormattedTextField textDetDate;
     private JTextField textRefSource;
     private JXMapViewer mapViewer;
 
-    public GeoreferenceDialog(LatLong georeference, SpecimenDetailsViewPane parent) {
-        this(georeference);
+    public GeoreferenceDialog(LatLong geoReference, SpecimenDetailsViewPane parent) {
+        this(geoReference);
         this.parent = parent;
     }
 
-    public GeoreferenceDialog(LatLong georeference) {
-        this.georeference = georeference;
+    public GeoreferenceDialog(LatLong geoReference) {
+        this.geoReference = geoReference;
         this.contentPanel = new JPanel(new MigLayout("wrap 1, fill"));
         init();
         loadData();
@@ -100,47 +98,56 @@ public class GeoreferenceDialog extends JDialog {
         updateMap();
     }
 
-    private void loadData() {
-        lblErrorLabel.setText("");
-        textFieldDecimalLat.setText(georeference.getDecLatString());
-        textFieldDecimalLong.setText(georeference.getDecLongString());
-
-        log.debug("load geo data: lat: " + georeference.getDecLatString() +
-                ", long: " + georeference.getDecLongString());
-
-        if (!georeference.getDatum().equals("")) {
-            cbDatum.setSelectedItem(georeference.getDatum());
-        }
-        cbMethod.setSelectedItem(georeference.getGeorefmethod());
-
-        txtGPSAccuracy.setText(georeference.getGpsaccuracyString());
-
-        comboBoxOrigUnits.setSelectedItem(georeference.getOrigLatLongUnits());
-
-        txtLatDegrees.setText(georeference.getLatDegString());
-        txtLatDecMin.setText(georeference.getDecLatMinString());
-        txtLatMin.setText(georeference.getLatMinString());
-        txtLatSec.setText(georeference.getLatSecString());
-        cbLatDir.setSelectedItem(georeference.getLatDir());
-
-        txtLongDegrees.setText(georeference.getLongDegString());
-        txtLongDecMin.setText(georeference.getDecLongMinString());
-        txtLongMin.setText(georeference.getLongMinString());
-        txtLongSec.setText(georeference.getLongSecString());
-        cbLongDir.setSelectedItem(georeference.getLongDir());
-
-        txtErrorRadius.setText(georeference.getMaxErrorDistanceString());
-        comboBoxErrorUnits.setSelectedItem(georeference.getMaxErrorUnits());
-
-        this.textFieldDetBy.setText(georeference.getDeterminedByAgent());
-        this.textDetDate.setValue(new SimpleDateFormat("yyyy-MM-dd")
-                .format(georeference.getDeterminedDate()));
-        this.textRefSource.setText(georeference.getLatLongRefSource());
-
-        textFieldRemarks.setText(georeference.getLatLongRemarks());
+    public LatLong getGeoReference() {
+        return geoReference;
     }
 
-    private void setState() {
+    public void setGeoReference(LatLong geoReference) {
+        this.geoReference = geoReference;
+        this.loadData();
+    }
+
+    public void loadData() {
+        lblErrorLabel.setText("");
+        textFieldDecimalLat.setText(geoReference.getDecLatString());
+        textFieldDecimalLong.setText(geoReference.getDecLongString());
+
+        log.debug("load geo data: lat: " + geoReference.getDecLatString() +
+                ", long: " + geoReference.getDecLongString());
+
+        if (!geoReference.getDatum().equals("")) {
+            cbDatum.setSelectedItem(geoReference.getDatum());
+        }
+        cbMethod.setSelectedItem(geoReference.getGeorefmethod());
+
+        txtGPSAccuracy.setText(geoReference.getGpsaccuracyString());
+
+        comboBoxOrigUnits.setSelectedItem(geoReference.getOrigLatLongUnits());
+
+        txtLatDegrees.setText(geoReference.getLatDegString());
+        txtLatDecMin.setText(geoReference.getDecLatMinString());
+        txtLatMin.setText(geoReference.getLatMinString());
+        txtLatSec.setText(geoReference.getLatSecString());
+        cbLatDir.setSelectedItem(geoReference.getLatDir());
+
+        txtLongDegrees.setText(geoReference.getLongDegString());
+        txtLongDecMin.setText(geoReference.getDecLongMinString());
+        txtLongMin.setText(geoReference.getLongMinString());
+        txtLongSec.setText(geoReference.getLongSecString());
+        cbLongDir.setSelectedItem(geoReference.getLongDir());
+
+        txtErrorRadius.setText(geoReference.getMaxErrorDistanceString());
+        comboBoxErrorUnits.setSelectedItem(geoReference.getMaxErrorUnits());
+
+        this.textFieldDetBy.setText(geoReference.getDeterminedByAgent());
+        this.textDetDate.setValue(new SimpleDateFormat("yyyy-MM-dd")
+                .format(geoReference.getDeterminedDate()));
+        this.textRefSource.setText(geoReference.getLatLongRefSource());
+
+        textFieldRemarks.setText(geoReference.getLatLongRemarks());
+    }
+
+    public void setState() {
         String acc = this.cbMethod.getSelectedItem().toString();
         this.txtGPSAccuracy.setEnabled(acc.equals("GPS"));
 
@@ -198,36 +205,36 @@ public class GeoreferenceDialog extends JDialog {
         this.okButton.grabFocus();
         if (textFieldDecimalLat.getText().length() > 0) {
             try {
-                georeference.setDecLat(BigDecimal.valueOf(
+                geoReference.setDecLat(BigDecimal.valueOf(
                         Double.parseDouble(textFieldDecimalLat.getText())));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: Latitude number format");
                 result = false;
             }
         } else {
-            georeference.setDecLat(null);
+            geoReference.setDecLat(null);
         }
         if (textFieldDecimalLong.getText().length() > 0) {
             try {
-                georeference.setDecLong(BigDecimal.valueOf(
+                geoReference.setDecLong(BigDecimal.valueOf(
                         Double.parseDouble(textFieldDecimalLong.getText())));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: Longitude number format");
                 result = false;
             }
         } else {
-            georeference.setDecLong(null);
+            geoReference.setDecLong(null);
         }
         if (cbDatum.getSelectedItem() != null) {
-            georeference.setDatum(cbDatum.getSelectedItem().toString());
+            geoReference.setDatum(cbDatum.getSelectedItem().toString());
         }
         if (cbMethod.getSelectedItem() != null) {
-            georeference.setGeorefmethod(cbMethod.getSelectedItem().toString());
+            geoReference.setGeorefmethod(cbMethod.getSelectedItem().toString());
         }
 
         if (txtGPSAccuracy.getText().length() > 0) {
             try {
-                georeference.setGpsaccuracy(
+                geoReference.setGpsaccuracy(
                         BigDecimal.valueOf(Double.parseDouble(txtGPSAccuracy.getText())));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: GPS Accuracy number format");
@@ -236,13 +243,13 @@ public class GeoreferenceDialog extends JDialog {
         }
 
         if (comboBoxOrigUnits.getSelectedItem() != null) {
-            georeference.setOrigLatLongUnits(
+            geoReference.setOrigLatLongUnits(
                     comboBoxOrigUnits.getSelectedItem().toString());
         }
 
         if (txtLatDegrees.getText().length() > 0) {
             try {
-                georeference.setLatDeg(Integer.parseInt(txtLatDegrees.getText()));
+                geoReference.setLatDeg(Integer.parseInt(txtLatDegrees.getText()));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: Lat Degrees number format");
                 result = false;
@@ -250,7 +257,7 @@ public class GeoreferenceDialog extends JDialog {
         }
         if (txtLatDecMin.getText().length() > 0) {
             try {
-                georeference.setDecLatMin(
+                geoReference.setDecLatMin(
                         BigDecimal.valueOf(Double.parseDouble(txtLatDecMin.getText())));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: Lat Dec Min number format");
@@ -259,7 +266,7 @@ public class GeoreferenceDialog extends JDialog {
         }
         if (txtLatMin.getText().length() > 0) {
             try {
-                georeference.setLatMin(Integer.parseInt(txtLatMin.getText()));
+                geoReference.setLatMin(Integer.parseInt(txtLatMin.getText()));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: Lat Min number format");
                 result = false;
@@ -267,7 +274,7 @@ public class GeoreferenceDialog extends JDialog {
         }
         if (txtLatSec.getText().length() > 0) {
             try {
-                georeference.setLatSec(
+                geoReference.setLatSec(
                         BigDecimal.valueOf(Double.parseDouble(txtLatSec.getText())));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: Lat Degrees number format");
@@ -275,12 +282,12 @@ public class GeoreferenceDialog extends JDialog {
             }
         }
         if (cbLatDir.getSelectedItem() != null) {
-            georeference.setLatDir(cbLatDir.getSelectedItem().toString());
+            geoReference.setLatDir(cbLatDir.getSelectedItem().toString());
         }
 
         if (txtLongDegrees.getText().length() > 0) {
             try {
-                georeference.setLongDeg(Integer.parseInt(txtLongDegrees.getText()));
+                geoReference.setLongDeg(Integer.parseInt(txtLongDegrees.getText()));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: Long Degrees number format");
                 result = false;
@@ -288,7 +295,7 @@ public class GeoreferenceDialog extends JDialog {
         }
         if (txtLongDecMin.getText().length() > 0) {
             try {
-                georeference.setDecLongMin(
+                geoReference.setDecLongMin(
                         BigDecimal.valueOf(Double.parseDouble(txtLongDecMin.getText())));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: Long Dec Min number format");
@@ -297,7 +304,7 @@ public class GeoreferenceDialog extends JDialog {
         }
         if (txtLongMin.getText().length() > 0) {
             try {
-                georeference.setLongMin(Integer.parseInt(txtLongMin.getText()));
+                geoReference.setLongMin(Integer.parseInt(txtLongMin.getText()));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: Long Min number format");
                 result = false;
@@ -305,7 +312,7 @@ public class GeoreferenceDialog extends JDialog {
         }
         if (txtLongSec.getText().length() > 0) {
             try {
-                georeference.setLongSec(
+                geoReference.setLongSec(
                         BigDecimal.valueOf(Double.parseDouble(txtLongSec.getText())));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: Long Degrees number format");
@@ -313,12 +320,12 @@ public class GeoreferenceDialog extends JDialog {
             }
         }
         if (cbLongDir.getSelectedItem() != null) {
-            georeference.setLongDir(cbLongDir.getSelectedItem().toString());
+            geoReference.setLongDir(cbLongDir.getSelectedItem().toString());
         }
 
         if (txtErrorRadius.getText().length() > 0) {
             try {
-                georeference.setMaxErrorDistance(
+                geoReference.setMaxErrorDistance(
                         Integer.parseInt(txtErrorRadius.getText()));
             } catch (NumberFormatException e) {
                 lblErrorLabel.setText("Error: Error radius number format");
@@ -327,23 +334,23 @@ public class GeoreferenceDialog extends JDialog {
         }
 
         if (comboBoxErrorUnits.getSelectedItem() != null) {
-            georeference.setMaxErrorUnits(
+            geoReference.setMaxErrorUnits(
                     comboBoxErrorUnits.getSelectedItem().toString());
         }
 
-        georeference.setDeterminedByAgent(this.textFieldDetBy.getText());
+        geoReference.setDeterminedByAgent(this.textFieldDetBy.getText());
 
         try {
-            georeference.setDeterminedDate(
+            geoReference.setDeterminedDate(
                     new SimpleDateFormat("yyyy-MM-dd").parse(this.textDetDate.getText()));
         } catch (ParseException e) {
             lblErrorLabel.setText("Error: Error date determined format");
             result = false;
         }
 
-        georeference.setLatLongRefSource(this.textRefSource.getText());
+        geoReference.setLatLongRefSource(this.textRefSource.getText());
 
-        georeference.setLatLongRemarks(this.textFieldRemarks.getText());
+        geoReference.setLatLongRemarks(this.textFieldRemarks.getText());
 
         return result;
     }
@@ -542,7 +549,7 @@ public class GeoreferenceDialog extends JDialog {
         this.pack();
     }
 
-    private void pasteFromExcel(String pasteValue) {
+    public void pasteFromExcel(String pasteValue) {
         Properties settings = Singleton.getSingletonInstance().getProperties().getProperties();
 
         String[] pasteValuesStr = pasteValue.split("\t");

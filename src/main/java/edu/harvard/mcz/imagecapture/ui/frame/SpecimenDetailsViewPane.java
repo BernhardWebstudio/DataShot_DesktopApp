@@ -45,6 +45,7 @@ import org.hibernate.SessionException;
 import org.hibernate.TransactionException;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
+import org.jdesktop.swingx.combobox.ListComboBoxModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +55,10 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.event.*;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -117,9 +121,6 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JComboBox<String> jComboBoxWorkflowStatus = null;
     private JLabel jLabelDBId = null;
     private JPanel jPanel = null;
-    private JPopupMenu jPopupCollectors;
-    private JPopupMenu jPopupNumbers;
-    private JPopupMenu jPopupSpecimenParts;
     private JScrollPane jScrollPaneCollectors = null;
     private JScrollPane jScrollPaneNotes = null;
     private JScrollPane jScrollPaneNumbers = null;
@@ -165,9 +166,16 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField textFieldMaxElev = null;
     private JTextField textFieldMicrohabitat = null;
     private SpecimenDetailsViewPane thisPane = null;
-    private int clickedOnCollsRow;
-    private int clickedOnNumsRow;
-    private int clickedOnPartsRow;
+
+
+    private JTextField textFieldDecimalLat;
+    private JTextField textFieldDecimalLong;
+    private JComboBox<String> cbMethod;
+    private JComboBox<String> cbDatum;
+    private JTextField txtErrorRadius;
+    private JComboBox<String> comboBoxErrorUnits;
+    private JButton pasteExcelButton;
+    private GeoreferenceDialog georeferenceDialog;
 
     /**
      * Construct an instance of a SpecimenDetailsViewPane showing the data present
@@ -696,6 +704,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             latLongs.add(newgeo);
         }
         specimen.setLatLong(latLongs);
+        reloadGeoRefFieldValues();
 
         // new - verbatim locality
         jTextFieldVerbatimLocality.setText(previousSpecimen.getVerbatimLocality());
@@ -730,11 +739,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         getLocationInCollectionJComboBox().setSelectedItem(
                 locationInCollectionPropertiesVal);
 
-    /*Set<LatLong> georeferences = specimen.getLatLong();
-    log.debug("setvalues: georeferences size is : + " + georeferences.size());
-    LatLong georeference_pre = georeferences.iterator().next();
-    log.debug("lat is : + " + georeference_pre.getLatDegString());
-    log.debug("long is : + " + georeference_pre.getLongDegString());*/
+        reloadGeoRefFieldValues();
 
         getCbTypeStatus().setSelectedItem(specimen.getTypeStatus());
         getDrawerNumberJTextField().setText(specimen.getDrawerNumber());
@@ -928,8 +933,8 @@ public class SpecimenDetailsViewPane extends JPanel {
             // row
             this.addBasicJLabel(jPanel, "Nature of ID");
             jPanel.add(this.getJComboBoxNatureOfId());
-            this.addBasicJLabel(jPanel, "ID Date", "tag label, right, span 2, split 3, sizegroup datedet");
-            jPanel.add(this.getJTextFieldDateDetermined(), "grow, sizegroup datedet");
+            this.addBasicJLabel(jPanel, "ID Date");
+            jPanel.add(this.getJTextFieldDateDetermined(), "grow, span 1, split 2, sizegroup datedet");
             jPanel.add(this.getDetsJButton(), "sizegroup datedet");
             // section: family, classification
             // row
@@ -966,20 +971,32 @@ public class SpecimenDetailsViewPane extends JPanel {
             // row
             this.addBasicJLabel(jPanel, "State/Province");
             jPanel.add(this.getPrimaryDivisionJTextField(), "grow");
-            // TODO
             // row
             jPanel.add(this.getJButtonSpecificLocality(), "align label");
             jPanel.add(this.getSpecificLocalityJTextField(), "grow, span 2");
-            jPanel.add(this.getJButtonGeoreference());
             // row
-            jPanel.add(new JLabel("Elevation"), "span, split 6, sizegroup elevation");
-            jPanel.add(new JLabel("from:"),
-                    "align label, sizegroup elevation, right");
-            jPanel.add(this.getVerbatimElevationJTextField(),
-                    "grow, sizegroup elevation");
-            jPanel.add(new JLabel("to:"), "align label, sizegroup elevation, right");
-            jPanel.add(this.getTextFieldMaxElev(), "grow, sizegroup elevation");
-            jPanel.add(this.getComboBoxElevUnits(), "wrap, sizegroup elevation");
+            this.addBasicJLabel(jPanel, "Latitude");
+            jPanel.add(this.getTextFieldDecimalLat(), "grow");
+            this.addBasicJLabel(jPanel, "Longitude");
+            jPanel.add(this.getTextFieldDecimalLong(), "grow");
+            // row
+            this.addBasicJLabel(jPanel, "Method");
+            jPanel.add(this.getMethodComboBox());
+            this.addBasicJLabel(jPanel, "Datum");
+            jPanel.add(this.getDatumComboBox());
+            // row
+            this.addBasicJLabel(jPanel, "Error Radius");
+            jPanel.add(this.getTxtErrorRadius(), "span 1, split 2, sizegroup errorradius, grow");
+            jPanel.add(this.getErrorUnitComboBox(), "sizegroup errorradius");
+            jPanel.add(this.getJButtonGeoreference());
+            jPanel.add(this.getJButtonPasteExcel());
+
+            // row
+            this.addBasicJLabel(jPanel, "Elevation from");
+            jPanel.add(this.getVerbatimElevationJTextField(),                    "grow");
+            this.addBasicJLabel(jPanel, "to");
+            jPanel.add(this.getTextFieldMaxElev(), "grow, span 1, split 2, sizegroup elevation");
+            jPanel.add(this.getComboBoxElevUnits(), "sizegroup elevation");
             // section: collection
             // row
             this.addBasicJLabel(jPanel, "Collection");
@@ -1078,6 +1095,25 @@ public class SpecimenDetailsViewPane extends JPanel {
         return jPanel;
     }
 
+    private JButton getJButtonPasteExcel() {
+        if (pasteExcelButton == null) {
+            pasteExcelButton = new JButton("Paste Excel");
+            SpecimenDetailsViewPane self = this;
+            pasteExcelButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    try {
+                        self.getGeoreferenceDialog().pasteFromExcel((String) clipboard.getData(DataFlavor.stringFlavor));
+                    } catch (Exception e) {
+                        log.error("Failed to paste clipboard data from excel", e);
+                    }
+                }
+            });
+        }
+        return pasteExcelButton;
+    }
+
     private JPanel getAccordionDetailsPanel() {
         if (accordionDetailsPanel == null) {
             JPanel accordionContent = new JPanel(new MigLayout("wrap 4, fillx"));
@@ -1101,9 +1137,27 @@ public class SpecimenDetailsViewPane extends JPanel {
             this.addBasicJLabel(accordionContent, "Drawer Number");
             accordionContent.add(this.getDrawerNumberJTextField(), "grow");
 
-            accordionDetailsPanel = new JAccordionPanel("More Details", accordionContent);
+            accordionDetailsPanel = new JAccordionPanel("Less Details","More Details",  accordionContent);
         }
         return accordionDetailsPanel;
+    }
+
+    /**
+     * Reset the field values of the geoRef fields (lat, long etc.)
+     */
+    private void reloadGeoRefFieldValues() {
+        Set<LatLong> geoReferences = specimen.getLatLong();
+        if (!geoReferences.isEmpty()) {
+            LatLong geoReferencePre = geoReferences.iterator().next();
+            if (!geoReferencePre.isEmpty()) {
+                getTextFieldDecimalLat().setText(geoReferencePre.getDecLatString());
+                getTextFieldDecimalLong().setText(geoReferencePre.getDecLongString());
+                getMethodComboBox().setSelectedItem(geoReferencePre.getGeorefmethod());
+                getDatumComboBox().setSelectedItem(geoReferencePre.getDatum());
+                getTxtErrorRadius().setText(geoReferencePre.getMaxErrorDistanceString());
+                getErrorUnitComboBox().setSelectedItem(geoReferencePre.getMaxErrorUnits());
+            }
+        }
     }
 
     /**
@@ -1126,10 +1180,21 @@ public class SpecimenDetailsViewPane extends JPanel {
         this.jLabelDBId.setText("DataBase ID: " + specimen.getSpecimenId());
     }
 
+    /**
+     * Add a label to a JPanel
+     * @param target
+     * @param labelText
+     */
     private void addBasicJLabel(JPanel target, String labelText) {
         addBasicJLabel(target, labelText, "tag label, right"); //"align label" was removed as requested
     }
 
+    /**
+     * Add a label to a JPanel
+     * @param target
+     * @param labelText
+     * @param constraints
+     */
     private void addBasicJLabel(JPanel target, String labelText, String constraints) {
         JLabel label = new JLabel();
         label.setText(labelText.concat(":"));
@@ -1308,6 +1373,104 @@ public class SpecimenDetailsViewPane extends JPanel {
             jTextFieldLastUpdatedBy.setForeground(Color.BLACK);
         }
         return jTextFieldLastUpdatedBy;
+    }
+
+    private JTextField getTextFieldDecimalLat() {
+        if (textFieldDecimalLat == null) {
+            textFieldDecimalLat = new JTextField();
+            textFieldDecimalLat.addFocusListener(new FocusAdapter() {
+                public void focusLost(FocusEvent e) {
+                    System.out.println("User entered " + textFieldDecimalLat.getText());
+                    getGeoreferenceDialog().getGeoReference().setDecLat(BigDecimal.valueOf(
+                            Double.parseDouble(textFieldDecimalLat.getText())));
+                    getGeoreferenceDialog().loadData();
+                }
+            });
+        }
+        return textFieldDecimalLat;
+    }
+
+    private JTextField getTextFieldDecimalLong() {
+        if (textFieldDecimalLong == null) {
+            textFieldDecimalLong = new JTextField();
+            textFieldDecimalLong.addFocusListener(new FocusAdapter() {
+                public void focusLost(FocusEvent e) {
+                    System.out.println("User entered " + textFieldDecimalLong.getText());
+                    getGeoreferenceDialog().getGeoReference().setDecLong(BigDecimal.valueOf(
+                            Double.parseDouble(textFieldDecimalLong.getText())));
+                    getGeoreferenceDialog().loadData();
+                }
+            });
+        }
+        return textFieldDecimalLong;
+    }
+
+    private JComboBox getMethodComboBox() {
+        if (cbMethod == null) {
+            cbMethod =
+                    new JComboBox<String>(new DefaultComboBoxModel<String>(new String[]{
+                            "not recorded", "unknown", "GEOLocate", "Geoportal", "Google Earth",
+                            "Google Maps", "Gazeteer", "GPS", "Label Data", "Wikipedia",
+                            "MaNIS/HertNet/ORNIS Georeferencing Guidelines"}));
+            cbMethod.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    getGeoreferenceDialog().getGeoReference().setGeorefmethod((String) cbMethod.getSelectedItem());
+                    getGeoreferenceDialog().loadData();
+                    getGeoreferenceDialog().setState();
+                }
+            });
+        }
+        return cbMethod;
+    }
+
+    private JComboBox getDatumComboBox() {
+        if (cbDatum == null) {
+            ComboBoxModel<String> datumModel =
+                    new ListComboBoxModel<String>(LatLong.getDatumValues());
+            cbDatum = new JComboBox<String>(datumModel);
+            // set default
+            cbDatum.setSelectedItem("WGS84");
+            cbDatum.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    getGeoreferenceDialog().getGeoReference().setDatum((String) cbDatum.getSelectedItem());
+                    getGeoreferenceDialog().loadData();
+                }
+            });
+        }
+        return cbDatum;
+    }
+
+    private JTextField getTxtErrorRadius() {
+        if (txtErrorRadius == null) {
+            txtErrorRadius = new JTextField();
+
+            txtErrorRadius.addFocusListener(new FocusAdapter() {
+                public void focusLost(FocusEvent e) {
+                    System.out.println("User entered " + txtErrorRadius.getText());
+                    getGeoreferenceDialog().getGeoReference().setMaxErrorDistance(Integer.parseInt(txtErrorRadius.getText()));
+                    getGeoreferenceDialog().loadData();
+                }
+            });
+        }
+        return txtErrorRadius;
+    }
+
+    private JComboBox getErrorUnitComboBox() {
+        if (comboBoxErrorUnits == null) {
+            comboBoxErrorUnits = new JComboBox<String>();
+            comboBoxErrorUnits.setModel(new DefaultComboBoxModel<String>(
+                    new String[]{"m", "ft", "km", "mi", "yd"}));
+            // set default
+            comboBoxErrorUnits.setSelectedItem("m");
+
+            comboBoxErrorUnits.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    getGeoreferenceDialog().getGeoReference().setMaxErrorUnits((String) comboBoxErrorUnits.getSelectedItem());
+                    getGeoreferenceDialog().loadData();
+                }
+            });
+        }
+        return comboBoxErrorUnits;
     }
 
     /**
@@ -1614,16 +1777,12 @@ georeference_pre.getLongDegString()); if
 
             try {
                 updateJButtonGeoreference();
+                SpecimenDetailsViewPane self = this;
                 jButtonGeoReference.addActionListener(
                         new java.awt.event.ActionListener() {
                             public void actionPerformed(java.awt.event.ActionEvent e) {
                                 thisPane.setStateToDirty();
-                                Set<LatLong> georeferences = specimen.getLatLong();
-                                // log.debug("the lat long is : " + specimen.getLatLong().);
-                                LatLong georeference = georeferences.iterator().next();
-                                georeference.setSpecimen(specimen);
-                                GeoreferenceDialog georefDialog =
-                                        new GeoreferenceDialog(georeference, thisPane);
+                                GeoreferenceDialog georefDialog = self.getGeoreferenceDialog();
                                 georefDialog.setVisible(true);
                                 georefDialog.addComponentListener(new ComponentAdapter() {
                                     @Override
@@ -1631,6 +1790,7 @@ georeference_pre.getLongDegString()); if
                                         updateJButtonGeoreference();
                                         super.componentHidden(e);
                                         autocompleteGeoDataFromGeoreference();
+                                        reloadGeoRefFieldValues();
                                     }
                                 });
                             }
@@ -1640,6 +1800,16 @@ georeference_pre.getLongDegString()); if
             }
         }
         return jButtonGeoReference;
+    }
+
+    private GeoreferenceDialog getGeoreferenceDialog() {
+        if (this.georeferenceDialog == null) {
+            Set<LatLong> georeferences = specimen.getLatLong();
+            LatLong georeference = georeferences.iterator().next();
+            georeference.setSpecimen(specimen);
+            this.georeferenceDialog = new GeoreferenceDialog(georeference, thisPane);
+        }
+        return this.georeferenceDialog;
     }
 
     public void setLocationData(String verbatimLoc, String specificLoc, String country, String stateProvince) {
@@ -2998,6 +3168,8 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
             comboBoxElevUnits = new JComboBox<String>();
             comboBoxElevUnits.setModel(
                     new DefaultComboBoxModel<>(new String[]{"", "?", "m", "ft"}));
+            // set default
+//            comboBoxElevUnits.setSelectedItem("m");
         }
         return comboBoxElevUnits;
     }

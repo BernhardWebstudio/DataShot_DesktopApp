@@ -1,5 +1,37 @@
 # Changelog
 
+## v1.14.0
+* [[`ee731155b5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/ee731155b5)] - Implement sync between new georef fields in main edit and georef dialog (Tim Bernhard)
+* [[`4ea26b87d3`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4ea26b87d3)] - TEst commit (Tim Bernhard)
+* [[`4bb95cece4`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4bb95cece4)] - Improve layout of accordion etc. (Tim Bernhard)
+* [[`13af131f51`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/13af131f51)] - Fix issue where edit pane was invisible (Tim Bernhard)
+* [[`9eee8d6440`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/9eee8d6440)] - First non-working implementation with accordion and scrolling search, georef (Tim Bernhard)
+* [[`be86d91626`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/be86d91626)] - Fix issue where search for Entry By would not work (Tim Bernhard)
+* [[`65f079e44d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/65f079e44d)] - Fix isssue where Province was not pasted (Tim Bernhard)
+* [[`79752f3844`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/79752f3844)] - Implement GeoNames API in order to actually fetch ISO names (Tim Bernhard)
+* [[`44c892f69f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/44c892f69f)] - Improve reverse georeference to help find subdivisions e.g. in LI (note: can be totally wrong!) (Tim Bernhard)
+* [[`73131313a7`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/73131313a7)] - Add encryption/decryption capabilities for Hibernate PW (Tim Bernhard)
+* [[`d605527d4c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d605527d4c)] - Enable on/off states of copy/paste per user (Tim Bernhard)
+* [[`f916979690`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f916979690)] - Reformat code (Tim Bernhard)
+* [[`f1921a95c4`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f1921a95c4)] - Track DataShot version in Tracking (Tim Bernhard)
+* [[`e4acbdc292`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e4acbdc292)] - Correct wrong primary divisions (fixes #34), thanks to Tran Si An Oliver (Tim Bernhard)
+* [[`a2c304221b`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/a2c304221b)] - Deactivate copy-paste once more (Tim Bernhard)
+* [[`a2d281f86f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/a2d281f86f)] - Add 'not recorded' as empty value to be overriden in GeoRef Excel (see #36)\\nhttps://github.com/BernhardWebstudio/DataShot\_DesktopApp/issues/36#issuecomment-774063691 (Tim Bernhard)
+* [[`43da2dad78`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/43da2dad78)] - Improve the stability of saving when associations were deleted (Tim Bernhard)
+* [[`c3e2d29097`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c3e2d29097)] - Implement a way to paste a whole Excel row. Fixes #36 (Tim Bernhard)
+* [[`4e640abe78`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4e640abe78)] - Fix issue where specimen attributes were not saved after paste (fixes #35), see also #33 (Tim Bernhard)
+* [[`673fd2d817`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/673fd2d817)] - Reformat Code (Tim Bernhard)
+* [[`c325ff4f66`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c325ff4f66)] - Make Specimen Editor Visible before Loading Images for Perceived Performance (Tim Bernhard)
+* [[`b7d9994d33`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b7d9994d33)] - Fix issue where copy/paste save possibly failed on same specimen part/collector (Tim Bernhard)
+* [[`e540683b06`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e540683b06)] - Fix part of #33: update specimen parts table on attribute change (Tim Bernhard)
+* [[`c1510b6fb5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c1510b6fb5)] - Fix part of #33: recursive clone of Specimen parts lead to StackOverflow (Tim Bernhard)
+* [[`6afdbd876f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/6afdbd876f)] - Improve resilience of dateLastUpdated search field again (Tim Bernhard)
+* [[`c1b591f25e`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c1b591f25e)] - Fix issue (see also: #32) where DateLastModified Input value comes back after clearing (Tim Bernhard)
+* [[`d5c5ed2da3`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d5c5ed2da3)] - Fix #32: implement search for date modified (Tim Bernhard)
+* [[`1fa7cc8954`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/1fa7cc8954)] - Add no-response GitHub Bot (Tim Bernhard)
+* [[`4fd5ef5e8d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4fd5ef5e8d)] - Update changelog to publish Version v1.12.2 (Tim Bernhard)
+
+
 ## v1.12.2
 * [[`f267428fe2`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f267428fe2)] - Re-enable 'Whats this image' prompt for single barcode files (Tim Bernhard)
 * [[`499cadaf86`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/499cadaf86)] - Include date in log (Tim Bernhard)

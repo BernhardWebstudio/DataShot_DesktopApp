@@ -155,11 +155,8 @@ public class WorkFlowStatus {
      * is already verbatim captured.
      */
     public static boolean allowsVerbatimUpdate(String workflowStatus) {
-        boolean result = false;
+        boolean result = workflowStatus.equals(STAGE_0);
 
-        if (workflowStatus.equals(STAGE_0)) {
-            result = true;
-        }
         if (workflowStatus.equals(STAGE_1)) {
             result = true;
         }
@@ -177,11 +174,8 @@ public class WorkFlowStatus {
      * is already verbatim captured.
      */
     public static boolean allowsVerbatimUpdateOverwrite(String workflowStatus) {
-        boolean result = false;
+        boolean result = workflowStatus.equals(STAGE_0);
 
-        if (workflowStatus.equals(STAGE_0)) {
-            result = true;
-        }
         if (workflowStatus.equals(STAGE_1)) {
             result = true;
         }
@@ -202,11 +196,8 @@ public class WorkFlowStatus {
      * verbatim classified.
      */
     public static boolean allowsClassifiedUpdate(String workflowStatus) {
-        boolean result = false;
+        boolean result = workflowStatus.equals(STAGE_0);
 
-        if (workflowStatus.equals(STAGE_0)) {
-            result = true;
-        }
         if (workflowStatus.equals(STAGE_1)) {
             result = true;
         }

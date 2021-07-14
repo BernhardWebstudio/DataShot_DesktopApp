@@ -175,10 +175,7 @@ public class ICImageListTableModel extends AbstractTableModel {
      */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean result = false;
-        if (columnIndex == COL_ID) {
-            result = true;
-        }
+        boolean result = columnIndex == COL_ID;
         return result;
     }
 

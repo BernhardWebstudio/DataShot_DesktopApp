@@ -166,7 +166,7 @@ public abstract class GenericLifeCycle<T> {
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             // loop properties & find the ones which are not null
             List<String> persistentAttributes = this.getEntityAttributes(instance, session);
-            log.debug("found entity attributes: " + persistentAttributes.toString());
+            log.debug("found entity attributes: " + persistentAttributes);
             int attributesSize = persistentAttributes.size();
             HashMap<String, Object> propertyValueRelations = new HashMap<String, Object>();
             for (int i = 0; i < attributesSize; i++) {
@@ -218,7 +218,6 @@ public abstract class GenericLifeCycle<T> {
     public List<T> findByExampleLike(T instance, int maxResults, int offset) {
         return this.findByExample(instance, maxResults, offset);
     }
-
 
 
     public String[] runQueryToGetStrings(ArrayList<String> collections, String sql, Logger log) {

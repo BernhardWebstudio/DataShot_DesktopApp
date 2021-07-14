@@ -578,7 +578,7 @@ public class FieldLoader {
                         // If we were provided
                         String ewProcess =
                                 "ArbitraryFieldLoad:" + match.getWorkFlowStatus() + ":" +
-                                        keys.toString();
+                                        keys;
                         if (hasExternalWorkflowProcess) {
                             ewProcess = match.getExternalWorkflowProcess();
                         }

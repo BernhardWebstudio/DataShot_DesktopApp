@@ -8,6 +8,9 @@ public class ISO3166 implements Serializable, Cloneable {
     private String countryName;
     private String isoCode;
 
+    public ISO3166() {
+    }
+
     public String getIsoCode() {
         return isoCode;
     }
@@ -31,6 +34,4 @@ public class ISO3166 implements Serializable, Cloneable {
     public void setId(Long id) {
         this.id = id;
     }
-
-    public ISO3166() {}
 }

@@ -20,9 +20,10 @@ package edu.harvard.mcz.imagecapture;
 
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcher;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.regex.Pattern;
 
 /**
  * Recognition and construction of text strings found in MCZ-ENT barcode labels.
@@ -32,79 +33,79 @@ import org.slf4j.LoggerFactory;
  */
 public class MCZENTBarcode implements BarcodeMatcher, BarcodeBuilder {
 
-  public static final String PATTERN = "MCZ-ENT[0-9]{8}";
-  public static final String PREFIX = "MCZ-ENT";
-  public static final int DIGITS = 8;
+    public static final String PATTERN = "MCZ-ENT[0-9]{8}";
+    public static final String PREFIX = "MCZ-ENT";
+    public static final int DIGITS = 8;
 
-  private static final Logger log =
-      LoggerFactory.getLogger(MCZENTBarcode.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(MCZENTBarcode.class);
 
-  public MCZENTBarcode() {
-    log.debug("Instantiating " + this.getClass().toString());
-  }
-
-  /* (non-Javadoc)
-   * @see
-   *     edu.harvard.mcz.imagecapture.BarcodeBuilder#getNumber(java.lang.String)
-   */
-  public Integer extractNumber(String aBarcode) {
-    Integer result = null;
-    if (matchesPattern(aBarcode)) {
-      result = Integer.valueOf(aBarcode.substring(aBarcode.length() - 8));
+    public MCZENTBarcode() {
+        log.debug("Instantiating " + this.getClass().toString());
     }
-    return result;
-  }
 
-  /* (non-Javadoc)
-   * @see
-   *     edu.harvard.mcz.imagecapture.BarcodeMatcher#matchesPattern(java.lang.String)
-   */
-  public boolean matchesPattern(String aBarcode) {
-    boolean result = false;
-    try {
-      result = aBarcode.matches("^" + PATTERN + "$");
-    } catch (NullPointerException e) {
-      // if aBarcode was null, treat result as false.
-    }
-    return result;
-  }
-
-  /* (non-Javadoc)
-   * @see
-   *     edu.harvard.mcz.imagecapture.BarcodeMatcher#matchFoundIn(java.lang.String)
-   */
-  public boolean matchFoundIn(String aBarcode) {
-    boolean result = false;
-    if (aBarcode != null) {
-      Pattern p = Pattern.compile(PATTERN);
-      result = p.matcher(aBarcode).find();
-    }
-    return result;
-  }
-
-  /* (non-Javadoc)
-   * @see
-   *     edu.harvard.mcz.imagecapture.BarcodeBuilder#makeFromNumber(java.lang.Integer)
-   */
-  public String makeFromNumber(Integer aNumber) {
-    String result = null;
-    if (aNumber != null) {
-      if (aNumber.toString().length() <= DIGITS) {
-        if (aNumber >= 0) {
-          String digits = Integer.valueOf(DIGITS).toString();
-          result = PREFIX + String.format("%0" + digits + "d", aNumber);
+    /* (non-Javadoc)
+     * @see
+     *     edu.harvard.mcz.imagecapture.BarcodeBuilder#getNumber(java.lang.String)
+     */
+    public Integer extractNumber(String aBarcode) {
+        Integer result = null;
+        if (matchesPattern(aBarcode)) {
+            result = Integer.valueOf(aBarcode.substring(aBarcode.length() - 8));
         }
-      }
+        return result;
     }
-    return result;
-  }
 
-  @Override
-  public String makeGuidFromBarcode(String barcode) {
-    String result = barcode;
-    if (barcode.startsWith(PREFIX)) {
-      result = "MCZ:Ent:" + barcode.substring(7).replaceFirst("^0*", "");
+    /* (non-Javadoc)
+     * @see
+     *     edu.harvard.mcz.imagecapture.BarcodeMatcher#matchesPattern(java.lang.String)
+     */
+    public boolean matchesPattern(String aBarcode) {
+        boolean result = false;
+        try {
+            result = aBarcode.matches("^" + PATTERN + "$");
+        } catch (NullPointerException e) {
+            // if aBarcode was null, treat result as false.
+        }
+        return result;
     }
-    return result;
-  }
+
+    /* (non-Javadoc)
+     * @see
+     *     edu.harvard.mcz.imagecapture.BarcodeMatcher#matchFoundIn(java.lang.String)
+     */
+    public boolean matchFoundIn(String aBarcode) {
+        boolean result = false;
+        if (aBarcode != null) {
+            Pattern p = Pattern.compile(PATTERN);
+            result = p.matcher(aBarcode).find();
+        }
+        return result;
+    }
+
+    /* (non-Javadoc)
+     * @see
+     *     edu.harvard.mcz.imagecapture.BarcodeBuilder#makeFromNumber(java.lang.Integer)
+     */
+    public String makeFromNumber(Integer aNumber) {
+        String result = null;
+        if (aNumber != null) {
+            if (aNumber.toString().length() <= DIGITS) {
+                if (aNumber >= 0) {
+                    String digits = Integer.valueOf(DIGITS).toString();
+                    result = PREFIX + String.format("%0" + digits + "d", aNumber);
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public String makeGuidFromBarcode(String barcode) {
+        String result = barcode;
+        if (barcode.startsWith(PREFIX)) {
+            result = "MCZ:Ent:" + barcode.substring(7).replaceFirst("^0*", "");
+        }
+        return result;
+    }
 }

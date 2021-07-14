@@ -108,7 +108,7 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
                     makeWithJava = true;
                 } else {
                     String runCommand = mogrify + " -path thumbs -resize " + thumbWidth +
-                            "x" + thumbHeight + " " + filesToThumb.toString();
+                            "x" + thumbHeight + " " + filesToThumb;
 
                     Runtime r = Runtime.getRuntime();
                     // log.debug("Debug {}", runCommand);

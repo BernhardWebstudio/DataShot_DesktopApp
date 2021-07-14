@@ -462,11 +462,8 @@ public class PositionTemplateBoxDialog extends JDialog {
      * @return true if valid, false otherwise.
      */
     private boolean validateValues() {
-        boolean result = true;
+        boolean result = ul.height >= minY && ul.height <= maxY;
         // Check that UL coordinate is on image.
-        if (ul.height < minY || ul.height > maxY) {
-            result = false;
-        }
         if (ul.width < minX || ul.width > maxX) {
             result = false;
         }

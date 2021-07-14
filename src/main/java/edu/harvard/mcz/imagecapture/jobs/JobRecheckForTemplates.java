@@ -122,7 +122,7 @@ public class JobRecheckForTemplates implements RunnableJob, Runnable {
     @Override
     public boolean cancel() {
         runStatus = RunStatus.STATUS_TERMINATED;
-        log.debug("JobCleanDirectory " + this.toString() +
+        log.debug("JobCleanDirectory " + this +
                 "  recieved cancel signal");
         return false;
     }
@@ -344,7 +344,7 @@ public class JobRecheckForTemplates implements RunnableJob, Runnable {
         counter = new Counter();
         // Obtain a list of image file records for the selected directory.
         List<ICImage> files = getFileList();
-        log.debug("ReckeckForTemplatesJob started" + this.toString());
+        log.debug("ReckeckForTemplatesJob started" + this);
         int i = 0;
         while (i < files.size() && runStatus != RunStatus.STATUS_TERMINATED &&
                 runStatus != RunStatus.STATUS_FAILED) {

@@ -21,11 +21,12 @@ package edu.harvard.mcz.imagecapture;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
 import edu.harvard.mcz.imagecapture.interfaces.PositionTemplateDetector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.util.List;
 import java.util.ListIterator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * DefaultPositionTemplateDetector find a template by the position of a barcode
@@ -36,77 +37,76 @@ import org.slf4j.LoggerFactory;
  * @see edu.harvard.mcz.imagecapture.PositionTemplate
  */
 public class DefaultPositionTemplateDetector
-    implements PositionTemplateDetector {
+        implements PositionTemplateDetector {
 
-  private static final Logger log =
-      LoggerFactory.getLogger(DefaultPositionTemplateDetector.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(DefaultPositionTemplateDetector.class);
 
-  @Override
-  public String detectTemplateForImage(File anImageFile)
-      throws UnreadableFileException {
-    return detectTemplateForImage(anImageFile, null);
-  }
-
-  @Override
-  public String detectTemplateForImage(CandidateImageFile scannableFile)
-      throws UnreadableFileException {
-    return detectTemplateForImage(scannableFile.getFile(), scannableFile);
-  }
-
-  protected String detectTemplateForImage(File anImageFile,
-                                          CandidateImageFile scannableFile)
-      throws UnreadableFileException {
-    String result = PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS;
-    // We will be calling getBarcodeText(PositionTemplate aTemplate) below, so
-    // it doesn't matter that we are instatiating the scannable file here with a
-    // default template.
-    // CandidateImageFile scannableFile = null;
-    if (scannableFile == null) {
-      scannableFile =
-          new CandidateImageFile(anImageFile, new PositionTemplate());
+    @Override
+    public String detectTemplateForImage(File anImageFile)
+            throws UnreadableFileException {
+        return detectTemplateForImage(anImageFile, null);
     }
 
-    List<String> templates = PositionTemplate.getTemplateIds();
-    // iterate through templates and check until the first template where a
-    // barcode is found
-    ListIterator<String> i = templates.listIterator();
-    boolean found = false;
-    while (i.hasNext() && !found) {
-      try {
-        // get the next template from the list
-        PositionTemplate template = new PositionTemplate(i.next());
-        log.debug("Testing template: " + template.getTemplateId());
-        if (template.getTemplateId().equals(
-                PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
-          // skip, this is the default result if no other is found.
-        } else {
-          // Check to see if the barcode is in the part of the template
-          // defined by getBarcodeULPosition and getBarcodeSize.
-          String text = scannableFile.getBarcodeText(template);
-          log.debug("Found:[" + text + "] status=" +
-                    scannableFile.getCatalogNumberBarcodeStatus());
-          if (scannableFile.getCatalogNumberBarcodeStatus() ==
-              CandidateImageFile.RESULT_BARCODE_SCANNED) {
-            // RESULT_BARCODE_SCANNED is only returned if the reader read a QR
-            // code barcode inside the area defined by the template for
-            // containing the barcode. If we got here, we found a barcode in the
-            // expected place and know which template to return.
-            found = true;
-            log.debug("Match to:" + template.getTemplateId());
-            result = template.getTemplateId();
-          }
+    @Override
+    public String detectTemplateForImage(CandidateImageFile scannableFile)
+            throws UnreadableFileException {
+        return detectTemplateForImage(scannableFile.getFile(), scannableFile);
+    }
+
+    protected String detectTemplateForImage(File anImageFile,
+                                            CandidateImageFile scannableFile)
+            throws UnreadableFileException {
+        String result = PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS;
+        // We will be calling getBarcodeText(PositionTemplate aTemplate) below, so
+        // it doesn't matter that we are instatiating the scannable file here with a
+        // default template.
+        // CandidateImageFile scannableFile = null;
+        if (scannableFile == null) {
+            scannableFile =
+                    new CandidateImageFile(anImageFile, new PositionTemplate());
         }
-      } catch (NoSuchTemplateException e) {
-        // Ending up here means a serious error in PositionTemplate
-        // as the list of position templates returned by getTemplates() includes
-        // an entry that isn't recognized as a valid template.
-        log.error(
-            "Fatal error.  PositionTemplate.getTemplates() includes an item that isn't a valid template.");
-        log.trace("Trace", e);
-        ;
-        ImageCaptureApp.exit(ImageCaptureApp.EXIT_ERROR);
-      }
+
+        List<String> templates = PositionTemplate.getTemplateIds();
+        // iterate through templates and check until the first template where a
+        // barcode is found
+        ListIterator<String> i = templates.listIterator();
+        boolean found = false;
+        while (i.hasNext() && !found) {
+            try {
+                // get the next template from the list
+                PositionTemplate template = new PositionTemplate(i.next());
+                log.debug("Testing template: " + template.getTemplateId());
+                if (template.getTemplateId().equals(
+                        PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
+                    // skip, this is the default result if no other is found.
+                } else {
+                    // Check to see if the barcode is in the part of the template
+                    // defined by getBarcodeULPosition and getBarcodeSize.
+                    String text = scannableFile.getBarcodeText(template);
+                    log.debug("Found:[" + text + "] status=" +
+                            scannableFile.getCatalogNumberBarcodeStatus());
+                    if (scannableFile.getCatalogNumberBarcodeStatus() ==
+                            CandidateImageFile.RESULT_BARCODE_SCANNED) {
+                        // RESULT_BARCODE_SCANNED is only returned if the reader read a QR
+                        // code barcode inside the area defined by the template for
+                        // containing the barcode. If we got here, we found a barcode in the
+                        // expected place and know which template to return.
+                        found = true;
+                        log.debug("Match to:" + template.getTemplateId());
+                        result = template.getTemplateId();
+                    }
+                }
+            } catch (NoSuchTemplateException e) {
+                // Ending up here means a serious error in PositionTemplate
+                // as the list of position templates returned by getTemplates() includes
+                // an entry that isn't recognized as a valid template.
+                log.error(
+                        "Fatal error.  PositionTemplate.getTemplates() includes an item that isn't a valid template.");
+                log.trace("Trace", e);
+                ImageCaptureApp.exit(ImageCaptureApp.EXIT_ERROR);
+            }
+        }
+        return result;
     }
-    return result;
-  }
 }

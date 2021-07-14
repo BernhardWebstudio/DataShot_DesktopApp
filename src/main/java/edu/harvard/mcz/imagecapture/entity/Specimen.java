@@ -1117,10 +1117,7 @@ public class Specimen implements Serializable {
     }
 
     public boolean isStateDone() {
-        boolean result = false;
-        if (this.workFlowStatus.equals(WorkFlowStatus.STAGE_DONE)) {
-            result = true;
-        }
+        boolean result = this.workFlowStatus.equals(WorkFlowStatus.STAGE_DONE);
         return result;
     }
 

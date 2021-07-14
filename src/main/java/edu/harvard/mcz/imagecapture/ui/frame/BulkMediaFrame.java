@@ -311,7 +311,7 @@ public class BulkMediaFrame extends JFrame implements PropertyChangeListener {
                                 "File Exists", JOptionPane.ERROR_MESSAGE);
                     }
                 } else {
-                    log.error("No files in selected directory. " + directory.toString());
+                    log.error("No files in selected directory. " + directory);
                 }
                 setProgress(100);
                 JOptionPane.showMessageDialog(

@@ -993,7 +993,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
             // row
             this.addBasicJLabel(jPanel, "Elevation from");
-            jPanel.add(this.getVerbatimElevationJTextField(),                    "grow");
+            jPanel.add(this.getVerbatimElevationJTextField(), "grow");
             this.addBasicJLabel(jPanel, "to");
             jPanel.add(this.getTextFieldMaxElev(), "grow, span 1, split 2, sizegroup elevation");
             jPanel.add(this.getComboBoxElevUnits(), "sizegroup elevation");
@@ -1108,6 +1108,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                     } catch (Exception e) {
                         log.error("Failed to paste clipboard data from excel", e);
                     }
+                    self.reloadGeoRefFieldValues();
                 }
             });
         }
@@ -1137,7 +1138,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             this.addBasicJLabel(accordionContent, "Drawer Number");
             accordionContent.add(this.getDrawerNumberJTextField(), "grow");
 
-            accordionDetailsPanel = new JAccordionPanel("Less Details","More Details",  accordionContent);
+            accordionDetailsPanel = new JAccordionPanel("Less Details", "More Details", accordionContent);
         }
         return accordionDetailsPanel;
     }
@@ -1147,9 +1148,11 @@ public class SpecimenDetailsViewPane extends JPanel {
      */
     private void reloadGeoRefFieldValues() {
         Set<LatLong> geoReferences = specimen.getLatLong();
+        boolean resetFields = true;
         if (!geoReferences.isEmpty()) {
             LatLong geoReferencePre = geoReferences.iterator().next();
             if (!geoReferencePre.isEmpty()) {
+                resetFields = false;
                 getTextFieldDecimalLat().setText(geoReferencePre.getDecLatString());
                 getTextFieldDecimalLong().setText(geoReferencePre.getDecLongString());
                 getMethodComboBox().setSelectedItem(geoReferencePre.getGeorefmethod());
@@ -1158,6 +1161,16 @@ public class SpecimenDetailsViewPane extends JPanel {
                 getErrorUnitComboBox().setSelectedItem(geoReferencePre.getMaxErrorUnits());
             }
         }
+
+        if (resetFields) {
+            getTextFieldDecimalLat().setText("");
+            getTextFieldDecimalLong().setText("");
+            getMethodComboBox().setSelectedItem("");
+            getDatumComboBox().setSelectedItem("");
+            getTxtErrorRadius().setText("");
+            getErrorUnitComboBox().setSelectedItem("");
+        }
+        this.updateJButtonGeoreference();
     }
 
     /**
@@ -1182,6 +1195,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     /**
      * Add a label to a JPanel
+     *
      * @param target
      * @param labelText
      */
@@ -1191,6 +1205,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     /**
      * Add a label to a JPanel
+     *
      * @param target
      * @param labelText
      * @param constraints
@@ -1381,8 +1396,12 @@ public class SpecimenDetailsViewPane extends JPanel {
             textFieldDecimalLat.addFocusListener(new FocusAdapter() {
                 public void focusLost(FocusEvent e) {
                     System.out.println("User entered " + textFieldDecimalLat.getText());
-                    getGeoreferenceDialog().getGeoReference().setDecLat(BigDecimal.valueOf(
-                            Double.parseDouble(textFieldDecimalLat.getText())));
+                    if (!textFieldDecimalLat.getText().trim().equals("")) {
+                        getGeoreferenceDialog().getGeoReference().setDecLat(BigDecimal.valueOf(
+                                Double.parseDouble(textFieldDecimalLat.getText())));
+                    } else {
+                        getGeoreferenceDialog().getGeoReference().setDecLat(null);
+                    }
                     getGeoreferenceDialog().loadData();
                 }
             });
@@ -1396,8 +1415,12 @@ public class SpecimenDetailsViewPane extends JPanel {
             textFieldDecimalLong.addFocusListener(new FocusAdapter() {
                 public void focusLost(FocusEvent e) {
                     System.out.println("User entered " + textFieldDecimalLong.getText());
-                    getGeoreferenceDialog().getGeoReference().setDecLong(BigDecimal.valueOf(
-                            Double.parseDouble(textFieldDecimalLong.getText())));
+                    if (!textFieldDecimalLong.getText().trim().equals("")) {
+                        getGeoreferenceDialog().getGeoReference().setDecLong(BigDecimal.valueOf(
+                                Double.parseDouble(textFieldDecimalLong.getText())));
+                    } else {
+                        getGeoreferenceDialog().getGeoReference().setDecLong(null);
+                    }
                     getGeoreferenceDialog().loadData();
                 }
             });
@@ -1447,7 +1470,12 @@ public class SpecimenDetailsViewPane extends JPanel {
             txtErrorRadius.addFocusListener(new FocusAdapter() {
                 public void focusLost(FocusEvent e) {
                     System.out.println("User entered " + txtErrorRadius.getText());
-                    getGeoreferenceDialog().getGeoReference().setMaxErrorDistance(Integer.parseInt(txtErrorRadius.getText()));
+                    String result = txtErrorRadius.getText();
+                    if (!result.trim().equals("")) {
+                        getGeoreferenceDialog().getGeoReference().setMaxErrorDistance(Integer.parseInt(result));
+                    } else {
+                        getGeoreferenceDialog().getGeoReference().setMaxErrorDistance(null);
+                    }
                     getGeoreferenceDialog().loadData();
                 }
             });
@@ -1812,12 +1840,15 @@ georeference_pre.getLongDegString()); if
         return this.georeferenceDialog;
     }
 
-    public void setLocationData(String verbatimLoc, String specificLoc, String country, String stateProvince) {
+    public void setLocationData(String verbatimLoc, String specificLoc, String country, String stateProvince, String lat, String lng) {
+        log.debug(String.join(" ", verbatimLoc, specificLoc, country, stateProvince, lat, lng));
         Map<Component, String> defaultsMapImmutable = Map.ofEntries(
                 Map.entry(this.getVerbatimLocalityJTextField(), verbatimLoc),
                 Map.entry(this.getSpecificLocalityJTextField(), specificLoc),
                 Map.entry(this.getCountryJTextField(), country),
-                Map.entry(this.getPrimaryDivisionJTextField(), stateProvince)
+                Map.entry(this.getPrimaryDivisionJTextField(), stateProvince),
+                Map.entry(this.getTextFieldDecimalLat(), lat),
+                Map.entry(this.getTextFieldDecimalLong(), lng)
         );
 
         Properties settings = Singleton.getSingletonInstance().getProperties().getProperties();
@@ -2916,10 +2947,7 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
      * or saved to the specimen, otherwise false indicating a dirty record.
      */
     private boolean isClean() {
-        boolean result = false;
-        if (state == STATE_CLEAN) {
-            result = true;
-        }
+        boolean result = state == STATE_CLEAN;
         return result;
     }
 
@@ -3205,7 +3233,7 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
                             new ArrayList<>(
                                     Arrays.asList("countryCode", "countryName", "adminName1")));
                     if (data != null) {
-                        log.debug("Got address from GeoNames: " + data.toString());
+                        log.debug("Got address from GeoNames: " + data);
                         if (this.getCountryJTextField().getSelectedItem() == null ||
                                 this.getCountryJTextField().getSelectedItem().equals("")) {
                             String countryName = (new ISO3166LifeCycle()).findByCountryCode((String) data.get("countryCode")).getCountryName();
@@ -3236,7 +3264,7 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
                                 new ArrayList<>(
                                         Arrays.asList("address.county", "address.state", "address.country")));
                 if (data != null) {
-                    log.debug("Got address from openstreetmap: " + data.toString());
+                    log.debug("Got address from openstreetmap: " + data);
                     if (this.getCountryJTextField().getSelectedItem() == null ||
                             this.getCountryJTextField().getSelectedItem().equals("")) {
                         this.getCountryJTextField().setSelectedItem(

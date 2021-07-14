@@ -20,49 +20,50 @@ package edu.harvard.mcz.imagecapture.lifecycle;
 
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.MCZbaseAuthAgentName;
-import java.util.List;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 /**
  *
  */
 public class MCZbaseAuthAgentNameLifeCycle {
-  private static final Logger log =
-      LoggerFactory.getLogger(MCZbaseAuthAgentNameLifeCycle.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(MCZbaseAuthAgentNameLifeCycle.class);
 
-  /**
-   * @return
-   */
-  public List<MCZbaseAuthAgentName> findAll() {
-    log.debug("finding all agent names");
-    try {
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      session.beginTransaction();
-      List<MCZbaseAuthAgentName> results = null;
-      try {
-        results = (List<MCZbaseAuthAgentName>)session
-                      .createQuery(
-                          "from MCZbaseAuthAgentName h order by h.agent_name")
-                      .setReadOnly(true)
-                      .list();
-        log.debug("find all successful, result size: " + results.size());
-        session.getTransaction().commit();
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        log.error("find all failed", e);
-      }
-      try {
-        session.close();
-      } catch (SessionException e) {
-      }
-      return results;
-    } catch (RuntimeException re) {
-      log.error("Find all failed.  ", re);
-      throw re;
+    /**
+     * @return
+     */
+    public List<MCZbaseAuthAgentName> findAll() {
+        log.debug("finding all agent names");
+        try {
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            session.beginTransaction();
+            List<MCZbaseAuthAgentName> results = null;
+            try {
+                results = (List<MCZbaseAuthAgentName>) session
+                        .createQuery(
+                                "from MCZbaseAuthAgentName h order by h.agent_name")
+                        .setReadOnly(true)
+                        .list();
+                log.debug("find all successful, result size: " + results.size());
+                session.getTransaction().commit();
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error("find all failed", e);
+            }
+            try {
+                session.close();
+            } catch (SessionException e) {
+            }
+            return results;
+        } catch (RuntimeException re) {
+            log.error("Find all failed.  ", re);
+            throw re;
+        }
     }
-  }
 }

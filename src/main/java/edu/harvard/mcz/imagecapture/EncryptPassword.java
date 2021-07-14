@@ -7,7 +7,6 @@ import java.util.Scanner;
 public class EncryptPassword {
 
     /**
-     *
      * @param args
      */
     public static void main(String[] args) {

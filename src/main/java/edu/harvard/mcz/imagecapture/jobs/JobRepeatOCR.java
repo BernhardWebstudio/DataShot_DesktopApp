@@ -129,7 +129,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
     @Override
     public boolean cancel() {
         runStatus = RunStatus.STATUS_TERMINATED;
-        log.debug("JobRepeatOCR " + this.toString() + "  recieved cancel signal");
+        log.debug("JobRepeatOCR " + this + "  recieved cancel signal");
         return false;
     }
 
@@ -561,7 +561,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
         // Obtain a list of image files to repeat OCR
         // (by querying specimens in state OCR and getting list of linked images).
         List<File> files = getFileList();
-        log.debug("repeatOCRJob started" + this.toString());
+        log.debug("repeatOCRJob started" + this);
         int i = 0;
         while (i < files.size() && runStatus != RunStatus.STATUS_TERMINATED) {
             // Find out how far along the process is

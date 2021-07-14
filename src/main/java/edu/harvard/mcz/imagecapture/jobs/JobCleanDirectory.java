@@ -119,7 +119,7 @@ public class JobCleanDirectory implements RunnableJob, Runnable {
     @Override
     public boolean cancel() {
         runStatus = RunStatus.STATUS_TERMINATED;
-        log.debug("JobCleanDirectory " + this.toString() +
+        log.debug("JobCleanDirectory " + this +
                 "  recieved cancel signal");
         return false;
     }
@@ -327,7 +327,7 @@ public class JobCleanDirectory implements RunnableJob, Runnable {
         counter = new Counter();
         // Obtain a list of image file records for the selected directory.
         List<File> files = getFileList();
-        log.debug("CleanDirectoryJob started" + this.toString());
+        log.debug("CleanDirectoryJob started" + this);
         int i = 0;
         while (i < files.size() && runStatus != RunStatus.STATUS_TERMINATED) {
             // Find out how far along the process is

@@ -421,12 +421,12 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
             if (reattach) {
                 // Update image file record
                 imageLifeCycle.attachDirty(image);
-                log.debug("Updated " + image.toString());
+                log.debug("Updated " + image);
                 counter.incrementFilesUpdated();
             } else {
                 // *** Save a database record of the image file.
                 imageLifeCycle.persist(image);
-                log.debug("Saved " + image.toString());
+                log.debug("Saved " + image);
                 counter.incrementFilesDatabased();
             }
         } catch (SaveFailedException e) {

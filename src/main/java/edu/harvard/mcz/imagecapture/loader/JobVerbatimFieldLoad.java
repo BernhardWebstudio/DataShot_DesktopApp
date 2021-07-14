@@ -80,7 +80,7 @@ public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
      */
     @Override
     public void run() {
-        log.debug("Debug {}", this.toString());
+        log.debug("Debug {}", this);
         start();
     }
 
@@ -542,7 +542,7 @@ public class JobVerbatimFieldLoad implements RunnableJob, Runnable {
     @Override
     public boolean cancel() {
         runStatus = RunStatus.STATUS_TERMINATED;
-        log.debug(this.getClass().getSimpleName() + " " + this.toString() +
+        log.debug(this.getClass().getSimpleName() + " " + this +
                 "  recieved cancel signal");
         return false;
     }

@@ -68,10 +68,7 @@ public class GenusSpeciesCountTableModel extends AbstractTableModel {
      */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean result = false;
-        if (columnIndex == 0) {
-            result = true;
-        }
+        boolean result = columnIndex == 0;
         return result;
     }
 

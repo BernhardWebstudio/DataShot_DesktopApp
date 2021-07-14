@@ -38,10 +38,7 @@ public class RunStatus {
      * of a job that has completed either successfully or with an error state.
      */
     public static boolean testComplete(int aStatus) {
-        boolean returnValue = false;
-        if (aStatus >= STATUS_FAILED) {
-            returnValue = true;
-        }
+        boolean returnValue = aStatus >= STATUS_FAILED;
         return returnValue;
     }
 

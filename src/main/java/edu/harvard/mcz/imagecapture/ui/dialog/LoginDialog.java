@@ -179,6 +179,7 @@ public class LoginDialog extends JDialog {
     private JPasswordField getJPasswordFieldDB() {
         if (jPasswordFieldDB == null) {
             jPasswordFieldDB = new JPasswordField();
+            //jPasswordFieldDB.setEchoChar((char) 0);
         }
         return jPasswordFieldDB;
     }
@@ -290,7 +291,7 @@ public class LoginDialog extends JDialog {
         String passwordValue = String.valueOf(jPasswordFieldDB.getPassword());
         try {
             return textEncryptor.decrypt(passwordValue);
-        } catch(EncryptionOperationNotPossibleException exception) {
+        } catch (EncryptionOperationNotPossibleException exception) {
             log.error("Failed to decrypt db password", exception);
             return passwordValue;
         }

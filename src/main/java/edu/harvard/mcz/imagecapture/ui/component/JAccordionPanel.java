@@ -18,7 +18,7 @@ public class JAccordionPanel extends JPanel {
             LoggerFactory.getLogger(JAccordionPanel.class);
     private String titleOpen = "";
     private String titleClosed = "";
-    private JScrollPane mainContent;
+    private final JScrollPane mainContent;
     private JButton toggleButton = null;
     private boolean contentVisible = false;
 
@@ -26,9 +26,9 @@ public class JAccordionPanel extends JPanel {
     /**
      * Instantiate the panel with a button to trigger the visibility of another component
      *
-     * @param titleOpen the button text to show when the content is visible
+     * @param titleOpen   the button text to show when the content is visible
      * @param titleClosed the button text to show when the content is hidden
-     * @param content the other component to trigger the visibility of
+     * @param content     the other component to trigger the visibility of
      */
     public JAccordionPanel(String titleOpen, String titleClosed, Component content) {
         super(new MigLayout("wrap 1, fillx"));
@@ -62,7 +62,7 @@ public class JAccordionPanel extends JPanel {
             toggleButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
-                    self.log.debug("Changing visibility of accordion content to " + String.valueOf(self.contentVisible));
+                    log.debug("Changing visibility of accordion content to " + self.contentVisible);
                     self.contentVisible = !self.contentVisible;
                     self.mainContent.setVisible(self.contentVisible);
                     resetTitle();

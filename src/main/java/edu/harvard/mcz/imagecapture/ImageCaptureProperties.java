@@ -225,7 +225,7 @@ public class ImageCaptureProperties extends AbstractTableModel {
     public static String KEY_EXCEL_COL_SPECIFIC_LOC = "georef.import.specific_loc.col";
     public static String KEY_EXCEL_OVERWRITE = "georef.import.overwrite";
     private Properties properties = null;
-    private String propertiesFilename = "imagecapture.properties";
+    private final String propertiesFilename = "imagecapture.properties";
     private String propertiesFilePath = null;
 
     public ImageCaptureProperties() {
@@ -483,10 +483,7 @@ public class ImageCaptureProperties extends AbstractTableModel {
      */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean returnValue = false;
-        if (columnIndex == 1) {
-            returnValue = true;
-        }
+        boolean returnValue = columnIndex == 1;
         return returnValue;
     }
 
@@ -704,16 +701,16 @@ public class ImageCaptureProperties extends AbstractTableModel {
      * the values for this instance of properties was retrieved.
      */
     public String getPropertiesSource() {
-        return propertiesFilePath.toString();
+        return propertiesFilePath;
     }
 
     protected void loadProperties() throws Exception {
         if (properties == null) {
             properties = new Properties();
             FileInputStream propertiesStream = null;
-            log.debug("Opening properties file: " + propertiesFilePath.toString());
+            log.debug("Opening properties file: " + propertiesFilePath);
             try {
-                propertiesStream = new FileInputStream(propertiesFilePath.toString());
+                propertiesStream = new FileInputStream(propertiesFilePath);
                 properties.load(propertiesStream);
                 // test dump
         /*Enumeration<Object> keys = properties.keys();
@@ -746,8 +743,8 @@ public class ImageCaptureProperties extends AbstractTableModel {
         FileOutputStream propertiesStream = null;
         try {
             System.out.println("Saving properties file: " +
-                    propertiesFilePath.toString());
-            propertiesStream = new FileOutputStream(propertiesFilePath.toString());
+                    propertiesFilePath);
+            propertiesStream = new FileOutputStream(propertiesFilePath);
             properties.store(propertiesStream, ImageCaptureApp.APP_NAME + " " +
                     ImageCaptureApp.getAppVersion() +
                     " Properties");

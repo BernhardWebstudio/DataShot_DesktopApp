@@ -1,3 +1,6 @@
-ALTER TABLE Tracking ADD `datashotVersion` VARCHAR (255) NULL DEFAULT NULL;
-ALTER TABLE Users ADD `canCopyPaste` TINYINT (1) NULL DEFAULT 0;
-ALTER TABLE Tracking ADD `couldCopyPaste` TINYINT (1) NULL DEFAULT 0;
+ALTER TABLE Tracking
+    ADD `datashotVersion` VARCHAR(255) NULL DEFAULT NULL;
+ALTER TABLE Users
+    ADD `canCopyPaste` TINYINT(1) NULL DEFAULT 0;
+ALTER TABLE Tracking
+    ADD `couldCopyPaste` TINYINT(1) NULL DEFAULT 0;

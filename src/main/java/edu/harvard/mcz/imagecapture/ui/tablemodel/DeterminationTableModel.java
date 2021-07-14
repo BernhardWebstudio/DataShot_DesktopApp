@@ -176,13 +176,10 @@ public class DeterminationTableModel extends AbstractTableModel {
      */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean result = true;
+        boolean result = columnIndex != ROW_SPECIMEN;
         // allow editor for all columns
         // if (columnIndex==ROW_ID || columnIndex==ROW_SPECIMEN) {
-        if (columnIndex == ROW_SPECIMEN) {
-            // turn off editing of determinationId and barcode.
-            result = false;
-        }
+        // turn off editing of determinationId and barcode.
         return result;
     }
 

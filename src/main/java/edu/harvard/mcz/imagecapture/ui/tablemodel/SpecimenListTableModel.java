@@ -208,10 +208,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
      */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean result = false;
-        if (columnIndex == COL_ID || (SpecimenDetailsViewPane.copyPasteActivated && columnIndex == COL_COPY)) {
-            result = true;
-        }
+        boolean result = columnIndex == COL_ID || (SpecimenDetailsViewPane.copyPasteActivated && columnIndex == COL_COPY);
         return result;
     }
 

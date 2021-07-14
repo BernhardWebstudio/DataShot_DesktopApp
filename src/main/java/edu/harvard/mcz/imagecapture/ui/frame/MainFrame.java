@@ -1456,7 +1456,7 @@ public class MainFrame extends JFrame implements RunnerListener {
                                         null,
                                         "Found " + results.size() +
                                                 " images in the database for the date " + dateEntered +
-                                                ".\n\nPossible missing images:\n" + sb.toString(),
+                                                ".\n\nPossible missing images:\n" + sb,
                                         "Find missing images", JOptionPane.PLAIN_MESSAGE);
                             }
                         }

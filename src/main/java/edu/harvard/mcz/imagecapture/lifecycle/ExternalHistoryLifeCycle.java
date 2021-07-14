@@ -18,6 +18,9 @@
  */
 package edu.harvard.mcz.imagecapture.lifecycle;
 
+import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.entity.ExternalHistory;
+import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Session;
@@ -25,175 +28,171 @@ import org.hibernate.SessionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import edu.harvard.mcz.imagecapture.data.HibernateUtil;
-import edu.harvard.mcz.imagecapture.entity.ExternalHistory;
-import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-
 /**
  *
  */
 public class ExternalHistoryLifeCycle {
 
-  private static final Logger log =
-      LoggerFactory.getLogger(ExternalHistoryLifeCycle.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(ExternalHistoryLifeCycle.class);
 
-  public void persist(ExternalHistory transientInstance)
-      throws SaveFailedException {
-    if (transientInstance.getExternalWorkflowProcess() != "") {
-      log.debug("persisting ExternalHistory instance");
-      try {
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        session.beginTransaction();
+    public void persist(ExternalHistory transientInstance)
+            throws SaveFailedException {
+        if (transientInstance.getExternalWorkflowProcess() != "") {
+            log.debug("persisting ExternalHistory instance");
+            try {
+                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                session.beginTransaction();
+                try {
+                    session.persist(transientInstance);
+                    session.getTransaction().commit();
+                    log.debug("persist successful");
+                } catch (HibernateException e) {
+                    session.getTransaction().rollback();
+                    log.error(e.getMessage());
+                    throw new SaveFailedException(
+                            "Unable to save externalHistory record. " + e.getMessage());
+                }
+                try {
+                    session.close();
+                } catch (SessionException e) {
+                }
+            } catch (RuntimeException re) {
+                log.error("persist failed", re);
+                throw re;
+            }
+        }
+    }
+
+    public void attachDirty(ExternalHistory instance) throws SaveFailedException {
+        log.debug("attaching dirty ExternalHistory instance");
         try {
-          session.persist(transientInstance);
-          session.getTransaction().commit();
-          log.debug("persist successful");
-        } catch (HibernateException e) {
-          session.getTransaction().rollback();
-          log.error(e.getMessage());
-          throw new SaveFailedException(
-              "Unable to save externalHistory record. " + e.getMessage());
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            session.beginTransaction();
+            try {
+                session.saveOrUpdate(instance);
+                session.getTransaction().commit();
+                log.debug("attach successful");
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error(e.getMessage());
+                throw new SaveFailedException(
+                        "Unable to save externalHistory record. " + e.getMessage());
+            }
+            try {
+                session.close();
+            } catch (SessionException e) {
+            }
+        } catch (RuntimeException re) {
+            log.error("attach failed", re);
+            throw re;
         }
+    }
+
+    public void attachClean(ExternalHistory instance) {
+        log.debug("attaching clean ExternalHistory instance");
         try {
-          session.close();
-        } catch (SessionException e) {
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            session.beginTransaction();
+            try {
+                session.lock(instance, LockMode.NONE);
+                session.getTransaction().commit();
+                log.debug("attach successful");
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error(e.getMessage());
+            }
+            try {
+                session.close();
+            } catch (SessionException e) {
+            }
+        } catch (RuntimeException re) {
+            log.error("attach failed", re);
+            throw re;
         }
-      } catch (RuntimeException re) {
-        log.error("persist failed", re);
-        throw re;
-      }
     }
-  }
 
-  public void attachDirty(ExternalHistory instance) throws SaveFailedException {
-    log.debug("attaching dirty ExternalHistory instance");
-    try {
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      session.beginTransaction();
-      try {
-        session.saveOrUpdate(instance);
-        session.getTransaction().commit();
-        log.debug("attach successful");
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        log.error(e.getMessage());
-        throw new SaveFailedException(
-            "Unable to save externalHistory record. " + e.getMessage());
-      }
-      try {
-        session.close();
-      } catch (SessionException e) {
-      }
-    } catch (RuntimeException re) {
-      log.error("attach failed", re);
-      throw re;
-    }
-  }
-
-  public void attachClean(ExternalHistory instance) {
-    log.debug("attaching clean ExternalHistory instance");
-    try {
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      session.beginTransaction();
-      try {
-        session.lock(instance, LockMode.NONE);
-        session.getTransaction().commit();
-        log.debug("attach successful");
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        log.error(e.getMessage());
-      }
-      try {
-        session.close();
-      } catch (SessionException e) {
-      }
-    } catch (RuntimeException re) {
-      log.error("attach failed", re);
-      throw re;
-    }
-  }
-
-  public void delete(ExternalHistory persistentInstance)
-      throws SaveFailedException {
-    log.debug("deleting ExternalHistory instance");
-    try {
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      session.beginTransaction();
-      try {
-        session.delete(persistentInstance);
-        session.getTransaction().commit();
-        log.debug("delete successful");
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        log.error(e.getMessage());
-        throw new SaveFailedException(
-            "Unable to Delete externalHistory record. " + e.getMessage());
-      }
-      try {
-        session.close();
-      } catch (SessionException e) {
-      }
-    } catch (RuntimeException re) {
-      log.error("delete failed", re);
-      throw re;
-    }
-  }
-
-  public ExternalHistory merge(ExternalHistory detachedInstance)
-      throws SaveFailedException {
-    log.debug("merging ExternalHistory instance");
-    try {
-      ExternalHistory result = detachedInstance;
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      session.beginTransaction();
-      try {
-        result = (ExternalHistory)session.merge(detachedInstance);
-        session.getTransaction().commit();
-        log.debug("merge successful");
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        log.error(e.getMessage());
-        throw new SaveFailedException(
-            "Unable to save externalHistory record. " + e.getMessage());
-      }
-      try {
-        session.close();
-      } catch (SessionException e) {
-      }
-      return result;
-    } catch (RuntimeException re) {
-      log.error("merge failed", re);
-      throw re;
-    }
-  }
-
-  public ExternalHistory findById(java.lang.Long id) {
-    log.debug("getting ExternalHistory instance with id: " + id);
-    try {
-      ExternalHistory instance = null;
-      Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-      session.beginTransaction();
-      try {
-        instance = (ExternalHistory)session.get(
-            "edu.harvard.mcz.imagecapture.data.ExternalHistory", id);
-        session.getTransaction().commit();
-        if (instance == null) {
-          log.debug("get successful, no instance found");
-        } else {
-          log.debug("get successful, instance found");
+    public void delete(ExternalHistory persistentInstance)
+            throws SaveFailedException {
+        log.debug("deleting ExternalHistory instance");
+        try {
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            session.beginTransaction();
+            try {
+                session.delete(persistentInstance);
+                session.getTransaction().commit();
+                log.debug("delete successful");
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error(e.getMessage());
+                throw new SaveFailedException(
+                        "Unable to Delete externalHistory record. " + e.getMessage());
+            }
+            try {
+                session.close();
+            } catch (SessionException e) {
+            }
+        } catch (RuntimeException re) {
+            log.error("delete failed", re);
+            throw re;
         }
-      } catch (HibernateException e) {
-        session.getTransaction().rollback();
-        log.error(e.getMessage());
-      }
-      try {
-        session.close();
-      } catch (SessionException e) {
-      }
-      return instance;
-    } catch (RuntimeException re) {
-      log.error("get failed", re);
-      throw re;
     }
-  }
+
+    public ExternalHistory merge(ExternalHistory detachedInstance)
+            throws SaveFailedException {
+        log.debug("merging ExternalHistory instance");
+        try {
+            ExternalHistory result = detachedInstance;
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            session.beginTransaction();
+            try {
+                result = (ExternalHistory) session.merge(detachedInstance);
+                session.getTransaction().commit();
+                log.debug("merge successful");
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error(e.getMessage());
+                throw new SaveFailedException(
+                        "Unable to save externalHistory record. " + e.getMessage());
+            }
+            try {
+                session.close();
+            } catch (SessionException e) {
+            }
+            return result;
+        } catch (RuntimeException re) {
+            log.error("merge failed", re);
+            throw re;
+        }
+    }
+
+    public ExternalHistory findById(java.lang.Long id) {
+        log.debug("getting ExternalHistory instance with id: " + id);
+        try {
+            ExternalHistory instance = null;
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            session.beginTransaction();
+            try {
+                instance = (ExternalHistory) session.get(
+                        "edu.harvard.mcz.imagecapture.data.ExternalHistory", id);
+                session.getTransaction().commit();
+                if (instance == null) {
+                    log.debug("get successful, no instance found");
+                } else {
+                    log.debug("get successful, instance found");
+                }
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error(e.getMessage());
+            }
+            try {
+                session.close();
+            } catch (SessionException e) {
+            }
+            return instance;
+        } catch (RuntimeException re) {
+            log.error("get failed", re);
+            throw re;
+        }
+    }
 }

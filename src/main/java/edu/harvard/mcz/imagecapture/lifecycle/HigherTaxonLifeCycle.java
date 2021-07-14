@@ -3,11 +3,6 @@ package edu.harvard.mcz.imagecapture.lifecycle;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.HigherTaxon;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Session;
@@ -15,6 +10,10 @@ import org.hibernate.SessionException;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class HigherTaxonLifeCycle {
 
@@ -48,7 +47,6 @@ public class HigherTaxonLifeCycle {
             return result.toArray(new String[]{});
         } catch (RuntimeException re) {
             log.error("Error", re);
-            ;
             return new String[]{};
         }
     }
@@ -95,7 +93,6 @@ public class HigherTaxonLifeCycle {
             return result.toArray(new String[]{});
         } catch (RuntimeException re) {
             log.error("Error", re);
-            ;
             return new String[]{};
         }
     }
@@ -128,7 +125,6 @@ public class HigherTaxonLifeCycle {
             return result.toArray(new String[]{});
         } catch (RuntimeException re) {
             log.error("Error", re);
-            ;
             return new String[]{};
         }
     }
@@ -351,7 +347,6 @@ public class HigherTaxonLifeCycle {
             return result;
         } catch (RuntimeException re) {
             log.error("Error", re);
-            ;
             return false;
         }
     }
@@ -384,7 +379,6 @@ public class HigherTaxonLifeCycle {
             return result;
         } catch (RuntimeException re) {
             log.error("Error", re);
-            ;
             return false;
         }
     }
@@ -428,7 +422,6 @@ public class HigherTaxonLifeCycle {
             return result;
         } catch (RuntimeException re) {
             log.error("Error", re);
-            ;
             return null;
         }
     }
@@ -479,7 +472,6 @@ public class HigherTaxonLifeCycle {
             return result;
         } catch (RuntimeException re) {
             log.error("Error", re);
-            ;
             return null;
         }
     }
@@ -533,7 +525,6 @@ public class HigherTaxonLifeCycle {
             return result;
         } catch (RuntimeException re) {
             log.error("Error", re);
-            ;
             return null;
         }
     }

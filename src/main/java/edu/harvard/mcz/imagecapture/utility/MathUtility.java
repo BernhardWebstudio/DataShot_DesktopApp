@@ -31,10 +31,7 @@ public class MathUtility {
      * @return True if a and b are equal when rounded out to ten decimal places.
      */
     public static boolean equalTenPlaces(double a, double b) {
-        boolean returnvalue = false;
-        if (Math.round(a * 10000000000d) == Math.round(b * 10000000000d)) {
-            returnvalue = true;
-        }
+        boolean returnvalue = Math.round(a * 10000000000d) == Math.round(b * 10000000000d);
         return returnvalue;
     }
 

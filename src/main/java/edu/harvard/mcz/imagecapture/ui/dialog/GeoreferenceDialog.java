@@ -45,6 +45,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
+
 /**
  *
  */
@@ -607,13 +608,17 @@ public class GeoreferenceDialog extends JDialog {
             }
         });
 
+        saveData();
+
         // also propagate changes to other screen
         if (parent != null) {
             parent.setLocationData(
                     getIndexIfAvailable(settings, pasteValues, ImageCaptureProperties.KEY_EXCEL_COL_VERBATIM_LOC),
                     getIndexIfAvailable(settings, pasteValues, ImageCaptureProperties.KEY_EXCEL_COL_SPECIFIC_LOC),
                     getIndexIfAvailable(settings, pasteValues, ImageCaptureProperties.KEY_EXCEL_COL_COUNTRY),
-                    getIndexIfAvailable(settings, pasteValues, ImageCaptureProperties.KEY_EXCEL_COL_STATE_PROVINCE)
+                    getIndexIfAvailable(settings, pasteValues, ImageCaptureProperties.KEY_EXCEL_COL_STATE_PROVINCE),
+                    textFieldDecimalLat.getText(),
+                    textFieldDecimalLong.getText()
             );
         }
     }

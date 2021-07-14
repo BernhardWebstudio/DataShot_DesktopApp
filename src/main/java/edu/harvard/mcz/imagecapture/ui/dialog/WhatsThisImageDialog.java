@@ -140,25 +140,19 @@ public class WhatsThisImageDialog extends JDialog {
     }
 
     public boolean isSpecimen() {
-        boolean result = false;
-        if (jComboBox.getSelectedItem().equals(SEL_SPECIMEN) &&
+        boolean result = jComboBox.getSelectedItem().equals(SEL_SPECIMEN) &&
                 Singleton.getSingletonInstance().getBarcodeMatcher().matchesPattern(
-                        jTextFieldBarcode.getText())) {
-            result = true;
-        }
+                        jTextFieldBarcode.getText());
         return result;
     }
 
     public boolean isDrawerImage() {
-        boolean result = false;
-        if (jComboBox.getSelectedItem().equals(SEL_DRAWER) &&
+        boolean result = jComboBox.getSelectedItem().equals(SEL_DRAWER) &&
                 jTextFieldDrawerNumber.getText().matches(
                         Singleton.getSingletonInstance()
                                 .getProperties()
                                 .getProperties()
-                                .getProperty(ImageCaptureProperties.KEY_REGEX_DRAWERNUMBER))) {
-            result = true;
-        }
+                                .getProperty(ImageCaptureProperties.KEY_REGEX_DRAWERNUMBER));
         return result;
     }
 

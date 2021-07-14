@@ -169,10 +169,7 @@ public class SpecimenPartsTableModel extends AbstractDeleteableTableModel {
      */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean result = true;
-        if (columnIndex == 3) {
-            result = false;
-        }
+        boolean result = columnIndex != 3;
         return result;
     }
 

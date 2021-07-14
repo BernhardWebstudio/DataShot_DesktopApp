@@ -1,5 +1,11 @@
 # Changelog
 
+## v1.14.1
+* [[`7a8e6109ad`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/7a8e6109ad)] - Fix issue where paste excel would not paste as much as possible (Tim Bernhard)
+* [[`e5fc6ed537`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e5fc6ed537)] - Minor setup fixes (Tim Bernhard)
+* [[`7f80f5430f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/7f80f5430f)] - Update changelog to publish Version v1.14.0 (Tim Bernhard)
+
+
 ## v1.14.0
 * [[`ee731155b5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/ee731155b5)] - Implement sync between new georef fields in main edit and georef dialog (Tim Bernhard)
 * [[`4ea26b87d3`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4ea26b87d3)] - TEst commit (Tim Bernhard)
@@ -16,7 +22,7 @@
 * [[`f1921a95c4`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f1921a95c4)] - Track DataShot version in Tracking (Tim Bernhard)
 * [[`e4acbdc292`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e4acbdc292)] - Correct wrong primary divisions (fixes #34), thanks to Tran Si An Oliver (Tim Bernhard)
 * [[`a2c304221b`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/a2c304221b)] - Deactivate copy-paste once more (Tim Bernhard)
-* [[`a2d281f86f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/a2d281f86f)] - Add 'not recorded' as empty value to be overriden in GeoRef Excel (see #36)\\nhttps://github.com/BernhardWebstudio/DataShot\_DesktopApp/issues/36#issuecomment-774063691 (Tim Bernhard)
+* [[`a2d281f86f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/a2d281f86f)] - Add 'not recorded' as empty value to be overriden in GeoRef Excel (see #36)\nhttps://github.com/BernhardWebstudio/DataShot\_DesktopApp/issues/36#issuecomment-774063691 (Tim Bernhard)
 * [[`43da2dad78`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/43da2dad78)] - Improve the stability of saving when associations were deleted (Tim Bernhard)
 * [[`c3e2d29097`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c3e2d29097)] - Implement a way to paste a whole Excel row. Fixes #36 (Tim Bernhard)
 * [[`4e640abe78`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/4e640abe78)] - Fix issue where specimen attributes were not saved after paste (fixes #35), see also #33 (Tim Bernhard)

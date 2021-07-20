@@ -122,7 +122,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     private JMenuItem jMenuItemReconcileFiles = null;
 
     private JMenuItem jMenuItemStats = null;
-
+    private JMenuItem jMenuItemMeliaStats = null;
     private JMenuItem jMenuItemRepeatOCR = null;
 
     private JMenuItem jMenuItemListRunningJobs = null;
@@ -211,6 +211,7 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemCreateLabels.setEnabled(false);
             jMenuItemStats.setEnabled(false);
             jMenuItemLog.setEnabled(false);
+            jMenuItemMeliaStats.setEnabled(false);
         } else {
             // Anyone authenticated user can change their own password.
             jMenuConfig.setEnabled(true);
@@ -249,6 +250,7 @@ public class MainFrame extends JFrame implements RunnerListener {
                     jMenuItemEditTemplates.setEnabled(true);
                     jMenuItemLoadData.setEnabled(true);
                     jMenuItemCleanupDirectory.setEnabled(true);
+                    jMenuItemMeliaStats.setEnabled(true);
                 }
                 // Enable other menu items only for those with full access rights
                 // Administrator and full roles both have full access rights
@@ -1153,12 +1155,36 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuData.setText("Data");
             jMenuData.setMnemonic(KeyEvent.VK_D);
             jMenuData.add(getJMenuItemSearch());
+            jMenuData.add(getJMenuItemMeliaStats());
             jMenuData.add(getJMenuItemVerbatimTranscription());
             jMenuData.add(getJMenuItemVerbatimClassification());
             jMenuData.add(getJMenuItemBrowseImages());
             jMenuData.add(getJMenuItemBrowseSpecimens());
         }
         return jMenuData;
+    }
+
+    /**
+     * This method initializes the melia statistics menu option
+     *
+     * @return
+     */
+    private JMenuItem getJMenuItemMeliaStats() {
+        if (jMenuItemMeliaStats == null) {
+            jMenuItemMeliaStats = new JMenuItem();
+            jMenuItemMeliaStats.setText("Melia Statistics");
+            jMenuItemMeliaStats.setEnabled(true);
+            jMenuItemMeliaStats.addActionListener(
+                    new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent e) {
+                            MeliaStatisticsDialog s = new MeliaStatisticsDialog(thisMainFrame);
+                            s.setVisible(true);
+                        }
+                    }
+            );
+
+        }
+        return jMenuItemMeliaStats;
     }
 
     /**
@@ -1189,7 +1215,8 @@ public class MainFrame extends JFrame implements RunnerListener {
                             VerbatimToTranscribeDialog s = new VerbatimToTranscribeDialog();
                             s.setVisible(true);
                         }
-                    });
+                    }
+            );
         }
         return jMenuItemVerbatimTranscription;
     }

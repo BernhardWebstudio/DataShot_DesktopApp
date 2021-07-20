@@ -31,16 +31,13 @@ import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.lifecycle.TrackingLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.field.JIntegerField;
 import net.miginfocom.swing.MigLayout;
+import org.jdatepicker.JDatePicker;
+import org.jdatepicker.UtilDateModel;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -79,7 +76,7 @@ public class SearchDialog extends JDialog {
     private JIntegerField jOffsetNumberField = null;
     private JIntegerField jLimitNumberField = null;
     private JTextField jTextFieldTribe = null;
-    private JFormattedTextField jTextFieldDateModified = null;
+    private JDatePicker jTextFieldDateModified = null;
     //private JTextField jTextFieldPrimaryDivision = null;
     private JComboBox<String> jComboBoxPrimaryDivision = null;
     private JTextField textFieldHigherGeog;
@@ -186,16 +183,9 @@ public class SearchDialog extends JDialog {
                     if (jTextFieldVerbatimLocality.getText() != null && jTextFieldVerbatimLocality.getText().length() > 0) {
                         searchCriteria.setVerbatimLocality(jTextFieldVerbatimLocality.getText());
                     }
-                    if (jTextFieldDateModified.getText() != null && jTextFieldDateModified.getText().length() > 0) {
-                        Date date = null;
-                        try {
-                            date = (new SimpleDateFormat("dd.MM.yyyy")).parse(jTextFieldDateModified.getText());
-                        } catch (ParseException parseException) {
-                            parseException.printStackTrace();
-                        }
-                        if (date != null) {
-                            searchCriteria.setDateLastUpdated(date);
-                        }
+                    Date fieldModifiedValue = (Date) jTextFieldDateModified.getModel().getValue();
+                    if (fieldModifiedValue != null) {
+                        searchCriteria.setDateLastUpdated(fieldModifiedValue);
                     }
 					/*if (jTextFieldPrimaryDivision.getText()!=null && jTextFieldPrimaryDivision.getText().length() > 0) { 
 						searchCriteria.setPrimaryDivison(jTextFieldPrimaryDivision.getText());
@@ -382,19 +372,7 @@ public class SearchDialog extends JDialog {
 
     private Component getLastUpdatedJTextField() {
         if (jTextFieldDateModified == null) {
-            DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
-            jTextFieldDateModified = new JFormattedTextField(df);
-            // Fixes issue where when emptying the field, the value would come back.
-            // Note though this is only a workaround
-            jTextFieldDateModified.setFocusLostBehavior(JFormattedTextField.PERSIST);
-            jTextFieldDateModified.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    if (!jTextFieldDateModified.isEditValid()) {
-                        jTextFieldDateModified.setValue(null);
-                    }
-                }
-            });
+            jTextFieldDateModified = new JDatePicker(new UtilDateModel());
         }
         return jTextFieldDateModified;
     }

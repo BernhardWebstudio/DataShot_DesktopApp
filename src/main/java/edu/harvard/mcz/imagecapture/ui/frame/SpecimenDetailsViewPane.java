@@ -854,7 +854,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         }
         getLastUpdatedByJTextField().setText(specimen.getLastUpdatedBy());
         if (specimen.getDateLastUpdated() != null) {
-            getLastUpdatedByJTextField().setText(
+            getJTextFieldDateUpdated().setText(
                     specimen.getDateLastUpdated().toString());
         }
 
@@ -1380,7 +1380,6 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField getLastUpdatedByJTextField() {
         if (jTextFieldLastUpdatedBy == null) {
             jTextFieldLastUpdatedBy = new JTextField();
-            jTextFieldLastUpdatedBy.setEditable(specimen.isEditable());
             jTextFieldLastUpdatedBy.setEditable(false);
             jTextFieldLastUpdatedBy.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "LastUpdatedBy"));

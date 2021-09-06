@@ -25,6 +25,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Uses a system runtime call to tesseract to obtain OCR text from a TIFF image
@@ -122,15 +125,14 @@ public class TesseractOCR implements OCR {
             log.debug("in TesseractOCR.getOCRText() 3");
 
             // Run tesseract to OCR the target file.
-            String runCommand =
-                    Singleton.getSingletonInstance()
-                            .getProperties()
-                            .getProperties()
-                            .getProperty(ImageCaptureProperties.KEY_TESSERACT_EXECUTABLE) +
-                            target + " " + tempFileBase + " " + language;
-            log.debug("in TesseractOCR.getOCRText() 4");
+            List<String> runCommand = new ArrayList<>();
+            runCommand.addAll(Arrays.asList(Singleton.getSingletonInstance()
+                    .getProperties()
+                    .getProperties()
+                    .getProperty(ImageCaptureProperties.KEY_TESSERACT_EXECUTABLE),
+                    target, tempFileBase, language));
 
-            Process proc = r.exec(runCommand);
+            Process proc = r.exec((String[]) runCommand.toArray());
             log.debug("in TesseractOCR.getOCRText() 5");
 
             System.out.println(runCommand);

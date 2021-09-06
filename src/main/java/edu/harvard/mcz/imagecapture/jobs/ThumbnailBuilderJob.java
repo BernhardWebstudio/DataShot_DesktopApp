@@ -107,14 +107,15 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
                 if (mogrify == null || mogrify.trim().length() > 0) {
                     makeWithJava = true;
                 } else {
-                    String runCommand = mogrify + " -path thumbs -resize " + thumbWidth +
-                            "x" + thumbHeight + " " + filesToThumb;
+                    List<String> runCommand = new ArrayList<>();
+                    runCommand.addAll(Arrays.asList(mogrify, "-path", "thumbs", "-resize", thumbWidth + "x" + thumbHeight));
+                    runCommand.add(filesToThumb.toString());
 
                     Runtime r = Runtime.getRuntime();
                     // log.debug("Debug {}", runCommand);
                     try {
                         String[] env = {""};
-                        Process proc = r.exec(runCommand, env, startPoint);
+                        Process proc = r.exec((String[]) runCommand.toArray(), env, startPoint);
                         InputStream stderr = proc.getErrorStream();
                         InputStreamReader isrstderr = new InputStreamReader(stderr);
                         BufferedReader br = new BufferedReader(isrstderr);

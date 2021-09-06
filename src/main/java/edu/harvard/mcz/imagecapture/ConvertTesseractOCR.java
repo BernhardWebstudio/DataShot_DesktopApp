@@ -29,7 +29,10 @@ import javax.imageio.ImageWriter;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Takes a buffered image, generates a TIFF file from it with a call
@@ -141,22 +144,22 @@ public class ConvertTesseractOCR implements OCR {
                 log.debug("in ConvertTesseractOCR.getOCRText() 10");
                 // Run imagemagick to convert the target file to TIFF for
                 // String runCommand = "convert temptiff.jpg -depth 8 temptiff.tif";
-                String runCommand =
+                List<String> runCommand = new ArrayList<>();
+                runCommand.addAll(Arrays.asList(Singleton.getSingletonInstance()
+                        .getProperties()
+                        .getProperties()
+                        .getProperty(ImageCaptureProperties.KEY_CONVERT_EXECUTABLE),
+                        "temptiff.jpg",
                         Singleton.getSingletonInstance()
                                 .getProperties()
                                 .getProperties()
-                                .getProperty(ImageCaptureProperties.KEY_CONVERT_EXECUTABLE) +
-                                " temptiff.jpg " +
-                                Singleton.getSingletonInstance()
-                                        .getProperties()
-                                        .getProperties()
-                                        .getProperty(ImageCaptureProperties.KEY_CONVERT_PARAMETERS) +
-                                " temptiff.tif";
+                                .getProperty(ImageCaptureProperties.KEY_CONVERT_PARAMETERS),
+                        "temptiff.tif"));
                 log.debug("in ConvertTesseractOCR.getOCRText() 11 runCommand is " +
-                        runCommand);
+                        runCommand.toString());
                 Runtime r = Runtime.getRuntime();
                 log.debug("in ConvertTesseractOCR.getOCRText() 12");
-                Process proc = r.exec(runCommand);
+                Process proc = r.exec((String[]) runCommand.toArray());
                 log.debug("in ConvertTesseractOCR.getOCRText() 13");
                 System.out.println(runCommand);
                 int exitVal = proc.waitFor();

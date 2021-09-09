@@ -103,7 +103,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JButton jButtonPaste = null;
     private JButton jButtonPrevious = null;
     private JButton jButtonSave = null;
-    private JButton jButtonSaveNext = null;
+    //private JButton jButtonSaveNext = null;
     private JButton jButtonSpecificLocality = null;
     private JCheckBox jCheckBoxValidDistributionFlag = null;
     private JComboBox<String> cbTypeStatus;
@@ -1078,7 +1078,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             // row
             jPanel.add(this.getAccordionDetailsPanel(), "grow, span 4");
             // section: controls
-            int splitSize = copyPasteActivated ? 7 : 5;
+            int splitSize = copyPasteActivated ? 6 : 4;
             jPanel.add(this.getJButtonHistory(),
                     "span, split " + splitSize); //, "span, split 4");//, "sizegroup
             if (copyPasteActivated) {
@@ -1092,29 +1092,29 @@ public class SpecimenDetailsViewPane extends JPanel {
                         "tag apply"); //, "sizegroup controls");
             }
             jPanel.add(this.getSaveJButton(), "tag apply"); //, "sizegroup controls");
-            jPanel.add(this.getSaveNextJButton(), "tag next, tag apply");
+//            jPanel.add(this.getSaveNextJButton(), "tag next, tag apply");
         }
         return jPanel;
     }
 
-    private JButton getSaveNextJButton() {
-        if (jButtonSaveNext == null) {
-            jButtonSaveNext = new JButton(WorkFlowStatus.STAGE_1 + ", Save, Next");
-            SpecimenDetailsViewPane self = this;
-            jButtonSaveNext.setEnabled(specimen.isEditable());
-            jButtonSaveNext.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    self.getJComboBoxWorkflowStatus().setSelectedItem(WorkFlowStatus.STAGE_1);
-                    self.jButtonSave.doClick();
-                    if (self.isClean()) {
-                        self.jButtonNext.doClick();
-                    }
-                }
-            });
-        }
-        return jButtonSaveNext;
-    }
+//    private JButton getSaveNextJButton() {
+//        if (jButtonSaveNext == null) {
+//            jButtonSaveNext = new JButton(WorkFlowStatus.STAGE_1 + ", Save, Next");
+//            SpecimenDetailsViewPane self = this;
+//            jButtonSaveNext.setEnabled(specimen.isEditable());
+//            jButtonSaveNext.addActionListener(new ActionListener() {
+//                @Override
+//                public void actionPerformed(ActionEvent actionEvent) {
+//                    self.getJComboBoxWorkflowStatus().setSelectedItem(WorkFlowStatus.STAGE_1);
+//                    self.jButtonSave.doClick();
+//                    if (self.isClean()) {
+//                        self.jButtonNext.doClick();
+//                    }
+//                }
+//            });
+//        }
+//        return jButtonSaveNext;
+//    }
 
     private JButton getJButtonPasteExcel() {
         if (pasteExcelButton == null) {

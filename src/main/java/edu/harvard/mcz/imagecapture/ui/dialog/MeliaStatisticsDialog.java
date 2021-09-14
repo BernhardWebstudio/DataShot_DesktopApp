@@ -167,7 +167,7 @@ public class MeliaStatisticsDialog extends JDialog {
         String startDateFormatted = format.format(startDate);
         String endDateFormatted = format.format(endDate);
         String[] families = getFamiliesTextField().getText().split("\n|,");
-        List familiesList = Arrays.asList(families);
+        List familiesList = Arrays.asList(Arrays.stream(families).map(String::trim).toArray(String[]::new));
         log.debug("Doing Melia statistics with " + startDateFormatted + ", " + endDateFormatted + ", and " + String.join(", ", families));
         // finally, all right, prepare & run queries
         String results = "";
@@ -182,26 +182,27 @@ public class MeliaStatisticsDialog extends JDialog {
         try {
 
             //
-            Query query1 = session.createQuery("SELECT count(DISTINCT i.imageId) FROM ICImage i INNER JOIN i.specimen AS s WHERE i.path < :end AND i.path > :start AND s.family in :families");
+            Query query1 = session.createQuery("SELECT count(DISTINCT i.imageId) FROM ICImage i LEFT JOIN i.specimen AS s WHERE i.path < :end AND i.path > :start AND s.family in (:families)");
             query1.setParameter("end", endDateFormatted);
             query1.setParameter("start", startDateFormatted);
-            query1.setParameter("families", familiesList);
+            query1.setParameterList("families", familiesList);
+            List resultsList = query1.getResultList();
             String results1 = CastUtility.castToString(query1.getSingleResult());
             results += "Nr. of ICImages: " + results1 + "\n";
 
             //
-            Query query2 = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM ICImage i INNER JOIN i.specimen AS s WHERE i.path < :end AND i.path > :start  AND s.family IN :families");
+            Query query2 = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM ICImage i LEFT JOIN i.specimen AS s WHERE i.path < :end AND i.path > :start AND s.family IN (:families)");
             query2.setParameter("end", endDateFormatted);
             query2.setParameter("start", startDateFormatted);
-            query2.setParameter("families", familiesList);
+            query2.setParameterList("families", familiesList);
             String results2 = CastUtility.castToString(query2.getSingleResult());
             results += "Corresponding to #specimen: " + results2 + "\n";
 
             //
-            Query query3 = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM Tracking t INNER JOIN t.specimen as s WHERE t.eventDateTime < :end AND t.eventDateTime > :start AND t.eventType = :eventType AND s.family IN :families");
+            Query query3 = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM Tracking t LEFT JOIN t.specimen as s WHERE t.eventDateTime < :end AND t.eventDateTime > :start AND t.eventType LIKE :eventType AND s.family IN (:families)");
             query3.setParameter("end", endDate);
             query3.setParameter("start", startDate);
-            query3.setParameter("families", familiesList);
+            query3.setParameterList("families", familiesList);
             query3.setParameter("eventType", "Text Entered");
             String results3 = CastUtility.castToString(query3.getSingleResult());
             results += "Text Entered in this date-range: " + results3 + "\n";

@@ -121,6 +121,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     private JMenuItem jMenuItemCreateLabels = null;
     private JMenuItem jMenuItemReconcileFiles = null;
 
+    private JMenuItem jMenuItemBatchUpdate = null;
     private JMenuItem jMenuItemStats = null;
     private JMenuItem jMenuItemMeliaStats = null;
     private JMenuItem jMenuItemRepeatOCR = null;
@@ -212,6 +213,7 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemStats.setEnabled(false);
             jMenuItemLog.setEnabled(false);
             jMenuItemMeliaStats.setEnabled(false);
+            jMenuItemBatchUpdate.setEnabled(false);
         } else {
             // Anyone authenticated user can change their own password.
             jMenuConfig.setEnabled(true);
@@ -265,6 +267,7 @@ public class MainFrame extends JFrame implements RunnerListener {
                     jMenuItemQCBarcodes.setEnabled(true);
                     jMenuItemRecheckTemplates.setEnabled(true);
                     jMenuItemRecheckAllTemplates.setEnabled(true);
+                    jMenuItemBatchUpdate.setEnabled(true);
                 }
             } catch (Exception e) {
                 // catch any problem with testing administration or user rights and do
@@ -1160,8 +1163,24 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuData.add(getJMenuItemVerbatimClassification());
             jMenuData.add(getJMenuItemBrowseImages());
             jMenuData.add(getJMenuItemBrowseSpecimens());
+            jMenuData.add(getJMenuItemBatchUpdate());
         }
         return jMenuData;
+    }
+
+    private JMenuItem getJMenuItemBatchUpdate() {
+        if (jMenuItemBatchUpdate == null) {
+            jMenuItemBatchUpdate = new JMenuItem("Batch Update");
+            jMenuItemBatchUpdate.addActionListener(
+                    new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent e) {
+                            BatchUpdateDialog dialog = new BatchUpdateDialog(thisMainFrame);
+                            dialog.setVisible(true);
+                        }
+                    }
+            );
+        }
+        return jMenuItemBatchUpdate;
     }
 
     /**

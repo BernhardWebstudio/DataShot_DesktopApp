@@ -1168,6 +1168,11 @@ public class MainFrame extends JFrame implements RunnerListener {
         return jMenuData;
     }
 
+    /**
+     * This method initializes the menu item for batch updates
+     *
+     * @return
+     */
     private JMenuItem getJMenuItemBatchUpdate() {
         if (jMenuItemBatchUpdate == null) {
             jMenuItemBatchUpdate = new JMenuItem("Batch Update");

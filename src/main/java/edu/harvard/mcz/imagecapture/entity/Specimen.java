@@ -225,11 +225,17 @@ public class Specimen implements Serializable {
     }
 
     public Boolean isEditable(Users user) {
-        return !this.isExported();
+        boolean canEdit = !this.isExported();
+        if (user != null) {
+            canEdit = canEdit && (user.isUserRole(Users.ROLE_FULL) || user.isUserRole(Users.ROLE_ADMINISTRATOR) || this.getTypeStatus() != WorkFlowStatus.STAGE_CLEAN);
+        } else {
+            canEdit = canEdit && this.getTypeStatus() != WorkFlowStatus.STAGE_CLEAN;
+        }
+        return canEdit;
     }
 
     public Boolean isEditable() {
-        return this.isEditable(null);
+        return this.isEditable(Singleton.getSingletonInstance().getUser());
     }
 
     public String getPrimaryDivisonISO() {

@@ -75,6 +75,7 @@ public class WorkFlowStatus {
     /**
      * State change for a specimen record indicating that the specimen record that
      * has been reviewed by a taxonomist.
+     * Record is now only editable by Admins.
      */
     public static final String STAGE_CLEAN = "Specialist Reviewed";
 

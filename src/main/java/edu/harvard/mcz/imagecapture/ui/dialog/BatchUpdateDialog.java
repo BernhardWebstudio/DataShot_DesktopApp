@@ -109,7 +109,7 @@ public class BatchUpdateDialog extends JDialog {
 
     private void doApplyChange() {
         String fieldName = ((UpdateableField) this.getFieldSelectionJComboBox().getSelectedItem()).getDatabaseDescription();
-        String conditionQuery = "WHERE " + fieldName + " LIKE :fromValue";
+        String conditionQuery = "WHERE " + fieldName + " LIKE :fromValue AND s.nahimaExported = 0";
 
         Session session;
         try {
@@ -147,7 +147,7 @@ public class BatchUpdateDialog extends JDialog {
             if (fieldName.startsWith("s.")) {
                 updateQuery = session.createQuery("UPDATE Specimen s SET " + fieldName + "= :toValue " + conditionQuery);
             } else if (fieldName.startsWith("c.")) {
-                updateQuery = session.createQuery("UPDATE Collector c SET " + fieldName + "= :toValue " + conditionQuery);
+                updateQuery = session.createQuery("UPDATE Collector c LEFT JOIN c.specimen AS s SET " + fieldName + "= :toValue " + conditionQuery);
             } else {
                 log.error("Unhandled updateable field prefix");
                 return;

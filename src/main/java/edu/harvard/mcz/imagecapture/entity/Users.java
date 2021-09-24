@@ -161,7 +161,7 @@ public class Users implements Serializable {
      * privileged class of users, e.g. isUserRole(Users.ROLE_DATAENTRY) returns true for a user who
      * is in role ROLE_FULL.
      *
-     * @param aUserRole the role to test, one of ROLE_DATAENTRY, ROLE_FULL, or ROLE_ADMINISTRATOR.
+     * @param aUserRole the role to test, one of Users.ROLE_*
      * @return true if this User has rights under aUserRole.
      * @see UsersLifeCycle#isUserAdministrator
      */

@@ -31,6 +31,19 @@ public class UsersLifeCycle {
     private static final Logger log =
             LoggerFactory.getLogger(UsersLifeCycle.class);
 
+    public static boolean isUserAdministrator(Users user) {
+        return user.isUserRole(Users.ROLE_ADMINISTRATOR);
+    }
+
+    /**
+     * A somewhat more secure version of #isUserAdministrator
+     * Why should this be more secure? Check is directly on the DB, meaning
+     * the time frame to change memory is very small.
+     * Also, the roles are guaranteed to be current
+     *
+     * @param aUserID the id of the user to check
+     * @return whether the user is admin or not
+     */
     public static boolean isUserAdministrator(int aUserID) {
         boolean returnValue = false;
 
@@ -45,7 +58,7 @@ public class UsersLifeCycle {
                             .list();
             session.getTransaction().commit();
             if (results.size() == 1) {
-                returnValue = results.get(0).getRole().equals("Administrator");
+                returnValue = results.get(0).getRole().equals(Users.ROLE_ADMINISTRATOR);
             }
         } catch (HibernateException e) {
             session.getTransaction().rollback();
@@ -56,6 +69,19 @@ public class UsersLifeCycle {
         return returnValue;
     }
 
+    public static boolean isUserChiefEditor(Users user) {
+        return user.isUserRole(Users.ROLE_CHIEF_EDITOR);
+    }
+
+    /**
+     * A somewhat more secure version of #isUserChiefEditor
+     * Why should this be more secure? Check is directly on the DB, meaning
+     * the time frame to change memory is very small.
+     * Also, the roles are guaranteed to be current
+     *
+     * @param aUserID the id of the user to check
+     * @return whether the user is admin or not
+     */
     public static boolean isUserChiefEditor(int aUserID) {
         boolean returnValue = false;
 

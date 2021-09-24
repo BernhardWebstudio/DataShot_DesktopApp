@@ -32,7 +32,6 @@ import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
 import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
 import edu.harvard.mcz.imagecapture.jobs.*;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
-import edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycle;
 import edu.harvard.mcz.imagecapture.loader.JobVerbatimFieldLoad;
 import edu.harvard.mcz.imagecapture.ui.dialog.*;
 import org.slf4j.Logger;
@@ -42,14 +41,12 @@ import javax.swing.*;
 import javax.swing.text.DefaultEditorKit;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Main user interface window for image capture application when run as a java
@@ -125,6 +122,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     private JMenuItem jMenuItemStats = null;
     private JMenuItem jMenuItemMeliaStats = null;
     private JMenuItem jMenuItemRepeatOCR = null;
+    private JMenuItem jMenuItemRunNahimaExport = null;
 
     private JMenuItem jMenuItemListRunningJobs = null;
 
@@ -214,6 +212,7 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemLog.setEnabled(false);
             jMenuItemMeliaStats.setEnabled(false);
             jMenuItemBatchUpdate.setEnabled(false);
+            jMenuItemRunNahimaExport.setEnabled(false);
         } else {
             // Anyone authenticated user can change their own password.
             jMenuConfig.setEnabled(true);
@@ -239,15 +238,16 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemRecheckTemplates.setEnabled(false);
             jMenuItemRecheckAllTemplates.setEnabled(false);
             try {
+                Users user = Singleton.getSingletonInstance().getUser();
                 // Enable some menu items only for administrators.
-                if (UsersLifeCycle.isUserAdministrator(
-                        Singleton.getSingletonInstance().getUser().getUserid())) {
+                if (user.isUserRole(Users.ROLE_ADMINISTRATOR)) {
                     // jMenuItemUsers.setEnabled(true);
                     jMenuItemPreprocess.setEnabled(true);
+                    jMenuItemBatchUpdate.setEnabled(true);
+                    jMenuItemRunNahimaExport.setEnabled(true);
                 }
                 // User privileges and some other items to the chief editor.
-                if (UsersLifeCycle.isUserChiefEditor(
-                        Singleton.getSingletonInstance().getUser().getUserid())) {
+                if (user.isUserRole(Users.ROLE_CHIEF_EDITOR)) {
                     jMenuItemUsers.setEnabled(true);
                     jMenuItemEditTemplates.setEnabled(true);
                     jMenuItemLoadData.setEnabled(true);
@@ -256,8 +256,7 @@ public class MainFrame extends JFrame implements RunnerListener {
                 }
                 // Enable other menu items only for those with full access rights
                 // Administrator and full roles both have full access rights
-                if (Singleton.getSingletonInstance().getUser().isUserRole(
-                        Users.ROLE_FULL)) {
+                if (user.isUserRole(Users.ROLE_FULL)) {
                     jMenuAction.setEnabled(true);
                     jMenuItemPreprocessOneDir.setEnabled(true);
                     jMenuConfig.setEnabled(true);
@@ -267,7 +266,6 @@ public class MainFrame extends JFrame implements RunnerListener {
                     jMenuItemQCBarcodes.setEnabled(true);
                     jMenuItemRecheckTemplates.setEnabled(true);
                     jMenuItemRecheckAllTemplates.setEnabled(true);
-                    jMenuItemBatchUpdate.setEnabled(true);
                 }
             } catch (Exception e) {
                 // catch any problem with testing administration or user rights and do
@@ -314,6 +312,7 @@ public class MainFrame extends JFrame implements RunnerListener {
         this.setIconImage(image);
 
         try {
+            assert iconFile != null;
             setIconImage(new ImageIcon(iconFile).getImage());
         } catch (Exception e) {
             log.error("Can't open icon file: " + iconFile);
@@ -384,12 +383,10 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemExit = new JMenuItem();
             jMenuItemExit.setText("Exit");
             jMenuItemExit.setMnemonic(KeyEvent.VK_E);
-            jMenuItemExit.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    ImageCaptureApp.cleanUp();
-                    System.out.println("Exit by user from main menu.");
-                    ImageCaptureApp.exit(ImageCaptureApp.EXIT_NORMAL);
-                }
+            jMenuItemExit.addActionListener(e -> {
+                ImageCaptureApp.cleanUp();
+                System.out.println("Exit by user from main menu.");
+                ImageCaptureApp.exit(ImageCaptureApp.EXIT_NORMAL);
             });
         }
         return jMenuItemExit;
@@ -405,31 +402,29 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemLogout = new JMenuItem();
             jMenuItemLogout.setText("Logout & change user");
             jMenuItemLogout.setMnemonic(KeyEvent.VK_U);
-            jMenuItemLogout.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    // remove the current user's browse (important if this is a userbrowse
-                    // by an administrator.
-                    jPanelCenter.removeAll();
-                    String oldUser = "anon";
-                    try {
-                        oldUser = Singleton.getSingletonInstance().getUserFullName();
-                    } catch (NullPointerException ex) {
-                        // no one was logged in
-                    }
-                    setState(MainFrame.STATE_RESET);
-                    Singleton.getSingletonInstance().unsetCurrentUser();
-                    HibernateUtil.terminateSessionFactory();
-                    Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
-                            "Logged out " + oldUser);
-                    // Force a login dialog by connecting to obtain record count;
-                    SpecimenLifeCycle sls = new SpecimenLifeCycle();
-                    try {
-                        setCount(sls.findSpecimenCountThrows());
-                        ImageCaptureApp.doStartUp();
-                    } catch (ConnectionException e1) {
-                        log.error(e1.getMessage(), e1);
-                        ImageCaptureApp.doStartUpNot();
-                    }
+            jMenuItemLogout.addActionListener(e -> {
+                // remove the current user's browse (important if this is a userbrowse
+                // by an administrator.
+                jPanelCenter.removeAll();
+                String oldUser = "anon";
+                try {
+                    oldUser = Singleton.getSingletonInstance().getUserFullName();
+                } catch (NullPointerException ex) {
+                    // no one was logged in
+                }
+                setState(MainFrame.STATE_RESET);
+                Singleton.getSingletonInstance().unsetCurrentUser();
+                HibernateUtil.terminateSessionFactory();
+                Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
+                        "Logged out " + oldUser);
+                // Force a login dialog by connecting to obtain record count;
+                SpecimenLifeCycle sls = new SpecimenLifeCycle();
+                try {
+                    setCount(sls.findSpecimenCountThrows());
+                    ImageCaptureApp.doStartUp();
+                } catch (ConnectionException e1) {
+                    log.error(e1.getMessage(), e1);
+                    ImageCaptureApp.doStartUpNot();
                 }
             });
         }
@@ -493,12 +488,10 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemAbout = new JMenuItem();
             jMenuItemAbout.setText("About");
             jMenuItemAbout.setMnemonic(KeyEvent.VK_B);
-            jMenuItemAbout.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    AboutDialog a = new AboutDialog();
-                    a.pack();
-                    a.setVisible(true);
-                }
+            jMenuItemAbout.addActionListener(e -> {
+                AboutDialog a = new AboutDialog();
+                a.pack();
+                a.setVisible(true);
             });
         }
         return jMenuItemAbout;
@@ -516,25 +509,23 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemPreprocess.setText("Preprocess All");
             jMenuItemPreprocess.setEnabled(true);
             try {
-                jMenuItemPreprocess.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));
+                jMenuItemPreprocess.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemScanOneBarcode.");
                 log.error(e.getLocalizedMessage());
             }
-            jMenuItemPreprocess.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    int result = JOptionPane.showConfirmDialog(
-                            Singleton.getSingletonInstance().getMainFrame(),
-                            "Are you sure, this will check all image files and may take some time.",
-                            "Preprocess All?", JOptionPane.YES_NO_OPTION);
-                    if (result == JOptionPane.YES_OPTION) {
-                        JobAllImageFilesScan scan = new JobAllImageFilesScan();
-                        (new Thread(scan)).start();
-                    } else {
-                        Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
-                                "Preprocess canceled.");
-                    }
+            jMenuItemPreprocess.addActionListener(e -> {
+                int result = JOptionPane.showConfirmDialog(
+                        Singleton.getSingletonInstance().getMainFrame(),
+                        "Are you sure, this will check all image files and may take some time.",
+                        "Preprocess All?", JOptionPane.YES_NO_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    JobAllImageFilesScan scan = new JobAllImageFilesScan();
+                    (new Thread(scan)).start();
+                } else {
+                    Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
+                            "Preprocess canceled.");
                 }
             });
         }
@@ -544,7 +535,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     /**
      * This method initializes the jMenuItem to delete a specimen record
      *
-     * @return
+     * @return the menu item to delete a specimen record
      */
     private JMenuItem getJMenuItemDelete() {
         if (jMenuItemDelete == null) {
@@ -552,39 +543,37 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemDelete.setText("Delete a specimen record");
             jMenuItemDelete.setEnabled(true);
             try {
-                jMenuItemDelete.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/red-warning-icon.png")));
+                jMenuItemDelete.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/red-warning-icon.png"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemScanOneBarcode.");
                 log.error(e.getLocalizedMessage());
             }
-            jMenuItemDelete.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    JTextField barcode = new JTextField();
-                    final JComponent[] inputs = new JComponent[]{
-                            new JLabel(
-                                    "<html>WARNING: ACTION IRREVERSIBLE!<br/><br/>Is there only one image associated with this record?<br/>Have you recorded the image file number/s and date imaged?<br/>Have you recorded the genus and species name?<br/><br/>Please enter the barcode of the specimen record you would like to delete:<br/>"),
-                            barcode};
-                    int result = JOptionPane.showConfirmDialog(null, inputs,
-                            "Delete a specimen record",
-                            JOptionPane.CANCEL_OPTION);
-                    if (result == JOptionPane.YES_OPTION) {
-                        String barcodeEntered = barcode.getText();
-                        SpecimenLifeCycle sls = new SpecimenLifeCycle();
-                        int delete_result = sls.deleteSpecimenByBarcode(barcodeEntered);
-                        if (delete_result == 0) {
-                            JOptionPane.showConfirmDialog(
-                                    null, "Error: specimen record not found.",
-                                    "Delete specimen record", JOptionPane.PLAIN_MESSAGE);
-                        } else if (delete_result == 1) {
-                            JOptionPane.showConfirmDialog(
-                                    null, "Specimen has been deleted successfully.",
-                                    "Delete specimen record", JOptionPane.PLAIN_MESSAGE);
-                        } else {
-                            JOptionPane.showConfirmDialog(null, "Error: delete failed.",
-                                    "Delete specimen record",
-                                    JOptionPane.PLAIN_MESSAGE);
-                        }
+            jMenuItemDelete.addActionListener(e -> {
+                JTextField barcode = new JTextField();
+                final JComponent[] inputs = new JComponent[]{
+                        new JLabel(
+                                "<html>WARNING: ACTION IRREVERSIBLE!<br/><br/>Is there only one image associated with this record?<br/>Have you recorded the image file number/s and date imaged?<br/>Have you recorded the genus and species name?<br/><br/>Please enter the barcode of the specimen record you would like to delete:<br/>"),
+                        barcode};
+                int result = JOptionPane.showConfirmDialog(null, inputs,
+                        "Delete a specimen record",
+                        JOptionPane.OK_CANCEL_OPTION);
+                if (result == JOptionPane.YES_OPTION) {
+                    String barcodeEntered = barcode.getText();
+                    SpecimenLifeCycle sls = new SpecimenLifeCycle();
+                    int delete_result = sls.deleteSpecimenByBarcode(barcodeEntered);
+                    if (delete_result == 0) {
+                        JOptionPane.showConfirmDialog(
+                                null, "Error: specimen record not found.",
+                                "Delete specimen record", JOptionPane.DEFAULT_OPTION);
+                    } else if (delete_result == 1) {
+                        JOptionPane.showConfirmDialog(
+                                null, "Specimen has been deleted successfully.",
+                                "Delete specimen record", JOptionPane.DEFAULT_OPTION);
+                    } else {
+                        JOptionPane.showConfirmDialog(null, "Error: delete failed.",
+                                "Delete specimen record",
+                                JOptionPane.DEFAULT_OPTION);
                     }
                 }
             });
@@ -595,26 +584,24 @@ public class MainFrame extends JFrame implements RunnerListener {
     /**
      * This method initializes the jMenuItem to load a verbatim field/data
      *
-     * @return
+     * @return the menu item to load data
      */
     private JMenuItem getJMenuItemLoadData() {
         if (jMenuItemLoadData == null) {
             jMenuItemLoadData = new JMenuItem();
             jMenuItemLoadData.setText("Load Data");
             try {
-                jMenuItemLoadData.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/cycle_icon_16px.jpg")));
+                jMenuItemLoadData.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/cycle_icon_16px.jpg"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemRecheckAllTemplates.");
                 log.error("Error", e);
             }
             jMenuItemLoadData.setEnabled(true);
-            jMenuItemLoadData.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    // TODO: Launch FieldLoaderWizard and have it launch job.
-                    JobVerbatimFieldLoad scan = new JobVerbatimFieldLoad();
-                    (new Thread(scan)).start();
-                }
+            jMenuItemLoadData.addActionListener(e -> {
+                // TODO: Launch FieldLoaderWizard and have it launch job.
+                JobVerbatimFieldLoad scan = new JobVerbatimFieldLoad();
+                (new Thread(scan)).start();
             });
         }
         return jMenuItemLoadData;
@@ -645,19 +632,17 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemScanOneBarcode.setText("Scan A File For Barcodes");
             jMenuItemScanOneBarcode.setMnemonic(KeyEvent.VK_S);
             try {
-                jMenuItemScanOneBarcode.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));
+                jMenuItemScanOneBarcode.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg"))));
             } catch (Exception e) {
                 System.out.println("Can't open icon file for jMenuItemScanOneBarcode.");
                 System.out.println(e.getLocalizedMessage());
             }
             jMenuItemScanOneBarcode.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            JobSingleBarcodeScan scan = new JobSingleBarcodeScan(false);
-                            scan.registerListener(thisMainFrame);
-                            (new Thread(scan)).start();
-                        }
+                    e -> {
+                        JobSingleBarcodeScan scan = new JobSingleBarcodeScan(false);
+                        scan.registerListener(thisMainFrame);
+                        (new Thread(scan)).start();
                     });
         }
         return jMenuItemScanOneBarcode;
@@ -674,18 +659,16 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemScanOneBarcodeSave.setMnemonic(KeyEvent.VK_D);
             jMenuItemScanOneBarcodeSave.setText("Database One File");
             try {
-                jMenuItemScanOneBarcodeSave.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));
+                jMenuItemScanOneBarcodeSave.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemScanOneBarcode.");
                 log.error(e.getLocalizedMessage());
             }
             jMenuItemScanOneBarcodeSave.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            JobSingleBarcodeScan scan = new JobSingleBarcodeScan(true);
-                            (new Thread(scan)).start();
-                        }
+                    e -> {
+                        JobSingleBarcodeScan scan = new JobSingleBarcodeScan(true);
+                        (new Thread(scan)).start();
                     });
         }
         return jMenuItemScanOneBarcodeSave;
@@ -713,7 +696,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     /**
      * This method initializes the menu to access the users overview
      *
-     * @return
+     * @return the menu item to open user management
      */
     private JMenuItem getJMenuItemUsers() {
         if (jMenuItemUsers == null) {
@@ -722,30 +705,28 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemUsers.setMnemonic(KeyEvent.VK_U);
             jMenuItemUsers.setEnabled(false);
             try {
-                jMenuItemUsers.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/people_icon_16px.png")));
+                jMenuItemUsers.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/people_icon_16px.png"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemUsers.");
                 log.error("Error", e);
             }
-            jMenuItemUsers.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    Singleton.getSingletonInstance().getMainFrame().setCursor(
-                            Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                    ulb = new UserListBrowser();
-                    if (slb != null) {
-                        jPanelCenter.remove(slb);
-                    }
-                    if (ilb != null) {
-                        jPanelCenter.remove(ilb);
-                    }
-                    jPanelCenter.removeAll();
-                    jPanelCenter.add(ulb, BorderLayout.CENTER);
-                    jPanelCenter.revalidate();
-                    jPanelCenter.repaint();
-                    Singleton.getSingletonInstance().getMainFrame().setCursor(
-                            Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+            jMenuItemUsers.addActionListener(e -> {
+                Singleton.getSingletonInstance().getMainFrame().setCursor(
+                        Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                ulb = new UserListBrowser();
+                if (slb != null) {
+                    jPanelCenter.remove(slb);
                 }
+                if (ilb != null) {
+                    jPanelCenter.remove(ilb);
+                }
+                jPanelCenter.removeAll();
+                jPanelCenter.add(ulb, BorderLayout.CENTER);
+                jPanelCenter.revalidate();
+                jPanelCenter.repaint();
+                Singleton.getSingletonInstance().getMainFrame().setCursor(
+                        Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
             });
         }
         return jMenuItemUsers;
@@ -777,12 +758,10 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemPreferences = new JMenuItem();
             jMenuItemPreferences.setText("Preferences");
             jMenuItemPreferences.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            PropertiesEditor p = new PropertiesEditor();
-                            p.pack();
-                            p.setVisible(true);
-                        }
+                    e -> {
+                        PropertiesEditor p = new PropertiesEditor();
+                        p.pack();
+                        p.setVisible(true);
                     });
         }
         return jMenuItemPreferences;
@@ -799,7 +778,7 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemCopy.setText("Copy");
             jMenuItemCopy.setMnemonic(KeyEvent.VK_C);
             jMenuItemCopy.setAccelerator(
-                    KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
+                    KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
             jMenuItemCopy.setEnabled(true);
         }
         return jMenuItemCopy;
@@ -816,7 +795,7 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemPaste.setText("Paste");
             jMenuItemPaste.setMnemonic(KeyEvent.VK_P);
             jMenuItemPaste.setAccelerator(
-                    KeyStroke.getKeyStroke(KeyEvent.VK_V, ActionEvent.CTRL_MASK));
+                    KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
             jMenuItemPaste.setEnabled(true);
         }
         return jMenuItemPaste;
@@ -832,13 +811,11 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemLog = new JMenuItem();
             jMenuItemLog.setText("View History");
             jMenuItemLog.setMnemonic(KeyEvent.VK_H);
-            jMenuItemLog.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    EventLogFrame logWindow = new EventLogFrame();
-                    logWindow.pack();
-                    logWindow.setVisible(true);
-                    System.gc();
-                }
+            jMenuItemLog.addActionListener(e -> {
+                EventLogFrame logWindow = new EventLogFrame();
+                logWindow.pack();
+                logWindow.setVisible(true);
+                System.gc();
             });
         }
         return jMenuItemLog;
@@ -964,26 +941,24 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemBrowseSpecimens.setText("Browse Specimens");
             jMenuItemBrowseSpecimens.setMnemonic(KeyEvent.VK_B);
             try {
-                jMenuItemBrowseSpecimens.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/butterfly_icon_16px.png")));
+                jMenuItemBrowseSpecimens.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/butterfly_icon_16px.png"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemBrowseImages.");
                 log.error("Error", e);
             }
             jMenuItemBrowseSpecimens.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            // Create a SpecimenBrowser jpanel and replace the
-                            // the content of the center of jPanelCenter with it.
-                            // TODO: extend beyond switching between ilb and slb.
-                            Singleton.getSingletonInstance().getMainFrame().setCursor(
-                                    Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                            slb = new SpecimenBrowser();
-                            adaptJpanelToSpecimenBrowser(slb);
-                            Singleton.getSingletonInstance().getMainFrame().setCursor(
-                                    Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                            System.gc();
-                        }
+                    e -> {
+                        // Create a SpecimenBrowser jpanel and replace the
+                        // the content of the center of jPanelCenter with it.
+                        // TODO: extend beyond switching between ilb and slb.
+                        Singleton.getSingletonInstance().getMainFrame().setCursor(
+                                Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                        slb = new SpecimenBrowser();
+                        adaptJpanelToSpecimenBrowser(slb);
+                        Singleton.getSingletonInstance().getMainFrame().setCursor(
+                                Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                        System.gc();
                     });
         }
         if (Singleton.getSingletonInstance()
@@ -1029,13 +1004,11 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemEditTemplates.setText("Edit Templates");
             jMenuItemEditTemplates.setMnemonic(KeyEvent.VK_T);
             jMenuItemEditTemplates.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            PositionTemplateEditor templateEditor =
-                                    new PositionTemplateEditor();
-                            templateEditor.pack();
-                            templateEditor.setVisible(true);
-                        }
+                    e -> {
+                        PositionTemplateEditor templateEditor =
+                                new PositionTemplateEditor();
+                        templateEditor.pack();
+                        templateEditor.setVisible(true);
                     });
         }
         return jMenuItemEditTemplates;
@@ -1052,41 +1025,39 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemBrowseImages.setText("Browse Image Files");
             jMenuItemBrowseImages.setMnemonic(KeyEvent.VK_I);
             try {
-                jMenuItemBrowseImages.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/image_icon_16px.png")));
+                jMenuItemBrowseImages.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/image_icon_16px.png"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemBrowseImages.");
                 log.error("Error", e);
             }
             jMenuItemBrowseImages.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            // Create a ImageListBrowser jpanel and replace the
-                            // the content of the center of jPanelCenter with it.
-                            // TODO: extend beyond switching between ilb and slb.
-                            Singleton.getSingletonInstance().getMainFrame().setCursor(
-                                    Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                            ilb = new ImageListBrowser();
-                            jPanelCenter.removeAll();
-                            jPanelCenter.add(ilb, BorderLayout.CENTER);
-                            jPanelCenter.revalidate();
-                            jPanelCenter.repaint();
-                            if (Singleton.getSingletonInstance()
-                                    .getProperties()
-                                    .getProperties()
-                                    .getProperty(ImageCaptureProperties.KEY_ENABLE_BROWSE)
-                                    .equals("false")) {
-                                jMenuItemBrowseSpecimens.setEnabled(false);
-                                jMenuItemBrowseImages.setEnabled(false);
-                            } else {
-                                jMenuItemBrowseSpecimens.setEnabled(true);
-                                jMenuItemBrowseImages.setEnabled(true);
-                            }
-                            setStatusMessage("Found " + ilb.getRowCount() + " images.");
-                            Singleton.getSingletonInstance().getMainFrame().setCursor(
-                                    Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                            System.gc();
+                    e -> {
+                        // Create a ImageListBrowser jpanel and replace the
+                        // the content of the center of jPanelCenter with it.
+                        // TODO: extend beyond switching between ilb and slb.
+                        Singleton.getSingletonInstance().getMainFrame().setCursor(
+                                Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                        ilb = new ImageListBrowser();
+                        jPanelCenter.removeAll();
+                        jPanelCenter.add(ilb, BorderLayout.CENTER);
+                        jPanelCenter.revalidate();
+                        jPanelCenter.repaint();
+                        if (Singleton.getSingletonInstance()
+                                .getProperties()
+                                .getProperties()
+                                .getProperty(ImageCaptureProperties.KEY_ENABLE_BROWSE)
+                                .equals("false")) {
+                            jMenuItemBrowseSpecimens.setEnabled(false);
+                            jMenuItemBrowseImages.setEnabled(false);
+                        } else {
+                            jMenuItemBrowseSpecimens.setEnabled(true);
+                            jMenuItemBrowseImages.setEnabled(true);
                         }
+                        setStatusMessage("Found " + ilb.getRowCount() + " images.");
+                        Singleton.getSingletonInstance().getMainFrame().setCursor(
+                                Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                        System.gc();
                     });
         }
         if (Singleton.getSingletonInstance()
@@ -1124,24 +1095,22 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemPreprocessOneDir.setMnemonic(KeyEvent.VK_P);
             jMenuItemPreprocessOneDir.setEnabled(true);
             try {
-                jMenuItemPreprocessOneDir.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));
+                jMenuItemPreprocessOneDir.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for getJMenuItemPreprocessOne.");
                 log.error(e.getLocalizedMessage());
             }
             jMenuItemPreprocessOneDir.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            JobAllImageFilesScan scan = new JobAllImageFilesScan(
-                                    JobAllImageFilesScan.SCAN_SELECT,
-                                    new File(
-                                            Singleton.getSingletonInstance()
-                                                    .getProperties()
-                                                    .getProperties()
-                                                    .getProperty(ImageCaptureProperties.KEY_IMAGEBASE)));
-                            (new Thread(scan)).start();
-                        }
+                    e -> {
+                        JobAllImageFilesScan scan = new JobAllImageFilesScan(
+                                JobAllImageFilesScan.SCAN_SELECT,
+                                new File(
+                                        Singleton.getSingletonInstance()
+                                                .getProperties()
+                                                .getProperties()
+                                                .getProperty(ImageCaptureProperties.KEY_IMAGEBASE)));
+                        (new Thread(scan)).start();
                     });
         }
         return jMenuItemPreprocessOneDir;
@@ -1164,6 +1133,7 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuData.add(getJMenuItemBrowseImages());
             jMenuData.add(getJMenuItemBrowseSpecimens());
             jMenuData.add(getJMenuItemBatchUpdate());
+            jMenuData.add(getjMenuItemRunNahimaExport());
         }
         return jMenuData;
     }
@@ -1171,21 +1141,33 @@ public class MainFrame extends JFrame implements RunnerListener {
     /**
      * This method initializes the menu item for batch updates
      *
-     * @return
+     * @return the menu item to open batch update dialog
      */
     private JMenuItem getJMenuItemBatchUpdate() {
         if (jMenuItemBatchUpdate == null) {
             jMenuItemBatchUpdate = new JMenuItem("Batch Update");
-            jMenuItemBatchUpdate.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            BatchUpdateDialog dialog = new BatchUpdateDialog(thisMainFrame);
-                            dialog.setVisible(true);
-                        }
-                    }
-            );
+            jMenuItemBatchUpdate.addActionListener(actionEvent -> {
+                BatchUpdateDialog dialog = new BatchUpdateDialog(thisMainFrame);
+                dialog.setVisible(true);
+            });
         }
         return jMenuItemBatchUpdate;
+    }
+
+    /**
+     * This method initializes the menu item for the export to Nahima
+     *
+     * @return the menu item to start the export to nahima
+     */
+    private JMenuItem getjMenuItemRunNahimaExport() {
+        if (jMenuItemRunNahimaExport == null) {
+            jMenuItemRunNahimaExport = new JMenuItem("Nahima Export");
+            jMenuItemRunNahimaExport.addActionListener(actionEvent -> {
+                NahimaExportDialog dialog = new NahimaExportDialog(thisMainFrame);
+                dialog.setVisible(true);
+            });
+        }
+        return jMenuItemRunNahimaExport;
     }
 
     /**
@@ -1198,14 +1180,10 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemMeliaStats = new JMenuItem();
             jMenuItemMeliaStats.setText("Melia Statistics");
             jMenuItemMeliaStats.setEnabled(true);
-            jMenuItemMeliaStats.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            MeliaStatisticsDialog s = new MeliaStatisticsDialog(thisMainFrame);
-                            s.setVisible(true);
-                        }
-                    }
-            );
+            jMenuItemMeliaStats.addActionListener(actionEvent -> {
+                MeliaStatisticsDialog s = new MeliaStatisticsDialog(thisMainFrame);
+                s.setVisible(true);
+            });
 
         }
         return jMenuItemMeliaStats;
@@ -1234,11 +1212,9 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemVerbatimTranscription.setText("Verbatim Transcription");
             jMenuItemVerbatimTranscription.setEnabled(true);
             jMenuItemVerbatimTranscription.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            VerbatimToTranscribeDialog s = new VerbatimToTranscribeDialog();
-                            s.setVisible(true);
-                        }
+                    actionEvent -> {
+                        VerbatimToTranscribeDialog s = new VerbatimToTranscribeDialog();
+                        s.setVisible(true);
                     }
             );
         }
@@ -1250,11 +1226,9 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemVerbatimClassification = new JMenuItem();
             jMenuItemVerbatimClassification.setText("Fill in from Verbatim");
             jMenuItemVerbatimClassification.setEnabled(true);
-            jMenuItemVerbatimClassification.addActionListener(new ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    VerbatimListDialog s = new VerbatimListDialog();
-                    s.setVisible(true);
-                }
+            jMenuItemVerbatimClassification.addActionListener(actionEvent -> {
+                VerbatimListDialog s = new VerbatimListDialog();
+                s.setVisible(true);
             });
         }
         return jMenuItemVerbatimClassification;
@@ -1271,19 +1245,17 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemCheckForABarcode.setText("Preprocess One Image File");
             jMenuItemCheckForABarcode.setMnemonic(KeyEvent.VK_C);
             try {
-                jMenuItemCheckForABarcode.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg")));
+                jMenuItemCheckForABarcode.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/barcode_icon_16px.jpg"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemCheckForABarcode.");
                 log.error("Error", e);
             }
             jMenuItemCheckForABarcode.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            JobSingleBarcodeScan scan = new JobSingleBarcodeScan(false);
-                            scan.registerListener(thisMainFrame);
-                            (new Thread(scan)).start();
-                        }
+                    actionEvent -> {
+                        JobSingleBarcodeScan scan = new JobSingleBarcodeScan(false);
+                        scan.registerListener(thisMainFrame);
+                        (new Thread(scan)).start();
                     });
         }
         return jMenuItemCheckForABarcode;
@@ -1295,11 +1267,9 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemReconcileFiles.setText("Reconcile image files with database");
             jMenuItemReconcileFiles.setMnemonic(KeyEvent.VK_R);
             jMenuItemReconcileFiles.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            JobFileReconciliation r = new JobFileReconciliation();
-                            (new Thread(r)).start();
-                        }
+                    actionEvent -> {
+                        JobFileReconciliation r = new JobFileReconciliation();
+                        (new Thread(r)).start();
                     });
         }
         return jMenuItemReconcileFiles;
@@ -1315,77 +1285,75 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemQCBarcodes = new JMenuItem();
             jMenuItemQCBarcodes.setText("QC Barcodes");
             jMenuItemQCBarcodes.setMnemonic(KeyEvent.VK_B);
-            jMenuItemQCBarcodes.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    Singleton.getSingletonInstance().getMainFrame().setCursor(
-                            Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                    Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
-                            "Running barcode QC checks");
-                    String[] missingBarcodes = SpecimenLifeCycle.getMissingBarcodes();
-                    ilb = new ImageListBrowser(true);
-                    if (slb != null) {
-                        jPanelCenter.remove(slb);
-                    }
-                    if (ulb != null) {
-                        jPanelCenter.remove(ulb);
-                    }
-                    jPanelCenter.removeAll();
-                    jPanelCenter.add(ilb, BorderLayout.CENTER);
-                    jPanelCenter.revalidate();
-                    jPanelCenter.repaint();
-                    Singleton.getSingletonInstance().getMainFrame().setCursor(
-                            Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-                    log.debug("Debug {}", missingBarcodes.length);
-                    if (missingBarcodes.length > 0) {
-                        Counter errorCount = new Counter();
-                        for (int i = 0; i < missingBarcodes.length; i++) {
-                            BarcodeBuilder builder =
-                                    Singleton.getSingletonInstance().getBarcodeBuilder();
-                            BarcodeMatcher matcher =
-                                    Singleton.getSingletonInstance().getBarcodeMatcher();
-                            String previous = builder.makeFromNumber(
-                                    matcher.extractNumber(missingBarcodes[i]) - 1);
-                            String previousFile = "";
-                            String previousPath = "";
-                            SpecimenLifeCycle sls = new SpecimenLifeCycle();
-                            List<Specimen> result = sls.findByBarcode(previous);
-                            if (result != null && (!result.isEmpty())) {
-                                Set<ICImage> images = result.get(0).getICImages();
+            jMenuItemQCBarcodes.addActionListener(e -> {
+                Singleton.getSingletonInstance().getMainFrame().setCursor(
+                        Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
+                        "Running barcode QC checks");
+                String[] missingBarcodes = SpecimenLifeCycle.getMissingBarcodes();
+                ilb = new ImageListBrowser(true);
+                if (slb != null) {
+                    jPanelCenter.remove(slb);
+                }
+                if (ulb != null) {
+                    jPanelCenter.remove(ulb);
+                }
+                jPanelCenter.removeAll();
+                jPanelCenter.add(ilb, BorderLayout.CENTER);
+                jPanelCenter.revalidate();
+                jPanelCenter.repaint();
+                Singleton.getSingletonInstance().getMainFrame().setCursor(
+                        Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+                log.debug("Debug {}", missingBarcodes.length);
+                if (missingBarcodes.length > 0) {
+                    Counter errorCount = new Counter();
+                    for (String missingBarcode : missingBarcodes) {
+                        BarcodeBuilder builder =
+                                Singleton.getSingletonInstance().getBarcodeBuilder();
+                        BarcodeMatcher matcher =
+                                Singleton.getSingletonInstance().getBarcodeMatcher();
+                        String previous = builder.makeFromNumber(
+                                matcher.extractNumber(missingBarcode) - 1);
+                        String previousFile = "";
+                        String previousPath = "";
+                        SpecimenLifeCycle sls = new SpecimenLifeCycle();
+                        List<Specimen> result = sls.findByBarcode(previous);
+                        if (result != null && (!result.isEmpty())) {
+                            Set<ICImage> images = result.get(0).getICImages();
 
-                                if (images != null && (!images.isEmpty())) {
-                                    Iterator<ICImage> it = images.iterator();
-                                    if (it.hasNext()) {
-                                        ICImage image = it.next();
-                                        previousFile = image.getFilename();
-                                        previousPath = image.getPath();
-                                    }
+                            if (images != null && (!images.isEmpty())) {
+                                Iterator<ICImage> it = images.iterator();
+                                if (it.hasNext()) {
+                                    ICImage image = it.next();
+                                    previousFile = image.getFilename();
+                                    previousPath = image.getPath();
                                 }
                             }
-                            RunnableJobError err = new RunnableJobError(
-                                    previousFile, missingBarcodes[i], previousPath, "",
-                                    "Barcode not found", null, null, null,
-                                    RunnableJobError.TYPE_BARCODE_MISSING_FROM_SEQUENCE,
-                                    previousFile, previousPath);
-                            errorCount.appendError(err);
                         }
-                        String report =
-                                "There are at least " + missingBarcodes.length +
-                                        " barcodes missing from the sequence.\nMissing numbers are shown below.\nIf two or more numbers are missing in sequence, only the first will be listed here.\n\nFiles with mismmatched barcodes are shown in main window.\n";
-                        RunnableJobReportDialog errorReportDialog =
-                                new RunnableJobReportDialog(
-                                        Singleton.getSingletonInstance().getMainFrame(), report,
-                                        errorCount.getErrors(),
-                                        RunnableJobErrorTableModel.TYPE_MISSING_BARCODES,
-                                        "QC Barcodes Report");
-                        errorReportDialog.setVisible(true);
-                    } else {
-                        JOptionPane.showMessageDialog(
-                                Singleton.getSingletonInstance().getMainFrame(),
-                                "No barcodes are missing from the sequence.\nAny missmatches are shown in table.",
-                                "Barcode QC Report", JOptionPane.OK_OPTION);
+                        RunnableJobError err = new RunnableJobError(
+                                previousFile, missingBarcode, previousPath, "",
+                                "Barcode not found", null, null, null,
+                                RunnableJobError.TYPE_BARCODE_MISSING_FROM_SEQUENCE,
+                                previousFile, previousPath);
+                        errorCount.appendError(err);
                     }
-                    System.gc();
+                    String report =
+                            "There are at least " + missingBarcodes.length +
+                                    " barcodes missing from the sequence.\nMissing numbers are shown below.\nIf two or more numbers are missing in sequence, only the first will be listed here.\n\nFiles with mismmatched barcodes are shown in main window.\n";
+                    RunnableJobReportDialog errorReportDialog =
+                            new RunnableJobReportDialog(
+                                    Singleton.getSingletonInstance().getMainFrame(), report,
+                                    errorCount.getErrors(),
+                                    RunnableJobErrorTableModel.TYPE_MISSING_BARCODES,
+                                    "QC Barcodes Report");
+                    errorReportDialog.setVisible(true);
+                } else {
+                    JOptionPane.showMessageDialog(
+                            Singleton.getSingletonInstance().getMainFrame(),
+                            "No barcodes are missing from the sequence.\nAny missmatches are shown in table.",
+                            "Barcode QC Report", JOptionPane.ERROR_MESSAGE);
                 }
+                System.gc();
             });
         }
         return jMenuItemQCBarcodes;
@@ -1401,11 +1369,9 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemSearch = new JMenuItem();
             jMenuItemSearch.setText("Search");
             jMenuItemSearch.setEnabled(true);
-            jMenuItemSearch.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    SearchDialog s = new SearchDialog(thisMainFrame);
-                    s.setVisible(true);
-                }
+            jMenuItemSearch.addActionListener(actionEvent -> {
+                SearchDialog s = new SearchDialog(thisMainFrame);
+                s.setVisible(true);
             });
         }
         return jMenuItemSearch;
@@ -1424,92 +1390,91 @@ public class MainFrame extends JFrame implements RunnerListener {
               log.error(e.getLocalizedMessage());
       }*/
             jMenuItemFindMissingImages.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            // JTextField dateimaged = new JTextField();
-                            SpecimenLifeCycle sls2 = new SpecimenLifeCycle();
-                            String[] paths = sls2.getDistinctPaths();
-                            // log.debug("num paths" + paths.length);
-                            JComboBox<String> pathCombo = new JComboBox<String>(paths);
-                            pathCombo.setEditable(true);
-                            final JComponent[] inputs = new JComponent[]{
-                                    new JLabel(
-                                            "<html>Find missing images<br/><br/>Please select the date imaged:<br/>"),
-                                    pathCombo};
-                            int result = JOptionPane.showConfirmDialog(
-                                    null, inputs, "Find missing images",
-                                    JOptionPane.CANCEL_OPTION);
-                            //
-                            if (result == JOptionPane.YES_OPTION) {
-                                // String dateEntered = dateimaged.getText();
-                                String dateEntered = pathCombo.getSelectedItem().toString();
-                                // dateEntered = dateEntered.replaceAll("\\", "\\\\");
-                                // System.out.println("BEFORE DATE ENTERED IS " + dateEntered);
-                                // dateEntered = dateEntered.replaceAll("\\", "\\\\");
-                                System.out.println("DATE ENTERED IS " + dateEntered);
-                                SpecimenLifeCycle sls = new SpecimenLifeCycle();
-                                List<ICImage> results = sls.findImagesByPath(dateEntered);
-                                ArrayList<Integer> seqvals = new ArrayList();
-                                ArrayList<Integer> missingvals = new ArrayList();
-                                String img_prefix = "";
-                                for (ICImage im : results) {
-                                    int last_underscore = im.getFilename().lastIndexOf("_");
-                                    img_prefix = im.getFilename().substring(0, last_underscore);
-                                    int dot = im.getFilename().indexOf(".");
-                                    String seqnum =
-                                            im.getFilename().substring(last_underscore + 1, dot);
-                                    // log.debug("seqnum: " + seqnum);
-                                    try {
-                                        Integer seqint = Integer.parseInt(seqnum);
-                                        seqvals.add(seqint);
-                                        // log.debug("seqint: " +seqint);
-                                    } catch (Exception e1) {
-                                    }
+                    actionEvent -> {
+                        // JTextField dateimaged = new JTextField();
+                        SpecimenLifeCycle sls2 = new SpecimenLifeCycle();
+                        String[] paths = sls2.getDistinctPaths();
+                        // log.debug("num paths" + paths.length);
+                        JComboBox<String> pathCombo = new JComboBox<String>(paths);
+                        pathCombo.setEditable(true);
+                        final JComponent[] inputs = new JComponent[]{
+                                new JLabel(
+                                        "<html>Find missing images<br/><br/>Please select the date imaged:<br/>"),
+                                pathCombo};
+                        int result = JOptionPane.showConfirmDialog(
+                                null, inputs, "Find missing images",
+                                JOptionPane.OK_CANCEL_OPTION);
+                        //
+                        if (result == JOptionPane.YES_OPTION) {
+                            // String dateEntered = dateimaged.getText();
+                            String dateEntered = Objects.requireNonNull(pathCombo.getSelectedItem()).toString();
+                            // dateEntered = dateEntered.replaceAll("\\", "\\\\");
+                            // System.out.println("BEFORE DATE ENTERED IS " + dateEntered);
+                            // dateEntered = dateEntered.replaceAll("\\", "\\\\");
+                            System.out.println("DATE ENTERED IS " + dateEntered);
+                            SpecimenLifeCycle sls = new SpecimenLifeCycle();
+                            List<ICImage> results = sls.findImagesByPath(dateEntered);
+                            ArrayList<Integer> seqvals = new ArrayList();
+                            ArrayList<Integer> missingvals = new ArrayList();
+                            String img_prefix = "";
+                            for (ICImage im : results) {
+                                int last_underscore = im.getFilename().lastIndexOf("_");
+                                img_prefix = im.getFilename().substring(0, last_underscore);
+                                int dot = im.getFilename().indexOf(".");
+                                String seqnum =
+                                        im.getFilename().substring(last_underscore + 1, dot);
+                                // log.debug("seqnum: " + seqnum);
+                                try {
+                                    Integer seqint = Integer.parseInt(seqnum);
+                                    seqvals.add(seqint);
+                                    // log.debug("seqint: " +seqint);
+                                } catch (Exception e1) {
+                                    log.error("Failed to parse int " + seqnum, e1);
                                 }
-                                for (int i = 0; i < seqvals.size(); i++) {
-                                    Integer current = seqvals.get(i);
-                                    if (i + 1 < seqvals.size()) {
-                                        Integer next = seqvals.get(i + 1);
-                                        if (next - current != 1) {
-                                            int gap = next - current;
-                                            for (int j = 1; j < gap; j++) {
-                                                missingvals.add(new Integer(current + j));
-                                            }
-                                        }
-                                        current = next;
-                                    }
-                                }
-                                StringBuilder sb = new StringBuilder();
-                /*for(Integer cint : missingvals){
-                        if(cint < 10000){
-                                sb.append("ETHZ_ENT01_2017_03_15_00");
-                        }else if(cint < 100000){
-                                sb.append("ETHZ_ENT01_2017_03_15_0");
-                        }else if(cint < 1000000){
-                                sb.append("ETHZ_ENT01_2017_03_15_");
-                        }
-                        sb.append(cint);
-                        sb.append(".JPG");
-                        sb.append("\n");
-                }*/
-                                for (Integer cint : missingvals) {
-                                    sb.append(img_prefix);
-                                    sb.append(cint);
-                                    sb.append(".JPG");
-                                    sb.append("\n");
-                                }
-
-                /*for(ICImage im : results){
-                        sb.append(im.getFilename());
-                        sb.append("\n");
-                }*/
-                                JOptionPane.showConfirmDialog(
-                                        null,
-                                        "Found " + results.size() +
-                                                " images in the database for the date " + dateEntered +
-                                                ".\n\nPossible missing images:\n" + sb,
-                                        "Find missing images", JOptionPane.PLAIN_MESSAGE);
                             }
+                            for (int i = 0; i < seqvals.size(); i++) {
+                                Integer current = seqvals.get(i);
+                                if (i + 1 < seqvals.size()) {
+                                    Integer next = seqvals.get(i + 1);
+                                    if (next - current != 1) {
+                                        int gap = next - current;
+                                        for (int j = 1; j < gap; j++) {
+                                            missingvals.add(current + j);
+                                        }
+                                    }
+                                    current = next;
+                                }
+                            }
+                            StringBuilder sb = new StringBuilder();
+            /*for(Integer cint : missingvals){
+                    if(cint < 10000){
+                            sb.append("ETHZ_ENT01_2017_03_15_00");
+                    }else if(cint < 100000){
+                            sb.append("ETHZ_ENT01_2017_03_15_0");
+                    }else if(cint < 1000000){
+                            sb.append("ETHZ_ENT01_2017_03_15_");
+                    }
+                    sb.append(cint);
+                    sb.append(".JPG");
+                    sb.append("\n");
+            }*/
+                            for (Integer cint : missingvals) {
+                                sb.append(img_prefix);
+                                sb.append(cint);
+                                sb.append(".JPG");
+                                sb.append("\n");
+                            }
+
+            /*for(ICImage im : results){
+                    sb.append(im.getFilename());
+                    sb.append("\n");
+            }*/
+                            JOptionPane.showConfirmDialog(
+                                    null,
+                                    "Found " + results.size() +
+                                            " images in the database for the date " + dateEntered +
+                                            ".\n\nPossible missing images:\n" + sb,
+                                    "Find missing images", JOptionPane.DEFAULT_OPTION);
                         }
                     });
         }
@@ -1527,20 +1492,18 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemChangePassword.setText("Change My Password");
             jMenuItemChangePassword.setMnemonic(KeyEvent.VK_M);
             try {
-                jMenuItemChangePassword.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/key_icon_16px.png")));
+                jMenuItemChangePassword.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/key_icon_16px.png"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemChangePassword.");
                 log.error("Error", e);
             }
             jMenuItemChangePassword.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            if (Singleton.getSingletonInstance().getUser() != null) {
-                                ChangePasswordDialog cpd = new ChangePasswordDialog(
-                                        thisMainFrame, Singleton.getSingletonInstance().getUser());
-                                cpd.setVisible(true);
-                            }
+                    e -> {
+                        if (Singleton.getSingletonInstance().getUser() != null) {
+                            ChangePasswordDialog cpd = new ChangePasswordDialog(
+                                    thisMainFrame, Singleton.getSingletonInstance().getUser());
+                            cpd.setVisible(true);
                         }
                     });
         }
@@ -1557,12 +1520,10 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemCreateLabels = new JMenuItem();
             jMenuItemCreateLabels.setText("Create Unit Tray Labels");
             jMenuItemCreateLabels.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            UnitTrayLabelBrowser lb = new UnitTrayLabelBrowser();
-                            lb.pack();
-                            lb.setVisible(true);
-                        }
+                    e -> {
+                        UnitTrayLabelBrowser lb = new UnitTrayLabelBrowser();
+                        lb.pack();
+                        lb.setVisible(true);
                     });
         }
         return jMenuItemCreateLabels;
@@ -1577,14 +1538,12 @@ public class MainFrame extends JFrame implements RunnerListener {
         if (jMenuItemStats == null) {
             jMenuItemStats = new JMenuItem();
             jMenuItemStats.setText("Statistics");
-            jMenuItemStats.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    SpecimenLifeCycle sls = new SpecimenLifeCycle();
-                    JOptionPane.showMessageDialog(
-                            Singleton.getSingletonInstance().getMainFrame(),
-                            sls.findSpecimenCount(), "Record counts",
-                            JOptionPane.INFORMATION_MESSAGE);
-                }
+            jMenuItemStats.addActionListener(e -> {
+                SpecimenLifeCycle sls = new SpecimenLifeCycle();
+                JOptionPane.showMessageDialog(
+                        Singleton.getSingletonInstance().getMainFrame(),
+                        sls.findSpecimenCount(), "Record counts",
+                        JOptionPane.INFORMATION_MESSAGE);
             });
         }
         return jMenuItemStats;
@@ -1600,17 +1559,15 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemRepeatOCR = new JMenuItem();
             jMenuItemRepeatOCR.setText("Redo OCR for All");
             try {
-                jMenuItemRepeatOCR.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png")));
+                jMenuItemRepeatOCR.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemRepeatOCR.");
                 log.error("Error", e);
             }
-            jMenuItemRepeatOCR.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    JobRepeatOCR r = new JobRepeatOCR();
-                    (new Thread(r)).start();
-                }
+            jMenuItemRepeatOCR.addActionListener(e -> {
+                JobRepeatOCR r = new JobRepeatOCR();
+                (new Thread(r)).start();
             });
         }
         return jMenuItemRepeatOCR;
@@ -1627,18 +1584,16 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemListRunningJobs.setText("List Running Jobs");
             jMenuItemListRunningJobs.setMnemonic(KeyEvent.VK_L);
             try {
-                jMenuItemListRunningJobs.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/tools_icon_16px.png")));
+                jMenuItemListRunningJobs.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/tools_icon_16px.png"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemListRunningJobs.");
                 log.error("Error", e);
             }
             jMenuItemListRunningJobs.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            RunnableJobFrame jobFrame = new RunnableJobFrame();
-                            jobFrame.setVisible(true);
-                        }
+                    e -> {
+                        RunnableJobFrame jobFrame = new RunnableJobFrame();
+                        jobFrame.setVisible(true);
                     });
         }
         return jMenuItemListRunningJobs;
@@ -1655,24 +1610,22 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemRedoOCROne.setText("Redo OCR for A Directory");
             jMenuItemRedoOCROne.setMnemonic(KeyEvent.VK_R);
             try {
-                jMenuItemRedoOCROne.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png")));
+                jMenuItemRedoOCROne.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemRedoOCROne.");
                 log.error("Error", e);
             }
             jMenuItemRedoOCROne.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            File target = new File(
-                                    Singleton.getSingletonInstance()
-                                            .getProperties()
-                                            .getProperties()
-                                            .getProperty(ImageCaptureProperties.KEY_IMAGEBASE));
-                            JobRepeatOCR r =
-                                    new JobRepeatOCR(JobRepeatOCR.SCAN_SELECT, target);
-                            (new Thread(r)).start();
-                        }
+                    e -> {
+                        File target = new File(
+                                Singleton.getSingletonInstance()
+                                        .getProperties()
+                                        .getProperties()
+                                        .getProperty(ImageCaptureProperties.KEY_IMAGEBASE));
+                        JobRepeatOCR r =
+                                new JobRepeatOCR(JobRepeatOCR.SCAN_SELECT, target);
+                        (new Thread(r)).start();
                     });
         }
         return jMenuItemRedoOCROne;
@@ -1683,25 +1636,23 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemCleanupDirectory = new JMenuItem();
             jMenuItemCleanupDirectory.setText("Cleanup Deleted Images");
             try {
-                jMenuItemCleanupDirectory.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/bb_trsh_icon_16px.png")));
+                jMenuItemCleanupDirectory.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/bb_trsh_icon_16px.png"))));
             } catch (Exception e) {
                 System.out.println(
                         "Can't open icon file for jMenuItemCleanupDirectory.");
                 System.out.println(e.getLocalizedMessage());
             }
             jMenuItemCleanupDirectory.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            JobCleanDirectory r = new JobCleanDirectory(
-                                    JobCleanDirectory.SCAN_SELECT,
-                                    new File(
-                                            Singleton.getSingletonInstance()
-                                                    .getProperties()
-                                                    .getProperties()
-                                                    .getProperty(ImageCaptureProperties.KEY_IMAGEBASE)));
-                            (new Thread(r)).start();
-                        }
+                    e -> {
+                        JobCleanDirectory r = new JobCleanDirectory(
+                                JobCleanDirectory.SCAN_SELECT,
+                                new File(
+                                        Singleton.getSingletonInstance()
+                                                .getProperties()
+                                                .getProperties()
+                                                .getProperty(ImageCaptureProperties.KEY_IMAGEBASE)));
+                        (new Thread(r)).start();
                     });
         }
         return jMenuItemCleanupDirectory;
@@ -1713,24 +1664,22 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemRecheckTemplates.setText("Recheck cases of WholeImageOnly");
             jMenuItemRecheckTemplates.setMnemonic(KeyEvent.VK_W);
             try {
-                jMenuItemRecheckTemplates.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png")));
+                jMenuItemRecheckTemplates.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemRecheckTemplates.");
                 log.error("Error", e);
             }
             jMenuItemRecheckTemplates.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            JobRecheckForTemplates r = new JobRecheckForTemplates(
-                                    JobRecheckForTemplates.SCAN_SELECT,
-                                    new File(
-                                            Singleton.getSingletonInstance()
-                                                    .getProperties()
-                                                    .getProperties()
-                                                    .getProperty(ImageCaptureProperties.KEY_IMAGEBASE)));
-                            (new Thread(r)).start();
-                        }
+                    e -> {
+                        JobRecheckForTemplates r = new JobRecheckForTemplates(
+                                JobRecheckForTemplates.SCAN_SELECT,
+                                new File(
+                                        Singleton.getSingletonInstance()
+                                                .getProperties()
+                                                .getProperties()
+                                                .getProperty(ImageCaptureProperties.KEY_IMAGEBASE)));
+                        (new Thread(r)).start();
                     });
         }
         return jMenuItemRecheckTemplates;
@@ -1742,18 +1691,16 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemRecheckAllTemplates.setText(
                     "Recheck All cases of WholeImageOnly");
             try {
-                jMenuItemRecheckAllTemplates.setIcon(new ImageIcon(this.getClass().getResource(
-                        "/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png")));
+                jMenuItemRecheckAllTemplates.setIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(
+                        "/edu/harvard/mcz/imagecapture/resources/images/reload_icon_16px.png"))));
             } catch (Exception e) {
                 log.error("Can't open icon file for jMenuItemRecheckAllTemplates.");
                 log.error("Error", e);
             }
             jMenuItemRecheckAllTemplates.addActionListener(
-                    new java.awt.event.ActionListener() {
-                        public void actionPerformed(java.awt.event.ActionEvent e) {
-                            JobRecheckForTemplates r = new JobRecheckForTemplates();
-                            (new Thread(r)).start();
-                        }
+                    e -> {
+                        JobRecheckForTemplates r = new JobRecheckForTemplates();
+                        (new Thread(r)).start();
                     });
         }
         return jMenuItemRecheckAllTemplates;

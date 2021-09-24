@@ -7,9 +7,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
+import java.net.URLEncoder;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,11 +24,37 @@ import java.util.Map;
 public abstract class AbstractRestClient {
     private static final Logger log =
             LoggerFactory.getLogger(AbstractRestClient.class);
+    protected final HttpClient httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_2)
+            .build();
 
     public AbstractRestClient() {
     }
 
+    private static String buildFormDataFromMap(Map<String, String> data) {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, String> entry : data.entrySet()) {
+            if (builder.length() > 0) {
+                builder.append("&");
+            }
+            builder.append(URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8));
+            builder.append("=");
+            builder.append(URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8));
+        }
+        return builder.toString();
+    }
+
     protected String getRequest(String url) throws Exception {
+        return getRequest(url, null);
+    }
+
+    /**
+     * Run a "GET" type request against a URL
+     * @param url the URL to query
+     * @param headers any headers to add to the request
+     * @return the body's string
+     */
+    protected String getRequest(String url, Map<String, String> headers) throws IOException {
 
         final URL obj = new URL(url);
         final HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -37,6 +69,11 @@ public abstract class AbstractRestClient {
                 "Datashot/Imagecapture App " + ImageCaptureApp.getAppVersion() +
                         ", Education, https://github.com/BernhardWebstudio/DataShot_DesktopApp/");
         con.setRequestProperty("Accept-Language", "en, de-CH;q=0.8, de;q=0.7");
+        if (headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                con.setRequestProperty(entry.getKey(), entry.getValue());
+            }
+        }
 
         BufferedReader in = new BufferedReader(
                 new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
@@ -57,6 +94,108 @@ public abstract class AbstractRestClient {
 
         con.disconnect();
         return response.toString();
+    }
+
+    /**
+     * Run a "POST" type request against a URL
+     *
+     * @param url the URL to post to
+     * @param data the data to post
+     * @return the body string
+     * @throws IOException from HTTPclient
+     * @throws InterruptedException from HTTPclient
+     */
+    protected String postRequest(String url, String data) throws IOException, InterruptedException {
+        return postRequest(url, data, null);
+    }
+
+    /**
+     * Run a "POST" type request against a URL
+     *
+     * @param url the URL to post to
+     * @param data the data to post
+     * @param headers additional headers to send
+     * @return the response body string
+     * @throws IOException from HTTPclient
+     * @throws InterruptedException from HTTPclient
+     */
+    protected String postRequest(String url, String data, Map<String, String> headers) throws IOException, InterruptedException {
+        log.debug("Posting request to " + url + " with data " + data);
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .POST(HttpRequest.BodyPublishers.ofString(data))
+                .uri(URI.create(url))
+                .setHeader("User-Agent", "DataShot " + ImageCaptureApp.getAppVersion()) // add request header
+                .setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        if (headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                builder.setHeader(entry.getKey(), entry.getValue());
+            }
+        }
+
+        HttpRequest request = builder.build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        // System.out.println(response.statusCode());
+
+        return response.body();
+    }
+
+    /**
+     * @see #postRequest(String, String, Map)
+     * @param formFields the fields to be sent as such
+     */
+    protected String postRequest(String url, Map<String, String> formFields, Map<String, String> headers) throws IOException, InterruptedException {
+        return postRequest(url, buildFormDataFromMap(formFields), headers);
+    }
+
+    /**
+     * @see #postRequest(String, String, Map)
+     * @param formFields the fields to be sent as such
+     */
+    protected String postRequest(String url, Map<String, String> formFields) throws IOException, InterruptedException {
+        return postRequest(url, formFields, null);
+    }
+
+    /**
+     * @see #postRequest(String, String, Map)
+     * @param data the JSON to be posted as such
+     */
+    protected JSONObject postRequest(String url, JSONObject data) throws IOException, InterruptedException {
+        return new JSONObject(postRequest(url, data.toString(), new HashMap<>() {{ put("Content-Type", "application/json"); }}));
+    };
+
+    /**
+     * Run a "PUT" type request against a URL
+     *
+     * @param url the URL to post to
+     * @param data the data to post
+     * @param headers additional headers to send
+     * @return the response body
+     * @throws IOException from HttpClient
+     * @throws InterruptedException from HttpClient
+     */
+    protected String putRequest(String url, String data, Map<String, String> headers) throws IOException, InterruptedException {
+        log.debug("Putting request to " + url + " with data " + data);
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .PUT(HttpRequest.BodyPublishers.ofString(data))
+                .uri(URI.create(url))
+                .setHeader("User-Agent", "DataShot " + ImageCaptureApp.getAppVersion()) // add request header
+                .setHeader("Content-Type", "application/x-www-form-urlencoded");
+
+        if (headers != null) {
+            for (Map.Entry<String, String> entry : headers.entrySet()) {
+                builder.setHeader(entry.getKey(), entry.getValue());
+            }
+        }
+
+        HttpRequest request = builder.build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+        // System.out.println(response.statusCode());
+        return response.body();
     }
 
     protected Object getValueForKeyInJson(JSONObject source, String key) {
@@ -97,10 +236,10 @@ public abstract class AbstractRestClient {
     protected Map<String, Object> fetchValues(String url,
                                               Collection<String> keys) {
         Map<String, Object> res = new HashMap<>();
-        StringBuffer query;
+        StringBuilder query;
         String queryResult = null;
 
-        query = new StringBuffer();
+        query = new StringBuilder();
 
         query.append(url);
 
@@ -131,9 +270,7 @@ public abstract class AbstractRestClient {
             if (obj.length() > 0) {
                 // just take the first search result ^.^
                 JSONObject finalObj = obj;
-                keys.forEach((String key) -> {
-                    res.put(key, this.getValueForKeyInJson(finalObj, key));
-                });
+                keys.forEach((String key) -> res.put(key, this.getValueForKeyInJson(finalObj, key)));
             }
         }
 

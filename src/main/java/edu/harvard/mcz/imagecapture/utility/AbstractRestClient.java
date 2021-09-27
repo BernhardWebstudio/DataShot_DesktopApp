@@ -1,5 +1,6 @@
 package edu.harvard.mcz.imagecapture.utility;
 
+import com.github.mizosoft.methanol.Methanol;
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,11 +25,10 @@ import java.util.Map;
 public abstract class AbstractRestClient {
     private static final Logger log =
             LoggerFactory.getLogger(AbstractRestClient.class);
-    protected final HttpClient httpClient = HttpClient.newBuilder()
-            .version(HttpClient.Version.HTTP_2)
-            .build();
+    protected final Methanol httpClient;
 
     public AbstractRestClient() {
+        httpClient = Methanol.newBuilder().userAgent("DataShot " + ImageCaptureApp.getAppVersion()).build();
     }
 
     private static String buildFormDataFromMap(Map<String, String> data) {
@@ -44,7 +44,7 @@ public abstract class AbstractRestClient {
         return builder.toString();
     }
 
-    protected String getRequest(String url) throws Exception {
+    protected String getRequest(String url) throws IOException {
         return getRequest(url, null);
     }
 
@@ -93,6 +93,9 @@ public abstract class AbstractRestClient {
         }
 
         con.disconnect();
+
+        log.debug("Response of put request: " + response.toString());
+
         return response.toString();
     }
 
@@ -138,6 +141,7 @@ public abstract class AbstractRestClient {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         // System.out.println(response.statusCode());
+        log.debug("Response of post request: " + response.body());
 
         return response.body();
     }
@@ -194,6 +198,7 @@ public abstract class AbstractRestClient {
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
+        log.debug("Response of put request: " + response.body());
         // System.out.println(response.statusCode());
         return response.body();
     }
@@ -264,7 +269,7 @@ public abstract class AbstractRestClient {
             log.error("Error", e);
         }
 
-        log.debug("obj=" + obj);
+        log.debug("Fetched obj=" + obj);
 
         if (obj != null) {
             if (obj.length() > 0) {

@@ -26,11 +26,11 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     public static int STATUS_DATASHOT_FAILED = 1;
     public static int STATUS_RUNNING_FINE = 0;
     public static int STATUS_FINISHED = -1;
+    private final List<ProgressListener> progressListener = new ArrayList<>();
     private Date start = null;
     private int nrOfSpecimenToProcess = 0;
     private int currentIndex = 0;
     private int status = STATUS_RUNNING_FINE;
-    private final List<ProgressListener> progressListener = new ArrayList<>();
     private Exception lastError = null;
 
     @Override
@@ -61,7 +61,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             currentIndex = currentIndex + 1;
             log.debug("Exporting specimen with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
             // upload images
-            JSONObject[] uploadedImages;
+            Object[] uploadedImages;
             try {
                 uploadedImages = manager.uploadImagesForSpecimen(specimen);
             } catch (Exception e) {
@@ -76,18 +76,30 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             // add images
             JSONObject imageTarget = (JSONObject) specimenJson.get("entomologie");
             JSONArray mediaAssets = new JSONArray();
-            for (JSONObject image : uploadedImages) {
+            for (Object image : uploadedImages) {
+                JSONObject imageJsonObj = (JSONObject) image;
+                Map<String, Object> reducedMediaAssetMap = new HashMap<>() {{
+                    put("_pool", NahimaManager.defaultPool);
+                    put("_id", JSONObject.NULL);
+                    put("_version", 1);
+                    put("datei", (new JSONArray()).put(new JSONObject(new HashMap<>() {{
+                        put("preferred", true);
+                        put("_id", imageJsonObj.get("_id"));
+                    }})));
+                    put("urspruelicherdateiname", imageJsonObj.get("original_filename"));
+                }};
+                JSONObject reducedImageMediaAsset = new JSONObject(reducedMediaAssetMap);
                 Map<String, Object> publicMediaAssetMap = new HashMap<>() {{
                     put("_objecttype", "mediaasset");
                     put("_mask", "mediaassetminimal");
                     put("_tags", new JSONArray());
-                    put("mediaasset", manager.reduceAssociateForAssociation(image));
+                    put("mediaasset", reducedImageMediaAsset);
                 }};
                 JSONObject publicMediaAsset = new JSONObject(publicMediaAssetMap);
 
                 Map<String, Object> mediaAssetMap = new HashMap<>() {{
-                    put("_id", null);
-                    put("source_reference", null);
+                    put("_id", JSONObject.NULL);
+                    put("source_reference", JSONObject.NULL);
                     put("__idx", 0);
                     put("_version", 1);
                     put("mediassetpublic", publicMediaAsset);
@@ -99,8 +111,11 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 
             // create in Nahima
             try {
-                manager.createObjectInNahima(specimenJson, "entomologie");
-            } catch (IOException | InterruptedException e) {
+                JSONObject result = manager.createObjectInNahima(specimenJson, "entomologie");
+                if (result.has("code") && result.getString("code").startsWith("error")) {
+                    throw new RuntimeException("Failed to save specimen in nahima. Error code: " + result.get("code"));
+                }
+            } catch (IOException | InterruptedException | RuntimeException e) {
                 lastError = e;
                 log.error("Failed to create new Nahima specimen", e);
                 this.status = STATUS_NAHIMA_FAILED;

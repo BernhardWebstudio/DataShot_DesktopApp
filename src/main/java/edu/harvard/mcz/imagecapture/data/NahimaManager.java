@@ -1,18 +1,19 @@
 package edu.harvard.mcz.imagecapture.data;
 
-import edu.harvard.mcz.imagecapture.ImageCaptureApp;
+import com.github.mizosoft.methanol.MediaType;
+import com.github.mizosoft.methanol.MultipartBodyPublisher;
+import com.github.mizosoft.methanol.MutableRequest;
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.utility.AbstractRestClient;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.util.*;
@@ -23,6 +24,7 @@ public class NahimaManager extends AbstractRestClient {
     private final String url;
     private final String username;
     private final String password;
+    public static final JSONObject defaultPool = new JSONObject("{ \"pool\": { \"_id\": 7 } }");
     private String token;
     private Map<String, Map<String, JSONObject>> resolveCache = new HashMap<String, Map<String, JSONObject>>();
 
@@ -54,36 +56,53 @@ public class NahimaManager extends AbstractRestClient {
         }
     }
 
-    protected void login() throws IOException, InterruptedException {
-        String queryUrl = this.url + "session/authenticate?token=" + this.token;
+    protected void login() throws IOException, InterruptedException, RuntimeException {
+        String queryUrl = this.url + "session/authenticate?method=easydb&token=" + this.token;
         HashMap<String, String> params = new HashMap<>();
-        params.put("username", this.username);
         params.put("password", this.password);
+        params.put("login", this.username);
 
-        this.postRequest(queryUrl, params);
+        // check status
+        String response = this.postRequest(queryUrl, params);
+        JSONObject responseObject = new JSONObject(response);
+        if (responseObject.has("code")) {
+            if (((String) responseObject.get("code")).startsWith("error")) {
+                throw new RuntimeException("Failed to log in. Error code: " + responseObject.get("code"));
+            }
+        }
     }
 
-    public JSONObject[] uploadImagesForSpecimen(Specimen specimen) throws IOException, InterruptedException {
+    public Object[] uploadImagesForSpecimen(Specimen specimen) throws IOException, InterruptedException, RuntimeException {
         // docs:
         // https://docs.easydb.de/en/technical/api/eas/
         // https://docs.easydb.de/en/sysadmin/eas/api/put/
         String baseQueryUrl = this.url + "eas/put?token=" + this.token;
-        ArrayList results = new ArrayList<>();
+        ArrayList<Object> results = new ArrayList<>();
 
         for (ICImage image : specimen.getICImages()) {
             String queryUrl = baseQueryUrl + "&original_filename=" + image.getFilename() + "&instance=image";
+            log.debug("Running image upload to URL " + queryUrl);
 
-            HttpRequest.Builder builder = HttpRequest.newBuilder().POST(HttpRequest.BodyPublishers.ofFile(Path.of(ImageCaptureProperties.assemblePathWithBase(image.getPath(), image.getFilename())))).uri(URI.create(url))
-                    .setHeader("User-Agent", "DataShot " + ImageCaptureApp.getAppVersion()) // add request header
-                    .setHeader("Content-Type", "application/x-www-form-urlencoded");
+            String imagePath = ImageCaptureProperties.assemblePathWithBase(image.getPath(), image.getFilename());
 
-            HttpRequest request = builder.build();
-
+            MultipartBodyPublisher multipartBody = MultipartBodyPublisher.newBuilder().filePart("image", Path.of(imagePath), MediaType.IMAGE_ANY).build();
+            MutableRequest request = MutableRequest.POST(queryUrl, multipartBody).header("Content-Disposition", "attachment; filename=\"" + image.getFilename() + "\"");
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            log.debug("Response from uploading image: " + response.body());
+
+            // check for errors
+            if (!response.body().startsWith("[")) {
+                JSONObject responseObject = new JSONObject(response.body());
+                if (responseObject.has("code") && responseObject.getString("code").startsWith("error")) {
+                    throw new RuntimeException("Failed to upload image: Error code: " + responseObject.get("code"));
+                }
+            }
+
             results.add((new JSONArray(response.body())).get(0));
         }
 
-        return (JSONObject[]) results.toArray();
+        return results.toArray();
     }
 
     public JSONObject createObjectInNahima(JSONObject object, String pool) throws IOException, InterruptedException {
@@ -91,7 +110,9 @@ public class NahimaManager extends AbstractRestClient {
         // https://docs.easydb.de/en/technical/api/db/
         String queryURL = this.url + "db/" + pool + "?token=" + token;
         // EasyDB seems to have mixed up PUT & POST, but well, we don't care
-        return new JSONObject(this.putRequest(queryURL, (new JSONArray()).put(object).toString(), null));
+        return new JSONObject(this.putRequest(queryURL, (new JSONArray()).put(object).toString(), new HashMap<>() {{
+            put("Content-Type", "application/json");
+        }}));
     }
 
     public JSONObject searchForString(String searchString, String objectType) throws IOException, InterruptedException {
@@ -102,8 +123,8 @@ public class NahimaManager extends AbstractRestClient {
      * Search for a string in a Nahima objecttype
      *
      * @param searchString the string to search for. Will be split by " ".
-     * @param objectType the objecttype we search for
-     * @param ignoreCache cache speeds things up, but is annoying when we just created a new object
+     * @param objectType   the objecttype we search for
+     * @param ignoreCache  cache speeds things up, but is annoying when we just created a new object
      * @return Nahima's response
      * @throws IOException
      * @throws InterruptedException
@@ -186,10 +207,18 @@ public class NahimaManager extends AbstractRestClient {
         JSONObject reduced = new JSONObject();
         String[] namesToKeep = {"_objecttype", "_mask", "_global_object_id"};
         for (String name : namesToKeep) {
-            reduced.put(name, associate.get(name));
+            try {
+                if (associate.has(name)) {
+                    reduced.put(name, associate.get(name));
+                }
+            } catch (JSONException e) {
+                // hmmm
+                log.error("Error trying to reduce", e);
+            }
         }
         JSONObject child = new JSONObject();
-        child.put("_id", ((JSONObject) associate.get((String) associate.get("_objecttype"))).get("_id"));
+
+        child.put("_id", associate.has("_id") ? associate.get("_id") : ((JSONObject) associate.get((String) associate.get("_objecttype"))).get("_id"));
         reduced.put((String) associate.get("_objecttype"), child);
         return reduced;
     }

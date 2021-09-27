@@ -25,22 +25,25 @@ public class NahimaExportDialog extends JDialog implements ProgressListener {
     }
 
     private void initialize() {
-        this.setTitle("Melia Statistics");
+        this.setTitle("Nahima Export");
         this.setContentPane(getJContentPane());
         this.pack();
         job = new NahimaExportJob();
         job.addProgressListener(this);
         Thread runningThread = new Thread(() -> {
+            boolean didRunSuccessfully = true;
             try {
                 job.run();
             } catch (Exception e) {
+                didRunSuccessfully = false;
                 log.error("Error when running Nahima export job", e);
                 getResultsTextField().setText("Error: " + e.getMessage());
                 getCloseButton().setEnabled(true);
             }
             if (job.getLastException() != null) {
+                didRunSuccessfully = false;
                 getResultsTextField().setText("Error: " + job.getLastException().getMessage());
-            } else {
+            } else if (didRunSuccessfully) {
                 getResultsTextField().setText("Finished processing " + String.valueOf(job.getTotalCount()) + " Specimen");
             }
             getCloseButton().setEnabled(true);
@@ -70,6 +73,8 @@ public class NahimaExportDialog extends JDialog implements ProgressListener {
         if (resultsTextField == null) {
             resultsTextField = new JTextArea();
             resultsTextField.setEnabled(false);
+            resultsTextField.setLineWrap(true);
+            resultsTextField.setRows(5);
             resultsTextField.setText("Please do not close this window until the export is done.");
         }
         return resultsTextField;

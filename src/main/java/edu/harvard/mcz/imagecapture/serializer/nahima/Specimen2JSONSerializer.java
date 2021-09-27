@@ -40,10 +40,19 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         result.put("folgerung", toSerialize.getInferences());
         // EasyDB specific fields
         result.put("_version", 1);
+        result.put("_id", JSONObject.NULL);
+        result.put("_pool", NahimaManager.defaultPool);
         // here, it already starts to get complicated, fuu.
         JSONArray reverseNestedDeterminations = new JSONArray();
         for (Determination det : toSerialize.getDeterminations()) {
-            JSONObject reverseNestedDetermination = new JSONObject();
+            Map<String, Object> reverseNestedCollectionMap = new HashMap<>(){{
+                put("_version", 1);
+                put("_pool", NahimaManager.defaultPool);
+                put("_id", JSONObject.NULL);
+                put("typusid", det.getTypeStatus());
+            }};
+
+            JSONObject reverseNestedDetermination = new JSONObject(reverseNestedCollectionMap);
 
             reverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
             reverseNestedDetermination.put("bestimmungsdatumtrans", det.getDateIdentified());
@@ -56,7 +65,6 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 
             reverseNestedDetermination.put("autortrans", det.getAuthorship()); // TODO: resolve
             reverseNestedDetermination.put("taxonnametrans", toSerialize.getAssociatedTaxon()); // TODO: resolve
-            reverseNestedDetermination.put("typusid", det.getTypeStatus());
             reverseNestedDetermination.put("familietrans", toSerialize.getFamily()); // TODO: resolve
             reverseNestedDetermination.put("genustrans", det.getGenus()); // TODO: resolve
             reverseNestedDetermination.put("subspezifischesarttrans", det.getSubspecificEpithet()); // TODO: resolve
@@ -96,6 +104,10 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("fehlerradius", georef == null ? null : georef.getMaxErrorDistance());
             put("hoehemin", toSerialize.getMinimum_elevation());
             put("hoehemax", toSerialize.getMaximum_elevation());
+            put("__idx", 0);
+            put("_version", 1);
+            put("_id", JSONObject.NULL);
+            put("_pool", NahimaManager.defaultPool);
         }};
         JSONObject reverseNestedCollection = new JSONObject(reverseNestedCollectionMap);
 
@@ -129,7 +141,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         // finally, wrap everything in the pool (might want to do somewhere else)
         JSONObject wrapper = new JSONObject();
         wrapper.put("entomologie", result);
-        wrapper.put("mask", "entomologie_public_unrestricted");
+        wrapper.put("_mask", "entomologie_public_unrestricted");
         wrapper.put("_objecttype", "entomologie");
         wrapper.put("_idx_in_objects", 1);
         return wrapper;
@@ -145,6 +157,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     }
 
     protected JSONObject dateToNahima(String date) throws ParseException {
+        log.debug("Parsing date from \"" + date + "\"");
         Date parsedDate = DateUtils.parseDate(date);
         return dateToNahima(parsedDate);
     }

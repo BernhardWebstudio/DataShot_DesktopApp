@@ -4,7 +4,6 @@ import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.utility.CastUtility;
 import net.miginfocom.swing.MigLayout;
 import org.hibernate.Session;
-import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.jdatepicker.JDatePicker;
 import org.jdatepicker.UtilDateModel;

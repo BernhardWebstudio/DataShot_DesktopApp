@@ -16,9 +16,9 @@ public class JAccordionPanel extends JPanel {
 
     private static final Logger log =
             LoggerFactory.getLogger(JAccordionPanel.class);
+    private final JScrollPane mainContent;
     private String titleOpen = "";
     private String titleClosed = "";
-    private final JScrollPane mainContent;
     private JButton toggleButton = null;
     private boolean contentVisible = false;
 

@@ -1050,7 +1050,7 @@ public class CandidateImageFile {
             returnValue.setText(result.getText());
             returnValue.setStatus(RESULT_BARCODE_SCANNED);
         } catch (ReaderException e) {
-            log.error(e.getClass().toString() + " " + e.getMessage());
+            log.error(e.getClass() + " " + e.getMessage());
             if (!Singleton.getSingletonInstance()
                     .getProperties()
                     .getProperties()
@@ -1076,13 +1076,13 @@ public class CandidateImageFile {
                     returnValue.setStatus(RESULT_ERROR);
                 } catch (ArrayIndexOutOfBoundsException e1) {
                     log.error(e.getMessage());
-                    returnValue.setText(e1.toString() + " " + e1.getMessage());
+                    returnValue.setText(e1 + " " + e1.getMessage());
                     returnValue.setStatus(RESULT_ERROR);
                 }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             log.error(e.getMessage());
-            returnValue.setText(e.toString() + " " + e.getMessage());
+            returnValue.setText(e + " " + e.getMessage());
             returnValue.setStatus(RESULT_ERROR);
         }
         return returnValue;

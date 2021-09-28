@@ -86,6 +86,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                         put("preferred", true);
                         put("_id", imageJsonObj.get("_id"));
                     }})));
+                    put("barcode", specimen.getBarcode());
                     put("urspruelicherdateiname", imageJsonObj.get("original_filename"));
                 }};
                 JSONObject reducedImageMediaAsset = new JSONObject(reducedMediaAssetMap);

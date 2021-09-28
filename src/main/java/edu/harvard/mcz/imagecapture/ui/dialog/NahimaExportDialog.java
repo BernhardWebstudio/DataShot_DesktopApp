@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 
 public class NahimaExportDialog extends JDialog implements ProgressListener {
     private static final Logger log =
@@ -44,7 +43,7 @@ public class NahimaExportDialog extends JDialog implements ProgressListener {
                 didRunSuccessfully = false;
                 getResultsTextField().setText("Error: " + job.getLastException().getMessage());
             } else if (didRunSuccessfully) {
-                getResultsTextField().setText("Finished processing " + String.valueOf(job.getTotalCount()) + " Specimen");
+                getResultsTextField().setText("Finished processing " + job.getTotalCount() + " Specimen");
             }
             getCloseButton().setEnabled(true);
         });

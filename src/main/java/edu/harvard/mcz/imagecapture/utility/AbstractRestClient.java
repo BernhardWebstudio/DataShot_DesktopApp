@@ -14,7 +14,6 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -50,7 +49,8 @@ public abstract class AbstractRestClient {
 
     /**
      * Run a "GET" type request against a URL
-     * @param url the URL to query
+     *
+     * @param url     the URL to query
      * @param headers any headers to add to the request
      * @return the body's string
      */
@@ -94,7 +94,7 @@ public abstract class AbstractRestClient {
 
         con.disconnect();
 
-        log.debug("Response of put request: " + response.toString());
+        log.debug("Response of put request: " + response);
 
         return response.toString();
     }
@@ -102,10 +102,10 @@ public abstract class AbstractRestClient {
     /**
      * Run a "POST" type request against a URL
      *
-     * @param url the URL to post to
+     * @param url  the URL to post to
      * @param data the data to post
      * @return the body string
-     * @throws IOException from HTTPclient
+     * @throws IOException          from HTTPclient
      * @throws InterruptedException from HTTPclient
      */
     protected String postRequest(String url, String data) throws IOException, InterruptedException {
@@ -115,11 +115,11 @@ public abstract class AbstractRestClient {
     /**
      * Run a "POST" type request against a URL
      *
-     * @param url the URL to post to
-     * @param data the data to post
+     * @param url     the URL to post to
+     * @param data    the data to post
      * @param headers additional headers to send
      * @return the response body string
-     * @throws IOException from HTTPclient
+     * @throws IOException          from HTTPclient
      * @throws InterruptedException from HTTPclient
      */
     protected String postRequest(String url, String data, Map<String, String> headers) throws IOException, InterruptedException {
@@ -147,37 +147,39 @@ public abstract class AbstractRestClient {
     }
 
     /**
-     * @see #postRequest(String, String, Map)
      * @param formFields the fields to be sent as such
+     * @see #postRequest(String, String, Map)
      */
     protected String postRequest(String url, Map<String, String> formFields, Map<String, String> headers) throws IOException, InterruptedException {
         return postRequest(url, buildFormDataFromMap(formFields), headers);
     }
 
     /**
-     * @see #postRequest(String, String, Map)
      * @param formFields the fields to be sent as such
+     * @see #postRequest(String, String, Map)
      */
     protected String postRequest(String url, Map<String, String> formFields) throws IOException, InterruptedException {
         return postRequest(url, formFields, null);
     }
 
     /**
-     * @see #postRequest(String, String, Map)
      * @param data the JSON to be posted as such
+     * @see #postRequest(String, String, Map)
      */
     protected JSONObject postRequest(String url, JSONObject data) throws IOException, InterruptedException {
-        return new JSONObject(postRequest(url, data.toString(), new HashMap<>() {{ put("Content-Type", "application/json"); }}));
-    };
+        return new JSONObject(postRequest(url, data.toString(), new HashMap<>() {{
+            put("Content-Type", "application/json");
+        }}));
+    }
 
     /**
      * Run a "PUT" type request against a URL
      *
-     * @param url the URL to post to
-     * @param data the data to post
+     * @param url     the URL to post to
+     * @param data    the data to post
      * @param headers additional headers to send
      * @return the response body
-     * @throws IOException from HttpClient
+     * @throws IOException          from HttpClient
      * @throws InterruptedException from HttpClient
      */
     protected String putRequest(String url, String data, Map<String, String> headers) throws IOException, InterruptedException {

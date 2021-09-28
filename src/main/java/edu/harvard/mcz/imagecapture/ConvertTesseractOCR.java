@@ -146,9 +146,9 @@ public class ConvertTesseractOCR implements OCR {
                 // String runCommand = "convert temptiff.jpg -depth 8 temptiff.tif";
                 List<String> runCommand = new ArrayList<>();
                 runCommand.addAll(Arrays.asList(Singleton.getSingletonInstance()
-                        .getProperties()
-                        .getProperties()
-                        .getProperty(ImageCaptureProperties.KEY_CONVERT_EXECUTABLE),
+                                .getProperties()
+                                .getProperties()
+                                .getProperty(ImageCaptureProperties.KEY_CONVERT_EXECUTABLE),
                         "temptiff.jpg",
                         Singleton.getSingletonInstance()
                                 .getProperties()
@@ -156,7 +156,7 @@ public class ConvertTesseractOCR implements OCR {
                                 .getProperty(ImageCaptureProperties.KEY_CONVERT_PARAMETERS),
                         "temptiff.tif"));
                 log.debug("in ConvertTesseractOCR.getOCRText() 11 runCommand is " +
-                        runCommand.toString());
+                        runCommand);
                 Runtime r = Runtime.getRuntime();
                 log.debug("in ConvertTesseractOCR.getOCRText() 12");
                 Process proc = r.exec((String[]) runCommand.toArray());

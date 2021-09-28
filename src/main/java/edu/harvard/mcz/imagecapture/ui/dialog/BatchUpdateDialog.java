@@ -157,7 +157,7 @@ public class BatchUpdateDialog extends JDialog {
 
             int numAffected = updateQuery.executeUpdate();
             session.getTransaction().commit();
-            JOptionPane.showMessageDialog(this, "Changed " + String.valueOf(numAffected) + " values", "Success",
+            JOptionPane.showMessageDialog(this, "Changed " + numAffected + " values", "Success",
                     JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             log.error("Failed to do query update: " + e.getMessage(), e);

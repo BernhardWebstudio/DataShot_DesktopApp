@@ -1,10 +1,7 @@
 package edu.harvard.mcz.imagecapture.serializer.nahima;
 
 import edu.harvard.mcz.imagecapture.data.NahimaManager;
-import edu.harvard.mcz.imagecapture.entity.Collector;
-import edu.harvard.mcz.imagecapture.entity.Determination;
-import edu.harvard.mcz.imagecapture.entity.LatLong;
-import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.serializer.ToJSONSerializerInterface;
 import org.apache.commons.lang3.time.DateUtils;
 import org.json.JSONArray;
@@ -50,6 +47,16 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                 put("_pool", NahimaManager.defaultPool);
                 put("_id", JSONObject.NULL);
                 put("typusid", det.getTypeStatus());
+                put("typusstatustrans", det.getTypeStatus());
+                put("autortrans", det.getAuthorship()); // TODO: resolve
+                put("taxonnametrans", toSerialize.getAssociatedTaxon()); // TODO: resolve
+                put("familietrans", toSerialize.getFamily()); // TODO: resolve
+                put("genustrans", det.getGenus()); // TODO: resolve
+                put("subspezifischesarttrans", det.getSubspecificEpithet()); // TODO: resolve
+                put("bestimmertrans", det.getIdentifiedBy());
+                put("infraspezifischestaxontrans", det.getInfraspecificEpithet()); // TODO: resolve
+                put("infrapezifischerrangtrans", det.getInfraspecificRank()); // TODO: resolve
+                put("arttrans", det.getSpecificEpithet()); // TODO: resolve
             }};
 
             JSONObject reverseNestedDetermination = new JSONObject(reverseNestedCollectionMap);
@@ -63,12 +70,6 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                 log.error("Failed to parse bestimmungsdatum", e);
             }
 
-            reverseNestedDetermination.put("autortrans", det.getAuthorship()); // TODO: resolve
-            reverseNestedDetermination.put("taxonnametrans", toSerialize.getAssociatedTaxon()); // TODO: resolve
-            reverseNestedDetermination.put("familietrans", toSerialize.getFamily()); // TODO: resolve
-            reverseNestedDetermination.put("genustrans", det.getGenus()); // TODO: resolve
-            reverseNestedDetermination.put("subspezifischesarttrans", det.getSubspecificEpithet()); // TODO: resolve
-            reverseNestedDetermination.put("bestimmertrans", det.getIdentifiedBy());
             JSONArray identifierPersons = new JSONArray();
             try {
                 JSONObject identifierPerson = nahimaManager.resolvePerson(det.getIdentifiedBy());
@@ -79,6 +80,13 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                 log.info("Failed to resolve person", e);
             }
             reverseNestedDetermination.put("_nested:bestimmung__bestimmer_person", identifierPersons);
+
+            try {
+                JSONObject resolvedTypeStatus = nahimaManager.resolveTypeStatus(det.getTypeStatus());
+                reverseNestedDetermination.put("typusstatus", resolvedTypeStatus);
+            } catch (IOException | InterruptedException e) {
+                log.info("Failed to resolve type status", e);
+            }
             // TODO: other fields
 
             // finally,
@@ -96,6 +104,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("kommentare", toSerialize.getSpecimenNotes());
             put("habitattrans", toSerialize.getHabitat());
             put("sammelorttrans", toSerialize.getVerbatimLocality());
+            put("lokalitaet", toSerialize.getSpecificLocality());
             put("neuhabitat", wrapInLan(toSerialize.getHabitat()));
             put("mikrohabitat", wrapInLan(toSerialize.getMicrohabitat()));
             put("traegerorganismustrans", toSerialize.getAssociatedTaxon());
@@ -105,6 +114,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("fehlerradius", georef == null ? null : georef.getMaxErrorDistance());
             put("hoehemin", toSerialize.getMinimum_elevation());
             put("hoehemax", toSerialize.getMaximum_elevation());
+            put("lokalitaettrans", toSerialize.getVerbatimLocality());
             put("__idx", 0);
             put("_version", 1);
             put("_id", JSONObject.NULL);
@@ -169,7 +179,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                 reverseNestedCollection.put("datum", this.dateToNahima(toSerialize.getDateEmerged()));
             }
         } catch (ParseException e) {
-            log.error("Failed to parse datum " + toSerialize.getDateEmerged(), e);
+            log.error("Failed to parse datum " + toSerialize.getDateEmerged() + " " + toSerialize.getDateNos(), e);
         }
         reverseNestedCollection.put("indikator_fuer_kultur_zucht", toSerialize.getDateEmergedIndicator());
         reverseNestedCollection.put("sammeldatumtrans", toSerialize.getDateCollected());
@@ -182,6 +192,16 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 
         reverseNestedCollections.put(reverseNestedCollection);
         result.put("_reverse_nested:aufsammlung:entomologie", reverseNestedCollections);
+
+        JSONArray parts = new JSONArray();
+        for (SpecimenPart part : toSerialize.getSpecimenParts()) {
+            JSONObject partJson = new JSONObject(new HashMap<>() {{
+                put("anzahlpraeparatteile", part.getLotCount());
+            }});
+            // TODO: (resolve) other fields
+            parts.put(partJson);
+        }
+        result.put("_nested:entomologie__praeparatteile", parts);
 
 
         // TODO: other fields

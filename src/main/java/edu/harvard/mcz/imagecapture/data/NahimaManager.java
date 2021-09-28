@@ -25,7 +25,7 @@ public class NahimaManager extends AbstractRestClient {
     private final String username;
     private final String password;
     private String token;
-    private Map<String, Map<String, JSONObject>> resolveCache = new HashMap<String, Map<String, JSONObject>>();
+    private final Map<String, Map<String, JSONObject>> resolveCache = new HashMap<String, Map<String, JSONObject>>();
 
     public NahimaManager(String url, String username, String password) throws IOException, InterruptedException, RuntimeException {
         // normalize URL
@@ -192,6 +192,28 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     /**
+     * Search in Nahima for one string, get result only if just one result though
+     *
+     * @param search     the string to search for
+     * @param objectType the object type that is searched
+     * @return the object if there is only one, null if not
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public JSONObject resolveStringSearchToOne(String search, String objectType) throws IOException, InterruptedException {
+        JSONObject results = this.searchForString(search, objectType);
+
+        JSONArray foundObjects = (JSONArray) results.get("objects");
+        if (foundObjects.length() == 1) {
+            return (JSONObject) foundObjects.get(0);
+        } else {
+            // TODO: create / select correct
+            log.info("Got != 1 " + objectType + " status. {}", results);
+            return null;
+        }
+    }
+
+    /**
      * Find a person in Nahima
      *
      * @param personName the name to search for
@@ -200,18 +222,10 @@ public class NahimaManager extends AbstractRestClient {
      * @throws InterruptedException
      */
     public JSONObject resolvePerson(String personName) throws IOException, InterruptedException {
-        JSONObject results = this.searchForString(personName, "person");
+        JSONObject results = this.resolveStringSearchToOne(personName, "person");
         // TODO: check compliance, does it really match well? We use "must", so let's hope so, but the resolution could still go wrong.
-        // also, multiple could be returned.
-        // or, none, in which case we might need to create one
-        JSONArray foundPersons = (JSONArray) results.get("objects");
-        if (foundPersons.length() == 1) {
-            return (JSONObject) foundPersons.get(0);
-        } else {
-            // TODO: create / select correct
-            log.info("Got != 1 person. {}", results);
-            return null;
-        }
+        // TODO: create / select correct
+        return results;
     }
 
     /**
@@ -223,29 +237,38 @@ public class NahimaManager extends AbstractRestClient {
      * @throws InterruptedException
      */
     public JSONObject resolveLocation(String location) throws IOException, InterruptedException {
-        JSONObject results = this.searchForString(location, "gazetteer");
-
-        JSONArray foundLocations = (JSONArray) results.get("objects");
-        if (foundLocations.length() == 1) {
-            return (JSONObject) foundLocations.get(0);
-        } else {
-            // TODO: create / select correct
-            log.info("Got != 1 location. {}", results);
-            return null;
-        }
+        JSONObject results = this.resolveStringSearchToOne(location, "gazetteer");
+        // TODO: create / select correct
+        return results;
     }
 
-    public JSONObject resolveUnitFor(String unit, String unitSubject) throws IOException, InterruptedException {
-        JSONObject results = this.searchForString(unit, unitSubject, "token");
+    /**
+     * Find a typusstatus in Nahima
+     *
+     * @param status the search string
+     * @return the nahima returned object if only one
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public JSONObject resolveTypeStatus(String status) throws IOException, InterruptedException {
+        JSONObject results = this.resolveStringSearchToOne(status, "typusstatus");
+        // TODO: create / select correct
+        return results;
+    }
 
-        JSONArray foundUnits = (JSONArray) results.get("objects");
-        if (foundUnits.length() == 1) {
-            return (JSONObject) foundUnits.get(0);
-        } else {
-            // TODO: create / select correct
-            log.info("Got != 1 unit. {}", results);
-            return null;
-        }
+    /**
+     * Generic function to resolve unit for a certain field
+     *
+     * @param unit        the unit to find in Nahima
+     * @param unitSubject the unit type
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public JSONObject resolveUnitFor(String unit, String unitSubject) throws IOException, InterruptedException {
+        JSONObject results = this.resolveStringSearchToOne(unit, unitSubject);
+        // TODO: create / select correct
+        return results;
     }
 
     /**
@@ -274,6 +297,7 @@ public class NahimaManager extends AbstractRestClient {
 
     /**
      * Find the location "Datum" in Nahima
+     *
      * @param format the datum to search for
      * @return the nahima returned object if only one
      * @throws IOException
@@ -294,22 +318,16 @@ public class NahimaManager extends AbstractRestClient {
 
     /**
      * Find the collection method in Nahima
+     *
      * @param method the collection method to search for
      * @return the nahima returned object if only one
      * @throws IOException
      * @throws InterruptedException
      */
     public JSONObject resolveCollectionMethod(String method) throws IOException, InterruptedException {
-        JSONObject results = this.searchForString(method, "sammlungsmethoden");
-
-        JSONArray foundMethods = (JSONArray) results.get("objects");
-        if (foundMethods.length() == 1) {
-            return (JSONObject) foundMethods.get(0);
-        } else {
-            // TODO: create / select correct
-            log.info("Got != 1 collecting method. {}", results);
-            return null;
-        }
+        JSONObject results = this.resolveStringSearchToOne(method, "sammlungsmethoden");
+        // TODO: create / select correct
+        return results;
     }
 
     /**

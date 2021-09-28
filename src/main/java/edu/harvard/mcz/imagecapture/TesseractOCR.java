@@ -127,9 +127,9 @@ public class TesseractOCR implements OCR {
             // Run tesseract to OCR the target file.
             List<String> runCommand = new ArrayList<>();
             runCommand.addAll(Arrays.asList(Singleton.getSingletonInstance()
-                    .getProperties()
-                    .getProperties()
-                    .getProperty(ImageCaptureProperties.KEY_TESSERACT_EXECUTABLE),
+                            .getProperties()
+                            .getProperties()
+                            .getProperty(ImageCaptureProperties.KEY_TESSERACT_EXECUTABLE),
                     target, tempFileBase, language));
 
             Process proc = r.exec((String[]) runCommand.toArray());

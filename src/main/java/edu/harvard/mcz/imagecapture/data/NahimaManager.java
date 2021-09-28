@@ -25,7 +25,7 @@ public class NahimaManager extends AbstractRestClient {
     private final String username;
     private final String password;
     private String token;
-    private final Map<String, Map<String, JSONObject>> resolveCache = new HashMap<String, Map<String, JSONObject>>();
+    private final Map<String, Map<String, JSONObject>> resolveCache = new HashMap<>();
 
     public NahimaManager(String url, String username, String password) throws IOException, InterruptedException, RuntimeException {
         // normalize URL
@@ -44,9 +44,13 @@ public class NahimaManager extends AbstractRestClient {
         this.login();
     }
 
+    /**
+     * Start a Nahima session
+     *
+     */
     protected void startSessionAndRetrieveToken() throws RuntimeException {
         String queryUrl = this.url + "session";
-        Collection<String> params = new HashSet<String>();
+        Collection<String> params = new HashSet<>();
         params.add("token");
         this.token = (String) this.fetchValues(queryUrl, params).get("token");
 
@@ -55,6 +59,10 @@ public class NahimaManager extends AbstractRestClient {
         }
     }
 
+    /**
+     * Do login to Nahima
+     *
+     */
     protected void login() throws IOException, InterruptedException, RuntimeException {
         String queryUrl = this.url + "session/authenticate?method=easydb&token=" + this.token;
         HashMap<String, String> params = new HashMap<>();
@@ -71,6 +79,12 @@ public class NahimaManager extends AbstractRestClient {
         }
     }
 
+    /**
+     * This function loops the images in a Specimen and uploads them to Nahima
+     *
+     * @param specimen the specimen whose images to upload
+     * @return the created mediassets
+     */
     public Object[] uploadImagesForSpecimen(Specimen specimen) throws IOException, InterruptedException, RuntimeException {
         // docs:
         // https://docs.easydb.de/en/technical/api/eas/
@@ -104,6 +118,13 @@ public class NahimaManager extends AbstractRestClient {
         return results.toArray();
     }
 
+    /**
+     * Run the query to create an object in Nahima
+     *
+     * @param object the object to create
+     * @param pool the pool to create the object in
+     * @return the created object as it is in Nahima
+     */
     public JSONObject createObjectInNahima(JSONObject object, String pool) throws IOException, InterruptedException {
         // docs:
         // https://docs.easydb.de/en/technical/api/db/
@@ -132,8 +153,6 @@ public class NahimaManager extends AbstractRestClient {
      * @param searchMode   e.g. "fulltext", "token", ...
      * @param ignoreCache  cache speeds things up, but is annoying when we just created a new object
      * @return Nahima's response
-     * @throws IOException
-     * @throws InterruptedException
      */
     public JSONObject searchForString(String searchString, String objectType, String searchMode, boolean ignoreCache) throws IOException, InterruptedException {
         // check cache for results
@@ -161,6 +180,7 @@ public class NahimaManager extends AbstractRestClient {
 
         JSONObject superSearch = new JSONObject();
         superSearch.put("search", search);
+        superSearch.put("type", "complex");
         JSONArray superSuperSearch = new JSONArray();
         superSuperSearch.put(superSearch);
         JSONObject query = new JSONObject();
@@ -197,11 +217,18 @@ public class NahimaManager extends AbstractRestClient {
      * @param search     the string to search for
      * @param objectType the object type that is searched
      * @return the object if there is only one, null if not
-     * @throws IOException
-     * @throws InterruptedException
      */
     public JSONObject resolveStringSearchToOne(String search, String objectType) throws IOException, InterruptedException {
+        if (search == null || objectType == null) {
+            log.warn("Cannot search as search " + search + " or objectType " + objectType + " is null");
+            return null;
+        }
+
         JSONObject results = this.searchForString(search, objectType);
+
+        if (results.has("code") && results.getString("code").startsWith("error")) {
+            throw new RuntimeException("Failed to resolve search. Error code: " + results.getString("code"));
+        }
 
         JSONArray foundObjects = (JSONArray) results.get("objects");
         if (foundObjects.length() == 1) {
@@ -217,14 +244,14 @@ public class NahimaManager extends AbstractRestClient {
      * Find a person in Nahima
      *
      * @param personName the name to search for
-     * @return
-     * @throws IOException
-     * @throws InterruptedException
      */
     public JSONObject resolvePerson(String personName) throws IOException, InterruptedException {
         JSONObject results = this.resolveStringSearchToOne(personName, "person");
         // TODO: check compliance, does it really match well? We use "must", so let's hope so, but the resolution could still go wrong.
         // TODO: create / select correct
+        if (results == null) {
+            // TODO: create
+        }
         return results;
     }
 
@@ -233,12 +260,13 @@ public class NahimaManager extends AbstractRestClient {
      *
      * @param location the search string
      * @return the nahima returned object if only one
-     * @throws IOException
-     * @throws InterruptedException
      */
     public JSONObject resolveLocation(String location) throws IOException, InterruptedException {
         JSONObject results = this.resolveStringSearchToOne(location, "gazetteer");
         // TODO: create / select correct
+        if (results == null) {
+            // TODO: create
+        }
         return results;
     }
 
@@ -247,12 +275,13 @@ public class NahimaManager extends AbstractRestClient {
      *
      * @param status the search string
      * @return the nahima returned object if only one
-     * @throws IOException
-     * @throws InterruptedException
      */
     public JSONObject resolveTypeStatus(String status) throws IOException, InterruptedException {
         JSONObject results = this.resolveStringSearchToOne(status, "typusstatus");
         // TODO: create / select correct
+        if (results == null) {
+            // TODO: create
+        }
         return results;
     }
 
@@ -261,13 +290,13 @@ public class NahimaManager extends AbstractRestClient {
      *
      * @param unit        the unit to find in Nahima
      * @param unitSubject the unit type
-     * @return
-     * @throws IOException
-     * @throws InterruptedException
      */
     public JSONObject resolveUnitFor(String unit, String unitSubject) throws IOException, InterruptedException {
         JSONObject results = this.resolveStringSearchToOne(unit, unitSubject);
         // TODO: create / select correct
+        if (results == null) {
+            // TODO: create
+        }
         return results;
     }
 
@@ -276,8 +305,6 @@ public class NahimaManager extends AbstractRestClient {
      *
      * @param unit the search string
      * @return the nahima returned object if only one
-     * @throws IOException
-     * @throws InterruptedException
      */
     public JSONObject resolveUnitForHeight(String unit) throws IOException, InterruptedException {
         return resolveUnitFor(unit, "einheitenfuerhoehe");
@@ -288,8 +315,6 @@ public class NahimaManager extends AbstractRestClient {
      *
      * @param unit the search string
      * @return the nahima returned object if only one
-     * @throws IOException
-     * @throws InterruptedException
      */
     public JSONObject resolveUnitForErrorRadius(String unit) throws IOException, InterruptedException {
         return resolveUnitFor(unit, "einheitenfuerdenfehlerradius");
@@ -300,8 +325,6 @@ public class NahimaManager extends AbstractRestClient {
      *
      * @param format the datum to search for
      * @return the nahima returned object if only one
-     * @throws IOException
-     * @throws InterruptedException
      */
     public JSONObject resolveDatumFormat(String format) throws IOException, InterruptedException {
         JSONObject results = this.searchForString(format, "datumsformate", "token");
@@ -321,12 +344,13 @@ public class NahimaManager extends AbstractRestClient {
      *
      * @param method the collection method to search for
      * @return the nahima returned object if only one
-     * @throws IOException
-     * @throws InterruptedException
      */
     public JSONObject resolveCollectionMethod(String method) throws IOException, InterruptedException {
         JSONObject results = this.resolveStringSearchToOne(method, "sammlungsmethoden");
         // TODO: create / select correct
+        if (results == null) {
+            // TODO: create
+        }
         return results;
     }
 
@@ -338,6 +362,9 @@ public class NahimaManager extends AbstractRestClient {
      * @return the reduced associate, ideal to reference on creation
      */
     public JSONObject reduceAssociateForAssociation(JSONObject associate) {
+        if (associate == null) {
+            return null;
+        }
         JSONObject reduced = new JSONObject();
         String[] namesToKeep = {"_objecttype", "_mask", "_global_object_id"};
         for (String name : namesToKeep) {

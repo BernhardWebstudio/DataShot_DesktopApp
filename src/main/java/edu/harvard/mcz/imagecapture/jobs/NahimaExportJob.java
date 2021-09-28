@@ -127,8 +127,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             specimen.setNahimaExported(true);
             try {
                 sls.attachDirty(specimen);
-                sls.persist(specimen);
-            } catch (SaveFailedException | SpecimenExistsException e) {
+            } catch (SaveFailedException e) {
                 lastError = e;
                 log.error("Failed to store Nahima export status", e);
                 this.status = STATUS_DATASHOT_FAILED;

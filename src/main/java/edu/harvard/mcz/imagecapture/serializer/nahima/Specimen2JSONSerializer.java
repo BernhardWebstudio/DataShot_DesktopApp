@@ -134,16 +134,18 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             log.error("Failed to resolve unit", e);
         }
 
-        try {
-            reverseNestedCollection.put("einheitdesfehlerradius", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveUnitForErrorRadius(georef.getMaxErrorUnits())));
-        } catch (IOException | InterruptedException e) {
-            log.error("Failed to resolve unit", e);
-        }
+        if (georef != null) {
+            try {
+                reverseNestedCollection.put("einheitdesfehlerradius", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveUnitForErrorRadius(georef.getMaxErrorUnits())));
+            } catch (IOException | InterruptedException e) {
+                log.error("Failed to resolve unit", e);
+            }
 
-        try {
-            reverseNestedCollection.put("datumsformatgeodaeischeskooordinatensystem", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveDatumFormat(georef.getDatum())));
-        } catch (IOException | InterruptedException e) {
-            log.error("Failed to resolve date format", e);
+            try {
+                reverseNestedCollection.put("datumsformatgeodaeischeskooordinatensystem", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveDatumFormat(georef.getDatum())));
+            } catch (IOException | InterruptedException e) {
+                log.error("Failed to resolve date format", e);
+            }
         }
 
         try {
@@ -202,7 +204,6 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             parts.put(partJson);
         }
         result.put("_nested:entomologie__praeparatteile", parts);
-
 
         // TODO: other fields
 

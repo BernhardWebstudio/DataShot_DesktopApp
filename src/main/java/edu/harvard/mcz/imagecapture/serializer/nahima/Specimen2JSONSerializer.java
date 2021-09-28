@@ -45,7 +45,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         // here, it already starts to get complicated, fuu.
         JSONArray reverseNestedDeterminations = new JSONArray();
         for (Determination det : toSerialize.getDeterminations()) {
-            Map<String, Object> reverseNestedCollectionMap = new HashMap<>(){{
+            Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
                 put("_version", 1);
                 put("_pool", NahimaManager.defaultPool);
                 put("_id", JSONObject.NULL);
@@ -90,11 +90,12 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         LatLong georef = toSerialize.getLatLong().isEmpty() ? null : (LatLong) toSerialize.getLatLong().toArray()[0];
         // some other basic reverse nested values for "aufsammlung" (collection)
         Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
-            put("sammlertrans", toSerialize.getCollectors().stream().map(Collector::getCollectorName).collect(Collectors.joining(", "))); // TODO: resolve
+            put("sammlertrans", toSerialize.getCollectors().stream().map(Collector::getCollectorName).collect(Collectors.joining(", ")));
             put("_nested:aufsammlung__indikatorenfuersammeldatum", new JSONArray(new String[]{toSerialize.getDateCollectedIndicator()}));
             put("sammlungstitel", toSerialize.getCollection());
             put("kommentare", toSerialize.getSpecimenNotes());
             put("habitattrans", toSerialize.getHabitat());
+            put("sammelorttrans", toSerialize.getVerbatimLocality());
             put("neuhabitat", wrapInLan(toSerialize.getHabitat()));
             put("mikrohabitat", wrapInLan(toSerialize.getMicrohabitat()));
             put("traegerorganismustrans", toSerialize.getAssociatedTaxon());
@@ -110,6 +111,53 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("_pool", NahimaManager.defaultPool);
         }};
         JSONObject reverseNestedCollection = new JSONObject(reverseNestedCollectionMap);
+
+        try {
+            reverseNestedCollection.put("sammelort", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveLocation(String.join(" ", toSerialize.getCountry(), toSerialize.getPrimaryDivison(), toSerialize.getSpecificLocality()))));
+        } catch (IOException | InterruptedException e) {
+            log.error("Failed to resolve location", e);
+        }
+
+        try {
+            reverseNestedCollection.put("einheitderhoehe", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveUnitForHeight(toSerialize.getElev_units())));
+        } catch (IOException | InterruptedException e) {
+            log.error("Failed to resolve unit", e);
+        }
+
+        try {
+            reverseNestedCollection.put("einheitdesfehlerradius", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveUnitForErrorRadius(georef.getMaxErrorUnits())));
+        } catch (IOException | InterruptedException e) {
+            log.error("Failed to resolve unit", e);
+        }
+
+        try {
+            reverseNestedCollection.put("datumsformatgeodaeischeskooordinatensystem", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveDatumFormat(georef.getDatum())));
+        } catch (IOException | InterruptedException e) {
+            log.error("Failed to resolve date format", e);
+        }
+
+        try {
+            reverseNestedCollection.put("_nested:aufsammlung__sammelmethoden", new JSONArray(new JSONObject[]{
+                    new JSONObject(new HashMap<>() {{
+                        put("sammlungsmethode", nahimaManager.resolveCollectionMethod(toSerialize.getCollectingMethod()));
+                    }})
+            }));
+        } catch (IOException | InterruptedException e) {
+            log.error("Failed to resolve collection method", e);
+        }
+
+        JSONArray collectors = new JSONArray();
+        for (Collector collector : toSerialize.getCollectors()) {
+            try {
+                JSONObject person = nahimaManager.reduceAssociateForAssociation(nahimaManager.resolvePerson(collector.getCollectorName()));
+                collectors.put(new JSONObject(new HashMap<>() {{
+                    put("sammler", person);
+                }}));
+            } catch (IOException | InterruptedException e) {
+                log.error("Failed to resolve date format", e);
+            }
+        }
+        reverseNestedCollection.put("_nested:aufsammlung__sammler", collectors);
 
         try {
             if (toSerialize.getDateNos().contains("-")) {

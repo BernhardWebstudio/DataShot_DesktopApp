@@ -19,12 +19,11 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class NahimaManager extends AbstractRestClient {
+    public static final JSONObject defaultPool = new JSONObject("{ \"pool\": { \"_id\": 7 } }");
     private static final Logger log = LoggerFactory.getLogger(NahimaManager.class);
-
     private final String url;
     private final String username;
     private final String password;
-    public static final JSONObject defaultPool = new JSONObject("{ \"pool\": { \"_id\": 7 } }");
     private String token;
     private Map<String, Map<String, JSONObject>> resolveCache = new HashMap<String, Map<String, JSONObject>>();
 
@@ -110,13 +109,19 @@ public class NahimaManager extends AbstractRestClient {
         // https://docs.easydb.de/en/technical/api/db/
         String queryURL = this.url + "db/" + pool + "?token=" + token;
         // EasyDB seems to have mixed up PUT & POST, but well, we don't care
-        return new JSONObject(this.putRequest(queryURL, (new JSONArray()).put(object).toString(), new HashMap<>() {{
+        String returnValue = this.putRequest(queryURL, (new JSONArray()).put(object).toString(), new HashMap<>() {{
             put("Content-Type", "application/json");
-        }}));
-    }
+        }});
 
-    public JSONObject searchForString(String searchString, String objectType) throws IOException, InterruptedException {
-        return searchForString(searchString, objectType, false);
+        // check for errors
+        if (!returnValue.startsWith("[")) {
+            JSONObject responseObject = new JSONObject(returnValue);
+            if (responseObject.has("code") && responseObject.getString("code").startsWith("error")) {
+                throw new RuntimeException("Failed to upload image: Error code: " + responseObject.get("code"));
+            }
+        }
+
+        return (JSONObject) (new JSONArray(returnValue)).get(0);
     }
 
     /**
@@ -124,12 +129,13 @@ public class NahimaManager extends AbstractRestClient {
      *
      * @param searchString the string to search for. Will be split by " ".
      * @param objectType   the objecttype we search for
+     * @param searchMode   e.g. "fulltext", "token", ...
      * @param ignoreCache  cache speeds things up, but is annoying when we just created a new object
      * @return Nahima's response
      * @throws IOException
      * @throws InterruptedException
      */
-    public JSONObject searchForString(String searchString, String objectType, boolean ignoreCache) throws IOException, InterruptedException {
+    public JSONObject searchForString(String searchString, String objectType, String searchMode, boolean ignoreCache) throws IOException, InterruptedException {
         // check cache for results
         Map<String, JSONObject> typeCache = resolveCache.get(objectType);
         if (typeCache != null) {
@@ -148,7 +154,7 @@ public class NahimaManager extends AbstractRestClient {
             JSONObject namePartSearch = new JSONObject();
             namePartSearch.put("type", "match");
             namePartSearch.put("bool", "must");
-            namePartSearch.put("mode", "fulltext");
+            namePartSearch.put("mode", searchMode);
             namePartSearch.put("string", name);
             search.put(namePartSearch);
         }
@@ -173,8 +179,20 @@ public class NahimaManager extends AbstractRestClient {
         return result;
     }
 
+    public JSONObject searchForString(String searchString, String objectType) throws IOException, InterruptedException {
+        return searchForString(searchString, objectType, false);
+    }
+
+    public JSONObject searchForString(String searchString, String objectType, String searchMode) throws IOException, InterruptedException {
+        return searchForString(searchString, objectType, searchMode, false);
+    }
+
+    public JSONObject searchForString(String searchString, String objectType, boolean ignoreCache) throws IOException, InterruptedException {
+        return searchForString(searchString, objectType, "fulltext", ignoreCache);
+    }
+
     /**
-     * Find a person in DataShot
+     * Find a person in Nahima
      *
      * @param personName the name to search for
      * @return
@@ -190,8 +208,106 @@ public class NahimaManager extends AbstractRestClient {
         if (foundPersons.length() == 1) {
             return (JSONObject) foundPersons.get(0);
         } else {
-            // TODO.
+            // TODO: create / select correct
             log.info("Got != 1 person. {}", results);
+            return null;
+        }
+    }
+
+    /**
+     * Find a location in Nahima
+     *
+     * @param location the search string
+     * @return the nahima returned object if only one
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public JSONObject resolveLocation(String location) throws IOException, InterruptedException {
+        JSONObject results = this.searchForString(location, "gazetteer");
+
+        JSONArray foundLocations = (JSONArray) results.get("objects");
+        if (foundLocations.length() == 1) {
+            return (JSONObject) foundLocations.get(0);
+        } else {
+            // TODO: create / select correct
+            log.info("Got != 1 location. {}", results);
+            return null;
+        }
+    }
+
+    public JSONObject resolveUnitFor(String unit, String unitSubject) throws IOException, InterruptedException {
+        JSONObject results = this.searchForString(unit, unitSubject, "token");
+
+        JSONArray foundUnits = (JSONArray) results.get("objects");
+        if (foundUnits.length() == 1) {
+            return (JSONObject) foundUnits.get(0);
+        } else {
+            // TODO: create / select correct
+            log.info("Got != 1 unit. {}", results);
+            return null;
+        }
+    }
+
+    /**
+     * Find a unit in Nahima
+     *
+     * @param unit the search string
+     * @return the nahima returned object if only one
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public JSONObject resolveUnitForHeight(String unit) throws IOException, InterruptedException {
+        return resolveUnitFor(unit, "einheitenfuerhoehe");
+    }
+
+    /**
+     * Find a unit in Nahima
+     *
+     * @param unit the search string
+     * @return the nahima returned object if only one
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public JSONObject resolveUnitForErrorRadius(String unit) throws IOException, InterruptedException {
+        return resolveUnitFor(unit, "einheitenfuerdenfehlerradius");
+    }
+
+    /**
+     * Find the location "Datum" in Nahima
+     * @param format the datum to search for
+     * @return the nahima returned object if only one
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public JSONObject resolveDatumFormat(String format) throws IOException, InterruptedException {
+        JSONObject results = this.searchForString(format, "datumsformate", "token");
+
+        JSONArray foundUnits = (JSONArray) results.get("objects");
+        if (foundUnits.length() == 1) {
+            return (JSONObject) foundUnits.get(0);
+        } else {
+            // TODO: create / select correct
+            log.info("Got != 1 datum format. {}", results);
+            return null;
+        }
+    }
+
+    /**
+     * Find the collection method in Nahima
+     * @param method the collection method to search for
+     * @return the nahima returned object if only one
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public JSONObject resolveCollectionMethod(String method) throws IOException, InterruptedException {
+        JSONObject results = this.searchForString(method, "sammlungsmethoden");
+
+        JSONArray foundMethods = (JSONArray) results.get("objects");
+        if (foundMethods.length() == 1) {
+            return (JSONObject) foundMethods.get(0);
+        } else {
+            // TODO: create / select correct
+            log.info("Got != 1 collecting method. {}", results);
             return null;
         }
     }
@@ -201,7 +317,7 @@ public class NahimaManager extends AbstractRestClient {
      * fully-hydrated object when creating another entity
      *
      * @param associate the object from easyDB to reduce
-     * @return
+     * @return the reduced associate, ideal to reference on creation
      */
     public JSONObject reduceAssociateForAssociation(JSONObject associate) {
         JSONObject reduced = new JSONObject();

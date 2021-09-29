@@ -1,6 +1,8 @@
 package edu.harvard.mcz.imagecapture.serializer.nahima;
 
+import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.data.NahimaManager;
+import edu.harvard.mcz.imagecapture.entity.Number;
 import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.serializer.ToJSONSerializerInterface;
 import org.apache.commons.lang3.time.DateUtils;
@@ -40,6 +42,32 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         result.put("_id", JSONObject.NULL);
         result.put("_pool", NahimaManager.defaultPool);
         // here, it already starts to get complicated, fuu.
+        // first, other ids, incl. specimen ID
+        JSONArray otherIds = new JSONArray();
+        for (Number otherNr : toSerialize.getNumbers()) {
+            Map<String, Object> otherNrMap = new HashMap<>() {{
+                put("andereid", otherNr.getNumber());
+                put("bemerkung", String.join(" ", otherNr.getNumber(), String.valueOf(otherNr.getNumberId()), otherNr.getNumberType()));
+            }};
+            try {
+                otherNrMap.put("typ", nahimaManager.resolveOtherNrType(otherNr.getNumberType()));
+            } catch (IOException | InterruptedException e) {
+                log.error("Failed to resolve nr type", e);
+            }
+            otherIds.put(new JSONObject(otherNrMap));
+        }
+        // also add specimen id as other id
+        JSONObject dataShotId = new JSONObject(new HashMap<String, Object>() {{
+            put("andereid", String.valueOf(toSerialize.getSpecimenId()));
+        }});
+        try {
+            dataShotId.put("typ", nahimaManager.resolveOtherNrType(ImageCaptureApp.APP_NAME + "-ID"));
+        } catch (IOException | InterruptedException e) {
+            log.error("Failed to resolve nr type", e);
+        }
+        otherIds.put(dataShotId);
+        result.put("_nested:entomologie__andereids", otherIds);
+        //
         JSONArray reverseNestedDeterminations = new JSONArray();
         for (Determination det : toSerialize.getDeterminations()) {
             Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
@@ -77,7 +105,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                     identifierPersons.put(nahimaManager.reduceAssociateForAssociation(identifierPerson));
                 }
             } catch (IOException | InterruptedException e) {
-                log.info("Failed to resolve person", e);
+                log.error("Failed to resolve person", e);
             }
             reverseNestedDetermination.put("_nested:bestimmung__bestimmer_person", identifierPersons);
 
@@ -85,7 +113,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                 JSONObject resolvedTypeStatus = nahimaManager.resolveTypeStatus(det.getTypeStatus());
                 reverseNestedDetermination.put("typusstatus", resolvedTypeStatus);
             } catch (IOException | InterruptedException e) {
-                log.info("Failed to resolve type status", e);
+                log.error("Failed to resolve type status", e);
             }
             // TODO: other fields
 

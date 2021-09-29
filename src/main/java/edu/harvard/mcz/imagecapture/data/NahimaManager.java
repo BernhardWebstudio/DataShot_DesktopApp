@@ -3,6 +3,7 @@ package edu.harvard.mcz.imagecapture.data;
 import com.github.mizosoft.methanol.MediaType;
 import com.github.mizosoft.methanol.MultipartBodyPublisher;
 import com.github.mizosoft.methanol.MutableRequest;
+import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
@@ -24,8 +25,8 @@ public class NahimaManager extends AbstractRestClient {
     private final String url;
     private final String username;
     private final String password;
-    private String token;
     private final Map<String, Map<String, JSONObject>> resolveCache = new HashMap<>();
+    private String token;
 
     public NahimaManager(String url, String username, String password) throws IOException, InterruptedException, RuntimeException {
         // normalize URL
@@ -46,7 +47,6 @@ public class NahimaManager extends AbstractRestClient {
 
     /**
      * Start a Nahima session
-     *
      */
     protected void startSessionAndRetrieveToken() throws RuntimeException {
         String queryUrl = this.url + "session";
@@ -61,7 +61,6 @@ public class NahimaManager extends AbstractRestClient {
 
     /**
      * Do login to Nahima
-     *
      */
     protected void login() throws IOException, InterruptedException, RuntimeException {
         String queryUrl = this.url + "session/authenticate?method=easydb&token=" + this.token;
@@ -121,14 +120,14 @@ public class NahimaManager extends AbstractRestClient {
     /**
      * Run the query to create an object in Nahima
      *
-     * @param object the object to create
-     * @param pool the pool to create the object in
+     * @param object  the object to create
+     * @param objType the pool to create the object in
      * @return the created object as it is in Nahima
      */
-    public JSONObject createObjectInNahima(JSONObject object, String pool) throws IOException, InterruptedException {
+    public JSONObject createObjectInNahima(JSONObject object, String objType) throws IOException, InterruptedException {
         // docs:
         // https://docs.easydb.de/en/technical/api/db/
-        String queryURL = this.url + "db/" + pool + "?token=" + token;
+        String queryURL = this.url + "db/" + objType + "?token=" + token;
         // EasyDB seems to have mixed up PUT & POST, but well, we don't care
         String returnValue = this.putRequest(queryURL, (new JSONArray()).put(object).toString(), new HashMap<>() {{
             put("Content-Type", "application/json");
@@ -145,6 +144,26 @@ public class NahimaManager extends AbstractRestClient {
         return (JSONObject) (new JSONArray(returnValue)).get(0);
     }
 
+    protected JSONObject loadFromCache(String id, String objectType) {
+        Map<String, JSONObject> typeCache = resolveCache.get(objectType);
+        if (typeCache != null) {
+            JSONObject cacheLoaded = typeCache.get(id);
+            if (cacheLoaded != null) {
+                return cacheLoaded;
+            }
+        }
+        return null;
+    }
+
+    protected void storeInCache(String id, String objectType, JSONObject result) {
+        Map<String, JSONObject> typeCache = resolveCache.get(objectType);
+        if (typeCache == null) {
+            typeCache = new HashMap<>();
+            resolveCache.put(objectType, typeCache);
+        }
+        typeCache.put(id, result);
+    }
+
     /**
      * Search for a string in a Nahima objecttype
      *
@@ -156,11 +175,10 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject searchForString(String searchString, String objectType, String searchMode, boolean ignoreCache) throws IOException, InterruptedException {
         // check cache for results
-        Map<String, JSONObject> typeCache = resolveCache.get(objectType);
-        if (typeCache != null) {
-            JSONObject cacheLoaded = typeCache.get(searchString);
-            if (cacheLoaded != null && !ignoreCache) {
-                return cacheLoaded;
+        if (!ignoreCache) {
+            JSONObject fromCache = loadFromCache(searchString, objectType);
+            if (fromCache != null) {
+                return fromCache;
             }
         }
 
@@ -190,11 +208,7 @@ public class NahimaManager extends AbstractRestClient {
 
         // store result in cache
         JSONObject result = this.postRequest(queryURL, query);
-        if (typeCache == null) {
-            typeCache = new HashMap<>();
-            resolveCache.put(objectType, typeCache);
-        }
-        typeCache.put(searchString, result);
+        storeInCache(searchString, objectType, result);
 
         return result;
     }
@@ -218,13 +232,13 @@ public class NahimaManager extends AbstractRestClient {
      * @param objectType the object type that is searched
      * @return the object if there is only one, null if not
      */
-    public JSONObject resolveStringSearchToOne(String search, String objectType) throws IOException, InterruptedException {
+    public JSONObject resolveStringSearchToOne(String search, String objectType, boolean ignoreCache) throws IOException, InterruptedException {
         if (search == null || objectType == null) {
             log.warn("Cannot search as search " + search + " or objectType " + objectType + " is null");
             return null;
         }
 
-        JSONObject results = this.searchForString(search, objectType);
+        JSONObject results = this.searchForString(search, objectType, ignoreCache);
 
         if (results.has("code") && results.getString("code").startsWith("error")) {
             throw new RuntimeException("Failed to resolve search. Error code: " + results.getString("code"));
@@ -238,6 +252,10 @@ public class NahimaManager extends AbstractRestClient {
             log.info("Got != 1 " + objectType + " status. {}", results);
             return null;
         }
+    }
+
+    public JSONObject resolveStringSearchToOne(String search, String objectType) throws IOException, InterruptedException {
+        return resolveStringSearchToOne(search, objectType, false);
     }
 
     /**
@@ -296,6 +314,35 @@ public class NahimaManager extends AbstractRestClient {
         // TODO: create / select correct
         if (results == null) {
             // TODO: create
+        }
+        return results;
+    }
+
+    /**
+     * Find a typusstatus in Nahima
+     *
+     * @param nrType the search string
+     * @return the nahima returned object if only one
+     */
+    public JSONObject resolveOtherNrType(String nrType) throws IOException, InterruptedException {
+        JSONObject results = this.resolveStringSearchToOne(nrType, "id_typen");
+        // TODO: create / select correct
+        if (results == null && nrType != null) {
+            // TODO: create
+            JSONObject toCreate = new JSONObject(new HashMap<>() {{
+                put("_idx_in_objects", 0);
+                put("_mask", "id_typen_all_fields");
+                put("_objecttype", "id_typen");
+                put("id_typen", new JSONObject(new HashMap<>() {{
+                    put("_id", JSONObject.NULL);
+                    put("_version", 1);
+                    put("name", nrType);
+                    put("bemerkung", "Created by " + ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion());
+                }}));
+            }});
+            this.createObjectInNahima(toCreate, "id_typen");
+            // TODO: it would be simpler to store the created in cache. But well... current format does not allow
+            return this.resolveStringSearchToOne(nrType, "id_typen", true);
         }
         return results;
     }

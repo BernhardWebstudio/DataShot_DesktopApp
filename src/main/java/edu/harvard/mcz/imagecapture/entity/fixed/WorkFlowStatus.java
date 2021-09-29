@@ -84,7 +84,7 @@ public class WorkFlowStatus {
      * indicate further progress to complete load of all data into MCZbase. Record
      * is now not editable in DataShot.
      */
-    public static final String STAGE_DONE = "Moved to MCZbase";
+    public static final String STAGE_DONE = "Moved to Nahima";
 
     /**
      * Specimen record has to be deleted.

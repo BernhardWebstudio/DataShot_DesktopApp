@@ -259,6 +259,48 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     /**
+     * Search an object in Nahima by a string. Create it if it is not found.
+     *
+     * @param name       the string to search by
+     * @param objectType the type of object to search
+     * @param mask       the mask of the field (the mapping), required for creation
+     * @param inner      the object with the properties intended for the newly created object
+     * @return the matching or new object
+     */
+    public JSONObject resolveOrCreate(String name, String objectType, String mask, JSONObject inner) throws IOException, InterruptedException {
+        JSONObject results = this.resolveStringSearchToOne(name, objectType);
+        // TODO: select correct
+        if (results == null) {
+            // create
+            JSONObject toCreate = wrapForCreation(inner, objectType, mask);
+            this.createObjectInNahima(toCreate, objectType);
+            // TODO: it would be simpler to store the created in cache. But well... current format does not allow
+            return this.resolveStringSearchToOne(name, objectType, true);
+        }
+        return results;
+    }
+
+    /**
+     * Search an object in Nahima which has a "name" and a "bemerkung" field.
+     * Create if not existing with Bemerkung = "Created by DataShot {version}"
+     *
+     * @param name       the expected value of the "name" field
+     * @param objectType the "_objecttype"
+     * @param mask       the mask of the field (the mapping)
+     * @return the object in Nahima
+     */
+    public JSONObject resolveNameBemerkungObject(String name, String objectType, String mask) throws IOException, InterruptedException {
+        return this.resolveOrCreate(name, objectType, mask, new JSONObject(new HashMap<>() {{
+            put("name", name);
+            put("bemerkung", "Created by " + ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion());
+        }}));
+    }
+
+    public JSONObject resolveNameBemerkungObject(String name, String objectType) throws IOException, InterruptedException {
+        return resolveNameBemerkungObject(name, objectType, objectType + "_all_fields");
+    }
+
+    /**
      * Find a person in Nahima
      *
      * @param personName the name to search for
@@ -325,26 +367,17 @@ public class NahimaManager extends AbstractRestClient {
      * @return the nahima returned object if only one
      */
     public JSONObject resolveOtherNrType(String nrType) throws IOException, InterruptedException {
-        JSONObject results = this.resolveStringSearchToOne(nrType, "id_typen");
-        // TODO: create / select correct
-        if (results == null && nrType != null) {
-            // TODO: create
-            JSONObject toCreate = new JSONObject(new HashMap<>() {{
-                put("_idx_in_objects", 0);
-                put("_mask", "id_typen_all_fields");
-                put("_objecttype", "id_typen");
-                put("id_typen", new JSONObject(new HashMap<>() {{
-                    put("_id", JSONObject.NULL);
-                    put("_version", 1);
-                    put("name", nrType);
-                    put("bemerkung", "Created by " + ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion());
-                }}));
-            }});
-            this.createObjectInNahima(toCreate, "id_typen");
-            // TODO: it would be simpler to store the created in cache. But well... current format does not allow
-            return this.resolveStringSearchToOne(nrType, "id_typen", true);
-        }
-        return results;
+        return this.resolveNameBemerkungObject(nrType, "id_typen", "id_typen_all_fields");
+    }
+
+    /**
+     * Find the collection method in Nahima
+     *
+     * @param method the collection method to search for
+     * @return the nahima returned object if only one
+     */
+    public JSONObject resolveCollectionMethod(String method) throws IOException, InterruptedException {
+        return resolveNameBemerkungObject(method, "sammlungsmethoden", "sammlungsmethoden__all_fields");
     }
 
     /**
@@ -368,6 +401,20 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     /**
+     * Find a family in Nahima
+     *
+     * @param family
+     * @return
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public JSONObject resolveFamily(String family) throws IOException, InterruptedException {
+        return resolveOrCreate(family, "familien", "familien_all_fields", new JSONObject(new HashMap<>() {{
+            put("familielat", family);
+        }}));
+    }
+
+    /**
      * Find the location "Datum" in Nahima
      *
      * @param format the datum to search for
@@ -384,21 +431,6 @@ public class NahimaManager extends AbstractRestClient {
             log.info("Got != 1 datum format. {}", results);
             return null;
         }
-    }
-
-    /**
-     * Find the collection method in Nahima
-     *
-     * @param method the collection method to search for
-     * @return the nahima returned object if only one
-     */
-    public JSONObject resolveCollectionMethod(String method) throws IOException, InterruptedException {
-        JSONObject results = this.resolveStringSearchToOne(method, "sammlungsmethoden");
-        // TODO: create / select correct
-        if (results == null) {
-            // TODO: create
-        }
-        return results;
     }
 
     /**
@@ -429,5 +461,31 @@ public class NahimaManager extends AbstractRestClient {
         child.put("_id", associate.has("_id") ? associate.get("_id") : ((JSONObject) associate.get((String) associate.get("_objecttype"))).get("_id"));
         reduced.put((String) associate.get("_objecttype"), child);
         return reduced;
+    }
+
+    /**
+     * Add pool, id and version so the object can be created appropriately in Nahima
+     *
+     * @param inner      the object to create
+     * @param objectType the "_objecttype" to create the object in
+     * @param mask       the mask specifying the fields to use
+     * @return the wrapped object, ready to be created
+     */
+    public JSONObject wrapForCreation(JSONObject inner, String objectType, String mask) {
+        inner.put("_pool", defaultPool);
+        inner.put("_id", JSONObject.NULL);
+        inner.put("_version", 1);
+
+        JSONObject result = new JSONObject(new HashMap<>() {{
+            put("_mask", mask);
+            put("_objecttype", objectType);
+            put("_idx_in_objects", 0);
+        }});
+        result.put(objectType, inner);
+        return result;
+    }
+
+    public JSONObject wrapForCreation(JSONObject inner, String objectType) {
+        return wrapForCreation(inner, objectType, objectType + "_all_fields");
     }
 }

@@ -17,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
@@ -67,7 +68,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         }
         otherIds.put(dataShotId);
         result.put("_nested:entomologie__andereids", otherIds);
-        //
+        // set determinations
         JSONArray reverseNestedDeterminations = new JSONArray();
         for (Determination det : toSerialize.getDeterminations()) {
             Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
@@ -89,37 +90,27 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 
             JSONObject reverseNestedDetermination = new JSONObject(reverseNestedCollectionMap);
 
+            // resolutions
+            tryNonInteractiveResolve(reverseNestedDetermination, "familie", () -> nahimaManager.resolveFamily(toSerialize.getFamily()));
+
             reverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
             reverseNestedDetermination.put("bestimmungsdatumtrans", det.getDateIdentified());
             // try to parse and set the date correctly
-            try {
-                reverseNestedDetermination.put("bestimmungsdatum", this.dateToNahima(det.getDateIdentified()));
-            } catch (ParseException e) {
-                log.error("Failed to parse bestimmungsdatum", e);
-            }
+            tryNonInteractiveResolve(reverseNestedDetermination, "bestimmungsdatum", () -> this.dateToNahima(det.getDateIdentified()));
 
             JSONArray identifierPersons = new JSONArray();
-            try {
-                JSONObject identifierPerson = nahimaManager.resolvePerson(det.getIdentifiedBy());
-                if (identifierPerson != null) {
-                    identifierPersons.put(nahimaManager.reduceAssociateForAssociation(identifierPerson));
-                }
-            } catch (IOException | InterruptedException e) {
-                log.error("Failed to resolve person", e);
-            }
+            tryNonInteractiveResolve(identifierPersons, () -> nahimaManager.reduceAssociateForAssociation(nahimaManager.resolvePerson(det.getIdentifiedBy())), "person");
             reverseNestedDetermination.put("_nested:bestimmung__bestimmer_person", identifierPersons);
 
-            try {
-                JSONObject resolvedTypeStatus = nahimaManager.resolveTypeStatus(det.getTypeStatus());
-                reverseNestedDetermination.put("typusstatus", resolvedTypeStatus);
-            } catch (IOException | InterruptedException e) {
-                log.error("Failed to resolve type status", e);
-            }
+            tryNonInteractiveResolve(reverseNestedDetermination, "typusstatus", () -> nahimaManager.resolveTypeStatus(det.getTypeStatus()));
             // TODO: other fields
 
             // finally,
             reverseNestedDeterminations.put(reverseNestedDetermination);
         }
+        // TODO: add specimen's own det
+
+
         result.put("_reverse_nested:bestimmung:entomologie", reverseNestedDeterminations);
 
         JSONArray reverseNestedCollections = new JSONArray();
@@ -150,52 +141,32 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         }};
         JSONObject reverseNestedCollection = new JSONObject(reverseNestedCollectionMap);
 
-        try {
-            reverseNestedCollection.put("sammelort", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveLocation(String.join(" ", toSerialize.getCountry(), toSerialize.getPrimaryDivison(), toSerialize.getSpecificLocality()))));
-        } catch (IOException | InterruptedException e) {
-            log.error("Failed to resolve location", e);
-        }
-
-        try {
-            reverseNestedCollection.put("einheitderhoehe", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveUnitForHeight(toSerialize.getElev_units())));
-        } catch (IOException | InterruptedException e) {
-            log.error("Failed to resolve unit", e);
-        }
+        tryNonInteractiveResolve(reverseNestedCollection, "sammelort", () -> nahimaManager.reduceAssociateForAssociation(
+                nahimaManager.resolveLocation(String.join(" ", toSerialize.getCountry(), toSerialize.getPrimaryDivison(), toSerialize.getSpecificLocality()))));
+        tryNonInteractiveResolve(reverseNestedCollection, "einheitderhoehe", () -> nahimaManager.reduceAssociateForAssociation(
+                nahimaManager.resolveUnitForHeight(toSerialize.getElev_units())));
 
         if (georef != null) {
-            try {
-                reverseNestedCollection.put("einheitdesfehlerradius", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveUnitForErrorRadius(georef.getMaxErrorUnits())));
-            } catch (IOException | InterruptedException e) {
-                log.error("Failed to resolve unit", e);
-            }
+            tryNonInteractiveResolve(reverseNestedCollection, "einheitdesfehlerradius", () -> nahimaManager.reduceAssociateForAssociation(
+                    nahimaManager.resolveUnitForErrorRadius(georef.getMaxErrorUnits()))
+            );
+            tryNonInteractiveResolve(reverseNestedCollection, "datumsformatgeodaeischeskooordinatensystem", () -> nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveDatumFormat(georef.getDatum())));
 
-            try {
-                reverseNestedCollection.put("datumsformatgeodaeischeskooordinatensystem", nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveDatumFormat(georef.getDatum())));
-            } catch (IOException | InterruptedException e) {
-                log.error("Failed to resolve date format", e);
-            }
         }
 
-        try {
-            reverseNestedCollection.put("_nested:aufsammlung__sammelmethoden", new JSONArray(new JSONObject[]{
-                    new JSONObject(new HashMap<>() {{
-                        put("sammlungsmethode", nahimaManager.resolveCollectionMethod(toSerialize.getCollectingMethod()));
-                    }})
-            }));
-        } catch (IOException | InterruptedException e) {
-            log.error("Failed to resolve collection method", e);
-        }
+        tryNonInteractiveResolve(reverseNestedCollection, "_nested:aufsammlung__sammelmethoden", () -> new JSONArray(new JSONObject[]{
+                new JSONObject(new HashMap<>() {{
+                    put("sammlungsmethode", nahimaManager.resolveCollectionMethod(toSerialize.getCollectingMethod()));
+                }})
+        }));
 
         JSONArray collectors = new JSONArray();
         for (Collector collector : toSerialize.getCollectors()) {
-            try {
-                JSONObject person = nahimaManager.reduceAssociateForAssociation(nahimaManager.resolvePerson(collector.getCollectorName()));
-                collectors.put(new JSONObject(new HashMap<>() {{
-                    put("sammler", person);
-                }}));
-            } catch (IOException | InterruptedException e) {
-                log.error("Failed to resolve date format", e);
-            }
+            tryNonInteractiveResolve(collectors, () -> new JSONObject(new HashMap<>() {{
+                put("sammler", nahimaManager.reduceAssociateForAssociation(
+                        nahimaManager.resolvePerson(collector.getCollectorName()))
+                );
+            }}), "sammler");
         }
         reverseNestedCollection.put("_nested:aufsammlung__sammler", collectors);
 
@@ -212,12 +183,10 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             log.error("Failed to parse datum " + toSerialize.getDateEmerged() + " " + toSerialize.getDateNos(), e);
         }
         reverseNestedCollection.put("indikator_fuer_kultur_zucht", toSerialize.getDateEmergedIndicator());
+        reverseNestedCollection.put("kultur_zucht", !Objects.equals(toSerialize.getDateEmerged(), "") && toSerialize.getDateEmerged() != null);
         reverseNestedCollection.put("sammeldatumtrans", toSerialize.getDateCollected());
-        try {
-            reverseNestedCollection.put("sammeldatum", dateToNahima(toSerialize.getDateCollected()));
-        } catch (ParseException e) {
-            log.error("Failed to parse datum " + toSerialize.getDateCollected(), e);
-        }
+        tryNonInteractiveResolve(reverseNestedCollection, "sammeldatum", () -> dateToNahima(toSerialize.getDateCollected()));
+
         // TODO: other fields
 
         reverseNestedCollections.put(reverseNestedCollection);
@@ -265,14 +234,65 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         return returnValue;
     }
 
+    /**
+     * Wrap a value in a JSON object indicating the language (en-US) of the value
+     *
+     * @param value the JSON Object
+     */
     protected JSONObject wrapInLan(Object value) {
+        return wrapInLan(value, "en-US");
+    }
+
+    /**
+     * Wrap a value in a JSON object indicating the language of the value
+     *
+     * @param value the JSON Object
+     */
+    protected JSONObject wrapInLan(Object value, String language) {
+        assert language != null;
         JSONObject returnValue = new JSONObject();
-        returnValue.put("en-US", value);
+        returnValue.put(language, value);
         return returnValue;
+    }
+
+    protected void tryNonInteractiveResolve(JSONObject target, String key, ResolverMethodInterface resolver) {
+        // try to parse and set correctly
+        try {
+            Object returnValue = resolver.doResolve();
+            if (returnValue != null) {
+                target.put(key, returnValue);
+            }
+        } catch (Exception e) {
+            log.error("Failed to resolve " + key, e);
+        }
+    }
+
+    protected void tryNonInteractiveResolve(JSONArray target, ResolverMethodInterface resolver, String debugHint) {
+        // try to parse and set correctly
+        try {
+            Object returnValue = resolver.doResolve();
+            if (returnValue != null) {
+                target.put(returnValue);
+            }
+        } catch (Exception e) {
+            log.error("Failed to resolve " + debugHint, e);
+        }
     }
 
     @Override
     public boolean supportsSerializationOf(Object target) {
         return target instanceof Specimen;
+    }
+
+    protected interface ResolverMethodInterface {
+        Object doResolve() throws Exception;
+    }
+
+    protected interface JSONObjectResolverMethodInterface extends ResolverMethodInterface {
+        JSONObject doResolve() throws Exception;
+    }
+
+    protected interface JSONArrayResolverMethodInterface extends ResolverMethodInterface {
+        JSONArray doResolve() throws Exception;
     }
 }

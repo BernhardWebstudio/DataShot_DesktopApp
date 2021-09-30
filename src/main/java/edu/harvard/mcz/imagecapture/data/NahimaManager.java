@@ -147,20 +147,13 @@ public class NahimaManager extends AbstractRestClient {
     protected JSONObject loadFromCache(String id, String objectType) {
         Map<String, JSONObject> typeCache = resolveCache.get(objectType);
         if (typeCache != null) {
-            JSONObject cacheLoaded = typeCache.get(id);
-            if (cacheLoaded != null) {
-                return cacheLoaded;
-            }
+            return typeCache.get(id);
         }
         return null;
     }
 
     protected void storeInCache(String id, String objectType, JSONObject result) {
-        Map<String, JSONObject> typeCache = resolveCache.get(objectType);
-        if (typeCache == null) {
-            typeCache = new HashMap<>();
-            resolveCache.put(objectType, typeCache);
-        }
+        Map<String, JSONObject> typeCache = resolveCache.computeIfAbsent(objectType, k -> new HashMap<>());
         typeCache.put(id, result);
     }
 
@@ -174,6 +167,10 @@ public class NahimaManager extends AbstractRestClient {
      * @return Nahima's response
      */
     public JSONObject searchForString(String searchString, String objectType, String searchMode, boolean ignoreCache) throws IOException, InterruptedException {
+        if (searchString == null || searchString.trim().equals("")) {
+            return null;
+        }
+
         // check cache for results
         if (!ignoreCache) {
             JSONObject fromCache = loadFromCache(searchString, objectType);
@@ -268,11 +265,19 @@ public class NahimaManager extends AbstractRestClient {
      * @return the matching or new object
      */
     public JSONObject resolveOrCreate(String name, String objectType, String mask, JSONObject inner) throws IOException, InterruptedException {
+        return resolveOrCreate(name, objectType, mask, inner, false);
+    }
+
+    public JSONObject resolveOrCreate(String name, String objectType, String mask, JSONObject inner, boolean omitPool) throws IOException, InterruptedException {
+        if (name == null || name.equals("")) {
+            return null;
+        }
+
         JSONObject results = this.resolveStringSearchToOne(name, objectType);
         // TODO: select correct
         if (results == null) {
             // create
-            JSONObject toCreate = wrapForCreation(inner, objectType, mask);
+            JSONObject toCreate = wrapForCreation(inner, objectType, mask, omitPool);
             this.createObjectInNahima(toCreate, objectType);
             // TODO: it would be simpler to store the created in cache. But well... current format does not allow
             return this.resolveStringSearchToOne(name, objectType, true);
@@ -292,7 +297,7 @@ public class NahimaManager extends AbstractRestClient {
     public JSONObject resolveNameBemerkungObject(String name, String objectType, String mask) throws IOException, InterruptedException {
         return this.resolveOrCreate(name, objectType, mask, new JSONObject(new HashMap<>() {{
             put("name", name);
-            put("bemerkung", "Created by " + ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion());
+            put("bemerkung", getCreatedByThisSoftwareIndication());
         }}));
     }
 
@@ -403,15 +408,84 @@ public class NahimaManager extends AbstractRestClient {
     /**
      * Find a family in Nahima
      *
-     * @param family
-     * @return
-     * @throws IOException
-     * @throws InterruptedException
+     * @param family the family to search for resp. create
      */
     public JSONObject resolveFamily(String family) throws IOException, InterruptedException {
         return resolveOrCreate(family, "familien", "familien_all_fields", new JSONObject(new HashMap<>() {{
             put("familielat", family);
         }}));
+    }
+
+    /**
+     * Find a subfamily in Nahima
+     *
+     * @param family the subfamily's name to resolve
+     */
+    public JSONObject resolveSubFamily(String family) throws IOException, InterruptedException {
+        return resolveOrCreate(family, "unterfamilien", "unterfamilien_all_fields", new JSONObject(new HashMap<>() {{
+            put("unterfamilielat", family);
+        }}));
+    }
+
+    /**
+     * Find a specific epithet ("art") in Nahima
+     *
+     * @param specificEpithet the subfamily's name to resolve
+     */
+    public JSONObject resolveSpecificEpithet(String specificEpithet) throws IOException, InterruptedException {
+        return resolveOrCreate(specificEpithet, "art", "art_all_fields", new JSONObject(new HashMap<>() {{
+            put("artlat", specificEpithet);
+            put("bemerkung", getCreatedByThisSoftwareIndication());
+        }}));
+    }
+
+    /**
+     * Find a subspecific epithet in Nahima
+     *
+     * @param subspecificEpithet the subfamily's name to resolve
+     */
+    public JSONObject resolveSubSpecificEpithet(String subspecificEpithet) throws IOException, InterruptedException {
+        return resolveOrCreate(subspecificEpithet, "subspezifischeart", "subspezifischeart_all_fields", new JSONObject(new HashMap<>() {{
+            put("subspezifischeartlat", subspecificEpithet);
+            put("bemerkung", getCreatedByThisSoftwareIndication());
+        }}));
+    }
+
+    /**
+     * Find an author in Nahima
+     *
+     * @param authorship the name to search for
+     * @return the existing or new author
+     */
+    public JSONObject resolveAuthorship(String authorship) throws IOException, InterruptedException {
+        return resolveOrCreate(authorship, "authors", "author__all_fields", new JSONObject(new HashMap<>() {{
+            put("autor", authorship);
+            put("_nested:authors__personen", new JSONArray());
+        }}), true);
+    }
+
+    /**
+     * Find an infraspecific epithet in Nahima
+     *
+     * @param infraspecificEpithet the subfamily's name to resolve
+     */
+    public JSONObject resolveInfraspecificEpithet(String infraspecificEpithet) throws IOException, InterruptedException {
+        return resolveOrCreate(infraspecificEpithet, "infraspezifischetaxon", "infraspezifischetaxon_all_fields", new JSONObject(new HashMap<>() {{
+            put("infraspezifischetaxon", infraspecificEpithet);
+            put("abkuerzung", JSONObject.NULL);
+            put("_nested:infraspezifischetaxon__trivialnamen", new JSONArray());
+            put("_nested:infraspezifischetaxon__referenzenfuerintraspezifischestaxon", new JSONArray());
+//            put("beschreibung", getCreatedByThisSoftwareIndication());
+        }}));
+    }
+
+    /**
+     * Find an infraspecific rank in Nahima
+     *
+     * @param infraspecificRank the subfamily's name to resolve
+     */
+    public JSONObject resolveInfraspecificRank(String infraspecificRank) throws IOException, InterruptedException {
+        return resolveNameBemerkungObject(infraspecificRank, "infraspezifischerrang", "id_typen_all_fields_1");
     }
 
     /**
@@ -471,11 +545,8 @@ public class NahimaManager extends AbstractRestClient {
      * @param mask       the mask specifying the fields to use
      * @return the wrapped object, ready to be created
      */
-    public JSONObject wrapForCreation(JSONObject inner, String objectType, String mask) {
-        inner.put("_pool", defaultPool);
-        inner.put("_id", JSONObject.NULL);
-        inner.put("_version", 1);
-
+    private JSONObject wrapForCreation(JSONObject inner, String objectType, String mask, boolean omitPool) {
+        inner = this.addDefaultValuesForCreation(inner, omitPool);
         JSONObject result = new JSONObject(new HashMap<>() {{
             put("_mask", mask);
             put("_objecttype", objectType);
@@ -485,7 +556,35 @@ public class NahimaManager extends AbstractRestClient {
         return result;
     }
 
+    public JSONObject wrapForCreation(JSONObject inner, String objectType, String mask) {
+        return wrapForCreation(inner, objectType, mask, false);
+    }
+
     public JSONObject wrapForCreation(JSONObject inner, String objectType) {
         return wrapForCreation(inner, objectType, objectType + "_all_fields");
+    }
+
+    /**
+     * Add fields with values that are required when creating a new entry in Nahima
+     *
+     * @param inner the object to add the fields to
+     * @return the object with the adjusted/added fields
+     */
+    public JSONObject addDefaultValuesForCreation(JSONObject inner) {
+        return addDefaultValuesForCreation(inner, false);
+    }
+
+    public JSONObject addDefaultValuesForCreation(JSONObject inner, boolean omitPool) {
+        if (!omitPool) {
+            inner.put("_pool", defaultPool);
+        }
+        inner.put("_id", JSONObject.NULL);
+        inner.put("_version", 1);
+        return inner;
+
+    }
+
+    public String getCreatedByThisSoftwareIndication() {
+        return "Created by " + ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion();
     }
 }

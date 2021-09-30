@@ -38,10 +38,6 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         result.put("barcodeqrcode", toSerialize.getBarcode());
         result.put("erschliessungsfragen", toSerialize.getQuestions());
         result.put("folgerung", toSerialize.getInferences());
-        // EasyDB specific fields
-        result.put("_version", 1);
-        result.put("_id", JSONObject.NULL);
-        result.put("_pool", NahimaManager.defaultPool);
         // here, it already starts to get complicated, fuu.
         // first, other ids, incl. specimen ID
         JSONArray otherIds = new JSONArray();
@@ -70,36 +66,42 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         result.put("_nested:entomologie__andereids", otherIds);
         // set determinations
         JSONArray reverseNestedDeterminations = new JSONArray();
-        for (Determination det : toSerialize.getDeterminations()) {
+        // adding specimen's own det by using `getAllDeterminations` instead of `getDeterminations`
+        for (Determination det : toSerialize.getAllDeterminations()) {
             Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
-                put("_version", 1);
-                put("_pool", NahimaManager.defaultPool);
-                put("_id", JSONObject.NULL);
                 put("typusid", det.getTypeStatus());
                 put("typusstatustrans", det.getTypeStatus());
-                put("autortrans", det.getAuthorship()); // TODO: resolve
+                put("autortrans", det.getAuthorship());
                 put("taxonnametrans", toSerialize.getAssociatedTaxon()); // TODO: resolve
-                put("familietrans", toSerialize.getFamily()); // TODO: resolve
+                put("familietrans", toSerialize.getFamily());
+                put("unterfamilietrans", toSerialize.getSubfamily());
                 put("genustrans", det.getGenus()); // TODO: resolve
-                put("subspezifischesarttrans", det.getSubspecificEpithet()); // TODO: resolve
+                put("subspezifischesarttrans", det.getSubspecificEpithet());
                 put("bestimmertrans", det.getIdentifiedBy());
-                put("infraspezifischestaxontrans", det.getInfraspecificEpithet()); // TODO: resolve
-                put("infrapezifischerrangtrans", det.getInfraspecificRank()); // TODO: resolve
-                put("arttrans", det.getSpecificEpithet()); // TODO: resolve
+                put("infraspezifischestaxontrans", det.getInfraspecificEpithet());
+                put("infrapezifischerrangtrans", det.getInfraspecificRank());
+                put("arttrans", det.getSpecificEpithet());
+                put("bestimmungsdatumtrans", det.getDateIdentified());
             }};
 
             JSONObject reverseNestedDetermination = new JSONObject(reverseNestedCollectionMap);
+            reverseNestedDetermination = nahimaManager.addDefaultValuesForCreation(reverseNestedDetermination);
 
             // resolutions
             tryNonInteractiveResolve(reverseNestedDetermination, "familie", () -> nahimaManager.resolveFamily(toSerialize.getFamily()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "unterfamilie", () -> nahimaManager.resolveSubFamily(toSerialize.getSubfamily()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "autor", () -> nahimaManager.resolveAuthorship(det.getAuthorship()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "art", () -> nahimaManager.resolveSpecificEpithet(det.getSpecificEpithet()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "subspezifischeart", () -> nahimaManager.resolveSubSpecificEpithet(det.getSubspecificEpithet()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "infraspezifischestaxon", () -> nahimaManager.resolveInfraspecificEpithet(det.getInfraspecificEpithet()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "infraspezifischerrang", () -> nahimaManager.resolveInfraspecificRank(det.getInfraspecificRank()));
 
             reverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
-            reverseNestedDetermination.put("bestimmungsdatumtrans", det.getDateIdentified());
             // try to parse and set the date correctly
             tryNonInteractiveResolve(reverseNestedDetermination, "bestimmungsdatum", () -> this.dateToNahima(det.getDateIdentified()));
 
             JSONArray identifierPersons = new JSONArray();
-            tryNonInteractiveResolve(identifierPersons, () -> nahimaManager.reduceAssociateForAssociation(nahimaManager.resolvePerson(det.getIdentifiedBy())), "person");
+            tryNonInteractiveResolve(identifierPersons, () -> nahimaManager.resolvePerson(det.getIdentifiedBy()), "person");
             reverseNestedDetermination.put("_nested:bestimmung__bestimmer_person", identifierPersons);
 
             tryNonInteractiveResolve(reverseNestedDetermination, "typusstatus", () -> nahimaManager.resolveTypeStatus(det.getTypeStatus()));
@@ -108,7 +110,6 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             // finally,
             reverseNestedDeterminations.put(reverseNestedDetermination);
         }
-        // TODO: add specimen's own det
 
 
         result.put("_reverse_nested:bestimmung:entomologie", reverseNestedDeterminations);
@@ -141,17 +142,13 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         }};
         JSONObject reverseNestedCollection = new JSONObject(reverseNestedCollectionMap);
 
-        tryNonInteractiveResolve(reverseNestedCollection, "sammelort", () -> nahimaManager.reduceAssociateForAssociation(
-                nahimaManager.resolveLocation(String.join(" ", toSerialize.getCountry(), toSerialize.getPrimaryDivison(), toSerialize.getSpecificLocality()))));
-        tryNonInteractiveResolve(reverseNestedCollection, "einheitderhoehe", () -> nahimaManager.reduceAssociateForAssociation(
-                nahimaManager.resolveUnitForHeight(toSerialize.getElev_units())));
+        tryNonInteractiveResolve(reverseNestedCollection, "sammelort", () -> nahimaManager.resolveLocation(String.join(" ", toSerialize.getCountry(), toSerialize.getPrimaryDivison(), toSerialize.getSpecificLocality())));
+        tryNonInteractiveResolve(reverseNestedCollection, "einheitderhoehe", () -> nahimaManager.resolveUnitForHeight(toSerialize.getElev_units()));
 
         if (georef != null) {
-            tryNonInteractiveResolve(reverseNestedCollection, "einheitdesfehlerradius", () -> nahimaManager.reduceAssociateForAssociation(
-                    nahimaManager.resolveUnitForErrorRadius(georef.getMaxErrorUnits()))
-            );
-            tryNonInteractiveResolve(reverseNestedCollection, "datumsformatgeodaeischeskooordinatensystem", () -> nahimaManager.reduceAssociateForAssociation(nahimaManager.resolveDatumFormat(georef.getDatum())));
-
+            tryNonInteractiveResolve(reverseNestedCollection, "einheitdesfehlerradius", () ->
+                    nahimaManager.resolveUnitForErrorRadius(georef.getMaxErrorUnits()));
+            tryNonInteractiveResolve(reverseNestedCollection, "datumsformatgeodaeischeskooordinatensystem", () -> nahimaManager.resolveDatumFormat(georef.getDatum()));
         }
 
         tryNonInteractiveResolve(reverseNestedCollection, "_nested:aufsammlung__sammelmethoden", () -> new JSONArray(new JSONObject[]{
@@ -205,11 +202,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         // TODO: other fields
 
         // finally, wrap everything in the pool (might want to do somewhere else)
-        JSONObject wrapper = new JSONObject();
-        wrapper.put("entomologie", result);
-        wrapper.put("_mask", "entomologie_public_unrestricted");
-        wrapper.put("_objecttype", "entomologie");
-        wrapper.put("_idx_in_objects", 1);
+        JSONObject wrapper = nahimaManager.wrapForCreation(result, "entomologie", "entomologie_public_unrestricted");
         return wrapper;
     }
 
@@ -260,7 +253,11 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         try {
             Object returnValue = resolver.doResolve();
             if (returnValue != null) {
-                target.put(key, returnValue);
+                if (returnValue instanceof JSONObject) {
+                    target.put(key, nahimaManager.reduceAssociateForAssociation((JSONObject) returnValue));
+                } else {
+                    target.put(key, returnValue);
+                }
             }
         } catch (Exception e) {
             log.error("Failed to resolve " + key, e);
@@ -272,7 +269,11 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         try {
             Object returnValue = resolver.doResolve();
             if (returnValue != null) {
-                target.put(returnValue);
+                if (returnValue instanceof JSONObject) {
+                    target.put(nahimaManager.reduceAssociateForAssociation((JSONObject) returnValue));
+                } else {
+                    target.put(returnValue);
+                }
             }
         } catch (Exception e) {
             log.error("Failed to resolve " + debugHint, e);

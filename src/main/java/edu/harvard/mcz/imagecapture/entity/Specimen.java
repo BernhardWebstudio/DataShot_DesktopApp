@@ -1,5 +1,6 @@
 package edu.harvard.mcz.imagecapture.entity;
 
+import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
@@ -1051,6 +1052,38 @@ public class Specimen implements Serializable {
 
     public void setDeterminations(Set<Determination> determinations) {
         this.determinations = determinations;
+    }
+
+    /**
+     * Get the determinations of this Specimen (see #getDeterminations) but including the one safed on the specimen too.
+     *
+     * @return the joined Determinations plus the Determination stored on this entity
+     */
+    public Set<Determination> getAllDeterminations() {
+        // copy
+        Set<Determination> allDets = new HashSet<>(this.determinations);
+        // create new one
+        Determination thisDet = new Determination();
+        thisDet.setGenus(this.getGenus());
+        thisDet.setSpecificEpithet(this.getSpecificEpithet());
+        thisDet.setSubspecificEpithet(this.getSubspecificEpithet());
+        thisDet.setInfraspecificEpithet(this.getInfraspecificEpithet());
+        thisDet.setInfraspecificRank(this.getInfraspecificRank());
+        thisDet.setAuthorship(this.getAuthorship());
+        thisDet.setUnNamedForm(this.getUnNamedForm());
+        thisDet.setIdentifiedBy(this.getIdentifiedBy());
+        thisDet.setTypeStatus(this.getTypeStatus());
+        thisDet.setNatureOfId(this.getNatureOfId());
+        thisDet.setDateIdentified(this.getDateIdentified());
+        thisDet.setVerbatimText("Main determination created by "
+                + ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion()
+                + "\n" + this.getVerbatimUnclassifiedText());
+        thisDet.setRemarks(this.getIdentificationRemarks());
+        // thisDet.setSpeciesNumber(this.getSpecimenNotes());
+        // add new one
+        allDets.add(thisDet);
+        // return
+        return allDets;
     }
 
     public Set<Tracking> getTrackings() {

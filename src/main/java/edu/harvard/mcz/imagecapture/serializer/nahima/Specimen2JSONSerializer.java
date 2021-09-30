@@ -69,32 +69,35 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         // adding specimen's own det by using `getAllDeterminations` instead of `getDeterminations`
         for (Determination det : toSerialize.getAllDeterminations()) {
             Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
+                put("arttrans", det.getSpecificEpithet());
+                put("autortrans", det.getAuthorship());
+                put("bestimmertrans", det.getIdentifiedBy());
+                put("bestimmungsdatumtrans", det.getDateIdentified());
+                put("familietrans", toSerialize.getFamily());
+                put("genustrans", det.getGenus());
+                put("infrapezifischerrangtrans", det.getInfraspecificRank());
+                put("infraspezifischestaxontrans", det.getInfraspecificEpithet());
+                put("subspezifischesarttrans", det.getSubspecificEpithet());
+                put("taxonnametrans", toSerialize.getAssociatedTaxon());
                 put("typusid", det.getTypeStatus());
                 put("typusstatustrans", det.getTypeStatus());
-                put("autortrans", det.getAuthorship());
-                put("taxonnametrans", toSerialize.getAssociatedTaxon()); // TODO: resolve
-                put("familietrans", toSerialize.getFamily());
                 put("unterfamilietrans", toSerialize.getSubfamily());
-                put("genustrans", det.getGenus()); // TODO: resolve
-                put("subspezifischesarttrans", det.getSubspecificEpithet());
-                put("bestimmertrans", det.getIdentifiedBy());
-                put("infraspezifischestaxontrans", det.getInfraspecificEpithet());
-                put("infrapezifischerrangtrans", det.getInfraspecificRank());
-                put("arttrans", det.getSpecificEpithet());
-                put("bestimmungsdatumtrans", det.getDateIdentified());
             }};
 
             JSONObject reverseNestedDetermination = new JSONObject(reverseNestedCollectionMap);
             reverseNestedDetermination = nahimaManager.addDefaultValuesForCreation(reverseNestedDetermination);
 
             // resolutions
-            tryNonInteractiveResolve(reverseNestedDetermination, "familie", () -> nahimaManager.resolveFamily(toSerialize.getFamily()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "unterfamilie", () -> nahimaManager.resolveSubFamily(toSerialize.getSubfamily()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "autor", () -> nahimaManager.resolveAuthorship(det.getAuthorship()));
             tryNonInteractiveResolve(reverseNestedDetermination, "art", () -> nahimaManager.resolveSpecificEpithet(det.getSpecificEpithet()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "subspezifischeart", () -> nahimaManager.resolveSubSpecificEpithet(det.getSubspecificEpithet()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "infraspezifischestaxon", () -> nahimaManager.resolveInfraspecificEpithet(det.getInfraspecificEpithet()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "autor", () -> nahimaManager.resolveAuthorship(det.getAuthorship()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "familie", () -> nahimaManager.resolveFamily(toSerialize.getFamily()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "genus", () -> nahimaManager.resolveGenus(det.getGenus()));
             tryNonInteractiveResolve(reverseNestedDetermination, "infraspezifischerrang", () -> nahimaManager.resolveInfraspecificRank(det.getInfraspecificRank()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "infraspezifischestaxon", () -> nahimaManager.resolveInfraspecificEpithet(det.getInfraspecificEpithet()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "subspezifischeart", () -> nahimaManager.resolveSubSpecificEpithet(det.getSubspecificEpithet()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "taxonname", () -> nahimaManager.resolveAssociatedTaxon(toSerialize.getAssociatedTaxon()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "unterfamilie", () -> nahimaManager.resolveSubFamily(toSerialize.getSubfamily()));
+            tryNonInteractiveResolve(reverseNestedDetermination, "tribus", () -> nahimaManager.resolveTribe(toSerialize.getTribe()));
 
             reverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
             // try to parse and set the date correctly

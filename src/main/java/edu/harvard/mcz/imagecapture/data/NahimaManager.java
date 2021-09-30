@@ -489,6 +489,50 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     /**
+     * Find a genus in Nahima
+     *
+     * @param genus the genus to search for or create (lat)
+     */
+    public JSONObject resolveGenus(String genus) throws IOException, InterruptedException {
+        return resolveOrCreate(genus, "genus", "genus_all_fields", new JSONObject(new HashMap<>() {{
+            put("genuslat", genus);
+            put("_nested:genus__trivialnamen", new JSONArray());
+            put("_nested:genus__referenzenfuergenus", new JSONArray());
+            put("abkuerzung", JSONObject.NULL);
+//            put("beschreibung", getCreatedByThisSoftwareIndication());
+        }}));
+    }
+
+    /**
+     *
+     * @param associatedTaxon
+     * @return
+     */
+    public JSONObject resolveAssociatedTaxon(String associatedTaxon) throws IOException, InterruptedException {
+        return resolveOrCreate(associatedTaxon, "taxonnamen", "taxonnamen__all_fields", new JSONObject(new HashMap<>(){{
+            put("dddtaxonnamelat", associatedTaxon);
+            put("_nested:taxonnamen__trivialnamen", new JSONArray());
+            put("_nested:taxonnamen__referenzenfuertribus", new JSONArray());
+            put("bemerkung", getCreatedByThisSoftwareIndication());
+        }}));
+    }
+
+    /**
+     *
+     * @param tribe
+     * @return
+     */
+    public JSONObject resolveTribe(String tribe) throws IOException, InterruptedException {
+        return resolveOrCreate(tribe, "tribus", "tribus_all_fields", new JSONObject(new HashMap<>(){{
+            put("tribuslat", tribe);
+            put("_nested:tribus__trivialnamen", new JSONArray());
+            put("_nested:tribus__referenzenfuertribus", new JSONArray());
+            put("abkuerzung", JSONObject.NULL);
+//            put("beschreibung", getCreatedByThisSoftwareIndication());
+        }}));
+    }
+
+    /**
      * Find the location "Datum" in Nahima
      *
      * @param format the datum to search for

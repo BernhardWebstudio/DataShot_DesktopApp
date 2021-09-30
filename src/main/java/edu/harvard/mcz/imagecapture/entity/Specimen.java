@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -99,15 +100,15 @@ public class Specimen implements Serializable {
             creatingPath; // A path for image file, denormalized from Image.path for
     // JPA query without join to Image.
     private String creatingFilename;
-    private Set<Collector> collectors = new HashSet<Collector>(0);
-    private Set<Determination> determinations = new HashSet<Determination>(0);
-    private Set<Tracking> trackings = new HashSet<Tracking>(0);
-    private Set<Number> numbers = new HashSet<Number>(0);
-    private Set<ICImage> ICImages = new HashSet<ICImage>(0);
-    private Set<SpecimenPart> specimenParts = new HashSet<SpecimenPart>(0);
-    private Set<LatLong> georeferences = new HashSet<LatLong>(0);
+    private Set<Collector> collectors = new HashSet<>(0);
+    private Set<Determination> determinations = new HashSet<>(0);
+    private Set<Tracking> trackings = new HashSet<>(0);
+    private Set<Number> numbers = new HashSet<>(0);
+    private Set<ICImage> ICImages = new HashSet<>(0);
+    private Set<SpecimenPart> specimenParts = new HashSet<>(0);
+    private Set<LatLong> georeferences = new HashSet<>(0);
     private Set<ExternalHistory> externalHistory =
-            new HashSet<ExternalHistory>(0);
+            new HashSet<>(0);
     private String primaryDivisonISO;
     private Boolean nahimaExported;
 
@@ -226,11 +227,11 @@ public class Specimen implements Serializable {
     }
 
     public Boolean isEditable(Users user) {
-        boolean canEdit = !this.isExported();
+        boolean canEdit = !this.isExported() && !this.isStateDone();
         if (user != null) {
             canEdit = canEdit && (user.isUserRole(Users.ROLE_FULL) || user.isUserRole(Users.ROLE_ADMINISTRATOR) || this.getTypeStatus() != WorkFlowStatus.STAGE_CLEAN);
         } else {
-            canEdit = canEdit && this.getTypeStatus() != WorkFlowStatus.STAGE_CLEAN;
+            canEdit = canEdit && !Objects.equals(this.getTypeStatus(), WorkFlowStatus.STAGE_CLEAN);
         }
         return canEdit;
     }
@@ -637,27 +638,6 @@ public class Specimen implements Serializable {
      */
     public void setVerbatimUnclassifiedText(String verbatimUnclassifiedText) {
         this.verbatimUnclassifiedText = verbatimUnclassifiedText;
-    }
-
-    /**
-     * @return the minimum_elevation
-     */
-    public String getMinimumElevationSt() {
-        if (minimum_elevation == null) {
-            return null;
-        }
-        return minimum_elevation.toString();
-    }
-
-    /**
-     * @param minimum_elevation the minimum_elevation to set
-     */
-    public void setMinimumElevationSt(String minimum_elevation) {
-        if (minimum_elevation == null || minimum_elevation.trim().length() == 0) {
-            this.minimum_elevation = null;
-        } else {
-            this.minimum_elevation = Long.parseLong(minimum_elevation);
-        }
     }
 
     /**
@@ -1126,7 +1106,7 @@ public class Specimen implements Serializable {
 
     public Set<LatLong> getLatLong() {
         if (georeferences == null) {
-            georeferences = new HashSet<LatLong>();
+            georeferences = new HashSet<>();
         }
         // TODO: remove the following code if possible
         if (georeferences.isEmpty()) {
@@ -1156,22 +1136,21 @@ public class Specimen implements Serializable {
     }
 
     public boolean isStateDone() {
-        boolean result = this.workFlowStatus.equals(WorkFlowStatus.STAGE_DONE);
-        return result;
+        return this.workFlowStatus.equals(WorkFlowStatus.STAGE_DONE);
     }
 
     public String getLoadFlags() {
         String result = "Unexpected State";
-        if (!flagInBulkloader && !flagInMCZbase && !flagAncilaryAlsoInMCZbase) {
+        if (!flagInBulkloader && !(flagInMCZbase || nahimaExported) && !flagAncilaryAlsoInMCZbase) {
             result = "In DataShot";
         }
-        if (flagInBulkloader && !flagInMCZbase && !flagAncilaryAlsoInMCZbase) {
+        if (flagInBulkloader && !(flagInMCZbase || nahimaExported) && !flagAncilaryAlsoInMCZbase) {
             result = "In Bulkloader";
         }
-        if (flagInBulkloader && flagInMCZbase && !flagAncilaryAlsoInMCZbase) {
+        if (flagInBulkloader && (flagInMCZbase || nahimaExported) && !flagAncilaryAlsoInMCZbase) {
             result = "Adding Image and Ids.";
         }
-        if (flagInBulkloader && flagInMCZbase && flagAncilaryAlsoInMCZbase) {
+        if (flagInBulkloader && (flagInMCZbase || nahimaExported) && flagAncilaryAlsoInMCZbase) {
             result = WorkFlowStatus.STAGE_DONE;
         }
         return result;

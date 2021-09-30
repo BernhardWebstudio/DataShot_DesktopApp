@@ -739,7 +739,7 @@ public class SearchDialog extends JDialog {
     private JIntegerField getLimitJIntegerField() {
         if (jLimitNumberField == null) {
             jLimitNumberField = new JIntegerField();
-            jLimitNumberField.setValue(0);
+            jLimitNumberField.setValue(50000);
         }
         return jLimitNumberField;
     }

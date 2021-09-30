@@ -176,66 +176,38 @@ public class ButtonEditor
                         try {
                             // SpecimenControler sc = new SpecimenControler(specimen);
                             if (((Specimen) targetId).getSpecimenId() != null) {
-                                if (((Specimen) targetId).isStateDone()) {
-                                    // Specimens in state_done are no longer editable
-                                    JOptionPane.showMessageDialog(
-                                            Singleton.getSingletonInstance().getMainFrame(),
-                                            "This Specimen record has been migrated and can no longer be edited here [" +
-                                                    ((Specimen) targetId).getLoadFlags() +
-                                                    "].\nSee: http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" +
-                                                    ((Specimen) targetId).getCatNum(),
-                                            "Migrated Specimen", JOptionPane.WARNING_MESSAGE);
-                                    //                                } else if (!((Specimen)
-                                    //                                targetId).isEditable()) {
-                                    //                                    JOptionPane.showMessageDialog(
-                                    //                                            Singleton.getSingletonInstance().getMainFrame(),
-                                    //                                            "This Specimen
-                                    //                                            record cannot be
-                                    //                                            edited by you.",
-                                    //                                            "Non-editable
-                                    //                                            Specimen",
-                                    //                                            JOptionPane.WARNING_MESSAGE);
-                                } else {
-                                    // Specimen is still editable
-                                    if (table != null) {
-                                        // Pass the specimen object for the row, the table model, and
-                                        // the row number on to the specimen controler.
-                                        try {
-                                            SpecimenController sc = new SpecimenController(
-                                                    (Specimen) targetId,
-                                                    (SpecimenListTableModel) table.getModel(), table, row);
-                                            if (table.getParent()
-                                                    .getParent()
-                                                    .getParent()
-                                                    .getParent()
-                                                    .getClass() == SpecimenBrowser.class) {
-                                                sc.addListener((DataChangeListener) table.getParent());
-                                            } else {
-                                                Component x = table;
-                                                boolean done = false;
-                                                while (!done) {
-                                                    log.debug("Debug {}", x.getParent());
-                                                    x = x.getParent();
-                                                    if (x.getClass() == SpecimenBrowser.class) {
-                                                        sc.addListener((DataChangeListener) x);
-                                                        done = true;
-                                                    }
-                                                }
-                                            }
-                                            sc.displayInEditor();
-                                        } catch (java.lang.ClassCastException eNotSp) {
-                                            // Request isn't coming from a SpecimenListTableModel
-                                            // View just the specimen record.
-                                            SpecimenController sc =
-                                                    new SpecimenController((Specimen) targetId);
-                                            sc.displayInEditor();
-                                        }
+                                // Specimen is still editable
+                                // Pass the specimen object for the row, the table model, and
+                                // the row number on to the specimen controler.
+                                try {
+                                    SpecimenController sc = new SpecimenController(
+                                            (Specimen) targetId,
+                                            (SpecimenListTableModel) table.getModel(), table, row);
+                                    if (table.getParent()
+                                            .getParent()
+                                            .getParent()
+                                            .getParent()
+                                            .getClass() == SpecimenBrowser.class) {
+                                        sc.addListener((DataChangeListener) table.getParent());
                                     } else {
-                                        log.debug("Debug {}", e.getSource());
-                                        // SpecimenControler sc = new
-                                        // SpecimenControler((Specimen)targetId);
-                                        // sc.displayInEditor();
+                                        Component x = table;
+                                        boolean done = false;
+                                        while (!done) {
+                                            log.debug("Debug {}", x.getParent());
+                                            x = x.getParent();
+                                            if (x.getClass() == SpecimenBrowser.class) {
+                                                sc.addListener((DataChangeListener) x);
+                                                done = true;
+                                            }
+                                        }
                                     }
+                                    sc.displayInEditor();
+                                } catch (ClassCastException eNotSp) {
+                                    // Request isn't coming from a SpecimenListTableModel
+                                    // View just the specimen record.
+                                    SpecimenController sc =
+                                            new SpecimenController((Specimen) targetId);
+                                    sc.displayInEditor();
                                 }
                             } else {
                                 log.debug(

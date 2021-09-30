@@ -91,9 +91,6 @@ public class WorkFlowStatus {
      */
     public static final String STAGE_DELETE = "Removal Requested";
 
-    private static final String[] CHANGABLE_VALUES = {
-            STAGE_0, STAGE_1, STAGE_VERBATIM, STAGE_CLASSIFIED, STAGE_2,
-            STAGE_QC_FAIL, STAGE_QC_PASS, STAGE_CLEAN, STAGE_DELETE};
     private static final String[] VALUES = {
             STAGE_0, STAGE_1, STAGE_VERBATIM, STAGE_CLASSIFIED,
             STAGE_2, STAGE_QC_FAIL, STAGE_QC_PASS, STAGE_CLEAN,
@@ -111,7 +108,7 @@ public class WorkFlowStatus {
      * set by a user.
      */
     public static String[] getWorkFlowStatusValues() {
-        String[] result = CHANGABLE_VALUES;
+        String[] result = VALUES;
         return result;
     }
 

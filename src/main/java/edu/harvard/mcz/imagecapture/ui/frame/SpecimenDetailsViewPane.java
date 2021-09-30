@@ -842,9 +842,9 @@ public class SpecimenDetailsViewPane extends JPanel {
         getQuestionsJTextField().setText(specimen.getQuestions());
         getJComboBoxWorkflowStatus().setSelectedItem(specimen.getWorkFlowStatus());
         if (specimen.isStateDone()) {
-            getJTextFieldMigrationStatus().setText(
-                    "http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" +
-                            specimen.getCatNum());
+            getJTextFieldMigrationStatus().setText(WorkFlowStatus.STAGE_DONE);
+//                    "http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" +
+//                            specimen.getCatNum());
         } else {
             getJTextFieldMigrationStatus().setText("");
         }
@@ -1349,9 +1349,9 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (jButtonSave == null) {
             jButtonSave = new JButton("Save");
             jButtonSave.setEnabled(specimen.isEditable());
-            if (specimen.isStateDone()) {
+            if (!specimen.isEditable()) {
                 jButtonSave.setEnabled(false);
-                jButtonSave.setText("Migrated " + specimen.getLoadFlags());
+                jButtonSave.setText(specimen.getWorkFlowStatus());
             }
             jButtonSave.setMnemonic(KeyEvent.VK_S);
             jButtonSave.setToolTipText(
@@ -3160,9 +3160,10 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
             jTextFieldMigrationStatus.setEditable(false);
             jTextFieldMigrationStatus.setText("");
             if (specimen.isStateDone()) {
-                String uri = "http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" +
-                        specimen.getCatNum();
-                jTextFieldMigrationStatus.setText(uri);
+//                String uri = "http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" +
+//                        specimen.getCatNum();
+//                jTextFieldMigrationStatus.setText(uri);
+                jTextFieldMigrationStatus.setText(WorkFlowStatus.STAGE_DONE);
             }
         }
         return jTextFieldMigrationStatus;

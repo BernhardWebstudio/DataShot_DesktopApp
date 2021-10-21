@@ -109,7 +109,7 @@ public class BatchUpdateDialog extends JDialog {
 
     private void doApplyChange() {
         String fieldName = ((UpdateableField) this.getFieldSelectionJComboBox().getSelectedItem()).getDatabaseDescription();
-        String conditionQuery = "WHERE " + fieldName + " LIKE :fromValue AND s.nahimaExported = 0";
+        String conditionQuery = "WHERE " + fieldName + " LIKE :fromValue AND (s.nahimaExported = 0 OR s.nahimaExported IS NULL)";
 
         Session session;
         try {
@@ -122,8 +122,17 @@ public class BatchUpdateDialog extends JDialog {
         }
 
         try {
+            Query selectQuery;
             // count how many specimen would be influenced
-            Query selectQuery = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM Specimen s LEFT JOIN s.collectors AS c " + conditionQuery);
+            if (fieldName.startsWith("s.")) {
+                selectQuery = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM Specimen s LEFT JOIN s.collectors AS c " + conditionQuery);
+            } else if (fieldName.startsWith("c.")) {
+                selectQuery = session.createQuery("SELECT count(DISTINCT c.collectorId) FROM Collector c LEFT JOIN c.specimen AS s " + conditionQuery);
+            } else {
+                log.error("Unhandled updateable field prefix");
+                return;
+            }
+
             selectQuery.setParameter("fromValue", getValueFromJTextField().getText());
             String nrOfChanges = CastUtility.castToString(selectQuery.getSingleResult());
             // ask for confirmation
@@ -146,13 +155,16 @@ public class BatchUpdateDialog extends JDialog {
             // do the change
             if (fieldName.startsWith("s.")) {
                 updateQuery = session.createQuery("UPDATE Specimen s SET " + fieldName + "= :toValue " + conditionQuery);
+                updateQuery.setParameter("fromValue", getValueFromJTextField().getText());
             } else if (fieldName.startsWith("c.")) {
-                updateQuery = session.createQuery("UPDATE Collector c LEFT JOIN c.specimen AS s SET " + fieldName + "= :toValue " + conditionQuery);
+                Query idsToUpdateQuery = session.createQuery("SELECT c.collectorId FROM Collector c LEFT JOIN c.specimen AS s " + conditionQuery);
+                idsToUpdateQuery.setParameter("fromValue", getValueFromJTextField().getText());
+                updateQuery = session.createQuery("UPDATE Collector c SET " + fieldName + " = :toValue WHERE c.collectorId IN (:toUpdateIds)");
+                updateQuery.setParameter("toUpdateIds", idsToUpdateQuery.getResultList());
             } else {
                 log.error("Unhandled updateable field prefix");
                 return;
             }
-            updateQuery.setParameter("fromValue", getValueFromJTextField().getText());
             updateQuery.setParameter("toValue", getValueToJTextField().getText());
 
             int numAffected = updateQuery.executeUpdate();

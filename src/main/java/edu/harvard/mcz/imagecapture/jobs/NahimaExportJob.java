@@ -6,6 +6,7 @@ import edu.harvard.mcz.imagecapture.data.NahimaManager;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
+import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
 import edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsException;
 import edu.harvard.mcz.imagecapture.interfaces.ProgressListener;
 import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
@@ -60,6 +61,20 @@ public class NahimaExportJob implements RunnableJob, Runnable {
         for (Specimen specimen : specimenToExport) {
             currentIndex = currentIndex + 1;
             log.debug("Exporting specimen with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
+
+            // map, associate where possible/needed
+            JSONObject specimenJson = null;
+            try {
+                specimenJson = serializer.serialize2JSON(specimen);
+            } catch (SkipSpecimenException e) {
+                continue;
+            }
+            if (specimenJson == null) {
+                // might want to add some checks
+                // to make sure this only happens when the SkipSpecimenException is thrown
+                continue;
+            }
+
             // upload images
             Object[] uploadedImages;
             try {
@@ -71,8 +86,6 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                 return;
             }
 
-            // map, associate where possible/needed
-            JSONObject specimenJson = serializer.serialize2JSON(specimen);
             // add images
             JSONObject imageTarget = (JSONObject) specimenJson.get("entomologie");
             JSONArray mediaAssets = new JSONArray();

@@ -4,6 +4,7 @@ import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.data.NahimaManager;
 import edu.harvard.mcz.imagecapture.entity.Number;
 import edu.harvard.mcz.imagecapture.entity.*;
+import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
 import edu.harvard.mcz.imagecapture.serializer.ToJSONSerializerInterface;
 import org.apache.commons.lang3.time.DateUtils;
 import org.json.JSONArray;
@@ -30,7 +31,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     }
 
     @Override
-    public JSONObject serialize2JSON(Object target) {
+    public JSONObject serialize2JSON(Object target) throws SkipSpecimenException {
         assert target instanceof Specimen;
         JSONObject result = new JSONObject();
         Specimen toSerialize = (Specimen) target;
@@ -88,28 +89,31 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             reverseNestedDetermination = nahimaManager.addDefaultValuesForCreation(reverseNestedDetermination);
 
             // resolutions
-            tryNonInteractiveResolve(reverseNestedDetermination, "art", () -> nahimaManager.resolveSpecificEpithet(det.getSpecificEpithet()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "autor", () -> nahimaManager.resolveAuthorship(det.getAuthorship()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "familie", () -> nahimaManager.resolveFamily(toSerialize.getFamily()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "genus", () -> nahimaManager.resolveGenus(det.getGenus()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "infraspezifischerrang", () -> nahimaManager.resolveInfraspecificRank(det.getInfraspecificRank()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "infraspezifischestaxon", () -> nahimaManager.resolveInfraspecificEpithet(det.getInfraspecificEpithet()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "subspezifischeart", () -> nahimaManager.resolveSubSpecificEpithet(det.getSubspecificEpithet()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "taxonname", () -> nahimaManager.resolveAssociatedTaxon(toSerialize.getAssociatedTaxon()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "unterfamilie", () -> nahimaManager.resolveSubFamily(toSerialize.getSubfamily()));
-            tryNonInteractiveResolve(reverseNestedDetermination, "tribus", () -> nahimaManager.resolveTribe(toSerialize.getTribe()));
+            tryNonSkippableResolve(reverseNestedDetermination, "art", () -> nahimaManager.resolveSpecificEpithet(det.getSpecificEpithet()));
+            tryNonSkippableResolve(reverseNestedDetermination, "autor", () -> nahimaManager.resolveAuthorship(det.getAuthorship()));
+            tryNonSkippableResolve(reverseNestedDetermination, "familie", () -> nahimaManager.resolveFamily(toSerialize.getFamily()));
+            tryNonSkippableResolve(reverseNestedDetermination, "genus", () -> nahimaManager.resolveGenus(det.getGenus()));
+            tryNonSkippableResolve(reverseNestedDetermination, "infraspezifischerrang", () -> nahimaManager.resolveInfraspecificRank(det.getInfraspecificRank()));
+            tryNonSkippableResolve(reverseNestedDetermination, "infraspezifischestaxon", () -> nahimaManager.resolveInfraspecificEpithet(det.getInfraspecificEpithet()));
+            tryNonSkippableResolve(reverseNestedDetermination, "subspezifischeart", () -> nahimaManager.resolveSubSpecificEpithet(det.getSubspecificEpithet()));
+            tryNonSkippableResolve(reverseNestedDetermination, "taxonname", () -> nahimaManager.resolveAssociatedTaxon(toSerialize.getAssociatedTaxon()));
+            tryNonSkippableResolve(reverseNestedDetermination, "unterfamilie", () -> nahimaManager.resolveSubFamily(toSerialize.getSubfamily()));
+            tryNonSkippableResolve(reverseNestedDetermination, "tribus", () -> nahimaManager.resolveTribe(toSerialize.getTribe()));
 
             reverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
             // try to parse and set the date correctly
-            tryNonInteractiveResolve(reverseNestedDetermination, "bestimmungsdatum", () -> this.dateToNahima(det.getDateIdentified()));
+            tryNonSkippableResolve(reverseNestedDetermination, "bestimmungsdatum", () -> this.dateToNahima(det.getDateIdentified()));
 
             JSONArray identifierPersons = new JSONArray();
-            tryNonInteractiveResolve(identifierPersons, () -> nahimaManager.resolvePerson(det.getIdentifiedBy()), "person");
+            trySkippableResolve(identifierPersons, () -> nahimaManager.resolvePerson(det.getIdentifiedBy()), "person");
             reverseNestedDetermination.put("_nested:bestimmung__bestimmer_person", identifierPersons);
 
-            tryNonInteractiveResolve(reverseNestedDetermination, "typusstatus", () -> nahimaManager.resolveTypeStatus(det.getTypeStatus()));
-            // TODO: other fields
 
+            try {
+                trySkippableResolve(reverseNestedDetermination, "typusstatus", () -> nahimaManager.resolveTypeStatus(det.getTypeStatus()));
+            } catch (SkipSpecimenException e) {
+                return null;
+            }
             // finally,
             reverseNestedDeterminations.put(reverseNestedDetermination);
         }
@@ -123,15 +127,16 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
             put("sammlertrans", toSerialize.getCollectors().stream().map(Collector::getCollectorName).collect(Collectors.joining(", ")));
             put("_nested:aufsammlung__indikatorenfuersammeldatum", new JSONArray(new String[]{toSerialize.getDateCollectedIndicator()}));
+            put("sammlungtrans", toSerialize.getCollection());
             put("sammlungstitel", toSerialize.getCollection());
             put("kommentare", toSerialize.getSpecimenNotes());
             put("habitattrans", toSerialize.getHabitat());
             put("sammelorttrans", toSerialize.getVerbatimLocality());
             put("lokalitaet", toSerialize.getSpecificLocality());
-            put("neuhabitat", wrapInLan(toSerialize.getHabitat()));
-            put("mikrohabitat", wrapInLan(toSerialize.getMicrohabitat()));
+            put("neuhabitat", nahimaManager.wrapInLan(toSerialize.getHabitat()));
+            put("mikrohabitat", nahimaManager.wrapInLan(toSerialize.getMicrohabitat()));
             put("traegerorganismustrans", toSerialize.getAssociatedTaxon());
-            put("traegerorganismus", wrapInLan(toSerialize.getAssociatedTaxon()));
+            put("traegerorganismus", nahimaManager.wrapInLan(toSerialize.getAssociatedTaxon()));
             put("breitengraddezimal", georef == null ? null : georef.getLatDeg());
             put("laengengraddezimal", georef == null ? null : georef.getLongDeg());
             put("fehlerradius", georef == null ? null : georef.getMaxErrorDistance());
@@ -145,16 +150,17 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         }};
         JSONObject reverseNestedCollection = new JSONObject(reverseNestedCollectionMap);
 
-        tryNonInteractiveResolve(reverseNestedCollection, "sammelort", () -> nahimaManager.resolveLocation(String.join(" ", toSerialize.getCountry(), toSerialize.getPrimaryDivison(), toSerialize.getSpecificLocality())));
-        tryNonInteractiveResolve(reverseNestedCollection, "einheitderhoehe", () -> nahimaManager.resolveUnitForHeight(toSerialize.getElev_units()));
+        trySkippableResolve(reverseNestedCollection, "sammelort", () -> nahimaManager.resolveLocation(toSerialize));
+        trySkippableResolve(reverseNestedCollection, "einheitderhoehe", () -> nahimaManager.resolveUnitForHeight(toSerialize.getElev_units()));
+
 
         if (georef != null) {
-            tryNonInteractiveResolve(reverseNestedCollection, "einheitdesfehlerradius", () ->
+            trySkippableResolve(reverseNestedCollection, "einheitdesfehlerradius", () ->
                     nahimaManager.resolveUnitForErrorRadius(georef.getMaxErrorUnits()));
-            tryNonInteractiveResolve(reverseNestedCollection, "datumsformatgeodaeischeskooordinatensystem", () -> nahimaManager.resolveDatumFormat(georef.getDatum()));
+            trySkippableResolve(reverseNestedCollection, "datumsformatgeodaeischeskooordinatensystem", () -> nahimaManager.resolveDatumFormat(georef.getDatum()));
         }
 
-        tryNonInteractiveResolve(reverseNestedCollection, "_nested:aufsammlung__sammelmethoden", () -> new JSONArray(new JSONObject[]{
+        tryNonSkippableResolve(reverseNestedCollection, "_nested:aufsammlung__sammelmethoden", () -> new JSONArray(new JSONObject[]{
                 new JSONObject(new HashMap<>() {{
                     put("sammlungsmethode", nahimaManager.resolveCollectionMethod(toSerialize.getCollectingMethod()));
                 }})
@@ -162,7 +168,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 
         JSONArray collectors = new JSONArray();
         for (Collector collector : toSerialize.getCollectors()) {
-            tryNonInteractiveResolve(collectors, () -> new JSONObject(new HashMap<>() {{
+            trySkippableResolve(collectors, () -> new JSONObject(new HashMap<>() {{
                 put("sammler", nahimaManager.reduceAssociateForAssociation(
                         nahimaManager.resolvePerson(collector.getCollectorName()))
                 );
@@ -185,9 +191,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         reverseNestedCollection.put("indikator_fuer_kultur_zucht", toSerialize.getDateEmergedIndicator());
         reverseNestedCollection.put("kultur_zucht", !Objects.equals(toSerialize.getDateEmerged(), "") && toSerialize.getDateEmerged() != null);
         reverseNestedCollection.put("sammeldatumtrans", toSerialize.getDateCollected());
-        tryNonInteractiveResolve(reverseNestedCollection, "sammeldatum", () -> dateToNahima(toSerialize.getDateCollected()));
-
-        // TODO: other fields
+        tryNonSkippableResolve(reverseNestedCollection, "sammeldatum", () -> dateToNahima(toSerialize.getDateCollected()));
 
         reverseNestedCollections.put(reverseNestedCollection);
         result.put("_reverse_nested:aufsammlung:entomologie", reverseNestedCollections);
@@ -197,12 +201,19 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             JSONObject partJson = new JSONObject(new HashMap<>() {{
                 put("anzahlpraeparatteile", part.getLotCount());
             }});
-            // TODO: (resolve) other fields
+            trySkippableResolve(partJson, "praeparatteil", () -> nahimaManager.resolvePreparationPart(part.getPartName()));
+            trySkippableResolve(partJson, "montierungsmethode", () -> nahimaManager.resolveMountingMethod(part.getPreserveMethod()));
+            JSONArray attributes = new JSONArray();
+            for (SpecimenPartAttribute attribute : part.getSpecimenPartAttributes()) {
+                trySkippableResolve(attributes, () -> nahimaManager.resolvePreparationPartAttribute(String.join(" ", attribute.getAttributeRemark(), attribute.getAttributeType(), attribute.getAttributeValue(), nahimaDateFormat.format(attribute.getAttributeDate()), attribute.getAttributeDeterminer()), attribute.getAttributeUnits()), "specimenAttribute");
+            }
+            partJson.put("attribute", attributes);
             parts.put(partJson);
         }
         result.put("_nested:entomologie__praeparatteile", parts);
 
-        // TODO: other fields
+        trySkippableResolve(reverseNestedCollection, "geschlecht", () -> nahimaManager.resolveSex(toSerialize.getSex()));
+        trySkippableResolve(reverseNestedCollection, "lebensabschnitt", () -> nahimaManager.resolveLifeStage(toSerialize.getLifeStage()));
 
         // finally, wrap everything in the pool (might want to do somewhere else)
         JSONObject wrapper = nahimaManager.wrapForCreation(result, "entomologie", "entomologie_public_unrestricted");
@@ -230,29 +241,25 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         return returnValue;
     }
 
-    /**
-     * Wrap a value in a JSON object indicating the language (en-US) of the value
-     *
-     * @param value the JSON Object
-     */
-    protected JSONObject wrapInLan(Object value) {
-        return wrapInLan(value, "en-US");
-    }
-
-    /**
-     * Wrap a value in a JSON object indicating the language of the value
-     *
-     * @param value the JSON Object
-     */
-    protected JSONObject wrapInLan(Object value, String language) {
-        assert language != null;
-        JSONObject returnValue = new JSONObject();
-        returnValue.put(language, value);
-        return returnValue;
-    }
-
-    protected void tryNonInteractiveResolve(JSONObject target, String key, ResolverMethodInterface resolver) {
+    protected void tryNonSkippableResolve(JSONObject target, String key, ResolverMethodInterface resolver) {
         // try to parse and set correctly
+        try {
+            trySkippableResolve(target, key, resolver);
+        } catch (Exception e) {
+            log.error("Failed to resolve " + key, e);
+        }
+    }
+
+    protected void tryNonSkippableResolve(JSONArray target, ResolverMethodInterface resolver, String debugHint) {
+        // try to parse and set correctly
+        try {
+            trySkippableResolve(target, resolver, debugHint);
+        } catch (Exception e) {
+            log.error("Failed to resolve " + debugHint, e);
+        }
+    }
+
+    protected void trySkippableResolve(JSONObject target, String key, ResolverMethodInterface resolver) throws SkipSpecimenException {
         try {
             Object returnValue = resolver.doResolve();
             if (returnValue != null) {
@@ -262,12 +269,12 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                     target.put(key, returnValue);
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException | ParseException e) {
             log.error("Failed to resolve " + key, e);
         }
     }
 
-    protected void tryNonInteractiveResolve(JSONArray target, ResolverMethodInterface resolver, String debugHint) {
+    protected void trySkippableResolve(JSONArray target, ResolverMethodInterface resolver, String debugHint) throws SkipSpecimenException {
         // try to parse and set correctly
         try {
             Object returnValue = resolver.doResolve();
@@ -278,7 +285,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                     target.put(returnValue);
                 }
             }
-        } catch (Exception e) {
+        } catch (IOException | InterruptedException | ParseException e) {
             log.error("Failed to resolve " + debugHint, e);
         }
     }
@@ -289,14 +296,14 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     }
 
     protected interface ResolverMethodInterface {
-        Object doResolve() throws Exception;
+        Object doResolve() throws IOException, InterruptedException, ParseException, SkipSpecimenException;
     }
 
     protected interface JSONObjectResolverMethodInterface extends ResolverMethodInterface {
-        JSONObject doResolve() throws Exception;
+        JSONObject doResolve() throws IOException, InterruptedException, ParseException, SkipSpecimenException;
     }
 
     protected interface JSONArrayResolverMethodInterface extends ResolverMethodInterface {
-        JSONArray doResolve() throws Exception;
+        JSONArray doResolve() throws IOException, InterruptedException, ParseException, SkipSpecimenException;
     }
 }

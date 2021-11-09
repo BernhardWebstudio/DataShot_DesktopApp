@@ -550,7 +550,14 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                             worker, "caste", "worker", "", "", "", new Date());
                     worker.getAttributeCollection().add(workerCaste);
                     s.getSpecimenParts().add(worker);
-                } else {
+                } else if (sex.equalsIgnoreCase("gyne")) {
+                    s.setSex("female");
+                    SpecimenPart gyne = new SpecimenPart();
+                    SpecimenPartAttribute gyneCaste = new SpecimenPartAttribute(
+                            gyne, "caste", "gyne", "", "", "", new Date());
+                    gyne.getAttributeCollection().add(gyneCaste);
+                    s.getSpecimenParts().add(gyne);
+                }  else {
                     s.setSex(sex);
                 }
                 s.setDateIdentified(parser.getIdentifiedDate());

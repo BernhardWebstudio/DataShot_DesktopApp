@@ -1,6 +1,6 @@
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
-import jsyntaxpane.syntaxkits.JavaScriptSyntaxKit;
+import de.sciss.syntaxpane.syntaxkits.JavaScriptSyntaxKit;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;

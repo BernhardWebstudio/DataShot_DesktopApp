@@ -261,6 +261,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         String exifComment = candidateImageFile.getExifUserCommentText();
         log.debug("ExifComment: " + exifComment);
         UnitTrayLabel labelRead = candidateImageFile.getTaxonLabelQRText(template);
+        image.setRawQRCode(candidateImageFile.getLabelText());
         TaxonNameReturner parser;
         String rawOCR;
         String state;

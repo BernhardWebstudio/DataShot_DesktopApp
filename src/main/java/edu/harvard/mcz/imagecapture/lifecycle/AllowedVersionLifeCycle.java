@@ -117,7 +117,7 @@ public class AllowedVersionLifeCycle {
         try {
             flyway.migrate();
         } catch (FlywayException e) {
-            log.error("Error", e);
+            log.error("Error", e); //
             // not the nice way, ok. Might throw again.
             flyway.repair();
             flyway.migrate();

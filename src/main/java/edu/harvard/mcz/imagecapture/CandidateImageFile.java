@@ -160,6 +160,10 @@ public class CandidateImageFile {
         templateUsed = template;
     }
 
+    public String getLabelText() {
+        return this.labelText;
+    }
+
     /**
      * Constructor
      *

@@ -111,6 +111,15 @@ public class Specimen implements Serializable {
             new HashSet<>(0);
     private String primaryDivisonISO;
     private Boolean nahimaExported;
+    private String order;
+
+    public String getOrder() {
+        return order;
+    }
+
+    public void setOrder(String order) {
+        this.order = order;
+    }
 
     public Specimen() {
         setDefaults();

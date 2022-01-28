@@ -25,6 +25,9 @@
         <property name="rawOcr" type="string">
             <column name="RawOCR" length="65535"/>
         </property>
+        <property name="rawQRCode" type="string">
+            <column name="RawQR" length="65535"/>
+        </property>
         <property name="path" type="string">
             <column name="Path" length="900"/>
         </property>

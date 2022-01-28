@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -550,14 +551,18 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                     SpecimenPartAttribute workerCaste = new SpecimenPartAttribute(
                             worker, "caste", "worker", "", "", "", new Date());
                     worker.getAttributeCollection().add(workerCaste);
+                    workerCaste.setSpecimenPart(worker);
                     s.getSpecimenParts().add(worker);
+                    worker.setSpecimen(s);
                 } else if (sex.equalsIgnoreCase("gyne")) {
                     s.setSex("female");
                     SpecimenPart gyne = new SpecimenPart();
                     SpecimenPartAttribute gyneCaste = new SpecimenPartAttribute(
                             gyne, "caste", "gyne", "", "", "", new Date());
                     gyne.getAttributeCollection().add(gyneCaste);
+                    gyneCaste.setSpecimenPart(gyne);
                     s.getSpecimenParts().add(gyne);
+                    gyne.setSpecimen(s);
                 }  else {
                     s.setSex(sex);
                 }

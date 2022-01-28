@@ -187,10 +187,9 @@ public class SpecimenPart implements Cloneable {
      */
     public Collection<SpecimenPartAttribute> getAttributeCollection() {
         if (attributeCollection == null) {
-            return new HashSet<SpecimenPartAttribute>();
-        } else {
-            return attributeCollection;
+            this.attributeCollection = new HashSet<SpecimenPartAttribute>();
         }
+        return attributeCollection;
     }
 
     /**

@@ -112,6 +112,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JComboBox<String> jComboBoxCollection = null;
     private JComboBox<String> jComboBoxCountry = null;
     private JComboBox<String> jComboBoxFamily = null;
+    private JComboBox<String> jComboBoxHigherOrder = null;
     private JComboBox<String> jComboBoxFeatures = null;
     private JComboBox<String> jComboBoxLifeStage = null;
     private JComboBox<String> jComboBoxLocationInCollection = null;
@@ -395,6 +396,12 @@ public class SpecimenDetailsViewPane extends JPanel {
             }
 
             specimen.setDrawerNumber(jTextFieldDrawerNumber.getText());
+            if (jComboBoxHigherOrder.getSelectedIndex() == -1 && jComboBoxHigherOrder.getSelectedItem() == null) {
+                specimen.setOrder("");
+            } else {
+                specimen.setOrder(jComboBoxHigherOrder.getSelectedItem().toString());
+                log.debug("Set order to " + jComboBoxHigherOrder.getSelectedItem().toString());
+            }
             if (jComboBoxFamily.getSelectedIndex() == -1 &&
                     jComboBoxFamily.getSelectedItem() == null) {
                 specimen.setFamily("");
@@ -744,6 +751,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 
         getCbTypeStatus().setSelectedItem(specimen.getTypeStatus());
         getDrawerNumberJTextField().setText(specimen.getDrawerNumber());
+        getOrderJTextField().setSelectedItem(specimen.getHigherOrder());
+        log.debug("Selected order to '" + specimen.getOrder() + "'");
         getFamilyJTextField().setSelectedItem(specimen.getFamily());
         getJTextFieldSubfamily().setSelectedItem(specimen.getSubfamily());
         getJTextFieldTribe().setText(specimen.getTribe());
@@ -1000,8 +1009,10 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPanel.add(this.getComboBoxElevUnits(), "sizegroup elevation");
             // section: collection
             // row
+            this.addBasicJLabel(jPanel, "Order");
+            jPanel.add(this.getOrderJTextField(), "grow");
             this.addBasicJLabel(jPanel, "Collection");
-            jPanel.add(this.getJTextFieldCollection(), "grow, span 3");
+            jPanel.add(this.getJTextFieldCollection(), "grow"); // "span 3"
             // double row:
             this.addBasicJLabel(jPanel, "Collectors");
             jPanel.add(this.getJScrollPaneCollectors(), "span 2 2, grow");
@@ -2064,6 +2075,31 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
             AutoCompleteDecorator.decorate(jComboBoxPrimaryDivision);
         }
         return jComboBoxPrimaryDivision;
+    }
+
+    /**
+     * This method initializes jTextField
+     *
+     * @return javax.swing.JTextField
+     */
+    private JComboBox<String> getOrderJTextField() {
+        if (jComboBoxHigherOrder == null) {
+            jComboBoxHigherOrder = new JComboBox<String>();
+            jComboBoxHigherOrder.setModel(new DefaultComboBoxModel<String>(
+                    HigherTaxonLifeCycle.selectDistinctOrder()));
+            jComboBoxHigherOrder.setEditable(specimen.isEditable());
+            // jComboBoxHigherOrder.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class,
+            // "Order", jComboBoxHigherOrder));
+            jComboBoxHigherOrder.setToolTipText(
+                    MetadataRetriever.getFieldHelp(Specimen.class, "HigherOrder"));
+            jComboBoxHigherOrder.addKeyListener(new java.awt.event.KeyAdapter() {
+                public void keyTyped(java.awt.event.KeyEvent e) {
+                    thisPane.setStateToDirty();
+                }
+            });
+            AutoCompleteDecorator.decorate(jComboBoxHigherOrder);
+        }
+        return jComboBoxHigherOrder;
     }
 
     /**

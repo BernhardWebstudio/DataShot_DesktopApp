@@ -111,15 +111,8 @@ public class Specimen implements Serializable {
             new HashSet<>(0);
     private String primaryDivisonISO;
     private Boolean nahimaExported;
-    private String order;
-
-    public String getOrder() {
-        return order;
-    }
-
-    public void setOrder(String order) {
-        this.order = order;
-    }
+    // need to call it higherOrder as "order" alone gives issues with SQL
+    private String higherOrder;
 
     public Specimen() {
         setDefaults();
@@ -218,6 +211,32 @@ public class Specimen implements Serializable {
         this.numbers = numbers;
         this.ICImages = ICImages;
         this.specimenParts = specimenParts;
+    }
+
+    public String getHigherOrder() {
+        return higherOrder;
+    }
+
+    public void setHigherOrder(String order) {
+        setOrder(order);
+    }
+
+    public String getOrder() {
+        return higherOrder;
+    }
+
+    public void setOrder(String order) {
+        this.higherOrder = order;
+        int supportedFieldLen = MetadataRetriever.getFieldLength(Specimen.class, "HigherOrder");
+        if (this.higherOrder != null &&
+                this.higherOrder.length() > supportedFieldLen && supportedFieldLen > 0
+        ) {
+            this.higherOrder = this.higherOrder.substring(
+                    0, supportedFieldLen);
+        }
+        if (this.higherOrder != null) {
+            this.higherOrder = this.higherOrder.trim();
+        }
     }
 
     public Boolean getNahimaExported() {

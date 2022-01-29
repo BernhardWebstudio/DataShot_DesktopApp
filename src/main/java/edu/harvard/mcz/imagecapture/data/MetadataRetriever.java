@@ -189,6 +189,9 @@ public class MetadataRetriever {
             if (fieldname.equalsIgnoreCase("Family")) {
                 length = 40;
             }
+            if (fieldname.equalsIgnoreCase("HigherOrder")) {
+                length = 40;
+            }
             if (fieldname.equalsIgnoreCase("Subfamily")) {
                 length = 40;
             }

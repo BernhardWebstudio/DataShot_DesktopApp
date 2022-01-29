@@ -24,27 +24,8 @@ public class HigherTaxonLifeCycle {
         List<String> result = new ArrayList<String>();
         try {
             String sql =
-                    " Select distinct family from HigherTaxon ht where ht.family is not null ";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            try {
-                session.beginTransaction();
-                Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    result.add(value);
-                }
-                session.getTransaction().commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error(e.getMessage());
-            } finally {
-                try {
-                    session.close();
-                } catch (SessionException e) {
-                }
-            }
-            return result.toArray(new String[]{});
+                    " Select distinct family from Specimen s where s.family is not null ";
+            return getStrings(result, sql);
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
@@ -57,12 +38,12 @@ public class HigherTaxonLifeCycle {
             String sql = "";
             if (family == null || family.equals("")) {
                 sql =
-                        " Select distinct subfamily from HigherTaxon ht where ht.subfamily is not null order by subfamily ";
+                        " Select distinct subfamily from Specimen s where s.subfamily is not null order by subfamily";
             } else {
                 sql =
-                        " Select distinct subfamily from HigherTaxon ht where ht.family = '" +
+                        " Select distinct subfamily from Specimen s where s.family = '" +
                                 family.trim() +
-                                "' and ht.subfamily is not null order by subfamily ";
+                                "' and s.subfamily is not null order by subfamily ";
             }
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
@@ -72,7 +53,7 @@ public class HigherTaxonLifeCycle {
                 if (!i.hasNext()) {
                     // No results, try without where family='?'
                     sql =
-                            " Select distinct subfamily from HigherTaxon ht where ht.subfamily is not null ";
+                            " Select distinct subfamily from Specimen s where s.subfamily is not null ";
                     q = session.createQuery(sql);
                     i = q.iterate();
                 }
@@ -101,18 +82,62 @@ public class HigherTaxonLifeCycle {
         List<String> result = new ArrayList<String>();
         try {
             String sql =
-                    " Select distinct tribe from HigherTaxon ht where ht.subfamily = '" +
-                            subfamily.trim() + "' and ht.tribe is not null ";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    " Select distinct tribe from Specimen s where s.subfamily = '" +
+                            subfamily.trim() + "' and s.tribe is not null ";
+            return getStrings(result, sql);
+        } catch (RuntimeException re) {
+            log.error("Error", re);
+            return new String[]{};
+        }
+    }
+
+    public static String[] selectDistinctOrder() {
+        List<String> result = new ArrayList<String>();
+        try {
+            String sql =
+                    " Select distinct higherOrder from Specimen s where s.higherOrder is not null ";
+            return getStrings(result, sql);
+        } catch (RuntimeException re) {
+            log.error("Error", re);
+            return new String[]{};
+        }
+    }
+
+    private static String[] getStrings(List<String> result, String sql) {
+        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        try {
+            session.beginTransaction();
+            Query q = session.createQuery(sql);
+            Iterator i = q.iterate();
+            while (i.hasNext()) {
+                String value = (String) i.next();
+                result.add(value);
+            }
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            log.error(e.getMessage());
+        } finally {
             try {
+                session.close();
+            } catch (SessionException e) {
+            }
+        }
+        return result.toArray(new String[]{});
+    }
+
+    public static String findOrderForFamily(String family) {
+        try {
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+
+            try {
+                String sql = "Select distinct higherOrder from Specimen s where s.higherOrder is not null and s.family LIKE :family";
                 session.beginTransaction();
                 Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    result.add(value);
-                }
+                q.setParameter("family", family);
+                String result = (String) q.getSingleResult();
                 session.getTransaction().commit();
+                return result;
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
                 log.error(e.getMessage());
@@ -122,11 +147,10 @@ public class HigherTaxonLifeCycle {
                 } catch (SessionException e) {
                 }
             }
-            return result.toArray(new String[]{});
-        } catch (RuntimeException re) {
-            log.error("Error", re);
-            return new String[]{};
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
+        return "";
     }
 
     public void persist(HigherTaxon transientInstance)

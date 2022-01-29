@@ -34,7 +34,7 @@
         <property name="family" type="string">
             <column name="Family" length="40"/>
         </property>
-        <property name="order" type="string">
+        <property name="higherOrder" type="string">
             <column name="HigherOrder" length="40"/>
         </property>
         <property name="subfamily" type="string">

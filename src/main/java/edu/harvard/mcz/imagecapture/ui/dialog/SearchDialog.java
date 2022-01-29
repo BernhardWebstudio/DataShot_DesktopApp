@@ -38,10 +38,7 @@ import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * SearchDialog
@@ -57,6 +54,7 @@ public class SearchDialog extends JDialog {
     private JScrollPane scrollPane = null;
     private JTextField jTextFieldDrawerNumber = null;
     private JTextField jTextFieldBarcode = null;
+    private JTextField jTextFieldOrder = null;
     private JTextField jTextFieldFamily = null;
     private JTextField jTextFieldGenus = null;
     private JTextField jTextFieldSpecies = null;
@@ -161,6 +159,9 @@ public class SearchDialog extends JDialog {
                     }
                     if (jTextFieldBarcode.getText() != null && jTextFieldBarcode.getText().length() > 0) {
                         searchCriteria.setBarcode(jTextFieldBarcode.getText());
+                    }
+                    if (jTextFieldOrder.getText() != null && jTextFieldOrder.getText().trim().length() > 0) {
+                        searchCriteria.setOrder(jTextFieldOrder.getText());
                     }
                     if (jTextFieldFamily.getText() != null && jTextFieldFamily.getText().length() > 0) {
                         searchCriteria.setFamily(jTextFieldFamily.getText());
@@ -296,6 +297,7 @@ public class SearchDialog extends JDialog {
                     "Imaged Date/Path",
                     "Drawer Number",
                     "Barcode",
+                    "Order",
                     "Family",
                     "Tribe",
                     "Subfamily",
@@ -322,6 +324,7 @@ public class SearchDialog extends JDialog {
                     this.getImagePathJComboBox(),
                     this.getDrawerNumberJTextField(),
                     this.getBarcodeJTextField(),
+                    this.getOrderJTextField(),
                     this.getFamilyJTextField(),
                     this.getTribeJTextField(),
                     this.getSubfamilyJTextField(),
@@ -368,6 +371,13 @@ public class SearchDialog extends JDialog {
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
         }
         return scrollPane;
+    }
+
+    private Component getOrderJTextField() {
+        if (jTextFieldOrder == null) {
+            jTextFieldOrder = new JTextField();
+        }
+        return jTextFieldOrder;
     }
 
     private Component getLastUpdatedJTextField() {
@@ -705,9 +715,7 @@ public class SearchDialog extends JDialog {
             values.add("");
             values.add("%_%");
             String[] qv = sls.getDistinctQuestions();
-            for (int x = 0; x < qv.length; x++) {
-                values.add(qv[x]);
-            }
+            values.addAll(Arrays.asList(qv));
             jComboBoxQuestions = new JComboBox(values.toArray());
             jComboBoxQuestions.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxQuestions);

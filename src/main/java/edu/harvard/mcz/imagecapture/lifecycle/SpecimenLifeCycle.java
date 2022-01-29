@@ -1029,6 +1029,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                 // actionPerformed method.
                 // example.excludeProperty("flagInBulkloader");
                 criteria.add(example);
+                criteria.setReadOnly(true);
                 if (instance.getTrackings() != null &&
                         instance.getTrackings().size() > 0) {
                     criteria.createCriteria("trackings", Criteria.INNER_JOIN)
@@ -1067,8 +1068,8 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                             .setFetchMode("numbers", FetchMode.JOIN)
                             .setFetchMode("specimenParts", FetchMode.JOIN)
                             .setFetchMode("specimenParts.specimenPartAttributes", FetchMode.JOIN)
-                            .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-
+                            .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
+                            .setReadOnly(true);
                     results = (List<Specimen>) criteria.list();
                 } else {
                     results = new ArrayList<>();
@@ -1076,6 +1077,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                 log.debug("find by example like successful, result size: " +
                         results.size());
                 session.getTransaction().commit();
+                log.debug("Find by example transaction commited");
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
                 log.error("find by example like failed", e);

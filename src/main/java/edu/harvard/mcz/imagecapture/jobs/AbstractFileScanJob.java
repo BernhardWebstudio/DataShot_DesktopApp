@@ -541,6 +541,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
             if (unitTrayLabel != null) {
                 //  We got json data from a barcode.
                 s.setFamily(parser.getFamily());
+                s.setOrder(HigherTaxonLifeCycle.findOrderForFamily(s.getFamily()));
                 s.setSubfamily(parser.getSubfamily());
                 s.setTribe(parser.getTribe());
                 // set sex

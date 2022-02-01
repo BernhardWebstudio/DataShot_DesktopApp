@@ -1,12 +1,16 @@
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.lifecycle.HigherTaxonLifeCycle;
 import edu.harvard.mcz.imagecapture.utility.CastUtility;
 import net.miginfocom.swing.MigLayout;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.jdatepicker.JDatePicker;
 import org.jdatepicker.UtilDateModel;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +32,8 @@ public class MeliaStatisticsDialog extends JDialog {
     private JTextArea familiesTextField;
     private JTextArea resultsTextField;
     private JButton doAnalysisButton;
+    private JComboBox orderField;
+
 
     public MeliaStatisticsDialog(Frame owner) {
         super(owner);
@@ -54,11 +60,13 @@ public class MeliaStatisticsDialog extends JDialog {
             // add contents
             String[] labels = {
                     "Date from",
-                    "Date to"
+                    "Date to",
+                    "Order"
             };
             Component[] fields = {
                     this.getDateStartField(),
-                    this.getDateEndField()
+                    this.getDateEndField(),
+                    this.getOrderField()
             };
 
             assert (fields.length == labels.length);
@@ -82,6 +90,21 @@ public class MeliaStatisticsDialog extends JDialog {
             jContentPanel.add(scrollPane, BorderLayout.CENTER);
         }
         return jContentPanel;
+    }
+
+    private Component getOrderField() {
+        if (orderField == null) {
+            orderField = new JComboBox<String>();
+            orderField.setModel(new DefaultComboBoxModel<String>(
+                    HigherTaxonLifeCycle.selectDistinctOrder()));
+            orderField.setEditable(true);
+            // jComboBoxHigherOrder.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class,
+            // "Order", jComboBoxHigherOrder));
+            orderField.setToolTipText(
+                    MetadataRetriever.getFieldHelp(Specimen.class, "HigherOrder"));
+            AutoCompleteDecorator.decorate(orderField);
+        }
+        return orderField;
     }
 
     /**
@@ -181,28 +204,31 @@ public class MeliaStatisticsDialog extends JDialog {
         try {
 
             //
-            Query query1 = session.createQuery("SELECT count(DISTINCT i.imageId) FROM ICImage i LEFT JOIN i.specimen AS s WHERE i.path < :end AND i.path > :start AND s.family in (:families)");
+            Query query1 = session.createQuery("SELECT count(DISTINCT i.imageId) FROM ICImage i LEFT JOIN i.specimen AS s WHERE i.path < :end AND i.path > :start AND (s.family in (:families) OR s.higherOrder = :higherOrder)");
             query1.setParameter("end", endDateFormatted);
             query1.setParameter("start", startDateFormatted);
             query1.setParameterList("families", familiesList);
+            query1.setParameter("higherOrder", orderField.getSelectedItem().toString());
             List resultsList = query1.getResultList();
             String results1 = CastUtility.castToString(query1.getSingleResult());
             results += "Nr. of ICImages: " + results1 + "\n";
 
             //
-            Query query2 = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM ICImage i LEFT JOIN i.specimen AS s WHERE i.path < :end AND i.path > :start AND s.family IN (:families)");
+            Query query2 = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM ICImage i LEFT JOIN i.specimen AS s WHERE i.path < :end AND i.path > :start AND (s.family in (:families) OR s.higherOrder = :higherOrder)");
             query2.setParameter("end", endDateFormatted);
             query2.setParameter("start", startDateFormatted);
             query2.setParameterList("families", familiesList);
+            query2.setParameter("higherOrder", orderField.getSelectedItem().toString());
             String results2 = CastUtility.castToString(query2.getSingleResult());
             results += "Corresponding to #specimen: " + results2 + "\n";
 
             //
-            Query query3 = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM Tracking t LEFT JOIN t.specimen as s WHERE t.eventDateTime < :end AND t.eventDateTime > :start AND t.eventType LIKE :eventType AND s.family IN (:families)");
+            Query query3 = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM Tracking t LEFT JOIN t.specimen as s WHERE t.eventDateTime < :end AND t.eventDateTime > :start AND t.eventType LIKE :eventType AND (s.family in (:families) OR s.higherOrder = :higherOrder)");
             query3.setParameter("end", endDate);
             query3.setParameter("start", startDate);
             query3.setParameterList("families", familiesList);
             query3.setParameter("eventType", "Text Entered");
+            query3.setParameter("higherOrder", orderField.getSelectedItem().toString());
             String results3 = CastUtility.castToString(query3.getSingleResult());
             results += "Text Entered in this date-range: " + results3 + "\n";
 

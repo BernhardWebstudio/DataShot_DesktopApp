@@ -25,10 +25,7 @@ import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.Tracking;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
-import edu.harvard.mcz.imagecapture.lifecycle.CollectorLifeCycle;
-import edu.harvard.mcz.imagecapture.lifecycle.ICImageLifeCycle;
-import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
-import edu.harvard.mcz.imagecapture.lifecycle.TrackingLifeCycle;
+import edu.harvard.mcz.imagecapture.lifecycle.*;
 import edu.harvard.mcz.imagecapture.ui.field.JIntegerField;
 import net.miginfocom.swing.MigLayout;
 import org.jdatepicker.JDatePicker;
@@ -54,7 +51,7 @@ public class SearchDialog extends JDialog {
     private JScrollPane scrollPane = null;
     private JTextField jTextFieldDrawerNumber = null;
     private JTextField jTextFieldBarcode = null;
-    private JTextField jTextFieldOrder = null;
+    private JComboBox jTextFieldOrder = null;
     private JTextField jTextFieldFamily = null;
     private JTextField jTextFieldGenus = null;
     private JTextField jTextFieldSpecies = null;
@@ -160,8 +157,8 @@ public class SearchDialog extends JDialog {
                     if (jTextFieldBarcode.getText() != null && jTextFieldBarcode.getText().length() > 0) {
                         searchCriteria.setBarcode(jTextFieldBarcode.getText());
                     }
-                    if (jTextFieldOrder.getText() != null && jTextFieldOrder.getText().trim().length() > 0) {
-                        searchCriteria.setOrder(jTextFieldOrder.getText());
+                    if (jTextFieldOrder.getSelectedItem() != null && jTextFieldOrder.getSelectedItem().toString().trim().length() > 0) {
+                        searchCriteria.setOrder(jTextFieldOrder.getSelectedItem().toString());
                     }
                     if (jTextFieldFamily.getText() != null && jTextFieldFamily.getText().length() > 0) {
                         searchCriteria.setFamily(jTextFieldFamily.getText());
@@ -373,9 +370,17 @@ public class SearchDialog extends JDialog {
         return scrollPane;
     }
 
-    private Component getOrderJTextField() {
+    private JComboBox getOrderJTextField() {
         if (jTextFieldOrder == null) {
-            jTextFieldOrder = new JTextField();
+            jTextFieldOrder = new JComboBox<String>();
+            jTextFieldOrder.setModel(new DefaultComboBoxModel<String>(
+                    HigherTaxonLifeCycle.selectDistinctOrder()));
+            jTextFieldOrder.setEditable(true);
+            // jComboBoxHigherOrder.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class,
+            // "Order", jComboBoxHigherOrder));
+            jTextFieldOrder.setToolTipText(
+                    MetadataRetriever.getFieldHelp(Specimen.class, "HigherOrder"));
+            AutoCompleteDecorator.decorate(jTextFieldOrder);
         }
         return jTextFieldOrder;
     }

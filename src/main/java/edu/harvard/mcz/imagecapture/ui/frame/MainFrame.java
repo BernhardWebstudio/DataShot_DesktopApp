@@ -119,7 +119,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 
     private JMenuItem jMenuItemBatchUpdate = null;
     private JMenuItem jMenuItemStats = null;
-    private JMenuItem jMenuItemMeliaStats = null;
+    private JMenuItem jMenuItemMaliaStats = null;
     private JMenuItem jMenuItemRepeatOCR = null;
     private JMenuItem jMenuItemRunNahimaExport = null;
 
@@ -209,7 +209,7 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuItemCreateLabels.setEnabled(false);
             jMenuItemStats.setEnabled(false);
             jMenuItemLog.setEnabled(false);
-            jMenuItemMeliaStats.setEnabled(false);
+            jMenuItemMaliaStats.setEnabled(false);
             jMenuItemBatchUpdate.setEnabled(false);
             jMenuItemRunNahimaExport.setEnabled(false);
         } else {
@@ -251,7 +251,7 @@ public class MainFrame extends JFrame implements RunnerListener {
                     jMenuItemEditTemplates.setEnabled(true);
                     jMenuItemLoadData.setEnabled(true);
                     jMenuItemCleanupDirectory.setEnabled(true);
-                    jMenuItemMeliaStats.setEnabled(true);
+                    jMenuItemMaliaStats.setEnabled(true);
                 }
                 // Enable other menu items only for those with full access rights
                 // Administrator and full roles both have full access rights
@@ -1126,7 +1126,7 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuData.setText("Data");
             jMenuData.setMnemonic(KeyEvent.VK_D);
             jMenuData.add(getJMenuItemSearch());
-            jMenuData.add(getJMenuItemMeliaStats());
+            jMenuData.add(getJMenuItemMaliaStats());
             jMenuData.add(getJMenuItemVerbatimTranscription());
             jMenuData.add(getJMenuItemVerbatimClassification());
             jMenuData.add(getJMenuItemBrowseImages());
@@ -1170,22 +1170,22 @@ public class MainFrame extends JFrame implements RunnerListener {
     }
 
     /**
-     * This method initializes the melia statistics menu option
+     * This method initializes the MALIA statistics menu option
      *
      * @return
      */
-    private JMenuItem getJMenuItemMeliaStats() {
-        if (jMenuItemMeliaStats == null) {
-            jMenuItemMeliaStats = new JMenuItem();
-            jMenuItemMeliaStats.setText("Melia Statistics");
-            jMenuItemMeliaStats.setEnabled(true);
-            jMenuItemMeliaStats.addActionListener(actionEvent -> {
-                MeliaStatisticsDialog s = new MeliaStatisticsDialog(thisMainFrame);
+    private JMenuItem getJMenuItemMaliaStats() {
+        if (jMenuItemMaliaStats == null) {
+            jMenuItemMaliaStats = new JMenuItem();
+            jMenuItemMaliaStats.setText("MALIA Statistics");
+            jMenuItemMaliaStats.setEnabled(true);
+            jMenuItemMaliaStats.addActionListener(actionEvent -> {
+                MaliaStatisticsDialog s = new MaliaStatisticsDialog(thisMainFrame);
                 s.setVisible(true);
             });
 
         }
-        return jMenuItemMeliaStats;
+        return jMenuItemMaliaStats;
     }
 
     /**

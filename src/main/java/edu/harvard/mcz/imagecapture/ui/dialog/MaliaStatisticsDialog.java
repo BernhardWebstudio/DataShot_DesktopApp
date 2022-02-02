@@ -23,9 +23,9 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class MeliaStatisticsDialog extends JDialog {
+public class MaliaStatisticsDialog extends JDialog {
     private static final Logger log =
-            LoggerFactory.getLogger(MeliaStatisticsDialog.class);
+            LoggerFactory.getLogger(MaliaStatisticsDialog.class);
     private JPanel jContentPanel;
     private JDatePicker endDateField;
     private JDatePicker startDateField;
@@ -35,13 +35,13 @@ public class MeliaStatisticsDialog extends JDialog {
     private JComboBox orderField;
 
 
-    public MeliaStatisticsDialog(Frame owner) {
+    public MaliaStatisticsDialog(Frame owner) {
         super(owner);
         initialize();
     }
 
     private void initialize() {
-        this.setTitle("Melia Statistics");
+        this.setTitle("MALIA Statistics");
         this.setContentPane(getJContentPane());
         this.pack();
     }

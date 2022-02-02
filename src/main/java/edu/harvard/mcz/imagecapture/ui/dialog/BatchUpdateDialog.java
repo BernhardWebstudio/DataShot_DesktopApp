@@ -15,7 +15,7 @@ import java.awt.event.ActionListener;
 
 public class BatchUpdateDialog extends JDialog {
     private static final Logger log =
-            LoggerFactory.getLogger(MeliaStatisticsDialog.class);
+            LoggerFactory.getLogger(MaliaStatisticsDialog.class);
     private JPanel jContentPanel;
     private JTextField valueToJTextField;
     private JTextField valueFromJTextField;

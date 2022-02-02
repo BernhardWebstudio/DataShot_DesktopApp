@@ -153,7 +153,7 @@ public class MaliaStatisticsDialog extends JDialog {
      */
     private JButton getDoAnalysisButton() {
         if (doAnalysisButton == null) {
-            doAnalysisButton = new JButton("Acquire Melia Statistics");
+            doAnalysisButton = new JButton("Acquire MALIA Statistics");
             doAnalysisButton.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {

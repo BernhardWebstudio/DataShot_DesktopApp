@@ -51,23 +51,23 @@ public class SearchDialog extends JDialog {
     private JScrollPane scrollPane = null;
     private JTextField jTextFieldDrawerNumber = null;
     private JTextField jTextFieldBarcode = null;
-    private JComboBox jTextFieldOrder = null;
+    private JComboBox<String> jTextFieldOrder = null;
     private JTextField jTextFieldFamily = null;
     private JTextField jTextFieldGenus = null;
     private JTextField jTextFieldSpecies = null;
-    private JComboBox jComboBoxCollection = null;
-    private JComboBox jComboBoxWorkflowStatus = null;
+    private JComboBox<String> jComboBoxCollection = null;
+    private JComboBox<Object> jComboBoxWorkflowStatus = null;
     private JTextField jTextFieldImageFilename = null;
-    private JComboBox jComboBoxPath = null;
-    private JComboBox jComboBoxEntryBy = null;
-    private JComboBox jComboBoxIdentifiedBy = null;
+    private JComboBox<String> jComboBoxPath = null;
+    private JComboBox<String> jComboBoxEntryBy = null;
+    private JComboBox<String> jComboBoxIdentifiedBy = null;
     private JTextField jTextFieldSubfamily = null;
     private JTextField jTextFieldSubspecies = null;
     private JButton jButton1 = null;
-    private JComboBox jComboBoxCollector = null;
+    private JComboBox<String> jComboBoxCollector = null;
     private JTextField jTextFieldVerbatimLocality = null;
-    private JComboBox jComboBoxCountry = null;
-    private JComboBox jComboBoxQuestions = null;
+    private JComboBox<String> jComboBoxCountry = null;
+    private JComboBox<String> jComboBoxQuestions = null;
     private JIntegerField jOffsetNumberField = null;
     private JIntegerField jLimitNumberField = null;
     private JTextField jTextFieldTribe = null;
@@ -370,11 +370,14 @@ public class SearchDialog extends JDialog {
         return scrollPane;
     }
 
-    private JComboBox getOrderJTextField() {
+    private JComboBox<String> getOrderJTextField() {
         if (jTextFieldOrder == null) {
             jTextFieldOrder = new JComboBox<String>();
-            jTextFieldOrder.setModel(new DefaultComboBoxModel<String>(
-                    HigherTaxonLifeCycle.selectDistinctOrder()));
+            jTextFieldOrder.setModel(new DefaultComboBoxModel<String>());
+            // lazily load the orders
+            SwingUtilities.invokeLater(() -> jTextFieldOrder.setModel(new DefaultComboBoxModel<String>(
+                    HigherTaxonLifeCycle.selectDistinctOrder()
+            )));
             jTextFieldOrder.setEditable(true);
             // jComboBoxHigherOrder.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class,
             // "Order", jComboBoxHigherOrder));
@@ -488,11 +491,15 @@ public class SearchDialog extends JDialog {
      *
      * @return javax.swing.JComboBox
      */
-    private JComboBox getCollectionJComboBox() {
+    private JComboBox<String> getCollectionJComboBox() {
         if (jComboBoxCollection == null) {
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
             jComboBoxCollection = new JComboBox<String>();
-            jComboBoxCollection.setModel(new DefaultComboBoxModel<String>(sls.getDistinctCollections()));
+            jComboBoxCollection.setModel(new DefaultComboBoxModel<String>());
+            // lazily load the collections
+            SwingUtilities.invokeLater(() -> jComboBoxCollection.setModel(new DefaultComboBoxModel<String>(
+                    sls.getDistinctCollections()
+            )));
             jComboBoxCollection.setEditable(true);
             jComboBoxCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Collection"));
             jComboBoxCollection.setMaximumSize(this.maxComboBoxDims);
@@ -506,15 +513,13 @@ public class SearchDialog extends JDialog {
      *
      * @return javax.swing.JComboBox
      */
-    private JComboBox getWorkflowsJComboBox() {
+    private JComboBox<Object> getWorkflowsJComboBox() {
         if (jComboBoxWorkflowStatus == null) {
             ArrayList<String> values = new ArrayList<String>();
             values.add("");
             String[] wfsv = WorkFlowStatus.getWorkFlowStatusValues();
-            for (int x = 0; x < wfsv.length; x++) {
-                values.add(wfsv[x]);
-            }
-            jComboBoxWorkflowStatus = new JComboBox(values.toArray());
+            values.addAll(Arrays.asList(wfsv));
+            jComboBoxWorkflowStatus = new JComboBox<>(values.toArray());
             jComboBoxWorkflowStatus.getModel().setSelectedItem("");
             jComboBoxWorkflowStatus.setEditable(true);
             jComboBoxWorkflowStatus.setMaximumSize(this.maxComboBoxDims);
@@ -540,10 +545,10 @@ public class SearchDialog extends JDialog {
      *
      * @return javax.swing.JComboBox
      */
-    private JComboBox getImagePathJComboBox() {
+    private JComboBox<String> getImagePathJComboBox() {
         if (jComboBoxPath == null) {
             ICImageLifeCycle ils = new ICImageLifeCycle();
-            jComboBoxPath = new JComboBox(ils.getDistinctPaths());
+            jComboBoxPath = new JComboBox<>(ils.getDistinctPaths());
             jComboBoxPath.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxPath);
             jComboBoxPath.setMaximumSize(this.maxComboBoxDims);
@@ -556,10 +561,14 @@ public class SearchDialog extends JDialog {
      *
      * @return javax.swing.JComboBox
      */
-    private JComboBox getUsersJComboBox() {
+    private JComboBox<String> getUsersJComboBox() {
         if (jComboBoxEntryBy == null) {
             TrackingLifeCycle tls = new TrackingLifeCycle();
-            jComboBoxEntryBy = new JComboBox(tls.getDistinctUsers());
+            jComboBoxEntryBy = new JComboBox<>();
+            // lazily load the users
+            SwingUtilities.invokeLater(() -> jComboBoxEntryBy.setModel(new DefaultComboBoxModel<String>(
+                    tls.getDistinctUsers()
+            )));
             jComboBoxEntryBy.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxEntryBy);
             jComboBoxEntryBy.setMaximumSize(this.maxComboBoxDims);
@@ -572,10 +581,14 @@ public class SearchDialog extends JDialog {
      *
      * @return java.swing.JComboBox
      */
-    private JComboBox getIdentifiedByComboBox() {
+    private JComboBox<String> getIdentifiedByComboBox() {
         if (jComboBoxIdentifiedBy == null) {
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
-            jComboBoxIdentifiedBy = new JComboBox(sls.getDistinctDeterminers());
+            jComboBoxIdentifiedBy = new JComboBox<>();
+            // lazily load the determiners
+            SwingUtilities.invokeLater(() -> jComboBoxIdentifiedBy.setModel(new DefaultComboBoxModel<String>(
+                    sls.getDistinctDeterminers()
+            )));
             jComboBoxIdentifiedBy.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxIdentifiedBy);
             jComboBoxIdentifiedBy.setMaximumSize(this.maxComboBoxDims);
@@ -625,11 +638,7 @@ public class SearchDialog extends JDialog {
             jButton1 = new JButton();
             jButton1.setText("Close");
             jButton1.setMnemonic(KeyEvent.VK_C);
-            jButton1.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    setVisible(false);
-                }
-            });
+            jButton1.addActionListener(e -> setVisible(false));
         }
         return jButton1;
     }
@@ -639,10 +648,14 @@ public class SearchDialog extends JDialog {
      *
      * @return javax.swing.JComboBox
      */
-    private JComboBox getCollectorsJComboBox() {
+    private JComboBox<String> getCollectorsJComboBox() {
         if (jComboBoxCollector == null) {
             CollectorLifeCycle cls = new CollectorLifeCycle();
-            jComboBoxCollector = new JComboBox(cls.getDistinctCollectors());
+            jComboBoxCollector = new JComboBox<>(cls.getDistinctCollectors());
+            // lazily load the collectors
+            SwingUtilities.invokeLater(() -> jComboBoxCollector.setModel(new DefaultComboBoxModel<String>(
+                    cls.getDistinctCollectors()
+            )));
             jComboBoxCollector.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxCollector);
             jComboBoxCollector.setMaximumSize(this.maxComboBoxDims);
@@ -667,17 +680,19 @@ public class SearchDialog extends JDialog {
      *
      * @return javax.swing.JComboBox
      */
-    private JComboBox getCountryJComboBox() {
+    private JComboBox<String> getCountryJComboBox() {
         if (jComboBoxCountry == null) {
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
-            ArrayList<String> values = new ArrayList<String>();
-            values.add("");
-            values.add("%_%");
-            String[] cv = sls.getDistinctCountries();
-            for (int x = 0; x < cv.length; x++) {
-                values.add(cv[x]);
-            }
-            jComboBoxCountry = new JComboBox(values.toArray());
+            jComboBoxCountry = new JComboBox<>();
+            // lazily load the countries
+            SwingUtilities.invokeLater(() -> {
+                jComboBoxCountry.setModel(new DefaultComboBoxModel<String>(
+                        sls.getDistinctCountries()
+                ));
+
+                jComboBoxCountry.addItem("");
+                jComboBoxCountry.addItem("%_%");
+            });
             jComboBoxCountry.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxCountry);
             jComboBoxCountry.setMaximumSize(this.maxComboBoxDims);
@@ -690,17 +705,19 @@ public class SearchDialog extends JDialog {
      *
      * @return javax.swing.JComboBox
      */
-    private JComboBox getPrimaryDivisionJComboBox() {
+    private JComboBox<String> getPrimaryDivisionJComboBox() {
         if (jComboBoxPrimaryDivision == null) {
-            SpecimenLifeCycle sls = new SpecimenLifeCycle();
-            ArrayList<String> values = new ArrayList<String>();
-            values.add("");
-            values.add("%_%");
-            String[] cv = sls.getDistinctPrimaryDivisions();
-            for (int x = 0; x < cv.length; x++) {
-                values.add(cv[x]);
-            }
-            jComboBoxPrimaryDivision = new JComboBox(values.toArray());
+            jComboBoxPrimaryDivision = new JComboBox<>();
+            // lazily load the primary divisions
+            SwingUtilities.invokeLater(() -> {
+                SpecimenLifeCycle sls = new SpecimenLifeCycle();
+                jComboBoxPrimaryDivision.setModel(new DefaultComboBoxModel<String>(
+                        sls.getDistinctPrimaryDivisions()
+                ));
+
+                jComboBoxPrimaryDivision.addItem("");
+                jComboBoxPrimaryDivision.addItem("%_%");
+            });
             jComboBoxPrimaryDivision.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxPrimaryDivision);
             jComboBoxPrimaryDivision.setMaximumSize(this.maxComboBoxDims);
@@ -713,15 +730,19 @@ public class SearchDialog extends JDialog {
      *
      * @return javax.swing.JComboBox
      */
-    private JComboBox getQuestionJComboBox() {
+    private JComboBox<String> getQuestionJComboBox() {
         if (jComboBoxQuestions == null) {
-            SpecimenLifeCycle sls = new SpecimenLifeCycle();
-            ArrayList<String> values = new ArrayList<String>();
-            values.add("");
-            values.add("%_%");
-            String[] qv = sls.getDistinctQuestions();
-            values.addAll(Arrays.asList(qv));
-            jComboBoxQuestions = new JComboBox(values.toArray());
+            jComboBoxQuestions = new JComboBox<>();
+            // lazily load the questions
+            SwingUtilities.invokeLater(() -> {
+                SpecimenLifeCycle sls = new SpecimenLifeCycle();
+                jComboBoxQuestions.setModel(new DefaultComboBoxModel<String>(
+                        sls.getDistinctQuestions()
+                ));
+
+                jComboBoxQuestions.addItem("");
+                jComboBoxQuestions.addItem("%_%");
+            });
             jComboBoxQuestions.setEditable(true);
             AutoCompleteDecorator.decorate(jComboBoxQuestions);
             jComboBoxQuestions.setMaximumSize(this.maxComboBoxDims);

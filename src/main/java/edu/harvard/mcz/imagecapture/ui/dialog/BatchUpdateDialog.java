@@ -1,5 +1,6 @@
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
+import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.utility.CastUtility;
 import net.miginfocom.swing.MigLayout;
@@ -154,18 +155,19 @@ public class BatchUpdateDialog extends JDialog {
             Query updateQuery;
             // do the change
             if (fieldName.startsWith("s.")) {
-                updateQuery = session.createQuery("UPDATE Specimen s SET " + fieldName + "= :toValue, DateLastUpdated = NOW() " + conditionQuery);
+                updateQuery = session.createQuery("UPDATE Specimen s SET " + fieldName + "= :toValue, DateLastUpdated = NOW(), LastUpdatedBy = :updatingUser " + conditionQuery);
                 updateQuery.setParameter("fromValue", getValueFromJTextField().getText());
             } else if (fieldName.startsWith("c.")) {
                 Query idsToUpdateQuery = session.createQuery("SELECT c.collectorId FROM Collector c LEFT JOIN c.specimen AS s " + conditionQuery);
                 idsToUpdateQuery.setParameter("fromValue", getValueFromJTextField().getText());
-                updateQuery = session.createQuery("UPDATE Collector c SET " + fieldName + " = :toValue, DateLastUpdated = NOW() WHERE c.collectorId IN (:toUpdateIds)");
+                updateQuery = session.createQuery("UPDATE Collector c SET " + fieldName + " = :toValue, DateLastUpdated = NOW(), LastUpdatedBy = :updatingUser WHERE c.collectorId IN (:toUpdateIds)");
                 updateQuery.setParameter("toUpdateIds", idsToUpdateQuery.getResultList());
             } else {
                 log.error("Unhandled updateable field prefix");
                 return;
             }
             updateQuery.setParameter("toValue", getValueToJTextField().getText());
+            updateQuery.setParameter("updatingUser", Singleton.getSingletonInstance().getUser().getFullname());
 
             int numAffected = updateQuery.executeUpdate();
             session.getTransaction().commit();

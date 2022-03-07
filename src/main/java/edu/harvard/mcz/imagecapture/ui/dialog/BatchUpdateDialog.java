@@ -154,12 +154,12 @@ public class BatchUpdateDialog extends JDialog {
             Query updateQuery;
             // do the change
             if (fieldName.startsWith("s.")) {
-                updateQuery = session.createQuery("UPDATE Specimen s SET " + fieldName + "= :toValue " + conditionQuery);
+                updateQuery = session.createQuery("UPDATE Specimen s SET " + fieldName + "= :toValue, DateLastUpdated = NOW() " + conditionQuery);
                 updateQuery.setParameter("fromValue", getValueFromJTextField().getText());
             } else if (fieldName.startsWith("c.")) {
                 Query idsToUpdateQuery = session.createQuery("SELECT c.collectorId FROM Collector c LEFT JOIN c.specimen AS s " + conditionQuery);
                 idsToUpdateQuery.setParameter("fromValue", getValueFromJTextField().getText());
-                updateQuery = session.createQuery("UPDATE Collector c SET " + fieldName + " = :toValue WHERE c.collectorId IN (:toUpdateIds)");
+                updateQuery = session.createQuery("UPDATE Collector c SET " + fieldName + " = :toValue, DateLastUpdated = NOW() WHERE c.collectorId IN (:toUpdateIds)");
                 updateQuery.setParameter("toUpdateIds", idsToUpdateQuery.getResultList());
             } else {
                 log.error("Unhandled updateable field prefix");

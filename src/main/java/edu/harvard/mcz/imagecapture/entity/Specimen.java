@@ -257,7 +257,7 @@ public class Specimen implements Serializable {
     public Boolean isEditable(Users user) {
         boolean canEdit = !this.isExported() && !this.isStateDone();
         if (user != null) {
-            canEdit = canEdit && (user.isUserRole(Users.ROLE_FULL) || user.isUserRole(Users.ROLE_ADMINISTRATOR) || this.getTypeStatus() != WorkFlowStatus.STAGE_CLEAN);
+            canEdit = canEdit && (user.isUserRole(Users.ROLE_FULL) || user.isUserRole(Users.ROLE_ADMINISTRATOR) || !Objects.equals(this.getTypeStatus(), WorkFlowStatus.STAGE_CLEAN));
         } else {
             canEdit = canEdit && !Objects.equals(this.getTypeStatus(), WorkFlowStatus.STAGE_CLEAN);
         }

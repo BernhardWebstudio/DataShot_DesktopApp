@@ -375,9 +375,18 @@ public class SearchDialog extends JDialog {
             jTextFieldOrder = new JComboBox<String>();
             jTextFieldOrder.setModel(new DefaultComboBoxModel<String>());
             // lazily load the orders
-            SwingUtilities.invokeLater(() -> jTextFieldOrder.setModel(new DefaultComboBoxModel<String>(
-                    HigherTaxonLifeCycle.selectDistinctOrder()
-            )));
+            SwingUtilities.invokeLater(() -> {
+                String[] orders = HigherTaxonLifeCycle.selectDistinctOrder();
+                jTextFieldOrder.setModel(new DefaultComboBoxModel<String>(
+                        orders
+                ));
+                jTextFieldOrder.addItem("");
+
+                if (!Arrays.stream(orders).anyMatch(""::equals)) {
+                    jTextFieldOrder.addItem("");
+                }
+                jTextFieldOrder.setSelectedItem("");
+            });
             jTextFieldOrder.setEditable(true);
             // jComboBoxHigherOrder.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class,
             // "Order", jComboBoxHigherOrder));
@@ -497,9 +506,16 @@ public class SearchDialog extends JDialog {
             jComboBoxCollection = new JComboBox<String>();
             jComboBoxCollection.setModel(new DefaultComboBoxModel<String>());
             // lazily load the collections
-            SwingUtilities.invokeLater(() -> jComboBoxCollection.setModel(new DefaultComboBoxModel<String>(
-                    sls.getDistinctCollections()
-            )));
+            SwingUtilities.invokeLater(() -> {
+                String[] collections = sls.getDistinctCollections();
+                jComboBoxCollection.setModel(new DefaultComboBoxModel<String>(
+                        collections
+                ));
+                if (!Arrays.stream(collections).anyMatch(""::equals)) {
+                    jComboBoxCollection.addItem("");
+                }
+                jComboBoxCollection.setSelectedItem("");
+            });
             jComboBoxCollection.setEditable(true);
             jComboBoxCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Collection"));
             jComboBoxCollection.setMaximumSize(this.maxComboBoxDims);

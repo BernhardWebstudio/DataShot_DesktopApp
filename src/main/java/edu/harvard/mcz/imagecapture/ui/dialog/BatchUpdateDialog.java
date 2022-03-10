@@ -157,6 +157,7 @@ public class BatchUpdateDialog extends JDialog {
             if (fieldName.startsWith("s.")) {
                 updateQuery = session.createQuery("UPDATE Specimen s SET " + fieldName + "= :toValue, dateLastUpdated = NOW(), lastUpdatedBy = :updatingUser " + conditionQuery);
                 updateQuery.setParameter("fromValue", getValueFromJTextField().getText());
+                updateQuery.setParameter("updatingUser", Singleton.getSingletonInstance().getUser().getFullname());
             } else if (fieldName.startsWith("c.")) {
                 Query idsToUpdateQuery = session.createQuery("SELECT c.collectorId FROM Collector c LEFT JOIN c.specimen AS s " + conditionQuery);
                 idsToUpdateQuery.setParameter("fromValue", getValueFromJTextField().getText());
@@ -167,7 +168,6 @@ public class BatchUpdateDialog extends JDialog {
                 return;
             }
             updateQuery.setParameter("toValue", getValueToJTextField().getText());
-            updateQuery.setParameter("updatingUser", Singleton.getSingletonInstance().getUser().getFullname());
 
             int numAffected = updateQuery.executeUpdate();
             session.getTransaction().commit();

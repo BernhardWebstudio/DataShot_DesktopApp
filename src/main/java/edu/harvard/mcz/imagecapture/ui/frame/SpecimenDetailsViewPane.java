@@ -290,10 +290,10 @@ public class SpecimenDetailsViewPane extends JPanel {
                 }
             });
         }
-        if (specimen.isExported() == null || specimen.isExported()) {
+        if (specimen.isExported() == null || specimen.isExported() || specimen.isStateDone()) {
             JOptionPane.showMessageDialog(
-                    thisPane, "This Specimen is already exported. No edit will be saved.",
-                    "Warning: not saveable", JOptionPane.WARNING_MESSAGE);
+                    thisPane, "This Specimen is already exported. Edit will not be saved to Nahima.",
+                    "Warning: not editable", JOptionPane.WARNING_MESSAGE);
         }
     }
 

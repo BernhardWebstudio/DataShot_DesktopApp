@@ -290,7 +290,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                 }
             });
         }
-        if (specimen.isExported() == null || specimen.isExported() || specimen.isStateDone()) {
+        if (specimen.isExported() || specimen.isStateDone()) {
             JOptionPane.showMessageDialog(
                     thisPane, "This Specimen is already exported. Edit will not be saved to Nahima.",
                     "Warning: not editable", JOptionPane.WARNING_MESSAGE);
@@ -358,9 +358,9 @@ public class SpecimenDetailsViewPane extends JPanel {
     }
 
     private boolean save() {
-        if (specimen.isExported()) {
+        if (!specimen.isEditable(Singleton.getSingletonInstance().getUser())) {
             JOptionPane.showMessageDialog(
-                    thisPane, "This Specimen is already exported. No edit will be saved.",
+                    thisPane, "This Specimen cannot be edited. No edit will be saved.",
                     "Warning", JOptionPane.WARNING_MESSAGE);
             return false;
         }

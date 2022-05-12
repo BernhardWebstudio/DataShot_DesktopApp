@@ -67,6 +67,7 @@ public class SearchDialog extends JDialog {
     private JComboBox<String> jComboBoxCollector = null;
     private JTextField jTextFieldVerbatimLocality = null;
     private JComboBox<String> jComboBoxCountry = null;
+    private JComboBox<String> jComboBoxSpecificLocality = null;
     private JComboBox<String> jComboBoxQuestions = null;
     private JIntegerField jOffsetNumberField = null;
     private JIntegerField jLimitNumberField = null;
@@ -151,9 +152,9 @@ public class SearchDialog extends JDialog {
                     // from the search criteria for a search by example.
                     searchCriteria.clearDefaults();
 
-                    if (jTextFieldDrawerNumber.getText() != null && jTextFieldDrawerNumber.getText().length() > 0) {
-                        searchCriteria.setDrawerNumber(jTextFieldDrawerNumber.getText());
-                    }
+//                    if (jTextFieldDrawerNumber.getText() != null && jTextFieldDrawerNumber.getText().length() > 0) {
+//                        searchCriteria.setDrawerNumber(jTextFieldDrawerNumber.getText());
+//                    }
                     if (jTextFieldBarcode.getText() != null && jTextFieldBarcode.getText().length() > 0) {
                         searchCriteria.setBarcode(jTextFieldBarcode.getText());
                     }
@@ -197,6 +198,12 @@ public class SearchDialog extends JDialog {
                     if (jComboBoxCountry.getSelectedItem() != null) {
                         if (!jComboBoxCountry.getSelectedItem().toString().equals("")) {
                             searchCriteria.setCountry(jComboBoxCountry.getSelectedItem().toString());
+                        }
+                    }
+
+                    if (jComboBoxSpecificLocality.getSelectedItem() != null) {
+                        if (!jComboBoxSpecificLocality.getSelectedItem().toString().equals("")) {
+                            searchCriteria.setSpecificLocality(jComboBoxSpecificLocality.getSelectedItem().toString());
                         }
                     }
 
@@ -292,7 +299,7 @@ public class SearchDialog extends JDialog {
             String[] labels = {
                     "Image Filename",
                     "Imaged Date/Path",
-                    "Drawer Number",
+                    //"Drawer Number",
                     "Barcode",
                     "Order",
                     "Family",
@@ -302,8 +309,9 @@ public class SearchDialog extends JDialog {
                     "Species",
                     "Subspecies",
                     "Verbatim Locality",
-                    "Country",
+                    "Specific Locality",
                     "State/Province",
+                    "Country",
                     "Collection",
                     "Collector",
                     "Interpreted Date",
@@ -319,7 +327,7 @@ public class SearchDialog extends JDialog {
             Component[] fields = {
                     this.getImageFileJTextField(),
                     this.getImagePathJComboBox(),
-                    this.getDrawerNumberJTextField(),
+                    //this.getDrawerNumberJTextField(),
                     this.getBarcodeJTextField(),
                     this.getOrderJTextField(),
                     this.getFamilyJTextField(),
@@ -329,8 +337,9 @@ public class SearchDialog extends JDialog {
                     this.getSpeciesJTextField(),
                     this.getSubspeciesJTextField(),
                     this.getVerbatimLocalityJTextField(),
-                    this.getCountryJComboBox(),
+                    this.getSpecificLocalityJComboBox(),
                     this.getPrimaryDivisionJComboBox(),
+                    this.getCountryJComboBox(),
                     this.getCollectionJComboBox(),
                     this.getCollectorsJComboBox(),
                     this.getInterpretedDateTextField(),
@@ -714,6 +723,31 @@ public class SearchDialog extends JDialog {
             jComboBoxCountry.setMaximumSize(this.maxComboBoxDims);
         }
         return jComboBoxCountry;
+    }
+
+    /**
+     * This method initializes jComboBox
+     *
+     * @return javax.swing.JComboBox
+     */
+    private JComboBox<String> getSpecificLocalityJComboBox() {
+        if (jComboBoxSpecificLocality == null) {
+            SpecimenLifeCycle sls = new SpecimenLifeCycle();
+            jComboBoxSpecificLocality = new JComboBox<>();
+            // lazily load the countries
+            SwingUtilities.invokeLater(() -> {
+                jComboBoxSpecificLocality.setModel(new DefaultComboBoxModel<String>(
+                        sls.getDistinctSpecificLocality()
+                ));
+
+                jComboBoxSpecificLocality.addItem("");
+                jComboBoxSpecificLocality.addItem("%_%");
+            });
+            jComboBoxSpecificLocality.setEditable(true);
+            AutoCompleteDecorator.decorate(jComboBoxSpecificLocality);
+            jComboBoxSpecificLocality.setMaximumSize(this.maxComboBoxDims);
+        }
+        return jComboBoxSpecificLocality;
     }
 
     /**

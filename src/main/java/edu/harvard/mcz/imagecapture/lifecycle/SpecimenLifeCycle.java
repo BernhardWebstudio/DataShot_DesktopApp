@@ -1177,4 +1177,17 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             throw re;
         }
     }
+
+    public String[] getDistinctSpecificLocality() {
+        ArrayList<String> collections = new ArrayList<String>();
+        collections.add(""); // put blank at top of list.
+        try {
+            String sql =
+                    "Select distinct specificLocality from Specimen spe WHERE spe.specificLocality is not null order by spe.specificLocality";
+            return loadStringsBySQL(collections, sql);
+        } catch (RuntimeException re) {
+            log.error("Error", re);
+            return new String[]{};
+        }
+    }
 }

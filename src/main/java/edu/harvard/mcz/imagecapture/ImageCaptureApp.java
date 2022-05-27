@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.util.Locale;
 import java.util.Properties;
 
 /**

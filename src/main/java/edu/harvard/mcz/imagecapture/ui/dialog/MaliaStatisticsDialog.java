@@ -1,5 +1,6 @@
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
+import com.github.lgooddatepicker.components.DatePicker;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
@@ -8,8 +9,6 @@ import edu.harvard.mcz.imagecapture.utility.CastUtility;
 import net.miginfocom.swing.MigLayout;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.jdatepicker.JDatePicker;
-import org.jdatepicker.UtilDateModel;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +26,8 @@ public class MaliaStatisticsDialog extends JDialog {
     private static final Logger log =
             LoggerFactory.getLogger(MaliaStatisticsDialog.class);
     private JPanel jContentPanel;
-    private JDatePicker endDateField;
-    private JDatePicker startDateField;
+    private DatePicker endDateField;
+    private DatePicker startDateField;
     private JTextArea familiesTextField;
     private JTextArea resultsTextField;
     private JButton doAnalysisButton;
@@ -120,9 +119,9 @@ public class MaliaStatisticsDialog extends JDialog {
     /**
      * @return
      */
-    private JDatePicker getDateEndField() {
+    private DatePicker getDateEndField() {
         if (endDateField == null) {
-            endDateField = new JDatePicker(new UtilDateModel());
+            endDateField = new DatePicker();
         }
         return endDateField;
     }
@@ -130,9 +129,9 @@ public class MaliaStatisticsDialog extends JDialog {
     /**
      * @return
      */
-    private JDatePicker getDateStartField() {
+    private DatePicker getDateStartField() {
         if (startDateField == null) {
-            startDateField = new JDatePicker(new UtilDateModel());
+            startDateField = new DatePicker();
         }
         return startDateField;
     }
@@ -172,8 +171,8 @@ public class MaliaStatisticsDialog extends JDialog {
         Date endDate;
         SimpleDateFormat format = new SimpleDateFormat("yyyy_MM_dd");
         try {
-            startDate = (Date) this.getDateStartField().getModel().getValue();
-            endDate = (Date) this.getDateEndField().getModel().getValue();
+            startDate = (Date) this.getDateStartField().convert().getDateWithDefaultZone();
+            endDate = (Date) this.getDateEndField().convert().getDateWithDefaultZone();
         } catch (Exception e) {
             getResultsTextField().setText("Failed to read entered dates. ".concat(e.getMessage()));
             return;

@@ -18,6 +18,8 @@
  */
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
+import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.components.DateTimePicker;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.entity.Collector;
@@ -28,8 +30,6 @@ import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.lifecycle.*;
 import edu.harvard.mcz.imagecapture.ui.field.JIntegerField;
 import net.miginfocom.swing.MigLayout;
-import org.jdatepicker.JDatePicker;
-import org.jdatepicker.UtilDateModel;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 import javax.swing.*;
@@ -72,7 +72,7 @@ public class SearchDialog extends JDialog {
     private JIntegerField jOffsetNumberField = null;
     private JIntegerField jLimitNumberField = null;
     private JTextField jTextFieldTribe = null;
-    private JDatePicker jTextFieldDateModified = null;
+    private DatePicker jTextFieldDateModified = null;
     //private JTextField jTextFieldPrimaryDivision = null;
     private JComboBox<String> jComboBoxPrimaryDivision = null;
     private JTextField textFieldHigherGeog;
@@ -182,7 +182,7 @@ public class SearchDialog extends JDialog {
                     if (jTextFieldVerbatimLocality.getText() != null && jTextFieldVerbatimLocality.getText().length() > 0) {
                         searchCriteria.setVerbatimLocality(jTextFieldVerbatimLocality.getText());
                     }
-                    Date fieldModifiedValue = (Date) jTextFieldDateModified.getModel().getValue();
+                    Date fieldModifiedValue = (Date) jTextFieldDateModified.convert().getDateWithDefaultZone();
                     if (fieldModifiedValue != null) {
                         searchCriteria.setDateLastUpdated(fieldModifiedValue);
                     }
@@ -408,7 +408,7 @@ public class SearchDialog extends JDialog {
 
     private Component getLastUpdatedJTextField() {
         if (jTextFieldDateModified == null) {
-            jTextFieldDateModified = new JDatePicker(new UtilDateModel());
+            jTextFieldDateModified = new DatePicker();
         }
         return jTextFieldDateModified;
     }

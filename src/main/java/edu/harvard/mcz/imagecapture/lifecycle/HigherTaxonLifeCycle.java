@@ -131,10 +131,11 @@ public class HigherTaxonLifeCycle {
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 
             try {
-                String sql = "Select distinct higherOrder from Specimen s where s.higherOrder is not null and s.family LIKE :family";
+                String sql = "Select distinct higherOrder from Specimen s where s.higherOrder is not null and s.higherOrder != :emptyStr and s.family LIKE :family";
                 session.beginTransaction();
                 Query q = session.createQuery(sql);
                 q.setParameter("family", family);
+                q.setParameter("emptyStr", "");
                 String result = (String) q.getSingleResult();
                 session.getTransaction().commit();
                 return result;

@@ -26,6 +26,8 @@ import edu.harvard.mcz.imagecapture.entity.Number;
 import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.entity.fixed.*;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
+import edu.harvard.mcz.imagecapture.interfaces.CloseListener;
+import edu.harvard.mcz.imagecapture.interfaces.CloseType;
 import edu.harvard.mcz.imagecapture.lifecycle.*;
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
@@ -345,8 +347,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                 }
             }
         }
-        if (higherGeogNotFoundWarning != null &&
-                higherGeogNotFoundWarning.length() > 0) {
+        if (higherGeogNotFoundWarning.length() > 0) {
             this.setWarning(higherGeogNotFoundWarning.toString());
         }
     }
@@ -1843,12 +1844,20 @@ georeference_pre.getLongDegString()); if
                                 thisPane.setStateToDirty();
                                 GeoreferenceDialog georefDialog = self.getGeoreferenceDialog();
                                 georefDialog.setVisible(true);
+                                georefDialog.addCloseListener(new CloseListener() {
+                                    @Override
+                                    public void onClose(CloseType type, Component source) {
+                                        if (type == CloseType.OK) {
+                                            autocompleteGeoDataFromGeoreference();
+                                        }
+                                    }
+                                });
+                                // could be included in close listener once it supports close by "x"
                                 georefDialog.addComponentListener(new ComponentAdapter() {
                                     @Override
                                     public void componentHidden(ComponentEvent e) {
                                         updateJButtonGeoreference();
                                         super.componentHidden(e);
-                                        autocompleteGeoDataFromGeoreference();
                                         reloadGeoRefFieldValues();
                                     }
                                 });

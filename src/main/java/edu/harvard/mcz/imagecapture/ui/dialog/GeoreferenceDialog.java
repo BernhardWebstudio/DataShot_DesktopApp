@@ -21,6 +21,8 @@ package edu.harvard.mcz.imagecapture.ui.dialog;
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.entity.LatLong;
+import edu.harvard.mcz.imagecapture.interfaces.CloseListener;
+import edu.harvard.mcz.imagecapture.interfaces.CloseType;
 import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.utility.InputUtility;
 import net.miginfocom.swing.MigLayout;
@@ -84,6 +86,7 @@ public class GeoreferenceDialog extends JDialog {
     private JFormattedTextField textDetDate;
     private JTextField textRefSource;
     private JXMapViewer mapViewer;
+    private ArrayList<CloseListener> closeListener;
 
     public GeoreferenceDialog(LatLong geoReference, SpecimenDetailsViewPane parent) {
         this(geoReference);
@@ -101,6 +104,10 @@ public class GeoreferenceDialog extends JDialog {
 
     public LatLong getGeoReference() {
         return geoReference;
+    }
+
+    public void addCloseListener(CloseListener closeListener) {
+        this.closeListener.add(closeListener);
     }
 
     public void setGeoReference(LatLong geoReference) {
@@ -521,8 +528,10 @@ public class GeoreferenceDialog extends JDialog {
         buttonPane.add(lblErrorLabel);
 
         okButton = new JButton("OK");
+        GeoreferenceDialog self = this;
         okButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                closeListener.forEach(listener -> listener.onClose(CloseType.OK, self));
 
                 lblErrorLabel.setText("");
 
@@ -538,7 +547,7 @@ public class GeoreferenceDialog extends JDialog {
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
+                closeListener.forEach(listener -> listener.onClose(CloseType.CANCEL, self));
                 loadData();
                 setVisible(false);
             }

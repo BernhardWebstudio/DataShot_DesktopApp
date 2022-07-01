@@ -94,6 +94,7 @@ public class GeoreferenceDialog extends JDialog {
     }
 
     public GeoreferenceDialog(LatLong geoReference) {
+        this.closeListener = new ArrayList<CloseListener>();
         this.geoReference = geoReference;
         this.contentPanel = new JPanel(new MigLayout("wrap 1, fill"));
         init();

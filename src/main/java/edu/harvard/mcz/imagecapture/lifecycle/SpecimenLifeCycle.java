@@ -837,6 +837,16 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                     query.executeUpdate();
 
                     query = session.createQuery(
+                            "DELETE FROM Number WHERE specimen = :specimen");
+                    query.setParameter("specimen", specimen);
+                    query.executeUpdate();
+
+                    query = session.createQuery(
+                            "DELETE FROM Determination WHERE specimen = :specimen");
+                    query.setParameter("specimen", specimen);
+                    query.executeUpdate();
+
+                    query = session.createQuery(
                             "DELETE FROM ICImage WHERE specimen = :specimen");
                     query.setParameter("specimen", specimen);
                     query.executeUpdate();

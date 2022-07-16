@@ -124,8 +124,9 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             imageTarget.put("_reverse_nested:entomologie_mediaassetpublic:entomologie", mediaAssets);
 
             // create in Nahima
+            JSONObject result = null;
             try {
-                JSONObject result = manager.createObjectInNahima(specimenJson, "entomologie");
+                result = manager.createObjectInNahima(specimenJson, "entomologie");
                 if (result.has("code") && result.getString("code").startsWith("error")) {
                     throw new RuntimeException("Failed to save specimen in nahima. Error code: " + result.get("code"));
                 }
@@ -138,6 +139,8 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 
             // then, finally, mark specimen as exported
             specimen.setNahimaExported(true);
+            specimen.setWorkFlowStatus(WorkFlowStatus.STAGE_DONE);
+            specimen.setNahimaId(result.getString("_global_object_id"));
             try {
                 sls.attachDirty(specimen);
             } catch (SaveFailedException e) {

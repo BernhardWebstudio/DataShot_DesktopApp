@@ -202,6 +202,9 @@
         <property name="nahimaExported" type="java.lang.Boolean">
             <column name="nahimaExported" default="0"/>
         </property>
+        <property name="nahimaId" type="string">
+            <column name="nahimaId" default="" />
+        </property>
         <property name="externalWorkflowProcess" type="string">
             <column name="externalWorkflowProcess" length="900"/>
         </property>

@@ -180,6 +180,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JComboBox<String> comboBoxErrorUnits;
     private JButton pasteExcelButton;
     private GeoreferenceDialog georeferenceDialog;
+    private JButton jButtonNahimaLink;
 
     /**
      * Construct an instance of a SpecimenDetailsViewPane showing the data present
@@ -1091,8 +1092,14 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPanel.add(this.getAccordionDetailsPanel(), "grow, span 4");
             // section: controls
             int splitSize = copyPasteActivated ? 6 : 4;
+            if (this.supportsLinkToNahima()) {
+                splitSize += 1;
+            }
             jPanel.add(this.getJButtonHistory(),
                     "span, split " + splitSize); //, "span, split 4");//, "sizegroup
+            if (this.supportsLinkToNahima()) {
+                jPanel.add(this.getLinkToNahima());
+            }
             if (copyPasteActivated) {
                 jPanel.add(this.getJButtonPaste());          //, sizegroup controls");
             }
@@ -1812,6 +1819,31 @@ public class SpecimenDetailsViewPane extends JPanel {
             }
         }
         return jButtonNumbersAdd;
+    }
+
+    private boolean supportsLinkToNahima() {
+        return Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_NAHIMA_URL) != null
+                && specimen.isExported()
+                && specimen.getNahimaId() != null
+                && !Objects.equals(specimen.getNahimaId(), "");
+    }
+
+    private JButton getLinkToNahima() {
+        if (jButtonNahimaLink == null) {
+            jButtonNahimaLink = new JButton();
+            jButtonNahimaLink.setText("Open in Nahima");
+            jButtonNahimaLink.addActionListener(new ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent e) {
+                    String urlString = Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_NAHIMA_URL) + "#/detail/" + specimen.getNahimaId().split("@")[0];
+                    try {
+                        Desktop.getDesktop().browse(new URL(urlString).toURI());
+                    } catch (Exception ex) {
+                        log.error("Failed opening entry in Nahima", ex);
+                    }
+                }
+            });
+        }
+        return jButtonNahimaLink;
     }
 
     private JButton getJButtonGeoreference() {

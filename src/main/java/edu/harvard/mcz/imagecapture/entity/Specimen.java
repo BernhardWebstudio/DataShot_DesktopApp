@@ -113,6 +113,15 @@ public class Specimen implements Serializable {
     private Boolean nahimaExported;
     // need to call it higherOrder as "order" alone gives issues with SQL
     private String higherOrder;
+    private String nahimaId;
+
+    public String getNahimaId() {
+        return nahimaId;
+    }
+
+    public void setNahimaId(String nahimaId) {
+        this.nahimaId = nahimaId;
+    }
 
     public Specimen() {
         setDefaults();

@@ -108,7 +108,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             trySkippableResolve(identifierPersons, () -> nahimaManager.resolvePerson(det.getIdentifiedBy()), "person");
             reverseNestedDetermination.put("_nested:bestimmung__bestimmer_person", identifierPersons);
 
-            tryNonSkippableResolve(reverseNestedDetermination, "typusstatus", () -> nahimaManager.resolveTypeStatus(det.getTypeStatus()));
+            trySkippableResolve(reverseNestedDetermination, "typusstatus", () -> nahimaManager.resolveTypeStatus(det.getTypeStatus()));
             // finally,
             reverseNestedDeterminations.put(reverseNestedDetermination);
         }
@@ -238,8 +238,8 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     /**
      * Try to run a resolve function on a certain property, do nothing if it fails
      *
-     * @param target the array to append data to
-     * @param key the property of the target to set
+     * @param target   the array to append data to
+     * @param key      the property of the target to set
      * @param resolver the resolver function
      */
     protected void tryNonSkippableResolve(JSONObject target, String key, ResolverMethodInterface resolver) {
@@ -254,8 +254,8 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     /**
      * Try to run a resolve function on a certain property, do nothing if it fails
      *
-     * @param target the array to append data to
-     * @param resolver the resolver function
+     * @param target    the array to append data to
+     * @param resolver  the resolver function
      * @param debugHint the useful info on what worked/did not work
      */
     protected void tryNonSkippableResolve(JSONArray target, ResolverMethodInterface resolver, String debugHint) {
@@ -269,10 +269,10 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 
     /**
      * Try to run a resolve function on a certain property, do nothing if it fails,
-     * except when a SkipSpecimenException is thrown, i.e., when the resolver is required
+     * except when a SkipSpecimenException is thrown, i.e., when the resolver allowed user input "skip specimen"
      *
-     * @param target the array to append data to
-     * @param key the property of the target to set
+     * @param target   the array to append data to
+     * @param key      the property of the target to set
      * @param resolver the resolver function
      */
     protected void trySkippableResolve(JSONObject target, String key, ResolverMethodInterface resolver) throws SkipSpecimenException {
@@ -285,17 +285,17 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                     target.put(key, returnValue);
                 }
             }
-        } catch (IOException | InterruptedException | ParseException e) {
+        } catch (IOException | InterruptedException | ParseException | RuntimeException e) {
             log.error("Failed to resolve " + key, e);
         }
     }
 
     /**
      * Try to run a resolve function on a certain property, do nothing if it fails,
-     * except when a SkipSpecimenException is thrown, i.e., when the resolver is required
+     * except when a SkipSpecimenException is thrown, i.e., when the resolver allowed user input "skip specimen"
      *
-     * @param target the array to append data to
-     * @param resolver the resolver function
+     * @param target    the array to append data to
+     * @param resolver  the resolver function
      * @param debugHint the useful info on what worked/did not work
      */
     protected void trySkippableResolve(JSONArray target, ResolverMethodInterface resolver, String debugHint) throws SkipSpecimenException {
@@ -309,7 +309,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                     target.put(returnValue);
                 }
             }
-        } catch (IOException | InterruptedException | ParseException e) {
+        } catch (IOException | InterruptedException | ParseException | RuntimeException e) {
             log.error("Failed to resolve " + debugHint, e);
         }
     }
@@ -320,14 +320,14 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     }
 
     protected interface ResolverMethodInterface {
-        Object doResolve() throws IOException, InterruptedException, ParseException, SkipSpecimenException;
+        Object doResolve() throws IOException, InterruptedException, ParseException, RuntimeException, SkipSpecimenException;
     }
 
     protected interface JSONObjectResolverMethodInterface extends ResolverMethodInterface {
-        JSONObject doResolve() throws IOException, InterruptedException, ParseException, SkipSpecimenException;
+        JSONObject doResolve() throws IOException, InterruptedException, ParseException, RuntimeException, SkipSpecimenException;
     }
 
     protected interface JSONArrayResolverMethodInterface extends ResolverMethodInterface {
-        JSONArray doResolve() throws IOException, InterruptedException, ParseException, SkipSpecimenException;
+        JSONArray doResolve() throws IOException, InterruptedException, ParseException, RuntimeException, SkipSpecimenException;
     }
 }

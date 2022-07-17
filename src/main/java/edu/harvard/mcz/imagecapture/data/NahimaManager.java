@@ -51,6 +51,29 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     /**
+     * Somehow, the ids of objects are done inconsistently in Nahima.
+     * Instead of finding out why/how, this function just goes through the possibilites
+     *
+     * @param objWithId the object whose id is searched
+     * @return the object id, null if not found
+     */
+    protected static Integer resolveId(JSONObject objWithId) {
+        if (objWithId == null) {
+            return null;
+        }
+        if (objWithId.has("_id")) {
+            return objWithId.getInt("_id");
+        }
+        if (objWithId.has("_system_object_id")) {
+            return objWithId.getInt("_system_object_id");
+        }
+        if (objWithId.has("_global_object_id")) {
+            return Integer.parseInt(objWithId.getString("_global_object_id").split("@")[0]);
+        }
+        return null;
+    }
+
+    /**
      * Start a Nahima session
      */
     protected void startSessionAndRetrieveToken() throws RuntimeException {
@@ -171,7 +194,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param ignoreCache  cache speeds things up, but is annoying when we just created a new object
      * @return Nahima's response
      */
-    public JSONObject searchForString(String searchString, String objectType, String searchMode, boolean ignoreCache) throws IOException, InterruptedException {
+    public JSONObject searchByString(String searchString, ArrayList<String> fields, String objectType, String searchMode, boolean ignoreCache, JSONObject additionalFilter) throws IOException, InterruptedException {
         if (searchString == null || searchString.trim().equals("")) {
             return null;
         }
@@ -195,7 +218,16 @@ public class NahimaManager extends AbstractRestClient {
             namePartSearch.put("bool", "must");
             namePartSearch.put("mode", searchMode);
             namePartSearch.put("string", name);
+            if (fields != null && fields.size() > 0) {
+                JSONArray fieldsArray = new JSONArray();
+                fields.forEach(field -> fieldsArray.put(field));
+                namePartSearch.put("fields", fieldsArray);
+            }
             search.put(namePartSearch);
+        }
+
+        if (additionalFilter != null) {
+            search.put(additionalFilter);
         }
 
         JSONObject superSearch = new JSONObject();
@@ -215,16 +247,20 @@ public class NahimaManager extends AbstractRestClient {
         return result;
     }
 
-    public JSONObject searchForString(String searchString, String objectType) throws IOException, InterruptedException {
-        return searchForString(searchString, objectType, false);
+    public JSONObject searchByString(String searchString, String objectType, String searchMode, boolean ignoreCache) throws IOException, InterruptedException {
+        return this.searchByString(searchString, null, objectType, searchMode, ignoreCache, null);
     }
 
-    public JSONObject searchForString(String searchString, String objectType, String searchMode) throws IOException, InterruptedException {
-        return searchForString(searchString, objectType, searchMode, false);
+    public JSONObject searchByString(String searchString, String objectType) throws IOException, InterruptedException {
+        return searchByString(searchString, objectType, false);
     }
 
-    public JSONObject searchForString(String searchString, String objectType, boolean ignoreCache) throws IOException, InterruptedException {
-        return searchForString(searchString, objectType, "fulltext", ignoreCache);
+    public JSONObject searchByString(String searchString, String objectType, String searchMode) throws IOException, InterruptedException {
+        return searchByString(searchString, objectType, searchMode, false);
+    }
+
+    public JSONObject searchByString(String searchString, String objectType, boolean ignoreCache) throws IOException, InterruptedException {
+        return searchByString(searchString, objectType, "fulltext", ignoreCache);
     }
 
     /**
@@ -240,7 +276,7 @@ public class NahimaManager extends AbstractRestClient {
             return null;
         }
 
-        JSONObject results = this.searchForString(search, objectType, ignoreCache);
+        JSONObject results = this.searchByString(search, objectType, ignoreCache);
 
         if (results.has("code") && results.getString("code").startsWith("error")) {
             throw new RuntimeException("Failed to resolve search. Error code: " + results.getString("code"));
@@ -308,10 +344,11 @@ public class NahimaManager extends AbstractRestClient {
             return null;
         }
 
-        JSONObject results = this.searchForString(name, objectType, false);
+        JSONObject results = this.searchByString(name, objectType, false);
 
-        if (results.has("code") && results.getString("code").startsWith("error")) {
-            throw new RuntimeException("Failed to resolve search for '" + name + "'. Error code: " + results.getString("code"));
+        if (results == null || (results.has("code") && results.getString("code").startsWith("error")) || !results.has("objects")) {
+            throw new RuntimeException("Failed to resolve search for '" + name + "' (" + objectType + ", " + mask + "). Error code: " +
+                    ((results != null && results.has("code")) ? results.getString("code") : "Unknown"));
         }
 
         JSONArray foundObjects = (JSONArray) results.get("objects");
@@ -336,7 +373,6 @@ public class NahimaManager extends AbstractRestClient {
     public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner) throws IOException, InterruptedException, SkipSpecimenException {
         return resolveOrCreateInteractive(name, objectType, mask, inner, false, 0);
     }
-
 
     public JSONObject askToCreate(JSONObject inner, String name, String objectType, String mask, boolean omitPool) throws IOException, InterruptedException, SkipSpecimenException {
         // ask whether to create the object like this
@@ -433,8 +469,35 @@ public class NahimaManager extends AbstractRestClient {
         return results;
     }
 
+    public JSONObject resolveRegionType(String type) throws IOException, InterruptedException {
+        return this.resolveStringSearchToOne(type, "region_verwaltungseinheiten");
+    }
+
     public JSONObject resolveCountry(String countryName) throws IOException, InterruptedException, SkipSpecimenException {
-        return this.resolveStringSearchToOne(countryName, "region_verwaltungseinheiten", true);
+        // need to make the filter as specific as possible
+        ArrayList<String> fields = new ArrayList<String>();
+        fields.add("gazetteer.ortsname");
+        JSONObject additionalFilter = new JSONObject();
+        additionalFilter.put("type", "in");
+        additionalFilter.put("bool", "must");
+        JSONArray filterFieldsFields = new JSONArray();
+        filterFieldsFields.put("gazetteer.region_verwaltungseinheit._global_object_id");
+        additionalFilter.put("fields", filterFieldsFields);
+        JSONArray filterFieldsIn = new JSONArray();
+        filterFieldsIn.put(resolveRegionType("Land").getString("_global_object_id"));
+        additionalFilter.put("in", filterFieldsIn);
+
+        JSONObject results = this.searchByString(countryName, fields, "gazetteer", "fulltext", false, additionalFilter);
+
+        if (results.has("code") && results.getString("code").startsWith("error")) {
+            throw new RuntimeException("Failed to resolve search for '" + countryName + "'. Error code: " + results.getString("code"));
+        }
+
+        JSONArray foundObjects = (JSONArray) results.get("objects");
+        if (foundObjects != null && foundObjects.length() == 1) {
+            return (JSONObject) foundObjects.get(0);
+        }
+        return null;
     }
 
     /**
@@ -443,12 +506,19 @@ public class NahimaManager extends AbstractRestClient {
      * @param specimen the specimen to search the location for
      * @return the Nahima returned object if only one
      */
-    public JSONObject resolveLocation(Specimen specimen) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolveLocation(Specimen specimen) throws IOException, InterruptedException, SkipSpecimenException, NullPointerException {
         String searchString = specimen.getPrimaryDivisonISO() != null ? specimen.getPrimaryDivisonISO() : String.join(" ", specimen.getPrimaryDivison(), specimen.getCountry());
-        JSONObject parent = resolveCountry(specimen.getCountry());
+
+        JSONObject parent = null;
+        try {
+            parent = resolveCountry(specimen.getCountry());
+        } catch (Exception e) {
+        }
+        ;
+        JSONObject finalParent = parent;
         return this.resolveOrCreateInteractive(searchString, "gazetteer", "gazetteer_all_fields", new JSONObject(new HashMap<>() {{
             put("ortsname", wrapInLan(specimen.getPrimaryDivison()));
-            put("_id_parent", parent.get("_id"));
+            put("_id_parent", resolveId(finalParent)); // Might throw NullPointerException. If we find the location, it is never called, therefore, we only have a problem if neither location nor country are found
             put("isocode3166_2", specimen.getPrimaryDivisonISO());
         }}));
     }

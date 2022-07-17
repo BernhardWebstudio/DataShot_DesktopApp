@@ -311,7 +311,7 @@ public class NahimaManager extends AbstractRestClient {
         JSONObject results = this.searchForString(name, objectType, false);
 
         if (results.has("code") && results.getString("code").startsWith("error")) {
-            throw new RuntimeException("Failed to resolve search. Error code: " + results.getString("code"));
+            throw new RuntimeException("Failed to resolve search for '" + name + "'. Error code: " + results.getString("code"));
         }
 
         JSONArray foundObjects = (JSONArray) results.get("objects");
@@ -326,7 +326,7 @@ public class NahimaManager extends AbstractRestClient {
             } else {
                 assert (foundObjects.length() == 0);
                 askToCreate(inner, name, objectType, mask, omitPool);
-                // TODO: the following could fail if the search and created object to not really align
+                // TODO: the following could fail if the search and created object do not really align
                 return this.resolveStringSearchToOne(name, objectType, true);
             }
         }

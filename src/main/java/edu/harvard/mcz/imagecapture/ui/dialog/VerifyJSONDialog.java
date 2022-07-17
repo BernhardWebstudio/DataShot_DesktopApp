@@ -46,7 +46,7 @@ public class VerifyJSONDialog extends JDialog {
             // add contents
             jScrollPaneContent.add(this.getDescription(), "grow");
             jScrollPaneContent.add(this.getEditor(), "grow");
-            jScrollPaneContent.add(this.getSkipSpecimenButton(), "grow split 2");
+            jScrollPaneContent.add(this.getSkipSpecimenButton(), "grow, split 2");
             jScrollPaneContent.add(this.getAcceptChoiceButton(), "grow");
 
             // add the scroll pane content to the panel

@@ -1079,7 +1079,7 @@ public class Specimen implements Serializable {
     public Set<Determination> getAllDeterminations() {
         // copy
         Set<Determination> allDets = new HashSet<>(this.determinations);
-        // create new one
+        // create new one from the "flat" fields
         Determination thisDet = new Determination();
         thisDet.setGenus(this.getGenus());
         thisDet.setSpecificEpithet(this.getSpecificEpithet());

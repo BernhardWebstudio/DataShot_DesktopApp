@@ -458,6 +458,9 @@ public class NahimaManager extends AbstractRestClient {
      * @param personName the name to search for
      */
     public JSONObject resolvePerson(String personName) throws IOException, InterruptedException, SkipSpecimenException {
+        if (personName == null) {
+            return null;
+        }
         String[] splitName = personName.split(" ");
         JSONObject results = this.resolveOrCreateInteractive(personName, "person", "person__public", new JSONObject(new HashMap<>() {{
             put("vollername", personName);

@@ -162,11 +162,13 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 
         JSONArray collectors = new JSONArray();
         for (Collector collector : toSerialize.getCollectors()) {
-            trySkippableResolve(collectors, () -> new JSONObject(new HashMap<>() {{
-                put("sammler", nahimaManager.reduceAssociateForAssociation(
-                        nahimaManager.resolvePerson(collector.getCollectorName()))
-                );
-            }}), "sammler");
+            if (collector.getCollectorName() != null && !Objects.equals(collector.getCollectorName(), "")) {
+                trySkippableResolve(collectors, () -> new JSONObject(new HashMap<>() {{
+                    put("sammler", nahimaManager.reduceAssociateForAssociation(
+                            nahimaManager.resolvePerson(collector.getCollectorName()))
+                    );
+                }}), "sammler");
+            }
         }
         reverseNestedCollection.put("_nested:aufsammlung__sammler", collectors);
 

@@ -52,7 +52,7 @@ public class ChooseFromJArrayDialog extends JDialog {
             // add contents
             jScrollPaneContent.add(this.getDescription(), "grow");
             jScrollPaneContent.add(this.getSelectionPane(), "grow");
-            jScrollPaneContent.add(this.getSkipSpecimenButton(), "grow split 3");
+            jScrollPaneContent.add(this.getSkipSpecimenButton(), "grow, split 3");
             jScrollPaneContent.add(this.getCreateNewButton(), "grow");
             jScrollPaneContent.add(this.getAcceptChoiceButton(), "grow");
 

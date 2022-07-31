@@ -7,7 +7,6 @@ import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
-import edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsException;
 import edu.harvard.mcz.imagecapture.interfaces.ProgressListener;
 import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
 import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
@@ -38,12 +37,15 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     public void start() {
         this.start = new Date();
         // fetch specimen to be exported
+        notifyWorkStatusChanged("Loading specimens to export.");
         SpecimenLifeCycle sls = new SpecimenLifeCycle();
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("workFlowStatus", WorkFlowStatus.STAGE_CLEAN);
         queryParams.put("nahimaExported", false);
         List<Specimen> specimenToExport = sls.findBy(queryParams);
         nrOfSpecimenToProcess = specimenToExport.size();
+        notifyProgressChanged();
+        notifyWorkStatusChanged("Loaded " + nrOfSpecimenToProcess + " specimen to export to Nahima. This can take a while.");
         // initialize Nahima manager
         Properties properties = Singleton.getSingletonInstance().getProperties().getProperties();
         NahimaManager manager;
@@ -60,7 +62,8 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 
         for (Specimen specimen : specimenToExport) {
             currentIndex = currentIndex + 1;
-            log.debug("Exporting specimen with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
+            log.debug("Exporting specimen " + currentIndex + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
+            notifyWorkStatusChanged("Exporting specimen " + currentIndex + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
 
             // map, associate where possible/needed
             JSONObject specimenJson = null;
@@ -76,7 +79,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             }
 
             // upload images
-            Object[] uploadedImages;
+            ArrayList<JSONObject> uploadedImages = new ArrayList<>();
             try {
                 uploadedImages = manager.uploadImagesForSpecimen(specimen);
             } catch (Exception e) {
@@ -86,11 +89,11 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                 return;
             }
 
+            notifyWorkStatusChanged("Uploaded " + uploadedImages.size() + " images for specimen " + currentIndex + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
+
             // add images
-            JSONObject imageTarget = (JSONObject) specimenJson.get("entomologie");
             JSONArray mediaAssets = new JSONArray();
-            for (Object image : uploadedImages) {
-                JSONObject imageJsonObj = (JSONObject) image;
+            for (JSONObject imageJsonObj : uploadedImages) {
                 Map<String, Object> reducedMediaAssetMap = new HashMap<>() {{
                     put("_pool", NahimaManager.defaultPool);
                     put("_id", JSONObject.NULL);
@@ -101,6 +104,28 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                     }})));
                     put("barcode", specimen.getBarcode());
                     put("urspruelicherdateiname", imageJsonObj.get("original_filename"));
+                    // empty, potentially later relevant stuff
+                    put("mediaassettyp", JSONObject.NULL);
+                    put("dateiname", JSONObject.NULL);
+                    put("dateigroesse", JSONObject.NULL);
+                    put("titel", JSONObject.NULL);
+                    put("beschreibung", JSONObject.NULL);
+                    put("lizenz_dcterms_licence", JSONObject.NULL);
+                    put("rechteinhaber_person", JSONObject.NULL);
+                    put("rechteinhaber_koeperschaft", JSONObject.NULL);
+                    put("aufnahmedatum_dc_date", JSONObject.NULL);
+                    put("format_dc_format", JSONObject.NULL);
+                    put("_nested:mediaasset__urheber_dc_creator", new JSONArray());
+                    put("_nested:mediaasset__schlagworte", new JSONArray());
+                    put("_reverse_nested:entomologie_mediaassetpublic:mediaassetpublic", new JSONArray());
+                    put("_reverse_nested:entomologie_mediaassetnonpublic:mediaassetpublic", new JSONArray());
+                    put("_reverse_nested:entomologie_mediaassetdeleted:mediaassetdeleted", new JSONArray());
+                    put("_reverse_nested:erdwissenschaften_mediaassetpublic:mediaassetpublic", new JSONArray());
+                    put("_reverse_nested:erdwissenschaften_mediaassetnonpublic:mediaassetnonpublic", new JSONArray());
+                    put("_reverse_nested:erdwissenschaften_mediaassetdeleted:mediaassetdeleted", new JSONArray());
+                    put("_reverse_nested:herbarien_mediaassetpublic:mediaassetpublic", new JSONArray());
+                    put("_reverse_nested:herbarien_mediaassetnonpublic:mediaassetnonpublic", new JSONArray());
+                    put("_reverse_nested:herbarien_mediaassetdeleted:mediaassetdeleted", new JSONArray());
                 }};
                 JSONObject reducedImageMediaAsset = new JSONObject(reducedMediaAssetMap);
                 Map<String, Object> publicMediaAssetMap = new HashMap<>() {{
@@ -116,12 +141,32 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                     put("source_reference", JSONObject.NULL);
                     put("__idx", 0);
                     put("_version", 1);
-                    put("mediassetpublic", publicMediaAsset);
+                    put("mediaassetpublic", publicMediaAsset);
                 }};
                 JSONObject mediaAsset = new JSONObject(mediaAssetMap);
+
+                // create, reduce
+                JSONObject createdMediaAsset = null;
+                try {
+                    createdMediaAsset = manager.createObjectInNahima(publicMediaAsset, "mediaasset");
+                    if (createdMediaAsset.has("code") && createdMediaAsset.getString("code").startsWith("error")) {
+                        throw new RuntimeException("Failed to save mediaasset in nahima. Error code: " + createdMediaAsset.get("code"));
+                    }
+                } catch (IOException | InterruptedException e) {
+                    lastError = e;
+                    log.error("Failed to create new Nahima specimen", e);
+                    this.status = STATUS_NAHIMA_FAILED;
+                    return;
+                }
+                reducedImageMediaAsset.put("_id", createdMediaAsset.getJSONObject("mediaasset").getInt("_id"));
+                publicMediaAsset.put("mediaasset", reducedImageMediaAsset);
+                mediaAsset.put("mediaassetpublic", publicMediaAsset);
                 mediaAssets.put(mediaAsset);
             }
+            // attach media to specimen
+            JSONObject imageTarget = (JSONObject) specimenJson.get("entomologie");
             imageTarget.put("_reverse_nested:entomologie_mediaassetpublic:entomologie", mediaAssets);
+            specimenJson.put("entomologie", imageTarget); // overwrite loaded value again
 
             // create in Nahima
             JSONObject result = null;
@@ -216,6 +261,15 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     public void notifyProgressChanged() {
         for (ProgressListener listener : progressListener) {
             listener.progressChanged(this.percentComplete());
+        }
+    }
+
+    /**
+     * Propagate the progress to all the listeners
+     */
+    public void notifyWorkStatusChanged(String status) {
+        for (ProgressListener listener : progressListener) {
+            listener.currentWorkStatusChanged(status);
         }
     }
 

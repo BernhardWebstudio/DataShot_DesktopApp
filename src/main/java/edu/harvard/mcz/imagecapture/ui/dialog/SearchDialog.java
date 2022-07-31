@@ -78,12 +78,14 @@ public class SearchDialog extends JDialog {
     private JTextField textFieldHigherGeog;
     private JLabel lblHigherGeography;
     private JTextField jTextFieldInterpretedDate;
+//    private Frame parentFrame;
 
     /**
      * @param owner
      */
     public SearchDialog(Frame owner) {
         super(owner);
+//        parentFrame = owner;
         initialize();
     }
 
@@ -94,6 +96,7 @@ public class SearchDialog extends JDialog {
      */
     private void initialize() {
 //        this.setSize(500, 750);
+//        this.setLocationRelativeTo(parentFrame);
         this.setTitle("Search For Specimens");
         this.setContentPane(getJContentPane());
 //        this.setPreferredSize(new Dimension(500, 750));

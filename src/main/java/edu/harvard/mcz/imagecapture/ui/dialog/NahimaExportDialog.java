@@ -17,6 +17,7 @@ public class NahimaExportDialog extends JDialog implements ProgressListener {
     private JTextArea resultsTextField;
     private JButton closeButton;
     private NahimaExportJob job;
+    private String staticStatusText;
 
     public NahimaExportDialog(Frame owner) {
         super(owner);
@@ -24,8 +25,11 @@ public class NahimaExportDialog extends JDialog implements ProgressListener {
     }
 
     private void initialize() {
+        this.setPreferredSize(new Dimension(450, 225));
         this.setTitle("Nahima Export");
+        this.staticStatusText = "Please do not close this window until the export is done.";
         this.setContentPane(getJContentPane());
+        this.setSize(new Dimension(450, 225));
         this.pack();
         job = new NahimaExportJob();
         job.addProgressListener(this);
@@ -74,7 +78,7 @@ public class NahimaExportDialog extends JDialog implements ProgressListener {
             resultsTextField.setEnabled(false);
             resultsTextField.setLineWrap(true);
             resultsTextField.setRows(5);
-            resultsTextField.setText("Please do not close this window until the export is done.");
+            resultsTextField.setText(this.staticStatusText);
         }
         return resultsTextField;
     }
@@ -97,6 +101,11 @@ public class NahimaExportDialog extends JDialog implements ProgressListener {
         if (job.getStatus() == NahimaExportJob.STATUS_FINISHED) {
             this.getCloseButton().setEnabled(true);
         }
+    }
+
+    @Override
+    public void currentWorkStatusChanged(String status) {
+        resultsTextField.setText(this.staticStatusText + "\n" + status);
     }
 
     private JButton getCloseButton() {

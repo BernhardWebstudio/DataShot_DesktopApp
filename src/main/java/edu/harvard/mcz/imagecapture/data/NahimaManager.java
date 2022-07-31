@@ -112,12 +112,12 @@ public class NahimaManager extends AbstractRestClient {
      * @param specimen the specimen whose images to upload
      * @return the created mediassets
      */
-    public Object[] uploadImagesForSpecimen(Specimen specimen) throws IOException, InterruptedException, RuntimeException {
+    public ArrayList<JSONObject> uploadImagesForSpecimen(Specimen specimen) throws IOException, InterruptedException, RuntimeException {
         // docs:
         // https://docs.easydb.de/en/technical/api/eas/
         // https://docs.easydb.de/en/sysadmin/eas/api/put/
         String baseQueryUrl = this.url + "eas/put?token=" + this.token;
-        ArrayList<Object> results = new ArrayList<>();
+        ArrayList<JSONObject> results = new ArrayList<>();
 
         for (ICImage image : specimen.getICImages()) {
             String queryUrl = baseQueryUrl + "&original_filename=" + image.getFilename() + "&instance=image";
@@ -139,10 +139,10 @@ public class NahimaManager extends AbstractRestClient {
                 }
             }
 
-            results.add((new JSONArray(response.body())).get(0));
+            results.add((new JSONArray(response.body())).getJSONObject(0));
         }
 
-        return results.toArray();
+        return results;
     }
 
     /**
@@ -271,6 +271,10 @@ public class NahimaManager extends AbstractRestClient {
      * @return the object if there is only one, null if not
      */
     public JSONObject resolveStringSearchToOne(String search, String objectType, boolean ignoreCache) throws IOException, InterruptedException {
+        return resolveStringSearchToOne(search, objectType, ignoreCache, null);
+    }
+
+    public JSONObject resolveStringSearchToOne(String search, String objectType, boolean ignoreCache, JSONObject selectionHelper) throws IOException, InterruptedException {
         if (search == null || objectType == null) {
             log.warn("Cannot search as search " + search + " or objectType " + objectType + " is null");
             return null;
@@ -288,6 +292,31 @@ public class NahimaManager extends AbstractRestClient {
         } else {
             // TODO: create / select correct
             log.info("Got != 1 " + objectType + " status. {}", results);
+            if (selectionHelper != null) {
+                ArrayList<Integer> possiblyCorrectIndices = new ArrayList<Integer>();
+                for (int i = 0; i < foundObjects.length(); ++i) {
+                    JSONObject testObj = foundObjects.getJSONObject(i);
+                    int matches = 0;
+                    int requiredMatches = 0;
+                    for (Iterator<String> it = selectionHelper.keys(); it.hasNext(); ) {
+                        String key = it.next();
+                        requiredMatches += 1;
+                        if (selectionHelper.get(key).equals(testObj.has(key) ? testObj.get(key) : null)) {
+                            matches += 1;
+                        }
+                    }
+                    if (matches == requiredMatches) {
+                        possiblyCorrectIndices.add(i);
+                    }
+                }
+
+                if (possiblyCorrectIndices.size() == 1) {
+                    return foundObjects.getJSONObject(possiblyCorrectIndices.get(0));
+                } else if (possiblyCorrectIndices.size() > 1) {
+                    log.warn("Found multiple " + objectType + " that match all fields. Using first one.");
+                    return foundObjects.getJSONObject(possiblyCorrectIndices.get(0));
+                }
+            }
             return null;
         }
     }
@@ -314,14 +343,14 @@ public class NahimaManager extends AbstractRestClient {
             return null;
         }
 
-        JSONObject results = this.resolveStringSearchToOne(name, objectType);
+        JSONObject results = this.resolveStringSearchToOne(name, objectType, false, inner);
         // TODO: select correct
         if (results == null) {
             // create
             JSONObject toCreate = wrapForCreation(inner, objectType, mask, omitPool);
             this.createObjectInNahima(toCreate, objectType);
             // TODO: it would be simpler to store the created in cache. But well... current format does not allow
-            return this.resolveStringSearchToOne(name, objectType, true);
+            return this.resolveStringSearchToOne(name, objectType, true, inner);
         }
         return results;
     }

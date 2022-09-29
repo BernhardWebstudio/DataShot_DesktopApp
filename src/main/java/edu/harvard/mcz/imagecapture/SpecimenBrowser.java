@@ -157,6 +157,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             }
             jTable.setModel(model);
             sorter = new TableRowSorter<SpecimenListTableModel>(model);
+            sorter.toggleSortOrder(SpecimenListTableModel.COL_BARCODE-1);
             jTable.setRowSorter(sorter);
             jTable.setDefaultRenderer(Specimen.class, new ButtonRenderer());
             jTable.setDefaultEditor(Specimen.class, new ButtonEditor());

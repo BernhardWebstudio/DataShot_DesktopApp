@@ -178,7 +178,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                     existingTemplate = imageLifeCycle.merge(matches.get(0));
                     matches.remove(0);
                     reattach = true;
-                    log.debug("Debug {}", existingTemplate);
+                    log.debug("Existing template from images merged: {}", existingTemplate);
                 } catch (SaveFailedException e) {
                     log.error(e.getMessage(), e);
                 }
@@ -190,7 +190,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                     existingTemplate = imageLifeCycle.merge(matches.get(0));
                     matches.remove(0);
                     reattach = true;
-                    log.debug("Debug {}", existingTemplate);
+                    log.debug("Existing template from images merged:  {}", existingTemplate);
                 } catch (SaveFailedException e) {
                     log.error(e.getMessage(), e);
                 }
@@ -250,7 +250,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         PositionTemplate template = candidateImageFile.getTemplateUsed();
         String templateId = template.getName();
         log.debug("Detected Template: " + templateId);
-        log.debug("Debug {}", candidateImageFile.getCatalogNumberBarcodeStatus());
+        log.debug("Candidate image file, catalog nr barcode status: {}", candidateImageFile.getCatalogNumberBarcodeStatus());
         String barcode = candidateImageFile.getBarcodeTextAtFoundTemplate();
         if (candidateImageFile.getCatalogNumberBarcodeStatus() !=
                 CandidateImageFile.RESULT_BARCODE_SCANNED) {
@@ -395,6 +395,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
         }
 
         image.setRawBarcode(barcode);
+        counter.logBarcode(barcode);
         if (isSpecimenImage) {
             AbstractFileScanJob.createDatabaseRecordForSpecimen(
                     containedFile, counter, image, barcode, exifComment, parser,

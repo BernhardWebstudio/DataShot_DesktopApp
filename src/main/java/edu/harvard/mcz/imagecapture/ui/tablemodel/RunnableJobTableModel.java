@@ -136,14 +136,14 @@ public class RunnableJobTableModel
                     break;
                 case 3:
                     returnvalue = ((RunnableJob) jobs.toArray()[rowIndex]).percentComplete();
-                    log.debug("Debug {}", returnvalue);
+                    log.debug("Percentage complete {}", returnvalue);
                     break;
             }
         } catch (ArrayIndexOutOfBoundsException e) {
-            log.debug("Debug {}", e.getMessage());
+            log.debug("Failed to set value of running job's table {}", e.getMessage());
             fireTableDataChanged();
         } catch (NullPointerException e) {
-            log.debug("Debug {}", e.getMessage());
+            log.debug("Failed to set value of running job's table {}", e.getMessage());
             fireTableDataChanged();
         }
         return returnvalue;
@@ -204,7 +204,7 @@ public class RunnableJobTableModel
      */
     @Override
     public void notifyListener(int anEvent, RunnableJob notifyingJob) {
-        log.debug("Debug {}", anEvent);
+        log.debug("Notifiying listeners of event: {}", anEvent);
         this.fireTableDataChanged();
     }
 }

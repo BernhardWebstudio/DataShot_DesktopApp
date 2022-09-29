@@ -19,14 +19,21 @@
 package edu.harvard.mcz.imagecapture.jobs;
 
 import edu.harvard.mcz.imagecapture.interfaces.ScanCounterInterface;
+import edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Counter
  */
 public class Counter implements ScanCounterInterface {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(Counter.class);
 
     private final StringBuffer errorReport;
     private int totalCount = 0;
@@ -41,7 +48,7 @@ public class Counter implements ScanCounterInterface {
     private int specimensDatabased = 0;
     private int filesUpdated = 0;
     private List<RunnableJobError> errors = null;
-
+    private ArrayList<String> barcodes = null;
 
     public Counter() {
         totalCount = 0;
@@ -56,6 +63,7 @@ public class Counter implements ScanCounterInterface {
         filesUpdated = 0;
         errorReport = new StringBuffer();
         errors = new ArrayList<RunnableJobError>();
+        barcodes = new ArrayList<String>();
     }
 
     public void appendError(RunnableJobError anError) {
@@ -82,6 +90,10 @@ public class Counter implements ScanCounterInterface {
 
     public void incrementFilesSeen() {
         filesSeen++;
+    }
+
+    public void logBarcode(String barcode) {
+        barcodes.add(barcode);
     }
 
     /**
@@ -143,14 +155,12 @@ public class Counter implements ScanCounterInterface {
         return filesFailed;
     }
 
-
     /**
      * @return the directories
      */
     public int getDirectories() {
         return directories;
     }
-
 
     /**
      * @return the directoriesFailed
@@ -199,6 +209,55 @@ public class Counter implements ScanCounterInterface {
     }
 
     @Override
+    public List<String> getBarcodes() {
+        return this.barcodes;
+    }
+
+    public String getBarcodeSequenceDescription() {
+        if (barcodes.size() > 2) {
+            ArrayList<String> barcodesMissing = new ArrayList<String>();
+            ArrayList<String> barcodeSeqWhereMoreThanOneMisses = new ArrayList<String>();
+            Collections.sort(barcodes);
+            for (int i =0; i < barcodes.size()-1; i++) {
+                Integer curr = Integer.valueOf(barcodes.get(i).replaceAll("[^0-9]", ""));
+                Integer next = Integer.valueOf(barcodes.get(i+1).replaceAll("[^0-9]", ""));
+                if (next - curr != 1 && next - curr != 0) {
+                    log.warn("Barcode missing between " + barcodes.get(i) + " and " + barcodes.get(i+1) + "");
+                    if (next - curr == 2) {
+                        barcodesMissing.add(barcodes.get(i).replace(String.valueOf(curr), String.valueOf(curr+1)));
+                    } else {
+                        barcodeSeqWhereMoreThanOneMisses.add(barcodes.get(i));
+                        barcodeSeqWhereMoreThanOneMisses.add(barcodes.get(i+1));
+                    }
+                }
+            }
+            if (barcodesMissing.size() == 0 && barcodeSeqWhereMoreThanOneMisses.size() == 0) {
+                return "No missing barcodes detected between " + barcodes.get(0) + " and " + barcodes.get(barcodes.size()-1) + ".\n";
+            }
+            if (barcodesMissing.size() + barcodeSeqWhereMoreThanOneMisses.size() / 2 > 5) {
+                return "Too many missing barcodes in sequence, " + barcodesMissing.size() + " single and " + (barcodeSeqWhereMoreThanOneMisses.size()/2) + " bigger distance.";
+            } else {
+                StringBuilder report = new StringBuilder("Missing barcode numbers: ");
+                if (barcodeSeqWhereMoreThanOneMisses.size() > 0) {
+                    for (int i = 0; i < barcodeSeqWhereMoreThanOneMisses.size()/2; ++i) {
+                        report.append("between ").append(barcodeSeqWhereMoreThanOneMisses.get(2 * i)).append(" & ").append(barcodeSeqWhereMoreThanOneMisses.get(2 * i + 1));
+                        if (i != barcodeSeqWhereMoreThanOneMisses.size() - 1) {
+                            report.append(", ");
+                        }
+                    }
+                }
+                if (barcodesMissing.size() > 0) {
+                    report.append(String.join(", ", barcodesMissing));
+                }
+                report.append(".\n");
+                return report.toString();
+            }
+        } else {
+            return "Not enough barcodes succeeded to analyse sequence.\n";
+        }
+    }
+
+    @Override
     public String toString() {
         String report = "Scanned " + this.getDirectories() + " directories.\n";
         report += "Scanned  " + this.getFilesSeen() + " files.\n";
@@ -213,6 +272,7 @@ public class Counter implements ScanCounterInterface {
         }
         report += "Skipped " + this.getFilesExisting() + " already existing files.\n";
         report += "Found " + this.getFilesFailed() + " files with problems.\n";
+        report += this.getBarcodeSequenceDescription();
         return report;
     }
 
@@ -235,6 +295,7 @@ public class Counter implements ScanCounterInterface {
         this.filesUpdated += counter.getFilesUpdated();
         this.errorReport.append(counter.getErrorReport());
         this.errors.addAll(counter.getErrors());
+        this.barcodes.addAll(counter.getBarcodes());
         return this;
     }
 }

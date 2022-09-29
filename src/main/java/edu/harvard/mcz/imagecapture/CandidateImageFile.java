@@ -1099,7 +1099,7 @@ public class CandidateImageFile {
      * @return the status tuple
      */
     private TextStatus checkSourceForBarcode(BufferedImage source) {
-        GrayU8 gray = ConvertBufferedImage.convertFrom(source, (GrayU8) null);
+        GrayU8 gray = ConvertBufferedImage.convertFrom(source, new GrayU8(1, 1));
 
         QrCodeDetector<GrayU8> detector =
                 FactoryFiducial.qrcode(null, GrayU8.class);
@@ -1130,7 +1130,7 @@ public class CandidateImageFile {
      */
     private TextStatus checkSourceForBarcodeAt(BufferedImage source, int fromLeft,
                                                int fromTop, int tol) {
-        GrayU8 gray = ConvertBufferedImage.convertFrom(source, (GrayU8) null);
+        GrayU8 gray = ConvertBufferedImage.convertFrom(source, new GrayU8(1, 1));
 
         QrCodeDetector<GrayU8> detector =
                 FactoryFiducial.qrcode(null, GrayU8.class);

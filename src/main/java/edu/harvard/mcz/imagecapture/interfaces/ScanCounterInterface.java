@@ -5,6 +5,7 @@ import edu.harvard.mcz.imagecapture.jobs.RunnableJobError;
 import java.util.List;
 
 public interface ScanCounterInterface {
+    void logBarcode(String barcode);
 
     void appendError(RunnableJobError anError);
 
@@ -90,5 +91,7 @@ public interface ScanCounterInterface {
      * @return
      */
     List<RunnableJobError> getErrors();
+
+    List<String> getBarcodes();
 
 }

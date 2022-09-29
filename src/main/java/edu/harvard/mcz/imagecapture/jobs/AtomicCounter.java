@@ -42,6 +42,7 @@ public class AtomicCounter implements ScanCounterInterface {
     private AtomicInteger specimensDatabased = new AtomicInteger(0);
     private AtomicInteger filesUpdated = new AtomicInteger(0);
     private List<RunnableJobError> errors = null;
+    private ArrayList<String> barcodes = null;
 
     public AtomicCounter() {
         totalCount = new AtomicInteger(0);
@@ -57,6 +58,12 @@ public class AtomicCounter implements ScanCounterInterface {
         filesUpdated = new AtomicInteger(0);
         errorReport = new StringBuffer();
         errors = new ArrayList<RunnableJobError>();
+        barcodes = new ArrayList<String>();
+    }
+
+    @Override
+    public void logBarcode(String barcode) {
+        barcodes.add(barcode);
     }
 
     public synchronized void appendError(RunnableJobError anError) {
@@ -197,6 +204,11 @@ public class AtomicCounter implements ScanCounterInterface {
 
     public List<RunnableJobError> getErrors() {
         return errors;
+    }
+
+    @Override
+    public List<String> getBarcodes() {
+        return barcodes;
     }
 
     @Override

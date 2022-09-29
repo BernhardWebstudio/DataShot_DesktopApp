@@ -106,9 +106,9 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
                                 .getProperty(ImageCaptureProperties.KEY_MOGRIFY_EXECUTABLE);
                 if (mogrify == null || mogrify.trim().length() > 0) {
                     makeWithJava = true;
+                    log.debug("Mogrify not find. Will generate thumbnails with Java.");
                 } else {
-                    List<String> runCommand = new ArrayList<>();
-                    runCommand.addAll(Arrays.asList(mogrify, "-path", "thumbs", "-resize", thumbWidth + "x" + thumbHeight));
+                    List<String> runCommand = new ArrayList<>(Arrays.asList(mogrify, "-path", "thumbs", "-resize", thumbWidth + "x" + thumbHeight));
                     runCommand.add(filesToThumb.toString());
 
                     Runtime r = Runtime.getRuntime();
@@ -131,7 +131,7 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
                                     "Finished creating thumbnails in: " + startPoint.getPath();
                             Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
                                     message);
-                            log.debug("Debug {}", message);
+                            log.debug(message);
                         } else {
                             log.error("Error returned running " + runCommand);
                             makeWithJava = true;
@@ -152,11 +152,10 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
                     for (int i = 0; i < potentialFilesToThumb.length; i++) {
                         try {
                             log.debug("Attempting thumbnail generation with java in " +
-                                    startPoint.getPath());
-                            log.debug("Attempting thumbnail generation with java to " +
+                                    startPoint.getPath() + " to " +
                                     thumbsDir.getPath());
                             ArrayList<String> makeFrom = new ArrayList<String>();
-                            List<File> files = Arrays.asList(startPoint.listFiles());
+                            List<File> files = Arrays.asList(Objects.requireNonNull(startPoint.listFiles()));
                             Iterator<File> it = files.iterator();
                             int creationCounter = 0;
                             int totalFiles = files.size();
@@ -190,6 +189,7 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
                                             ImageIO.write(img, "jpg", target);
                                             creationCounter++;
                                         }
+                                        log.debug("Created thumbnail from " + file.getPath() + " to " + target.getPath());
                                     }
                                     setThumbPercentComplete(
                                             (int) (((float) creationCounter / totalFiles) * 100));
@@ -202,6 +202,7 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
                                 Singleton.getSingletonInstance()
                                         .getMainFrame()
                                         .setStatusMessage(message);
+                                log.debug(message);
                             }
                         } catch (IOException e) {
                             log.error(
@@ -268,7 +269,7 @@ class ThumbnailBuilderJob implements Runnable, RunnableJob {
     protected void setThumbPercentComplete(int aPercentage) {
         // set value
         thumbPercentComplete = aPercentage;
-        log.debug("Debug {}", thumbPercentComplete);
+        log.debug("Setting thumbnail building percentage completed to {}", thumbPercentComplete);
         // notify listeners
         Iterator<RunnerListener> i = thumbListeners.iterator();
         while (i.hasNext()) {

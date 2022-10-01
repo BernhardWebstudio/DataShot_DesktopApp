@@ -210,7 +210,7 @@ public class MaliaStatisticsDialog extends JDialog {
             query1.setParameter("higherOrder", orderField.getSelectedItem().toString());
             List resultsList = query1.getResultList();
             String results1 = CastUtility.castToString(query1.getSingleResult());
-            results += "Nr. of ICImages: " + results1 + "\n";
+            results += results1 + " images with matching family or higher order and path between " + startDateFormatted + " and " + endDateFormatted + "\n";
 
             //
             Query query2 = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM ICImage i LEFT JOIN i.specimen AS s WHERE i.path < :end AND i.path > :start AND (s.family in (:families) OR s.higherOrder = :higherOrder)");
@@ -219,7 +219,7 @@ public class MaliaStatisticsDialog extends JDialog {
             query2.setParameterList("families", familiesList);
             query2.setParameter("higherOrder", orderField.getSelectedItem().toString());
             String results2 = CastUtility.castToString(query2.getSingleResult());
-            results += "Corresponding to #specimen: " + results2 + "\n";
+            results += "corresponding to " + results2 + "specimen.\n";
 
             //
             Query query3 = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM Tracking t LEFT JOIN t.specimen as s WHERE t.eventDateTime < :end AND t.eventDateTime > :start AND t.eventType LIKE :eventType AND (s.family in (:families) OR s.higherOrder = :higherOrder)");
@@ -229,7 +229,7 @@ public class MaliaStatisticsDialog extends JDialog {
             query3.setParameter("eventType", "Text Entered");
             query3.setParameter("higherOrder", orderField.getSelectedItem().toString());
             String results3 = CastUtility.castToString(query3.getSingleResult());
-            results += "Text Entered in this date-range: " + results3 + "\n";
+            results += "In this date-range for these families/order, for " + results3 + " specimen was a text entered event tracked.\n";
 
             session.getTransaction().commit();
         } catch (Exception e) {

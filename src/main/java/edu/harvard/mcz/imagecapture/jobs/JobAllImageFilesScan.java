@@ -266,7 +266,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                     this);
             RunnableJobReportDialog errorReportDialog = new RunnableJobReportDialog(
                     Singleton.getSingletonInstance().getMainFrame(), counter.toString(),
-                    counter.getErrors(), "Preprocess Results");
+                    counter.getErrors(), "Preprocessing Results", counter.getNumbersToCopy());
             errorReportDialog.setVisible(true);
         }
 

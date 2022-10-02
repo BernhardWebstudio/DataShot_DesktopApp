@@ -21,6 +21,7 @@ package edu.harvard.mcz.imagecapture.ui.dialog;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.jobs.RunnableJobError;
 import edu.harvard.mcz.imagecapture.jobs.RunnableJobErrorTableModel;
+import net.miginfocom.swing.MigLayout;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.QuoteMode;
@@ -30,6 +31,9 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import javax.swing.table.TableModel;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -48,17 +52,19 @@ public class RunnableJobReportDialog extends JDialog {
             LoggerFactory.getLogger(RunnableJobReportDialog.class);
 
     private String title = "Job Results";
+    private String textToCopy = null;
     private JPanel jContentPane = null;
     private JPanel jPanel = null;
     private JPanel jPanel1 = null;
-    private JLabel jLabel = null;
-    private JButton jButton = null;
+    private JLabel titleJLabel = null;
+    private JButton okJButton = null;
     private JScrollPane jScrollPane = null;
     private JTable jTable = null;
     private JTextArea jTextArea = null;
     private JDialog thisDialog = null;
     private RunnableJobErrorTableModel model = null;
     private JButton btnSave;
+    private JButton copyReportButton;
 
     /**
      * @param owner
@@ -71,13 +77,38 @@ public class RunnableJobReportDialog extends JDialog {
     }
 
     public RunnableJobReportDialog(Frame owner, String resultsMessage,
-                                   List<RunnableJobError> errors, String title) {
+                                   List<RunnableJobError> errors, String title, String textToCopy) {
         super(owner);
         this.title = title;
+        this.textToCopy = textToCopy;
         thisDialog = this;
         model = new RunnableJobErrorTableModel(errors);
 
-        log.debug("Debug {}", model.getRowCount());
+        log.debug("Nr of rows in RunnableJobReportDialog: {}", model.getRowCount());
+
+        initialize();
+
+        jTextArea.setText(resultsMessage);
+        pack();
+    }
+
+    public RunnableJobReportDialog(Frame owner, String resultsMessage,
+                                   List<RunnableJobError> errors, String title) {
+        this(owner, resultsMessage, errors, title, null);
+    }
+
+    public RunnableJobReportDialog(Frame owner, String resultsMessage,
+                                   List<RunnableJobError> errors, int listType,
+                                   String title, String textToCopy) {
+        super(owner);
+        this.title = title;
+        this.textToCopy = textToCopy;
+        thisDialog = this;
+        model = new RunnableJobErrorTableModel(errors, listType);
+
+        log.debug("Nr of rows in RunnableJobReportDialog: {}", model.getRowCount());
+        log.debug("Nr of columns in RunnableJobReportDialog: {}", model.getColumnCount());
+        log.debug(model.getColumnName(4));
 
         initialize();
 
@@ -88,19 +119,7 @@ public class RunnableJobReportDialog extends JDialog {
     public RunnableJobReportDialog(Frame owner, String resultsMessage,
                                    List<RunnableJobError> errors, int listType,
                                    String title) {
-        super(owner);
-        this.title = title;
-        thisDialog = this;
-        model = new RunnableJobErrorTableModel(errors, listType);
-
-        log.debug("Debug {}", model.getRowCount());
-        log.debug("Debug {}", model.getColumnCount());
-        log.debug(model.getColumnName(4));
-
-        initialize();
-
-        jTextArea.setText(resultsMessage);
-        pack();
+        this(owner, resultsMessage, errors, listType, title, null);
     }
 
     public void setMessage(String resultsMessage) {
@@ -135,8 +154,8 @@ public class RunnableJobReportDialog extends JDialog {
         if (jContentPane == null) {
             jContentPane = new JPanel();
             jContentPane.setLayout(new BorderLayout());
-            jContentPane.add(getJPanel(), BorderLayout.NORTH);
-            jContentPane.add(getJPanel1(), BorderLayout.SOUTH);
+            jContentPane.add(getTitleReportJPanel(), BorderLayout.NORTH);
+            jContentPane.add(getSaveCloseButtonJPanel(), BorderLayout.SOUTH);
             jContentPane.add(getJScrollPane(), BorderLayout.CENTER);
         }
         return jContentPane;
@@ -147,21 +166,16 @@ public class RunnableJobReportDialog extends JDialog {
      *
      * @return javax.swing.JPanel
      */
-    private JPanel getJPanel() {
+    private JPanel getTitleReportJPanel() {
         if (jPanel == null) {
-            GridBagConstraints gridBagConstraints = new GridBagConstraints();
-            gridBagConstraints.fill = GridBagConstraints.BOTH;
-            gridBagConstraints.gridy = 1;
-            gridBagConstraints.weightx = 1.0;
-            gridBagConstraints.weighty = 1.0;
-            gridBagConstraints.gridheight = 3;
-            gridBagConstraints.gridx = 0;
-            jLabel = new JLabel();
-            jLabel.setText(title);
-            jPanel = new JPanel();
-            jPanel.setLayout(new GridBagLayout());
-            jPanel.add(jLabel, new GridBagConstraints());
-            jPanel.add(getJTextArea(), gridBagConstraints);
+            jPanel = new JPanel(new MigLayout("wrap 2, fillx"));
+            titleJLabel = new JLabel();
+            titleJLabel.setText(title);
+
+            jPanel.add(titleJLabel, "span 2");
+
+            jPanel.add(getJTextArea(), "grow");
+            jPanel.add(getCopyReportButton(), "shrink");
         }
         return jPanel;
     }
@@ -171,7 +185,7 @@ public class RunnableJobReportDialog extends JDialog {
      *
      * @return javax.swing.JPanel
      */
-    private JPanel getJPanel1() {
+    private JPanel getSaveCloseButtonJPanel() {
         if (jPanel1 == null) {
             jPanel1 = new JPanel();
             jPanel1.setLayout(new GridBagLayout());
@@ -183,7 +197,7 @@ public class RunnableJobReportDialog extends JDialog {
             GridBagConstraints gbc_jButton = new GridBagConstraints();
             gbc_jButton.gridx = 1;
             gbc_jButton.gridy = 0;
-            jPanel1.add(getJButton(), gbc_jButton);
+            jPanel1.add(getOkButton(), gbc_jButton);
         }
         return jPanel1;
     }
@@ -193,17 +207,33 @@ public class RunnableJobReportDialog extends JDialog {
      *
      * @return javax.swing.JButton
      */
-    private JButton getJButton() {
-        if (jButton == null) {
-            jButton = new JButton();
-            jButton.setText("OK");
-            jButton.addActionListener(new java.awt.event.ActionListener() {
+    private JButton getOkButton() {
+        if (okJButton == null) {
+            okJButton = new JButton();
+            okJButton.setText("OK");
+            okJButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     thisDialog.setVisible(false);
                 }
             });
         }
-        return jButton;
+        return okJButton;
+    }
+
+    private JButton getCopyReportButton() {
+        if (copyReportButton == null) {
+            copyReportButton = new JButton();
+            copyReportButton.setText("Copy numbers");
+            copyReportButton.addActionListener(new java.awt.event.ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent actionEvent) {
+                    StringSelection selection = new StringSelection(textToCopy == null ? jTextArea.getText() : textToCopy);
+                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    clipboard.setContents(selection,selection);
+                }
+            });
+        }
+        return copyReportButton;
     }
 
     /**
@@ -267,8 +297,8 @@ public class RunnableJobReportDialog extends JDialog {
 
             csvFormat = csvFormat.withHeader(titles.toArray(new String[0]));
 
-            log.debug("Debug {}", jTextArea.getText());
-            log.debug("Debug {}", csvFormat.getHeaderComments());
+            log.debug("Text in text area {}", jTextArea.getText());
+            log.debug("CSV Header comments {}", csvFormat.getHeaderComments());
 
             Date now = new Date();
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd_HH.mm.ss");

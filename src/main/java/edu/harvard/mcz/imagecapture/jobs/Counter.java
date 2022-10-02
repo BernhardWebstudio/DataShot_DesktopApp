@@ -18,14 +18,15 @@
  */
 package edu.harvard.mcz.imagecapture.jobs;
 
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.interfaces.ScanCounterInterface;
-import edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Counter
@@ -218,28 +219,28 @@ public class Counter implements ScanCounterInterface {
             ArrayList<String> barcodesMissing = new ArrayList<String>();
             ArrayList<String> barcodeSeqWhereMoreThanOneMisses = new ArrayList<String>();
             Collections.sort(barcodes);
-            for (int i =0; i < barcodes.size()-1; i++) {
+            for (int i = 0; i < barcodes.size() - 1; i++) {
                 Integer curr = Integer.valueOf(barcodes.get(i).replaceAll("[^0-9]", ""));
-                Integer next = Integer.valueOf(barcodes.get(i+1).replaceAll("[^0-9]", ""));
+                Integer next = Integer.valueOf(barcodes.get(i + 1).replaceAll("[^0-9]", ""));
                 if (next - curr != 1 && next - curr != 0) {
-                    log.warn("Barcode missing between " + barcodes.get(i) + " and " + barcodes.get(i+1) + "");
+                    log.warn("Barcode missing between " + barcodes.get(i) + " and " + barcodes.get(i + 1) + "");
                     if (next - curr == 2) {
-                        barcodesMissing.add(barcodes.get(i).replace(String.valueOf(curr), String.valueOf(curr+1)));
+                        barcodesMissing.add(barcodes.get(i).replace(String.valueOf(curr), String.valueOf(curr + 1)));
                     } else {
                         barcodeSeqWhereMoreThanOneMisses.add(barcodes.get(i));
-                        barcodeSeqWhereMoreThanOneMisses.add(barcodes.get(i+1));
+                        barcodeSeqWhereMoreThanOneMisses.add(barcodes.get(i + 1));
                     }
                 }
             }
             if (barcodesMissing.size() == 0 && barcodeSeqWhereMoreThanOneMisses.size() == 0) {
-                return "No missing barcodes detected between " + barcodes.get(0) + " and " + barcodes.get(barcodes.size()-1) + ".\n";
+                return "No missing barcodes detected between " + barcodes.get(0) + " and " + barcodes.get(barcodes.size() - 1) + ".\n";
             }
             if (barcodesMissing.size() + barcodeSeqWhereMoreThanOneMisses.size() / 2 > 5) {
-                return "Too many missing barcodes in sequence, " + barcodesMissing.size() + " single and " + (barcodeSeqWhereMoreThanOneMisses.size()/2) + " bigger distance.";
+                return "Too many missing barcodes in sequence, " + barcodesMissing.size() + " single and " + (barcodeSeqWhereMoreThanOneMisses.size() / 2) + " bigger distance.";
             } else {
                 StringBuilder report = new StringBuilder("Missing barcode numbers: ");
                 if (barcodeSeqWhereMoreThanOneMisses.size() > 0) {
-                    for (int i = 0; i < barcodeSeqWhereMoreThanOneMisses.size()/2; ++i) {
+                    for (int i = 0; i < barcodeSeqWhereMoreThanOneMisses.size() / 2; ++i) {
                         report.append("between ").append(barcodeSeqWhereMoreThanOneMisses.get(2 * i)).append(" & ").append(barcodeSeqWhereMoreThanOneMisses.get(2 * i + 1));
                         if (i != barcodeSeqWhereMoreThanOneMisses.size() - 1) {
                             report.append(", ");
@@ -274,6 +275,47 @@ public class Counter implements ScanCounterInterface {
         report += "Found " + this.getFilesFailed() + " files with problems.\n";
         report += this.getBarcodeSequenceDescription();
         return report;
+    }
+
+    public String getNumbersToCopy() {
+        // all the keys that can be used to determine the cell to store the
+        Map<String, Integer> propertyKeyAndValue = Stream.of(new Object[][]{
+                {ImageCaptureProperties.KEY_EXCEL_COL_NR_FILES, getTotal()},
+                {ImageCaptureProperties.KEY_EXCEL_COL_NR_FILES_EXIST, getFilesExisting()},
+                {ImageCaptureProperties.KEY_EXCEL_COL_NR_FILES_UPDATED, getFilesUpdated()},
+                {ImageCaptureProperties.KEY_EXCEL_COL_NR_FILES_DATABASED, getFilesDatabased()},
+                {ImageCaptureProperties.KEY_EXCEL_COL_NR_SPECIMEN_EXIST, getSpecimensExisting()},
+                {ImageCaptureProperties.KEY_EXCEL_COL_NR_SPECIMEN_UPDATED, getSpecimensUpdated()},
+                {ImageCaptureProperties.KEY_EXCEL_COL_NR_SPECIMEN_DATABASED, getSpecimens()},
+                {ImageCaptureProperties.KEY_EXCEL_COL_NR_FILES_FAILED, getFilesFailed()},
+                {ImageCaptureProperties.KEY_EXCEL_COL_NR_DIRECTORIES, getDirectories()},
+                {ImageCaptureProperties.KEY_EXCEL_COL_NR_DIRECTORIES_FAILED, getDirectoriesFailed()},
+        }).collect(Collectors.toMap(data -> (String) data[0], data -> (Integer) data[1]));
+
+        Map<Integer, String> cellIdxValue = new HashMap<>();
+
+        Integer maxColPlusOne = 0;
+        Properties properties = Singleton.getSingletonInstance().getProperties().getProperties();
+        for (String propertyKey : propertyKeyAndValue.keySet()) {
+            if (properties.containsKey(propertyKey)) {
+                Integer keyValue = Integer.valueOf(properties.getProperty(propertyKey));
+                if (keyValue >= 0 && keyValue < 100) {
+                    maxColPlusOne = java.lang.Math.max(keyValue + 1, maxColPlusOne);
+                    cellIdxValue.put(keyValue, String.valueOf(propertyKeyAndValue.get(propertyKey)));
+                } else {
+                    log.warn("The key value of {} is outside the accepted range.", keyValue);
+                }
+            }
+        }
+
+        StringBuilder copyStrBuilder = new StringBuilder("");
+        for (Integer i = 0; i < maxColPlusOne; i++) {
+            if (cellIdxValue.containsKey(i)) {
+                copyStrBuilder.append(cellIdxValue.get(i));
+            }
+            copyStrBuilder.append("\t");
+        }
+        return copyStrBuilder.toString();
     }
 
     /**

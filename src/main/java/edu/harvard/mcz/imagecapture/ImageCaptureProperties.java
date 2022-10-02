@@ -226,6 +226,21 @@ public class ImageCaptureProperties extends AbstractTableModel {
     public static String KEY_EXCEL_OVERWRITE = "georef.import.overwrite";
 
     /**
+     * The keys for setting the columns to paste to for runnable job output numbers
+     */
+    public static String KEY_EXCEL_COL_NR_FILES = "scanjob.export_copy.nr_of_files.col";
+    public static String KEY_EXCEL_COL_NR_FILES_EXIST = "scanjob.export_copy.nr_of_files_exist.col";
+    public static String KEY_EXCEL_COL_NR_FILES_DATABASED = "scanjob.export_copy.nr_of_files_databased.col";
+    public static String KEY_EXCEL_COL_NR_FILES_UPDATED = "scanjob.export_copy.nr_of_files_updated.col";
+    public static String KEY_EXCEL_COL_NR_SPECIMEN_EXIST = "scanjob.export_copy.nr_of_specimen_exist.col";
+    public static String KEY_EXCEL_COL_NR_SPECIMEN_DATABASED = "scanjob.export_copy.nr_of_specimen_databased.col";
+    public static String KEY_EXCEL_COL_NR_SPECIMEN_UPDATED = "scanjob.export_copy.nr_of_specimen_updated.col";
+    public static String KEY_EXCEL_COL_NR_FILES_FAILED = "scanjob.export_copy.nr_of_files_failed.col";
+    public static String KEY_EXCEL_COL_NR_DIRECTORIES = "scanjob.export_copy.nr_of_directories.col";
+    public static String KEY_EXCEL_COL_NR_DIRECTORIES_FAILED = "scanjob.export_copy.nr_of_directories_failed.col";
+
+
+    /**
      * The keys for interaction with Nahima
      */
     public static String KEY_NAHIMA_URL = "nahima.url";
@@ -701,6 +716,7 @@ public class ImageCaptureProperties extends AbstractTableModel {
                 properties.setProperty(key, value);
             }
         });
+        // the
     }
 
     /* Place where properties in this instance are persisted.

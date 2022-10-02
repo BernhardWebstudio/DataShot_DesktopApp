@@ -93,5 +93,4 @@ public interface ScanCounterInterface {
     List<RunnableJobError> getErrors();
 
     List<String> getBarcodes();
-
 }

@@ -25,6 +25,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class NahimaManager extends AbstractRestClient {
+    public static final int defaultPoolId = 7;
     public static final JSONObject defaultPool = new JSONObject("{ \"pool\": { \"_id\": 7 } }");
     private static final Logger log = LoggerFactory.getLogger(NahimaManager.class);
     private final String url;
@@ -165,7 +166,7 @@ public class NahimaManager extends AbstractRestClient {
         if (!returnValue.startsWith("[")) {
             JSONObject responseObject = new JSONObject(returnValue);
             if (responseObject.has("code") && responseObject.getString("code").startsWith("error")) {
-                throw new RuntimeException("Failed to upload image: Error code: " + responseObject.get("code"));
+                throw new RuntimeException("Failed to create object: Error code: " + responseObject.get("code"));
             }
         }
 
@@ -291,22 +292,41 @@ public class NahimaManager extends AbstractRestClient {
             return (JSONObject) foundObjects.get(0);
         } else {
             // TODO: create / select correct
-            log.info("Got != 1 " + objectType + " status. {}", results);
+            log.info("Got != 1 " + objectType + " objects. {}", results);
             if (selectionHelper != null) {
                 ArrayList<Integer> possiblyCorrectIndices = new ArrayList<Integer>();
+                ArrayList<Integer> carefulPossiblyCorrectIndices = new ArrayList<Integer>();
+                ArrayList<JSONObject> objectsToCompare = new ArrayList<JSONObject>();
                 for (int i = 0; i < foundObjects.length(); ++i) {
                     JSONObject testObj = foundObjects.getJSONObject(i);
+                    objectsToCompare.add(testObj);
+                    if (testObj.has(objectType)) {
+                        objectsToCompare.add(testObj.getJSONObject(objectType));
+                    }
+                }
+                for (int i = 0; i < objectsToCompare.size(); ++i) {
+                    JSONObject testObj = objectsToCompare.get(i);
                     int matches = 0;
                     int requiredMatches = 0;
                     for (Iterator<String> it = selectionHelper.keys(); it.hasNext(); ) {
                         String key = it.next();
-                        requiredMatches += 1;
+                        if (selectionHelper.get(key) instanceof String && !((String) selectionHelper.get(key)).contains("DataShot")) {
+                            requiredMatches += 1;
+                        }
                         if (selectionHelper.get(key).equals(testObj.has(key) ? testObj.get(key) : null)) {
                             matches += 1;
                         }
                     }
-                    if (matches == requiredMatches) {
-                        possiblyCorrectIndices.add(i);
+                    if (matches >= requiredMatches) {
+                        try {
+                            JSONObject pool = (JSONObject) testObj.get("_pool");
+                            if (((JSONObject) pool.get("pool")).getInt("_id") == NahimaManager.defaultPoolId) {
+                                possiblyCorrectIndices.add(i);
+                            }
+                        } catch (Exception e) {
+                            log.error("Could not verify pool", e);
+                            carefulPossiblyCorrectIndices.add(i);
+                        }
                     }
                 }
 
@@ -315,6 +335,9 @@ public class NahimaManager extends AbstractRestClient {
                 } else if (possiblyCorrectIndices.size() > 1) {
                     log.warn("Found multiple " + objectType + " that match all fields. Using first one.");
                     return foundObjects.getJSONObject(possiblyCorrectIndices.get(0));
+                } else if (carefulPossiblyCorrectIndices.size() > 0) {
+                    log.warn("Found multiple " + objectType + " that match all fields, but without verifying pool. Using first one.");
+                    return foundObjects.getJSONObject(carefulPossiblyCorrectIndices.get(0));
                 }
             }
             return null;
@@ -350,7 +373,10 @@ public class NahimaManager extends AbstractRestClient {
             JSONObject toCreate = wrapForCreation(inner, objectType, mask, omitPool);
             this.createObjectInNahima(toCreate, objectType);
             // TODO: it would be simpler to store the created in cache. But well... current format does not allow
-            return this.resolveStringSearchToOne(name, objectType, true, inner);
+            results = this.resolveStringSearchToOne(name, objectType, true, inner);
+            if (results == null) {
+                log.error("Created " + objectType + " in Nahima, but did not find it afterwards.");
+            }
         }
         return results;
     }
@@ -368,8 +394,8 @@ public class NahimaManager extends AbstractRestClient {
      * @return the matching or new object
      */
     public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner, boolean omitPool, int recurse) throws IOException, InterruptedException, SkipSpecimenException {
-        if (name == null || objectType == null) {
-            log.warn("Cannot search as search " + name + " or objectType " + objectType + " is null");
+        if (name == null || objectType == null || name.equals("")) {
+            log.warn("Cannot search as search " + name + " or objectType " + objectType + " is null or empty");
             return null;
         }
 
@@ -443,7 +469,7 @@ public class NahimaManager extends AbstractRestClient {
             case ChooseFromJArrayDialog.RETURN_CHANGE_SEARCH:
                 return askToChangeSearch(name, objectType, inner, mask, omitPool);
             default:
-                throw new RuntimeException("Undefined result type.");
+                throw new RuntimeException("Undefined result type: " + result);
         }
     }
 
@@ -546,9 +572,9 @@ public class NahimaManager extends AbstractRestClient {
             parent = resolveCountry(specimen.getCountry());
         } catch (Exception e) {
         }
-        ;
+
         JSONObject finalParent = parent;
-        return this.resolveOrCreateInteractive(searchString, "gazetteer", "gazetteer_all_fields", new JSONObject(new HashMap<>() {{
+        return this.resolveOrCreateInteractive(searchString, "gazetteer", "gazetteer__all_fields", new JSONObject(new HashMap<>() {{
             put("ortsname", wrapInLan(specimen.getPrimaryDivison()));
             put("_id_parent", resolveId(finalParent)); // Might throw NullPointerException. If we find the location, it is never called, therefore, we only have a problem if neither location nor country are found
             put("isocode3166_2", specimen.getPrimaryDivisonISO());
@@ -817,10 +843,27 @@ public class NahimaManager extends AbstractRestClient {
      * @return the reduced associate, ideal to reference on creation
      */
     public JSONObject reduceAssociateForAssociation(JSONObject associate) {
+        return reduceAssociateForAssociation(associate, null);
+    }
+
+    public JSONObject reduceAssociateForAssociation(JSONObject associate, String objectType) {
         if (associate == null) {
             return null;
         }
         JSONObject reduced = new JSONObject();
+        boolean isWrapped = false;
+        String wrapperKey = "";
+        if (associate.keySet().size() == 1) {
+            isWrapped = true;
+            wrapperKey = (String) associate.keySet().toArray()[0];
+            JSONObject newAssociate = associate.optJSONObject(wrapperKey);
+            if (newAssociate == null) {
+                // e.g. if the JSON Object is just {value: "value"}, e.g. for dates
+                return associate;
+            } else {
+                associate = newAssociate;
+            }
+        }
         String[] namesToKeep = {"_objecttype", "_mask", "_global_object_id"};
         for (String name : namesToKeep) {
             try {
@@ -834,8 +877,26 @@ public class NahimaManager extends AbstractRestClient {
         }
         JSONObject child = new JSONObject();
 
-        child.put("_id", associate.has("_id") ? associate.get("_id") : ((JSONObject) associate.get((String) associate.get("_objecttype"))).get("_id"));
-        reduced.put((String) associate.get("_objecttype"), child);
+        int childId;
+        if (associate.has("_id")) {
+            childId = associate.getInt("_id");
+        } else if (associate.has("_objecttype")) {
+            childId = (associate.getJSONObject(associate.getString("_objecttype"))).getInt("_id");
+        } else if (isWrapped && associate.has(wrapperKey)) {
+            childId = associate.getJSONObject(wrapperKey).getInt("_id");
+        } else {
+            log.error("Failed to resolve _id in object: {}", associate);
+            throw new IllegalStateException("Failed to resolve _id in object");
+        }
+        child.put("_id", childId);
+        if (associate.has("_objecttype")) {
+            reduced.put(associate.getString("_objecttype"), child);
+        } else if (isWrapped) {
+            reduced.put(wrapperKey, child);
+        } else {
+            assert (objectType != null);
+            reduced.put(objectType, child);
+        }
         return reduced;
     }
 

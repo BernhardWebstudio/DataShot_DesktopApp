@@ -295,54 +295,7 @@ public class NahimaManager extends AbstractRestClient {
             // TODO: create / select correct
             log.info("Got != 1 " + objectType + " objects. {}", results);
             if (selectionHelper != null) {
-                ArrayList<Integer> possiblyCorrectIndices = new ArrayList<Integer>();
-                ArrayList<Integer> carefulPossiblyCorrectIndices = new ArrayList<Integer>();
-                ArrayList<JSONObject> objectsToCompare = new ArrayList<JSONObject>();
-                HashMap<Integer, Integer> newIndicesToOldIndices = new HashMap<Integer, Integer>();
-                for (int i = 0; i < foundObjects.length(); ++i) {
-                    JSONObject testObj = foundObjects.getJSONObject(i);
-                    objectsToCompare.add(testObj);
-                    newIndicesToOldIndices.put(objectsToCompare.size() - 1, i);
-                    if (testObj.has(objectType)) {
-                        objectsToCompare.add(testObj.getJSONObject(objectType));
-                        newIndicesToOldIndices.put(objectsToCompare.size() - 1, i);
-                    }
-                }
-                for (int i = 0; i < objectsToCompare.size(); ++i) {
-                    JSONObject testObj = objectsToCompare.get(i);
-                    int matches = 0;
-                    int requiredMatches = 0;
-                    for (Iterator<String> it = selectionHelper.keys(); it.hasNext(); ) {
-                        String key = it.next();
-                        if (selectionHelper.get(key) instanceof String && !((String) selectionHelper.get(key)).contains("DataShot")) {
-                            requiredMatches += 1;
-                        }
-                        if (selectionHelper.get(key).equals(testObj.has(key) ? testObj.get(key) : null)) {
-                            matches += 1;
-                        }
-                    }
-                    if (matches >= requiredMatches) {
-                        try {
-                            JSONObject pool = (JSONObject) testObj.get("_pool");
-                            if (((JSONObject) pool.get("pool")).getInt("_id") == NahimaManager.defaultPoolId) {
-                                possiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
-                            }
-                        } catch (Exception e) {
-                            log.error("Could not verify pool", e);
-                            carefulPossiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
-                        }
-                    }
-                }
-
-                if (possiblyCorrectIndices.size() == 1) {
-                    return foundObjects.getJSONObject(possiblyCorrectIndices.get(0));
-                } else if (possiblyCorrectIndices.size() > 1) {
-                    log.warn("Found multiple " + objectType + " that match all fields. Using first one.");
-                    return foundObjects.getJSONObject(possiblyCorrectIndices.get(0));
-                } else if (carefulPossiblyCorrectIndices.size() > 0) {
-                    log.warn("Found multiple " + objectType + " that match all fields, but without verifying pool. Using first one.");
-                    return foundObjects.getJSONObject(carefulPossiblyCorrectIndices.get(0));
-                }
+                return findSimilarMatch(foundObjects, objectType, selectionHelper, true);
             }
             return null;
         }
@@ -350,6 +303,70 @@ public class NahimaManager extends AbstractRestClient {
 
     public JSONObject resolveStringSearchToOne(String search, String objectType) throws IOException, InterruptedException {
         return resolveStringSearchToOne(search, objectType, false);
+    }
+
+    /**
+     * Compares an array of JSON objects to an ideal JSON object,
+     * returns a match if there is one
+     *
+     * @param foundObjects    the array of JSON objects to compare to
+     * @param objectType      the type of the JSON object
+     * @param selectionHelper the ideal JSON object
+     * @param allowDuplicates whether to return a match if more than one matches
+     * @return the matching object from the found objects
+     */
+    protected JSONObject findSimilarMatch(JSONArray foundObjects, String objectType, JSONObject selectionHelper, boolean allowDuplicates) {
+        ArrayList<Integer> possiblyCorrectIndices = new ArrayList<Integer>();
+        ArrayList<Integer> carefulPossiblyCorrectIndices = new ArrayList<Integer>();
+        ArrayList<JSONObject> objectsToCompare = new ArrayList<JSONObject>();
+        HashMap<Integer, Integer> newIndicesToOldIndices = new HashMap<Integer, Integer>();
+        for (int i = 0; i < foundObjects.length(); ++i) {
+            JSONObject testObj = foundObjects.getJSONObject(i);
+            objectsToCompare.add(testObj);
+            newIndicesToOldIndices.put(objectsToCompare.size() - 1, i);
+            if (testObj.has(objectType)) {
+                objectsToCompare.add(testObj.getJSONObject(objectType));
+                newIndicesToOldIndices.put(objectsToCompare.size() - 1, i);
+            }
+        }
+        for (int i = 0; i < objectsToCompare.size(); ++i) {
+            JSONObject testObj = objectsToCompare.get(i);
+            int matches = 0;
+            int requiredMatches = 0;
+            for (Iterator<String> it = selectionHelper.keys(); it.hasNext(); ) {
+                String key = it.next();
+                if (selectionHelper.get(key) instanceof String && !((String) selectionHelper.get(key)).contains("DataShot")) {
+                    requiredMatches += 1;
+                }
+                if (selectionHelper.get(key).equals(testObj.has(key) ? testObj.get(key) : null)) {
+                    matches += 1;
+                }
+            }
+            if (matches >= requiredMatches && requiredMatches > 0) {
+                try {
+                    JSONObject pool = (JSONObject) testObj.get("_pool");
+                    if (((JSONObject) pool.get("pool")).getInt("_id") == NahimaManager.defaultPoolId) {
+                        possiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
+                    }
+                } catch (Exception e) {
+                    log.error("Could not verify pool", e);
+                    carefulPossiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
+                }
+            }
+        }
+
+        if (possiblyCorrectIndices.size() == 1) {
+            return foundObjects.getJSONObject(possiblyCorrectIndices.get(0));
+        } else if (possiblyCorrectIndices.size() > 1 && allowDuplicates) {
+            log.warn("Found multiple " + objectType + " that match all fields. Using first one.");
+            return foundObjects.getJSONObject(possiblyCorrectIndices.get(0));
+        } else if (carefulPossiblyCorrectIndices.size() > 0) {
+            log.warn("Found " + carefulPossiblyCorrectIndices.size() + " " + objectType + " that match all fields, but without verifying pool. Using first one.");
+            if (allowDuplicates || (possiblyCorrectIndices.size() == 0 && carefulPossiblyCorrectIndices.size() == 1)) {
+                return foundObjects.getJSONObject(carefulPossiblyCorrectIndices.get(0));
+            }
+        }
+        return null;
     }
 
     /**
@@ -418,6 +435,12 @@ public class NahimaManager extends AbstractRestClient {
             log.info("Got != 1 " + objectType + " status. {}", results);
             // create / select correct
             if (foundObjects.length() > 1) {
+                // first, loop objects to see whether we can find exactly one exact match
+                JSONObject bestMatch = findSimilarMatch(foundObjects, objectType, inner, false);
+                if (bestMatch != null) {
+                    return bestMatch;
+                }
+                // otherwise, ask the user to select the correct one
                 return this.askToChooseObject(foundObjects, name, objectType, mask, inner, omitPool);
             } else {
                 assert (foundObjects.length() == 0);
@@ -433,13 +456,37 @@ public class NahimaManager extends AbstractRestClient {
         return resolveOrCreateInteractive(name, objectType, mask, inner, false, 0);
     }
 
+    /**
+     * Opens a dialog for the user to verify that an entity would be created correctly
+     *
+     * @param inner      the object prototype
+     * @param name       the name of the object
+     * @param objectType the type of the object
+     * @param mask       the mask to create the object with
+     * @param omitPool   whether to add the pool to the creation query or not
+     * @return the created object
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws SkipSpecimenException
+     * @throws InvocationTargetException
+     */
     public JSONObject askToCreate(JSONObject inner, String name, String objectType, String mask, boolean omitPool) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         // ask whether to create the object like this
-        VerifyJSONDialog dialog = new VerifyJSONDialog(Singleton.getSingletonInstance().getMainFrame(), inner.toString(), name);
-        int result = dialog.getReturnDecision();
-        switch (result) {
+        final int[] choice = new int[1];
+        final JSONObject[] resultingObj = new JSONObject[1];
+        JSONObject finalInner = inner;
+        SwingUtilities.invokeAndWait(new Runnable() {
+            public void run() {
+                VerifyJSONDialog dialog = new VerifyJSONDialog(Singleton.getSingletonInstance().getMainFrame(), finalInner.toString(), name);
+                dialog.setVisible(true);
+                int result = dialog.getReturnDecision();
+                choice[0] = result;
+                resultingObj[0] = new JSONObject(dialog.getResultingJSON());
+            }
+        });
+        switch (choice[0]) {
             case VerifyJSONDialog.RETURN_ACCEPT:
-                inner = new JSONObject(dialog.getResultingJSON());
+                inner = resultingObj[0];
             case VerifyJSONDialog.RETURN_CHANGE_SEARCH:
                 return askToChangeSearch(name, objectType, inner, mask, omitPool);
             case VerifyJSONDialog.RETURN_SKIP:
@@ -496,8 +543,13 @@ public class NahimaManager extends AbstractRestClient {
      * @param omitPool   whether to omit the pool when wrapping the object for creation
      */
     private JSONObject askToChangeSearch(String name, String objectType, JSONObject inner, String mask, boolean omitPool) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
-        String newSearch = (String) JOptionPane.showInputDialog(Singleton.getSingletonInstance().getMainFrame(), "Search for " + objectType, "Change Search", JOptionPane.QUESTION_MESSAGE, null, null, name);
-        return resolveOrCreateInteractive(newSearch, objectType, mask, inner, omitPool, 1);
+        final String[] newSearch = new String[1];
+        SwingUtilities.invokeAndWait(new Runnable() {
+            public void run() {
+                newSearch[0] = (String) JOptionPane.showInputDialog(Singleton.getSingletonInstance().getMainFrame(), "Search for " + objectType, "Change Search", JOptionPane.QUESTION_MESSAGE, null, null, name);
+            }
+        });
+        return resolveOrCreateInteractive(newSearch[0], objectType, mask, inner, omitPool, 1);
     }
 
     /**

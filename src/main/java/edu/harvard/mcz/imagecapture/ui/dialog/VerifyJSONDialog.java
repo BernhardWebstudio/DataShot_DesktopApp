@@ -26,7 +26,7 @@ public class VerifyJSONDialog extends JDialog {
     private JEditorPane editor;
 
     public VerifyJSONDialog(Frame owner, String json, String search) {
-        super(owner);
+        super(owner, "Create a matching ...", ModalityType.APPLICATION_MODAL);
         this.json = json;
         this.search = search;
         initialize();
@@ -42,10 +42,10 @@ public class VerifyJSONDialog extends JDialog {
         if (jContentPane == null) {
             jContentPane = new JPanel(new BorderLayout());
             JPanel jScrollPaneContent = new JPanel();
-            jScrollPaneContent.setLayout(new MigLayout("wrap 1, fillx"));
+            jScrollPaneContent.setLayout(new MigLayout("wrap 1, fillx, hmin 250lp"));
             // add contents
             jScrollPaneContent.add(this.getDescription(), "grow");
-            jScrollPaneContent.add(this.getEditor(), "grow");
+            jScrollPaneContent.add(this.getEditor(), "grow, hmin 250lp");
             jScrollPaneContent.add(this.getSkipSpecimenButton(), "grow, split 2");
             jScrollPaneContent.add(this.getAcceptChoiceButton(), "grow");
 
@@ -62,8 +62,8 @@ public class VerifyJSONDialog extends JDialog {
             return editor;
         }
         editor = new JEditorPane();
-        editor.setText(this.json);
         editor.setEditorKit(new JavaScriptSyntaxKit());
+        editor.setText(this.json);
         return editor;
     }
 
@@ -80,7 +80,7 @@ public class VerifyJSONDialog extends JDialog {
         if (acceptChoiceButton != null) {
             return acceptChoiceButton;
         }
-        acceptChoiceButton = new JButton("Continue with Choice");
+        acceptChoiceButton = new JButton("Continue with Creation");
         acceptChoiceButton.addActionListener(new ActionListener() {
 
             @Override

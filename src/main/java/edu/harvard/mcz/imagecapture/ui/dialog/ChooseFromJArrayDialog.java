@@ -3,6 +3,8 @@ package edu.harvard.mcz.imagecapture.ui.dialog;
 import net.miginfocom.swing.MigLayout;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,12 +16,11 @@ public class ChooseFromJArrayDialog extends JDialog {
     public static final int RETURN_SKIP = 2;
     public static final int RETURN_CHANGE_SEARCH = 3;
     public static final int RETURN_CREATE_NEW = 4;
-
+    private static final Logger log = LoggerFactory.getLogger(ChooseFromJArrayDialog.class);
     private final JSONArray selection;
     private final String entityType;
     private final String search;
     private int returnDecision;
-
     // the UI elements
     private JPanel jContentPane;
     private JTextPane descriptionPane;
@@ -72,6 +73,37 @@ public class ChooseFromJArrayDialog extends JDialog {
         return descriptionPane;
     }
 
+    public String simplifyJSONObjectText(Object obj) {
+        try {
+            JSONObject jsonObject = (JSONObject) obj;
+            try {
+                while (jsonObject.has(entityType) && !jsonObject.has("_standard")) {
+                    jsonObject = jsonObject.getJSONObject(entityType);
+                }
+
+                if (jsonObject.has("_standard")) {
+                    JSONObject standardObj = jsonObject.getJSONObject("_standard");
+                    if (standardObj.keySet().size() == 1) {
+                        standardObj = standardObj.getJSONObject((String) standardObj.keySet().toArray()[0]);
+
+                        JSONObject textObj = standardObj.getJSONObject("text");
+                        return textObj.toString();
+                    } else {
+                        log.debug("More than 1 _standard available -> cannot simplify object: " + standardObj.toString());
+                    }
+                } else {
+                    log.debug("Key _standard not available -> cannot simplify object: " + jsonObject.toString());
+                }
+            } catch (Exception e) {
+                log.error("Failed to simplify JSON object to text: " + obj.toString(), e);
+            }
+
+            return obj.toString();
+        } catch (ClassCastException e) {
+            return obj.toString();
+        }
+    }
+
     public JPanel getSelectionPane() {
         if (buttonGroupPanel == null) {
             selectionButtonGroup = new ButtonGroup();
@@ -80,7 +112,7 @@ public class ChooseFromJArrayDialog extends JDialog {
 
             for (Object obj : this.selection) {
                 JRadioButton radioButton = new JRadioButton();
-                radioButton.setText(obj.toString());
+                radioButton.setText(simplifyJSONObjectText(obj));
                 selectionButtonGroup.add(radioButton);
                 buttonGroupPanel.add(radioButton);
             }
@@ -89,7 +121,7 @@ public class ChooseFromJArrayDialog extends JDialog {
         }
         return buttonGroupPanel;
     }
-    
+
     public JButton getAcceptChoiceButton() {
         if (acceptChoiceButton == null) {
             acceptChoiceButton = new JButton("Continue with Choice");
@@ -101,7 +133,7 @@ public class ChooseFromJArrayDialog extends JDialog {
         }
         return acceptChoiceButton;
     }
-    
+
     public JButton getSkipSpecimenButton() {
         if (skipSpecimenButton == null) {
             skipSpecimenButton = new JButton("Skip Specimen");
@@ -114,7 +146,7 @@ public class ChooseFromJArrayDialog extends JDialog {
         }
         return skipSpecimenButton;
     }
-    
+
     public JButton getCreateNewButton() {
         if (createNewButton == null) {
             createNewButton = new JButton("Create New");

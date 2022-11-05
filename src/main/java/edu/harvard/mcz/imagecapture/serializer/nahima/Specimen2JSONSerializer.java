@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -327,7 +328,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                     target.put(key, returnValue);
                 }
             }
-        } catch (IOException | InterruptedException | ParseException | RuntimeException e) {
+        } catch (IOException | InterruptedException | ParseException | RuntimeException | InvocationTargetException e) {
             log.error("Failed to resolve " + key, e);
         }
     }
@@ -351,7 +352,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                     target.put(returnValue);
                 }
             }
-        } catch (IOException | InterruptedException | ParseException | RuntimeException e) {
+        } catch (IOException | InterruptedException | ParseException | RuntimeException | InvocationTargetException e) {
             log.error("Failed to resolve " + debugHint, e);
         }
     }
@@ -362,14 +363,14 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     }
 
     protected interface ResolverMethodInterface {
-        Object doResolve() throws IOException, InterruptedException, ParseException, RuntimeException, SkipSpecimenException;
+        Object doResolve() throws IOException, InterruptedException, ParseException, RuntimeException, SkipSpecimenException, InvocationTargetException;
     }
 
     protected interface JSONObjectResolverMethodInterface extends ResolverMethodInterface {
-        JSONObject doResolve() throws IOException, InterruptedException, ParseException, RuntimeException, SkipSpecimenException;
+        JSONObject doResolve() throws IOException, InterruptedException, ParseException, RuntimeException, SkipSpecimenException, InvocationTargetException;
     }
 
     protected interface JSONArrayResolverMethodInterface extends ResolverMethodInterface {
-        JSONArray doResolve() throws IOException, InterruptedException, ParseException, RuntimeException, SkipSpecimenException;
+        JSONArray doResolve() throws IOException, InterruptedException, ParseException, RuntimeException, SkipSpecimenException, InvocationTargetException;
     }
 }

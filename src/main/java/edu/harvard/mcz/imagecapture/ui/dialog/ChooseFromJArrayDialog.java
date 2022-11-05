@@ -31,7 +31,7 @@ public class ChooseFromJArrayDialog extends JDialog {
 
 
     public ChooseFromJArrayDialog(Frame owner, JSONArray selection, String entityType, String search) {
-        super(owner);
+        super(owner, "Choose a matching ...", ModalityType.APPLICATION_MODAL);
         this.entityType = entityType;
         this.selection = selection;
         this.search = search;
@@ -73,16 +73,16 @@ public class ChooseFromJArrayDialog extends JDialog {
     }
 
     public JPanel getSelectionPane() {
-        if (selectionButtonGroup == null) {
+        if (buttonGroupPanel == null) {
             selectionButtonGroup = new ButtonGroup();
             buttonGroupPanel = new JPanel();
             buttonGroupPanel.setLayout(new GridLayout(selection.length(), 1));
 
             for (Object obj : this.selection) {
-                JRadioButton btn = new JRadioButton();
-                btn.setText(obj.toString());
-                selectionButtonGroup.add(btn);
-                buttonGroupPanel.add(btn);
+                JRadioButton radioButton = new JRadioButton();
+                radioButton.setText(obj.toString());
+                selectionButtonGroup.add(radioButton);
+                buttonGroupPanel.add(radioButton);
             }
 
             buttonGroupPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Possibilities"));
@@ -133,7 +133,7 @@ public class ChooseFromJArrayDialog extends JDialog {
         int i = 0;
         while (buttons.hasMoreElements()) {
             AbstractButton button = buttons.nextElement();
-            if (selectionButtonGroup.isSelected((ButtonModel) button)) {
+            if (button.isSelected()) {
                 return i;
             }
             i++;
@@ -142,7 +142,7 @@ public class ChooseFromJArrayDialog extends JDialog {
     }
 
     public JSONObject getSelectedItem() {
-        return selection.getJSONObject(getSelectedIndex());
+        return getSelectedIndex() > 0 ? selection.getJSONObject(getSelectedIndex()) : null;
     }
 
     public int getReturnDecision() {

@@ -36,27 +36,27 @@ public class NahimaExportDialog extends JDialog implements ProgressListener, Gui
         this.pack();
         job = new NahimaExportJob();
         job.addProgressListener(this);
-//        Thread runningThread = new Thread(() -> {
-//            boolean didRunSuccessfully = true;
-//            try {
-//                job.run();
-//            } catch (Exception e) {
-//                didRunSuccessfully = false;
-//                log.error("Error when running Nahima export job", e);
-//                getResultsTextField().setText("Error: " + e.getMessage());
-//                getCloseButton().setEnabled(true);
-//            }
-//            if (job.getLastException() != null) {
-//                didRunSuccessfully = false;
-//                getResultsTextField().setText("Error: " + job.getLastException().getMessage());
-//            } else if (didRunSuccessfully) {
-//                getResultsTextField().setText("Finished processing " + job.getTotalCount() + " Specimen");
-//            }
-//            getCloseButton().setEnabled(true);
-//        });
-//        runningThread.start();
+        Thread runningThread = new Thread(() -> {
+            boolean didRunSuccessfully = true;
+            try {
+                job.run();
+            } catch (Exception e) {
+                didRunSuccessfully = false;
+                log.error("Error when running Nahima export job", e);
+                getResultsTextField().setText("Error: " + e.getMessage());
+                getCloseButton().setEnabled(true);
+            }
+            if (job.getLastException() != null) {
+                didRunSuccessfully = false;
+                getResultsTextField().setText("Error: " + job.getLastException().getMessage());
+            } else if (didRunSuccessfully) {
+                getResultsTextField().setText("Finished processing " + job.getTotalCount() + " Specimen");
+            }
+            getCloseButton().setEnabled(true);
+        });
+        runningThread.start();
         // TODO: something like https://stackoverflow.com/questions/20269083/make-a-swing-thread-that-show-a-please-wait-jdialog
-        SwingUtilities.invokeLater(job);
+//        SwingUtilities.invokeLater(job);
     }
 
     private JPanel getJContentPane() {

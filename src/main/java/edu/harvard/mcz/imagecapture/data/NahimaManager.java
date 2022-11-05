@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.util.*;
@@ -297,11 +298,14 @@ public class NahimaManager extends AbstractRestClient {
                 ArrayList<Integer> possiblyCorrectIndices = new ArrayList<Integer>();
                 ArrayList<Integer> carefulPossiblyCorrectIndices = new ArrayList<Integer>();
                 ArrayList<JSONObject> objectsToCompare = new ArrayList<JSONObject>();
+                HashMap<Integer, Integer> newIndicesToOldIndices = new HashMap<Integer, Integer>();
                 for (int i = 0; i < foundObjects.length(); ++i) {
                     JSONObject testObj = foundObjects.getJSONObject(i);
                     objectsToCompare.add(testObj);
+                    newIndicesToOldIndices.put(objectsToCompare.size() - 1, i);
                     if (testObj.has(objectType)) {
                         objectsToCompare.add(testObj.getJSONObject(objectType));
+                        newIndicesToOldIndices.put(objectsToCompare.size() - 1, i);
                     }
                 }
                 for (int i = 0; i < objectsToCompare.size(); ++i) {
@@ -321,11 +325,11 @@ public class NahimaManager extends AbstractRestClient {
                         try {
                             JSONObject pool = (JSONObject) testObj.get("_pool");
                             if (((JSONObject) pool.get("pool")).getInt("_id") == NahimaManager.defaultPoolId) {
-                                possiblyCorrectIndices.add(i);
+                                possiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
                             }
                         } catch (Exception e) {
                             log.error("Could not verify pool", e);
-                            carefulPossiblyCorrectIndices.add(i);
+                            carefulPossiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
                         }
                     }
                 }
@@ -393,7 +397,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param omitPool   whether to add a pool field when creating the object new
      * @return the matching or new object
      */
-    public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner, boolean omitPool, int recurse) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner, boolean omitPool, int recurse) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         if (name == null || objectType == null || name.equals("")) {
             log.warn("Cannot search as search " + name + " or objectType " + objectType + " is null or empty");
             return null;
@@ -425,11 +429,11 @@ public class NahimaManager extends AbstractRestClient {
         // return null;
     }
 
-    public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveOrCreateInteractive(name, objectType, mask, inner, false, 0);
     }
 
-    public JSONObject askToCreate(JSONObject inner, String name, String objectType, String mask, boolean omitPool) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject askToCreate(JSONObject inner, String name, String objectType, String mask, boolean omitPool) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         // ask whether to create the object like this
         VerifyJSONDialog dialog = new VerifyJSONDialog(Singleton.getSingletonInstance().getMainFrame(), inner.toString(), name);
         int result = dialog.getReturnDecision();
@@ -456,12 +460,21 @@ public class NahimaManager extends AbstractRestClient {
      * @param inner        the object to use for creation when applicable
      * @param omitPool     whether to omit the pool when wrapping the object for creation
      */
-    public JSONObject askToChooseObject(JSONArray foundObjects, String name, String objectType, String mask, JSONObject inner, boolean omitPool) throws SkipSpecimenException, IOException, InterruptedException {
-        ChooseFromJArrayDialog dialog = new ChooseFromJArrayDialog(Singleton.getSingletonInstance().getMainFrame(), foundObjects, objectType, name);
-        int result = dialog.getReturnDecision();
-        switch (result) {
+    public JSONObject askToChooseObject(JSONArray foundObjects, String name, String objectType, String mask, JSONObject inner, boolean omitPool) throws SkipSpecimenException, IOException, InterruptedException, InvocationTargetException {
+        final int[] choice = new int[1];
+        final JSONObject[] selection = new JSONObject[1];
+        SwingUtilities.invokeAndWait(new Runnable() {
+            public void run() {
+                ChooseFromJArrayDialog dialog = new ChooseFromJArrayDialog(Singleton.getSingletonInstance().getMainFrame(), foundObjects, objectType, name);
+                dialog.setVisible(true);
+                int result = dialog.getReturnDecision();
+                choice[0] = result;
+                selection[0] = dialog.getSelectedItem();
+            }
+        });
+        switch (choice[0]) {
             case ChooseFromJArrayDialog.RETURN_ACCEPT:
-                return dialog.getSelectedItem();
+                return selection[0];
             case ChooseFromJArrayDialog.RETURN_SKIP:
                 throw new SkipSpecimenException();
             case ChooseFromJArrayDialog.RETURN_CREATE_NEW:
@@ -469,7 +482,7 @@ public class NahimaManager extends AbstractRestClient {
             case ChooseFromJArrayDialog.RETURN_CHANGE_SEARCH:
                 return askToChangeSearch(name, objectType, inner, mask, omitPool);
             default:
-                throw new RuntimeException("Undefined result type: " + result);
+                throw new RuntimeException("Undefined result type: " + choice[0]);
         }
     }
 
@@ -482,7 +495,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param mask       the mask to use when creating anew
      * @param omitPool   whether to omit the pool when wrapping the object for creation
      */
-    private JSONObject askToChangeSearch(String name, String objectType, JSONObject inner, String mask, boolean omitPool) throws IOException, InterruptedException, SkipSpecimenException {
+    private JSONObject askToChangeSearch(String name, String objectType, JSONObject inner, String mask, boolean omitPool) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         String newSearch = (String) JOptionPane.showInputDialog(Singleton.getSingletonInstance().getMainFrame(), "Search for " + objectType, "Change Search", JOptionPane.QUESTION_MESSAGE, null, null, name);
         return resolveOrCreateInteractive(newSearch, objectType, mask, inner, omitPool, 1);
     }
@@ -512,7 +525,7 @@ public class NahimaManager extends AbstractRestClient {
      *
      * @param personName the name to search for
      */
-    public JSONObject resolvePerson(String personName) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolvePerson(String personName) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         if (personName == null) {
             return null;
         }
@@ -564,7 +577,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param specimen the specimen to search the location for
      * @return the Nahima returned object if only one
      */
-    public JSONObject resolveLocation(Specimen specimen) throws IOException, InterruptedException, SkipSpecimenException, NullPointerException {
+    public JSONObject resolveLocation(Specimen specimen) throws IOException, InterruptedException, SkipSpecimenException, NullPointerException, InvocationTargetException {
         String searchString = specimen.getPrimaryDivisonISO() != null ? specimen.getPrimaryDivisonISO() : String.join(" ", specimen.getPrimaryDivison(), specimen.getCountry());
 
         JSONObject parent = null;
@@ -587,7 +600,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param status the search string
      * @return the nahima returned object if only one
      */
-    public JSONObject resolveTypeStatus(String status) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolveTypeStatus(String status) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         JSONObject result = this.resolveOrCreateInteractive(status, "typusstatus", "typusstatus_all_fields_1", new JSONObject(new HashMap<>() {{
             put("name", status);
             put("bemerkung", getCreatedByThisSoftwareIndication());
@@ -601,7 +614,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param unit        the unit to find in Nahima
      * @param unitSubject the unit type
      */
-    public JSONObject resolveUnitFor(String unit, String unitSubject) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolveUnitFor(String unit, String unitSubject) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         JSONObject results = this.resolveOrCreateInteractive(unit, unitSubject, unitSubject + "_all_fields", new JSONObject(new HashMap<>() {{
             put("name", unit);
             put("bemerkung", getCreatedByThisSoftwareIndication());
@@ -635,7 +648,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param unit the search string
      * @return the nahima returned object if only one
      */
-    public JSONObject resolveUnitForHeight(String unit) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolveUnitForHeight(String unit) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveUnitFor(unit, "einheitenfuerhoehe");
     }
 
@@ -645,7 +658,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param unit the search string
      * @return the nahima returned object if only one
      */
-    public JSONObject resolveUnitForErrorRadius(String unit) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolveUnitForErrorRadius(String unit) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveUnitFor(unit, "einheitenfuerdenfehlerradius");
     }
 
@@ -750,7 +763,7 @@ public class NahimaManager extends AbstractRestClient {
     /**
      * Find or create a sex in Nahima
      */
-    public JSONObject resolveSex(String sex) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolveSex(String sex) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveOrCreateInteractive(sex, "geschlechter", "geschlechter_all_fields_1", new JSONObject(new HashMap<>() {{
             put("name", sex);
             put("bemerkung", getCreatedByThisSoftwareIndication());
@@ -760,7 +773,7 @@ public class NahimaManager extends AbstractRestClient {
     /**
      * Find or create a life stage in Nahima
      */
-    public JSONObject resolveLifeStage(String lifeStage) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolveLifeStage(String lifeStage) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveOrCreateInteractive(lifeStage, "lebensabschnitte", "lebensabschnitte_all_fields", new JSONObject(new HashMap<>() {{
             put("name", lifeStage);
             put("bemerkung", getCreatedByThisSoftwareIndication());
@@ -798,7 +811,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param format the datum to search for
      * @return the nahima returned object if only one
      */
-    public JSONObject resolveDatumFormat(String format) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolveDatumFormat(String format) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveOrCreateInteractive(format, "datumsformate", "datumsformate", new JSONObject(new HashMap<>() {{
             put("name", format);
             put("bemerkung", getCreatedByThisSoftwareIndication());
@@ -808,7 +821,7 @@ public class NahimaManager extends AbstractRestClient {
     /**
      * Find or create a preparation part in Nahima
      */
-    public JSONObject resolvePreparationPart(String partName) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolvePreparationPart(String partName) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveOrCreateInteractive(partName, "praeparatteile", "praeparatteile_all_fields", new JSONObject(new HashMap<>() {{
             put("name", partName);
             put("bemerkung", getCreatedByThisSoftwareIndication());
@@ -818,7 +831,7 @@ public class NahimaManager extends AbstractRestClient {
     /**
      * Find or create a preparation part attribute in Nahima
      */
-    public JSONObject resolvePreparationPartAttribute(String attributeName, String attributeValue) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolvePreparationPartAttribute(String attributeName, String attributeValue) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveOrCreateInteractive(attributeName + " " + attributeValue, "probenteilattribute", "probenteilattribute_all_fields", new JSONObject(new HashMap<>() {{
             put("attribute", attributeName);
             put("einheit", attributeValue);
@@ -828,7 +841,7 @@ public class NahimaManager extends AbstractRestClient {
     /**
      * Find or create a preparation part in Nahima
      */
-    public JSONObject resolveMountingMethod(String method) throws IOException, InterruptedException, SkipSpecimenException {
+    public JSONObject resolveMountingMethod(String method) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveOrCreateInteractive(method, "montierungsmethoden", "montierungsmethoden_all_fields", new JSONObject(new HashMap<>() {{
             put("name", method);
             put("bemerkung", getCreatedByThisSoftwareIndication());

@@ -81,7 +81,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "infraspezifischerrang", () -> nahimaManager.resolveInfraspecificRank(toSerialize.getInfraspecificRank()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "infraspezifischestaxon", () -> nahimaManager.resolveInfraspecificEpithet(toSerialize.getInfraspecificEpithet()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "subspezifischeart", () -> nahimaManager.resolveSubSpecificEpithet(toSerialize.getSubspecificEpithet()));
-        tryNonUserSkippableResolve(mainReverseNestedDetermination, "taxonname", () -> nahimaManager.resolveAssociatedTaxon(toSerialize.getAssociatedTaxon()));
+        tryNonUserSkippableResolve(mainReverseNestedDetermination, "taxonname", () -> nahimaManager.resolveTaxon(String.join(" ", toSerialize.getGenus(), toSerialize.getSpecificEpithet(), toSerialize.getSubspecificEpithet()).replace("  ", " ")));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "unterfamilie", () -> nahimaManager.resolveSubFamily(toSerialize.getSubfamily()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "tribus", () -> nahimaManager.resolveTribe(toSerialize.getTribe()));
 
@@ -91,7 +91,13 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 
         JSONArray identifierPersons = new JSONArray();
         tryUserSkippableResolve(identifierPersons, () -> nahimaManager.resolvePerson(toSerialize.getIdentifiedBy()), "person");
-        mainReverseNestedDetermination.put("_nested:bestimmung__bestimmer_person", identifierPersons);
+        JSONArray wrappedIdentifierPersons = new JSONArray();
+        identifierPersons.forEach(identifierPerson -> {
+            JSONObject wrappedIdentifier = new JSONObject();
+            wrappedIdentifier.put("bestimmer_person", identifierPerson);
+            wrappedIdentifierPersons.put(wrappedIdentifier);
+        });
+        mainReverseNestedDetermination.put("_nested:bestimmung__bestimmer_person", wrappedIdentifierPersons);
 
         if (!Objects.equals(toSerialize.getTypeStatus(), "Not a Type")) {
             tryUserSkippableResolve(mainReverseNestedDetermination, "typusstatus", () -> nahimaManager.resolveTypeStatus(toSerialize.getTypeStatus()));
@@ -115,7 +121,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 //                put("taxonnametrans", toSerialize.getAssociatedTaxon());
 //                put("unterfamilietrans", toSerialize.getSubfamily());
             }};
-            if (!Objects.equals(det.getTypeStatus(), "Not a Type")) {
+            if (det.getTypeStatus() != null && !Objects.equals(det.getTypeStatus(), "Not a Type")) {
                 reverseNestedCollectionMap.put("typusid", det.getSpeciesNumber());
                 reverseNestedCollectionMap.put("typusstatustrans", det.getTypeStatus());
             }
@@ -126,7 +132,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             // try to parse and set the date correctly
             tryNonUserSkippableResolve(reverseNestedDetermination, "bestimmungsdatum", () -> this.dateToNahima(det.getDateIdentified(), true));
 
-            tryUserSkippableResolve(reverseNestedDetermination, "typusstatus", () -> nahimaManager.resolveTypeStatus(det.getTypeStatus()));
+//            tryUserSkippableResolve(reverseNestedDetermination, "typusstatus", () -> nahimaManager.resolveTypeStatus(det.getTypeStatus()));
             // finally,
             reverseNestedDeterminations.put(reverseNestedDetermination);
         }
@@ -148,13 +154,13 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("mikrohabitat", nahimaManager.wrapInLan(toSerialize.getMicrohabitat()));
             put("traegerorganismustrans", toSerialize.getAssociatedTaxon());
             put("traegerorganismus", nahimaManager.wrapInLan(toSerialize.getAssociatedTaxon()));
-//            put("breitengraddezimal", georef == null ? null : georef.getLatDeg());
-//            put("laengengraddezimal", georef == null ? null : georef.getLongDeg());
-            put("breitengrad", georef == null ? null : georef.getLatDeg());
-            put("laengengrad", georef == null ? null : georef.getLongDeg());
-            put("fehlerradius", georef == null ? null : georef.getMaxErrorDistance());
-            put("hoehemin", toSerialize.getMinimum_elevation());
-            put("hoehemax", toSerialize.getMaximum_elevation());
+            put("breitengraddezimal", (georef == null || georef.getLatDeg() == null) ? JSONObject.NULL : georef.getLatDeg().toString());
+            put("laengengraddezimal", (georef == null || georef.getLongDeg() == null) ? JSONObject.NULL : georef.getLongDeg().toString());
+//            put("breitengrad", georef == null ? JSONObject.NULL : georef.getLatDeg().toString());
+//            put("laengengrad", georef == null ? JSONObject.NULL : georef.getLongDeg().toString());
+            put("fehlerradius", (georef == null || georef.getMaxErrorDistance() == null) ? JSONObject.NULL : georef.getMaxErrorDistance().toString());
+            put("hoehemin", toSerialize.getMinimum_elevation() == null ? JSONObject.NULL : toSerialize.getMinimum_elevation().toString());
+            put("hoehemax", toSerialize.getMaximum_elevation() == null ? JSONObject.NULL : toSerialize.getMaximum_elevation().toString());
             put("lokalitaettrans", toSerialize.getVerbatimLocality());
             put("__idx", 0);
             put("_version", 1);

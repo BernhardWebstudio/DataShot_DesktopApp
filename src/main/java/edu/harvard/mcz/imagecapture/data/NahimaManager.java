@@ -835,7 +835,7 @@ public class NahimaManager extends AbstractRestClient {
     /**
      *
      */
-    public JSONObject resolveAssociatedTaxon(String associatedTaxon) throws IOException, InterruptedException {
+    public JSONObject resolveTaxon(String associatedTaxon) throws IOException, InterruptedException {
         return resolveOrCreate(associatedTaxon, "taxonnamen", "taxonnamen__all_fields", new JSONObject(new HashMap<>() {{
             put("dddtaxonnamelat", associatedTaxon);
             put("_nested:taxonnamen__trivialnamen", new JSONArray());

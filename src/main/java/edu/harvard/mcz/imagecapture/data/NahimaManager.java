@@ -103,7 +103,7 @@ public class NahimaManager extends AbstractRestClient {
         JSONObject responseObject = new JSONObject(response);
         if (responseObject.has("code")) {
             if (((String) responseObject.get("code")).startsWith("error")) {
-                throw new RuntimeException("Failed to log in. Error code: " + responseObject.get("code"));
+                throw new RuntimeException("Failed to log in. Error code: " + responseObject.get("code") + ". " + (responseObject.has("description") ? responseObject.getString("description") : ""));
             }
         }
     }
@@ -487,6 +487,7 @@ public class NahimaManager extends AbstractRestClient {
         switch (choice[0]) {
             case VerifyJSONDialog.RETURN_ACCEPT:
                 inner = resultingObj[0];
+                break;
             case VerifyJSONDialog.RETURN_CHANGE_SEARCH:
                 return askToChangeSearch(name, objectType, inner, mask, omitPool);
             case VerifyJSONDialog.RETURN_SKIP:

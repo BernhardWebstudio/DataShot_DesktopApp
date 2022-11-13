@@ -140,7 +140,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         result.put("_reverse_nested:bestimmung:entomologie", reverseNestedDeterminations);
 
         JSONArray reverseNestedCollections = new JSONArray();
-        LatLong georef = toSerialize.getLatLong().isEmpty() ? null : (LatLong) toSerialize.getLatLong().toArray()[0];
+        LatLong georef = toSerialize.getLatLong().isEmpty() ? null : toSerialize.getLatLong().iterator().next();;
         // some other basic reverse nested values for "aufsammlung" (collection)
         Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
             put("sammlertrans", toSerialize.getCollectors().stream().map(Collector::getCollectorName).collect(Collectors.joining(", ")));
@@ -154,10 +154,10 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("mikrohabitat", nahimaManager.wrapInLan(toSerialize.getMicrohabitat()));
             put("traegerorganismustrans", toSerialize.getAssociatedTaxon());
             put("traegerorganismus", nahimaManager.wrapInLan(toSerialize.getAssociatedTaxon()));
-            put("breitengraddezimal", (georef == null || georef.getLatDeg() == null) ? JSONObject.NULL : georef.getLatDeg().toString());
-            put("laengengraddezimal", (georef == null || georef.getLongDeg() == null) ? JSONObject.NULL : georef.getLongDeg().toString());
-//            put("breitengrad", georef == null ? JSONObject.NULL : georef.getLatDeg().toString());
-//            put("laengengrad", georef == null ? JSONObject.NULL : georef.getLongDeg().toString());
+            put("breitengraddezimal", (georef == null) ? JSONObject.NULL : georef.getDecLatString());
+            put("laengengraddezimal", (georef == null) ? JSONObject.NULL : georef.getDecLongString());
+            put("breitengrad",  (georef == null || georef.getLatDeg() == null) ? JSONObject.NULL : georef.getLatDeg().toString());
+            put("laengengrad", (georef == null || georef.getLongDeg() == null) ? JSONObject.NULL : georef.getLongDeg().toString());
             put("fehlerradius", (georef == null || georef.getMaxErrorDistance() == null) ? JSONObject.NULL : georef.getMaxErrorDistance().toString());
             put("hoehemin", toSerialize.getMinimum_elevation() == null ? JSONObject.NULL : toSerialize.getMinimum_elevation().toString());
             put("hoehemax", toSerialize.getMaximum_elevation() == null ? JSONObject.NULL : toSerialize.getMaximum_elevation().toString());
@@ -218,7 +218,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         reverseNestedCollection.put("indikator_fuer_kultur_zucht", toSerialize.getDateEmergedIndicator());
         reverseNestedCollection.put("kultur_zucht", !Objects.equals(toSerialize.getDateEmerged(), "") && toSerialize.getDateEmerged() != null);
         reverseNestedCollection.put("sammeldatumtrans", toSerialize.getDateCollected());
-        tryNonUserSkippableResolve(reverseNestedCollection, "sammeldatum", () -> dateToNahima(toSerialize.getDateCollected(), true));
+        tryNonUserSkippableResolve(reverseNestedCollection, "sammeldatum", () -> dateToNahima(toSerialize.getDateCollected(), false));
 
         reverseNestedCollections.put(reverseNestedCollection);
         result.put("_reverse_nested:aufsammlung:entomologie", reverseNestedCollections);
@@ -265,7 +265,17 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             Date parsedDate = DateUtils.parseDate(date);
             return dateToNahima(parsedDate);
         } catch (ParseException e) {
+            String[] splitDate = date.split("\\.");
+            if (splitDate.length == 3) {
+                // try manually, knowing the Swiss type of date
+                try {
+                    SimpleDateFormat format = new SimpleDateFormat("d.M.y");
+                    return dateToNahima(format.parse(date));
+                } catch (ParseException ex) {
+                }
+            }
             if (!allowInvalid) {
+                log.error("Failed to convert date from " + date, e);
                 throw e;
             }
             JSONObject returnValue = new JSONObject();

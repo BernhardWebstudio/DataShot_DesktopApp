@@ -631,7 +631,23 @@ public class NahimaManager extends AbstractRestClient {
      * @return the Nahima returned object if only one
      */
     public JSONObject resolveLocation(Specimen specimen) throws IOException, InterruptedException, SkipSpecimenException, NullPointerException, InvocationTargetException {
-        String searchString = specimen.getPrimaryDivisonISO() != null ? specimen.getPrimaryDivisonISO() : String.join(" ", specimen.getPrimaryDivison(), specimen.getCountry());
+        String searchString = "";
+        if (specimen.getPrimaryDivisonISO() != null && !specimen.getPrimaryDivisonISO().equals("unknown")) {
+            searchString = specimen.getPrimaryDivisonISO();
+        } else {
+            if (specimen.getPrimaryDivison() != null && !specimen.getPrimaryDivison().equals("unknown")) {
+                searchString = specimen.getPrimaryDivison();
+            }
+            if (specimen.getCountry() != null && !specimen.getCountry().equals("unknown")) {
+                searchString += " " + specimen.getCountry();
+            }
+        }
+
+        searchString = searchString.trim();
+
+        if (searchString.equals("")) {
+            return new JSONObject();
+        }
 
         JSONObject parent = null;
         try {

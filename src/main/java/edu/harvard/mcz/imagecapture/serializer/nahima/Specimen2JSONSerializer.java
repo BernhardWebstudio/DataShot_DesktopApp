@@ -239,8 +239,8 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         }
         result.put("_nested:entomologie__praeparatteile", parts);
 
-        tryUserSkippableResolve(reverseNestedCollection, "geschlecht", () -> nahimaManager.resolveSex(toSerialize.getSex()));
-        tryUserSkippableResolve(reverseNestedCollection, "lebensabschnitt", () -> nahimaManager.resolveLifeStage(toSerialize.getLifeStage()));
+        tryUserSkippableResolve(result, "geschlecht", () -> nahimaManager.resolveSex(toSerialize.getSex()));
+        tryUserSkippableResolve(result, "lebensabschnitt", () -> nahimaManager.resolveLifeStage(toSerialize.getLifeStage()));
 
         // finally, wrap everything in the pool (might want to do somewhere else)
         JSONObject wrapper = nahimaManager.wrapForCreation(result, "entomologie", "entomologie_public_unrestricted");

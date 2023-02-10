@@ -167,7 +167,7 @@ public class NahimaManager extends AbstractRestClient {
         if (!returnValue.startsWith("[")) {
             JSONObject responseObject = new JSONObject(returnValue);
             if (responseObject.has("code") && responseObject.getString("code").startsWith("error")) {
-                throw new RuntimeException("Failed to create object: Error code: " + responseObject.get("code"));
+                throw new RuntimeException("Failed to create object of type '"+objType+"': Error code: " + responseObject.get("code"));
             }
         }
 
@@ -582,14 +582,56 @@ public class NahimaManager extends AbstractRestClient {
         if (personName == null) {
             return null;
         }
-        String[] splitName = personName.split(" ");
-        JSONObject results = this.resolveOrCreateInteractive(personName, "person", "person__public", new JSONObject(new HashMap<>() {{
-            put("vollername", personName);
-            put("vorname", splitName[0]);
-            put("nachname", splitName.length > 1 ? splitName[1] : JSONObject.NULL);
-            put("mitlerername", JSONObject.NULL);
+        String[] splitName;
+        String actualNamePart = personName;
+        String birthdate = "";
+        String deathdate = "";
+        String lastName = "";
+        String firstName = "";
+        if (personName.contains("(")) {
+            String[] personNameSplit = personName.split("\\(");
+            actualNamePart = personNameSplit[0];
+            String datePart = personNameSplit[1];
+            String[] splitDatePart = Arrays.stream(datePart.split("-")).map(String::trim).toArray(String[]::new);
+            birthdate = splitDatePart[0];
+            if (splitDatePart.length > 1) {
+                deathdate = splitDatePart[1];
+            }
+        }
+        if (actualNamePart.contains(",")) {
+            splitName = Arrays.stream(actualNamePart.split(",")).map(String::trim).toArray(String[]::new);
+            lastName = splitName[0];
+            firstName = splitName[1];
+        } else {
+            splitName = Arrays.stream(actualNamePart.split(" ")).map(String::trim).toArray(String[]::new);
+            firstName = splitName[0];
+            lastName = splitName.length > 1 ? splitName[splitName.length - 1] : "";
+        }
+        // inner class stuff
+        String finalActualNamePart = actualNamePart;
+        String finalFirstName = firstName;
+        String finalLastName = lastName;
+        HashMap<String, Object> personHashMap = new HashMap<>() {{
+            put("vollername", finalActualNamePart);
+            put("vorname", finalFirstName.equals("") ? JSONObject.NULL : finalFirstName);
+            put("nachname", finalLastName.equals("") ? JSONObject.NULL : finalLastName);
+            put("mitlerername", JSONObject.NULL); // TODO: split first name into these here where appropriate
             put("nismpersonid", JSONObject.NULL);
-        }}), true, 0);
+        }};
+        if (!birthdate.equals("")) {
+            String finalBirthdate = birthdate;
+            personHashMap.put("geburtstag", new JSONObject(new HashMap<>() {{
+                put("value", finalBirthdate);
+            }}));
+        }
+        if (!deathdate.equals("")) {
+            String finalDeathdate = deathdate;
+            personHashMap.put("sterbetag", new JSONObject(new HashMap<>() {{
+                put("value", finalDeathdate);
+            }}));
+        }
+        log.debug("Resolved person " + personName + " to first name " + finalFirstName + ", last name " + finalLastName + ", birth date " + birthdate + ", and death date " + deathdate);
+        JSONObject results = this.resolveOrCreateInteractive(personName, "person", "person__public", new JSONObject(personHashMap), true, 0);
         return results;
     }
 

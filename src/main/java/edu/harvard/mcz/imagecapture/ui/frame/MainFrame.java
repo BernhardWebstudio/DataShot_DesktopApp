@@ -122,6 +122,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     private JMenuItem jMenuItemMaliaStats = null;
     private JMenuItem jMenuItemRepeatOCR = null;
     private JMenuItem jMenuItemRunNahimaExport = null;
+    private JMenuItem jMenuItemRunSingleNahimaExport = null;
 
     private JMenuItem jMenuItemListRunningJobs = null;
 
@@ -1133,6 +1134,7 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuData.add(getJMenuItemBrowseSpecimens());
             jMenuData.add(getJMenuItemBatchUpdate());
             jMenuData.add(getjMenuItemRunNahimaExport());
+            jMenuData.add(getjMenuItemRunSingleNahimaExport());
         }
         return jMenuData;
     }
@@ -1167,6 +1169,22 @@ public class MainFrame extends JFrame implements RunnerListener {
             });
         }
         return jMenuItemRunNahimaExport;
+    }
+
+    /**
+     * This method initializes the menu item for the export to Nahima
+     *
+     * @return the menu item to start the export to nahima
+     */
+    private JMenuItem getjMenuItemRunSingleNahimaExport() {
+        if (jMenuItemRunSingleNahimaExport == null) {
+            jMenuItemRunSingleNahimaExport = new JMenuItem("1 Nahima Export");
+            jMenuItemRunSingleNahimaExport.addActionListener(actionEvent -> {
+                SingleNahimaExportDialog dialog = new SingleNahimaExportDialog(thisMainFrame, thisMainFrame);
+                dialog.setVisible(true);
+            });
+        }
+        return jMenuItemRunSingleNahimaExport;
     }
 
     /**

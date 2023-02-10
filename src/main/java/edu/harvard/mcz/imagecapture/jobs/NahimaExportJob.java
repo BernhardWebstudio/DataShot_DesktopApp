@@ -32,6 +32,11 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     private int currentIndex = 0;
     private int status = STATUS_RUNNING_FINE;
     private Exception lastError = null;
+    private String oneSpecimenBarcode = null;
+
+    public void setOneSpecimenToExportBarcode(String oneSpecimenBarcode) {
+        this.oneSpecimenBarcode = oneSpecimenBarcode;
+    }
 
     @Override
     public void start() {
@@ -42,6 +47,9 @@ public class NahimaExportJob implements RunnableJob, Runnable {
         Map<String, Object> queryParams = new HashMap<>();
         queryParams.put("workFlowStatus", WorkFlowStatus.STAGE_CLEAN);
         queryParams.put("nahimaExported", false);
+        if (this.oneSpecimenBarcode != null && !this.oneSpecimenBarcode.equals("")) {
+            queryParams.put("barcode", this.oneSpecimenBarcode);
+        }
         List<Specimen> specimenToExport = sls.findBy(queryParams);
         nrOfSpecimenToProcess = specimenToExport.size();
         notifyProgressChanged();

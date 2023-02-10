@@ -46,7 +46,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         for (Number otherNr : toSerialize.getNumbers()) {
             Map<String, Object> otherNrMap = new HashMap<>() {{
                 put("andereid", otherNr.getNumber());
-                put("bemerkung", String.join(" ", otherNr.getNumber(), String.valueOf(otherNr.getNumberId()), otherNr.getNumberType()));
+                put("bemerkung", String.join(" ", otherNr.getNumber(), otherNr.getNumberType()));
             }};
             try {
                 otherNrMap.put("typ", nahimaManager.resolveOtherNrType(otherNr.getNumberType()));
@@ -140,7 +140,8 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         result.put("_reverse_nested:bestimmung:entomologie", reverseNestedDeterminations);
 
         JSONArray reverseNestedCollections = new JSONArray();
-        LatLong georef = toSerialize.getLatLong().isEmpty() ? null : toSerialize.getLatLong().iterator().next();;
+        LatLong georef = toSerialize.getLatLong().isEmpty() ? null : toSerialize.getLatLong().iterator().next();
+        ;
         // some other basic reverse nested values for "aufsammlung" (collection)
         Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
             put("sammlertrans", toSerialize.getCollectors().stream().map(Collector::getCollectorName).collect(Collectors.joining(", ")));
@@ -156,7 +157,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("traegerorganismus", nahimaManager.wrapInLan(toSerialize.getAssociatedTaxon()));
             put("breitengraddezimal", (georef == null) ? JSONObject.NULL : georef.getDecLatString());
             put("laengengraddezimal", (georef == null) ? JSONObject.NULL : georef.getDecLongString());
-            put("breitengrad",  (georef == null || georef.getLatDeg() == null) ? JSONObject.NULL : georef.getLatDeg().toString());
+            put("breitengrad", (georef == null || georef.getLatDeg() == null) ? JSONObject.NULL : georef.getLatDeg().toString());
             put("laengengrad", (georef == null || georef.getLongDeg() == null) ? JSONObject.NULL : georef.getLongDeg().toString());
             put("fehlerradius", (georef == null || georef.getMaxErrorDistance() == null) ? JSONObject.NULL : georef.getMaxErrorDistance().toString());
             put("hoehemin", toSerialize.getMinimum_elevation() == null ? JSONObject.NULL : toSerialize.getMinimum_elevation().toString());
@@ -198,27 +199,44 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                     put("sammler", nahimaManager.reduceAssociateForAssociation(
                             nahimaManager.resolvePerson(collector.getCollectorName()))
                     );
-                }}), "sammler");
+                }}), "sammler", false);
             }
         }
         reverseNestedCollection.put("_nested:aufsammlung__sammler", collectors);
 
+        boolean isoDateIsPeriod = toSerialize.getIsoDate().contains("-");
+        String[] dateSplit = toSerialize.getIsoDate().split("-");
+
         try {
-            if (toSerialize.getDateNos().contains("-")) {
-                String[] dateSplit = toSerialize.getDateNos().split("-");
-                reverseNestedCollection.put("zeitraumtrans", toSerialize.getDateNos());
-                reverseNestedCollection.put("zeitraum", dateRangeToNahima(dateSplit[0].trim(), dateSplit[1].trim()));
-            } else {
-                reverseNestedCollection.put("datumtrans", toSerialize.getDateNos());
-                reverseNestedCollection.put("datum", this.dateToNahima(toSerialize.getDateEmerged(), false));
+            if (toSerialize.getDateNos() != null && !toSerialize.getDateNos().equals("")) {
+                if (toSerialize.getDateNos().contains("-")) {
+                    reverseNestedCollection.put("zeitraumtrans", toSerialize.getDateNos());
+                } else {
+                    reverseNestedCollection.put("datumtrans", toSerialize.getDateNos());
+                }
+                if (isoDateIsPeriod) {
+                    reverseNestedCollection.put("zeitraum", dateRangeToNahima(dateSplit[0].trim(), dateSplit[1].trim()));
+                } else {
+                    reverseNestedCollection.put("datum", this.dateToNahima(toSerialize.getIsoDate(), false));
+                }
+
+                if (Objects.equals(toSerialize.getDateNos(), toSerialize.getDateCollected())) {
+                    if (isoDateIsPeriod) {
+                        reverseNestedCollection.put("aufsammlungszeitraum", dateRangeToNahima(
+                                dateSplit[0].trim(), dateSplit[1].trim(), false
+                        ));
+                    } else {
+                        reverseNestedCollection.put("sammeldatum", dateToNahima(toSerialize.getIsoDate(), false));
+                    }
+                }
             }
         } catch (ParseException e) {
             log.error("Failed to parse datum " + toSerialize.getDateEmerged() + " " + toSerialize.getDateNos(), e);
         }
+
         reverseNestedCollection.put("indikator_fuer_kultur_zucht", toSerialize.getDateEmergedIndicator());
         reverseNestedCollection.put("kultur_zucht", !Objects.equals(toSerialize.getDateEmerged(), "") && toSerialize.getDateEmerged() != null);
         reverseNestedCollection.put("sammeldatumtrans", toSerialize.getDateCollected());
-        tryNonUserSkippableResolve(reverseNestedCollection, "sammeldatum", () -> dateToNahima(toSerialize.getDateCollected(), false));
 
         reverseNestedCollections.put(reverseNestedCollection);
         result.put("_reverse_nested:aufsammlung:entomologie", reverseNestedCollections);
@@ -248,11 +266,15 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     }
 
     protected JSONObject dateRangeToNahima(String from, String to) throws ParseException {
-        Date parsedDateFrom = DateUtils.parseDate(from);
-        Date parsedDateTo = DateUtils.parseDate(to);
+        return this.dateRangeToNahima(from, to, false);
+    }
+
+    protected JSONObject dateRangeToNahima(String from, String to, boolean allowInvalid) throws ParseException {
+        JSONObject parsedDateFrom = this.dateToNahima(from, allowInvalid);
+        JSONObject parsedDateTo = this.dateToNahima(to, allowInvalid);
         JSONObject returnValue = new JSONObject();
-        returnValue.put("from", nahimaDateFormat.format(parsedDateFrom));
-        returnValue.put("to", nahimaDateFormat.format(parsedDateTo));
+        returnValue.put("from", parsedDateFrom.getString("value"));
+        returnValue.put("to", parsedDateTo.getString("value"));
         return returnValue;
     }
 
@@ -265,11 +287,24 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             Date parsedDate = DateUtils.parseDate(date);
             return dateToNahima(parsedDate);
         } catch (ParseException e) {
-            String[] splitDate = date.split("\\.");
-            if (splitDate.length == 3) {
+            if (date.matches("^[0-9]{1,2}\\.^[0-9]{1,2}\\.^[0-9]{2,4}$")) {
                 // try manually, knowing the Swiss type of date
                 try {
                     SimpleDateFormat format = new SimpleDateFormat("d.M.y");
+                    return dateToNahima(format.parse(date));
+                } catch (ParseException ex) {
+                }
+            }
+            if (date.matches("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}$")) {
+                try {
+                    SimpleDateFormat format = new SimpleDateFormat("d/M/y");
+                    return dateToNahima(format.parse(date));
+                } catch (ParseException ex) {
+                }
+            }
+            if (date.matches("^[0-9]{2,4}/[0-9]{1,2}/[0-9]{1,2}$")) {
+                try {
+                    SimpleDateFormat format = new SimpleDateFormat("y/M/d");
                     return dateToNahima(format.parse(date));
                 } catch (ParseException ex) {
                 }
@@ -349,20 +384,24 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         }
     }
 
-    /**
-     * Try to run a resolve function on a certain property, do nothing if it fails,
-     * except when a SkipSpecimenException is thrown, i.e., when the resolver allowed user input "skip specimen"
-     *
-     * @param target    the array to append data to
-     * @param resolver  the resolver function
-     * @param debugHint the useful info on what worked/did not work
-     */
     protected void tryUserSkippableResolve(JSONArray target, ResolverMethodInterface resolver, String debugHint) throws SkipSpecimenException {
+        tryUserSkippableResolve(target, resolver, debugHint, true);
+    }
+
+        /**
+         * Try to run a resolve function on a certain property, do nothing if it fails,
+         * except when a SkipSpecimenException is thrown, i.e., when the resolver allowed user input "skip specimen"
+         *
+         * @param target    the array to append data to
+         * @param resolver  the resolver function
+         * @param debugHint the useful info on what worked/did not work
+         */
+    protected void tryUserSkippableResolve(JSONArray target, ResolverMethodInterface resolver, String debugHint, boolean reduceJSONObject) throws SkipSpecimenException {
         // try to parse and set correctly
         try {
             Object returnValue = resolver.doResolve();
             if (returnValue != null) {
-                if (returnValue instanceof JSONObject) {
+                if (returnValue instanceof JSONObject && reduceJSONObject) {
                     target.put(nahimaManager.reduceAssociateForAssociation((JSONObject) returnValue));
                 } else {
                     target.put(returnValue);

@@ -26,8 +26,16 @@ public class NahimaExportDialog extends JDialog implements ProgressListener, Gui
         super(owner);
         initialize();
     }
+    public NahimaExportDialog(Frame owner, String oneSpecimenBarcode) {
+        super(owner);
+        initialize(oneSpecimenBarcode);
+    }
 
     private void initialize() {
+        initialize(null);
+    }
+
+    private void initialize(String oneSpecimenToExport) {
         this.setPreferredSize(new Dimension(450, 225));
         this.setTitle("Nahima Export");
         this.staticStatusText = "Please do not close this window until the export is done.";
@@ -35,6 +43,9 @@ public class NahimaExportDialog extends JDialog implements ProgressListener, Gui
         this.setSize(new Dimension(450, 225));
         this.pack();
         job = new NahimaExportJob();
+        if (oneSpecimenToExport != null) {
+            job.setOneSpecimenToExportBarcode(oneSpecimenToExport);
+        }
         job.addProgressListener(this);
         Thread runningThread = new Thread(() -> {
             boolean didRunSuccessfully = true;

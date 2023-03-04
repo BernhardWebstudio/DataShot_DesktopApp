@@ -673,6 +673,9 @@ public class NahimaManager extends AbstractRestClient {
      * @return the Nahima returned object if only one
      */
     public JSONObject resolveLocation(Specimen specimen) throws IOException, InterruptedException, SkipSpecimenException, NullPointerException, InvocationTargetException {
+        if (specimen == null) {
+            return null;
+        }
         String searchString = "";
         if (specimen.getPrimaryDivisonISO() != null && !specimen.getPrimaryDivisonISO().equals("unknown")) {
             searchString = specimen.getPrimaryDivisonISO();
@@ -897,6 +900,14 @@ public class NahimaManager extends AbstractRestClient {
     public JSONObject resolveTaxon(String associatedTaxon) throws IOException, InterruptedException {
         return resolveOrCreate(associatedTaxon, "taxonnamen", "taxonnamen__all_fields", new JSONObject(new HashMap<>() {{
             put("dddtaxonnamelat", associatedTaxon);
+            put("taxonnamelat", new JSONObject(new HashMap<>() {{
+                put("scientificName", associatedTaxon);
+                put("redList", false); // TODO: use the redlist api to check
+                put("unclear", true);
+                put("_standard", new JSONObject(new HashMap<>() {{
+                    put("text", associatedTaxon);
+                }}));
+            }}));
             put("_nested:taxonnamen__trivialnamen", new JSONArray());
             put("_nested:taxonnamen__referenzenfuertribus", new JSONArray());
             put("bemerkung", getCreatedByThisSoftwareIndication());
@@ -971,7 +982,7 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     public JSONObject reduceAssociateForAssociation(JSONObject associate, String objectType) {
-        if (associate == null) {
+        if (associate == null|| associate.isEmpty()) {
             return null;
         }
         JSONObject reduced = new JSONObject();

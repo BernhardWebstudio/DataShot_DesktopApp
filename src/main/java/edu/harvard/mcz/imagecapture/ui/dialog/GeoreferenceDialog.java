@@ -503,7 +503,7 @@ public class GeoreferenceDialog extends JDialog {
         for (int i = 0; i < labels.length; i++) {
             JLabel label = new JLabel();
             label.setText(labels[i].concat(":"));
-            fieldsPanel.add(label, "right"); //"align label");
+            fieldsPanel.add(label, "tag label, right"); //"align label");
             fieldsPanel.add(fields[i], "grow");
         }
 

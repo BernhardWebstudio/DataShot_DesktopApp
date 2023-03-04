@@ -40,7 +40,8 @@ public class NahimaExportDialog extends JDialog implements ProgressListener, Gui
         this.setTitle("Nahima Export");
         this.staticStatusText = "Please do not close this window until the export is done.";
         this.setContentPane(getJContentPane());
-        this.setSize(new Dimension(450, 225));
+        this.setMinimumSize(new Dimension(350, 100));
+        this.setSize(new Dimension(550, 225));
         this.pack();
         job = new NahimaExportJob();
         if (oneSpecimenToExport != null) {

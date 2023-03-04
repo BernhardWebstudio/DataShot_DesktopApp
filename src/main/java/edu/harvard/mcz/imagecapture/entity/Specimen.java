@@ -114,6 +114,24 @@ public class Specimen implements Serializable {
     // need to call it higherOrder as "order" alone gives issues with SQL
     private String higherOrder;
     private String nahimaId;
+    private String citedInPublicationLink;
+    private String citedInPublicationComment;
+
+    public String getCitedInPublicationComment() {
+        return citedInPublicationComment;
+    }
+
+    public void setCitedInPublicationComment(String citedInPublicationComment) {
+        this.citedInPublicationComment = citedInPublicationComment;
+    }
+
+    public String getCitedInPublicationLink() {
+        return citedInPublicationLink;
+    }
+
+    public void setCitedInPublicationLink(String citedInPublicationLink) {
+        this.citedInPublicationLink = citedInPublicationLink;
+    }
 
     public String getNahimaId() {
         return nahimaId;

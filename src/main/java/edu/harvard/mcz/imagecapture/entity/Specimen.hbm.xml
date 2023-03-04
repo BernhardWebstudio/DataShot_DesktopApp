@@ -28,6 +28,12 @@
         <property name="citedInPublication" type="string">
             <column name="CitedInPublication" length="900"/>
         </property>
+        <property name="citedInPublicationLink" type="string">
+            <column name="CitedInPublicationLink" length="900"/>
+        </property>
+        <property name="citedInPublicationComment" type="string">
+            <column name="CitedInPublicationComment" length="900"/>
+        </property>
         <property name="features" type="string">
             <column name="Features" length="50"/>
         </property>

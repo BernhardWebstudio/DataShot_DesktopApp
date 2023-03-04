@@ -81,7 +81,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "infraspezifischerrang", () -> nahimaManager.resolveInfraspecificRank(toSerialize.getInfraspecificRank()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "infraspezifischestaxon", () -> nahimaManager.resolveInfraspecificEpithet(toSerialize.getInfraspecificEpithet()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "subspezifischeart", () -> nahimaManager.resolveSubSpecificEpithet(toSerialize.getSubspecificEpithet()));
-        tryNonUserSkippableResolve(mainReverseNestedDetermination, "taxonname", () -> nahimaManager.resolveTaxon(String.join(" ", toSerialize.getGenus(), toSerialize.getSpecificEpithet(), toSerialize.getSubspecificEpithet()).replace("  ", " ")));
+        tryNonUserSkippableResolve(mainReverseNestedDetermination, "taxonname", () -> nahimaManager.resolveTaxon(String.join(" ", toSerialize.getGenus(), toSerialize.getSpecificEpithet(), toSerialize.getSubspecificEpithet(), toSerialize.getInfraspecificRank(), toSerialize.getInfraspecificEpithet()).replace("  ", " ")));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "unterfamilie", () -> nahimaManager.resolveSubFamily(toSerialize.getSubfamily()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "tribus", () -> nahimaManager.resolveTribe(toSerialize.getTribe()));
 
@@ -148,12 +148,12 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("sammlungtrans", toSerialize.getCollection());
             put("sammlungstitel", toSerialize.getCollection());
             put("kommentare", toSerialize.getSpecimenNotes());
-            put("habitattrans", toSerialize.getHabitat());
+//            put("habitattrans", toSerialize.getHabitat());
 //            put("sammelorttrans", toSerialize.getVerbatimLocality());
             put("lokalitaet", toSerialize.getSpecificLocality());
             put("neuhabitat", nahimaManager.wrapInLan(toSerialize.getHabitat()));
             put("mikrohabitat", nahimaManager.wrapInLan(toSerialize.getMicrohabitat()));
-            put("traegerorganismustrans", toSerialize.getAssociatedTaxon());
+//            put("traegerorganismustrans", toSerialize.getAssociatedTaxon());
             put("traegerorganismus", nahimaManager.wrapInLan(toSerialize.getAssociatedTaxon()));
             put("breitengraddezimal", (georef == null) ? JSONObject.NULL : georef.getDecLatString());
             put("laengengraddezimal", (georef == null) ? JSONObject.NULL : georef.getDecLongString());
@@ -261,7 +261,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         tryUserSkippableResolve(result, "lebensabschnitt", () -> nahimaManager.resolveLifeStage(toSerialize.getLifeStage()));
 
         // finally, wrap everything in the pool (might want to do somewhere else)
-        JSONObject wrapper = nahimaManager.wrapForCreation(result, "entomologie", "entomologie_public_unrestricted");
+        JSONObject wrapper = nahimaManager.wrapForCreation(result, "entomologie", "entomologie__complete");
         return wrapper;
     }
 

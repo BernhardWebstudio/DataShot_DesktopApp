@@ -35,6 +35,7 @@ import edu.harvard.mcz.imagecapture.ui.MouseWheelScrollListener;
 import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor;
 import edu.harvard.mcz.imagecapture.ui.component.JAccordionPanel;
 import edu.harvard.mcz.imagecapture.ui.component.JTableWithRowBorder;
+import edu.harvard.mcz.imagecapture.ui.dialog.CitedInDialog;
 import edu.harvard.mcz.imagecapture.ui.dialog.GeoreferenceDialog;
 import edu.harvard.mcz.imagecapture.ui.field.FilteringGeogJComboBox;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.CollectorTableModel;
@@ -136,7 +137,6 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField jTextFieldAssociatedTaxon = null;
     private JTextField jTextFieldAuthorship = null;
     private JTextField jTextFieldBarcode = null;
-    private JTextField jTextFieldCitedInPub = null;
     private JTextField jTextFieldCollectingMethod = null;
     private JTextField jTextFieldCreator = null;
     private JTextField jTextFieldDateCollected = null;
@@ -169,6 +169,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField jTextFieldVerbatimLocality = null;
     private JTextField textFieldMaxElev = null;
     private JTextField textFieldMicrohabitat = null;
+    private JButton citedInPublicationButton = null;
     private SpecimenDetailsViewPane thisPane = null;
 
 
@@ -530,7 +531,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 
             log.debug("sex=" + specimen.getSex());
 
-            specimen.setCitedInPublication(jTextFieldCitedInPub.getText());
             // specimen.setPreparationType(jTextFieldPreparationType.getText());
             specimen.setAssociatedTaxon(jTextFieldAssociatedTaxon.getText());
             specimen.setHabitat(jTextFieldHabitat.getText());
@@ -719,7 +719,10 @@ public class SpecimenDetailsViewPane extends JPanel {
         // new - verbatim locality
         jTextFieldVerbatimLocality.setText(previousSpecimen.getVerbatimLocality());
         // new - publications
-        jTextFieldCitedInPub.setText(previousSpecimen.getCitedInPublication());
+//        jTextFieldCitedInPub.setText(previousSpecimen.getCitedInPublication());
+        specimen.setCitedInPublicationComment(previousSpecimen.getCitedInPublicationComment());
+        specimen.setCitedInPublicationLink(previousSpecimen.getCitedInPublicationLink());
+        specimen.setCitedInPublication(previousSpecimen.getCitedInPublication());
         // new - features
         jComboBoxFeatures.setSelectedItem(previousSpecimen.getFeatures());
         // new - collecting method
@@ -849,7 +852,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         getJComboBoxFeatures().setSelectedItem(specimen.getFeatures());
         getJComboBoxLifeStage().setSelectedItem(specimen.getLifeStage());
         getJComboBoxSex().setSelectedItem(specimen.getSex());
-        getCitedInPublicationJTextField().setText(specimen.getCitedInPublication());
+//        getCitedInPublicationJTextField().setText(specimen.getCitedInPublication());
         getQuestionsJTextField().setText(specimen.getQuestions());
         getJComboBoxWorkflowStatus().setSelectedItem(specimen.getWorkFlowStatus());
         if (specimen.isStateDone()) {
@@ -1056,7 +1059,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPanel.add(this.getJButtonAddPrep(), "right");
             // row
             this.addBasicJLabel(jPanel, "Publications");
-            jPanel.add(this.getCitedInPublicationJTextField(), "grow");
+            jPanel.add(this.getCitedInPublicationButton(), "grow");
             this.addBasicJLabel(jPanel, "Associated Taxon");
             jPanel.add(this.getAssociatedTaxonJTextField(), "grow");
             // row
@@ -1114,6 +1117,33 @@ public class SpecimenDetailsViewPane extends JPanel {
 //            jPanel.add(this.getSaveNextJButton(), "tag next, tag apply");
         }
         return jPanel;
+    }
+
+    private JButton getCitedInPublicationButton() {
+        if (citedInPublicationButton == null) {
+            citedInPublicationButton = new JButton("Manage Publication");
+            SpecimenDetailsViewPane self = this;
+            citedInPublicationButton.addActionListener(actionEvent -> {
+                CitedInDialog dialog = new CitedInDialog(self.specimen.getCitedInPublication(),
+                        self.specimen.getCitedInPublicationLink(),
+                        self.specimen.getCitedInPublicationComment());
+                dialog.addCloseListener((type, source) -> {
+                    if (type == CloseType.OK) {
+                        self.specimen.setCitedInPublication(
+                                dialog.getCitedInPublication()
+                        );
+                        self.specimen.setCitedInPublicationLink(
+                                dialog.getCitedInLink()
+                        );
+                        self.specimen.setCitedInPublicationComment(
+                                dialog.getCitedInComment()
+                        );
+                    }
+                });
+                dialog.setVisible(true);
+            });
+        }
+        return citedInPublicationButton;
     }
 
 //    private JButton getSaveNextJButton() {
@@ -3098,28 +3128,6 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
                     });
         }
         return jButtonDeterminations;
-    }
-
-    /**
-     * This method initializes jTextField
-     *
-     * @return javax.swing.JTextField
-     */
-    private JTextField getCitedInPublicationJTextField() {
-        if (jTextFieldCitedInPub == null) {
-            jTextFieldCitedInPub = new JTextField();
-            jTextFieldCitedInPub.setEditable(specimen.isEditable());
-            jTextFieldCitedInPub.setInputVerifier(MetadataRetriever.getInputVerifier(
-                    Specimen.class, "CitedInPublication", jTextFieldCitedInPub));
-            jTextFieldCitedInPub.setToolTipText(
-                    MetadataRetriever.getFieldHelp(Specimen.class, "CitedInPublication"));
-            jTextFieldCitedInPub.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
-        }
-        return jTextFieldCitedInPub;
     }
 
     private JScrollPane getBasicWrapperJScrollPane() {

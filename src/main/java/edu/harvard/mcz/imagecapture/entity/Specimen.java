@@ -116,30 +116,7 @@ public class Specimen implements Serializable {
     private String nahimaId;
     private String citedInPublicationLink;
     private String citedInPublicationComment;
-
-    public String getCitedInPublicationComment() {
-        return citedInPublicationComment;
-    }
-
-    public void setCitedInPublicationComment(String citedInPublicationComment) {
-        this.citedInPublicationComment = citedInPublicationComment;
-    }
-
-    public String getCitedInPublicationLink() {
-        return citedInPublicationLink;
-    }
-
-    public void setCitedInPublicationLink(String citedInPublicationLink) {
-        this.citedInPublicationLink = citedInPublicationLink;
-    }
-
-    public String getNahimaId() {
-        return nahimaId;
-    }
-
-    public void setNahimaId(String nahimaId) {
-        this.nahimaId = nahimaId;
-    }
+    private String citedInPublicationYear;
 
     public Specimen() {
         setDefaults();
@@ -238,6 +215,46 @@ public class Specimen implements Serializable {
         this.numbers = numbers;
         this.ICImages = ICImages;
         this.specimenParts = specimenParts;
+    }
+
+    public Set<LatLong> getGeoreferences() {
+        return georeferences;
+    }
+
+    public void setGeoreferences(Set<LatLong> georeferences) {
+        this.georeferences = georeferences;
+    }
+
+    public String getCitedInPublicationYear() {
+        return citedInPublicationYear;
+    }
+
+    public void setCitedInPublicationYear(String citedInPublicationYear) {
+        this.citedInPublicationYear = citedInPublicationYear;
+    }
+
+    public String getCitedInPublicationComment() {
+        return citedInPublicationComment;
+    }
+
+    public void setCitedInPublicationComment(String citedInPublicationComment) {
+        this.citedInPublicationComment = citedInPublicationComment;
+    }
+
+    public String getCitedInPublicationLink() {
+        return citedInPublicationLink;
+    }
+
+    public void setCitedInPublicationLink(String citedInPublicationLink) {
+        this.citedInPublicationLink = citedInPublicationLink;
+    }
+
+    public String getNahimaId() {
+        return nahimaId;
+    }
+
+    public void setNahimaId(String nahimaId) {
+        this.nahimaId = nahimaId;
     }
 
     public String getHigherOrder() {

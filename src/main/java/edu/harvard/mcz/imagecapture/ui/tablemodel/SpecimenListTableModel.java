@@ -75,7 +75,13 @@ public class SpecimenListTableModel extends AbstractTableModel {
      */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
+        if (specimens == null || specimens.size() <= rowIndex) {
+            return null;
+        }
         Specimen s = specimens.get(rowIndex);
+        if (s == null) {
+            return null;
+        }
         Object result = null;
         if (columnIndex == COL_ID) {
             result = s;

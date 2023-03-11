@@ -1051,8 +1051,8 @@ public class SpecimenDetailsViewPane extends JPanel {
             this.addBasicJLabel(jPanel, "Sex");
             jPanel.add(this.getJComboBoxSex(), "grow");
             // row
-            this.addBasicJLabel(jPanel, "Features");
-            jPanel.add(this.getJComboBoxFeatures(), "wrap");
+//            this.addBasicJLabel(jPanel, "Features");
+//            jPanel.add(this.getJComboBoxFeatures(), "wrap");
             // double row:
             this.addBasicJLabel(jPanel, "Specimen Parts");
             jPanel.add(this.getJScrollPaneSpecimenParts(), "span 3 2, grow");
@@ -1126,7 +1126,8 @@ public class SpecimenDetailsViewPane extends JPanel {
             citedInPublicationButton.addActionListener(actionEvent -> {
                 CitedInDialog dialog = new CitedInDialog(self.specimen.getCitedInPublication(),
                         self.specimen.getCitedInPublicationLink(),
-                        self.specimen.getCitedInPublicationComment());
+                        self.specimen.getCitedInPublicationComment(),
+                        self.specimen.getCitedInPublicationYear());
                 dialog.addCloseListener((type, source) -> {
                     if (type == CloseType.OK) {
                         self.specimen.setCitedInPublication(
@@ -1137,6 +1138,9 @@ public class SpecimenDetailsViewPane extends JPanel {
                         );
                         self.specimen.setCitedInPublicationComment(
                                 dialog.getCitedInComment()
+                        );
+                        self.specimen.setCitedInPublicationYear(
+                                dialog.getCitedInPublicationYear()
                         );
                     }
                 });

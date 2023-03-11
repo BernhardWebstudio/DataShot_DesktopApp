@@ -16,28 +16,30 @@ public class CitedInDialog extends JDialog {
 
     private static final Logger log =
             LoggerFactory.getLogger(CitedInDialog.class);
-
+    private final JPanel contentPanel = new JPanel(new MigLayout("wrap 2, fillx"));
     private String citedInPublication;
     private String citedInLink;
     private String citedInComment;
-
-    private final JPanel contentPanel = new JPanel(new MigLayout("wrap 2, fillx"));
+    private String citedInYear;
     private JButton okButton;
     private JButton cancelButton;
     private JTextField citedInTextField;
     private JTextField citedInLinkTextField;
     private JTextField citedInCommentTextField;
+    private JTextField citedInYearTextField;
 
     private ArrayList<CloseListener> closeListener;
 
-    public CitedInDialog(String citedIn, String link, String comment) {
+    public CitedInDialog(String citedIn, String link, String comment, String year) {
         this.closeListener = new ArrayList<CloseListener>();
         this.citedInComment = comment;
         this.citedInPublication = citedIn;
+        this.citedInYear = year;
         this.citedInLink = link;
-        log.debug("CitedInDialog with {} and {} and {}", citedIn, link, comment);
+        log.debug("CitedInDialog with {}, {}, {} and {}", citedIn, link, comment, year);
         init();
     }
+
     public void addCloseListener(CloseListener closeListener) {
         this.closeListener.add(closeListener);
     }
@@ -54,21 +56,28 @@ public class CitedInDialog extends JDialog {
         return citedInCommentTextField.getText();
     }
 
+    public String getCitedInPublicationYear() {
+        return citedInYear;
+    }
+
     private void init() {
         citedInTextField = new JTextField(this.citedInPublication);
         citedInCommentTextField = new JTextField(this.citedInComment);
         citedInLinkTextField = new JTextField(this.citedInLink);
+        citedInYearTextField = new JTextField(this.citedInYear);
 
         Component[] fields = {
                 citedInTextField,
                 citedInLinkTextField,
-                citedInCommentTextField
+                citedInYearTextField,
+                citedInCommentTextField,
         };
 
         String[] labels = {
                 "Cited In",
                 "Link",
-                "Comment"
+                "Year",
+                "Comment",
         };
 
         for (int i = 0; i < labels.length; i++) {
@@ -111,5 +120,4 @@ public class CitedInDialog extends JDialog {
         getContentPane().add(buttonPane, BorderLayout.SOUTH);
         this.pack();
     }
-
 }

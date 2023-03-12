@@ -81,7 +81,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "infraspezifischerrang", () -> nahimaManager.resolveInfraspecificRank(toSerialize.getInfraspecificRank()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "infraspezifischestaxon", () -> nahimaManager.resolveInfraspecificEpithet(toSerialize.getInfraspecificEpithet()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "subspezifischeart", () -> nahimaManager.resolveSubSpecificEpithet(toSerialize.getSubspecificEpithet()));
-        tryNonUserSkippableResolve(mainReverseNestedDetermination, "taxonname", () -> nahimaManager.resolveTaxon(String.join(" ", toSerialize.getGenus(), toSerialize.getSpecificEpithet(), toSerialize.getSubspecificEpithet(), toSerialize.getInfraspecificRank(), toSerialize.getInfraspecificEpithet()).replace("  ", " ")));
+        tryNonUserSkippableResolve(mainReverseNestedDetermination, "taxonname", () -> nahimaManager.resolveTaxon(String.join(" ", toSerialize.getGenus(), toSerialize.getSpecificEpithet(), toSerialize.getSubspecificEpithet(), toSerialize.getInfraspecificRank(), toSerialize.getInfraspecificEpithet()).trim().replace("  ", " ")));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "unterfamilie", () -> nahimaManager.resolveSubFamily(toSerialize.getSubfamily()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "tribus", () -> nahimaManager.resolveTribe(toSerialize.getTribe()));
 
@@ -257,6 +257,20 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         }
         result.put("_nested:entomologie__praeparatteile", parts);
 
+        // publication
+        JSONArray publications = new JSONArray();
+        if (toSerialize.getCitedInPublication() != null && !toSerialize.getCitedInPublication().isBlank()) {
+            JSONObject publication = new JSONObject();
+            tryUserSkippableResolve(publication, "publikation", () -> nahimaManager.resolvePublication(
+                    toSerialize.getCitedInPublication(),
+                    toSerialize.getCitedInPublicationLink(),
+                    toSerialize.getCitedInPublicationYear(),
+                    toSerialize.getCitedInPublicationComment()
+            ));
+            publications.put(publication);
+        }
+        result.put("_nested:entomologie__publikationen", publications);
+
         tryUserSkippableResolve(result, "geschlecht", () -> nahimaManager.resolveSex(toSerialize.getSex()));
         tryUserSkippableResolve(result, "lebensabschnitt", () -> nahimaManager.resolveLifeStage(toSerialize.getLifeStage()));
 
@@ -388,14 +402,14 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         tryUserSkippableResolve(target, resolver, debugHint, true);
     }
 
-        /**
-         * Try to run a resolve function on a certain property, do nothing if it fails,
-         * except when a SkipSpecimenException is thrown, i.e., when the resolver allowed user input "skip specimen"
-         *
-         * @param target    the array to append data to
-         * @param resolver  the resolver function
-         * @param debugHint the useful info on what worked/did not work
-         */
+    /**
+     * Try to run a resolve function on a certain property, do nothing if it fails,
+     * except when a SkipSpecimenException is thrown, i.e., when the resolver allowed user input "skip specimen"
+     *
+     * @param target    the array to append data to
+     * @param resolver  the resolver function
+     * @param debugHint the useful info on what worked/did not work
+     */
     protected void tryUserSkippableResolve(JSONArray target, ResolverMethodInterface resolver, String debugHint, boolean reduceJSONObject) throws SkipSpecimenException {
         // try to parse and set correctly
         try {

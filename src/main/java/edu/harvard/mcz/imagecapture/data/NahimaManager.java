@@ -59,6 +59,20 @@ public class NahimaManager extends AbstractRestClient {
      * @param objWithId the object whose id is searched
      * @return the object id, null if not found
      */
+    protected static Integer resolveId(JSONObject objWithId, String objectType) {
+        if (objWithId == null) {
+            return null;
+        }
+        Integer id = null;
+        if (objWithId.has(objectType)) {
+            id = resolveId(objWithId.getJSONObject(objectType));
+        }
+        if (id == null) {
+            return resolveId(objWithId);
+        }
+        return id;
+    }
+
     protected static Integer resolveId(JSONObject objWithId) {
         if (objWithId == null) {
             return null;
@@ -167,11 +181,37 @@ public class NahimaManager extends AbstractRestClient {
         if (!returnValue.startsWith("[")) {
             JSONObject responseObject = new JSONObject(returnValue);
             if (responseObject.has("code") && responseObject.getString("code").startsWith("error")) {
-                throw new RuntimeException("Failed to create object of type '"+objType+"': Error code: " + responseObject.get("code"));
+                throw new RuntimeException("Failed to create object of type '" + objType + "': Error code: " + responseObject.get("code"));
             }
         }
 
-        return (JSONObject) (new JSONArray(returnValue)).get(0);
+        // check which object types the user is allowed to create
+//        try {
+//            this.postRequest(this.url + "db_info/create", new JSONObject(new HashMap<>() {{
+//                put("objecttype", objType);
+//                put("tag_ids", JSONObject.NULL);
+//            }}));
+//        } catch (Exception e) {
+//        }
+
+        return (new JSONArray(returnValue)).getJSONObject(0);
+    }
+
+    public JSONObject findObjectByUuid(String uuid) throws IOException {
+        String queryURL = this.url + "objects/uuid/" + uuid;
+        String returnValue = this.getRequest(queryURL, new HashMap<>() {{
+            put("Content-Type", "application/json");
+        }});
+
+        // check for errors
+        if (returnValue == null || !returnValue.startsWith("[")) {
+            JSONObject responseObject = new JSONObject(returnValue);
+            if (responseObject.has("code") && responseObject.getString("code").startsWith("error")) {
+                throw new RuntimeException("Failed to fetch object by uuid '" + uuid + "': Error code: " + responseObject.get("code"));
+            }
+        }
+
+        return new JSONObject(returnValue);
     }
 
     protected JSONObject loadFromCache(String id, String objectType) {
@@ -293,8 +333,9 @@ public class NahimaManager extends AbstractRestClient {
             return (JSONObject) foundObjects.get(0);
         } else {
             // TODO: create / select correct
-            log.info("Got != 1 " + objectType + " objects. {}", results);
+            log.info("Got " + String.valueOf(foundObjects.length()) + " != 1 " + objectType + " objects when searching for '" + search + "'. {}", results);
             if (selectionHelper != null) {
+                log.info("Using selectionHelper {}", selectionHelper);
                 return findSimilarMatch(foundObjects, objectType, selectionHelper, true);
             }
             return null;
@@ -392,11 +433,22 @@ public class NahimaManager extends AbstractRestClient {
         if (results == null) {
             // create
             JSONObject toCreate = wrapForCreation(inner, objectType, mask, omitPool);
-            this.createObjectInNahima(toCreate, objectType);
-            // TODO: it would be simpler to store the created in cache. But well... current format does not allow
-            results = this.resolveStringSearchToOne(name, objectType, true, inner);
+            JSONObject createdResponse = this.createObjectInNahima(toCreate, objectType);
+            Thread.sleep(250); // this is a heuristic number and is here to improve reliability, as Nahima does not usually claim creation immediately.
+            if (createdResponse.has("_uuid")) {
+                try {
+                    results = this.findObjectByUuid(createdResponse.getString("_uuid"));
+                } catch (IOException ex) {
+                    // maybe handle? don't know...
+                    log.error("Failed to find object: {}", ex);
+                }
+            } else {
+                // TODO: it would be simpler to store the created in cache. But well... current format does not allow
+                results = this.resolveStringSearchToOne(name, objectType, true, inner);
+            }
             if (results == null) {
                 log.error("Created " + objectType + " in Nahima, but did not find it afterwards.");
+                results = createdResponse;
             }
         }
         return results;
@@ -701,9 +753,10 @@ public class NahimaManager extends AbstractRestClient {
         }
 
         JSONObject finalParent = parent;
+        Integer parentId = resolveId(finalParent, "gazetteer");
         return this.resolveOrCreateInteractive(searchString, "gazetteer", "gazetteer__all_fields", new JSONObject(new HashMap<>() {{
             put("ortsname", wrapInLan(specimen.getPrimaryDivison()));
-            put("_id_parent", resolveId(finalParent)); // Might throw NullPointerException. If we find the location, it is never called, therefore, we only have a problem if neither location nor country are found
+            put("_id_parent", parentId == null ? JSONObject.NULL : parentId); // Might throw NullPointerException. If we find the location, it is never called, therefore, we only have a problem if neither location nor country are found
             put("isocode3166_2", specimen.getPrimaryDivisonISO());
         }}));
     }
@@ -817,7 +870,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolveSubSpecificEpithet(String subspecificEpithet) throws IOException, InterruptedException {
         return resolveOrCreate(subspecificEpithet, "subspezifischeart", "subspezifischeart_all_fields", new JSONObject(new HashMap<>() {{
-            put("subspezifischeartlat", subspecificEpithet);
+            put("subspezifischeart", subspecificEpithet);
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}));
     }
@@ -847,6 +900,28 @@ public class NahimaManager extends AbstractRestClient {
             put("_nested:infraspezifischetaxon__trivialnamen", new JSONArray());
             put("_nested:infraspezifischetaxon__referenzenfuerintraspezifischestaxon", new JSONArray());
 //            put("beschreibung", getCreatedByThisSoftwareIndication());
+        }}));
+    }
+
+    /**
+     * Find (or create) a publication in Nahima
+     *
+     * @param citedInPublication
+     * @param citedInPublicationLink
+     * @param citedInPublicationYear
+     * @param citedInPublicationComment
+     * @return
+     */
+    public JSONObject resolvePublication(String citedInPublication, String citedInPublicationLink, String citedInPublicationYear, String citedInPublicationComment) throws IOException, InterruptedException {
+        return resolveOrCreate(citedInPublication, "publikation", "publikation__public", new JSONObject(new HashMap<>() {{
+            put("publikationsjahr", new JSONObject(new HashMap<>() {{
+                put("value", (citedInPublicationYear != null && !citedInPublication.equals("")) ? citedInPublicationYear : "0000");
+            }}));
+            put("publikationstitel", new JSONObject(new HashMap<>() {{
+                put("en-US", citedInPublication);
+            }}));
+            put("publikationsreferenzzbdoi", citedInPublicationLink);
+            put("publikationskommentar", citedInPublicationComment);
         }}));
     }
 
@@ -982,7 +1057,7 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     public JSONObject reduceAssociateForAssociation(JSONObject associate, String objectType) {
-        if (associate == null|| associate.isEmpty()) {
+        if (associate == null || associate.isEmpty()) {
             return null;
         }
         JSONObject reduced = new JSONObject();

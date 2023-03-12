@@ -18,10 +18,10 @@
  */
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.FormSpecs;
-import com.jgoodies.forms.layout.RowSpec;
+import com.privatejgoodies.forms.layout.ColumnSpec;
+import com.privatejgoodies.forms.layout.FormLayout;
+import com.privatejgoodies.forms.layout.FormSpecs;
+import com.privatejgoodies.forms.layout.RowSpec;
 import edu.harvard.mcz.imagecapture.entity.SpecimenPartAttribute;
 import edu.harvard.mcz.imagecapture.entity.fixed.Caste;
 import edu.harvard.mcz.imagecapture.entity.fixed.LifeStage;

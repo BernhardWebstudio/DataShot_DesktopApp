@@ -346,6 +346,10 @@ public class LatLong implements Serializable, Cloneable {
         return this.maxErrorUnits;
     }
 
+    public String getActualMaxErrorUnits() {
+        return this.maxErrorUnits;
+    }
+
     public void setMaxErrorUnits(String maxErrorUnits) {
         this.maxErrorUnits = maxErrorUnits;
     }
@@ -592,7 +596,7 @@ public class LatLong implements Serializable, Cloneable {
         newgeo.setLongMin(this.getLongMin());
         newgeo.setLongSec(this.getLongSec());
         newgeo.setMaxErrorDistance(this.getMaxErrorDistance());
-        newgeo.setMaxErrorUnits(this.getMaxErrorUnits());
+        newgeo.setMaxErrorUnits(this.getActualMaxErrorUnits());
         newgeo.setNearestNamedPlace(this.getNearestNamedPlace());
         newgeo.setOrigLatLongUnits(this.getOrigLatLongUnits());
         newgeo.setUtmEw(this.getUtmEw());

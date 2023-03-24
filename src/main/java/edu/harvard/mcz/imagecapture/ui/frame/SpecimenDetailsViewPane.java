@@ -1940,7 +1940,12 @@ georeference_pre.getLongDegString()); if
         if (this.georeferenceDialog == null) {
             Set<LatLong> georeferences = specimen.getLatLong();
             LatLong georeference = georeferences.iterator().next();
+            if (georeference.isEmpty()) {
+                // to fix the two different default values
+                georeference.setDatum((String)this.cbDatum.getSelectedItem());
+            }
             georeference.setSpecimen(specimen);
+
             this.georeferenceDialog = new GeoreferenceDialog(georeference, thisPane);
         }
         return this.georeferenceDialog;

@@ -45,7 +45,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         for (Number otherNr : toSerialize.getNumbers()) {
             Map<String, Object> otherNrMap = new HashMap<>() {{
                 put("andereid", otherNr.getNumber());
-                put("bemerkung", String.join(" ", otherNr.getNumber(), otherNr.getNumberType()));
+//                put("bemerkung", String.join(" ", otherNr.getNumber(), otherNr.getNumberType()));
             }};
             try {
                 otherNrMap.put("typ", nahimaManager.resolveOtherNrType(otherNr.getNumberType()));
@@ -84,7 +84,9 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "unterfamilie", () -> nahimaManager.resolveSubFamily(toSerialize.getSubfamily()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "tribus", () -> nahimaManager.resolveTribe(toSerialize.getTribe()));
 
-        mainReverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
+        if (toSerialize.getIdentificationRemarks() != null && !toSerialize.getIdentificationRemarks().equals("")) {
+            mainReverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
+        }
         // try to parse and set the date correctly
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "bestimmungsdatum", () -> this.dateToNahima(toSerialize.getDateIdentified(), true));
 
@@ -182,9 +184,13 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 
 
         if (georef != null) {
-            tryUserSkippableResolve(reverseNestedCollection, "einheitdesfehlerradius", () ->
-                    nahimaManager.resolveUnitForErrorRadius(georef.getMaxErrorUnits()));
-            tryUserSkippableResolve(reverseNestedCollection, "datumsformatgeodaeischeskooordinatensystem", () -> nahimaManager.resolveDatumFormat(georef.getDatum()));
+            if (georef.getActualMaxErrorUnits() != null) {
+                tryUserSkippableResolve(reverseNestedCollection, "einheitdesfehlerradius", () ->
+                        nahimaManager.resolveUnitForErrorRadius(georef.getMaxErrorUnits()));
+            }
+            if (georef.getDatum() != null) {
+                tryUserSkippableResolve(reverseNestedCollection, "datumsformatgeodaeischeskooordinatensystem", () -> nahimaManager.resolveDatumFormat(georef.getDatum()));
+            }
         }
 
         if (toSerialize.getCollectingMethod() != null && !toSerialize.getCollectingMethod().equals("")) {

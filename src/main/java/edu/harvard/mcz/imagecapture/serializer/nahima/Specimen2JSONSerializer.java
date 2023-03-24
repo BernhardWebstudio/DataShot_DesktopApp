@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     private static final Logger log = LoggerFactory.getLogger(Specimen2JSONSerializer.class);
@@ -143,11 +142,15 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         LatLong georef = toSerialize.getLatLong().isEmpty() ? null : toSerialize.getLatLong().iterator().next();
         ;
         // some other basic reverse nested values for "aufsammlung" (collection)
+        JSONObject[] comments = {
+                new JSONObject(new HashMap<>() {{
+                    put("kommentar", toSerialize.getSpecimenNotes());
+                }})};
         Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
-            put("sammlertrans", toSerialize.getCollectors().stream().map(Collector::getCollectorName).collect(Collectors.joining(", ")));
-            put("sammlungtrans", toSerialize.getCollection());
+//            put("sammlertrans", toSerialize.getCollectors().stream().map(Collector::getCollectorName).collect(Collectors.joining(", ")));
+//            put("sammlungtrans", toSerialize.getCollection());
             put("sammlungstitel", toSerialize.getCollection());
-            put("kommentare", toSerialize.getSpecimenNotes());
+            put("_nested:aufsammlung__kommentare", new JSONArray(comments));
 //            put("habitattrans", toSerialize.getHabitat());
 //            put("sammelorttrans", toSerialize.getVerbatimLocality());
             put("lokalitaet", toSerialize.getSpecificLocality());

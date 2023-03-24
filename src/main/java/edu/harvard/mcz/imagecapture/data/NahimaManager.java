@@ -492,6 +492,7 @@ public class NahimaManager extends AbstractRestClient {
                 if (bestMatch != null) {
                     return bestMatch;
                 }
+                log.info("Asking user to select " + name + " (" + objectType + ") from results.", results);
                 // otherwise, ask the user to select the correct one
                 return this.askToChooseObject(foundObjects, name, objectType, mask, inner, omitPool);
             } else {
@@ -574,12 +575,17 @@ public class NahimaManager extends AbstractRestClient {
         });
         switch (choice[0]) {
             case ChooseFromJArrayDialog.RETURN_ACCEPT:
+                log.debug("User chose to accept selection");
+                assert (selection[0] != null && !selection[0].isEmpty());
                 return selection[0];
             case ChooseFromJArrayDialog.RETURN_SKIP:
+                log.debug("User chose to skip specimen");
                 throw new SkipSpecimenException();
             case ChooseFromJArrayDialog.RETURN_CREATE_NEW:
+                log.debug("User chose to create new");
                 return askToCreate(inner, name, objectType, mask, omitPool);
             case ChooseFromJArrayDialog.RETURN_CHANGE_SEARCH:
+                log.debug("User chose to change search");
                 return askToChangeSearch(name, objectType, inner, mask, omitPool);
             default:
                 throw new RuntimeException("Undefined result type: " + choice[0]);

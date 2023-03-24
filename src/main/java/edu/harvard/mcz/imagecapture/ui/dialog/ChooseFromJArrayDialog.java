@@ -174,7 +174,7 @@ public class ChooseFromJArrayDialog extends JDialog {
     }
 
     public JSONObject getSelectedItem() {
-        return getSelectedIndex() > 0 ? selection.getJSONObject(getSelectedIndex()) : null;
+        return getSelectedIndex() >= 0 ? selection.getJSONObject(getSelectedIndex()) : null;
     }
 
     public int getReturnDecision() {

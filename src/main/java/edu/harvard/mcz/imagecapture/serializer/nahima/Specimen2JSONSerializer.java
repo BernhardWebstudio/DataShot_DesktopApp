@@ -6,6 +6,7 @@ import edu.harvard.mcz.imagecapture.entity.Number;
 import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
 import edu.harvard.mcz.imagecapture.serializer.ToJSONSerializerInterface;
+import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
 import org.apache.commons.lang3.time.DateUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -37,7 +38,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         Specimen toSerialize = (Specimen) target;
         // easy, first level fields
         result.put("barcodeqrcode", toSerialize.getBarcode());
-        result.put("erschliessungsfragen", toSerialize.getQuestions());
+//        result.put("erschliessungsfragen", toSerialize.getQuestions());
         result.put("folgerung", toSerialize.getInferences());
         // here, it already starts to get complicated, fuu.
         // first, other ids, incl. specimen ID
@@ -83,6 +84,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "taxonname", () -> nahimaManager.resolveTaxon(String.join(" ", toSerialize.getGenus(), toSerialize.getSpecificEpithet(), toSerialize.getSubspecificEpithet(), toSerialize.getInfraspecificRank(), toSerialize.getInfraspecificEpithet()).trim().replace("  ", " ")));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "unterfamilie", () -> nahimaManager.resolveSubFamily(toSerialize.getSubfamily()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "tribus", () -> nahimaManager.resolveTribe(toSerialize.getTribe()));
+        tryNonUserSkippableResolve(mainReverseNestedDetermination, "ordnung", () -> nahimaManager.resolveOrder(toSerialize.getHigherOrder()));
 
         if (toSerialize.getIdentificationRemarks() != null && !toSerialize.getIdentificationRemarks().equals("")) {
             mainReverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
@@ -129,7 +131,12 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 
             JSONObject reverseNestedDetermination = new JSONObject(reverseNestedCollectionMap);
             reverseNestedDetermination = nahimaManager.addDefaultValuesForCreation(reverseNestedDetermination);
-            reverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
+//            reverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
+
+            if (det.getRemarks() != null && !det.getRemarks().equals("")) {
+                reverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{det.getRemarks()}));
+            }
+
             // try to parse and set the date correctly
             tryNonUserSkippableResolve(reverseNestedDetermination, "bestimmungsdatum", () -> this.dateToNahima(det.getDateIdentified(), true));
 
@@ -148,11 +155,14 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                 new JSONObject(new HashMap<>() {{
                     put("kommentar", toSerialize.getSpecimenNotes());
                 }})};
+
+        if (toSerialize.getSpecimenNotes() == null || toSerialize.getSpecimenNotes().equals("")) {
+            comments = null;
+        }
         Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
 //            put("sammlertrans", toSerialize.getCollectors().stream().map(Collector::getCollectorName).collect(Collectors.joining(", ")));
 //            put("sammlungtrans", toSerialize.getCollection());
             put("sammlungstitel", toSerialize.getCollection());
-            put("_nested:aufsammlung__kommentare", new JSONArray(comments));
 //            put("habitattrans", toSerialize.getHabitat());
 //            put("sammelorttrans", toSerialize.getVerbatimLocality());
             put("lokalitaet", toSerialize.getSpecificLocality());
@@ -173,22 +183,29 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("_id", JSONObject.NULL);
             put("_pool", NahimaManager.defaultPool);
         }};
+        if (comments != null) {
+            reverseNestedCollectionMap.put("_nested:aufsammlung__kommentare", new JSONArray(comments));
+        }
         if (toSerialize.getDateCollectedIndicator() != null
                 && !toSerialize.getDateCollectedIndicator().equals("")) {
-            reverseNestedCollectionMap.put("_nested:aufsammlung__indikatorenfuersammeldatum", new JSONArray(new String[]{toSerialize.getDateCollectedIndicator()}));
+            JSONArray indicators = new JSONArray();
+            JSONObject indicator = new JSONObject();
+            tryUserSkippableResolve(indicator, "indikatorfuersammeldatum", () -> nahimaManager.resolveCollectionDateIndicator(toSerialize.getDateCollectedIndicator()));
+            indicators.put(indicator);
+            reverseNestedCollectionMap.put("_nested:aufsammlung__indikatorenfuersammeldatum", indicators);
         }
         JSONObject reverseNestedCollection = new JSONObject(reverseNestedCollectionMap);
 
         tryUserSkippableResolve(reverseNestedCollection, "sammelort", () -> nahimaManager.resolveLocation(toSerialize));
         tryUserSkippableResolve(reverseNestedCollection, "einheitderhoehe", () -> nahimaManager.resolveUnitForHeight(toSerialize.getElev_units()));
 
-
-        if (georef != null) {
+        // only export if not default
+        if (georef != null && !georef.equals(new LatLong())) {
             if (georef.getActualMaxErrorUnits() != null) {
                 tryUserSkippableResolve(reverseNestedCollection, "einheitdesfehlerradius", () ->
                         nahimaManager.resolveUnitForErrorRadius(georef.getMaxErrorUnits()));
             }
-            if (georef.getDatum() != null) {
+            if (georef.getDatum() != null && !georef.getDatum().equals("")) {
                 tryUserSkippableResolve(reverseNestedCollection, "datumsformatgeodaeischeskooordinatensystem", () -> nahimaManager.resolveDatumFormat(georef.getDatum()));
             }
         }
@@ -244,7 +261,9 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         }
 
         reverseNestedCollection.put("indikator_fuer_kultur_zucht", toSerialize.getDateEmergedIndicator());
-        reverseNestedCollection.put("kultur_zucht", !Objects.equals(toSerialize.getDateEmerged(), "") && toSerialize.getDateEmerged() != null);
+        if (!Objects.equals(toSerialize.getDateEmerged(), "") && toSerialize.getDateEmerged() != null) {
+            reverseNestedCollection.put("kultur_zucht", true);
+        }
         reverseNestedCollection.put("sammeldatumtrans", toSerialize.getDateCollected());
 
         reverseNestedCollections.put(reverseNestedCollection);
@@ -257,12 +276,16 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             }});
             tryUserSkippableResolve(partJson, "praeparatteil", () -> nahimaManager.resolvePreparationPart(part.getPartName()));
             tryUserSkippableResolve(partJson, "montierungsmethode", () -> nahimaManager.resolveMountingMethod(part.getPreserveMethod()));
-            JSONArray attributes = new JSONArray();
-            for (SpecimenPartAttribute attribute : part.getSpecimenPartAttributes()) {
-                tryUserSkippableResolve(attributes, () -> nahimaManager.resolvePreparationPartAttribute(String.join(" ", attribute.getAttributeRemark(), attribute.getAttributeType(), attribute.getAttributeValue(), nahimaDateFormat.format(attribute.getAttributeDate()), attribute.getAttributeDeterminer()), attribute.getAttributeUnits()), "specimenAttribute");
+
+            if (part.getSpecimenPartAttributes().size() > 0) {
+                for (SpecimenPartAttribute attribute : part.getSpecimenPartAttributes()) {
+                    JSONObject partJsonClone = new JSONObject(partJson.toString());
+                    tryUserSkippableResolve(partJsonClone, "attribute", () -> nahimaManager.resolvePreparationPartAttribute(NullHandlingUtility.joinNonNull(" ", attribute.getAttributeRemark(), attribute.getAttributeType(), attribute.getAttributeValue(), attribute.getAttributeDate() != null ? nahimaDateFormat.format(attribute.getAttributeDate()) : "", attribute.getAttributeDeterminer()), attribute.getAttributeUnits()));
+                    parts.put(partJsonClone);
+                }
+            } else {
+                parts.put(partJson);
             }
-            partJson.put("attribute", attributes);
-            parts.put(partJson);
         }
         result.put("_nested:entomologie__praeparatteile", parts);
 
@@ -310,6 +333,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             Date parsedDate = DateUtils.parseDate(date);
             return dateToNahima(parsedDate);
         } catch (ParseException e) {
+            JSONObject returnValue = new JSONObject();
             if (date.matches("^[0-9]{1,2}\\.^[0-9]{1,2}\\.^[0-9]{2,4}$")) {
                 // try manually, knowing the Swiss type of date
                 try {
@@ -332,11 +356,20 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                 } catch (ParseException ex) {
                 }
             }
+            // year-only dates are allowed in Nahima, somehow
+            if (date.matches("^[0-9]{4}$")) {
+                returnValue.put("value", date);
+                return returnValue;
+            }
+            // as are month & year
+            if (date.matches("^[0-9]{4}/[0-9]{2}$")) {
+                returnValue.put("value", date.replace("/", "-"));
+                return returnValue;
+            }
             if (!allowInvalid) {
                 log.error("Failed to convert date from " + date, e);
                 throw e;
             }
-            JSONObject returnValue = new JSONObject();
             returnValue.put("value", date);
             return returnValue;
         }

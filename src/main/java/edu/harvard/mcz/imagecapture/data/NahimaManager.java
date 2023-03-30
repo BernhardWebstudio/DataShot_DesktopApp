@@ -12,6 +12,7 @@ import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
 import edu.harvard.mcz.imagecapture.ui.dialog.ChooseFromJArrayDialog;
 import edu.harvard.mcz.imagecapture.ui.dialog.VerifyJSONDialog;
 import edu.harvard.mcz.imagecapture.utility.AbstractRestClient;
+import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -497,9 +498,13 @@ public class NahimaManager extends AbstractRestClient {
                 return this.askToChooseObject(foundObjects, name, objectType, mask, inner, omitPool);
             } else {
                 assert (foundObjects.length() == 0);
-                askToCreate(inner, name, objectType, mask, omitPool);
+                JSONObject created = askToCreate(inner, name, objectType, mask, omitPool);
                 // TODO: the following could fail if the search and created object do not really align
-                return this.resolveStringSearchToOne(name, objectType, true);
+                JSONObject found = this.resolveStringSearchToOne(name, objectType, true);
+                if (found == null && created != null) {
+                    return created;
+                }
+                return found;
             }
         }
         // return null;
@@ -651,9 +656,9 @@ public class NahimaManager extends AbstractRestClient {
             actualNamePart = personNameSplit[0];
             String datePart = personNameSplit[1];
             String[] splitDatePart = Arrays.stream(datePart.split("-")).map(String::trim).toArray(String[]::new);
-            birthdate = splitDatePart[0];
+            birthdate = splitDatePart[0].replace("(", "").replace(")", "");
             if (splitDatePart.length > 1) {
-                deathdate = splitDatePart[1];
+                deathdate = splitDatePart[1].replace(")", "");
             }
         }
         if (actualNamePart.contains(",")) {
@@ -1008,6 +1013,18 @@ public class NahimaManager extends AbstractRestClient {
         }}));
     }
 
+    public JSONObject resolveOrder(String higherOrder) throws IOException, InterruptedException {
+        return resolveOrCreate(higherOrder, "ordnungen", "ordnungen_all_fields", new JSONObject(new HashMap<>() {{
+            put("ordnunglat", higherOrder);
+        }}));
+    }
+
+    public JSONObject resolveCollectionDateIndicator(String indicator) throws IOException, InterruptedException {
+        return resolveOrCreate(indicator, "indikatorfuersammeldatum", "indikatorfuersammeldatum_all_fields", new JSONObject(new HashMap<>() {{
+            put("name", indicator);
+        }}));
+    }
+
     /**
      * Find or create the location "Datum" in Nahima
      *
@@ -1035,7 +1052,7 @@ public class NahimaManager extends AbstractRestClient {
      * Find or create a preparation part attribute in Nahima
      */
     public JSONObject resolvePreparationPartAttribute(String attributeName, String attributeValue) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
-        return resolveOrCreateInteractive(attributeName + " " + attributeValue, "probenteilattribute", "probenteilattribute_all_fields", new JSONObject(new HashMap<>() {{
+        return resolveOrCreateInteractive(NullHandlingUtility.joinNonNull(" ", attributeName, attributeValue), "probenteilattribute", "probenteilattribute_all_fields", new JSONObject(new HashMap<>() {{
             put("attribute", attributeName);
             put("einheit", attributeValue);
         }}), true, 0);

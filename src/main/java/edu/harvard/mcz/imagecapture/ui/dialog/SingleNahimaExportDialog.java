@@ -27,7 +27,7 @@ public class SingleNahimaExportDialog extends JDialog {
     private void initialize() {
         this.setTitle("Export 1 Specimen to Nahima");
         this.setContentPane(getJContentPane());
-        this.setPreferredSize(new Dimension(250, 100));
+        this.setPreferredSize(new Dimension(350, 100));
         this.pack();
     }
 

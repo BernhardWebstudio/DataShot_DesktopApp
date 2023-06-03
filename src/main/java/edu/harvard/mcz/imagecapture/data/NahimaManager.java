@@ -1052,9 +1052,12 @@ public class NahimaManager extends AbstractRestClient {
      * Find or create a preparation part attribute in Nahima
      */
     public JSONObject resolvePreparationPartAttribute(String attributeName, String attributeValue) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
+        if (attributeName == null && attributeValue == null) {
+            return new JSONObject();
+        }
         return resolveOrCreateInteractive(NullHandlingUtility.joinNonNull(" ", attributeName, attributeValue), "probenteilattribute", "probenteilattribute_all_fields", new JSONObject(new HashMap<>() {{
             put("attribute", attributeName);
-            put("einheit", attributeValue);
+            put("einheit", attributeValue == null ? JSONObject.NULL : attributeValue);
         }}), true, 0);
     }
 

@@ -51,6 +51,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             queryParams.put("barcode", this.oneSpecimenBarcode);
         }
         List<Specimen> specimenToExport = sls.findBy(queryParams);
+        Collections.shuffle(specimenToExport);
         nrOfSpecimenToProcess = specimenToExport.size();
         notifyProgressChanged();
         notifyWorkStatusChanged("Loaded " + nrOfSpecimenToProcess + " specimen to export to Nahima. This can take a while.");

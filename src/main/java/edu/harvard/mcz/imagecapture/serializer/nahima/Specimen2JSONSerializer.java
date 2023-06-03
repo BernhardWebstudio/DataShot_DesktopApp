@@ -280,7 +280,8 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             if (part.getSpecimenPartAttributes().size() > 0) {
                 for (SpecimenPartAttribute attribute : part.getSpecimenPartAttributes()) {
                     JSONObject partJsonClone = new JSONObject(partJson.toString());
-                    tryUserSkippableResolve(partJsonClone, "attribute", () -> nahimaManager.resolvePreparationPartAttribute(NullHandlingUtility.joinNonNull(" ", attribute.getAttributeRemark(), attribute.getAttributeType(), attribute.getAttributeValue(), attribute.getAttributeDate() != null ? nahimaDateFormat.format(attribute.getAttributeDate()) : "", attribute.getAttributeDeterminer()), attribute.getAttributeUnits()));
+//                    tryUserSkippableResolve(partJsonClone, "attribute", () -> nahimaManager.resolvePreparationPartAttribute(NullHandlingUtility.joinNonNull(" ", attribute.getAttributeRemark(), attribute.getAttributeType(), attribute.getAttributeValue(), attribute.getAttributeDate() != null ? nahimaDateFormat.format(attribute.getAttributeDate()) : "", attribute.getAttributeDeterminer()), attribute.getAttributeUnits()));
+                    tryUserSkippableResolve(partJsonClone, "attribute", () -> nahimaManager.resolvePreparationPartAttribute(attribute.getAttributeValue(), attribute.getAttributeUnits()));
                     parts.put(partJsonClone);
                 }
             } else {

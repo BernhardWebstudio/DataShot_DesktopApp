@@ -577,7 +577,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
             if (state.equals(WorkFlowStatus.STAGE_0)) {
                 // Look up likely matches for the OCR of the higher taxa in the
                 // HigherTaxon authority file.
-                if (!parser.getFamily().equals("")) {
+                if (!parser.getFamily().equals("") && !parser.getFamily().equals(barcode)) {
                     // check family against database (with a soundex match)
                     HigherTaxonLifeCycle hls = new HigherTaxonLifeCycle();
                     String match = hls.findMatch(parser.getFamily());

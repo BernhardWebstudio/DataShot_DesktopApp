@@ -415,12 +415,11 @@ public class HigherTaxonLifeCycle {
      * @return a String containing the matched family name, null
      * if no match or a connection problem.
      */
-
     public String findMatch(String aFamily) {
         String result = null;
         try {
             String sql =
-                    "Select distinct family from HigherTaxon ht  where soundex(ht.family) = soundex('" +
+                    "SELECT DISTINCT family FROM HigherTaxon ht WHERE soundex(ht.family) = soundex('" +
                             aFamily + "')  ";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {

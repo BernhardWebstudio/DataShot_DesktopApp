@@ -1,9 +1,8 @@
 package edu.harvard.mcz.imagecapture.lifecycle;
 
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
-import org.hibernate.HibernateException;
-import org.hibernate.Session;
-import org.hibernate.SessionException;
+import org.hibernate.*;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.metadata.ClassMetadata;
 import org.slf4j.Logger;
 
@@ -52,6 +51,33 @@ public abstract class GenericLifeCycle<T> {
             return instance;
         } catch (RuntimeException re) {
             log.error("get failed", re);
+            throw re;
+        }
+    }
+
+    public List<T> findBy(DetachedCriteria criteria, int limit, int offset) {
+        try {
+            List<T> results = null;
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            try {
+                // TODO: handle paths/relationships
+                Transaction txn = session.beginTransaction();
+                Criteria executableQuery = criteria.getExecutableCriteria(session);
+                if (limit > 0) {
+                    executableQuery.setMaxResults(limit);
+                }
+                if (offset > 0) {
+                    executableQuery.setFirstResult(offset);
+                }
+                results = executableQuery.list();
+                txn.commit();
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error(e.getMessage());
+            }
+            return results;
+        } catch (RuntimeException re) {
+            log.error("find by detached criteria failed", re);
             throw re;
         }
     }

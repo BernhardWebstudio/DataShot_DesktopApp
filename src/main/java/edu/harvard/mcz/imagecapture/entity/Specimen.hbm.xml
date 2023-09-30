@@ -221,49 +221,49 @@
             <column name="externalWorkflowDate"/>
         </property>
         <!-- TODO: rethink nullability of related columns -->
-        <set name="collectors" cascade="all" fetch="subselect" order-by="collectorName asc">
+        <set name="collectors" cascade="all" fetch="join" order-by="collectorName asc">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.Collector"/>
         </set>
-        <set name="determinations" cascade="all" fetch="subselect">
+        <set name="determinations" cascade="all" fetch="join">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.Determination"/>
         </set>
-        <set name="trackings" inverse="true" fetch="subselect">
+        <set name="trackings" inverse="true" fetch="join">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.Tracking"/>
         </set>
-        <set name="numbers" cascade="all" fetch="subselect" order-by="number asc">
+        <set name="numbers" cascade="all" fetch="join" order-by="number asc">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.Number"/>
         </set>
-        <set name="ICImages" cascade="all" fetch="subselect">
+        <set name="ICImages" cascade="all" fetch="join">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.ICImage"/>
         </set>
-        <set name="specimenParts" cascade="all" fetch="subselect">
+        <set name="specimenParts" cascade="all" fetch="join">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.SpecimenPart"/>
         </set>
-        <set name="LatLong" cascade="all" fetch="subselect">
+        <set name="LatLong" cascade="all" fetch="join">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.LatLong"/>
         </set>
-        <set name="externalHistory" cascade="all" fetch="subselect">
+        <set name="externalHistory" cascade="all" fetch="join">
             <key>
                 <column name="SpecimenId"/>
             </key>

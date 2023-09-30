@@ -18,30 +18,34 @@
  */
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
-import com.github.lgooddatepicker.components.DatePicker;
-import com.github.lgooddatepicker.components.DateTimePicker;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
-import edu.harvard.mcz.imagecapture.entity.Collector;
-import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
-import edu.harvard.mcz.imagecapture.entity.Tracking;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.lifecycle.*;
 import edu.harvard.mcz.imagecapture.ui.field.JIntegerField;
 import net.miginfocom.swing.MigLayout;
+import org.hibernate.FetchMode;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * SearchDialog
  */
 public class SearchDialog extends JDialog {
 
+    private static final Logger log =
+            LoggerFactory.getLogger(SearchDialog.class); //  @jve:decl-index=0:
     private static final long serialVersionUID = 1L;
     private final Dimension maxComboBoxDims = new Dimension(350, 250);
     private JPanel jContentPane = null;
@@ -72,7 +76,8 @@ public class SearchDialog extends JDialog {
     private JIntegerField jOffsetNumberField = null;
     private JIntegerField jLimitNumberField = null;
     private JTextField jTextFieldTribe = null;
-    private DatePicker jTextFieldDateModified = null;
+    private JTextField jTextFieldDateModified = null;
+    //    private DatePicker jTextFieldDateModified = null;
     //private JTextField jTextFieldPrimaryDivision = null;
     private JComboBox<String> jComboBoxPrimaryDivision = null;
     private JTextField textFieldHigherGeog;
@@ -150,132 +155,139 @@ public class SearchDialog extends JDialog {
             jButton.addActionListener(new java.awt.event.ActionListener() {
                 public void actionPerformed(java.awt.event.ActionEvent e) {
                     Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Searching...");
-                    Specimen searchCriteria = new Specimen();
-                    // Default specimen is created with valid distribution flag = true, etc. need to remove this
-                    // from the search criteria for a search by example.
-                    searchCriteria.clearDefaults();
-
 //                    if (jTextFieldDrawerNumber.getText() != null && jTextFieldDrawerNumber.getText().length() > 0) {
 //                        searchCriteria.setDrawerNumber(jTextFieldDrawerNumber.getText());
 //                    }
+//                    Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                    DetachedCriteria cr = DetachedCriteria.forClass(Specimen.class, "specimen");
+
                     if (jTextFieldBarcode.getText() != null && jTextFieldBarcode.getText().length() > 0) {
-                        searchCriteria.setBarcode(jTextFieldBarcode.getText());
+                        cr.add(Restrictions.like("barcode", jTextFieldBarcode.getText()));
                     }
                     if (jTextFieldOrder.getSelectedItem() != null && jTextFieldOrder.getSelectedItem().toString().trim().length() > 0) {
-                        searchCriteria.setOrder(jTextFieldOrder.getSelectedItem().toString());
+                        cr.add(Restrictions.like("higherOrder", jTextFieldOrder.getSelectedItem().toString()));
                     }
                     if (jTextFieldFamily.getText() != null && jTextFieldFamily.getText().length() > 0) {
-                        searchCriteria.setFamily(jTextFieldFamily.getText());
+                        cr.add(Restrictions.like("family", jTextFieldFamily.getText()));
                     }
                     if (jTextFieldSubfamily.getText() != null && jTextFieldSubfamily.getText().length() > 0) {
-                        searchCriteria.setSubfamily(jTextFieldSubfamily.getText());
+                        cr.add(Restrictions.like("subfamily", jTextFieldSubfamily.getText()));
                     }
                     if (jTextFieldTribe.getText() != null && jTextFieldTribe.getText().length() > 0) {
-                        searchCriteria.setTribe(jTextFieldTribe.getText());
+                        cr.add(Restrictions.like("tribe", jTextFieldTribe.getText()));
                     }
                     if (jTextFieldGenus.getText() != null && jTextFieldGenus.getText().length() > 0) {
-                        searchCriteria.setGenus(jTextFieldGenus.getText());
+                        cr.add(Restrictions.like("genus", jTextFieldGenus.getText()));
                     }
                     if (jTextFieldSpecies.getText() != null && jTextFieldSpecies.getText().length() > 0) {
-                        searchCriteria.setSpecificEpithet(jTextFieldSpecies.getText());
+                        cr.add(Restrictions.like("specificEpithet", jTextFieldSpecies.getText()));
                     }
                     if (jTextFieldSubspecies.getText() != null && jTextFieldSubspecies.getText().length() > 0) {
-                        searchCriteria.setSubspecificEpithet(jTextFieldSubspecies.getText());
+                        cr.add(Restrictions.like("subspecificEpithet", jTextFieldSubspecies.getText()));
                     }
                     if (jTextFieldVerbatimLocality.getText() != null && jTextFieldVerbatimLocality.getText().length() > 0) {
-                        searchCriteria.setVerbatimLocality(jTextFieldVerbatimLocality.getText());
-                    }
-                    Date fieldModifiedValue = (Date) jTextFieldDateModified.convert().getDateWithDefaultZone();
-                    if (fieldModifiedValue != null) {
-                        searchCriteria.setDateLastUpdated(fieldModifiedValue);
+                        cr.add(Restrictions.like("verbatimLocality", jTextFieldVerbatimLocality.getText()));
                     }
 					/*if (jTextFieldPrimaryDivision.getText()!=null && jTextFieldPrimaryDivision.getText().length() > 0) { 
 						searchCriteria.setPrimaryDivison(jTextFieldPrimaryDivision.getText());
 					}*/
                     if (jComboBoxWorkflowStatus.getSelectedItem() != null) {
                         if (!jComboBoxWorkflowStatus.getSelectedItem().toString().equals("")) {
-                            searchCriteria.setWorkFlowStatus(jComboBoxWorkflowStatus.getSelectedItem().toString());
+                            cr.add(Restrictions.eq("workFlowStatus", jComboBoxWorkflowStatus.getSelectedItem().toString()));
                         }
                     }
                     // TODO: Add higher geography
                     if (jComboBoxCountry.getSelectedItem() != null) {
                         if (!jComboBoxCountry.getSelectedItem().toString().equals("")) {
-                            searchCriteria.setCountry(jComboBoxCountry.getSelectedItem().toString());
+                            cr.add(Restrictions.like("country", jComboBoxCountry.getSelectedItem().toString()));
                         }
                     }
 
                     if (jComboBoxSpecificLocality.getSelectedItem() != null) {
                         if (!jComboBoxSpecificLocality.getSelectedItem().toString().equals("")) {
-                            searchCriteria.setSpecificLocality(jComboBoxSpecificLocality.getSelectedItem().toString());
+                            cr.add(Restrictions.like("specificLocality", jComboBoxSpecificLocality.getSelectedItem().toString()));
                         }
                     }
 
                     if (jComboBoxPrimaryDivision.getSelectedItem() != null) {
                         if (!jComboBoxPrimaryDivision.getSelectedItem().toString().equals("")) {
-                            searchCriteria.setPrimaryDivison(jComboBoxPrimaryDivision.getSelectedItem().toString());
+                            cr.add(Restrictions.like("primaryDivison", jComboBoxPrimaryDivision.getSelectedItem().toString()));
                         }
                     }
 
                     if (jTextFieldInterpretedDate.getText() != null && jTextFieldInterpretedDate.getText().length() > 0) {
-                        searchCriteria.setIsoDate(jTextFieldInterpretedDate.getText());
+                        cr.add(Restrictions.like("isoDate", jTextFieldInterpretedDate.getText()));
                     }
+                    if (jTextFieldDateModified.getText() != null && jTextFieldDateModified.getText().length() > 0) {
+                        cr.add(Restrictions.like("dateLastUpdated", jTextFieldDateModified.getText()));
+                    }
+//                    Date fieldModifiedValue = (Date) jTextFieldDateModified.convert().getDateWithDefaultZone();
+//                    if (fieldModifiedValue != null) {
+//                        searchCriteria.setDateLastUpdated(fieldModifiedValue);
+//                    }
 
                     if (jComboBoxCollector.getSelectedItem() != null) {
                         if (!jComboBoxCollector.getSelectedItem().toString().equals("")) {
-                            Collector c = new Collector();
-                            c.setCollectorName(jComboBoxCollector.getSelectedItem().toString());
-                            Set<Collector> collectors = new HashSet<Collector>();
-                            collectors.add(c);
-                            searchCriteria.setCollectors(collectors);
+                            cr.createAlias("specimen.collectors", "collector");
+                            cr.add(Restrictions.like(
+                                    "collector.collectorName",
+                                    jComboBoxCollector.getSelectedItem().toString()
+                            ));
                         }
                     }
                     if ((jTextFieldImageFilename.getText() != null && jTextFieldImageFilename.getText().length() > 0) ||
                             (jComboBoxEntryBy.getSelectedItem() != null)) {
                         // Either image filename or date imaged or both have content
                         // so we need to add an image to the search criteria.
-                        ICImage i = new ICImage();
-
+                        cr.setFetchMode("specimen.ICImages", FetchMode.JOIN);
+                        cr.createAlias("specimen.ICImages", "image");
                         if (jTextFieldImageFilename.getText() != null && jTextFieldImageFilename.getText().length() > 0) {
                             // if filename has content, add it
-                            i.setFilename(jTextFieldImageFilename.getText());
+                            cr.add(Restrictions.like(
+                                    "image.filename",
+                                    jTextFieldImageFilename.getText()
+                            ));
                         }
                         if (jComboBoxPath.getSelectedItem() != null) {
                             if (!jComboBoxPath.getSelectedItem().toString().equals("")) {
                                 // it the path = date imaged has content, add it
-                                i.setPath(jComboBoxPath.getSelectedItem().toString());
+                                cr.add(Restrictions.like(
+                                        "image.path",
+                                        jTextFieldImageFilename.getText()
+                                ));
                             }
                         }
-                        Set<ICImage> im = new HashSet<ICImage>();
-                        im.add(i);
-                        searchCriteria.setICImages(im);
                     }
                     if (jComboBoxCollection.getSelectedItem() != null) {
                         if (!jComboBoxCollection.getSelectedItem().toString().equals("")) {
-                            searchCriteria.setCollection(jComboBoxCollection.getSelectedItem().toString());
+                            cr.add(Restrictions.like(
+                                    "collection",
+                                    jComboBoxCollection.getSelectedItem().toString()
+                            ));
                         }
                     }
                     if (jComboBoxEntryBy.getSelectedItem() != null) {
                         if (!jComboBoxEntryBy.getSelectedItem().toString().equals("")) {
-                            Tracking tc = new Tracking();
-                            tc.setUser(jComboBoxEntryBy.getSelectedItem().toString());
-                            tc.setDatashotVersion(null);
-                            tc.setCouldCopyPaste(null);
-                            Set<Tracking> trackings = new HashSet<Tracking>();
-                            trackings.add(tc);
-                            searchCriteria.setTrackings(trackings);
+                            cr.setFetchMode("specimen.trackings", FetchMode.JOIN);
+                            cr.createAlias("specimen.trackings", "tracking");
+                            cr.add(Restrictions.like(
+                                    "tracking.user", jComboBoxEntryBy.getSelectedItem().toString()
+                            ));
                         }
                     }
                     if (jComboBoxIdentifiedBy.getSelectedItem() != null) {
                         if (!jComboBoxIdentifiedBy.getSelectedItem().toString().equals("")) {
-                            searchCriteria.setIdentifiedBy(jComboBoxIdentifiedBy.getSelectedItem().toString());
+                            cr.add(Restrictions.like("identifiedBy", jComboBoxIdentifiedBy.getSelectedItem().toString()));
                         }
                     }
                     if (jComboBoxQuestions.getSelectedItem() != null) {
                         if (!jComboBoxQuestions.getSelectedItem().toString().equals("")) {
-                            searchCriteria.setQuestions(jComboBoxQuestions.getSelectedItem().toString());
+                            cr.add(Restrictions.like("questions", jComboBoxQuestions.getSelectedItem().toString()));
                         }
                     }
-                    Singleton.getSingletonInstance().getMainFrame().setSpecimenBrowseList(searchCriteria, jLimitNumberField.getIntValue(), jOffsetNumberField.getIntValue());
+                    cr.addOrder(Order.asc("specimenId"));
+                    log.debug("Starting search with criteria...");
+                    Singleton.getSingletonInstance().getMainFrame().setSpecimenBrowseList(cr, jLimitNumberField.getIntValue(), jOffsetNumberField.getIntValue());
                 }
             });
         }
@@ -411,7 +423,10 @@ public class SearchDialog extends JDialog {
 
     private Component getLastUpdatedJTextField() {
         if (jTextFieldDateModified == null) {
-            jTextFieldDateModified = new DatePicker();
+            //DatePickerSettings datePickerSettings = new DatePickerSettings(new Locale("en", "CH"));
+
+            //jTextFieldDateModified = new DatePicker(datePickerSettings);
+            jTextFieldDateModified = new JTextField();
         }
         return jTextFieldDateModified;
     }

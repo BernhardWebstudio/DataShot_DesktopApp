@@ -18,6 +18,7 @@ import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsException;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
 import org.hibernate.*;
+import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -27,11 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.persistence.PersistenceException;
+import javax.persistence.TypedQuery;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 // Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
 
@@ -130,6 +129,56 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             // TODO Handle save error in UI
             log.error("Error", e);
         }
+    }
+
+    public List<Specimen> findBy(DetachedCriteria criteria, int limit, int offset) {
+
+        try {
+            List<Specimen> results = null;
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            try {
+                // TODO: handle paths/relationships
+                Transaction txn = session.beginTransaction();
+                Criteria executableQuery = criteria.getExecutableCriteria(session);
+//                cr.add(new Distinct(new Projection()))
+//                executableQuery.setResultTransformer(new DistinctRootEntityResultTransformer());
+                if (limit > 0) {
+                    executableQuery.setMaxResults(limit);
+                }
+                if (offset > 0) {
+                    executableQuery.setFirstResult(offset);
+                }
+                results = executableQuery.list();
+                txn.commit();
+
+                session = HibernateUtil.getSessionFactory().getCurrentSession();
+                txn = session.beginTransaction();
+                Set<Long> specimenIds = new HashSet<>();
+                results.forEach(result -> specimenIds.add(result.getSpecimenId()));
+                TypedQuery<Specimen> query = session.createQuery(
+                        "SELECT s FROM Specimen s " +
+                                "LEFT JOIN FETCH s.ICImages " +
+                                "LEFT JOIN FETCH s.collectors " +
+                                "LEFT JOIN FETCH s.specimenParts " +
+                                "LEFT JOIN FETCH s.numbers " +
+                                "LEFT JOIN FETCH s.trackings " +
+                                "LEFT JOIN FETCH s.externalHistory " +
+                                "LEFT JOIN FETCH s.higherGeography " +
+                                "WHERE s.id IN (?1)"
+                );
+                query.setParameter(1, specimenIds);
+                results = query.getResultList();
+                txn.commit();
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error(e.getMessage());
+            }
+            return results;
+        } catch (RuntimeException re) {
+            log.error("find by detached criteria failed", re);
+            throw re;
+        }
+
     }
 
     /**

@@ -28,8 +28,10 @@ import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.CopyRowButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
+import org.hibernate.Criteria;
 import org.hibernate.SessionException;
 import org.hibernate.TransactionException;
+import org.hibernate.criterion.DetachedCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,16 +54,13 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
     private JScrollPane jScrollPane = null;
     private JTable jTable = null;
     private JPanel jPanel = null;
-    private JLabel jLabel = null;
     private JTextField jTextField = null;
     private JComboBox jComboBox = null;
-    private JLabel jLabel1 = null;
     private TableRowSorter<SpecimenListTableModel> sorter;
-    private JLabel jLabel2 = null;
     private JTextField jTextFieldFamily = null;
-    private JLabel jLabel3 = null;
     private JTextField jTextFieldDrawerNumber = null;
     private Specimen searchCriteria = null;
+    private DetachedCriteria searchCriteria2 = null;
     private boolean useLike = false;
     private int maxResults = 0;
     private int offset = 0;
@@ -94,6 +93,15 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
         initialize();
     }
 
+    public SpecimenBrowser(DetachedCriteria criteria, int limit, int offset) {
+        super();
+        this.searchCriteria = null;
+        this.searchCriteria2 = criteria;
+        this.maxResults = limit;
+        this.offset = offset;
+        initialize();
+    }
+
     /**
      * This method initializes this
      */
@@ -114,13 +122,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             jScrollPane = new JScrollPane();
             try {
                 jScrollPane.setViewportView(getJTable());
-            } catch (SessionException e) {
-                log.debug(e.getMessage(), e);
-                Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
-                        "Database Connection Error.");
-                HibernateUtil.terminateSessionFactory();
-                this.setVisible(false);
-            } catch (TransactionException e) {
+            } catch (SessionException | TransactionException e) {
                 log.debug(e.getMessage(), e);
                 Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
                         "Database Connection Error.");
@@ -144,9 +146,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             // jTable.setAutoCreateRowSorter(true);
             SpecimenLifeCycle s = new SpecimenLifeCycle();
             SpecimenListTableModel model = null;
-            if (searchCriteria == null) {
-                model = new SpecimenListTableModel(s.findAll());
-            } else {
+            if (searchCriteria != null) {
                 if (useLike) {
                     model = new SpecimenListTableModel(
                             s.findByExampleLike(searchCriteria, maxResults, offset));
@@ -154,10 +154,16 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
                     model = new SpecimenListTableModel(
                             s.findByExample(searchCriteria, maxResults, offset));
                 }
+            } else if (searchCriteria2 != null) {
+                model = new SpecimenListTableModel(
+                        s.findBy(this.searchCriteria2, maxResults, offset)
+                );
+            } else {
+                model = new SpecimenListTableModel(s.findAll());
             }
             jTable.setModel(model);
             sorter = new TableRowSorter<SpecimenListTableModel>(model);
-            sorter.toggleSortOrder(SpecimenListTableModel.COL_BARCODE-1);
+            sorter.toggleSortOrder(SpecimenListTableModel.COL_BARCODE - 1);
             jTable.setRowSorter(sorter);
             jTable.setDefaultRenderer(Specimen.class, new ButtonRenderer());
             jTable.setDefaultEditor(Specimen.class, new ButtonEditor());
@@ -194,7 +200,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
             gridBagConstraints3.gridx = 6;
             gridBagConstraints3.gridy = 0;
-            jLabel3 = new JLabel();
+            JLabel jLabel3 = new JLabel();
             jLabel3.setText("Drawer:");
             GridBagConstraints gridBagConstraints21 = new GridBagConstraints();
             gridBagConstraints21.fill = GridBagConstraints.BOTH;
@@ -204,13 +210,13 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             GridBagConstraints gridBagConstraints11 = new GridBagConstraints();
             gridBagConstraints11.gridx = 4;
             gridBagConstraints11.gridy = 0;
-            jLabel2 = new JLabel();
+            JLabel jLabel2 = new JLabel();
             jLabel2.setText("Family:");
             GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
             gridBagConstraints2.gridx = 2;
             gridBagConstraints2.insets = new Insets(0, 5, 0, 0);
             gridBagConstraints2.gridy = 0;
-            jLabel1 = new JLabel();
+            JLabel jLabel1 = new JLabel();
             jLabel1.setText("Workflow:");
             GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
             gridBagConstraints1.fill = GridBagConstraints.BOTH;
@@ -222,7 +228,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             gridBagConstraints.fill = GridBagConstraints.BOTH;
             gridBagConstraints.anchor = GridBagConstraints.WEST;
             gridBagConstraints.weightx = 1.0;
-            jLabel = new JLabel();
+            JLabel jLabel = new JLabel();
             jLabel.setText("Find Barcode:");
             jPanel = new JPanel();
             jPanel.setLayout(new GridBagLayout());

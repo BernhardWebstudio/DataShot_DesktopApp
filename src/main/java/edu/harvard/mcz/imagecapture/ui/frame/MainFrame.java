@@ -926,10 +926,6 @@ public class MainFrame extends JFrame implements RunnerListener {
         setStatusMessage("Found " + slb.getRowCount() + " matching specimens");
     }
 
-    public void setSpecimenBrowseList(Specimen searchCriteria) {
-        this.setSpecimenBrowseList(searchCriteria, 0, 0);
-    }
-
     /**
      * This method initializes jMenuItemBrowseSpecimens
      *

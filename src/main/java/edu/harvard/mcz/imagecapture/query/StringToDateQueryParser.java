@@ -61,9 +61,19 @@ public class StringToDateQueryParser {
                 LocalDate date = LocalDate.of(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)), Integer.parseInt(m.group(3)));
                 return new DateTuple(date);
             });
+            put("(\\d{4})[/,\\.\\-]{1}(\\d{1,2})[/,\\.\\-]{1}(\\d{1,2}) ?\\- ?(\\d{4})[/,\\.\\-]{1}(\\d{1,2})[/,\\.\\-]{1}(\\d{1,2})", m -> {
+                LocalDate startDate = LocalDate.of(Integer.parseInt(m.group(1)), Integer.parseInt(m.group(2)), Integer.parseInt(m.group(3)));
+                LocalDate endDate = LocalDate.of(Integer.parseInt(m.group(4)), Integer.parseInt(m.group(5)), Integer.parseInt(m.group(6)));
+                return new DateTuple(startDate, endDate);
+            });
             put("(\\d{1,2})[/,\\.\\-]{1}(\\d{1,2})[/,\\.\\-]{1}(\\d{4})", m -> {
                 LocalDate date = LocalDate.of(Integer.parseInt(m.group(3)), Integer.parseInt(m.group(2)), Integer.parseInt(m.group(1)));
                 return new DateTuple(date);
+            });
+            put("(\\d{1,2})[/,\\.\\-]{1}(\\d{1,2})[/,\\.\\-]{1}(\\d{4}) ?\\- ?(\\d{1,2})[/,\\.\\-]{1}(\\d{1,2})[/,\\.\\-]{1}(\\d{4})", m -> {
+                LocalDate startDate = LocalDate.of(Integer.parseInt(m.group(3)), Integer.parseInt(m.group(2)), Integer.parseInt(m.group(1)));
+                LocalDate endDate = LocalDate.of(Integer.parseInt(m.group(6)), Integer.parseInt(m.group(4)), Integer.parseInt(m.group(5)));
+                return new DateTuple(startDate, endDate);
             });
         }};
 

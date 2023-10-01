@@ -1,15 +1,5 @@
 package edu.harvard.mcz.imagecapture.lifecycle;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hibernate.HibernateException;
-import org.hibernate.LockMode;
-import org.hibernate.Session;
-import org.hibernate.SessionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.Tracking;
@@ -17,6 +7,13 @@ import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import org.hibernate.*;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 // Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
 
@@ -317,6 +314,33 @@ public class TrackingLifeCycle extends GenericLifeCycle {
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
+        }
+    }
+
+    @Override
+    public List<Tracking> findByIds(List ids) {
+        try {
+            List<Tracking> results = null;
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            try {
+                session = HibernateUtil.getSessionFactory().getCurrentSession();
+                Transaction txn = session.beginTransaction();
+                Query<Tracking> query = session.createQuery(
+                        "SELECT t FROM Tracking t " +
+                                "LEFT JOIN FETCH t.specimen " +
+                                "WHERE t.id IN (?1)"
+                );
+                query.setParameter(1, ids);
+                results = query.list();
+                txn.commit();
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error(e.getMessage());
+            }
+            return results;
+        } catch (RuntimeException re) {
+            log.error("find by ids failed", re);
+            throw re;
         }
     }
 }

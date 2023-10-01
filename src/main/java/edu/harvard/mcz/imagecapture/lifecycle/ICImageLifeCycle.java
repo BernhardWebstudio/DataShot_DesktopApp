@@ -5,16 +5,12 @@ import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import org.hibernate.HibernateException;
-import org.hibernate.LockMode;
-import org.hibernate.Session;
-import org.hibernate.SessionException;
+import org.hibernate.*;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 // Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
@@ -388,20 +384,16 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
      */
 
     public String[] getDistinctPaths() {
-        ArrayList<String> types = new ArrayList<String>();
+        List<String> types = new ArrayList<>();
         types.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct path from ICImage im where im.path is not null order by im.path  ";
+                    "Select distinct path from ICImage im where im.path is not null order by im.path";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
                 Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    types.add(value);
-                }
+                types.addAll(q.list());
                 session.getTransaction().commit();
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
@@ -411,11 +403,37 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
                 session.close();
             } catch (SessionException e) {
             }
-            String[] result = types.toArray(new String[]{});
-            return result;
+            return types.toArray(new String[]{});
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
+        }
+    }
+
+    @Override
+    public List<ICImage> findByIds(List<Long> ids) {
+        try {
+            List<ICImage> results = null;
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            try {
+                session = HibernateUtil.getSessionFactory().getCurrentSession();
+                Transaction txn = session.beginTransaction();
+                Query<ICImage> query = session.createQuery(
+                        "SELECT i FROM ICImage i " +
+                                "LEFT JOIN FETCH i.templateId " +
+                                "WHERE s.id IN (?1)"
+                );
+                query.setParameter(1, ids);
+                results = query.list();
+                txn.commit();
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error(e.getMessage());
+            }
+            return results;
+        } catch (RuntimeException re) {
+            log.error("find by ids failed", re);
+            throw re;
         }
     }
 }

@@ -1,16 +1,5 @@
 package edu.harvard.mcz.imagecapture.lifecycle;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.hibernate.HibernateException;
-import org.hibernate.LockMode;
-import org.hibernate.Session;
-import org.hibernate.SessionException;
-import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.Users;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchValueException;
@@ -19,6 +8,16 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import org.hibernate.HibernateException;
+import org.hibernate.LockMode;
+import org.hibernate.Session;
+import org.hibernate.SessionException;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 // Generated Feb 5, 2009 5:23:55 PM by Hibernate Tools 3.2.2.GA
 
@@ -89,10 +88,9 @@ public class UsersLifeCycle {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         session.beginTransaction();
         try {
-            List<Users> results =
-                    (List<Users>) session
-                            .createQuery("from Users as u where u.userid = '" + aUserID + "'")
-                            .list();
+            Query query = session.createQuery("FROM Users WHERE userid = :userid");
+            query.setParameter("userid", aUserID);
+            List<Users> results = query.list();
             session.getTransaction().commit();
             if (results.size() == 1) {
                 returnValue = results.get(0).isUserRole(Users.ROLE_CHIEF_EDITOR);
@@ -142,13 +140,11 @@ public class UsersLifeCycle {
         String returnValue = "";
 
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        session.beginTransaction();
         try {
-            List<Users> results =
-                    (List<Users>) session
-                            .createQuery("from Users as u where u.username = '" + aUsername +
-                                    "'")
-                            .list();
+            session.beginTransaction();
+            Query query = session.createQuery("FROM Users WHERE username = :username");
+            query.setParameter("username", aUsername);
+            List<Users> results = query.list();
             session.getTransaction().commit();
             if (results.size() > 0) {
                 returnValue = results.get(0).getFullname();

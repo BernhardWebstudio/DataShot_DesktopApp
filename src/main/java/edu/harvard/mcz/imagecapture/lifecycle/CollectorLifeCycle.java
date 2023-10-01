@@ -5,14 +5,13 @@ package edu.harvard.mcz.imagecapture.lifecycle;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.Collector;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
-import org.hibernate.HibernateException;
-import org.hibernate.LockMode;
-import org.hibernate.Session;
-import org.hibernate.SessionException;
+import org.hibernate.*;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Home object for domain model class Collector.
@@ -25,7 +24,7 @@ public class CollectorLifeCycle extends GenericLifeCycle {
             LoggerFactory.getLogger(CollectorLifeCycle.class);
 
     public CollectorLifeCycle() {
-        super(CollectorLifeCycle.class, log);
+        super(CollectorLifeCycle.class, log, "");
     }
 
     public void persist(Collector transientInstance) throws SaveFailedException {
@@ -196,6 +195,32 @@ public class CollectorLifeCycle extends GenericLifeCycle {
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
+        }
+    }
+
+    @Override
+    public List<Collector> findByIds(List ids) {
+        try {
+            List<Collector> results = null;
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            try {
+                session = HibernateUtil.getSessionFactory().getCurrentSession();
+                Transaction txn = session.beginTransaction();
+                Query<Collector> query = session.createQuery(
+                        "SELECT c FROM Collector c " +
+                                "WHERE c.id IN (?1)"
+                );
+                query.setParameter(1, ids);
+                results = query.list();
+                txn.commit();
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error(e.getMessage());
+            }
+            return results;
+        } catch (RuntimeException re) {
+            log.error("find by detached criteria failed", re);
+            throw re;
         }
     }
 }

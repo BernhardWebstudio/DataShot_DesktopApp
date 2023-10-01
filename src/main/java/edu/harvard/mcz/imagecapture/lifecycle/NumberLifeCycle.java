@@ -1,10 +1,9 @@
 package edu.harvard.mcz.imagecapture.lifecycle;
 
-import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
-import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.data.HibernateUtil;
-import edu.harvard.mcz.imagecapture.entity.Number;
-import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Session;
@@ -13,8 +12,11 @@ import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.entity.Number;
+import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 
 // Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
 
@@ -25,8 +27,7 @@ import java.util.Iterator;
  */
 public class NumberLifeCycle {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(NumberLifeCycle.class);
+    private static final Logger log = LoggerFactory.getLogger(NumberLifeCycle.class);
 
     /**
      * Retrieve, as a string array suitable for populating a pick list,
@@ -43,7 +44,7 @@ public class NumberLifeCycle {
      * </code>
      *
      * @return an array of strings consisting of { "", "Unknown", select distinct
-     * numberType from Number }
+     *         numberType from Number }
      */
 
     public static String[] getDistinctTypes() {
@@ -53,25 +54,18 @@ public class NumberLifeCycle {
                 .getProperties()
                 .getProperty(ImageCaptureProperties.KEY_SHOW_ALL_NUMBER_TYPES)
                 .equals("false")) {
-            return Number.getNumberTypeValues().toArray(new String[]{});
+            return Number.getNumberTypeValues().toArray(new String[] {});
         } else {
-            types.add("");        // put blank at top of list.
+            types.add(""); // put blank at top of list.
             types.add("Unknown"); // follow with "Unknown", see below.
             try {
-                String sql =
-                        "Select distinct numberType from Number num where num.numberType is not null order by num.numberType  ";
+                String sql = "Select distinct numberType from Number num where num.numberType is not null order by num.numberType  ";
                 Session session = HibernateUtil.getSessionFactory().getCurrentSession();
                 try {
                     session.beginTransaction();
-                    Query q = session.createQuery(sql);
-                    Iterator i = q.iterate();
-                    while (i.hasNext()) {
-                        String value = (String) i.next();
-                        // add, only if value isn't the "Unknown" put at top of list above.
-                        if (!value.equals("Unknown")) {
-                            types.add(value);
-                        }
-                    }
+                    Query query = session.createQuery(sql);
+                    types.addAll((Collection<String>) query.list().stream().filter(q -> !q.equals("Unknown")).collect(Collectors.toList()));
+
                     session.getTransaction().commit();
                 } catch (HibernateException e) {
                     session.getTransaction().rollback();
@@ -81,20 +75,19 @@ public class NumberLifeCycle {
                     session.close();
                 } catch (SessionException e) {
                 }
-                String[] result = types.toArray(new String[]{});
+                String[] result = types.toArray(new String[] {});
             } catch (RuntimeException re) {
                 log.error("Error", re);
                 types = new ArrayList<String>();
             }
         }
-        return types.toArray(new String[]{});
+        return types.toArray(new String[] {});
     }
 
     public void persist(Number transientInstance) throws SaveFailedException {
         log.debug("persisting Number instance");
         try {
-            org.hibernate.Session session =
-                    HibernateUtil.getSessionFactory().getCurrentSession();
+            org.hibernate.Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             session.beginTransaction();
             try {
                 session.persist(transientInstance);

@@ -23,12 +23,14 @@ import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.lifecycle.*;
-import edu.harvard.mcz.imagecapture.query.DetachedQuery;
+import edu.harvard.mcz.imagecapture.query.Specification;
+import edu.harvard.mcz.imagecapture.query.StringToDateQueryParser;
 import edu.harvard.mcz.imagecapture.ui.field.JIntegerField;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import net.miginfocom.swing.MigLayout;
-import org.hibernate.FetchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +40,8 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import jakarta.persistence.criteria.*;
-import jakarta.persistence.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * SearchDialog
@@ -162,67 +163,83 @@ public class SearchDialog extends JDialog {
 //                        searchCriteria.setDrawerNumber(jTextFieldDrawerNumber.getText());
 //                    }
 //                    Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-                    DetachedQuery cr = DetachedQuery.forClass(Specimen.class, "specimen");
+                    Map<String, Object> query = new HashMap<String, Object>();
 
                     if (jTextFieldBarcode.getText() != null && jTextFieldBarcode.getText().length() > 0) {
-                        cr.add(Restrictions.like("barcode", jTextFieldBarcode.getText()));
+                        query.put("barcode", jTextFieldBarcode.getText());
                     }
                     if (jTextFieldOrder.getSelectedItem() != null && jTextFieldOrder.getSelectedItem().toString().trim().length() > 0) {
-                        cr.add(Restrictions.like("higherOrder", jTextFieldOrder.getSelectedItem().toString()));
+                        query.put("higherOrder", jTextFieldOrder.getSelectedItem().toString());
                     }
                     if (jTextFieldFamily.getText() != null && jTextFieldFamily.getText().length() > 0) {
-                        cr.add(Restrictions.like("family", jTextFieldFamily.getText()));
+                        query.put("family", jTextFieldFamily.getText());
                     }
                     if (jTextFieldSubfamily.getText() != null && jTextFieldSubfamily.getText().length() > 0) {
-                        cr.add(Restrictions.like("subfamily", jTextFieldSubfamily.getText()));
+                        query.put("subfamily", jTextFieldSubfamily.getText());
                     }
                     if (jTextFieldTribe.getText() != null && jTextFieldTribe.getText().length() > 0) {
-                        cr.add(Restrictions.like("tribe", jTextFieldTribe.getText()));
+                        query.put("tribe", jTextFieldTribe.getText());
                     }
                     if (jTextFieldGenus.getText() != null && jTextFieldGenus.getText().length() > 0) {
-                        cr.add(Restrictions.like("genus", jTextFieldGenus.getText()));
+                        query.put("genus", jTextFieldGenus.getText());
                     }
                     if (jTextFieldSpecies.getText() != null && jTextFieldSpecies.getText().length() > 0) {
-                        cr.add(Restrictions.like("specificEpithet", jTextFieldSpecies.getText()));
+                        query.put("specificEpithet", jTextFieldSpecies.getText());
                     }
                     if (jTextFieldSubspecies.getText() != null && jTextFieldSubspecies.getText().length() > 0) {
-                        cr.add(Restrictions.like("subspecificEpithet", jTextFieldSubspecies.getText()));
+                        query.put("subspecificEpithet", jTextFieldSubspecies.getText());
                     }
                     if (jTextFieldVerbatimLocality.getText() != null && jTextFieldVerbatimLocality.getText().length() > 0) {
-                        cr.add(Restrictions.like("verbatimLocality", jTextFieldVerbatimLocality.getText()));
+                        query.put("verbatimLocality", jTextFieldVerbatimLocality.getText());
                     }
 					/*if (jTextFieldPrimaryDivision.getText()!=null && jTextFieldPrimaryDivision.getText().length() > 0) { 
 						searchCriteria.setPrimaryDivison(jTextFieldPrimaryDivision.getText());
 					}*/
                     if (jComboBoxWorkflowStatus.getSelectedItem() != null) {
                         if (!jComboBoxWorkflowStatus.getSelectedItem().toString().equals("")) {
-                            cr.add(Restrictions.eq("workFlowStatus", jComboBoxWorkflowStatus.getSelectedItem().toString()));
+                            query.put("workFlowStatus", jComboBoxWorkflowStatus.getSelectedItem().toString());
                         }
                     }
                     // TODO: Add higher geography
                     if (jComboBoxCountry.getSelectedItem() != null) {
                         if (!jComboBoxCountry.getSelectedItem().toString().equals("")) {
-                            cr.add(Restrictions.like("country", jComboBoxCountry.getSelectedItem().toString()));
+                            query.put("country", jComboBoxCountry.getSelectedItem().toString());
                         }
                     }
 
                     if (jComboBoxSpecificLocality.getSelectedItem() != null) {
                         if (!jComboBoxSpecificLocality.getSelectedItem().toString().equals("")) {
-                            cr.add(Restrictions.like("specificLocality", jComboBoxSpecificLocality.getSelectedItem().toString()));
+                            query.put("specificLocality", jComboBoxSpecificLocality.getSelectedItem().toString());
                         }
                     }
 
                     if (jComboBoxPrimaryDivision.getSelectedItem() != null) {
                         if (!jComboBoxPrimaryDivision.getSelectedItem().toString().equals("")) {
-                            cr.add(Restrictions.like("primaryDivison", jComboBoxPrimaryDivision.getSelectedItem().toString()));
+                            query.put("primaryDivison", jComboBoxPrimaryDivision.getSelectedItem().toString());
                         }
                     }
 
                     if (jTextFieldInterpretedDate.getText() != null && jTextFieldInterpretedDate.getText().length() > 0) {
-                        cr.add(Restrictions.like("isoDate", jTextFieldInterpretedDate.getText()));
+                        query.put("isoDate", jTextFieldInterpretedDate.getText());
                     }
                     if (jTextFieldDateModified.getText() != null && jTextFieldDateModified.getText().length() > 0) {
-                        cr.add(Restrictions.like("dateLastUpdated", jTextFieldDateModified.getText()));
+                        try {
+                            StringToDateQueryParser parser = new StringToDateQueryParser(jTextFieldDateModified.getText());
+                            query.put("dateLastUpdated", new Specification<Specimen, Long>() {
+                                @Override
+                                public Predicate toPredicate(Root<Specimen> root, CriteriaQuery<Long> query, CriteriaBuilder cb) {
+                                    return cb.between(
+                                            root.get("dateLastUpdated"), parser.getDateLowerBound(), parser.getDateUpperBound()
+                                    );
+                                }
+                            });
+                        } catch (IllegalArgumentException exception) {
+                            exception.printStackTrace();
+                            Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Error: Search could not be composed.");
+                            JOptionPane.showMessageDialog(null, "Date for dateLastUpdated search could not be parsed.", "Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+//                        query.put("dateLastUpdated", jTextFieldDateModified.getText());
                     }
 //                    Date fieldModifiedValue = (Date) jTextFieldDateModified.convert().getDateWithDefaultZone();
 //                    if (fieldModifiedValue != null) {
@@ -231,66 +248,60 @@ public class SearchDialog extends JDialog {
 
                     if (jComboBoxCollector.getSelectedItem() != null) {
                         if (!jComboBoxCollector.getSelectedItem().toString().equals("")) {
-                            cr.createAlias("specimen.collectors", "collector");
-                            cr.add(Restrictions.like(
-                                    "collector.collectorName",
+                            query.put(
+                                    "collectors.collectorName",
                                     jComboBoxCollector.getSelectedItem().toString()
-                            ));
+                            );
                         }
                     }
                     if ((jTextFieldImageFilename.getText() != null && jTextFieldImageFilename.getText().length() > 0) ||
                             (jComboBoxEntryBy.getSelectedItem() != null)) {
                         // Either image filename or date imaged or both have content
                         // so we need to add an image to the search criteria.
-                        cr.setFetchMode("specimen.ICImages", FetchMode.JOIN);
-                        cr.createAlias("specimen.ICImages", "image");
                         if (jTextFieldImageFilename.getText() != null && jTextFieldImageFilename.getText().length() > 0) {
                             // if filename has content, add it
-                            cr.add(Restrictions.like(
-                                    "image.filename",
+                            query.put(
+                                    "ICImages.filename",
                                     jTextFieldImageFilename.getText()
-                            ));
+                            );
                         }
                         if (jComboBoxPath.getSelectedItem() != null) {
                             if (!jComboBoxPath.getSelectedItem().toString().equals("")) {
                                 // it the path = date imaged has content, add it
-                                cr.add(Restrictions.like(
-                                        "image.path",
-                                        jTextFieldImageFilename.getText()
-                                ));
+                                query.put(
+                                        "ICImages.path",
+                                        jComboBoxPath.getSelectedItem().toString()
+                                );
                             }
                         }
                     }
                     if (jComboBoxCollection.getSelectedItem() != null) {
                         if (!jComboBoxCollection.getSelectedItem().toString().equals("")) {
-                            cr.add(Restrictions.like(
+                            query.put(
                                     "collection",
                                     jComboBoxCollection.getSelectedItem().toString()
-                            ));
+                            );
                         }
                     }
                     if (jComboBoxEntryBy.getSelectedItem() != null) {
                         if (!jComboBoxEntryBy.getSelectedItem().toString().equals("")) {
-                            cr.setFetchMode("specimen.trackings", FetchMode.JOIN);
-                            cr.createAlias("specimen.trackings", "tracking");
-                            cr.add(Restrictions.like(
-                                    "tracking.user", jComboBoxEntryBy.getSelectedItem().toString()
-                            ));
+                            query.put(
+                                    "trackings.user", jComboBoxEntryBy.getSelectedItem().toString()
+                            );
                         }
                     }
                     if (jComboBoxIdentifiedBy.getSelectedItem() != null) {
                         if (!jComboBoxIdentifiedBy.getSelectedItem().toString().equals("")) {
-                            cr.add(Restrictions.like("identifiedBy", jComboBoxIdentifiedBy.getSelectedItem().toString()));
+                            query.put("identifiedBy", jComboBoxIdentifiedBy.getSelectedItem().toString());
                         }
                     }
                     if (jComboBoxQuestions.getSelectedItem() != null) {
                         if (!jComboBoxQuestions.getSelectedItem().toString().equals("")) {
-                            cr.add(Restrictions.like("questions", jComboBoxQuestions.getSelectedItem().toString()));
+                            query.put("questions", jComboBoxQuestions.getSelectedItem().toString());
                         }
                     }
-                    cr.addOrder(Order.asc("id"));
                     log.debug("Starting search with criteria...");
-                    Singleton.getSingletonInstance().getMainFrame().setSpecimenBrowseList(cr, jLimitNumberField.getIntValue(), jOffsetNumberField.getIntValue());
+                    Singleton.getSingletonInstance().getMainFrame().setSpecimenBrowseList(query, jLimitNumberField.getIntValue(), jOffsetNumberField.getIntValue());
                 }
             });
         }

@@ -25,7 +25,7 @@ public class HigherTaxonLifeCycle {
         try {
             String sql =
                     " Select distinct family from Specimen s where s.family is not null ";
-            return getStrings(result, sql);
+            return addStrings(result, sql);
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
@@ -45,33 +45,7 @@ public class HigherTaxonLifeCycle {
                                 family.trim() +
                                 "' and s.subfamily is not null order by subfamily ";
             }
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            try {
-                session.beginTransaction();
-                Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                if (!i.hasNext()) {
-                    // No results, try without where family='?'
-                    sql =
-                            " Select distinct subfamily from Specimen s where s.subfamily is not null ";
-                    q = session.createQuery(sql);
-                    i = q.iterate();
-                }
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    result.add(value);
-                }
-                session.getTransaction().commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error(e.getMessage());
-            } finally {
-                try {
-                    session.close();
-                } catch (SessionException e) {
-                }
-            }
-            return result.toArray(new String[]{});
+            return addStrings(result, sql);
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
@@ -84,7 +58,7 @@ public class HigherTaxonLifeCycle {
             String sql =
                     " Select distinct tribe from Specimen s where s.subfamily = '" +
                             subfamily.trim() + "' and s.tribe is not null ";
-            return getStrings(result, sql);
+            return addStrings(result, sql);
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
@@ -96,23 +70,19 @@ public class HigherTaxonLifeCycle {
         try {
             String sql =
                     " Select distinct higherOrder from Specimen s where s.higherOrder is not null ";
-            return getStrings(result, sql);
+            return addStrings(result, sql);
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
         }
     }
 
-    private static String[] getStrings(List<String> result, String sql) {
+    private static String[] addStrings(List<String> result, String sql) {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         try {
             session.beginTransaction();
             Query q = session.createQuery(sql);
-            Iterator i = q.iterate();
-            while (i.hasNext()) {
-                String value = (String) i.next();
-                result.add(value);
-            }
+            result.addAll(q.list());
             session.getTransaction().commit();
         } catch (HibernateException e) {
             session.getTransaction().rollback();
@@ -354,11 +324,7 @@ public class HigherTaxonLifeCycle {
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
-                Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                if (i.hasNext()) {
-                    result = true;
-                }
+                result = session.createQuery(sql).list().size() > 0;
                 session.getTransaction().commit();
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
@@ -386,11 +352,7 @@ public class HigherTaxonLifeCycle {
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
-                Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                if (i.hasNext()) {
-                    result = true;
-                }
+                result = session.createQuery(sql).list().size() > 0;
                 session.getTransaction().commit();
             } catch (HibernateException e) {
                 session.getTransaction().rollback();

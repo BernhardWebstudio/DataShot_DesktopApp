@@ -12,6 +12,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 
+import java.util.List;
+
 public class ISO3166LifeCycle extends GenericLifeCycle<ISO3166> {
 
     private static final Logger log =
@@ -74,5 +76,10 @@ public class ISO3166LifeCycle extends GenericLifeCycle<ISO3166> {
             log.error(e.getMessage());
         }
         return instance;
+    }
+
+    @Override
+    public List<ISO3166> findByIds(List<Long> ids) {
+        return null;
     }
 }

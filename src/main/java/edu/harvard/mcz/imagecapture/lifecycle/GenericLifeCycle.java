@@ -1,39 +1,32 @@
 package edu.harvard.mcz.imagecapture.lifecycle;
 
-// import org.hibernate.metamodel.model.domain.spi.EntityTypeDescriptor;
-// import org.hibernate.metamodel.model.domain.spi.NonIdPersistentAttribute;
-// import org.hibernate.metamodel.spi.MetamodelImplementor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.query.Specification;
+import jakarta.persistence.criteria.*;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
-import org.hibernate.Transaction;
 import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.metamodel.spi.MetamodelImplementor;
+import org.hibernate.query.Query;
 import org.slf4j.Logger;
 
-import edu.harvard.mcz.imagecapture.data.HibernateUtil;
-import jakarta.persistence.Query;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import java.util.*;
 
 public abstract class GenericLifeCycle<T> {
 
     private final Class<T> tCLass;
+    private final String idProperty;
     protected Logger log;
 
-
     public GenericLifeCycle(Class<T> tClass, Logger log) {
+        this(tClass, log, "id");
+    }
+
+    public GenericLifeCycle(Class<T> tClass, Logger log, String idProperty) {
         this.tCLass = tClass;
         this.log = log;
+        this.idProperty = idProperty;
     }
 
     public T findOneBy(String propertyPath, Object value) {
@@ -43,7 +36,7 @@ public abstract class GenericLifeCycle<T> {
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
-                CriteriaBuilder cb = session.getCriteriaBuilder();
+                CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
                 CriteriaQuery cr = cb.createQuery(this.tCLass);
                 Root<T> root = cr.from(this.tCLass);
                 cr = cr.where(cb.equal(root.get(propertyPath), value));
@@ -53,6 +46,7 @@ public abstract class GenericLifeCycle<T> {
                 } else {
                     log.debug("get successful, instance found");
                 }
+                session.getTransaction().commit();
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
                 log.error(e.getMessage());
@@ -60,33 +54,6 @@ public abstract class GenericLifeCycle<T> {
             return instance;
         } catch (RuntimeException re) {
             log.error("get failed", re);
-            throw re;
-        }
-    }
-
-    public List<T> findBy(DetachedCriteria criteria, int limit, int offset) {
-        try {
-            List<T> results = null;
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            try {
-                // TODO: handle paths/relationships
-                Transaction txn = session.beginTransaction();
-                Criteria executableQuery = criteria.getExecutableCriteria(session);
-                if (limit > 0) {
-                    executableQuery.setMaxResults(limit);
-                }
-                if (offset > 0) {
-                    executableQuery.setFirstResult(offset);
-                }
-                results = executableQuery.list();
-                txn.commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error(e.getMessage());
-            }
-            return results;
-        } catch (RuntimeException re) {
-            log.error("find by detached criteria failed", re);
             throw re;
         }
     }
@@ -101,32 +68,42 @@ public abstract class GenericLifeCycle<T> {
         return this.findBy(propertyValueMap, 0, 0, false);
     }
 
+    abstract public List<T> findByIds(List<Long> ids);
+
     public List<T> findBy(Map<String, Object> propertyValueMap, int maxResults, int offset, boolean like) {
         log.debug("finding " + this.tCLass.toGenericString() + " instance by hashmap: " + propertyValueMap.toString());
         try {
-            List<T> results = null;
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
-                // TODO: handle paths/relationships
                 session.beginTransaction();
                 CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
-                CriteriaQuery cr = cb.createQuery(this.tCLass);
+                CriteriaQuery<Long> cr = cb.createQuery(Long.class);
                 Root<T> root = cr.from(this.tCLass);
-                cr.select(root);
                 List<Predicate> propertyValueRelations = new ArrayList<>();
                 for (Map.Entry<String, Object> entry : propertyValueMap.entrySet()) {
-
-
+                    Expression<String> propertyToMatch = null;
+                    // handle paths/joins etc.
+                    String[] splitKey = entry.getKey().split("\\.");
+                    if (splitKey.length > 1) {
+                        Join<Object, Object> currentRoot = root.join(splitKey[0]);
+                        for (int i = 1; i < splitKey.length - 1; i++) {
+                            currentRoot = currentRoot.join(splitKey[i]);
+                        }
+                        propertyToMatch = currentRoot.get(splitKey[splitKey.length - 1]);
+                    } else {
+                        propertyToMatch = root.get(entry.getKey());
+                    }
 
                     Predicate p = null;
-                    if (like && entry.getValue() instanceof String) {
-                        p = cb.like(root.get(entry.getKey()), (String) entry.getValue());
+                    if (entry.getValue() instanceof Specification) {
+                        p = ((Specification<T, Long>) entry.getValue()).toPredicate(root, cr, cb);
+                    } else if (like && entry.getValue() instanceof String) {
+                        p = cb.like(propertyToMatch, (String) entry.getValue());
                     } else {
                         Object value = entry.getValue();
                         if (value instanceof String || value instanceof Date || value instanceof java.lang.Number) {
-                            p = cb.equal(root.get(entry.getKey()), entry.getValue());
+                            p = cb.equal(propertyToMatch, entry.getValue());
                         } else {
-                            // TODO: handle paths/relationships
                             log.warn("Will not handle property: " + entry.getKey() + " with value type " + " " + value.getClass().toGenericString());
                         }
                     }
@@ -135,6 +112,7 @@ public abstract class GenericLifeCycle<T> {
                     }
                 }
                 cr.where(cb.and(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()])));
+                cr.select(root.get(this.idProperty));
                 Query q = session.createQuery(cr);
                 if (maxResults != 0) {
                     q = q.setMaxResults(maxResults);
@@ -142,14 +120,17 @@ public abstract class GenericLifeCycle<T> {
                 if (offset != 0) {
                     q = q.setFirstResult(offset);
                 }
-                results = q.getResultList();
+                // then, do join all
+                List<Long> ids = q.list();
+                log.debug("find by example successful, result size: " + ids.size());
                 session.getTransaction().commit();
-                log.debug("find by example successful, result size: " + results.size());
+                return this.findByIds(ids);
+
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
                 log.error(e.getMessage());
             }
-            return results;
+            return new ArrayList<T>();
         } catch (RuntimeException re) {
             log.error("find by hashmap failed", re);
             throw re;
@@ -191,8 +172,9 @@ public abstract class GenericLifeCycle<T> {
      */
     private List<String> getEntityAttributes(T instance, Session session) {
         // untested. other possible implementations: https://stackoverflow.com/questions/19418500/get-table-column-names-in-hibernate
-
-        ClassMetadata classMetadata = HibernateUtil.getSessionFactory().getClassMetadata(instance.getClass());
+        // from https://stackoverflow.com/questions/43499887/hibernate-5-2-get-natural-id-properties-from-metamodel
+        MetamodelImplementor metamodel = (MetamodelImplementor) HibernateUtil.getSessionFactory().getCurrentSession().getMetamodel();
+        ClassMetadata classMetadata = (ClassMetadata) metamodel.entityPersister(instance.getClass().getName());
         String[] propertyNames = classMetadata.getPropertyNames();
         return Arrays.asList(propertyNames);
     }
@@ -263,14 +245,7 @@ public abstract class GenericLifeCycle<T> {
         try {
             session.beginTransaction();
             Query q = session.createQuery(sql);
-            Iterator i = q.getResultList().iterator();
-            while (i.hasNext()) {
-                String value = (String) i.next();
-                // add, only if value isn't the "" put at top of list above.
-                if (!value.equals("")) {
-                    collections.add(value.trim());
-                }
-            }
+            collections.addAll(q.list());
             session.getTransaction().commit();
         } catch (HibernateException e) {
             session.getTransaction().rollback();

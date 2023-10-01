@@ -219,7 +219,7 @@ public class ImageListBrowser extends JPanel {
     private JComboBox getJComboBox() {
         if (jComboBox == null) {
             ICImageLifeCycle ils = new ICImageLifeCycle();
-            jComboBox = new JComboBox(ils.getDistinctPaths());
+            jComboBox = new JComboBox((String[])ils.getDistinctPaths());
             jComboBox.setEditable(true);
             TableColumn pathColumn = jTableImages.getColumnModel().getColumn(ICImageListTableModel.COL_PATH);
             pathColumn.setCellEditor(new DefaultCellEditor(jComboBox));

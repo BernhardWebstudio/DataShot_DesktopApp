@@ -3,23 +3,6 @@
  */
 package edu.harvard.mcz.imagecapture.lifecycle;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import org.hibernate.*;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Example;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
@@ -35,9 +18,16 @@ import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsException;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
 import jakarta.persistence.PersistenceException;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.*;
-import jakarta.persistence.criteria.*;
+import org.hibernate.*;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 
 
 // Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
@@ -53,7 +43,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             LoggerFactory.getLogger(SpecimenLifeCycle.class);
 
     public SpecimenLifeCycle() {
-        super(Specimen.class, SpecimenLifeCycle.log);
+        super(Specimen.class, SpecimenLifeCycle.log, "id");
     }
 
     /**
@@ -137,56 +127,6 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             // TODO Handle save error in UI
             log.error("Error", e);
         }
-    }
-
-    public List<Specimen> findBy(DetachedCriteria criteria, int limit, int offset) {
-
-        try {
-            List<Specimen> results = null;
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            try {
-                // TODO: handle paths/relationships
-                Transaction txn = session.beginTransaction();
-                Criteria executableQuery = criteria.getExecutableCriteria(session);
-//                cr.add(new Distinct(new Projection()))
-//                executableQuery.setResultTransformer(new DistinctRootEntityResultTransformer());
-                if (limit > 0) {
-                    executableQuery.setMaxResults(limit);
-                }
-                if (offset > 0) {
-                    executableQuery.setFirstResult(offset);
-                }
-                results = executableQuery.list();
-                txn.commit();
-
-                session = HibernateUtil.getSessionFactory().getCurrentSession();
-                txn = session.beginTransaction();
-                Set<Long> specimenIds = new HashSet<>();
-                results.forEach(result -> specimenIds.add(result.getSpecimenId()));
-                Query<Specimen> query = session.createQuery(
-                        "SELECT s FROM Specimen s " +
-                                "LEFT JOIN FETCH s.ICImages " +
-                                "LEFT JOIN FETCH s.collectors " +
-                                "LEFT JOIN FETCH s.specimenParts " +
-                                "LEFT JOIN FETCH s.numbers " +
-                                "LEFT JOIN FETCH s.trackings " +
-                                "LEFT JOIN FETCH s.externalHistory " +
-                                "LEFT JOIN FETCH s.higherGeography " +
-                                "WHERE s.id IN (?1)"
-                );
-                query.setParameter(1, specimenIds);
-                results = query.getResultList();
-                txn.commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error(e.getMessage());
-            }
-            return results;
-        } catch (RuntimeException re) {
-            log.error("find by detached criteria failed", re);
-            throw re;
-        }
-
     }
 
     /**
@@ -959,20 +899,13 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct identifiedBy from Specimen spe WHERE spe.identifiedBy is not null order by spe.identifiedBy  ";
+                    "Select distinct identifiedBy from Specimen spe WHERE spe.identifiedBy is not null order by spe.identifiedBy";
             // String sql = "Select distinct identifiedby from Specimen";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
                 Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    // add, only if value isn't the "" put at top of list above.
-                    if (!value.equals("")) {
-                        collections.add(value.trim());
-                    }
-                }
+                collections.addAll(q.list());
                 session.getTransaction().commit();
             } catch (HibernateException e) {
                 e.printStackTrace();
@@ -996,20 +929,13 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct primaryDivison from Specimen spe WHERE spe.primaryDivison is not null order by spe.primaryDivison  ";
+                    "Select distinct primaryDivison from Specimen spe WHERE spe.primaryDivison is not null order by spe.primaryDivison";
             // String sql = "Select distinct identifiedby from Specimen";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
                 Query q = session.createQuery(sql);
-                Iterator i = q.iterate();
-                while (i.hasNext()) {
-                    String value = (String) i.next();
-                    // add, only if value isn't the "" put at top of list above.
-                    if (!value.equals("")) {
-                        collections.add(value.trim());
-                    }
-                }
+                collections.addAll(q.list());
                 session.getTransaction().commit();
             } catch (HibernateException e) {
                 e.printStackTrace();
@@ -1041,209 +967,6 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
     }
 
-    public List<Specimen> findByExampleLike(Specimen instance) {
-        return this.findByExampleLike(instance, 0, 0);
-    }
-
-    /**
-     * Find specimens with values matching those found in an example specimen
-     * instance, including links out to related entities.  Like matching is
-     * enabled, so strings containing '%' will generate like where criteria with
-     * the % as a wild card.  Matches are case insensitive.
-     *
-     * @param instance
-     * @return
-     */
-    public List<Specimen> findByExampleLike(Specimen instance, int maxResults,
-                                            int offset) {
-        // as date last updated is a "similar" field, not an equal field, we have to
-        // extract it separate
-        Date lastUpdated = instance.getDateLastUpdated();
-        instance.setDateLastUpdated(null);
-        log.debug(
-                "finding Specimen instance by example with trackings, collectors, and images and like criteria");
-        try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            session.beginTransaction();
-            List<Specimen> results = null;
-            try {
-                Criteria criteria = session.createCriteria(Specimen.class);
-                // add criteria to find on a certain day
-                if (lastUpdated != null) {
-                    Date lastUpdatedDayStart = (Date) lastUpdated.clone();
-                    lastUpdatedDayStart.setHours(0);
-                    lastUpdatedDayStart.setMinutes(0);
-                    lastUpdatedDayStart.setSeconds(0);
-                    Date lastUpdatedDayEnd = (Date) lastUpdated.clone();
-                    lastUpdatedDayEnd.setHours(23);
-                    lastUpdatedDayEnd.setMinutes(59);
-                    lastUpdatedDayEnd.setSeconds(59);
-                    criteria.add(Restrictions.and(
-                            Restrictions.ge("dateLastUpdated", lastUpdatedDayStart),
-                            Restrictions.le("dateLastUpdated", lastUpdatedDayEnd)));
-                } else {
-                    log.debug("last Update null. ");
-                }
-                instance.setFlagAncilaryAlsoInMCZbase(null);
-                instance.setFlagInBulkloader(null);
-                instance.setFlagInMCZbase(null);
-
-                Example example = Example.create(instance).enableLike().ignoreCase();
-                // Note: Criteria in example instance can be excluded here, or by
-                // setting their values to null.  See the invocation of
-                // Specimen.clearDefaults in SearchDialog.getJButtonSearch()'s
-                // actionPerformed method.
-                // example.excludeProperty("flagInBulkloader");
-                criteria.add(example);
-                criteria.setReadOnly(true);
-                if (instance.getTrackings() != null &&
-                        instance.getTrackings().size() > 0) {
-                    criteria.createCriteria("trackings", Criteria.INNER_JOIN)
-                            .add(Example.create(instance.getTrackings().toArray()[0])
-                                    .enableLike());
-                }
-                if (instance.getICImages() != null &&
-                        instance.getICImages().size() > 0) {
-                    criteria.createCriteria("ICImages", Criteria.INNER_JOIN)
-                            .add(Example.create(instance.getICImages().toArray()[0])
-                                    .enableLike()
-                                    .ignoreCase());
-                }
-                if (instance.getCollectors() != null &&
-                        instance.getCollectors().size() > 0) {
-                    criteria.createCriteria("collectors", Criteria.INNER_JOIN)
-                            .add(Example.create(instance.getCollectors().toArray()[0])
-                                    .enableLike()
-                                    .ignoreCase());
-                }
-                if (offset != 0) {
-                    criteria.setFirstResult(offset);
-                }
-                if (maxResults != 0) {
-                    criteria.setMaxResults(maxResults);
-                }
-                criteria.setProjection(Projections.distinct(Projections.id()));
-                List<?> ids = criteria.list();
-                if (ids.size() > 0) {
-                    criteria = session.createCriteria(Specimen.class)
-                            .add(Restrictions.in("id", ids))
-                            .setFetchMode("trackings", FetchMode.JOIN)
-                            .setFetchMode("ICImages", FetchMode.JOIN)
-                            .setFetchMode("collectors", FetchMode.JOIN)
-                            .setFetchMode("LatLong", FetchMode.JOIN)
-                            .setFetchMode("numbers", FetchMode.JOIN)
-                            .setFetchMode("specimenParts", FetchMode.JOIN)
-                            .setFetchMode("specimenParts.specimenPartAttributes", FetchMode.JOIN)
-                            .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY)
-                            .setReadOnly(true);
-                    results = (List<Specimen>) criteria.list();
-                } else {
-                    results = new ArrayList<>();
-                }
-                log.debug("find by example like successful, result size: " +
-                        results.size());
-                session.getTransaction().commit();
-                log.debug("Find by example transaction commited");
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error("find by example like failed", e);
-            }
-            if (results != null) {
-                for (int i = 0; i < results.size(); i++) {
-          /* try {
-               log.debug("Parts: " + results.get(i).getSpecimenParts().size());
-               log.debug("Parts: " + ((SpecimenPart)
-           results.get(i).getSpecimenParts().toArray()[0]).getPartAttributeValuesConcat());
-               log.debug("Part Attribute: " + ((SpecimenPartAttribute)
-           ((SpecimenPart)
-           results.get(i).getSpecimenParts().toArray()[0]).getAttributeCollection().toArray()[0]).getSpecimenPartAttributeId());
-           } catch (Exception e) {
-               log.debug("Debug {}", e.getMessage());
-           }*/
-                }
-            } else {
-                results = new ArrayList<>();
-            }
-            return results;
-        } catch (RuntimeException re) {
-            log.error("find by example like failed", re);
-            throw re;
-        }
-    }
-
-    public List<Specimen> findByExample(Specimen instance) {
-        return this.findByExample(instance, 0, 0);
-    }
-
-    /**
-     * Find Specimen records based on an example specimen, don't use if you are
-     * only searching by barcode.
-     *
-     * @param instance Specimen instance to use as a pattern for the search
-     * @return list of Specimens matching instance
-     *
-     * @see SpecimenLifeCycle#findByBarcode(String)
-     */
-    public List<Specimen> findByExample(Specimen instance, int maxResults,
-                                        int offset) {
-        log.debug("finding Specimen instance by example");
-        // as date last updated is a "similar" field, not an equal field, we have to
-        // extract it separate
-        Date lastUpdated = instance.getDateLastUpdated();
-        instance.setDateLastUpdated(null);
-        try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-            session.beginTransaction();
-            List<Specimen> results = null;
-            try {
-                Criteria criteria = session.createCriteria(Specimen.class);
-                criteria.add(Example.create(instance));
-                // add criteria to find on a certain day
-                if (lastUpdated != null) {
-                    Date lastUpdatedDayStart = (Date) lastUpdated.clone();
-                    lastUpdatedDayStart.setHours(0);
-                    lastUpdatedDayStart.setMinutes(0);
-                    lastUpdatedDayStart.setSeconds(0);
-                    Date lastUpdatedDayEnd = (Date) lastUpdated.clone();
-                    lastUpdatedDayEnd.setHours(23);
-                    lastUpdatedDayEnd.setMinutes(59);
-                    lastUpdatedDayEnd.setSeconds(59);
-                    criteria.add(Restrictions.and(
-                            Restrictions.ge("dateLastUpdated", lastUpdatedDayStart),
-                            Restrictions.le("dateLastUpdated", lastUpdatedDayEnd)));
-                } else {
-                    log.debug("last Update null. ");
-                }
-                if (instance.getTrackings() != null &&
-                        instance.getTrackings().size() > 0) {
-                    criteria.createCriteria("trackings")
-                            .add(Example.create(instance.getTrackings().toArray()[0]));
-                }
-                if (instance.getICImages() != null &&
-                        instance.getICImages().size() > 0) {
-                    criteria.createCriteria("ICImages")
-                            .add(Example.create(instance.getICImages().toArray()[0]));
-                }
-                if (offset != 0) {
-                    criteria.setFirstResult(offset);
-                }
-                if (maxResults != 0) {
-                    criteria.setMaxResults(maxResults);
-                }
-                results = (List<Specimen>) criteria.list();
-                log.debug("find by example successful, result size: " + results.size());
-                session.getTransaction().commit();
-            } catch (HibernateException e) {
-                session.getTransaction().rollback();
-                log.error("find by example failed", e);
-            }
-            return results;
-        } catch (RuntimeException re) {
-            log.error("find by example failed", re);
-            throw re;
-        }
-    }
-
     public String[] getDistinctSpecificLocality() {
         ArrayList<String> collections = new ArrayList<String>();
         collections.add(""); // put blank at top of list.
@@ -1254,6 +977,39 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
+        }
+    }
+
+    @Override
+    public List<Specimen> findByIds(List<Long> ids) {
+        try {
+            List<Specimen> results = null;
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            try {
+                session = HibernateUtil.getSessionFactory().getCurrentSession();
+                Transaction txn = session.beginTransaction();
+                Query<Specimen> query = session.createQuery(
+                        "SELECT s FROM Specimen s " +
+                                "LEFT JOIN FETCH s.ICImages " +
+                                "LEFT JOIN FETCH s.collectors " +
+                                "LEFT JOIN FETCH s.specimenParts " +
+                                "LEFT JOIN FETCH s.numbers " +
+                                "LEFT JOIN FETCH s.trackings " +
+                                "LEFT JOIN FETCH s.externalHistory " +
+                                "LEFT JOIN FETCH s.LatLong " +
+                                "WHERE s.id IN (?1)"
+                );
+                query.setParameter(1, ids);
+                results = query.list();
+                txn.commit();
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error(e.getMessage());
+            }
+            return results;
+        } catch (RuntimeException re) {
+            log.error("find by ids failed", re);
+            throw re;
         }
     }
 }

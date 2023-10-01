@@ -87,16 +87,16 @@ public class SpecimenListTableModel extends AbstractTableModel {
         }
         Object result = null;
         if (columnIndex == COL_ID) {
-//            result = s;
-            result = s.getSpecimenId();
+            result = s;
+//            result = s.getSpecimenId();
         } else {
             if (!SpecimenDetailsViewPane.copyPasteActivated) {
                 columnIndex += 1;
             }
             switch (columnIndex) {
                 case COL_ID:
-                     result = s.getSpecimenId();
-//                    result = s;
+                    result = s;
+//                     result = s.getSpecimenId();
                     break;
                 case COL_COPY:
                     result = s;

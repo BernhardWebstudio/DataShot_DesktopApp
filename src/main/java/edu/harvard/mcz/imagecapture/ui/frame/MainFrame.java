@@ -34,7 +34,6 @@ import edu.harvard.mcz.imagecapture.jobs.*;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.loader.JobVerbatimFieldLoad;
 import edu.harvard.mcz.imagecapture.ui.dialog.*;
-import org.hibernate.criterion.DetachedCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -898,21 +897,11 @@ public class MainFrame extends JFrame implements RunnerListener {
         jLabelStatus.setText("Status: " + aMessage.substring(0, maxLength));
     }
 
-    public void setSpecimenBrowseList(DetachedCriteria criteria, int limit,
+    public void setSpecimenBrowseList(Map<String, Object> criteria, int limit,
                                       int offset) {
         Singleton.getSingletonInstance().getMainFrame().setCursor(
                 Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        slb = new SpecimenBrowser(criteria, limit, offset);
-        this.adaptJpanelToSpecimenBrowser(slb);
-        Singleton.getSingletonInstance().getMainFrame().setCursor(
-                Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-    }
-
-    public void setSpecimenBrowseList(Specimen searchCriteria, int limit,
-                                      int offset) {
-        Singleton.getSingletonInstance().getMainFrame().setCursor(
-                Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-        slb = new SpecimenBrowser(searchCriteria, true, limit, offset);
+        slb = new SpecimenBrowser(criteria, true, limit, offset);
         this.adaptJpanelToSpecimenBrowser(slb);
         Singleton.getSingletonInstance().getMainFrame().setCursor(
                 Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));

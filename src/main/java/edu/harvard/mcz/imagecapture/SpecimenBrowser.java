@@ -30,7 +30,6 @@ import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
 import org.hibernate.SessionException;
 import org.hibernate.TransactionException;
-import org.hibernate.criterion.DetachedCriteria;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +37,7 @@ import javax.swing.*;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * SpecimenBrowser is a Searchable, Sortable, tabular view of multiple
@@ -58,8 +58,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
     private TableRowSorter<SpecimenListTableModel> sorter;
     private JTextField jTextFieldFamily = null;
     private JTextField jTextFieldDrawerNumber = null;
-    private Specimen searchCriteria = null;
-    private DetachedCriteria searchCriteria2 = null;
+    private Map<String, Object> searchCriteria2 = null;
     private boolean useLike = false;
     private int maxResults = 0;
     private int offset = 0;
@@ -69,32 +68,13 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
      */
     public SpecimenBrowser() {
         super();
-        searchCriteria = null;
         useLike = false;
         initialize();
     }
 
-    public SpecimenBrowser(Specimen specimenSearchCriteria) {
-        this(specimenSearchCriteria, false);
-    }
-
-    public SpecimenBrowser(Specimen specimenSearchCriteria, boolean like) {
-        this(specimenSearchCriteria, like, 0, 0);
-    }
-
-    public SpecimenBrowser(Specimen specimenSearchCriteria, boolean like,
-                           int maxResults, int offset) {
+    public SpecimenBrowser(Map<String, Object> criteria, boolean like, int limit, int offset) {
         super();
-        this.searchCriteria = specimenSearchCriteria;
         this.useLike = like;
-        this.offset = offset;
-        this.maxResults = maxResults;
-        initialize();
-    }
-
-    public SpecimenBrowser(DetachedCriteria criteria, int limit, int offset) {
-        super();
-        this.searchCriteria = null;
         this.searchCriteria2 = criteria;
         this.maxResults = limit;
         this.offset = offset;
@@ -145,17 +125,9 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             // jTable.setAutoCreateRowSorter(true);
             SpecimenLifeCycle s = new SpecimenLifeCycle();
             SpecimenListTableModel model = null;
-            if (searchCriteria != null) {
-                if (useLike) {
-                    model = new SpecimenListTableModel(
-                            s.findByExampleLike(searchCriteria, maxResults, offset));
-                } else {
-                    model = new SpecimenListTableModel(
-                            s.findByExample(searchCriteria, maxResults, offset));
-                }
-            } else if (searchCriteria2 != null) {
+            if (searchCriteria2 != null) {
                 model = new SpecimenListTableModel(
-                        s.findBy(this.searchCriteria2, maxResults, offset)
+                        s.findBy(this.searchCriteria2, maxResults, offset, useLike)
                 );
             } else {
                 model = new SpecimenListTableModel(s.findAll());

@@ -997,6 +997,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                                 "LEFT JOIN FETCH s.trackings " +
                                 "LEFT JOIN FETCH s.externalHistory " +
                                 "LEFT JOIN FETCH s.LatLong " +
+                                "LEFT JOIN FETCH s.determinations " +
                                 "WHERE s.id IN (?1)"
                 );
                 query.setParameter(1, ids);

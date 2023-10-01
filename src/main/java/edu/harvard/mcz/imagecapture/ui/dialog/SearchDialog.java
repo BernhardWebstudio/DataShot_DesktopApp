@@ -23,10 +23,10 @@ import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.lifecycle.*;
+import edu.harvard.mcz.imagecapture.query.DetachedQuery;
 import edu.harvard.mcz.imagecapture.ui.field.JIntegerField;
 import net.miginfocom.swing.MigLayout;
 import org.hibernate.FetchMode;
-import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
@@ -38,6 +38,9 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import jakarta.persistence.criteria.*;
+import jakarta.persistence.*;
 
 /**
  * SearchDialog
@@ -159,7 +162,7 @@ public class SearchDialog extends JDialog {
 //                        searchCriteria.setDrawerNumber(jTextFieldDrawerNumber.getText());
 //                    }
 //                    Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-                    DetachedCriteria cr = DetachedCriteria.forClass(Specimen.class, "specimen");
+                    DetachedQuery cr = DetachedQuery.forClass(Specimen.class, "specimen");
 
                     if (jTextFieldBarcode.getText() != null && jTextFieldBarcode.getText().length() > 0) {
                         cr.add(Restrictions.like("barcode", jTextFieldBarcode.getText()));
@@ -285,7 +288,7 @@ public class SearchDialog extends JDialog {
                             cr.add(Restrictions.like("questions", jComboBoxQuestions.getSelectedItem().toString()));
                         }
                     }
-                    cr.addOrder(Order.asc("specimenId"));
+                    cr.addOrder(Order.asc("id"));
                     log.debug("Starting search with criteria...");
                     Singleton.getSingletonInstance().getMainFrame().setSpecimenBrowseList(cr, jLimitNumberField.getIntValue(), jOffsetNumberField.getIntValue());
                 }

@@ -1,20 +1,29 @@
 package edu.harvard.mcz.imagecapture.lifecycle;
 
-import edu.harvard.mcz.imagecapture.data.HibernateUtil;
-import org.hibernate.*;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.metadata.ClassMetadata;
-import org.slf4j.Logger;
-
-import javax.persistence.Query;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
-import java.util.*;
 // import org.hibernate.metamodel.model.domain.spi.EntityTypeDescriptor;
 // import org.hibernate.metamodel.model.domain.spi.NonIdPersistentAttribute;
 // import org.hibernate.metamodel.spi.MetamodelImplementor;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.SessionException;
+import org.hibernate.Transaction;
+import org.hibernate.metadata.ClassMetadata;
+import org.slf4j.Logger;
+
+import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import jakarta.persistence.Query;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 public abstract class GenericLifeCycle<T> {
 
@@ -100,12 +109,15 @@ public abstract class GenericLifeCycle<T> {
             try {
                 // TODO: handle paths/relationships
                 session.beginTransaction();
-                CriteriaBuilder cb = session.getCriteriaBuilder();
+                CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
                 CriteriaQuery cr = cb.createQuery(this.tCLass);
                 Root<T> root = cr.from(this.tCLass);
                 cr.select(root);
                 List<Predicate> propertyValueRelations = new ArrayList<>();
                 for (Map.Entry<String, Object> entry : propertyValueMap.entrySet()) {
+
+
+
                     Predicate p = null;
                     if (like && entry.getValue() instanceof String) {
                         p = cb.like(root.get(entry.getKey()), (String) entry.getValue());

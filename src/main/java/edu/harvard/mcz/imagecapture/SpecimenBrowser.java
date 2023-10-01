@@ -28,7 +28,6 @@ import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.CopyRowButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
-import org.hibernate.Criteria;
 import org.hibernate.SessionException;
 import org.hibernate.TransactionException;
 import org.hibernate.criterion.DetachedCriteria;

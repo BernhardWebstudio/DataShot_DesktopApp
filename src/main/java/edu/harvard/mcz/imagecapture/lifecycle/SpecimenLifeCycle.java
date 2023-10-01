@@ -3,6 +3,23 @@
  */
 package edu.harvard.mcz.imagecapture.lifecycle;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import org.hibernate.*;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Example;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
@@ -17,20 +34,11 @@ import edu.harvard.mcz.imagecapture.exceptions.ConnectionException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsException;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
-import org.hibernate.*;
-import org.hibernate.criterion.DetachedCriteria;
-import org.hibernate.criterion.Example;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.exception.ConstraintViolationException;
-import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.*;
+import jakarta.persistence.criteria.*;
 
-import javax.persistence.PersistenceException;
-import javax.persistence.TypedQuery;
-import java.math.BigDecimal;
-import java.util.*;
 
 // Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
 
@@ -155,7 +163,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                 txn = session.beginTransaction();
                 Set<Long> specimenIds = new HashSet<>();
                 results.forEach(result -> specimenIds.add(result.getSpecimenId()));
-                TypedQuery<Specimen> query = session.createQuery(
+                Query<Specimen> query = session.createQuery(
                         "SELECT s FROM Specimen s " +
                                 "LEFT JOIN FETCH s.ICImages " +
                                 "LEFT JOIN FETCH s.collectors " +
@@ -217,8 +225,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                 }
                 log.error("persist failed", e);
                 String existsPattern = "^Duplicate entry '.*' for key 'Barcode'$";
-                if (message.matches(existsPattern) || pmessage.matches(existsPattern) ||
-                        e instanceof ConstraintViolationException) {
+                if (message.matches(existsPattern) || pmessage.matches(existsPattern)) {
                     log.debug("specimen exists");
                     throw new SpecimenExistsException("Specimen record exists for " +
                             transientInstance.getBarcode());

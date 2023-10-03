@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 // Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
@@ -29,7 +30,7 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
             LoggerFactory.getLogger(ICImageLifeCycle.class);
 
     public ICImageLifeCycle() {
-        super(ICImage.class, ICImageLifeCycle.log);
+        super(ICImage.class, ICImageLifeCycle.log, "imageId");
     }
 
     public static List<ICImage> findMismatchedImages() {
@@ -260,8 +261,7 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             session.beginTransaction();
             try {
-                instance = (ICImage) session.get(
-                        "edu.harvard.mcz.imagecapture.entity.ICImage", id);
+                instance = session.get(ICImage.class, id);
                 session.getTransaction().commit();
                 if (instance == null) {
                     log.debug("get successful, no instance found");
@@ -412,6 +412,10 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
 
     @Override
     public List<ICImage> findByIds(List<Long> ids) {
+        if (ids.size() == 1) {
+            ICImage image = this.findById(ids.get(0));
+            return new ArrayList<>(Arrays.asList(image));
+        }
         try {
             List<ICImage> results = null;
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
@@ -419,8 +423,7 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
                 session = HibernateUtil.getSessionFactory().getCurrentSession();
                 Transaction txn = session.beginTransaction();
                 Query<ICImage> query = session.createQuery(
-                        "SELECT i FROM ICImage i " +
-                                "WHERE i.id IN (?1)"
+                        "SELECT i FROM ICImage i WHERE i.imageId IN (?1)"
                 );
                 query.setParameter(1, ids);
                 results = query.list();

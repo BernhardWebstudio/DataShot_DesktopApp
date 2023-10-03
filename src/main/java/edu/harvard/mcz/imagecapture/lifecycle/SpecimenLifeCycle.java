@@ -43,7 +43,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             LoggerFactory.getLogger(SpecimenLifeCycle.class);
 
     public SpecimenLifeCycle() {
-        super(Specimen.class, SpecimenLifeCycle.log, "id");
+        super(Specimen.class, SpecimenLifeCycle.log, "specimenId");
     }
 
     /**
@@ -998,7 +998,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                                 "LEFT JOIN FETCH s.externalHistory " +
                                 "LEFT JOIN FETCH s.LatLong " +
                                 "LEFT JOIN FETCH s.determinations " +
-                                "WHERE s.id IN (?1)"
+                                "WHERE s.specimenId IN (?1)"
                 );
                 query.setParameter(1, ids);
                 results = query.list();

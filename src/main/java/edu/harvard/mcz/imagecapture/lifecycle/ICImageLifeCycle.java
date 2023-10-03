@@ -420,7 +420,6 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
                 Transaction txn = session.beginTransaction();
                 Query<ICImage> query = session.createQuery(
                         "SELECT i FROM ICImage i " +
-                                "LEFT JOIN FETCH i.templateId " +
                                 "WHERE i.id IN (?1)"
                 );
                 query.setParameter(1, ids);

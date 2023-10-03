@@ -246,6 +246,7 @@ public class ImageCaptureProperties extends AbstractTableModel {
     public static String KEY_NAHIMA_URL = "nahima.url";
     public static String KEY_NAHIMA_PASSWORD = "nahima.password";
     public static String KEY_NAHIMA_USER = "nahima.user";
+    public static String KEY_NAHIMA_INTERACTIVE = "nahima.interactive";
     private final String propertiesFilename = "imagecapture.properties";
     /**
      * Private properties

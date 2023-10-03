@@ -33,10 +33,11 @@ public class NahimaManager extends AbstractRestClient {
     private final String url;
     private final String username;
     private final String password;
+    private final boolean interactive;
     private final Map<String, Map<String, JSONObject>> resolveCache = new HashMap<>();
     private String token;
 
-    public NahimaManager(String url, String username, String password) throws IOException, InterruptedException, RuntimeException {
+    public NahimaManager(String url, String username, String password, boolean interactive) throws IOException, InterruptedException, RuntimeException {
         // normalize URL
         if (!url.endsWith("/")) {
             url = url + "/";
@@ -48,6 +49,7 @@ public class NahimaManager extends AbstractRestClient {
         this.url = url;
         this.username = username;
         this.password = password;
+        this.interactive = interactive;
 
         this.startSessionAndRetrieveToken();
         this.login();
@@ -489,7 +491,7 @@ public class NahimaManager extends AbstractRestClient {
             // create / select correct
             if (foundObjects.length() > 1) {
                 // first, loop objects to see whether we can find exactly one exact match
-                JSONObject bestMatch = findSimilarMatch(foundObjects, objectType, inner, false);
+                JSONObject bestMatch = findSimilarMatch(foundObjects, objectType, inner, !interactive);
                 if (bestMatch != null) {
                     return bestMatch;
                 }
@@ -533,23 +535,27 @@ public class NahimaManager extends AbstractRestClient {
         final int[] choice = new int[1];
         final JSONObject[] resultingObj = new JSONObject[1];
         JSONObject finalInner = inner;
-        SwingUtilities.invokeAndWait(new Runnable() {
-            public void run() {
-                VerifyJSONDialog dialog = new VerifyJSONDialog(Singleton.getSingletonInstance().getMainFrame(), finalInner.toString(), name);
-                dialog.setVisible(true);
-                int result = dialog.getReturnDecision();
-                choice[0] = result;
-                resultingObj[0] = new JSONObject(dialog.getResultingJSON());
+        if (interactive) {
+            SwingUtilities.invokeAndWait(new Runnable() {
+                public void run() {
+                    VerifyJSONDialog dialog = new VerifyJSONDialog(Singleton.getSingletonInstance().getMainFrame(), finalInner.toString(), name);
+                    dialog.setVisible(true);
+                    int result = dialog.getReturnDecision();
+                    choice[0] = result;
+                    resultingObj[0] = new JSONObject(dialog.getResultingJSON());
+                }
+            });
+            switch (choice[0]) {
+                case VerifyJSONDialog.RETURN_ACCEPT:
+                    inner = resultingObj[0];
+                    break;
+                case VerifyJSONDialog.RETURN_CHANGE_SEARCH:
+                    return askToChangeSearch(name, objectType, inner, mask, omitPool);
+                case VerifyJSONDialog.RETURN_SKIP:
+                    throw new SkipSpecimenException();
             }
-        });
-        switch (choice[0]) {
-            case VerifyJSONDialog.RETURN_ACCEPT:
-                inner = resultingObj[0];
-                break;
-            case VerifyJSONDialog.RETURN_CHANGE_SEARCH:
-                return askToChangeSearch(name, objectType, inner, mask, omitPool);
-            case VerifyJSONDialog.RETURN_SKIP:
-                throw new SkipSpecimenException();
+        } else {
+            inner = resultingObj[0];
         }
         JSONObject toCreate = wrapForCreation(inner, objectType, mask, omitPool);
         // It would be simpler to store the created in cache. But well... current format does not allow

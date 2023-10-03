@@ -421,7 +421,7 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
                 Query<ICImage> query = session.createQuery(
                         "SELECT i FROM ICImage i " +
                                 "LEFT JOIN FETCH i.templateId " +
-                                "WHERE s.id IN (?1)"
+                                "WHERE i.id IN (?1)"
                 );
                 query.setParameter(1, ids);
                 results = query.list();

@@ -59,7 +59,12 @@ public class NahimaExportJob implements RunnableJob, Runnable {
         Properties properties = Singleton.getSingletonInstance().getProperties().getProperties();
         NahimaManager manager;
         try {
-            manager = new NahimaManager(properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL), properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_USER), properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_PASSWORD));
+            manager = new NahimaManager(
+                    properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL),
+                    properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_USER),
+                    properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_PASSWORD),
+                    (Boolean) properties.getOrDefault(ImageCaptureProperties.KEY_NAHIMA_INTERACTIVE, true)
+            );
         } catch (Exception e) {
             lastError = e;
             log.error("Failed to instantiate NahimaManager", e);

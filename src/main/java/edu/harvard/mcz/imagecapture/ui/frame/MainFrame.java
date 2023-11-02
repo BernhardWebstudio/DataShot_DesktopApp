@@ -18,6 +18,7 @@
  */
 package edu.harvard.mcz.imagecapture.ui.frame;
 
+import com.opencsv.exceptions.CsvValidationException;
 import edu.harvard.mcz.imagecapture.*;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.data.LocationInCollection;
@@ -43,6 +44,7 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.*;
@@ -122,6 +124,7 @@ public class MainFrame extends JFrame implements RunnerListener {
     private JMenuItem jMenuItemMaliaStats = null;
     private JMenuItem jMenuItemRepeatOCR = null;
     private JMenuItem jMenuItemRunNahimaExport = null;
+    private JMenuItem jMenuItemRunNahimaDrawerExport = null;
     private JMenuItem jMenuItemRunSingleNahimaExport = null;
 
     private JMenuItem jMenuItemListRunningJobs = null;
@@ -1130,6 +1133,7 @@ public class MainFrame extends JFrame implements RunnerListener {
             jMenuData.add(getJMenuItemBrowseSpecimens());
             jMenuData.add(getJMenuItemBatchUpdate());
             jMenuData.add(getjMenuItemRunNahimaExport());
+            jMenuData.add(getjMenuItemRunNahimaDrawerExport());
             jMenuData.add(getjMenuItemRunSingleNahimaExport());
         }
         return jMenuData;
@@ -1165,6 +1169,27 @@ public class MainFrame extends JFrame implements RunnerListener {
             });
         }
         return jMenuItemRunNahimaExport;
+    }
+
+    /**
+     * This method initializes the menu item for the export to Nahima
+     *
+     * @return the menu item to start the export to nahima
+     */
+    private JMenuItem getjMenuItemRunNahimaDrawerExport() {
+        if (jMenuItemRunNahimaDrawerExport == null) {
+            jMenuItemRunNahimaDrawerExport = new JMenuItem("Nahima Drawer Export");
+            jMenuItemRunNahimaDrawerExport.addActionListener(actionEvent -> {
+                NahimaDrawerExportDialog dialog = null;
+                try {
+                    dialog = new NahimaDrawerExportDialog(thisMainFrame);
+                    dialog.setVisible(true);
+                } catch (CsvValidationException | IOException e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+        return jMenuItemRunNahimaDrawerExport;
     }
 
     /**

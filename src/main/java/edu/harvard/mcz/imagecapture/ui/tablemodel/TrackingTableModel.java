@@ -8,6 +8,7 @@ import edu.harvard.mcz.imagecapture.entity.Tracking;
 import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /** Table model for displaying Tracking records in a JTable.
  *
@@ -21,15 +22,15 @@ public class TrackingTableModel extends AbstractTableModel {
     private List<Tracking> events = null;
 
     public TrackingTableModel() {
-        events = new ArrayList<Tracking>();
+        setTrackings(null);
     }
 
     public TrackingTableModel(List<Tracking> aTrackingSet) {
-        events = aTrackingSet;
+        setTrackings(aTrackingSet);
     }
 
     public void setTrackings(List<Tracking> aTrackingSet) {
-        events = aTrackingSet;
+        events = Objects.requireNonNullElseGet(aTrackingSet, ArrayList::new);
     }
 
     /* (non-Javadoc)

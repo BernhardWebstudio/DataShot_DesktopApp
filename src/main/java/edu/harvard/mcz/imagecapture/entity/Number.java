@@ -16,6 +16,7 @@ public class Number implements java.io.Serializable, Cloneable, Comparable {
     private Specimen specimen;
     private String number;
     private String numberType;
+    private String temporaryComment = null;
 
     public Number() {
     }
@@ -94,5 +95,13 @@ public class Number implements java.io.Serializable, Cloneable, Comparable {
             throw new UnsupportedOperationException("Cannot compare Number to " + o.getClass());
         }
         return this.getNumber().compareTo(((Number) o).getNumber());
+    }
+
+    public String getTemporaryComment() {
+        return temporaryComment;
+    }
+
+    public void setTemporaryComment(String temporaryComment) {
+        this.temporaryComment = temporaryComment;
     }
 }

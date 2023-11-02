@@ -39,6 +39,41 @@ public class ChooseFromJArrayDialog extends JDialog {
         initialize();
     }
 
+    protected String simplifyJSONObjectText(Object obj) {
+        return simplifyJSONObjectText(obj, entityType);
+    }
+
+    public static String simplifyJSONObjectText(Object obj, String entityType) {
+        try {
+            JSONObject jsonObject = (JSONObject) obj;
+            try {
+                while (jsonObject.has(entityType) && !jsonObject.has("_standard")) {
+                    jsonObject = jsonObject.getJSONObject(entityType);
+                }
+
+                if (jsonObject.has("_standard")) {
+                    JSONObject standardObj = jsonObject.getJSONObject("_standard");
+                    if (standardObj.keySet().size() == 1) {
+                        standardObj = standardObj.getJSONObject((String) standardObj.keySet().toArray()[0]);
+
+                        JSONObject textObj = standardObj.getJSONObject("text");
+                        return textObj.toString();
+                    } else {
+                        log.debug("More than 1 _standard available -> cannot simplify object: " + standardObj.toString());
+                    }
+                } else {
+                    log.debug("Key _standard not available -> cannot simplify object: " + jsonObject.toString());
+                }
+            } catch (Exception e) {
+                log.error("Failed to simplify JSON object to text: " + obj.toString(), e);
+            }
+
+            return obj.toString();
+        } catch (ClassCastException e) {
+            return obj.toString();
+        }
+    }
+
     private void initialize() {
         this.setTitle("Choose the matching " + entityType);
         this.setContentPane(getJContentPane());
@@ -71,37 +106,6 @@ public class ChooseFromJArrayDialog extends JDialog {
             descriptionPane.setText("Search for \"" + this.search + "\" resulted in multiple results. Which one is the correct one?");
         }
         return descriptionPane;
-    }
-
-    public String simplifyJSONObjectText(Object obj) {
-        try {
-            JSONObject jsonObject = (JSONObject) obj;
-            try {
-                while (jsonObject.has(entityType) && !jsonObject.has("_standard")) {
-                    jsonObject = jsonObject.getJSONObject(entityType);
-                }
-
-                if (jsonObject.has("_standard")) {
-                    JSONObject standardObj = jsonObject.getJSONObject("_standard");
-                    if (standardObj.keySet().size() == 1) {
-                        standardObj = standardObj.getJSONObject((String) standardObj.keySet().toArray()[0]);
-
-                        JSONObject textObj = standardObj.getJSONObject("text");
-                        return textObj.toString();
-                    } else {
-                        log.debug("More than 1 _standard available -> cannot simplify object: " + standardObj.toString());
-                    }
-                } else {
-                    log.debug("Key _standard not available -> cannot simplify object: " + jsonObject.toString());
-                }
-            } catch (Exception e) {
-                log.error("Failed to simplify JSON object to text: " + obj.toString(), e);
-            }
-
-            return obj.toString();
-        } catch (ClassCastException e) {
-            return obj.toString();
-        }
     }
 
     public JPanel getSelectionPane() {

@@ -2936,8 +2936,8 @@ java.awt.event.KeyAdapter() { public void keyTyped(java.awt.event.KeyEvent e) {
                     // Request by specimen doesn't work with Oracle.  Why?
                     // EventLogFrame logViewer = new EventLogFrame(new
                     // ArrayList<Tracking>(tls.findBySpecimen(specimen)));
-                    EventLogFrame logViewer = new EventLogFrame(new ArrayList<Tracking>(
-                            tls.findBySpecimenId(specimen.getSpecimenId())));
+                    EventLogFrame logViewer = new EventLogFrame(
+                            tls.findBySpecimen(specimen));
                     logViewer.pack();
                     logViewer.setVisible(true);
                 }

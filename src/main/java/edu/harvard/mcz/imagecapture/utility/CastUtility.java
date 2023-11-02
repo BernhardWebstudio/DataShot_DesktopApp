@@ -20,4 +20,22 @@ public class CastUtility {
         }
         return "";
     }
+
+    public static Boolean castToBoolean(Object anything) {
+        if (anything instanceof String) {
+
+            Boolean.parseBoolean((String) anything);
+        }
+        if (anything instanceof Integer) {
+            return ((Integer)anything) != 0;
+        }
+        if (anything instanceof Float) {
+            return ((Float)anything) != 0.0;
+        }
+        try {
+            return (Boolean) anything;
+        } catch (ClassCastException e) {
+            return false;
+        }
+    }
 }

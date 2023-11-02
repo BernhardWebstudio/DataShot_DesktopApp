@@ -227,19 +227,18 @@ public class TrackingLifeCycle extends GenericLifeCycle {
      * @return a list of the tracking records for that specimen.
      */
 
-    public List<Tracking> findBySpecimenId(Long specimenId) {
+    public List<Tracking> findBySpecimen(Specimen specimen) {
         log.debug("finding Tracking instances by specimen");
         try {
             List<Tracking> results = null;
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             session.beginTransaction();
             try {
-
                 CriteriaBuilder cb = session.getCriteriaBuilder();
                 CriteriaQuery cr = cb.createQuery(Tracking.class);
                 Root<Tracking> root = cr.from(Tracking.class);
                 cr.select(root);
-                cr.where(cb.equal(root.get("specimen"), specimenId));
+                cr.where(cb.equal(root.get("specimen"), specimen));
                 results = session.createQuery(cr).getResultList();
                 //        results = session
                 //                      .createQuery("SELECT * From Tracking t where
@@ -259,6 +258,7 @@ public class TrackingLifeCycle extends GenericLifeCycle {
             try {
                 session.close();
             } catch (SessionException e) {
+                log.error("find by specimen id failed", e);
             }
             return results;
         } catch (RuntimeException re) {

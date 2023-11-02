@@ -12,6 +12,8 @@ import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
 import edu.harvard.mcz.imagecapture.ui.dialog.ChooseFromJArrayDialog;
 import edu.harvard.mcz.imagecapture.ui.dialog.VerifyJSONDialog;
 import edu.harvard.mcz.imagecapture.utility.AbstractRestClient;
+import edu.harvard.mcz.imagecapture.utility.FileUtility;
+import edu.harvard.mcz.imagecapture.utility.ListUtility;
 import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,11 +22,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NahimaManager extends AbstractRestClient {
     public static final int defaultPoolId = 7;
@@ -142,7 +146,11 @@ public class NahimaManager extends AbstractRestClient {
             String queryUrl = baseQueryUrl + "&original_filename=" + image.getFilename() + "&instance=image";
             log.debug("Running image upload to URL " + queryUrl);
 
-            String imagePath = ImageCaptureProperties.assemblePathWithBase(image.getPath(), image.getFilename());
+            String imagePath = FileUtility.findValidFilepath(
+                    ImageCaptureProperties.assemblePathWithBase(image.getPath(), image.getFilename()),
+                    image.getPath() + File.separator + image.getFilename(),
+                    image.getPath()
+            );
 
             MultipartBodyPublisher multipartBody = MultipartBodyPublisher.newBuilder().filePart("image", Path.of(imagePath), MediaType.IMAGE_ANY).build();
             MutableRequest request = MutableRequest.POST(queryUrl, multipartBody).header("Content-Disposition", "attachment; filename=\"" + image.getFilename() + "\"");
@@ -497,6 +505,11 @@ public class NahimaManager extends AbstractRestClient {
                 }
                 log.info("Asking user to select " + name + " (" + objectType + ") from results.", results);
                 // otherwise, ask the user to select the correct one
+                if (!this.interactive && ListUtility.allEqual(
+                        foundObjects.toList().stream().map(el -> ChooseFromJArrayDialog.simplifyJSONObjectText(el, objectType)).collect(Collectors.toList())
+                )) {
+                    return foundObjects.getJSONObject(0);
+                }
                 return this.askToChooseObject(foundObjects, name, objectType, mask, inner, omitPool);
             } else {
                 assert (foundObjects.length() == 0);
@@ -1155,7 +1168,7 @@ public class NahimaManager extends AbstractRestClient {
         JSONObject result = new JSONObject(new HashMap<>() {{
             put("_mask", mask);
             put("_objecttype", objectType);
-            put("_idx_in_objects", 0);
+            put("_idx_in_objects", 1);
         }});
         result.put(objectType, inner);
         return result;

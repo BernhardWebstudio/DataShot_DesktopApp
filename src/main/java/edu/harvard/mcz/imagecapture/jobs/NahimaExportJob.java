@@ -12,6 +12,7 @@ import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
 import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.serializer.nahima.Specimen2JSONSerializer;
+import edu.harvard.mcz.imagecapture.utility.CastUtility;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -33,9 +34,14 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     private int status = STATUS_RUNNING_FINE;
     private Exception lastError = null;
     private String oneSpecimenBarcode = null;
+    private List<Specimen> specimenToExport = null;
 
     public void setOneSpecimenToExportBarcode(String oneSpecimenBarcode) {
         this.oneSpecimenBarcode = oneSpecimenBarcode;
+    }
+
+    public void setSpecimenToExport(List<Specimen> specimenToExport) {
+        this.specimenToExport = specimenToExport;
     }
 
     @Override
@@ -44,13 +50,15 @@ public class NahimaExportJob implements RunnableJob, Runnable {
         // fetch specimen to be exported
         notifyWorkStatusChanged("Loading specimens to export.");
         SpecimenLifeCycle sls = new SpecimenLifeCycle();
-        Map<String, Object> queryParams = new HashMap<>();
-        queryParams.put("workFlowStatus", WorkFlowStatus.STAGE_CLEAN);
-        queryParams.put("nahimaExported", false);
-        if (this.oneSpecimenBarcode != null && !this.oneSpecimenBarcode.equals("")) {
-            queryParams.put("barcode", this.oneSpecimenBarcode);
+        if (specimenToExport == null) {
+            Map<String, Object> queryParams = new HashMap<>();
+            queryParams.put("workFlowStatus", WorkFlowStatus.STAGE_CLEAN);
+            queryParams.put("nahimaExported", false);
+            if (this.oneSpecimenBarcode != null && !this.oneSpecimenBarcode.equals("")) {
+                queryParams.put("barcode", this.oneSpecimenBarcode);
+            }
+            specimenToExport = sls.findBy(queryParams);
         }
-        List<Specimen> specimenToExport = sls.findBy(queryParams);
         Collections.shuffle(specimenToExport);
         nrOfSpecimenToProcess = specimenToExport.size();
         notifyProgressChanged();
@@ -63,7 +71,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                     properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL),
                     properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_USER),
                     properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_PASSWORD),
-                    (Boolean) properties.getOrDefault(ImageCaptureProperties.KEY_NAHIMA_INTERACTIVE, true)
+                    CastUtility.castToBoolean(properties.getOrDefault(ImageCaptureProperties.KEY_NAHIMA_INTERACTIVE, true))
             );
         } catch (Exception e) {
             lastError = e;
@@ -200,13 +208,15 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             specimen.setNahimaExported(true);
             specimen.setWorkFlowStatus(WorkFlowStatus.STAGE_DONE);
             specimen.setNahimaId(result.getString("_global_object_id"));
-            try {
-                sls.attachDirty(specimen);
-            } catch (SaveFailedException e) {
-                lastError = e;
-                log.error("Failed to store Nahima export status", e);
-                this.status = STATUS_DATASHOT_FAILED;
-                return;
+            if (specimen.getSpecimenId() != null && specimen.getSpecimenId() > 0) {
+                try {
+                    sls.attachDirty(specimen);
+                } catch (SaveFailedException e) {
+                    lastError = e;
+                    log.error("Failed to store Nahima export status", e);
+                    this.status = STATUS_DATASHOT_FAILED;
+                    return;
+                }
             }
             notifyProgressChanged();
         }

@@ -48,6 +48,9 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                 put("andereid", otherNr.getNumber());
 //                put("bemerkung", String.join(" ", otherNr.getNumber(), otherNr.getNumberType()));
             }};
+            if (otherNr.getTemporaryComment() != null) {
+                otherNrMap.put("bemerkung", otherNr.getTemporaryComment());
+            }
             try {
                 otherNrMap.put("typ", nahimaManager.resolveOtherNrType(otherNr.getNumberType()));
             } catch (IOException | InterruptedException e) {
@@ -81,10 +84,14 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "infraspezifischerrang", () -> nahimaManager.resolveInfraspecificRank(toSerialize.getInfraspecificRank()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "infraspezifischestaxon", () -> nahimaManager.resolveInfraspecificEpithet(toSerialize.getInfraspecificEpithet()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "subspezifischeart", () -> nahimaManager.resolveSubSpecificEpithet(toSerialize.getSubspecificEpithet()));
-        tryNonUserSkippableResolve(mainReverseNestedDetermination, "taxonname", () -> nahimaManager.resolveTaxon(String.join(" ", toSerialize.getGenus(), toSerialize.getSpecificEpithet(), toSerialize.getSubspecificEpithet(), toSerialize.getInfraspecificRank(), toSerialize.getInfraspecificEpithet()).trim().replace("  ", " ")));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "unterfamilie", () -> nahimaManager.resolveSubFamily(toSerialize.getSubfamily()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "tribus", () -> nahimaManager.resolveTribe(toSerialize.getTribe()));
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "ordnung", () -> nahimaManager.resolveOrder(toSerialize.getHigherOrder()));
+
+        String taxonName = NullHandlingUtility.joinNonNull(" ", toSerialize.getGenus(), toSerialize.getSpecificEpithet(), toSerialize.getSubspecificEpithet(), toSerialize.getInfraspecificRank(), toSerialize.getInfraspecificEpithet()).trim().replace("  ", " ");
+        if (!taxonName.equals("")) {
+            tryNonUserSkippableResolve(mainReverseNestedDetermination, "taxonname", () -> nahimaManager.resolveTaxon(taxonName));
+        }
 
         if (toSerialize.getIdentificationRemarks() != null && !toSerialize.getIdentificationRemarks().equals("")) {
             mainReverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
@@ -230,6 +237,9 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         }
         reverseNestedCollection.put("_nested:aufsammlung__sammler", collectors);
 
+        if (toSerialize.getIsoDate() == null) {
+            toSerialize.setIsoDate("");
+        }
         boolean isoDateIsPeriod = toSerialize.getIsoDate().contains("-");
         String[] dateSplit = toSerialize.getIsoDate().split("-");
 
@@ -282,7 +292,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                     JSONObject partJsonClone = new JSONObject(partJson.toString());
 //                    tryUserSkippableResolve(partJsonClone, "attribute", () -> nahimaManager.resolvePreparationPartAttribute(NullHandlingUtility.joinNonNull(" ", attribute.getAttributeRemark(), attribute.getAttributeType(), attribute.getAttributeValue(), attribute.getAttributeDate() != null ? nahimaDateFormat.format(attribute.getAttributeDate()) : "", attribute.getAttributeDeterminer()), attribute.getAttributeUnits()));
 //                    tryUserSkippableResolve(partJsonClone, "attribute", () -> nahimaManager.resolvePreparationPartAttribute(attribute.getAttributeValue(), attribute.getAttributeUnits()));
-                    tryUserSkippableResolve(partJsonClone, "attribute", () -> nahimaManager.resolvePreparationPartAttribute(NullHandlingUtility.joinNonNull(": ",  attribute.getAttributeType(), attribute.getAttributeValue()), attribute.getAttributeUnits()));
+                    tryUserSkippableResolve(partJsonClone, "attribute", () -> nahimaManager.resolvePreparationPartAttribute(NullHandlingUtility.joinNonNull(": ", attribute.getAttributeType(), attribute.getAttributeValue()), attribute.getAttributeUnits()));
                     parts.put(partJsonClone);
                 }
             } else {

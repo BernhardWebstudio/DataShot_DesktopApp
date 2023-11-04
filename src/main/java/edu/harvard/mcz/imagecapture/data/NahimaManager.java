@@ -568,7 +568,7 @@ public class NahimaManager extends AbstractRestClient {
                     throw new SkipSpecimenException();
             }
         } else {
-            inner = resultingObj[0];
+            resultingObj[0] = inner;
         }
         JSONObject toCreate = wrapForCreation(inner, objectType, mask, omitPool);
         // It would be simpler to store the created in cache. But well... current format does not allow

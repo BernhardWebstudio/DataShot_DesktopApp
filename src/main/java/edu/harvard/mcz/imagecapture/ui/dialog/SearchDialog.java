@@ -419,7 +419,6 @@ public class SearchDialog extends JDialog {
                     jTextFieldOrder.setModel(new DefaultComboBoxModel<>(
                             orders
                     ));
-                    jTextFieldOrder.addItem("");
 
                     if (!Arrays.stream(orders).anyMatch(""::equals)) {
                         jTextFieldOrder.addItem("");
@@ -652,10 +651,10 @@ public class SearchDialog extends JDialog {
      */
     private JComboBox<String> getIdentifiedByComboBox() {
         if (jComboBoxIdentifiedBy == null) {
-            SpecimenLifeCycle sls = new SpecimenLifeCycle();
             jComboBoxIdentifiedBy = new JComboBox<>();
             // lazily load the determiners
             (new Thread(() -> {
+                SpecimenLifeCycle sls = new SpecimenLifeCycle();
                 String[] determiners = sls.getDistinctDeterminers();
                 SwingUtilities.invokeLater(() -> jComboBoxIdentifiedBy.setModel(new DefaultComboBoxModel<>(
                         determiners

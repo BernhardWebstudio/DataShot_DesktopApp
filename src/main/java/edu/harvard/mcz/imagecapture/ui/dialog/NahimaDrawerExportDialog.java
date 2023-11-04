@@ -166,10 +166,23 @@ public class NahimaDrawerExportDialog extends JDialog implements ProgressListene
             specimen.setBarcode("Schulthess Drawer " + matcher.group(1));
             List<Map<String, String>> relevantCsvRows = this.csvContent.stream().filter(row -> Integer.parseInt(row.get("Drawer")) == drawerNumber).collect(Collectors.toList());
             HashSet<String> relevantTags = new HashSet<>();
+            //
+            String[] firstOrderCols = new String[]{
+                    "Suborder", "Family", "Subfamily", "Tribe",
+            };
+            for (String col : firstOrderCols) {
+                relevantCsvRows.forEach(row -> {
+                    String value = row.get(col);
+                    if (value != null && value.length() > 0) {
+                        relevantTags.add(value);
+                    }
+                });
+            }
+
+            String[] relevantCols = new String[]{
+                    "Genus", "Species", "subspecies", "Infra. Name"
+            };
             relevantCsvRows.forEach(row -> {
-                String[] relevantCols = new String[]{
-                        "Suborder", "Family", "Subfamily", "Tribe", "Genus", "Species", "subspecies", "Infra. Name"
-                };
                 for (String relevantCol : relevantCols) {
                     String value = row.get(relevantCol);
                     if (value != null && value.length() > 0) {
@@ -182,17 +195,17 @@ public class NahimaDrawerExportDialog extends JDialog implements ProgressListene
             number1.setTemporaryComment(String.join(", ", relevantTags));
             number1.setNumber(specimen.getBarcode());
             number1.setSpecimen(specimen);
-//            Number number2 = new Number();
-//            number2.setNumberType("Schulthess Drawer");
-//            number2.setNumber(matcher.group(1));
-//            number2.setSpecimen(specimen);
+            Number number2 = new Number();
+            number2.setNumberType("Schulthess Drawer");
+            number2.setNumber(matcher.group(1));
+            number2.setSpecimen(specimen);
 //            Number number3 = new Number();
 //            number3.setNumberType("Test-Number-Type");
 //            number3.setNumber(matcher.group(1));
 //            number3.setSpecimen(specimen);
             specimen.setNumbers(new HashSet<>() {{
                 add(number1);
-//                add(number2);
+                add(number2);
 //                add(number3);
             }});
         }

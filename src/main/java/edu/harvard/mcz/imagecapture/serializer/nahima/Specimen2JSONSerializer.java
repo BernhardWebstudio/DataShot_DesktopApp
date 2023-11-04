@@ -59,15 +59,17 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             otherIds.put(new JSONObject(otherNrMap));
         }
         // also add specimen id as other id
-        JSONObject dataShotId = new JSONObject(new HashMap<String, Object>() {{
-            put("andereid", String.valueOf(toSerialize.getSpecimenId()));
-        }});
-        try {
-            dataShotId.put("typ", nahimaManager.resolveOtherNrType(ImageCaptureApp.APP_NAME + "-ID"));
-        } catch (IOException | InterruptedException e) {
-            log.error("Failed to resolve nr type", e);
+        if (toSerialize.getSpecimenId() != null) {
+            JSONObject dataShotId = new JSONObject(new HashMap<String, Object>() {{
+                put("andereid", String.valueOf(toSerialize.getSpecimenId()));
+            }});
+            try {
+                dataShotId.put("typ", nahimaManager.resolveOtherNrType(ImageCaptureApp.APP_NAME + "-ID"));
+            } catch (IOException | InterruptedException e) {
+                log.error("Failed to resolve nr type", e);
+            }
+            otherIds.put(dataShotId);
         }
-        otherIds.put(dataShotId);
         result.put("_nested:entomologie__andereids", otherIds);
         // set determinations
         JSONArray reverseNestedDeterminations = new JSONArray();

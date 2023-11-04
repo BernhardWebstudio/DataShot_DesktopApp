@@ -164,8 +164,7 @@ public class ImageDisplayFrame extends JFrame {
      * @throws BadTemplateException
      */
     public void loadImagesFromFiles(Set<ICImage> imageFiles) {
-        log.debug("Debug {}", imageFiles.size());
-        jComboBoxImagePicker.removeAllItems();
+        log.debug("Loading images from files with size {}", imageFiles.size());
         Iterator<ICImage> i = imageFiles.iterator();
         ICImage image = null;
         int fileCount = imageFiles.size();
@@ -189,15 +188,15 @@ public class ImageDisplayFrame extends JFrame {
         jLabelImageCountNr.setForeground(fileCount > 1 ? Color.RED : Color.BLACK);
         jComboBoxImagePicker.setEnabled(fileCount > 1);
         jComboBoxImagePicker.setSelectedItem(image.getFilename());
-        try {
-            PositionTemplate defaultTemplate =
-                    PositionTemplate.findTemplateForImage(image);
-            loadImagesFromFileSingle(fileToCheck, defaultTemplate, image);
-        } catch (BadTemplateException e) {
-            log.error("Error", e);
-        } catch (ImageLoadException e) {
-            log.error("Error", e);
-        }
+        ICImage finalImage = image;
+        (new Thread(() -> {
+            try {
+                PositionTemplate defaultTemplate = PositionTemplate.findTemplateForImage(finalImage);
+                loadImagesFromFileSingle(fileToCheck, defaultTemplate, finalImage);
+            } catch (ImageLoadException | BadTemplateException e) {
+                e.printStackTrace();
+            }
+        })).start();
         jTabbedPane.setSelectedIndex(0); // move focus to full image tab
     }
 
@@ -210,14 +209,18 @@ public class ImageDisplayFrame extends JFrame {
      * @throws ImageLoadException
      * @throws BadTemplateException
      */
+
     public void loadImagesFromFileSingle(File anImageFile,
                                          PositionTemplate defaultTemplate,
                                          ICImage image)
             throws ImageLoadException, BadTemplateException {
-        log.debug("Debug {}", anImageFile.getName());
+        log.debug("Loading single image file with name {}", anImageFile.getName());
         boolean templateProblem = false;
         selectedImage = image;
         // TODO: template detection?
+
+        // first, reset image pane to show that we are loading images
+        this.indicateImageLoading();
 
         try {
             imagefile = ImageIO.read(anImageFile);
@@ -231,11 +234,13 @@ public class ImageDisplayFrame extends JFrame {
                 URL url = this.getClass().getResource(
                         "/edu/harvard/mcz/imagecapture/resources/images/gnome-mime-image.png");
                 BufferedImage anImage = ImageIO.read(url);
-                this.setBarcodeImage(anImage);
-                this.setSpecimenImage(anImage);
-                this.setPinLabelImage(anImage);
-                this.setUnitTrayImage(anImage);
-                this.setUnitTrayLabelsImage(anImage);
+                SwingUtilities.invokeLater(() -> {
+                    setBarcodeImage(anImage);
+                    setSpecimenImage(anImage);
+                    setPinLabelImage(anImage);
+                    setUnitTrayImage(anImage);
+                    setUnitTrayLabelsImage(anImage);
+                });
             } else {
                 if (imagefile.getHeight() != defaultTemplate.getImageSize().height ||
                         imagefile.getWidth() != defaultTemplate.getImageSize().width) {
@@ -249,7 +254,7 @@ public class ImageDisplayFrame extends JFrame {
                     int y = defaultTemplate.getBarcodeULPosition().height;
                     int w = defaultTemplate.getBarcodeSize().width;
                     int h = defaultTemplate.getBarcodeSize().height;
-                    this.setBarcodeImage(imagefile.getSubimage(x, y, w, h));
+                    SwingUtilities.invokeLater(() -> this.setBarcodeImage(imagefile.getSubimage(x, y, w, h)));
                 } catch (Exception ex) {
                     try {
                         this.setBarcodeImage(imagefile);
@@ -268,7 +273,8 @@ public class ImageDisplayFrame extends JFrame {
                     int w = defaultTemplate.getSpecimenSize().width;
                     int h = defaultTemplate.getSpecimenSize().height;
                     BufferedImage img = imagefile.getSubimage(x, y, w, h);
-                    this.setSpecimenImage(img);
+
+                    SwingUtilities.invokeLater(() -> this.setSpecimenImage(img));
                 } catch (Exception ex) {
                     templateProblem = true;
                     System.out.println(ex.getMessage());
@@ -278,7 +284,7 @@ public class ImageDisplayFrame extends JFrame {
                     int y = defaultTemplate.getLabelPosition().height;
                     int w = defaultTemplate.getLabelSize().width;
                     int h = defaultTemplate.getLabelSize().height;
-                    this.setPinLabelImage(imagefile.getSubimage(x, y, w, h));
+                    SwingUtilities.invokeLater(() -> this.setPinLabelImage(imagefile.getSubimage(x, y, w, h)));
                 } catch (Exception ex) {
                     templateProblem = true;
                     System.out.println(ex.getMessage());
@@ -288,7 +294,8 @@ public class ImageDisplayFrame extends JFrame {
                     int y = defaultTemplate.getTextPosition().height;
                     int w = defaultTemplate.getTextSize().width;
                     int h = defaultTemplate.getTextSize().height;
-                    this.setUnitTrayImage(imagefile.getSubimage(x, y, w, h));
+
+                    SwingUtilities.invokeLater(() -> this.setUnitTrayImage(imagefile.getSubimage(x, y, w, h)));
                 } catch (Exception ex) {
                     templateProblem = true;
                     System.out.println(ex.getMessage());
@@ -298,14 +305,14 @@ public class ImageDisplayFrame extends JFrame {
                     int y = defaultTemplate.getUTLabelsPosition().height;
                     int w = defaultTemplate.getUTLabelsSize().width;
                     int h = defaultTemplate.getUTLabelsSize().height;
-                    this.setUnitTrayLabelsImage(imagefile.getSubimage(x, y, w, h));
+                    SwingUtilities.invokeLater(() -> this.setUnitTrayLabelsImage(imagefile.getSubimage(x, y, w, h)));
                 } catch (Exception ex) {
                     templateProblem = true;
                     System.out.println(ex.getMessage());
                 }
             }
             // Display the full image (also packs!)
-            this.setFullImage();
+            SwingUtilities.invokeLater(this::setFullImage);
         } catch (IOException e1) {
             log.error("IOException reading image file!", e1);
             throw new ImageLoadException("Unable to read image file " +
@@ -321,7 +328,7 @@ public class ImageDisplayFrame extends JFrame {
         log.debug("Debug {}", anImageFile.getPath());
         if (UsersLifeCycle.isUserChiefEditor(
                 Singleton.getSingletonInstance().getUser().getUserid())) {
-            updateTemplateList();
+            SwingUtilities.invokeLater(() -> updateTemplateList());
         }
     }
 
@@ -482,7 +489,7 @@ public class ImageDisplayFrame extends JFrame {
         return jPanelSpecimen;
     }
 
-    public void setSpecimenImage(BufferedImage anImage) {
+    public void setSpecimenImage(Image anImage) {
         imagePanelSpecimen.setImage(anImage);
         imagePanelSpecimen.zoomToFit();
         if (imagePanelSpecimen.getPreferredSize().height > 500 ||
@@ -507,7 +514,7 @@ public class ImageDisplayFrame extends JFrame {
     }
 
     public void setUnitTrayImage(Image anImage) {
-        imagePanelUnitTrayTaxon.setImage((BufferedImage) anImage);
+        imagePanelUnitTrayTaxon.setImage(anImage);
         imagePanelUnitTrayTaxon.zoomToFit();
         //		jLabelUnitTray.setIcon(new ImageIcon(anImage));
         //		this.pack();
@@ -519,7 +526,7 @@ public class ImageDisplayFrame extends JFrame {
     }
 
     public void setUnitTrayLabelsImage(Image anImage) {
-        imagePanelTrayLabels.setImage((BufferedImage) anImage);
+        imagePanelTrayLabels.setImage(anImage);
         imagePanelTrayLabels.zoomToFit();
         if (imagePanelTrayLabels.getPreferredSize().height > 500 ||
                 imagePanelTrayLabels.getPreferredSize().width > 500) {
@@ -528,7 +535,7 @@ public class ImageDisplayFrame extends JFrame {
     }
 
     public void setPinLabelImage(Image anImage) {
-        imagePanelPinLabels.setImage((BufferedImage) anImage);
+        imagePanelPinLabels.setImage(anImage);
         imagePanelPinLabels.zoomToFit();
         this.pack();
         if (imagePanelPinLabels.getPreferredSize().height > 500 ||
@@ -649,14 +656,32 @@ public class ImageDisplayFrame extends JFrame {
         return imagePanelUnitTrayTaxon;
     }
 
-    private void setFullImage() {
-        if (imagefile != null) {
-            getPanelFullImage().setImage(imagefile);
-            // We need to make sure the container hierarchy holding the image knows
-            // what size the image pane is before zoom to fit will work.
+    private void indicateImageLoading() {
+        URL loadingImageUrl = this.getClass().getResource(
+                "/edu/harvard/mcz/imagecapture/resources/images/Spin-1s-200px.gif");
+        Image loadingImage = Toolkit.getDefaultToolkit().createImage(loadingImageUrl);
+        log.debug("Loading spinner loaded.");
+        SwingUtilities.invokeLater(() -> {
+            setBarcodeImage(loadingImage);
+            setSpecimenImage(loadingImage);
+            setPinLabelImage(loadingImage);
+            setUnitTrayImage(loadingImage);
+            setUnitTrayLabelsImage(loadingImage);
+            getPanelFullImage().setImage(loadingImage);
             this.pack();
-            imagePaneFullImage.zoomToFit();
-        }
+        });
+    }
+
+    private void setFullImage(BufferedImage image) {
+        getPanelFullImage().setImage(image);
+        // We need to make sure the container hierarchy holding the image knows
+        // what size the image pane is before zoom to fit will work.
+        this.pack();
+        imagePaneFullImage.zoomToFit();
+    }
+
+    private void setFullImage() {
+        setFullImage(imagefile);
     }
 
     private ImageZoomPanel getPanelFullImage() {
@@ -783,77 +808,79 @@ public class ImageDisplayFrame extends JFrame {
                             if (jComboBoxImagePicker.getSelectedItem() == null) {
                                 log.debug("No selected item");
                             } else {
-                                try {
-                                    String filename =
-                                            jComboBoxImagePicker.getSelectedItem() != null
-                                                    ? jComboBoxImagePicker.getSelectedItem().toString()
-                                                    : null;
-                                    if (filename != null && targetSpecimen != null) {
-                                        // find matching images, set first one as the display image.
-                                        Set<ICImage> images;
-                                        if (targetSpecimen.getICImages() == null) {
-                                            ICImageLifeCycle ils = new ICImageLifeCycle();
-                                            images = new HashSet<>(
-                                                    ils.findBy(new HashMap<String, Object>() {
-                                                        {
-                                                            put("Filename", filename);
-                                                            put("SPECIMENID", targetSpecimen.getSpecimenId());
+                                (new Thread(() -> {
+                                    try {
+                                        String filename =
+                                                jComboBoxImagePicker.getSelectedItem() != null
+                                                        ? jComboBoxImagePicker.getSelectedItem().toString()
+                                                        : null;
+                                        if (filename != null && targetSpecimen != null) {
+                                            // find matching images, set first one as the display image.
+                                            Set<ICImage> images;
+                                            if (targetSpecimen.getICImages() == null) {
+                                                ICImageLifeCycle ils = new ICImageLifeCycle();
+                                                images = new HashSet<>(
+                                                        ils.findBy(new HashMap<String, Object>() {
+                                                            {
+                                                                put("Filename", filename);
+                                                                put("SPECIMENID", targetSpecimen.getSpecimenId());
+                                                            }
+                                                        }));
+                                            } else {
+                                                images = targetSpecimen.getICImages();
+                                            }
+                                            if (images != null && images.size() > 0) {
+                                                log.debug("Found images: " + images.size());
+                                                Iterator<ICImage> ii = images.iterator();
+                                                boolean found = false;
+                                                while (ii.hasNext() && !found) {
+                                                    ICImage image = ii.next();
+                                                    log.debug("image is " + image);
+                                                    log.debug("image specimen is " + image.getSpecimen());
+                                                    log.debug("image path is " + image.getPath());
+                                                    log.debug("target specimen bar code is " +
+                                                            targetSpecimen.getBarcode());
+                                                    log.debug("image specimen barcode is " +
+                                                            image.getSpecimen().getBarcode());
+                                                    if (!image.getFilename().equals(filename) ||
+                                                            image.getPath().equals("") ||
+                                                            image.getPath().toUpperCase().contains(".JPG") ||
+                                                            image.getSpecimen() == null ||
+                                                            !image.getSpecimen().getBarcode().equals(
+                                                                    targetSpecimen.getBarcode())) {
+                                                        // wrong path or filename
+                                                        log.debug("WrongFile: " + image.getPath());
+                                                    } else {
+                                                        found = true;
+                                                        // String startPointName =
+                                                        // Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
+                                                        String path = image.getPath();
+                                                        if (path == null) {
+                                                            path = "";
                                                         }
-                                                    }));
-                                        } else {
-                                            images = targetSpecimen.getICImages();
-                                        }
-                                        if (images != null && images.size() > 0) {
-                                            log.debug("Found images: " + images.size());
-                                            Iterator<ICImage> ii = images.iterator();
-                                            boolean found = false;
-                                            while (ii.hasNext() && !found) {
-                                                ICImage image = ii.next();
-                                                log.debug("image is " + image);
-                                                log.debug("image specimen is " + image.getSpecimen());
-                                                log.debug("image path is " + image.getPath());
-                                                log.debug("target specimen bar code is " +
-                                                        targetSpecimen.getBarcode());
-                                                log.debug("image specimen barcode is " +
-                                                        image.getSpecimen().getBarcode());
-                                                if (!image.getFilename().equals(filename) ||
-                                                        image.getPath().equals("") ||
-                                                        image.getPath().toUpperCase().contains(".JPG") ||
-                                                        image.getSpecimen() == null ||
-                                                        !image.getSpecimen().getBarcode().equals(
-                                                                targetSpecimen.getBarcode())) {
-                                                    // wrong path or filename
-                                                    log.debug("WrongFile: " + image.getPath());
-                                                } else {
-                                                    found = true;
-                                                    // String startPointName =
-                                                    // Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
-                                                    String path = image.getPath();
-                                                    if (path == null) {
-                                                        path = "";
-                                                    }
-                                                    File fileToCheck = new File(
-                                                            ImageCaptureProperties.assemblePathWithBase(
-                                                                    path, image.getFilename()));
-                                                    PositionTemplate defaultTemplate;
-                                                    try {
-                                                        defaultTemplate =
-                                                                PositionTemplate.findTemplateForImage(image);
-                                                        loadImagesFromFileSingle(fileToCheck,
-                                                                defaultTemplate, image);
-                                                    } catch (ImageLoadException |
-                                                            BadTemplateException ex) {
-                                                        log.error("Error", ex);
+                                                        File fileToCheck = new File(
+                                                                ImageCaptureProperties.assemblePathWithBase(
+                                                                        path, image.getFilename()));
+                                                        PositionTemplate defaultTemplate;
+                                                        try {
+                                                            defaultTemplate =
+                                                                    PositionTemplate.findTemplateForImage(image);
+                                                            loadImagesFromFileSingle(fileToCheck,
+                                                                    defaultTemplate, image);
+                                                        } catch (ImageLoadException |
+                                                                BadTemplateException ex) {
+                                                            log.error("Error", ex);
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
+                                    } catch (NullPointerException e2) {
+                                        // Probably means an empty jComboBoxImagePicker
+                                        e2.printStackTrace();
+                                        log.error(e2.getMessage(), e2);
                                     }
-                                } catch (NullPointerException e2) {
-                                    // Probably means an empty jComboBoxImagePicker
-                                    e2.printStackTrace();
-                                    log.error(e2.getMessage(), e2);
-                                }
+                                })).start();
                             }
                         }
                     });

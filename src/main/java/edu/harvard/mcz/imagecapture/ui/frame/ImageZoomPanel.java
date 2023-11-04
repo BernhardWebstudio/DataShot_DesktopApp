@@ -45,15 +45,13 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
     private static final Logger log =
             LoggerFactory.getLogger(ImageZoomPanel.class);
 
-    private BufferedImage image; //  @jve:decl-index=0:
-
     private JPanel jPanel = null;
     private JButton jButton = null;
     private JButton jButton1 = null;
     private JButton jButton2 = null;
     private JButton jButton3 = null;
     private JScrollPane jScrollPane = null;
-    private ImagePanel jLabel = null;
+    private ImagePanel imagePanel = null;
     private JButton jButton4 = null;
     private Cursor originalCursor = null;
     private Cursor zoomCursor = null;
@@ -63,7 +61,6 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
      */
     public ImageZoomPanel() {
         super();
-        image = null;
         initialize();
     }
 
@@ -78,10 +75,13 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
         setImage(anImage);
     }
 
+    public void setImage(Image anImage) {
+        imagePanel.setImage(anImage);
+    }
+
     public void setImage(BufferedImage anImage) {
         // ImageObserver observer = null;
-        image = anImage;
-        jLabel.setImage(image);
+        imagePanel.setImage(anImage);
         //		//jLabel.setText("");
         //		Dimension size = new Dimension(image.getWidth(),
         // image.getHeight());
@@ -92,7 +92,7 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
         //		Graphics2D g2 = (Graphics2D) jLabel.getGraphics();
         //		g2.drawImage(image, x, y, observer);
         //		jLabel.paint(g2);
-        jLabel.repaint();
+        imagePanel.repaint();
     }
 
     /**
@@ -114,7 +114,7 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
             log.error("Unable to load ZoomCursor. ", e);
             zoomCursor = null;
         }
-        jLabel.addMouseListener(this);
+        imagePanel.addMouseListener(this);
     }
 
     /**
@@ -240,33 +240,33 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
      */
     private JScrollPane getJScrollPane() {
         if (jScrollPane == null) {
-            jLabel = new ImagePanel();
+            imagePanel = new ImagePanel();
             // jLabel.setText("Image goes here");
             jScrollPane = new JScrollPane();
             jScrollPane.setAutoscrolls(true);
-            jScrollPane.setViewportView(jLabel);
+            jScrollPane.setViewportView(imagePanel);
         }
         return jScrollPane;
     }
 
     public void zoomFull() {
-        jLabel.fullSize();
-        jLabel.repaint();
-        jLabel.doLayout();
+        imagePanel.fullSize();
+        imagePanel.repaint();
+        imagePanel.doLayout();
         jScrollPane.doLayout();
     }
 
     public void zoomToFit() {
-        jLabel.zoomToFit(jScrollPane.getWidth() - 1, jScrollPane.getHeight() - 1);
-        jLabel.repaint();
-        jLabel.doLayout();
+        imagePanel.zoomToFit(jScrollPane.getWidth() - 1, jScrollPane.getHeight() - 1);
+        imagePanel.repaint();
+        imagePanel.doLayout();
         jScrollPane.doLayout();
     }
 
     public void zoomIn() {
-        jLabel.zoomIn();
-        jLabel.repaint();
-        jLabel.doLayout();
+        imagePanel.zoomIn();
+        imagePanel.repaint();
+        imagePanel.doLayout();
         int yval = jScrollPane.getVerticalScrollBar().getValue();
         jScrollPane.getVerticalScrollBar().setValue(
                 (int) (yval + (jScrollPane.getHeight() * 0.1)));
@@ -282,9 +282,9 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
     }
 
     public void zoomOut() {
-        jLabel.zoomOut();
-        jLabel.repaint();
-        jLabel.doLayout();
+        imagePanel.zoomOut();
+        imagePanel.repaint();
+        imagePanel.doLayout();
         int yval = jScrollPane.getVerticalScrollBar().getValue();
         jScrollPane.getVerticalScrollBar().setValue(
                 (int) (yval - (jScrollPane.getHeight() * 0.1)));
@@ -298,9 +298,9 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
     }
 
     public void center() {
-        jLabel.center();
-        jLabel.repaint();
-        jLabel.doLayout();
+        imagePanel.center();
+        imagePanel.repaint();
+        imagePanel.doLayout();
         jScrollPane.doLayout();
     }
 
@@ -330,12 +330,12 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
     public void mouseClicked(MouseEvent e) {
         if (e.getButton() == MouseEvent.BUTTON1) {
             Point clickAt = e.getPoint();
-            Dimension size = jLabel.getSize();
-            jLabel.zoomIn();
-            jLabel.repaint();
-            jLabel.doLayout();
-            jLabel.centerOn(clickAt);
-            jLabel.invalidate();
+            Dimension size = imagePanel.getSize();
+            imagePanel.zoomIn();
+            imagePanel.repaint();
+            imagePanel.doLayout();
+            imagePanel.centerOn(clickAt);
+            imagePanel.invalidate();
             jScrollPane.revalidate();
             jScrollPane.getParent().validate();
             jScrollPane.setVisible(false);
@@ -347,7 +347,7 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
         } else if (e.getButton() == MouseEvent.BUTTON3) {
             Point clickAt = e.getPoint();
             zoomOut();
-            jLabel.centerOn(clickAt);
+            imagePanel.centerOn(clickAt);
         }
     }
 
@@ -357,9 +357,9 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
     @Override
     public void mouseEntered(MouseEvent e) {
         // TODO Auto-generated method stub
-        originalCursor = jLabel.getCursor();
+        originalCursor = imagePanel.getCursor();
         if (zoomCursor != null) {
-            jLabel.setCursor(zoomCursor);
+            imagePanel.setCursor(zoomCursor);
         }
     }
 
@@ -369,7 +369,7 @@ public class ImageZoomPanel extends JPanel implements MouseListener {
     @Override
     public void mouseExited(MouseEvent e) {
         // TODO Auto-generated method stub
-        jLabel.setCursor(originalCursor);
+        imagePanel.setCursor(originalCursor);
     }
 
     /* (non-Javadoc)

@@ -206,7 +206,9 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 
             // then, finally, mark specimen as exported
             specimen.setNahimaExported(true);
-            specimen.setWorkFlowStatus(WorkFlowStatus.STAGE_DONE);
+            if (Objects.equals(specimen.getWorkFlowStatus(), WorkFlowStatus.STAGE_CLEAN)) {
+                specimen.setWorkFlowStatus(WorkFlowStatus.STAGE_DONE);
+            }
             specimen.setNahimaId(result.getString("_global_object_id"));
             if (specimen.getSpecimenId() != null && specimen.getSpecimenId() > 0) {
                 try {

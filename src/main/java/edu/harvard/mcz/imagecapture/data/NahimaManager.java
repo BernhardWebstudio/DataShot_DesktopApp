@@ -8,6 +8,7 @@ import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
 import edu.harvard.mcz.imagecapture.ui.dialog.ChooseFromJArrayDialog;
 import edu.harvard.mcz.imagecapture.ui.dialog.VerifyJSONDialog;
@@ -1233,5 +1234,55 @@ public class NahimaManager extends AbstractRestClient {
 
     public String getCreatedByThisSoftwareIndication() {
         return "Created by " + ImageCaptureApp.APP_NAME + " " + ImageCaptureApp.getAppVersion();
+    }
+
+    public JSONObject findTagWithName(String name) throws IOException {
+        JSONObject tagFromCache = this.loadFromCache(name, "_tag");
+        if (tagFromCache != null) {
+            return tagFromCache;
+        }
+
+        String queryUrl = this.url + "tags?token=" + this.token;
+
+        String response = this.getRequest(queryUrl);
+        if (!response.startsWith("[")) {
+            JSONObject responseObject = new JSONObject(response);
+            if (responseObject.has("code")) {
+                if (((String) responseObject.get("code")).startsWith("error")) {
+                    throw new RuntimeException("Failed to fetch tags. Error code: " + responseObject.get("code") + ". " + (responseObject.has("description") ? responseObject.getString("description") : ""));
+                }
+            }
+        }
+        JSONObject responseObject = (new JSONArray(response)).getJSONObject(0);
+        JSONArray tagArray = responseObject.getJSONArray("_tags");
+        for (int tagIdx = 0; tagIdx < tagArray.length(); ++tagIdx) {
+            JSONObject tag = tagArray.getJSONObject(tagIdx);
+            JSONObject tag_names = tag.getJSONObject("displayname");
+            Iterator<String> keys = tag_names.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
+                String tag_name = tag_names.getString(key);
+                if (Objects.equals(tag_name.toLowerCase(), name.toLowerCase())) {
+                    storeInCache(name, "_tag", tag);
+                    return tag;
+                }
+            }
+        }
+        throw new RuntimeException("Could not find tag with name " + name);
+    }
+
+    public JSONArray resolveWorkflowStatusTags(String workFlowStatus) throws IOException {
+        if (Objects.equals(workFlowStatus, WorkFlowStatus.STAGE_CLEAN)) {
+            return new JSONArray();
+        }
+
+        JSONObject tag = findTagWithName("Entwurf");
+        if (tag != null) {
+            return new JSONArray() {{
+                put(tag.getInt("_id"));
+            }};
+        } else {
+            throw new RuntimeException("Cound not find Entwurf tag");
+        }
     }
 }

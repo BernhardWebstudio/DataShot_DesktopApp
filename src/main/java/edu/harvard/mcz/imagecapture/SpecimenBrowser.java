@@ -133,7 +133,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
                 model = new SpecimenListTableModel(s.findAll());
             }
             jTable.setModel(model);
-            sorter = new TableRowSorter<SpecimenListTableModel>(model);
+            sorter = new TableRowSorter<>(model);
             sorter.toggleSortOrder(SpecimenListTableModel.COL_BARCODE - 1);
             jTable.setRowSorter(sorter);
             jTable.setDefaultRenderer(Specimen.class, new ButtonRenderer());
@@ -270,7 +270,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
                     RowFilter.regexFilter(jComboBox.getSelectedItem().toString(),
                             SpecimenListTableModel.COL_WORKFLOW);
             ArrayList<RowFilter<SpecimenListTableModel, Object>> i =
-                    new ArrayList<RowFilter<SpecimenListTableModel, Object>>();
+                    new ArrayList<>();
             i.add(rf_family);
             i.add(rf_barcode);
             // i.add(rf_drawer);

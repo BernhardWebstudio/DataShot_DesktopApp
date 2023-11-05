@@ -1208,7 +1208,7 @@ public class Specimen implements Serializable {
     }
 
     public boolean isStateDone() {
-        return this.workFlowStatus.equals(WorkFlowStatus.STAGE_DONE);
+        return this.workFlowStatus.equals(WorkFlowStatus.STAGE_DONE) || this.nahimaExported;
     }
 
     public String getLoadFlags() {

@@ -21,10 +21,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -165,7 +163,7 @@ public class NahimaDrawerExportDialog extends JDialog implements ProgressListene
             // if drawer found, can create the data based on the CSV file
             specimen.setBarcode("Schulthess Drawer " + matcher.group(1));
             List<Map<String, String>> relevantCsvRows = this.csvContent.stream().filter(row -> Integer.parseInt(row.get("Drawer")) == drawerNumber).collect(Collectors.toList());
-            HashSet<String> relevantTags = new HashSet<>();
+            Set<String> relevantTags = new LinkedHashSet<>();
             //
             String[] firstOrderCols = new String[]{
                     "Suborder", "Family", "Subfamily", "Tribe",

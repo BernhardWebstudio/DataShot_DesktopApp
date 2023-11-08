@@ -229,6 +229,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                 status =
                         "Error: last edited entry has been modified externally. Try again.";
             }
+            log.debug(status);
             Singleton.getSingletonInstance().getMainFrame().setStatusMessage(status);
             log.debug(e.getMessage(), e);
             HibernateUtil.restartSessionFactory();
@@ -1428,7 +1429,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (jComboBoxCollection == null) {
             log.debug("init jComboBoxCollection");
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
-            jComboBoxCollection = new JComboBox<String>();
+            jComboBoxCollection = new JComboBox<>();
             jComboBoxCollection.setModel(new DefaultComboBoxModel<>());
             // lazily load the collections
             (new Thread(() -> {
@@ -1516,7 +1517,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JComboBox getMethodComboBox() {
         if (cbMethod == null) {
             cbMethod =
-                    new JComboBox<String>(new DefaultComboBoxModel<String>(new String[]{
+                    new JComboBox<>(new DefaultComboBoxModel<>(new String[]{
                             "not recorded", "unknown", "GEOLocate", "Geoportal", "Google Earth",
                             "Google Maps", "Gazeteer", "GPS", "Label Data", "Wikipedia",
                             "MaNIS/HertNet/ORNIS Georeferencing Guidelines"}));
@@ -1535,7 +1536,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         if (cbDatum == null) {
             ComboBoxModel<String> datumModel =
                     new ListComboBoxModel<String>(LatLong.getDatumValues());
-            cbDatum = new JComboBox<String>(datumModel);
+            cbDatum = new JComboBox<>(datumModel);
             // set default
             cbDatum.setSelectedItem("WGS84");
             cbDatum.addActionListener(new ActionListener() {
@@ -1570,8 +1571,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     private JComboBox getErrorUnitComboBox() {
         if (comboBoxErrorUnits == null) {
-            comboBoxErrorUnits = new JComboBox<String>();
-            comboBoxErrorUnits.setModel(new DefaultComboBoxModel<String>(
+            comboBoxErrorUnits = new JComboBox<>();
+            comboBoxErrorUnits.setModel(new DefaultComboBoxModel<>(
                     new String[]{"m", "ft", "km", "mi", "yd"}));
             // set default
             comboBoxErrorUnits.setSelectedItem("m");
@@ -1824,7 +1825,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                 .getColumn(NumberTableModel.COLUMN_NUMBER)
                 .setCellEditor(new ValidatingTableCellEditor(field1));
         // Then, setup the type field
-        JComboBox<String> jComboNumberTypes = new JComboBox<String>();
+        JComboBox<String> jComboNumberTypes = new JComboBox<>();
 
 //        (new Thread(() -> {
         String[] types = NumberLifeCycle.getDistinctTypes();
@@ -2099,7 +2100,7 @@ georeference_pre.getLongDegString()); if
     private JComboBox<String> getCountryJTextField() {
         if (jComboBoxCountry == null) {
             log.debug("init jComboBoxCountry");
-            jComboBoxCountry = new JComboBox<String>();
+            jComboBoxCountry = new JComboBox<>();
             (new Thread(() -> {
                 SpecimenLifeCycle sls = new SpecimenLifeCycle();
                 String[] countries = sls.getDistinctCountries();
@@ -2164,7 +2165,7 @@ georeference_pre.getLongDegString()); if
      */
     private JComboBox<String> getOrderJTextField() {
         if (jComboBoxHigherOrder == null) {
-            jComboBoxHigherOrder = new JComboBox<String>();
+            jComboBoxHigherOrder = new JComboBox<>();
 
             (new Thread(() -> {
                 String[] orders = HigherTaxonLifeCycle.selectDistinctOrder();
@@ -2200,8 +2201,8 @@ georeference_pre.getLongDegString()); if
      */
     private JComboBox<String> getFamilyJTextField() {
         if (jComboBoxFamily == null) {
-            jComboBoxFamily = new JComboBox<String>();
-            jComboBoxFamily.setModel(new DefaultComboBoxModel<String>(
+            jComboBoxFamily = new JComboBox<>();
+            jComboBoxFamily.setModel(new DefaultComboBoxModel<>(
                     HigherTaxonLifeCycle.selectDistinctFamily()));
             jComboBoxFamily.setEditable(specimen.isEditable());
             // jTextFieldFamily.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class,
@@ -2225,8 +2226,8 @@ georeference_pre.getLongDegString()); if
      */
     private JComboBox<String> getJTextFieldSubfamily() {
         if (jComboBoxSubfamily == null) {
-            jComboBoxSubfamily = new JComboBox<String>();
-            jComboBoxSubfamily.setModel(new DefaultComboBoxModel<String>(
+            jComboBoxSubfamily = new JComboBox<>();
+            jComboBoxSubfamily.setModel(new DefaultComboBoxModel<>(
                     HigherTaxonLifeCycle.selectDistinctSubfamily("")));
             jComboBoxSubfamily.setEditable(specimen.isEditable());
             // jTextFieldSubfamily.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class,
@@ -2272,9 +2273,9 @@ georeference_pre.getLongDegString()); if
      */
     private JComboBox<String> getJComboBoxSex() {
         if (jComboBoxSex == null) {
-            jComboBoxSex = new JComboBox<String>();
+            jComboBoxSex = new JComboBox<>();
             jComboBoxSex.setModel(
-                    new DefaultComboBoxModel<String>(Sex.getSexValues()));
+                    new DefaultComboBoxModel<>(Sex.getSexValues()));
             jComboBoxSex.setEditable(specimen.isEditable());
             jComboBoxSex.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "Sex"));
@@ -2295,9 +2296,9 @@ georeference_pre.getLongDegString()); if
      */
     private JComboBox<String> getJComboBoxFeatures() {
         if (jComboBoxFeatures == null) {
-            jComboBoxFeatures = new JComboBox<String>();
+            jComboBoxFeatures = new JComboBox<>();
             jComboBoxFeatures.setModel(
-                    new DefaultComboBoxModel<String>(Features.getFeaturesValues()));
+                    new DefaultComboBoxModel<>(Features.getFeaturesValues()));
             jComboBoxFeatures.setEditable(specimen.isEditable());
             jComboBoxFeatures.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "Features"));
@@ -2314,9 +2315,9 @@ georeference_pre.getLongDegString()); if
 
     private JComboBox<String> getJComboBoxNatureOfId() {
         if (jComboBoxNatureOfId == null) {
-            jComboBoxNatureOfId = new JComboBox<String>();
+            jComboBoxNatureOfId = new JComboBox<>();
             jComboBoxNatureOfId.setModel(
-                    new DefaultComboBoxModel<String>(NatureOfId.getNatureOfIdValues()));
+                    new DefaultComboBoxModel<>(NatureOfId.getNatureOfIdValues()));
             jComboBoxNatureOfId.setEditable(specimen.isEditable());
             jComboBoxNatureOfId.setToolTipText(
                     MetadataRetriever.getFieldHelp(Determination.class, "NatureOfId"));
@@ -2339,9 +2340,9 @@ georeference_pre.getLongDegString()); if
      */
     private JComboBox<String> getJComboBoxLifeStage() {
         if (jComboBoxLifeStage == null) {
-            jComboBoxLifeStage = new JComboBox<String>();
+            jComboBoxLifeStage = new JComboBox<>();
             jComboBoxLifeStage.setModel(
-                    new DefaultComboBoxModel<String>(LifeStage.getLifeStageValues()));
+                    new DefaultComboBoxModel<>(LifeStage.getLifeStageValues()));
             jComboBoxLifeStage.setEditable(specimen.isEditable());
             jComboBoxLifeStage.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "Lifestage"));
@@ -2800,8 +2801,8 @@ georeference_pre.getLongDegString()); if
      */
     private JComboBox<String> getJComboBoxWorkflowStatus() {
         if (jComboBoxWorkflowStatus == null) {
-            jComboBoxWorkflowStatus = new JComboBox<String>();
-            jComboBoxWorkflowStatus.setModel(new DefaultComboBoxModel<String>(
+            jComboBoxWorkflowStatus = new JComboBox<>();
+            jComboBoxWorkflowStatus.setModel(new DefaultComboBoxModel<>(
                     WorkFlowStatus.getWorkFlowStatusValues()));
             jComboBoxWorkflowStatus.setEditable(false);
             jComboBoxWorkflowStatus.setBackground(MainFrame.BG_COLOR_QC_FIELD);
@@ -2819,8 +2820,8 @@ georeference_pre.getLongDegString()); if
      */
     private JComboBox<String> getLocationInCollectionJComboBox() {
         if (jComboBoxLocationInCollection == null) {
-            jComboBoxLocationInCollection = new JComboBox<String>();
-            jComboBoxLocationInCollection.setModel(new DefaultComboBoxModel<String>(
+            jComboBoxLocationInCollection = new JComboBox<>();
+            jComboBoxLocationInCollection.setModel(new DefaultComboBoxModel<>(
                     LocationInCollection.getLocationInCollectionValues()));
             jComboBoxLocationInCollection.setEditable(false);
             jComboBoxLocationInCollection.setToolTipText(
@@ -3319,7 +3320,7 @@ georeference_pre.getLongDegString()); if
 
     private JComboBox<String> getComboBoxElevUnits() {
         if (comboBoxElevUnits == null) {
-            comboBoxElevUnits = new JComboBox<String>();
+            comboBoxElevUnits = new JComboBox<>();
             comboBoxElevUnits.setModel(
                     new DefaultComboBoxModel<>(new String[]{"", "?", "m", "ft"}));
             // set default
@@ -3338,7 +3339,7 @@ georeference_pre.getLongDegString()); if
 
     private void autocompleteGeoDataFromGeoreference() {
         // initialize hash map; todo: memoize, load from file
-        HashMap<String, String> primaryDivisionMapping = new HashMap<String, String>();
+        HashMap<String, String> primaryDivisionMapping = new HashMap<>();
         primaryDivisionMapping.put("Grisons", "Graubünden");
         primaryDivisionMapping.put("St. Gallen", "Sankt Gallen");
         primaryDivisionMapping.put("Tessin", "Ticino");
@@ -3446,7 +3447,7 @@ georeference_pre.getLongDegString()); if
      */
     private JComboBox<String> getJCBDeterminer() {
         if (jCBDeterminer == null) {
-            jCBDeterminer = new JComboBox<String>();
+            jCBDeterminer = new JComboBox<>();
             (new Thread(() -> {
                 SpecimenLifeCycle sls = new SpecimenLifeCycle();
                 String[] determiners = sls.getDistinctDeterminers();
@@ -3479,7 +3480,7 @@ georeference_pre.getLongDegString()); if
      */
     private JComboBox<String> getCbTypeStatus() {
         if (cbTypeStatus == null) {
-            cbTypeStatus = new JComboBox<String>(TypeStatus.getTypeStatusValues());
+            cbTypeStatus = new JComboBox<>(TypeStatus.getTypeStatusValues());
             // cbTypeStatus = new JComboBox(TypeStatus.getTypeStatusValues());  // for
             // visual editor
             cbTypeStatus.setEditable(specimen.isEditable());

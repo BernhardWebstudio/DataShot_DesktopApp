@@ -300,7 +300,7 @@ public class HibernateUtil {
      * @return the Hibernate SessionFactory.
      */
     public static SessionFactory getSessionFactory() {
-        if (sessionFactory == null) {
+        if (sessionFactory == null) {// || sessionFactory.isClosed()) {
             createSessionFactory();
         }
         return sessionFactory;

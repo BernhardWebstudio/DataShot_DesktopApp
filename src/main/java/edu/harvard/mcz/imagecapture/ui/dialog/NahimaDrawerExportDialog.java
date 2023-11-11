@@ -12,6 +12,7 @@ import edu.harvard.mcz.imagecapture.interfaces.ProgressListener;
 import edu.harvard.mcz.imagecapture.jobs.NahimaExportJob;
 import edu.harvard.mcz.imagecapture.utility.FileUtility;
 import net.miginfocom.swing.MigLayout;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +22,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -171,8 +172,11 @@ public class NahimaDrawerExportDialog extends JDialog implements ProgressListene
             for (String col : firstOrderCols) {
                 relevantCsvRows.forEach(row -> {
                     String value = row.get(col);
-                    if (value != null && value.length() > 0) {
-                        relevantTags.add(value);
+                    if (value != null) {
+                        value = StringUtils.strip(value.strip(), "()");
+                        if (value.length() > 0 && !value.equals("sp.")) {
+                            relevantTags.add(value);
+                        }
                     }
                 });
             }
@@ -183,8 +187,11 @@ public class NahimaDrawerExportDialog extends JDialog implements ProgressListene
             relevantCsvRows.forEach(row -> {
                 for (String relevantCol : relevantCols) {
                     String value = row.get(relevantCol);
-                    if (value != null && value.length() > 0) {
-                        relevantTags.add(value);
+                    if (value != null) {
+                        value = StringUtils.strip(value.strip(), "()");
+                        if (value.length() > 0 && !value.equals("sp.")) {
+                            relevantTags.add(value);
+                        }
                     }
                 }
             });

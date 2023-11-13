@@ -49,10 +49,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -111,9 +108,7 @@ public class ImageDisplayFrame extends JFrame {
 
     private JPanel jPanelImagePicker = null;
 
-    private JLabel jLabelImageCountTxt = null;
-
-    private JComboBox jComboBoxImagePicker = null;
+    private JComboBox<String> jComboBoxImagePicker = null;
 
     private JLabel jLabelImageCountNr = null;
 
@@ -165,38 +160,43 @@ public class ImageDisplayFrame extends JFrame {
      */
     public void loadImagesFromFiles(Set<ICImage> imageFiles) {
         log.debug("Loading images from files with size {}", imageFiles.size());
+        ArrayList<String> fileNames = new ArrayList<String>();
         Iterator<ICImage> i = imageFiles.iterator();
         ICImage image = null;
         int fileCount = imageFiles.size();
         while (i.hasNext()) {
             image = i.next();
-            jComboBoxImagePicker.addItem(image.getFilename());
+            fileNames.add(image.getFilename());
             log.debug("Adding image to picklist: " + image.getPath() +
                     image.getFilename());
         }
         // TODO: stored path may need separator conversion for different systems.
         // String startPointName =
         // Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
-        String path = image.getPath();
-        if (path == null) {
-            path = "";
-        }
-        // File fileToCheck = new File(startPointName + path + image.getFilename());
-        File fileToCheck = new File(
-                ImageCaptureProperties.assemblePathWithBase(path, image.getFilename()));
+
         jLabelImageCountNr.setText("(" + fileCount + ")");
         jLabelImageCountNr.setForeground(fileCount > 1 ? Color.RED : Color.BLACK);
+        jComboBoxImagePicker.setModel(new DefaultComboBoxModel<>(fileNames.toArray(new String[0])));
         jComboBoxImagePicker.setEnabled(fileCount > 1);
-        jComboBoxImagePicker.setSelectedItem(image.getFilename());
-        ICImage finalImage = image;
-        (new Thread(() -> {
-            try {
-                PositionTemplate defaultTemplate = PositionTemplate.findTemplateForImage(finalImage);
-                loadImagesFromFileSingle(fileToCheck, defaultTemplate, finalImage);
-            } catch (ImageLoadException | BadTemplateException e) {
-                e.printStackTrace();
+        // File fileToCheck = new File(startPointName + path + image.getFilename());
+        if (image != null) {
+            String path = image.getPath();
+            if (path == null) {
+                path = "";
             }
-        })).start();
+            File fileToCheck = new File(
+                    ImageCaptureProperties.assemblePathWithBase(path, image.getFilename()));
+            ICImage finalImage = image;
+            jComboBoxImagePicker.setSelectedItem(image.getFilename());
+            (new Thread(() -> {
+                try {
+                    PositionTemplate defaultTemplate = PositionTemplate.findTemplateForImage(finalImage);
+                    loadImagesFromFileSingle(fileToCheck, defaultTemplate, finalImage);
+                } catch (ImageLoadException | BadTemplateException e) {
+                    e.printStackTrace();
+                }
+            })).start();
+        }
         jTabbedPane.setSelectedIndex(0); // move focus to full image tab
     }
 
@@ -758,7 +758,7 @@ public class ImageDisplayFrame extends JFrame {
             gridBagConstraints.gridy = 0;
             gridBagConstraints.weightx = 1.0;
             gridBagConstraints.gridx = 3;
-            jLabelImageCountTxt = new JLabel();
+            JLabel jLabelImageCountTxt = new JLabel();
             jLabelImageCountTxt.setText("Images: ");
             jPanelImagePicker = new JPanel();
             GridBagLayout gbl_jPanelImagePicker = new GridBagLayout();

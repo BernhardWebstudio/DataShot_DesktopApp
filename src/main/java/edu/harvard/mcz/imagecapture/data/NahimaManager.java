@@ -496,12 +496,13 @@ public class NahimaManager extends AbstractRestClient {
             // TODO: check compliance, does it really match well? We use "must", so let's hope so, but the resolution could still go wrong.
             return (JSONObject) foundObjects.get(0);
         } else {
-            log.info("Got != 1 " + objectType + " status. {}", results);
+            log.info("Got " + foundObjects.length() + " != 1 " + objectType + " status. {}", results);
             // create / select correct
             if (foundObjects.length() > 1) {
                 // first, loop objects to see whether we can find exactly one exact match
                 JSONObject bestMatch = findSimilarMatch(foundObjects, objectType, inner, !interactive);
                 if (bestMatch != null) {
+                    log.info("Found 1 best match, using it.");
                     return bestMatch;
                 }
                 log.info("Asking user to select " + name + " (" + objectType + ") from results.", results);
@@ -1207,7 +1208,6 @@ public class NahimaManager extends AbstractRestClient {
         inner.put("_id", JSONObject.NULL);
         inner.put("_version", 1);
         return inner;
-
     }
 
 

@@ -144,7 +144,7 @@ public class BatchUpdateDialog extends JDialog {
                 return;
             }
         } catch (Exception e) {
-            log.error("Failed to do query update: " + e.getMessage(), e);
+            log.error("Failed to do query (" + conditionQuery + ") update: " + e.getMessage(), e);
             JOptionPane.showMessageDialog(this, "Failed to query: " + e.getMessage(), "Error",
                     JOptionPane.ERROR_MESSAGE);
             session.getTransaction().rollback();

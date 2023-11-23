@@ -173,7 +173,10 @@ public class NahimaDrawerExportDialog extends JDialog implements ProgressListene
                 relevantCsvRows.forEach(row -> {
                     String value = row.get(col);
                     if (value != null) {
-                        value = StringUtils.strip(value.strip(), "()");
+                        value = value.strip();
+                        if (value.startsWith("(") && value.endsWith(")")) {
+                            value = StringUtils.strip(value, "()");
+                        }
                         if (value.length() > 0 && !value.equals("sp.")) {
                             relevantTags.add(value);
                         }
@@ -188,7 +191,10 @@ public class NahimaDrawerExportDialog extends JDialog implements ProgressListene
                 for (String relevantCol : relevantCols) {
                     String value = row.get(relevantCol);
                     if (value != null) {
-                        value = StringUtils.strip(value.strip(), "()");
+                        value = value.strip();
+                        if (value.startsWith("(") && value.endsWith(")")) {
+                            value = StringUtils.strip(value, "()");
+                        }
                         if (value.length() > 0 && !value.equals("sp.")) {
                             relevantTags.add(value);
                         }

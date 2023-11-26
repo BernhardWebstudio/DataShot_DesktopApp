@@ -1256,7 +1256,7 @@ public class NahimaManager extends AbstractRestClient {
         JSONObject responseObject = (new JSONArray(response)).getJSONObject(0);
         JSONArray tagArray = responseObject.getJSONArray("_tags");
         for (int tagIdx = 0; tagIdx < tagArray.length(); ++tagIdx) {
-            JSONObject tag = tagArray.getJSONObject(tagIdx);
+            JSONObject tag = tagArray.getJSONObject(tagIdx).getJSONObject("tag");
             JSONObject tag_names = tag.getJSONObject("displayname");
             Iterator<String> keys = tag_names.keys();
             while (keys.hasNext()) {

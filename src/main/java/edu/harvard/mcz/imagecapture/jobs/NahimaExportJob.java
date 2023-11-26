@@ -52,10 +52,11 @@ public class NahimaExportJob implements RunnableJob, Runnable {
         SpecimenLifeCycle sls = new SpecimenLifeCycle();
         if (specimenToExport == null) {
             Map<String, Object> queryParams = new HashMap<>();
-            queryParams.put("workFlowStatus", WorkFlowStatus.STAGE_CLEAN);
             queryParams.put("nahimaExported", false);
             if (this.oneSpecimenBarcode != null && !this.oneSpecimenBarcode.equals("")) {
                 queryParams.put("barcode", this.oneSpecimenBarcode);
+            } else {
+                queryParams.put("workFlowStatus", WorkFlowStatus.STAGE_CLEAN);
             }
             specimenToExport = sls.findBy(queryParams);
         }

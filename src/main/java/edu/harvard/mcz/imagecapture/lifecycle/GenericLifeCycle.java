@@ -101,7 +101,7 @@ public abstract class GenericLifeCycle<T> {
                         p = cb.like(propertyToMatch, (String) entry.getValue());
                     } else {
                         Object value = entry.getValue();
-                        if (value instanceof String || value instanceof Date || value instanceof java.lang.Number) {
+                        if (value instanceof Boolean || value instanceof String || value instanceof Date || value instanceof java.lang.Number) {
                             p = cb.equal(propertyToMatch, entry.getValue());
                         } else {
                             log.warn("Will not handle property: " + entry.getKey() + " with value type " + " " + value.getClass().toGenericString());

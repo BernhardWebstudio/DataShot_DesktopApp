@@ -352,8 +352,18 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             JSONObject returnValue = new JSONObject();
             // remove all trailing zeros, so we don't have to deal with formats like
             // 2021/00/00
-            date = StringUtils.strip(date, "0./");
+            date = StringUtils.strip(date.replaceAll("/00|00/|\\.00|00\\.", ""), "./");
             // find different formats
+            // year-only dates are allowed in Nahima, somehow
+            if (date.matches("^[0-9]{4}$")) {
+                returnValue.put("value", date);
+                return returnValue;
+            }
+            // as are month & year
+            if (date.matches("^[0-9]{4}/[0-9]{2}$")) {
+                returnValue.put("value", date.replace("/", "-"));
+                return returnValue;
+            }
             if (date.matches("^[0-9]{1,2}\\.^[0-9]{1,2}\\.^[0-9]{2,4}$")) {
                 // try manually, knowing the Swiss type of date
                 try {
@@ -375,16 +385,6 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                     return dateToNahima(format.parse(date));
                 } catch (ParseException ex) {
                 }
-            }
-            // year-only dates are allowed in Nahima, somehow
-            if (date.matches("^[0-9]{4}$")) {
-                returnValue.put("value", date);
-                return returnValue;
-            }
-            // as are month & year
-            if (date.matches("^[0-9]{4}/[0-9]{2}$")) {
-                returnValue.put("value", date.replace("/", "-"));
-                return returnValue;
             }
             if (!allowInvalid) {
                 log.error("Failed to convert date from " + date, e);

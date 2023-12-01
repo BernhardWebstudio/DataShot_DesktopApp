@@ -7,6 +7,7 @@ import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
 import edu.harvard.mcz.imagecapture.serializer.ToJSONSerializerInterface;
 import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -17,10 +18,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     private static final Logger log = LoggerFactory.getLogger(Specimen2JSONSerializer.class);
@@ -147,7 +145,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             }
 
             // try to parse and set the date correctly
-            tryNonUserSkippableResolve(reverseNestedDetermination, "bestimmungsdatum", () -> this.dateToNahima(det.getDateIdentified(), false));
+//            tryNonUserSkippableResolve(reverseNestedDetermination, "bestimmungsdatum", () -> this.dateToNahima(det.getDateIdentified(), false));
 
 //            tryUserSkippableResolve(reverseNestedDetermination, "typusstatus", () -> nahimaManager.resolveTypeStatus(det.getTypeStatus()));
             // finally,
@@ -352,6 +350,10 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             return dateToNahima(parsedDate);
         } catch (ParseException e) {
             JSONObject returnValue = new JSONObject();
+            // remove all trailing zeros, so we don't have to deal with formats like
+            // 2021/00/00
+            date = StringUtils.strip(date, "0./");
+            // find different formats
             if (date.matches("^[0-9]{1,2}\\.^[0-9]{1,2}\\.^[0-9]{2,4}$")) {
                 // try manually, knowing the Swiss type of date
                 try {

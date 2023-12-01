@@ -761,14 +761,15 @@ public class NahimaManager extends AbstractRestClient {
             return null;
         }
         String searchString = "";
-        if (specimen.getPrimaryDivisonISO() != null && !specimen.getPrimaryDivisonISO().equals("unknown")) {
-            searchString = specimen.getPrimaryDivisonISO();
-        } else {
-            if (specimen.getPrimaryDivison() != null && !specimen.getPrimaryDivison().equals("unknown")) {
-                searchString = specimen.getPrimaryDivison();
-            }
-            if (specimen.getCountry() != null && !specimen.getCountry().equals("unknown")) {
-                searchString += " " + specimen.getCountry();
+        if (specimen.getPrimaryDivison() != null && !specimen.getPrimaryDivison().equals("unknown")) {
+            searchString = specimen.getPrimaryDivison();
+        }
+        if (specimen.getCountry() != null && !specimen.getCountry().equals("unknown")) {
+            searchString += " " + specimen.getCountry();
+        }
+        if (Objects.equals(searchString.trim(), "")) {
+            if (specimen.getPrimaryDivisonISO() != null && !specimen.getPrimaryDivisonISO().equals("unknown")) {
+                searchString = specimen.getPrimaryDivisonISO();
             }
         }
 
@@ -781,7 +782,7 @@ public class NahimaManager extends AbstractRestClient {
         JSONObject parent = null;
         try {
             parent = resolveCountry(specimen.getCountry());
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
 
         JSONObject finalParent = parent;
@@ -800,11 +801,10 @@ public class NahimaManager extends AbstractRestClient {
      * @return the nahima returned object if only one
      */
     public JSONObject resolveTypeStatus(String status) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
-        JSONObject result = this.resolveOrCreateInteractive(status, "typusstatus", "typusstatus_all_fields_1", new JSONObject(new HashMap<>() {{
+        return this.resolveOrCreateInteractive(status, "typusstatus", "typusstatus_all_fields_1", new JSONObject(new HashMap<>() {{
             put("name", status);
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}), false, 0);
-        return result;
     }
 
     /**
@@ -814,11 +814,10 @@ public class NahimaManager extends AbstractRestClient {
      * @param unitSubject the unit type
      */
     public JSONObject resolveUnitFor(String unit, String unitSubject) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
-        JSONObject results = this.resolveOrCreateInteractive(unit, unitSubject, unitSubject + "_all_fields", new JSONObject(new HashMap<>() {{
+        return this.resolveOrCreateInteractive(unit, unitSubject, unitSubject + "_all_fields", new JSONObject(new HashMap<>() {{
             put("name", unit);
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}));
-        return results;
     }
 
     /**

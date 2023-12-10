@@ -7,7 +7,6 @@ import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
 import edu.harvard.mcz.imagecapture.serializer.ToJSONSerializerInterface;
 import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -352,7 +351,16 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             JSONObject returnValue = new JSONObject();
             // remove all trailing zeros, so we don't have to deal with formats like
             // 2021/00/00
-            date = StringUtils.strip(date.replaceAll("/00|00/|\\.00|00\\.", ""), "./");
+            ArrayList<String> dateSplit = new ArrayList<>(Arrays.asList(date.split("\\.|/")));
+            while (dateSplit.size() > 0 && dateSplit.get(dateSplit.size() - 1).replaceAll("0", "").equals("")) {
+                dateSplit.remove(dateSplit.size() - 1);
+            }
+            while (dateSplit.size() > 0 && dateSplit.get(0).replaceAll("0", "").equals("")) {
+                dateSplit.remove(0);
+            }
+            // use consistent delimiter from here on, no choice between "." and "/" anymore
+            date = String.join("/", dateSplit);
+
             // find different formats
             // year-only dates are allowed in Nahima, somehow
             if (date.matches("^[0-9]{4}$")) {
@@ -364,26 +372,19 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                 returnValue.put("value", date.replace("/", "-"));
                 return returnValue;
             }
-            if (date.matches("^[0-9]{1,2}\\.^[0-9]{1,2}\\.^[0-9]{2,4}$")) {
-                // try manually, knowing the Swiss type of date
-                try {
-                    SimpleDateFormat format = new SimpleDateFormat("d.M.y");
-                    return dateToNahima(format.parse(date));
-                } catch (ParseException ex) {
-                }
-            }
+            // but ideally, we have the full year available...
             if (date.matches("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{2,4}$")) {
                 try {
                     SimpleDateFormat format = new SimpleDateFormat("d/M/y");
                     return dateToNahima(format.parse(date));
-                } catch (ParseException ex) {
+                } catch (ParseException ignored) {
                 }
             }
             if (date.matches("^[0-9]{2,4}/[0-9]{1,2}/[0-9]{1,2}$")) {
                 try {
                     SimpleDateFormat format = new SimpleDateFormat("y/M/d");
                     return dateToNahima(format.parse(date));
-                } catch (ParseException ex) {
+                } catch (ParseException ignored) {
                 }
             }
             if (!allowInvalid) {

@@ -17,6 +17,7 @@ import java.net.URLEncoder;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -128,7 +129,8 @@ public abstract class AbstractRestClient {
                 .POST(HttpRequest.BodyPublishers.ofString(data))
                 .uri(URI.create(url))
                 .setHeader("User-Agent", "DataShot " + ImageCaptureApp.getAppVersion()) // add request header
-                .setHeader("Content-Type", "application/x-www-form-urlencoded");
+                .setHeader("Content-Type", "application/x-www-form-urlencoded")
+                .timeout(Duration.ofMinutes(5));
 
         if (headers != null) {
             for (Map.Entry<String, String> entry : headers.entrySet()) {

@@ -476,6 +476,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param mask       the mask of the field (the mapping), required for creation
      * @param inner      the object with the properties intended for the newly created object
      * @param omitPool   whether to add a pool field when creating the object new
+     * @param recurse    the number of times we are searching already for the object
      * @return the matching or new object
      */
     public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner, boolean omitPool, int recurse) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
@@ -500,7 +501,7 @@ public class NahimaManager extends AbstractRestClient {
             // create / select correct
             if (foundObjects.length() > 1) {
                 // first, loop objects to see whether we can find exactly one exact match
-                JSONObject bestMatch = findSimilarMatch(foundObjects, objectType, inner, !interactive);
+                JSONObject bestMatch = findSimilarMatch(foundObjects, objectType, inner, !this.interactive);
                 if (bestMatch != null) {
                     log.info("Found 1 best match, using it.");
                     return bestMatch;

@@ -1,6 +1,5 @@
 package edu.harvard.mcz.imagecapture.utility;
 
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -26,7 +25,8 @@ public class JSONUtility {
         return areEqualIgnoringUnderscore(obj1, obj2, false);
     }
 
-    private static boolean areEqualIgnoringUnderscore(@NotNull JSONObject obj1, JSONObject obj2, boolean inverted) {
+    private static boolean areEqualIgnoringUnderscore(JSONObject obj1, JSONObject obj2, boolean inverted) {
+        assert(obj1 != null);
         Iterator<String> keys = obj1.keys();
         while (keys.hasNext()) {
             String key = keys.next();

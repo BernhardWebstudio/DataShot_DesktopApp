@@ -130,7 +130,7 @@ public abstract class AbstractRestClient {
                 .uri(URI.create(url))
                 .setHeader("User-Agent", "DataShot " + ImageCaptureApp.getAppVersion()) // add request header
                 .setHeader("Content-Type", "application/x-www-form-urlencoded")
-                .timeout(Duration.ofMinutes(5));
+                .timeout(Duration.ofMinutes(3));
 
         if (headers != null) {
             for (Map.Entry<String, String> entry : headers.entrySet()) {

@@ -12,10 +12,7 @@ import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
 import edu.harvard.mcz.imagecapture.ui.dialog.ChooseFromJArrayDialog;
 import edu.harvard.mcz.imagecapture.ui.dialog.VerifyJSONDialog;
-import edu.harvard.mcz.imagecapture.utility.AbstractRestClient;
-import edu.harvard.mcz.imagecapture.utility.FileUtility;
-import edu.harvard.mcz.imagecapture.utility.ListUtility;
-import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
+import edu.harvard.mcz.imagecapture.utility.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -467,6 +464,31 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     /**
+     * Remove duplicate entries (ignoring underscores in JSON Object' keys) from a JSONArray
+     *
+     * @param results
+     * @return
+     */
+    public JSONArray removeDuplicates(JSONArray results) {
+        JSONArray uniqueResults = new JSONArray();
+        for (int i = 0; i < results.length(); i++) {
+            JSONObject entry = results.getJSONObject(i);
+            boolean found = false;
+            // check that this is not present yet
+            for (int j = 0; j < uniqueResults.length(); j++) {
+                JSONObject compareTo = uniqueResults.getJSONObject(j);
+                if (JSONUtility.areEqualIgnoringUnderscore(entry, compareTo)) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                uniqueResults.put(entry);
+            }
+        }
+        return uniqueResults;
+    }
+
+    /**
      * Search an object in Nahima by a string.
      * Ask the user whether to create it if it is not found,
      * or which to use if more than one is found.
@@ -492,7 +514,7 @@ public class NahimaManager extends AbstractRestClient {
                     ((results != null && results.has("code")) ? results.getString("code") : "Unknown"));
         }
 
-        JSONArray foundObjects = (JSONArray) results.get("objects");
+        JSONArray foundObjects = removeDuplicates(results.getJSONArray("objects"));
         if (foundObjects.length() == 1) {
             // TODO: check compliance, does it really match well? We use "must", so let's hope so, but the resolution could still go wrong.
             return (JSONObject) foundObjects.get(0);

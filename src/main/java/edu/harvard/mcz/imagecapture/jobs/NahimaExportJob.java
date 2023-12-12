@@ -211,6 +211,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                 specimen.setWorkFlowStatus(WorkFlowStatus.STAGE_DONE);
             }
             specimen.setNahimaId(result.getString("_global_object_id"));
+            specimen.setDateLastNahimaUpdated(new Date());
             if (specimen.getSpecimenId() != null && specimen.getSpecimenId() > 0) {
                 try {
                     sls.attachDirty(specimen);

@@ -116,6 +116,8 @@ public class Specimen implements Serializable {
     private String citedInPublicationLink;
     private String citedInPublicationComment;
     private String citedInPublicationYear;
+    private Date dateLastNahimaUpdated;
+
 
     public Specimen() {
         setDefaults();
@@ -254,6 +256,14 @@ public class Specimen implements Serializable {
 
     public void setNahimaId(String nahimaId) {
         this.nahimaId = nahimaId;
+    }
+
+    public Date getDateLastNahimaUpdated() {
+        return dateLastNahimaUpdated;
+    }
+
+    public void setDateLastNahimaUpdated(Date dateLastNahimaUpdated) {
+        this.dateLastNahimaUpdated = dateLastNahimaUpdated;
     }
 
     public String getHigherOrder() {

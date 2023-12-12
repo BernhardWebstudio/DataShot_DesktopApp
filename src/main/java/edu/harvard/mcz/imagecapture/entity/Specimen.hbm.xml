@@ -211,6 +211,9 @@
         <property name="nahimaExported" type="java.lang.Boolean">
             <column name="nahimaExported" default="0"/>
         </property>
+        <property name="dateLastNahimaUpdated" type="timestamp">
+            <column name="DateLastNahimaUpdated" length="0"/>
+        </property>
         <property name="nahimaId" type="string">
             <column name="nahimaId" default=""/>
         </property>

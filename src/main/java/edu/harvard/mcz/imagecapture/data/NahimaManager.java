@@ -385,6 +385,10 @@ public class NahimaManager extends AbstractRestClient {
             int requiredMatches = 0;
             for (Iterator<String> it = selectionHelper.keys(); it.hasNext(); ) {
                 String key = it.next();
+                if (key.startsWith("_")) {
+                    continue;
+                }
+                // TODO: compare more than just Strings
                 if (selectionHelper.get(key) instanceof String && !((String) selectionHelper.get(key)).contains("DataShot")) {
                     requiredMatches += 1;
                 }
@@ -414,6 +418,19 @@ public class NahimaManager extends AbstractRestClient {
             log.warn("Found " + carefulPossiblyCorrectIndices.size() + " " + objectType + " that match all fields, but without verifying pool. Using first one.");
             if (allowDuplicates || (possiblyCorrectIndices.size() == 0 && carefulPossiblyCorrectIndices.size() == 1)) {
                 return foundObjects.getJSONObject(carefulPossiblyCorrectIndices.get(0));
+            }
+        }
+        return null;
+    }
+
+    protected JSONObject findExactMatch(JSONArray foundObjects, String objectType, JSONObject selectionHelper) {
+        for (int i = 0; i < foundObjects.length(); ++i) {
+            JSONObject testObj = foundObjects.getJSONObject(i);
+            if (JSONUtility.areEqualIgnoringUnderscore(testObj, selectionHelper)) {
+                return testObj;
+            }
+            if (testObj.has(objectType) && JSONUtility.areEqualIgnoringUnderscore(selectionHelper, testObj.getJSONObject(objectType))) {
+                return testObj;
             }
         }
         return null;
@@ -522,6 +539,11 @@ public class NahimaManager extends AbstractRestClient {
             log.info("Got " + foundObjects.length() + " != 1 " + objectType + " status. {}", results);
             // create / select correct
             if (foundObjects.length() > 1) {
+                JSONObject perfectMatch = findExactMatch(foundObjects, objectType, inner);
+                if (perfectMatch != null) {
+                    return perfectMatch;
+                }
+                // TODO: maybe, we only want the perfect match, and nothing else?!?
                 // first, loop objects to see whether we can find exactly one exact match
                 JSONObject bestMatch = findSimilarMatch(foundObjects, objectType, inner, !this.interactive);
                 if (bestMatch != null) {

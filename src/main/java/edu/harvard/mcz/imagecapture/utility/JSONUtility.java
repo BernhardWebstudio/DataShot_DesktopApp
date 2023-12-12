@@ -26,7 +26,12 @@ public class JSONUtility {
     }
 
     private static boolean areEqualIgnoringUnderscore(JSONObject obj1, JSONObject obj2, boolean inverted) {
-        assert(obj1 != null);
+        if (obj1 == null) {
+            return obj2 == null;
+        }
+        if (obj2 == null) {
+            return false;
+        }
         Iterator<String> keys = obj1.keys();
         while (keys.hasNext()) {
             String key = keys.next();
@@ -51,6 +56,12 @@ public class JSONUtility {
     }
 
     private static boolean objectsAreEqual(Object val1, Object val2) {
+        if (val1 == null) {
+            return val2 == null;
+        }
+        if (val2 == null) {
+            return false;
+        }
         if (val1 instanceof JSONObject && val2 instanceof JSONObject) {
             return areEqualIgnoringUnderscore((JSONObject) val1, (JSONObject) val2);
         } else if (val1 instanceof JSONArray && val2 instanceof JSONArray) {

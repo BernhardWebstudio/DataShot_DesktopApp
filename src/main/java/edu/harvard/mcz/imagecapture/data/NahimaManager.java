@@ -635,7 +635,8 @@ public class NahimaManager extends AbstractRestClient {
      * @param omitPool     whether to omit the pool when wrapping the object for creation
      */
     public JSONObject askToChooseObject(JSONArray foundObjects, String name, String objectType, String mask, JSONObject inner, boolean omitPool) throws SkipSpecimenException, IOException, InterruptedException, InvocationTargetException {
-        if (this.interactive == false) {
+        // TODO: implement a better auto-choose algorithm
+        if (!this.interactive) {
             throw new SkipSpecimenException();
         }
 

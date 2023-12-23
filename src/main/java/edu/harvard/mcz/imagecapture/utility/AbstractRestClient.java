@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
 
 public abstract class AbstractRestClient {
     private static final Logger log =
@@ -28,7 +29,14 @@ public abstract class AbstractRestClient {
     protected final Methanol httpClient;
 
     public AbstractRestClient() {
-        httpClient = Methanol.newBuilder().userAgent("DataShot " + ImageCaptureApp.getAppVersion()).build();
+        Methanol.Builder builder = Methanol.newBuilder()
+                .userAgent("DataShot " + ImageCaptureApp.getAppVersion())
+                .requestTimeout(Duration.ofSeconds(60))      // Default request timeout
+                .headersTimeout(Duration.ofSeconds(30))       // Timeout for receiving response headers
+                .readTimeout(Duration.ofSeconds(30));          // Timeout for single reads;
+        httpClient = builder.executor(Executors.newFixedThreadPool(4))
+                .connectTimeout(Duration.ofSeconds(60))
+                .build();
     }
 
     private static String buildFormDataFromMap(Map<String, String> data) {

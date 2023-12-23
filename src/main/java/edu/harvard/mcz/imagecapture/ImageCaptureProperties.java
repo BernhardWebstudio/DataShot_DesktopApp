@@ -477,7 +477,7 @@ public class ImageCaptureProperties extends AbstractTableModel {
         } else {
             result = base + path + fileSeparator + aFileName;
         }
-        log.debug("Debug {}", result);
+        log.debug("Assembled path with base: {}", result);
         return result;
     }
 

@@ -334,6 +334,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         JSONObject parsedDateFrom = this.dateToNahima(from, allowInvalid);
         JSONObject parsedDateTo = this.dateToNahima(to, allowInvalid);
         JSONObject returnValue = new JSONObject();
+
         returnValue.put("from", parsedDateFrom.getString("value"));
         returnValue.put("to", parsedDateTo.getString("value"));
         return returnValue;

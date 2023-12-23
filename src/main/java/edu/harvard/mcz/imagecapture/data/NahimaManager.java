@@ -635,6 +635,10 @@ public class NahimaManager extends AbstractRestClient {
      * @param omitPool     whether to omit the pool when wrapping the object for creation
      */
     public JSONObject askToChooseObject(JSONArray foundObjects, String name, String objectType, String mask, JSONObject inner, boolean omitPool) throws SkipSpecimenException, IOException, InterruptedException, InvocationTargetException {
+        if (this.interactive == false) {
+            throw new SkipSpecimenException();
+        }
+
         final int[] choice = new int[1];
         final JSONObject[] selection = new JSONObject[1];
         SwingUtilities.invokeAndWait(new Runnable() {

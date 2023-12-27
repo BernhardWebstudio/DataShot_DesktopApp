@@ -85,9 +85,9 @@ public class HibernateUtil {
                             configuration, settings, ImageCaptureProperties.KEY_DB_USER,
                             "USER_PLACEHOLDER"));
             properties.setProperty(ImageCaptureProperties.KEY_DB_PASSWORD,
-                    HibernateUtil.getConfigOrSettingsValue(
+                    LoginDialog.decryptPassword(HibernateUtil.getConfigOrSettingsValue(
                             configuration, settings, ImageCaptureProperties.KEY_DB_PASSWORD,
-                            "PASSWORD_PLACEHOLDER"));
+                            "PASSWORD_PLACEHOLDER").toCharArray()));
             properties.setProperty(ImageCaptureProperties.KEY_DB_DIALECT,
                     HibernateUtil.getConfigOrSettingsValue(
                             configuration, settings, ImageCaptureProperties.KEY_DB_DIALECT,

@@ -105,8 +105,10 @@ public class Singleton {
      */
     public void setCurrentUser(Users user) {
         this.user = user;
-        this.getMainFrame().setStatusMessage("Connected as " +
-                this.user.getFullname());
+        if (this.getMainFrame() != null) {
+            this.getMainFrame().setStatusMessage("Connected as " +
+                    this.user.getFullname());
+        }
     }
 
     /**

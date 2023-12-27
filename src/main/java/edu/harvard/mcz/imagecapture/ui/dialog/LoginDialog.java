@@ -73,6 +73,18 @@ public class LoginDialog extends JDialog {
                 String.valueOf(ajPasswordField.getPassword()));
     }
 
+    public static String decryptPassword(char[] password) {
+        AES256TextEncryptor textEncryptor = new AES256TextEncryptor();
+        textEncryptor.setPassword(encryptPassword);
+        String passwordValue = String.valueOf(password);
+        try {
+            return textEncryptor.decrypt(passwordValue);
+        } catch (EncryptionOperationNotPossibleException exception) {
+            log.error("Failed to decrypt db password", exception);
+            return passwordValue;
+        }
+    }
+
     /**
      * This method initializes this
      */
@@ -286,15 +298,7 @@ public class LoginDialog extends JDialog {
     }
 
     public String getDBPassword() {
-        AES256TextEncryptor textEncryptor = new AES256TextEncryptor();
-        textEncryptor.setPassword(encryptPassword);
-        String passwordValue = String.valueOf(jPasswordFieldDB.getPassword());
-        try {
-            return textEncryptor.decrypt(passwordValue);
-        } catch (EncryptionOperationNotPossibleException exception) {
-            log.error("Failed to decrypt db password", exception);
-            return passwordValue;
-        }
+        return decryptPassword(jPasswordFieldDB.getPassword());
     }
 
     public void setDBPassword(String aDBPassword) {

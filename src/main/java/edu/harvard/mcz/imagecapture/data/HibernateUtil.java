@@ -99,6 +99,7 @@ public class HibernateUtil {
             configuration.setProperties(properties);
             sessionFactory = configuration.buildSessionFactory();
         } catch (Exception e) {
+            log.error("Failed to create anon session factory", e);
             createSessionFactory();
         }
     }
@@ -124,6 +125,7 @@ public class HibernateUtil {
             Configuration configuration = new Configuration().configure();
             // Add authentication properties obtained from the user
             boolean success = false;
+            boolean mainFrameAvailable = Singleton.getSingletonInstance().getMainFrame() != null;
             // retrieve the connection parameters from hibernate.cfg.xml and load into
             // the LoginDialog
             LoginDialog loginDialog =
@@ -132,7 +134,7 @@ public class HibernateUtil {
                 // Check authentication (starting with the database
                 // user(schema)/password.
                 if (loginDialog.getResult() == LoginDialog.RESULT_LOGIN) {
-                    if (Singleton.getSingletonInstance().getMainFrame() != null) {
+                    if (mainFrameAvailable) {
                         Singleton.getSingletonInstance().getMainFrame().setCursor(
                                 Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                         Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
@@ -162,11 +164,9 @@ public class HibernateUtil {
                                 configuration,
                                 "Initial SessionFactory creation failed. Database not connectable: " +
                                         ex.getMessage());
-                        try {
+                        if (mainFrameAvailable) {
                             Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
                                     "Database connection failed.");
-                        } catch (NullPointerException e) {
-                            // expected if we haven't instantiated a main frame.
                         }
                         System.out.println("Initial SessionFactory creation failed." + ex);
                     } catch (Throwable ex) {
@@ -198,11 +198,9 @@ public class HibernateUtil {
                                 Singleton.getSingletonInstance().setCurrentUser(
                                         foundUser.get(0));
                                 success = true;
-                                try {
+                                if (mainFrameAvailable) {
                                     Singleton.getSingletonInstance().getMainFrame().setState(
                                             MainFrame.STATE_RUNNING);
-                                } catch (NullPointerException ex) {
-                                    // expected if we haven't instantiated a main frame.
                                 }
                             }
                         }
@@ -226,9 +224,8 @@ public class HibernateUtil {
                             }
                         }
                     } catch (Throwable e) {
-                        log.error(e.getMessage());
-                        log.trace(e.getMessage(), e);
-                        System.out.println("Initial SessionFactory creation failed." +
+                        log.error(e.getMessage(), e);
+                        System.out.println("SessionFactory creation failed." +
                                 e.getMessage());
                         loginDialog = HibernateUtil.getLoginDialog(
                                 configuration, "Login failed: " + e.getCause());
@@ -236,12 +233,12 @@ public class HibernateUtil {
                         sessionFactory.close();
                         sessionFactory = null;
                         configuration = new Configuration().configure();
-                        if (Singleton.getSingletonInstance().getMainFrame() != null) {
+                        if (mainFrameAvailable) {
                             Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
                                     "Login failed.");
                         }
                     }
-                    if (Singleton.getSingletonInstance().getMainFrame() != null) {
+                    if (mainFrameAvailable) {
                         Singleton.getSingletonInstance().getMainFrame().setCursor(
                                 Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
                     }
@@ -250,9 +247,11 @@ public class HibernateUtil {
         } catch (Throwable ex) {
             // Make sure you log the exception, as it might be swallowed
             ex.printStackTrace();
-            System.out.println("Initial SessionFactory creation failed." + ex);
+            log.error("SessionFactory creation failed", ex);
+            System.out.println("SessionFactory creation failed." + ex);
+            ex.printStackTrace();
             if (ex.getCause() != null) {
-                System.out.println("Cause" + ex.getCause().getMessage());
+                System.out.println("Cause: " + ex.getCause().getMessage());
             }
             throw new ExceptionInInitializerError(ex);
         }

@@ -153,7 +153,7 @@ public class NahimaManager extends AbstractRestClient {
             MultipartBodyPublisher multipartBody = MultipartBodyPublisher.newBuilder().filePart("image", Path.of(imagePath), MediaType.IMAGE_ANY).build();
             log.debug("Built multipart body...");
             MutableRequest request = MutableRequest.POST(queryUrl, multipartBody).header("Content-Disposition", "attachment; filename=\"" + image.getFilename() + "\"");
-            log.debug("Built request to uplaod...");
+            log.debug("Built request to upload...");
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             log.debug("Response from uploading image: " + response.body());

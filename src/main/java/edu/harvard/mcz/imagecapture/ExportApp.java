@@ -13,6 +13,7 @@ public class ExportApp implements ProgressListener {
         exportJob.goAnon();
         exportJob.addProgressListener(this);
         exportJob.run();
+        System.exit(exportJob.getStatus() == NahimaExportJob.STATUS_FINISHED ? 0 : 1);
     }
 
     public static void main(String[] args) {

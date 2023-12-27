@@ -18,6 +18,7 @@ public abstract class GenericLifeCycle<T> {
     private final Class<T> tCLass;
     private final String idProperty;
     protected Logger log;
+    boolean anon = false;
 
     public GenericLifeCycle(Class<T> tClass, Logger log) {
         this(tClass, log, "id");
@@ -29,11 +30,19 @@ public abstract class GenericLifeCycle<T> {
         this.idProperty = idProperty;
     }
 
+    protected Session getSession() {
+        return HibernateUtil.getSessionFactory(anon).getCurrentSession();
+    }
+
+    public void goAnon() {
+        this.anon = true;
+    }
+
     public T findOneBy(String propertyPath, Object value) {
         log.debug("getting one " + this.tCLass.toGenericString() + " by " + propertyPath);
         try {
             T instance = null;
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             try {
                 session.beginTransaction();
                 CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
@@ -73,7 +82,7 @@ public abstract class GenericLifeCycle<T> {
     public List<T> findBy(Map<String, Object> propertyValueMap, int maxResults, int offset, boolean like) {
         log.debug("finding " + this.tCLass.toGenericString() + " instance by hashmap: " + propertyValueMap.toString());
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             try {
                 session.beginTransaction();
                 CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
@@ -173,7 +182,7 @@ public abstract class GenericLifeCycle<T> {
     private List<String> getEntityAttributes(T instance, Session session) {
         // untested. other possible implementations: https://stackoverflow.com/questions/19418500/get-table-column-names-in-hibernate
         // from https://stackoverflow.com/questions/43499887/hibernate-5-2-get-natural-id-properties-from-metamodel
-        MetamodelImplementor metamodel = (MetamodelImplementor) HibernateUtil.getSessionFactory().getCurrentSession().getMetamodel();
+        MetamodelImplementor metamodel = (MetamodelImplementor) this.getSession().getMetamodel();
         ClassMetadata classMetadata = (ClassMetadata) metamodel.entityPersister(instance.getClass().getName());
         String[] propertyNames = classMetadata.getPropertyNames();
         return Arrays.asList(propertyNames);
@@ -183,7 +192,7 @@ public abstract class GenericLifeCycle<T> {
         log.debug("finding " + tCLass.toGenericString() + " instance by example");
         try {
             List<T> results = null;
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             // loop properties & find the ones which are not null
             List<String> persistentAttributes = this.getEntityAttributes(instance, session);
             log.debug("found entity attributes: " + persistentAttributes);
@@ -241,7 +250,7 @@ public abstract class GenericLifeCycle<T> {
 
 
     public String[] runQueryToGetStrings(ArrayList<String> collections, String sql, Logger log) {
-        Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+        Session session = this.getSession();
         try {
             session.beginTransaction();
             Query q = session.createQuery(sql);

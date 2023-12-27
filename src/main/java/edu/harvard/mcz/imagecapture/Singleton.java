@@ -125,6 +125,9 @@ public class Singleton {
      * @return the userFullName
      */
     public String getUserFullName() {
+        if (this.user == null) {
+            return "Anonymous";
+        }
         return this.user.getFullname();
     }
 

@@ -143,7 +143,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             throws SaveFailedException, SpecimenExistsException {
         log.debug("persisting Specimen instance");
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             session.beginTransaction();
             try {
                 session.persist(transientInstance);
@@ -200,7 +200,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         log.debug("attaching dirty Specimen instance with id " +
                 instance.getSpecimenId());
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             session.beginTransaction();
             try {
                 session.saveOrUpdate(instance);
@@ -240,7 +240,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
         log.debug("attaching clean Specimen instance");
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             session.beginTransaction();
             try {
                 session.lock(instance, LockMode.NONE);
@@ -282,7 +282,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     public void delete(Specimen persistentInstance) {
         log.debug("deleting Specimen instance");
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             session.beginTransaction();
             try {
                 session.delete(persistentInstance);
@@ -311,7 +311,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     public Specimen merge(Specimen detachedInstance) {
         log.debug("merging Specimen instance");
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             session.beginTransaction();
             try {
                 Specimen result = (Specimen) session.merge(detachedInstance);
@@ -341,7 +341,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     public Specimen findById(java.lang.Long id) {
         log.debug("getting Specimen instance with id: " + id);
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             session.beginTransaction();
             Specimen instance = null;
             try {
@@ -372,7 +372,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     public List<Specimen> findByBarcode(String barcode) {
         log.debug("findByBarcode '" + barcode + "' start");
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             session.beginTransaction();
             List<Specimen> results = null;
             try {
@@ -400,7 +400,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     public List<Specimen> findAll() {
         log.debug("finding all Specimens");
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             session.beginTransaction();
             List<Specimen> results = null;
             try {
@@ -430,7 +430,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             if (startAt < 0 || fetchSize < 0) {
                 throw new RuntimeException("Negative value given for page size");
             }
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             session.beginTransaction();
             List<Specimen> results = null;
             try {
@@ -461,7 +461,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     public List<ICImage> findImagesByPath(String path) {
         log.debug("finding images by path " + path);
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             session.beginTransaction();
             List<ICImage> results = null;
             try {
@@ -529,7 +529,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         try {
             String sql =
                     "Select count(*), workFlowStatus from Specimen group by workFlowStatus ";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             try {
                 result.append("Specimen records: \n");
                 session.beginTransaction();
@@ -567,7 +567,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         try {
             String sql =
                     "Select count(S), genus, specificEpithet from Specimen S WHERE S.workFlowStatus = 'Taxon Entered' group by S.genus, S.specificEpithet ";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             try {
                 session.beginTransaction();
                 Iterator results = session.createQuery(sql).list().iterator();
@@ -610,7 +610,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                             +
                             "group by S.verbatimLocality, S.dateNos, S.verbatimCollector, S.verbatimCollection, "
                             + "S.verbatimNumbers, S.verbatimUnclassifiedText ";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             try {
                 session.beginTransaction();
                 Iterator results = session.createQuery(sql).list().iterator();
@@ -646,7 +646,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                                           String workflowStatus) {
         log.debug("finding Specimen instances for verbatim capture");
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             List<Specimen> results = null;
             try {
                 session.beginTransaction();
@@ -677,7 +677,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         log.debug("finding counts of taxa for verbatim values");
         List<CountValue> result = new ArrayList<CountValue>();
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             try {
                 session.beginTransaction();
                 Query query = session.createQuery(
@@ -732,7 +732,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         log.debug("finding specimens from verbatim values");
         List<Specimen> result = new ArrayList<Specimen>();
         try {
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             try {
                 session.beginTransaction();
                 Query query = session.createQuery(
@@ -819,7 +819,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 
             Long specimenId = specimen.getSpecimenId();
             try {
-                Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+                Session session = this.getSession();
                 Transaction transaction = session.beginTransaction();
                 try {
                     Query query = session.createQuery(
@@ -901,7 +901,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             String sql =
                     "Select distinct identifiedBy from Specimen spe WHERE spe.identifiedBy is not null order by spe.identifiedBy";
             // String sql = "Select distinct identifiedby from Specimen";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             try {
                 session.beginTransaction();
                 Query q = session.createQuery(sql);
@@ -931,7 +931,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             String sql =
                     "Select distinct primaryDivison from Specimen spe WHERE spe.primaryDivison is not null order by spe.primaryDivison";
             // String sql = "Select distinct identifiedby from Specimen";
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             try {
                 session.beginTransaction();
                 Query q = session.createQuery(sql);
@@ -984,9 +984,8 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     public List<Specimen> findByIds(List<Long> ids) {
         try {
             List<Specimen> results = null;
-            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            Session session = this.getSession();
             try {
-                session = HibernateUtil.getSessionFactory().getCurrentSession();
                 Transaction txn = session.beginTransaction();
                 Query<Specimen> query = session.createQuery(
                         "SELECT s FROM Specimen s " +

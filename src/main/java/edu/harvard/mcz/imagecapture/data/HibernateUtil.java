@@ -64,6 +64,45 @@ public class HibernateUtil {
         return HibernateUtil.properties;
     }
 
+    private static void createAnonSessionFactory() {
+        try {
+            if (sessionFactory != null) {
+                terminateSessionFactory();
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        try {
+            Configuration configuration = new Configuration().configure();
+            Properties settings =
+                    Singleton.getSingletonInstance().getProperties().getProperties();
+
+            properties.setProperty(ImageCaptureProperties.KEY_DB_URL, HibernateUtil.getConfigOrSettingsValue(
+                    configuration, settings, ImageCaptureProperties.KEY_DB_URL,
+                    "URL_PLACEHOLDER"));
+            properties.setProperty(ImageCaptureProperties.KEY_DB_USER,
+                    HibernateUtil.getConfigOrSettingsValue(
+                            configuration, settings, ImageCaptureProperties.KEY_DB_USER,
+                            "USER_PLACEHOLDER"));
+            properties.setProperty(ImageCaptureProperties.KEY_DB_PASSWORD,
+                    HibernateUtil.getConfigOrSettingsValue(
+                            configuration, settings, ImageCaptureProperties.KEY_DB_PASSWORD,
+                            "PASSWORD_PLACEHOLDER"));
+            properties.setProperty(ImageCaptureProperties.KEY_DB_DIALECT,
+                    HibernateUtil.getConfigOrSettingsValue(
+                            configuration, settings, ImageCaptureProperties.KEY_DB_DIALECT,
+                            "DIALECT_PLACEHOLDER"));
+            properties.setProperty(ImageCaptureProperties.KEY_DB_DRIVER,
+                    HibernateUtil.getConfigOrSettingsValue(
+                            configuration, settings, ImageCaptureProperties.KEY_DB_DRIVER,
+                            "DRIVER_CLASS_PLACEHOLDER"));
+            configuration.setProperties(properties);
+            sessionFactory = configuration.buildSessionFactory();
+        } catch (Exception e) {
+            createSessionFactory();
+        }
+    }
+
     /**
      * Using the Hibernate configuration in Configuration from hibernate.cfg.xml
      * create a Hibernate sessionFactory.  Method is private as the the session
@@ -288,6 +327,10 @@ public class HibernateUtil {
         }
     }
 
+    public static SessionFactory getSessionFactory() {
+        return getSessionFactory(false);
+    }
+
     /**
      * Call this method to obtain a Hibernate Session.
      * <p>
@@ -299,9 +342,13 @@ public class HibernateUtil {
      *
      * @return the Hibernate SessionFactory.
      */
-    public static SessionFactory getSessionFactory() {
+    public static SessionFactory getSessionFactory(boolean anon) {
         if (sessionFactory == null) {// || sessionFactory.isClosed()) {
-            createSessionFactory();
+            if (anon) {
+                createAnonSessionFactory();
+            } else {
+                createSessionFactory();
+            }
         }
         return sessionFactory;
     }

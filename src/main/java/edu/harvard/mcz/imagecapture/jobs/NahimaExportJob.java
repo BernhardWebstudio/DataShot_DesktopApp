@@ -35,6 +35,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     private Exception lastError = null;
     private String oneSpecimenBarcode = null;
     private List<Specimen> specimenToExport = null;
+    private boolean anon = false;
 
     public void setOneSpecimenToExportBarcode(String oneSpecimenBarcode) {
         this.oneSpecimenBarcode = oneSpecimenBarcode;
@@ -44,12 +45,19 @@ public class NahimaExportJob implements RunnableJob, Runnable {
         this.specimenToExport = specimenToExport;
     }
 
+    public void goAnon() {
+        this.anon = true;
+    }
+
     @Override
     public void start() {
         this.start = new Date();
         // fetch specimen to be exported
         notifyWorkStatusChanged("Loading specimens to export.");
         SpecimenLifeCycle sls = new SpecimenLifeCycle();
+        if (this.anon) {
+            sls.goAnon();
+        }
         if (specimenToExport == null) {
             Map<String, Object> queryParams = new HashMap<>();
             queryParams.put("nahimaExported", false);

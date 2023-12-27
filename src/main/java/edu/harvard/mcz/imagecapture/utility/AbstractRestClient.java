@@ -31,9 +31,9 @@ public abstract class AbstractRestClient {
     public AbstractRestClient() {
         Methanol.Builder builder = Methanol.newBuilder()
                 .userAgent("DataShot " + ImageCaptureApp.getAppVersion())
-                .requestTimeout(Duration.ofSeconds(360))      // Default request timeout
-                .headersTimeout(Duration.ofSeconds(120))       // Timeout for receiving response headers
-                .readTimeout(Duration.ofSeconds(60));          // Timeout for single reads;
+                .requestTimeout(Duration.ofMinutes(5))      // Default request timeout
+                .headersTimeout(Duration.ofMinutes(2))       // Timeout for receiving response headers
+                .readTimeout(Duration.ofMinutes(1));          // Timeout for single reads;
         httpClient = builder.executor(Executors.newFixedThreadPool(8))
                 .connectTimeout(Duration.ofSeconds(120))
                 .build();

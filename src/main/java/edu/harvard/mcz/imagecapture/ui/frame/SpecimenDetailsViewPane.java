@@ -295,7 +295,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                 }
             });
         }
-        if (specimen.isExported() || specimen.isStateDone()) {
+        if (!specimen.isEditable(Singleton.getSingletonInstance().getUser())) {
             JOptionPane.showMessageDialog(
                     thisPane, "This Specimen is already exported. Edit will not be saved to Nahima.",
                     "Warning: not editable", JOptionPane.WARNING_MESSAGE);

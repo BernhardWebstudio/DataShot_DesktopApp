@@ -18,6 +18,10 @@ import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsException;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
 import jakarta.persistence.PersistenceException;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.hibernate.*;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -74,7 +78,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                             +
                             "          select max(cast(substr(c.barcode,-8) as decimal(8,0))) from Specimen c WHERE cast(substr(a.barcode,-8) as decimal(8,0)) > 49999 "
                             + "        ) "
-                            + "        order by 1";
+                            + "        ORDER BY 1";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
@@ -377,7 +381,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             List<Specimen> results = null;
             try {
                 Query query = session.createQuery(
-                        "From Specimen s WHERE s.barcode LIKE :barcode");
+                        "SELECT * FROM Specimen s WHERE s.barcode LIKE :barcode");
                 query.setParameter("barcode", barcode);
                 results = (List<Specimen>) query.list();
                 log.debug("find query successful, result size: " + results.size());
@@ -405,7 +409,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             List<Specimen> results = null;
             try {
                 results = (List<Specimen>) session
-                        .createQuery("From Specimen s order by s.barcode")
+                        .createQuery("SELECT FROM Specimen s ORDER BY s.barcode")
                         .list();
                 log.debug("find all successful, result size: " + results.size());
                 session.getTransaction().commit();
@@ -434,7 +438,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             session.beginTransaction();
             List<Specimen> results = null;
             try {
-                Query query = session.createQuery("From Specimen s order by s.barcode");
+                Query query = session.createQuery("SELECT FROM Specimen s ORDER BY s.barcode");
                 query.setFirstResult(startAt);
                 query.setFetchSize(fetchSize);
                 results = (List<Specimen>) query.list();
@@ -455,7 +459,32 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         }
     }
 
-    // Select distinct path from ICImage im WHERE im.path is not null order by
+    /**
+     * Find specimen that should be exported to Nahima
+     *
+     * @return
+     */
+    public List<Specimen> findToExport() {
+        try {
+            Session session = getSession();
+            session.beginTransaction();
+            List<Specimen> results = null;
+            CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
+            CriteriaQuery<Specimen> cr = cb.createQuery(Specimen.class);
+            Root<Specimen> root = cr.from(Specimen.class);
+            List<Predicate> propertyValueRelations = new ArrayList<>();
+            propertyValueRelations.add(cb.equal(root.get("nahimaExported"), false));
+            propertyValueRelations.add(cb.lessThan(root.get("dateLastNahimaUpdated"), root.get("dateLastUpdated")));
+            cr.where(cb.and(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()])));
+            Query<Specimen> q = session.createQuery(cr);
+            return q.list();
+        } catch (Exception e) {
+            log.error("Find to export failed", e);
+            throw e;
+        }
+    }
+
+    // Select distinct path from ICImage im WHERE im.path is not null ORDER BY
     // im.path
 
     public List<ICImage> findImagesByPath(String path) {
@@ -470,12 +499,12 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                 String sql = "";
                 if (path.contains("\\")) {
                     sql =
-                            "From ICImage im WHERE im.path='" + path + "\\' order by imageId";
+                            "From ICImage im WHERE im.path='" + path + "\\' ORDER BY imageId";
                 } else {
-                    sql = "From ICImage im WHERE im.path='" + path + "' order by imageId";
+                    sql = "From ICImage im WHERE im.path='" + path + "' ORDER BY imageId";
                 }
 
-                // String sql = "From ICImage im WHERE im.path='"+path+"\\\' order by
+                // String sql = "From ICImage im WHERE im.path='"+path+"\\\' ORDER BY
                 // imageId";
                 Query query = session.createQuery(sql);
                 results = (List<ICImage>) query.list();
@@ -503,7 +532,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct im.path from ICImage im order by im.imageId";
+                    "Select distinct im.path from ICImage im ORDER BY im.imageId";
             return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error("Error", re);
@@ -798,7 +827,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct country from Specimen spe WHERE spe.country is not null order by spe.country  ";
+                    "Select distinct country from Specimen spe WHERE spe.country is not null ORDER BY spe.country  ";
             return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error("Error", re);
@@ -886,7 +915,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct collection from Specimen spe WHERE spe.collection is not null order by spe.collection  ";
+                    "Select distinct collection from Specimen spe WHERE spe.collection is not null ORDER BY spe.collection  ";
             return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error("Error", re);
@@ -899,7 +928,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct identifiedBy from Specimen spe WHERE spe.identifiedBy is not null order by spe.identifiedBy";
+                    "Select distinct identifiedBy from Specimen spe WHERE spe.identifiedBy is not null ORDER BY spe.identifiedBy";
             // String sql = "Select distinct identifiedby from Specimen";
             Session session = this.getSession();
             try {
@@ -929,7 +958,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct primaryDivison from Specimen spe WHERE spe.primaryDivison is not null order by spe.primaryDivison";
+                    "Select distinct primaryDivison from Specimen spe WHERE spe.primaryDivison is not null ORDER BY spe.primaryDivison";
             // String sql = "Select distinct identifiedby from Specimen";
             Session session = this.getSession();
             try {
@@ -959,7 +988,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct questions from Specimen spe WHERE spe.questions is not null order by spe.questions  ";
+                    "Select distinct questions from Specimen spe WHERE spe.questions is not null ORDER BY spe.questions  ";
             return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error("Error", re);
@@ -972,7 +1001,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct specificLocality from Specimen spe WHERE spe.specificLocality is not null order by spe.specificLocality";
+                    "Select distinct specificLocality from Specimen spe WHERE spe.specificLocality is not null ORDER BY spe.specificLocality";
             return loadStringsBySQL(collections, sql);
         } catch (RuntimeException re) {
             log.error("Error", re);

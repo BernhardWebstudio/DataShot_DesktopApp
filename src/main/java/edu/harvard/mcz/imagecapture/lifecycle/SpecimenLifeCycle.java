@@ -466,19 +466,29 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
      */
     public List<Specimen> findToExport() {
         try {
-            Session session = getSession();
-            session.beginTransaction();
+            Session session = this.getSession();
             List<Specimen> results = null;
-            CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
-            CriteriaQuery<Specimen> cr = cb.createQuery(Specimen.class);
-            Root<Specimen> root = cr.from(Specimen.class);
-            List<Predicate> propertyValueRelations = new ArrayList<>();
-            propertyValueRelations.add(cb.equal(root.get("nahimaExported"), false));
-            propertyValueRelations.add(cb.lessThan(root.get("dateLastNahimaUpdated"), root.get("dateLastUpdated")));
-            cr.where(cb.and(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()])));
-            Query<Specimen> q = session.createQuery(cr);
-            return q.list();
-        } catch (Exception e) {
+            try {
+                session.beginTransaction();
+                CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
+                CriteriaQuery<Specimen> cr = cb.createQuery(Specimen.class);
+                Root<Specimen> root = cr.from(Specimen.class);
+                List<Predicate> propertyValueRelations = new ArrayList<>();
+                propertyValueRelations.add(cb.equal(root.get("nahimaExported"), false));
+                propertyValueRelations.add(cb.lessThan(root.get("dateLastNahimaUpdated"), root.get("dateLastUpdated")));
+                cr.where(cb.or(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()])));
+                Query<Specimen> q = session.createQuery(cr);
+                results = q.list();
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error("find images failed", e);
+            }
+            try {
+                session.close();
+            } catch (SessionException e) {
+            }
+            return results;
+        } catch (RuntimeException e) {
             log.error("Find to export failed", e);
             throw e;
         }

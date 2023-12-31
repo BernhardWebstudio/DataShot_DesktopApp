@@ -250,6 +250,8 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                     reverseNestedCollection.put("datumtrans", toSerialize.getDateNos());
                 }
                 if (isoDateIsPeriod) {
+                    assert (dateSplit.length == 2);
+                    // TODO: inverse if needed
                     reverseNestedCollection.put("zeitraum", dateRangeToNahima(dateSplit[0].trim(), dateSplit[1].trim()));
                 } else {
                     reverseNestedCollection.put("datum", this.dateToNahima(toSerialize.getIsoDate(), false));
@@ -331,9 +333,11 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     }
 
     protected JSONObject dateRangeToNahima(String from, String to, boolean allowInvalid) throws ParseException {
-        JSONObject parsedDateFrom = this.dateToNahima(from, allowInvalid);
-        JSONObject parsedDateTo = this.dateToNahima(to, allowInvalid);
         JSONObject returnValue = new JSONObject();
+
+        // swap if needed to have the order correct
+        JSONObject parsedDateFrom = this.dateToNahima(from.compareTo(to) < 0 ? from : to, allowInvalid);
+        JSONObject parsedDateTo = this.dateToNahima(from.compareTo(to) < 0 ? to : from, allowInvalid);
 
         returnValue.put("from", parsedDateFrom.getString("value"));
         returnValue.put("to", parsedDateTo.getString("value"));

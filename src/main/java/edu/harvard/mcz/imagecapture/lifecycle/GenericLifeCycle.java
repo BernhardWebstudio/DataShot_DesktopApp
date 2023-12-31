@@ -16,7 +16,7 @@ import java.util.*;
 public abstract class GenericLifeCycle<T> {
 
     private final Class<T> tCLass;
-    private final String idProperty;
+    protected final String idProperty;
     protected Logger log;
     boolean anon = false;
 

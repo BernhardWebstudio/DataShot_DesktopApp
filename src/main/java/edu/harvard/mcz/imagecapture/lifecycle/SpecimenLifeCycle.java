@@ -467,7 +467,6 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     public List<Specimen> findToExport() {
         try {
             Session session = this.getSession();
-            List<Specimen> results = null;
             try {
                 session.beginTransaction();
                 CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
@@ -477,8 +476,11 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                 propertyValueRelations.add(cb.equal(root.get("nahimaExported"), false));
                 propertyValueRelations.add(cb.lessThan(root.get("dateLastNahimaUpdated"), root.get("dateLastUpdated")));
                 cr.where(cb.or(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()])));
-                Query<Specimen> q = session.createQuery(cr);
-                results = q.list();
+                cr.select(root.get(this.idProperty));
+                Query q = session.createQuery(cr);
+                List<Long> ids = q.list();
+                session.getTransaction().commit();
+                return this.findByIds(ids);
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
                 log.error("find images failed", e);
@@ -487,11 +489,11 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                 session.close();
             } catch (SessionException e) {
             }
-            return results;
         } catch (RuntimeException e) {
             log.error("Find to export failed", e);
             throw e;
         }
+        return null;
     }
 
     // Select distinct path from ICImage im WHERE im.path is not null ORDER BY

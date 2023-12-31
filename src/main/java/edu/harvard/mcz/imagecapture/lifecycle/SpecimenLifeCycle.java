@@ -470,7 +470,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             try {
                 session.beginTransaction();
                 CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
-                CriteriaQuery<Specimen> cr = cb.createQuery(Specimen.class);
+                CriteriaQuery<Long> cr = cb.createQuery(Long.class);
                 Root<Specimen> root = cr.from(Specimen.class);
                 List<Predicate> propertyValueRelations = new ArrayList<>();
                 propertyValueRelations.add(cb.equal(root.get("nahimaExported"), false));

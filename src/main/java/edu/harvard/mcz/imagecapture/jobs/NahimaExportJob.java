@@ -98,7 +98,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 
             // map, associate where possible/needed
             JSONObject specimenJson = null;
-            if (specimen.getNahimaId() != null || specimen.getNahimaId().equals("")) {
+            if (specimen.getNahimaId() != null && !specimen.getNahimaId().equals("")) {
                 // TODO: implement update functionality
                 continue;
             }

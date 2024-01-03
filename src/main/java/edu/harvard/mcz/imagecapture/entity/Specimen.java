@@ -308,7 +308,7 @@ public class Specimen implements Serializable {
     }
 
     public Boolean isEditable(Users user) {
-        boolean canEdit = !this.isExported() && !this.isStateDone();
+        boolean canEdit = !this.isStateDone();
         if (user != null) {
             canEdit = (user.isUserRole(Users.ROLE_FULL) ||
                     user.isUserRole(Users.ROLE_ADMINISTRATOR)) ||
@@ -1224,8 +1224,7 @@ public class Specimen implements Serializable {
     }
 
     public boolean isStateDone() {
-        return Objects.equals(this.workFlowStatus, WorkFlowStatus.STAGE_DONE) ||
-                (this.nahimaExported != null && this.nahimaExported);
+        return Objects.equals(this.workFlowStatus, WorkFlowStatus.STAGE_DONE);
     }
 
     public String getLoadFlags() {

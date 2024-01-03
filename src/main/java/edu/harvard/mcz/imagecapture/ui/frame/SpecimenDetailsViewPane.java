@@ -856,7 +856,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 //        getCitedInPublicationJTextField().setText(specimen.getCitedInPublication());
         getQuestionsJTextField().setText(specimen.getQuestions());
         getJComboBoxWorkflowStatus().setSelectedItem(specimen.getWorkFlowStatus());
-        if (specimen.isStateDone()) {
+        if (specimen.isExported()) {
             getJTextFieldMigrationStatus().setText(WorkFlowStatus.STAGE_DONE);
 //                    "http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" +
 //                            specimen.getCatNum());
@@ -3265,7 +3265,7 @@ georeference_pre.getLongDegString()); if
             // jLabelMigrationStatus.setBorder(null);
             jTextFieldMigrationStatus.setEditable(false);
             jTextFieldMigrationStatus.setText("");
-            if (specimen.isStateDone()) {
+            if (specimen.isExported()) {
 //                String uri = "http://mczbase.mcz.harvard.edu/guid/MCZ:Ent:" +
 //                        specimen.getCatNum();
 //                jTextFieldMigrationStatus.setText(uri);

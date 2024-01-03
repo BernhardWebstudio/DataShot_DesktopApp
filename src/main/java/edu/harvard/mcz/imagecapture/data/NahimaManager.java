@@ -1329,7 +1329,9 @@ public class NahimaManager extends AbstractRestClient {
         JSONObject tag = findTagWithName("Entwurf");
         if (tag != null) {
             return new JSONArray() {{
-                put(tag.getInt("_id"));
+                put(new JSONObject() {{
+                    put("_id", tag.getInt("_id"));
+                }});
             }};
         } else {
             throw new RuntimeException("Cound not find Entwurf tag");

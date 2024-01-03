@@ -105,6 +105,13 @@ public class MetadataRetriever {
                         if (!content.matches(ImageCaptureApp.REGEX_DATE)) {
                             returnValue = false;
                         }
+                        // check that, for date ranges, the range is valid/increasing
+                        if (content.contains("-")) {
+                            String[] split = content.split("-");
+                            if (split[1].compareTo(split[0]) < 0) {
+                                returnValue = false;
+                            }
+                        }
                     }
                     return returnValue;
                 }

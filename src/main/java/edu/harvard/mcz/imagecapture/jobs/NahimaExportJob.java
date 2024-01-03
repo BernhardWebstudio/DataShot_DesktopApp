@@ -98,15 +98,22 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 
             // map, associate where possible/needed
             JSONObject specimenJson = null;
-            if (specimen.getNahimaId() != null && !specimen.getNahimaId().equals("")) {
-                // TODO: implement update functionality
-                continue;
-            }
+            JSONObject existingExport = null;
             try {
-                specimenJson = serializer.serialize2JSON(specimen);
+                if (specimen.getNahimaId() != null && !specimen.getNahimaId().equals("")) {
+                    try {
+                        existingExport = manager.findObjectByGlobalObjectId(specimen.getNahimaId());
+                    } catch (IOException | InterruptedException e) {
+                        throw new SkipSpecimenException();
+                    }
+                    specimenJson = serializer.serialize2JSON(specimen, existingExport);
+                } else {
+                    specimenJson = serializer.serialize2JSON(specimen);
+                }
             } catch (SkipSpecimenException e) {
                 continue;
             }
+
             if (specimenJson == null) {
                 // might want to add some checks
                 // to make sure this only happens when the SkipSpecimenException is thrown
@@ -116,7 +123,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             // upload images
             ArrayList<JSONObject> uploadedImages = new ArrayList<>();
             try {
-                uploadedImages = manager.uploadImagesForSpecimen(specimen);
+                uploadedImages = manager.uploadImagesForSpecimen(specimen, existingExport);
             } catch (Exception e) {
                 lastError = e;
                 log.error("Failed to upload images", e);
@@ -129,73 +136,79 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             // add images
             JSONArray mediaAssets = new JSONArray();
             for (JSONObject imageJsonObj : uploadedImages) {
-                Map<String, Object> reducedMediaAssetMap = new HashMap<>() {{
-                    put("_pool", NahimaManager.defaultPool);
-                    put("_id", JSONObject.NULL);
-                    put("_version", 1);
-                    put("datei", (new JSONArray()).put(new JSONObject(new HashMap<>() {{
-                        put("preferred", true);
-                        put("_id", imageJsonObj.get("_id"));
-                    }})));
-                    put("barcode", specimen.getBarcode());
-                    put("urspruelicherdateiname", imageJsonObj.get("original_filename"));
-                    // empty, potentially later relevant stuff
-                    put("mediaassettyp", JSONObject.NULL);
-                    put("dateiname", JSONObject.NULL);
-                    put("dateigroesse", JSONObject.NULL);
-                    put("titel", JSONObject.NULL);
-                    put("beschreibung", JSONObject.NULL);
-                    put("lizenz_dcterms_licence", JSONObject.NULL);
-                    put("rechteinhaber_person", JSONObject.NULL);
-                    put("rechteinhaber_koeperschaft", JSONObject.NULL);
-                    put("aufnahmedatum_dc_date", JSONObject.NULL);
-                    put("format_dc_format", JSONObject.NULL);
-                    put("_nested:mediaasset__urheber_dc_creator", new JSONArray());
-                    put("_nested:mediaasset__schlagworte", new JSONArray());
-                    put("_reverse_nested:entomologie_mediaassetpublic:mediaassetpublic", new JSONArray());
-                    put("_reverse_nested:entomologie_mediaassetnonpublic:mediaassetpublic", new JSONArray());
-                    put("_reverse_nested:entomologie_mediaassetdeleted:mediaassetdeleted", new JSONArray());
-                    put("_reverse_nested:erdwissenschaften_mediaassetpublic:mediaassetpublic", new JSONArray());
-                    put("_reverse_nested:erdwissenschaften_mediaassetnonpublic:mediaassetnonpublic", new JSONArray());
-                    put("_reverse_nested:erdwissenschaften_mediaassetdeleted:mediaassetdeleted", new JSONArray());
-                    put("_reverse_nested:herbarien_mediaassetpublic:mediaassetpublic", new JSONArray());
-                    put("_reverse_nested:herbarien_mediaassetnonpublic:mediaassetnonpublic", new JSONArray());
-                    put("_reverse_nested:herbarien_mediaassetdeleted:mediaassetdeleted", new JSONArray());
-                }};
-                JSONObject reducedImageMediaAsset = new JSONObject(reducedMediaAssetMap);
-                Map<String, Object> publicMediaAssetMap = new HashMap<>() {{
-                    put("_objecttype", "mediaasset");
-                    put("_mask", "mediaassetminimal");
-                    put("_tags", new JSONArray());
-                    put("mediaasset", reducedImageMediaAsset);
-                }};
-                JSONObject publicMediaAsset = new JSONObject(publicMediaAssetMap);
-
-                Map<String, Object> mediaAssetMap = new HashMap<>() {{
-                    put("_id", JSONObject.NULL);
-                    put("source_reference", JSONObject.NULL);
-                    put("__idx", 0);
-                    put("_version", 1);
-                    put("mediaassetpublic", publicMediaAsset);
-                }};
-                JSONObject mediaAsset = new JSONObject(mediaAssetMap);
-
-                // create, reduce
-                JSONObject createdMediaAsset = null;
-                try {
-                    createdMediaAsset = manager.createObjectInNahima(publicMediaAsset, "mediaasset");
-                    if (createdMediaAsset.has("code") && createdMediaAsset.getString("code").startsWith("error")) {
-                        throw new RuntimeException("Failed to save mediaasset in nahima. Error code: " + createdMediaAsset.get("code"));
+                JSONObject mediaAsset;
+                if (imageJsonObj.has("mediaassetpublic")) {
+                    mediaAsset = imageJsonObj;
+                } else {
+                    Map<String, Object> reducedMediaAssetMap = new HashMap<>() {{
+                        put("_pool", NahimaManager.defaultPool);
+                        put("_id", JSONObject.NULL);
+                        put("_version", 1);
+                        put("datei", (new JSONArray()).put(new JSONObject(new HashMap<>() {{
+                            put("preferred", true);
+                            put("_id", imageJsonObj.get("_id"));
+                        }})));
+                        put("barcode", specimen.getBarcode());
+                        put("urspruelicherdateiname", imageJsonObj.get("original_filename"));
+                        // empty, potentially later relevant stuff
+                        put("mediaassettyp", JSONObject.NULL);
+                        put("dateiname", JSONObject.NULL);
+                        put("dateigroesse", JSONObject.NULL);
+                        put("titel", JSONObject.NULL);
+                        put("beschreibung", JSONObject.NULL);
+                        put("lizenz_dcterms_licence", JSONObject.NULL);
+                        put("rechteinhaber_person", JSONObject.NULL);
+                        put("rechteinhaber_koeperschaft", JSONObject.NULL);
+                        put("aufnahmedatum_dc_date", JSONObject.NULL);
+                        put("format_dc_format", JSONObject.NULL);
+                        put("_nested:mediaasset__urheber_dc_creator", new JSONArray());
+                        put("_nested:mediaasset__schlagworte", new JSONArray());
+                        put("_reverse_nested:entomologie_mediaassetpublic:mediaassetpublic", new JSONArray());
+                        put("_reverse_nested:entomologie_mediaassetnonpublic:mediaassetpublic", new JSONArray());
+                        put("_reverse_nested:entomologie_mediaassetdeleted:mediaassetdeleted", new JSONArray());
+                        put("_reverse_nested:erdwissenschaften_mediaassetpublic:mediaassetpublic", new JSONArray());
+                        put("_reverse_nested:erdwissenschaften_mediaassetnonpublic:mediaassetnonpublic", new JSONArray());
+                        put("_reverse_nested:erdwissenschaften_mediaassetdeleted:mediaassetdeleted", new JSONArray());
+                        put("_reverse_nested:herbarien_mediaassetpublic:mediaassetpublic", new JSONArray());
+                        put("_reverse_nested:herbarien_mediaassetnonpublic:mediaassetnonpublic", new JSONArray());
+                        put("_reverse_nested:herbarien_mediaassetdeleted:mediaassetdeleted", new JSONArray());
+                    }};
+                    JSONObject reducedImageMediaAsset = new JSONObject(reducedMediaAssetMap);
+                    Map<String, Object> publicMediaAssetMap = new HashMap<>() {{
+                        put("_objecttype", "mediaasset");
+                        put("_mask", "mediaassetminimal");
+                        put("_tags", new JSONArray());
+                        put("mediaasset", reducedImageMediaAsset);
+                    }};
+                    JSONObject publicMediaAsset = new JSONObject(publicMediaAssetMap);
+                    // create, reduce
+                    JSONObject createdMediaAsset = null;
+                    try {
+                        createdMediaAsset = manager.createObjectInNahima(publicMediaAsset, "mediaasset");
+                        if (createdMediaAsset.has("code") && createdMediaAsset.getString("code").startsWith("error")) {
+                            throw new RuntimeException("Failed to save mediaasset in nahima. Error code: " + createdMediaAsset.get("code"));
+                        }
+                    } catch (IOException | InterruptedException e) {
+                        lastError = e;
+                        log.error("Failed to create new Nahima specimen", e);
+                        this.status = STATUS_NAHIMA_FAILED;
+                        return;
                     }
-                } catch (IOException | InterruptedException e) {
-                    lastError = e;
-                    log.error("Failed to create new Nahima specimen", e);
-                    this.status = STATUS_NAHIMA_FAILED;
-                    return;
+
+                    Map<String, Object> mediaAssetMap = new HashMap<>() {{
+                        put("_id", JSONObject.NULL);
+                        put("source_reference", JSONObject.NULL);
+                        put("__idx", 0);
+                        put("_version", 1);
+                        put("mediaassetpublic", publicMediaAsset);
+                    }};
+                    mediaAsset = new JSONObject(mediaAssetMap);
+
+                    reducedImageMediaAsset.put("_id", createdMediaAsset.getJSONObject("mediaasset").getInt("_id"));
+                    publicMediaAsset.put("mediaasset", reducedImageMediaAsset);
+                    mediaAsset.put("mediaassetpublic", publicMediaAsset);
                 }
-                reducedImageMediaAsset.put("_id", createdMediaAsset.getJSONObject("mediaasset").getInt("_id"));
-                publicMediaAsset.put("mediaasset", reducedImageMediaAsset);
-                mediaAsset.put("mediaassetpublic", publicMediaAsset);
+
                 mediaAssets.put(mediaAsset);
             }
             // attach media to specimen

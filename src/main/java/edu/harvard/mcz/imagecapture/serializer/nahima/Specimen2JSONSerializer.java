@@ -30,6 +30,11 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 
     @Override
     public JSONObject serialize2JSON(Object target) throws SkipSpecimenException {
+        return serialize2JSON(target, null);
+    }
+
+    @Override
+    public JSONObject serialize2JSON(Object target, JSONObject existing) throws SkipSpecimenException {
         assert target instanceof Specimen;
         JSONObject result = new JSONObject();
         Specimen toSerialize = (Specimen) target;
@@ -73,7 +78,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         // adding specimen's own det,
         // only the "main" one should be resolved
         JSONObject mainReverseNestedDetermination = new JSONObject();
-        mainReverseNestedDetermination = nahimaManager.addDefaultValuesForCreation(mainReverseNestedDetermination);
+        mainReverseNestedDetermination = nahimaManager.addDefaultValuesForCreation(mainReverseNestedDetermination, existing == null ? null : existing.getJSONArray("_reverse_nested:bestimmung:entomologie").getJSONObject(0));
 
         // resolutions
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "art", () -> nahimaManager.resolveSpecificEpithet(toSerialize.getSpecificEpithet()));
@@ -185,8 +190,8 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("hoehemax", toSerialize.getMaximum_elevation() == null ? JSONObject.NULL : toSerialize.getMaximum_elevation().toString());
             put("lokalitaettrans", toSerialize.getVerbatimLocality());
             put("__idx", 0);
-            put("_version", 1);
-            put("_id", JSONObject.NULL);
+            put("_version", existing == null ? 1 : existing.getJSONArray("_reverse_nested:aufsammlung:entomologie").getJSONObject(0).getInt("_version"));
+            put("_id", existing == null ? JSONObject.NULL : NahimaManager.resolveId(existing.getJSONArray("_reverse_nested:aufsammlung:entomologie").getJSONObject(0)));
             put("_pool", NahimaManager.defaultPool);
         }};
         if (comments != null) {
@@ -251,7 +256,6 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
                 }
                 if (isoDateIsPeriod) {
                     assert (dateSplit.length == 2);
-                    // TODO: inverse if needed
                     reverseNestedCollection.put("zeitraum", dateRangeToNahima(dateSplit[0].trim(), dateSplit[1].trim()));
                 } else {
                     reverseNestedCollection.put("datum", this.dateToNahima(toSerialize.getIsoDate(), false));
@@ -320,7 +324,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         tryUserSkippableResolve(result, "lebensabschnitt", () -> nahimaManager.resolveLifeStage(toSerialize.getLifeStage()));
 
         // finally, wrap everything in the pool (might want to do somewhere else)
-        JSONObject wrapper = nahimaManager.wrapForCreation(result, "entomologie", "entomologie__complete");
+        JSONObject wrapper = nahimaManager.wrapForCreation(result, existing, "entomologie", "entomologie__complete", false);
 
         // and add tags if needed
         tryUserSkippableResolve(wrapper, "_tags", () -> nahimaManager.resolveWorkflowStatusTags(toSerialize.getWorkFlowStatus()));
@@ -344,6 +348,15 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         return returnValue;
     }
 
+    /**
+     * Parse all "allowed" date formats, to possibly get a good, parsed, date
+     * Wrap it in whatever format Nahima requires
+     *
+     * @param date         the date string to parse
+     * @param allowInvalid whether or not to allow invalid dates. Returns the input string, wrapped, if true.
+     * @return the JSON Object Nahima expects
+     * @throws ParseException if invalid dates are not allowed.
+     */
     protected JSONObject dateToNahima(String date, boolean allowInvalid) throws ParseException {
         log.debug("Parsing date from \"" + date + "\"");
         if (date == null || date.equals("")) {

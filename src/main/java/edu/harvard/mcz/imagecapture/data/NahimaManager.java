@@ -78,7 +78,7 @@ public class NahimaManager extends AbstractRestClient {
         return id;
     }
 
-    protected static Integer resolveId(JSONObject objWithId) {
+    public static Integer resolveId(JSONObject objWithId) {
         if (objWithId == null) {
             return null;
         }
@@ -133,7 +133,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param specimen the specimen whose images to upload
      * @return the created mediassets
      */
-    public ArrayList<JSONObject> uploadImagesForSpecimen(Specimen specimen) throws IOException, InterruptedException, RuntimeException {
+    public ArrayList<JSONObject> uploadImagesForSpecimen(Specimen specimen, JSONObject existingExport) throws IOException, InterruptedException, RuntimeException {
         // docs:
         // https://docs.easydb.de/en/technical/api/eas/
         // https://docs.easydb.de/en/sysadmin/eas/api/put/
@@ -141,6 +141,34 @@ public class NahimaManager extends AbstractRestClient {
         ArrayList<JSONObject> results = new ArrayList<>();
 
         for (ICImage image : specimen.getICImages()) {
+            // first, filter whether this particular image is already online, part of this specimen
+            boolean foundExisting = false;
+            if (existingExport != null) {
+                // check if the image has already been uploaded
+                JSONArray mediaassets = existingExport.getJSONObject("entomologie").getJSONArray("_reverse_nested:entomologie_mediaassetpublic:entomologie");
+                for (int i = 0; i < mediaassets.length(); ++i) {
+                    JSONObject std = mediaassets.getJSONObject(i).getJSONObject("mediaassetpublic").getJSONObject("_standard").getJSONObject("eas");
+                    Iterator<String> keys = std.keys();
+
+                    while (keys.hasNext()) {
+                        String key = keys.next();
+                        String filename = std.getJSONArray(key).getJSONObject(0).getString("original_filename");
+                        if (Objects.equals(filename, image.getFilename())) {
+                            // file has been uploaded already
+                            results.add(
+                                    mediaassets.getJSONObject(i)
+                            );
+                            foundExisting = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (foundExisting) {
+                continue;
+            }
+
+            // if not existing, continue with uploading
             String queryUrl = baseQueryUrl + "&original_filename=" + image.getFilename() + "&instance=image";
             log.debug("Running image upload to URL " + queryUrl);
 
@@ -225,6 +253,60 @@ public class NahimaManager extends AbstractRestClient {
         return new JSONObject(returnValue);
     }
 
+    /**
+     * Load an object from Nahima by its global object identifier
+     *
+     * @param globalObjectId the global object identifier
+     * @return the object
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    public JSONObject findObjectByGlobalObjectId(String globalObjectId) throws IOException, InterruptedException {
+        if (globalObjectId == null || globalObjectId.equals("")) {
+            return null;
+        }
+
+        String queryURL = this.url + "search";
+        JSONObject query = new JSONObject() {{
+            put("best_mask_filter", true);
+            put("generate_rights", false);
+            put("search", new JSONArray() {{
+                put(new JSONObject() {{
+                    put("type", "in");
+                    put("fields", new JSONArray() {{
+                        put("_global_object_id");
+                    }});
+                    put("in", new JSONArray() {{
+                        put(globalObjectId);
+                    }});
+                }});
+            }});
+        }};
+
+        JSONObject result = this.postRequest(queryURL, query);
+        if (result.has("code") && result.getString("code").startsWith("error")) {
+            throw new RuntimeException("Failed to fetch object by global object id '" + globalObjectId + "': Error code: " + result.get("code"));
+        }
+        if (result.has("objects") && result.getJSONArray("objects").length() == 0) {
+            return null;
+        }
+        if (result.has("objects")) {
+            // TODO: we can expect that for what we use it currently, there will never be more than one.
+            // however, that's not a general case
+            return result.getJSONArray("objects").getJSONObject(0);
+        }
+        return result;
+    }
+
+    /**
+     * Small utility method to speed some things up,
+     * by loading from this local cache (keyword: memoization)
+     *
+     * @param id         the cache identifier
+     * @param objectType the type of object to retrieve
+     * @return the cached object
+     * @see NahimaManager::storeInCache
+     */
     protected JSONObject loadFromCache(String id, String objectType) {
         Map<String, JSONObject> typeCache = resolveCache.get(objectType);
         if (typeCache != null) {
@@ -233,6 +315,15 @@ public class NahimaManager extends AbstractRestClient {
         return null;
     }
 
+    /**
+     * Small utility method to speed some things up,
+     * by storing to this local cache (keyword: memoization)
+     *
+     * @param id         the cache identifier
+     * @param objectType the type of object to retrieve
+     * @param result     the object to cache/memoize
+     * @see NahimaManager::loadFromCache
+     */
     protected void storeInCache(String id, String objectType, JSONObject result) {
         Map<String, JSONObject> typeCache = resolveCache.computeIfAbsent(objectType, k -> new HashMap<>());
         typeCache.put(id, result);
@@ -1215,8 +1306,9 @@ public class NahimaManager extends AbstractRestClient {
      * @param mask       the mask specifying the fields to use
      * @return the wrapped object, ready to be created
      */
-    private JSONObject wrapForCreation(JSONObject inner, String objectType, String mask, boolean omitPool) {
-        inner = this.addDefaultValuesForCreation(inner, omitPool);
+
+    public JSONObject wrapForCreation(JSONObject inner, JSONObject existing, String objectType, String mask, boolean omitPool) {
+        inner = this.addDefaultValuesForCreation(inner, omitPool, existing);
         JSONObject result = new JSONObject(new HashMap<>() {{
             put("_mask", mask);
             put("_objecttype", objectType);
@@ -1224,6 +1316,10 @@ public class NahimaManager extends AbstractRestClient {
         }});
         result.put(objectType, inner);
         return result;
+    }
+
+    public JSONObject wrapForCreation(JSONObject inner, String objectType, String mask, boolean omitPool) {
+        return wrapForCreation(inner, null, objectType, mask, omitPool);
     }
 
     public JSONObject wrapForCreation(JSONObject inner, String objectType, String mask) {
@@ -1244,6 +1340,14 @@ public class NahimaManager extends AbstractRestClient {
         return addDefaultValuesForCreation(inner, false);
     }
 
+    public JSONObject addDefaultValuesForCreation(JSONObject inner, JSONObject existing) {
+        return addDefaultValuesForCreation(inner, false, existing);
+    }
+
+    public JSONObject addDefaultValuesForCreation(JSONObject inner, boolean omitPool) {
+        return addDefaultValuesForCreation(inner, omitPool, null);
+    }
+
     /**
      * Add default values, such as _id and _version, for creation
      *
@@ -1251,12 +1355,12 @@ public class NahimaManager extends AbstractRestClient {
      * @param omitPool whether to *not* add the property _pool
      * @return the object with the new values
      */
-    public JSONObject addDefaultValuesForCreation(JSONObject inner, boolean omitPool) {
+    public JSONObject addDefaultValuesForCreation(JSONObject inner, boolean omitPool, JSONObject existing) {
         if (!omitPool) {
             inner.put("_pool", defaultPool);
         }
-        inner.put("_id", JSONObject.NULL);
-        inner.put("_version", 1);
+        inner.put("_id", existing == null ? JSONObject.NULL : resolveId(existing));
+        inner.put("_version", existing == null ? 1 : existing.getInt("_version"));
         return inner;
     }
 

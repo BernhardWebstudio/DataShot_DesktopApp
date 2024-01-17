@@ -237,7 +237,7 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     public JSONObject findObjectByUuid(String uuid) throws IOException {
-        String queryURL = this.url + "objects/uuid/" + uuid;
+        String queryURL = this.url + "objects/uuid/" + uuid + "?token=" + token;
         String returnValue = this.getRequest(queryURL, new HashMap<>() {{
             put("Content-Type", "application/json");
         }});
@@ -266,7 +266,7 @@ public class NahimaManager extends AbstractRestClient {
             return null;
         }
 
-        String queryURL = this.url + "search";
+        String queryURL = this.url + "search" + "?token=" + token;
         JSONObject query = new JSONObject() {{
             put("best_mask_filter", true);
             put("generate_rights", false);

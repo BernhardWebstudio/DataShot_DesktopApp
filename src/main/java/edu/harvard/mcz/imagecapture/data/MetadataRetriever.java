@@ -117,6 +117,9 @@ public class MetadataRetriever {
                     if (content.length() > getFieldLength(aTableClass, fieldname)) {
                         returnValue = false;
                     } else {
+                        if (content.length() < 1) {
+                            return true;
+                        }
                         if (!content.matches(ImageCaptureApp.REGEX_DATE)) {
                             returnValue = false;
                         }

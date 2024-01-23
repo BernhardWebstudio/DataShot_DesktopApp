@@ -80,6 +80,14 @@ public class MetadataRetriever {
         if (Integer.parseInt(split[0]) > Year.now().getValue()) {
             return false;
         }
+        // allow only year, or only year and month
+        if (split.length < 3) {
+            if (split.length > 1) {
+                return Integer.parseInt(split[1]) <= 12;
+            }
+            return true;
+        }
+        // allow 00s as month or day
         if (Objects.equals(split[1], "00") || Objects.equals(split[2], "00")) {
             return (
                     Integer.parseInt(split[1]) <= 12 && Integer.parseInt(split[2]) <= 31

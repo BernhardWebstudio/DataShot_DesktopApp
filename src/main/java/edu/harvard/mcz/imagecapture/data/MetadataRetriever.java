@@ -22,11 +22,14 @@ import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.entity.Number;
 import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
+import org.apache.commons.validator.GenericValidator;
 
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.text.ParseException;
+import java.time.Year;
+import java.util.Objects;
 
 /**
  * MetadataRetriever produces metadata (field lengths, tooltip texts, input masks, input verifiers)
@@ -72,6 +75,19 @@ public class MetadataRetriever {
         return formatter;
     }
 
+    public static boolean isValidDateISOString(final String dateString) {
+        String[] split = dateString.split("/");
+        if (Integer.parseInt(split[0]) > Year.now().getValue()) {
+            return false;
+        }
+        if (Objects.equals(split[1], "00") || Objects.equals(split[2], "00")) {
+            return (
+                    Integer.parseInt(split[1]) <= 12 && Integer.parseInt(split[2]) <= 31
+            );
+        }
+        return GenericValidator.isDate(dateString, "yyyy/MM/dd", true);
+    }
+
     /**
      * Generates an InputVerifier for a JTextField
      * <p>
@@ -87,7 +103,6 @@ public class MetadataRetriever {
      * @return an InputVerifier for the JTextField
      * TODO: implement tests for more than just length.
      */
-
     public static InputVerifier getInputVerifier(final Class aTableClass, final String fieldname, final JTextField field) {
         InputVerifier result = null;
         if (
@@ -109,6 +124,14 @@ public class MetadataRetriever {
                         if (content.contains("-")) {
                             String[] split = content.split("-");
                             if (split[1].compareTo(split[0]) < 0) {
+                                returnValue = false;
+                            }
+                            if (!MetadataRetriever.isValidDateISOString(split[0]) || !MetadataRetriever.isValidDateISOString(split[1])) {
+                                returnValue = false;
+                            }
+                        } else {
+                            // check that the input is also a valid date in terms of numbers
+                            if (!MetadataRetriever.isValidDateISOString(content)) {
                                 returnValue = false;
                             }
                         }

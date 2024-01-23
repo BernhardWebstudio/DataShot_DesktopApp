@@ -1360,7 +1360,7 @@ public class NahimaManager extends AbstractRestClient {
             inner.put("_pool", defaultPool);
         }
         inner.put("_id", existing == null ? JSONObject.NULL : resolveId(existing));
-        inner.put("_version", existing == null ? 1 : existing.getInt("_version"));
+        inner.put("_version", existing == null ? 1 : existing.getInt("_version") + 1);
         return inner;
     }
 

@@ -38,6 +38,11 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         assert target instanceof Specimen;
         JSONObject result = new JSONObject();
         Specimen toSerialize = (Specimen) target;
+        if (existing != null) {
+            if (existing.has("entomologie")) {
+                existing = existing.getJSONObject("entomologie");
+            }
+        }
         // easy, first level fields
         result.put("barcodeqrcode", toSerialize.getBarcode());
 //        result.put("erschliessungsfragen", toSerialize.getQuestions());
@@ -170,6 +175,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         if (toSerialize.getSpecimenNotes() == null || toSerialize.getSpecimenNotes().equals("")) {
             comments = null;
         }
+        JSONObject finalExisting = existing;
         Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {{
 //            put("sammlertrans", toSerialize.getCollectors().stream().map(Collector::getCollectorName).collect(Collectors.joining(", ")));
 //            put("sammlungtrans", toSerialize.getCollection());
@@ -190,8 +196,8 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("hoehemax", toSerialize.getMaximum_elevation() == null ? JSONObject.NULL : toSerialize.getMaximum_elevation().toString());
             put("lokalitaettrans", toSerialize.getVerbatimLocality());
             put("__idx", 0);
-            put("_version", existing == null ? 1 : existing.getJSONArray("_reverse_nested:aufsammlung:entomologie").getJSONObject(0).getInt("_version"));
-            put("_id", existing == null ? JSONObject.NULL : NahimaManager.resolveId(existing.getJSONArray("_reverse_nested:aufsammlung:entomologie").getJSONObject(0)));
+            put("_version", finalExisting == null ? 1 : finalExisting.getJSONArray("_reverse_nested:aufsammlung:entomologie").getJSONObject(0).getInt("_version") + 1);
+            put("_id", finalExisting == null ? JSONObject.NULL : NahimaManager.resolveId(finalExisting.getJSONArray("_reverse_nested:aufsammlung:entomologie").getJSONObject(0)));
             put("_pool", NahimaManager.defaultPool);
         }};
         if (comments != null) {

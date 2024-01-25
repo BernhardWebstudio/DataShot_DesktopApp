@@ -160,6 +160,7 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField jTextFieldLocality = null;
     private JTextField jTextFieldMigrationStatus = null;
     private JTextField jTextFieldMinElevation = null;
+    private JTextField jTextFieldMaxElevation = null;
     private JTextField jTextFieldQuestions = null;
     private JTextField jTextFieldSpecies = null;
     private JTextField jTextFieldStatus = null;
@@ -167,7 +168,6 @@ public class SpecimenDetailsViewPane extends JPanel {
     private JTextField jTextFieldTribe = null;
     private JTextField jTextFieldUnnamedForm = null;
     private JTextField jTextFieldVerbatimLocality = null;
-    private JTextField textFieldMaxElev = null;
     private JTextField textFieldMicrohabitat = null;
     private JButton citedInPublicationButton = null;
     private SpecimenDetailsViewPane thisPane = null;
@@ -476,11 +476,11 @@ public class SpecimenDetailsViewPane extends JPanel {
             }
             specimen.setMinimum_elevation(min_elev);
             Long max_elev;
-            if (textFieldMaxElev.getText().trim().length() == 0) {
+            if (jTextFieldMaxElevation.getText().trim().length() == 0) {
                 max_elev = null;
             } else {
                 try {
-                    max_elev = Long.parseLong(textFieldMaxElev.getText());
+                    max_elev = Long.parseLong(jTextFieldMaxElevation.getText());
                 } catch (NumberFormatException e) {
                     max_elev = null;
                 }
@@ -614,10 +614,10 @@ public class SpecimenDetailsViewPane extends JPanel {
             jTextFieldMinElevation.setText("");
         }
         try {
-            textFieldMaxElev.setText(
+            jTextFieldMaxElevation.setText(
                     Long.toString(previousSpecimen.getMaximum_elevation()));
         } catch (Exception e) {
-            textFieldMaxElev.setText("");
+            jTextFieldMaxElevation.setText("");
         }
         if (previousSpecimen.getElev_units() != null) {
             comboBoxElevUnits.setSelectedItem(previousSpecimen.getElev_units());
@@ -826,9 +826,9 @@ public class SpecimenDetailsViewPane extends JPanel {
             jTextFieldMinElevation.setText("");
         }
         try {
-            textFieldMaxElev.setText(Long.toString(specimen.getMaximum_elevation()));
+            jTextFieldMaxElevation.setText(Long.toString(specimen.getMaximum_elevation()));
         } catch (Exception e) {
-            textFieldMaxElev.setText("");
+            jTextFieldMaxElevation.setText("");
         }
         if (specimen.getElev_units() != null) {
             comboBoxElevUnits.setSelectedItem(specimen.getElev_units());
@@ -1011,7 +1011,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             this.addBasicJLabel(jPanel, "Elevation from");
             jPanel.add(this.getVerbatimElevationJTextField(), "grow");
             this.addBasicJLabel(jPanel, "to");
-            jPanel.add(this.getTextFieldMaxElev(), "grow, span 1, split 2, sizegroup elevation");
+            jPanel.add(this.getjTextFieldMaxElevation(), "grow, span 1, split 2, sizegroup elevation");
             jPanel.add(this.getComboBoxElevUnits(), "sizegroup elevation");
             // section: collection
             // row
@@ -1313,17 +1313,11 @@ public class SpecimenDetailsViewPane extends JPanel {
      */
     private JTextField getGenusJTextField() {
         if (jTextFieldGenus == null) {
-            jTextFieldGenus = new JTextField();
-            jTextFieldGenus.setEditable(specimen.isEditable());
+            jTextFieldGenus = this.getBasicJTextField();
             jTextFieldGenus.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "Genus", jTextFieldGenus));
             jTextFieldGenus.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "Genus"));
-            jTextFieldGenus.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldGenus;
     }
@@ -1335,17 +1329,11 @@ public class SpecimenDetailsViewPane extends JPanel {
      */
     private JTextField getSpecificEpithetJTextField() {
         if (jTextFieldSpecies == null) {
-            jTextFieldSpecies = new JTextField();
-            jTextFieldSpecies.setEditable(specimen.isEditable());
+            jTextFieldSpecies = this.getBasicJTextField();
             jTextFieldSpecies.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "SpecificEpithet", jTextFieldSpecies));
             jTextFieldSpecies.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "SpecificEpithet"));
-            jTextFieldSpecies.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldSpecies;
     }
@@ -1357,17 +1345,11 @@ public class SpecimenDetailsViewPane extends JPanel {
      */
     private JTextField getSubspecifcEpithetJTextField() {
         if (jTextFieldSubspecies == null) {
-            jTextFieldSubspecies = new JTextField();
-            jTextFieldSubspecies.setEditable(specimen.isEditable());
+            jTextFieldSubspecies = this.getBasicJTextField();
             jTextFieldSubspecies.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "SubspecificEpithet", jTextFieldSubspecies));
             jTextFieldSubspecies.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "SubspecificEpithet"));
-            jTextFieldSubspecies.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldSubspecies;
     }
@@ -1379,17 +1361,11 @@ public class SpecimenDetailsViewPane extends JPanel {
      */
     private JTextField getSpecificLocalityJTextField() {
         if (jTextFieldLocality == null) {
-            jTextFieldLocality = new JTextField();
-            jTextFieldLocality.setEditable(specimen.isEditable());
+            jTextFieldLocality = this.getBasicJTextField();
             jTextFieldLocality.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "SpecificLocality", jTextFieldLocality));
             jTextFieldLocality.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "SpecificLocality"));
-            jTextFieldLocality.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldLocality;
     }
@@ -1478,7 +1454,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     private JTextField getTextFieldDecimalLat() {
         if (textFieldDecimalLat == null) {
-            textFieldDecimalLat = new JTextField();
+            textFieldDecimalLat = this.getBasicJTextField();
             textFieldDecimalLat.addFocusListener(new FocusAdapter() {
                 public void focusLost(FocusEvent e) {
                     System.out.println("User entered " + textFieldDecimalLat.getText());
@@ -1497,7 +1473,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     private JTextField getTextFieldDecimalLong() {
         if (textFieldDecimalLong == null) {
-            textFieldDecimalLong = new JTextField();
+            textFieldDecimalLong = this.getBasicJTextField();
             textFieldDecimalLong.addFocusListener(new FocusAdapter() {
                 public void focusLost(FocusEvent e) {
                     System.out.println("User entered " + textFieldDecimalLong.getText());
@@ -1551,7 +1527,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     private JTextField getTxtErrorRadius() {
         if (txtErrorRadius == null) {
-            txtErrorRadius = new JTextField();
+            txtErrorRadius = this.getBasicJTextField();
 
             txtErrorRadius.addFocusListener(new FocusAdapter() {
                 public void focusLost(FocusEvent e) {
@@ -1816,8 +1792,7 @@ public class SpecimenDetailsViewPane extends JPanel {
      */
     private void setupNumberJTableRenderer() {
         // First, setup the number field
-        JTextField field1 = new JTextField();
-        field1.setEditable(specimen.isEditable());
+        JTextField field1 = this.getBasicJTextField();
         field1.setInputVerifier(
                 MetadataRetriever.getInputVerifier(Number.class, "Number", field1));
         field1.setVerifyInputWhenFocusTarget(true);
@@ -2052,18 +2027,12 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getDrawerNumberJTextField() {
         if (jTextFieldDrawerNumber == null) {
-            jTextFieldDrawerNumber = new JTextField();
-            jTextFieldDrawerNumber.setEditable(specimen.isEditable());
+            jTextFieldDrawerNumber = this.getBasicJTextField();
             jTextFieldDrawerNumber.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "DrawerNumber",
                             jTextFieldDrawerNumber));
             jTextFieldDrawerNumber.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "DrawerNumber"));
-            jTextFieldDrawerNumber.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldDrawerNumber;
     }
@@ -2075,19 +2044,12 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getVerbatimLocalityJTextField() {
         if (jTextFieldVerbatimLocality == null) {
-            jTextFieldVerbatimLocality = new JTextField();
-            jTextFieldVerbatimLocality.setEditable(specimen.isEditable());
+            jTextFieldVerbatimLocality = this.getBasicJTextField();
             jTextFieldVerbatimLocality.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "VerbatimLocality",
                             jTextFieldVerbatimLocality));
             jTextFieldVerbatimLocality.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "VerbatimLocality"));
-            jTextFieldVerbatimLocality.addKeyListener(
-                    new java.awt.event.KeyAdapter() {
-                        public void keyTyped(java.awt.event.KeyEvent e) {
-                            thisPane.setStateToDirty();
-                        }
-                    });
         }
         return jTextFieldVerbatimLocality;
     }
@@ -2251,17 +2213,11 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldTribe() {
         if (jTextFieldTribe == null) {
-            jTextFieldTribe = new JTextField();
-            jTextFieldTribe.setEditable(specimen.isEditable());
+            jTextFieldTribe = this.getBasicJTextField();
             jTextFieldTribe.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "Tribe", jTextFieldTribe));
             jTextFieldTribe.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "Tribe"));
-            jTextFieldTribe.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldTribe;
     }
@@ -2365,19 +2321,13 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldVerbatimDate() {
         if (jTextFieldDateNos == null) {
-            jTextFieldDateNos = new JTextField();
-            jTextFieldDateNos.setEditable(specimen.isEditable());
+            jTextFieldDateNos = this.getBasicJTextField();
             // jTextFieldDateNos.setToolTipText("Date found on labels where date might
             // be either date collected or date emerged, or some other date");
             jTextFieldDateNos.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "DateNOS", jTextFieldDateNos));
             jTextFieldDateNos.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "DateNOS"));
-            jTextFieldDateNos.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
             //            InputUtility.addChangeListener(jTextFieldDateNos, e -> {
             //                // co-update the ISO-date field
             //                // TODO: note that this could be unwanted. possibly. On
@@ -2411,17 +2361,11 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldDateEmerged() {
         if (jTextFieldDateEmerged == null) {
-            jTextFieldDateEmerged = new JTextField();
-            jTextFieldDateEmerged.setEditable(specimen.isEditable());
+            jTextFieldDateEmerged = this.getBasicJTextField();
             jTextFieldDateEmerged.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "DateEmerged", jTextFieldDateEmerged));
             jTextFieldDateEmerged.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "DateEmerged"));
-            jTextFieldDateEmerged.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldDateEmerged;
     }
@@ -2433,8 +2377,7 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldDateEmergedIndicator() {
         if (jTextFieldDateEmergedIndicator == null) {
-            jTextFieldDateEmergedIndicator = new JTextField();
-            jTextFieldDateEmergedIndicator.setEditable(specimen.isEditable());
+            jTextFieldDateEmergedIndicator = this.getBasicJTextField();
             jTextFieldDateEmergedIndicator.setToolTipText(
                     "Verbatim text indicating that this is a date emerged.");
             jTextFieldDateEmergedIndicator.setInputVerifier(
@@ -2444,12 +2387,6 @@ georeference_pre.getLongDegString()); if
             jTextFieldDateEmergedIndicator.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class,
                             "DateEmergedIndicator"));
-            jTextFieldDateEmergedIndicator.addKeyListener(
-                    new java.awt.event.KeyAdapter() {
-                        public void keyTyped(java.awt.event.KeyEvent e) {
-                            thisPane.setStateToDirty();
-                        }
-                    });
         }
         return jTextFieldDateEmergedIndicator;
     }
@@ -2461,15 +2398,9 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldDateCollected() {
         if (jTextFieldDateCollected == null) {
-            jTextFieldDateCollected = new JTextField();
-            jTextFieldDateCollected.setEditable(specimen.isEditable());
+            jTextFieldDateCollected = this.getBasicJTextField();
             jTextFieldDateCollected.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "DateCollected"));
-            jTextFieldDateCollected.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldDateCollected;
     }
@@ -2481,8 +2412,7 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldDateCollectedIndicator() {
         if (jTextFieldDateCollectedIndicator == null) {
-            jTextFieldDateCollectedIndicator = new JTextField();
-            jTextFieldDateCollectedIndicator.setEditable(specimen.isEditable());
+            jTextFieldDateCollectedIndicator = this.getBasicJTextField();
             jTextFieldDateCollectedIndicator.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class,
                             "DateCollectedIndicator",
@@ -2490,12 +2420,6 @@ georeference_pre.getLongDegString()); if
             jTextFieldDateCollectedIndicator.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class,
                             "DateCollectedIndicator"));
-            jTextFieldDateCollectedIndicator.addKeyListener(
-                    new java.awt.event.KeyAdapter() {
-                        public void keyTyped(java.awt.event.KeyEvent e) {
-                            thisPane.setStateToDirty();
-                        }
-                    });
         }
         return jTextFieldDateCollectedIndicator;
     }
@@ -2507,7 +2431,7 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldInfraspecificName() {
         if (jTextFieldInfraspecificEpithet == null) {
-            jTextFieldInfraspecificEpithet = new JTextField();
+            jTextFieldInfraspecificEpithet = this.getBasicJTextField();
             jTextFieldInfraspecificEpithet.setEditable(specimen.isEditable());
             jTextFieldInfraspecificEpithet.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class,
@@ -2516,12 +2440,6 @@ georeference_pre.getLongDegString()); if
             jTextFieldInfraspecificEpithet.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class,
                             "InfraspecificEpithet"));
-            jTextFieldInfraspecificEpithet.addKeyListener(
-                    new java.awt.event.KeyAdapter() {
-                        public void keyTyped(java.awt.event.KeyEvent e) {
-                            thisPane.setStateToDirty();
-                        }
-                    });
         }
         return jTextFieldInfraspecificEpithet;
     }
@@ -2533,7 +2451,7 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldInfraspecificRank() {
         if (jTextFieldInfraspecificRank == null) {
-            jTextFieldInfraspecificRank = new JTextField();
+            jTextFieldInfraspecificRank = this.getBasicJTextField();
             jTextFieldInfraspecificRank.setEditable(specimen.isEditable());
             jTextFieldInfraspecificRank.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class,
@@ -2541,12 +2459,6 @@ georeference_pre.getLongDegString()); if
                             jTextFieldInfraspecificRank));
             jTextFieldInfraspecificRank.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "InfraspecificRank"));
-            jTextFieldInfraspecificRank.addKeyListener(
-                    new java.awt.event.KeyAdapter() {
-                        public void keyTyped(java.awt.event.KeyEvent e) {
-                            thisPane.setStateToDirty();
-                        }
-                    });
         }
         return jTextFieldInfraspecificRank;
     }
@@ -2558,17 +2470,11 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldAuthorship() {
         if (jTextFieldAuthorship == null) {
-            jTextFieldAuthorship = new JTextField();
-            jTextFieldAuthorship.setEditable(specimen.isEditable());
+            jTextFieldAuthorship = this.getBasicJTextField();
             jTextFieldAuthorship.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "Authorship", jTextFieldAuthorship));
             jTextFieldAuthorship.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "Authorship"));
-            jTextFieldAuthorship.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldAuthorship;
     }
@@ -2580,17 +2486,11 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldUnnamedForm() {
         if (jTextFieldUnnamedForm == null) {
-            jTextFieldUnnamedForm = new JTextField();
-            jTextFieldUnnamedForm.setEditable(specimen.isEditable());
+            jTextFieldUnnamedForm = this.getBasicJTextField();
             jTextFieldUnnamedForm.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "UnnamedForm", jTextFieldUnnamedForm));
             jTextFieldUnnamedForm.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "UnnamedForm"));
-            jTextFieldUnnamedForm.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldUnnamedForm;
     }
@@ -2602,18 +2502,27 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getVerbatimElevationJTextField() {
         if (jTextFieldMinElevation == null) {
-            jTextFieldMinElevation = new JTextField();
-            jTextFieldMinElevation.setEditable(specimen.isEditable());
-            jTextFieldMinElevation.setInputVerifier(
-                    MetadataRetriever.getInputVerifier(
-                            Specimen.class, "VerbatimElevation", jTextFieldMinElevation));
-            jTextFieldMinElevation.setToolTipText(
-                    MetadataRetriever.getFieldHelp(Specimen.class, "VerbatimElevation"));
-            jTextFieldMinElevation.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
+            jTextFieldMinElevation = this.getBasicJTextField();
+            jTextFieldMinElevation.setInputVerifier(new InputVerifier() {
+                @Override
+                public boolean verify(JComponent input) {
+                    if (jTextFieldMinElevation.getText().equals("")) {
+                        return true;
+                    }
+                    try {
+                        double val1 = Double.parseDouble(jTextFieldMinElevation.getText());
+                        if (jTextFieldMaxElevation.getText().equals("")) {
+                            return true;
+                        }
+                        double val2 = Double.parseDouble(jTextFieldMaxElevation.getText());
+                        return val1 <= val2;
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
                 }
             });
+            jTextFieldMinElevation.setToolTipText(
+                    MetadataRetriever.getFieldHelp(Specimen.class, "VerbatimElevation"));
         }
         return jTextFieldMinElevation;
     }
@@ -2625,19 +2534,13 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldCollectingMethod() {
         if (jTextFieldCollectingMethod == null) {
-            jTextFieldCollectingMethod = new JTextField();
+            jTextFieldCollectingMethod = this.getBasicJTextField();
             jTextFieldCollectingMethod.setEditable(specimen.isEditable());
             jTextFieldCollectingMethod.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "CollectingMethod",
                             jTextFieldCollectingMethod));
             jTextFieldCollectingMethod.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "CollectingMethod"));
-            jTextFieldCollectingMethod.addKeyListener(
-                    new java.awt.event.KeyAdapter() {
-                        public void keyTyped(java.awt.event.KeyEvent e) {
-                            thisPane.setStateToDirty();
-                        }
-                    });
         }
         return jTextFieldCollectingMethod;
     }
@@ -2693,18 +2596,12 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getQuestionsJTextField() {
         if (jTextFieldQuestions == null) {
-            jTextFieldQuestions = new JTextField();
-            jTextFieldQuestions.setEditable(specimen.isEditable());
+            jTextFieldQuestions =this.getBasicJTextField();
             jTextFieldQuestions.setBackground(MainFrame.BG_COLOR_QC_FIELD);
             jTextFieldQuestions.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "Questions", jTextFieldQuestions));
             jTextFieldQuestions.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "Questions"));
-            jTextFieldQuestions.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldQuestions;
     }
@@ -2756,18 +2653,12 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getAssociatedTaxonJTextField() {
         if (jTextFieldAssociatedTaxon == null) {
-            jTextFieldAssociatedTaxon = new JTextField();
-            jTextFieldAssociatedTaxon.setEditable(specimen.isEditable());
+            jTextFieldAssociatedTaxon = this.getBasicJTextField();
             jTextFieldAssociatedTaxon.setInputVerifier(
                     MetadataRetriever.getInputVerifier(Specimen.class, "AssociatedTaxon",
                             jTextFieldAssociatedTaxon));
             jTextFieldAssociatedTaxon.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "AssociatedTaxon"));
-            jTextFieldAssociatedTaxon.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldAssociatedTaxon;
     }
@@ -2779,17 +2670,11 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldHabitat() {
         if (jTextFieldHabitat == null) {
-            jTextFieldHabitat = new JTextField();
-            jTextFieldHabitat.setEditable(specimen.isEditable());
+            jTextFieldHabitat = this.getBasicJTextField();
             jTextFieldHabitat.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "Habitat", jTextFieldHabitat));
             jTextFieldHabitat.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "Habitat"));
-            jTextFieldHabitat.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldHabitat;
     }
@@ -2849,18 +2734,12 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldInferences() {
         if (jTextFieldInferences == null) {
-            jTextFieldInferences = new JTextField();
-            jTextFieldInferences.setEditable(specimen.isEditable());
+            jTextFieldInferences = this.getBasicJTextField();
             jTextFieldInferences.setBackground(MainFrame.BG_COLOR_ENT_FIELD);
             jTextFieldInferences.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "Inferences", jTextFieldInferences));
             jTextFieldInferences.setToolTipText(
                     MetadataRetriever.getFieldHelp(Specimen.class, "Inferences"));
-            jTextFieldInferences.addKeyListener(new java.awt.event.KeyAdapter() {
-                public void keyTyped(java.awt.event.KeyEvent e) {
-                    thisPane.setStateToDirty();
-                }
-            });
         }
         return jTextFieldInferences;
     }
@@ -3259,8 +3138,7 @@ georeference_pre.getLongDegString()); if
 
     private JTextField getJTextFieldMigrationStatus() {
         if (jTextFieldMigrationStatus == null) {
-            jTextFieldMigrationStatus = new JTextField();
-            jTextFieldMigrationStatus.setEditable(specimen.isEditable());
+            jTextFieldMigrationStatus = this.getBasicJTextField();
             // jLabelMigrationStatus.setBackground(null);
             // jLabelMigrationStatus.setBorder(null);
             jTextFieldMigrationStatus.setEditable(false);
@@ -3282,10 +3160,7 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getJTextFieldImgCount() {
         if (jTextFieldImageCount == null) {
-            jTextFieldImageCount = new JTextField();
-            if (specimen != null) {
-                jTextFieldImageCount.setEditable(specimen.isEditable());
-            }
+            jTextFieldImageCount = this.getBasicJTextField();
             jTextFieldImageCount.setForeground(Color.BLACK);
             jTextFieldImageCount.setEnabled(false);
             updateImageCount();
@@ -3310,12 +3185,43 @@ georeference_pre.getLongDegString()); if
         }
     }
 
-    private JTextField getTextFieldMaxElev() {
-        if (textFieldMaxElev == null) {
-            textFieldMaxElev = new JTextField();
-            textFieldMaxElev.setEditable(specimen.isEditable());
+    private JTextField getjTextFieldMaxElevation() {
+        if (jTextFieldMaxElevation == null) {
+            jTextFieldMaxElevation = this.getBasicJTextField();
+
+            jTextFieldMaxElevation.setInputVerifier(new InputVerifier() {
+                @Override
+                public boolean verify(JComponent input) {
+                    if (jTextFieldMaxElevation.getText().equals("")) {
+                        return true;
+                    }
+                    try {
+                        double val2 = Double.parseDouble(jTextFieldMaxElevation.getText());
+                        if (jTextFieldMinElevation.getText().equals("")) {
+                            return true;
+                        }
+                        double val1 = Double.parseDouble(jTextFieldMinElevation.getText());
+                        return val1 <= val2;
+                    } catch (NumberFormatException e) {
+                        return false;
+                    }
+                }
+            });
         }
-        return textFieldMaxElev;
+        return jTextFieldMaxElevation;
+    }
+
+    private JTextField getBasicJTextField() {
+        JTextField jTextField = new JTextField();
+        if (specimen != null) {
+            jTextField.setEditable(specimen.isEditable());
+        }
+        jTextField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent e) {
+                thisPane.setStateToDirty();
+            }
+        });
+        return jTextField;
     }
 
     private JComboBox<String> getComboBoxElevUnits() {
@@ -3331,8 +3237,7 @@ georeference_pre.getLongDegString()); if
 
     private JTextField getTextFieldMicrohabitat() {
         if (textFieldMicrohabitat == null) {
-            textFieldMicrohabitat = new JTextField();
-            textFieldMicrohabitat.setEditable(specimen.isEditable());
+            textFieldMicrohabitat = this.getBasicJTextField();
         }
         return textFieldMicrohabitat;
     }

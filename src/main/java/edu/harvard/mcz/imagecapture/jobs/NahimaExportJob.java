@@ -3,6 +3,7 @@ package edu.harvard.mcz.imagecapture.jobs;
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.NahimaManager;
+import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
@@ -13,11 +14,13 @@ import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.serializer.nahima.Specimen2JSONSerializer;
 import edu.harvard.mcz.imagecapture.utility.CastUtility;
+import edu.harvard.mcz.imagecapture.utility.FileUtility;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -96,8 +99,25 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             log.debug("Exporting specimen " + currentIndex + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
             notifyWorkStatusChanged("Exporting specimen " + currentIndex + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
 
+            // check if all images are present, otherwise, can skip anyway
+            boolean allFound = true;
+            for (ICImage image : specimen.getICImages()) {
+                String imagePath = FileUtility.findValidFilepath(
+                        ImageCaptureProperties.assemblePathWithBase(image.getPath(), image.getFilename()),
+                        image.getPath() + File.separator + image.getFilename(),
+                        image.getPath()
+                );
+                if (!(new File(imagePath)).exists()) {
+                    log.warn("Image file " + imagePath + " was not found.");
+                    allFound = false;
+                }
+            }
+            if (!allFound) {
+                continue;
+            }
+
             // map, associate where possible/needed
-            JSONObject specimenJson = null;
+            JSONObject specimenJson;
             JSONObject existingExport = null;
             try {
                 if (specimen.getNahimaId() != null && !specimen.getNahimaId().equals("")) {

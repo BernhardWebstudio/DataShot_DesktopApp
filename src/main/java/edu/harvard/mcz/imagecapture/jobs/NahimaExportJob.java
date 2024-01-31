@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class NahimaExportJob implements RunnableJob, Runnable {
     private static final Logger log = LoggerFactory.getLogger(NahimaExportJob.class);
@@ -37,7 +38,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     private int status = STATUS_RUNNING_FINE;
     private Exception lastError = null;
     private String oneSpecimenBarcode = null;
-    private List<Specimen> specimenToExport = null;
+    private List<Long> specimenToExport = null;
     private boolean anon = false;
 
     public void setOneSpecimenToExportBarcode(String oneSpecimenBarcode) {
@@ -45,7 +46,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     }
 
     public void setSpecimenToExport(List<Specimen> specimenToExport) {
-        this.specimenToExport = specimenToExport;
+        this.specimenToExport = specimenToExport.stream().map(spec -> spec.getSpecimenId()).collect(Collectors.toList());
     }
 
     public void goAnon() {
@@ -66,9 +67,9 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                 Map<String, Object> queryParams = new HashMap<>();
                 queryParams.put("nahimaExported", false);
                 queryParams.put("barcode", this.oneSpecimenBarcode);
-                specimenToExport = sls.findBy(queryParams);
+                specimenToExport = sls.findBy(queryParams).stream().map(spec -> spec.getSpecimenId()).collect(Collectors.toList());
             } else {
-                specimenToExport = sls.findToExport();
+                specimenToExport = sls.findIdsToExport();
             }
         }
         Collections.shuffle(specimenToExport);
@@ -94,8 +95,14 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 
         Specimen2JSONSerializer serializer = new Specimen2JSONSerializer(manager);
 
-        for (Specimen specimen : specimenToExport) {
+        for (Long specimenId : specimenToExport) {
+            Specimen specimen = sls.findById(specimenId);
             currentIndex = currentIndex + 1;
+            // check if it hasn't been exported by another instance already
+            if (specimen.getDateLastNahimaUpdated() != null && specimen.getDateLastNahimaUpdated().after(specimen.getDateLastUpdated())) {
+                continue;
+            }
+
             log.debug("Exporting specimen " + currentIndex + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
             notifyWorkStatusChanged("Exporting specimen " + currentIndex + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
 

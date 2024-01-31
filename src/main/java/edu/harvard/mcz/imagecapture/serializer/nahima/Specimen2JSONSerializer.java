@@ -368,6 +368,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         if (date == null || date.equals("")) {
             return null;
         }
+        date = date.trim();
         try {
             Date parsedDate = DateUtils.parseDate(date);
             return dateToNahima(parsedDate);

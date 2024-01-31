@@ -464,7 +464,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
      *
      * @return
      */
-    public List<Specimen> findToExport() {
+    public List<Long> findIdsToExport() {
         try {
             Session session = this.getSession();
             try {
@@ -480,7 +480,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                 Query q = session.createQuery(cr);
                 List<Long> ids = q.list();
                 session.getTransaction().commit();
-                return this.findByIds(ids);
+                return ids;
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
                 log.error("find images failed", e);

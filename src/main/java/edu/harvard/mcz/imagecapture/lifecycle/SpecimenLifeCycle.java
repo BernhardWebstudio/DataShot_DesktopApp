@@ -380,8 +380,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             session.beginTransaction();
             List<Specimen> results = null;
             try {
-                Query query = session.createQuery(
-                        "SELECT * FROM Specimen s WHERE s.barcode LIKE :barcode");
+                Query query = session.createQuery("FROM Specimen s WHERE s.barcode LIKE :barcode", Specimen.class);
                 query.setParameter("barcode", barcode);
                 results = (List<Specimen>) query.list();
                 log.debug("find query successful, result size: " + results.size());
@@ -409,7 +408,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             List<Specimen> results = null;
             try {
                 results = (List<Specimen>) session
-                        .createQuery("SELECT FROM Specimen s ORDER BY s.barcode")
+                        .createQuery("FROM Specimen s ORDER BY s.barcode", Specimen.class)
                         .list();
                 log.debug("find all successful, result size: " + results.size());
                 session.getTransaction().commit();
@@ -438,7 +437,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             session.beginTransaction();
             List<Specimen> results = null;
             try {
-                Query query = session.createQuery("SELECT FROM Specimen s ORDER BY s.barcode");
+                Query query = session.createQuery("FROM Specimen s ORDER BY s.barcode", Specimen.class);
                 query.setFirstResult(startAt);
                 query.setFetchSize(fetchSize);
                 results = (List<Specimen>) query.list();
@@ -569,7 +568,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         StringBuffer result = new StringBuffer();
         try {
             String sql =
-                    "Select count(*), workFlowStatus from Specimen group by workFlowStatus ";
+                    "SELECT COUNT(*), workFlowStatus from Specimen GROUP BY workFlowStatus ";
             Session session = this.getSession();
             try {
                 result.append("Specimen records: \n");
@@ -607,7 +606,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         ArrayList<GenusSpeciesCount> result = new ArrayList<GenusSpeciesCount>();
         try {
             String sql =
-                    "Select count(S), genus, specificEpithet from Specimen S WHERE S.workFlowStatus = 'Taxon Entered' group by S.genus, S.specificEpithet ";
+                    "SELECT COUNT(S), genus, specificEpithet from Specimen S WHERE S.workFlowStatus = 'Taxon Entered' GROUP BY S.genus, S.specificEpithet ";
             Session session = this.getSession();
             try {
                 session.beginTransaction();
@@ -644,12 +643,12 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         ArrayList<VerbatimCount> result = new ArrayList<VerbatimCount>();
         try {
             String sql =
-                    "Select count(S), S.verbatimLocality, S.dateNos, S.verbatimCollector, S.verbatimCollection, "
+                    "SELECT COUNT(S), S.verbatimLocality, S.dateNos, S.verbatimCollector, S.verbatimCollection, "
                             + "S.verbatimNumbers, S.verbatimUnclassifiedText "
                             + "from Specimen S "
                             + "where S.workFlowStatus = 'Verbatim Entered' "
                             +
-                            "group by S.verbatimLocality, S.dateNos, S.verbatimCollector, S.verbatimCollection, "
+                            "GROUP BY S.verbatimLocality, S.dateNos, S.verbatimCollector, S.verbatimCollection, "
                             + "S.verbatimNumbers, S.verbatimUnclassifiedText ";
             Session session = this.getSession();
             try {
@@ -692,7 +691,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             try {
                 session.beginTransaction();
                 Query query = session.createQuery(
-                        "From Specimen as s WHERE s.genus = ? and s.specificEpithet = ? and s.workFlowStatus = ? ");
+                        "From Specimen s WHERE s.genus = ? and s.specificEpithet = ? and s.workFlowStatus = ? ", Specimen.class);
                 query.setParameter(0, genus);
                 query.setParameter(1, specificEpithet);
                 query.setParameter(2, workflowStatus);
@@ -722,7 +721,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             try {
                 session.beginTransaction();
                 Query query = session.createQuery(
-                        "Select count(s), s.genus, s.specificEpithet "
+                        "SELECT COUNT(s), s.genus, s.specificEpithet "
                                 + "From Specimen as s "
                                 + "where s.verbatimLocality = ? and s.dateNos = ? "
                                 + "   and s.verbatimCollector = ? and s.verbatimCollection = ? "
@@ -852,7 +851,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         List<Specimen> specimens = findByBarcode(barcode);
         if (specimens.size() == 0) {
             return 0; // specimen not found
-        } else if (specimens.size() >= 1) {
+        } else {
             Specimen specimen = specimens.get(0);
 
             // this does not work - need to do it manually as below!!

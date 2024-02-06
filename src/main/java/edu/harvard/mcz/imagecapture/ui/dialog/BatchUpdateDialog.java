@@ -110,7 +110,7 @@ public class BatchUpdateDialog extends JDialog {
 
     private void doApplyChange() {
         String fieldName = ((UpdateableField) this.getFieldSelectionJComboBox().getSelectedItem()).getDatabaseDescription();
-        String conditionQuery = "WHERE " + fieldName + " LIKE :fromValue AND (s.nahimaExported = FALSE OR s.nahimaExported IS NULL)";
+        String conditionQuery = "WHERE " + fieldName + " LIKE :fromValue"; //  AND (s.nahimaExported = FALSE OR s.nahimaExported IS NULL)
 
         Session session;
         try {

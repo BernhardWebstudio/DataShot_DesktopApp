@@ -481,12 +481,27 @@ public class NahimaManager extends AbstractRestClient {
                 if (key.startsWith("_")) {
                     continue;
                 }
-                // TODO: compare more than just Strings
+                if (selectionHelper.get(key) instanceof JSONObject && selectionHelper.getJSONObject(key).has("en-US")) {
+                    requiredMatches += 1;
+
+                    if (testObj.has(key) && Objects.equals(testObj.getJSONObject(key).getString("en-US"), selectionHelper.getJSONObject(key).getString("en-US"))) {
+                        matches += 1;
+                    }
+                }
+                // TODO: compare more than just Strings, Integers and
                 if (selectionHelper.get(key) instanceof String && !((String) selectionHelper.get(key)).contains("DataShot")) {
                     requiredMatches += 1;
+
+                    if (selectionHelper.get(key).equals(testObj.has(key) ? testObj.get(key) : null)) {
+                        matches += 1;
+                    }
                 }
-                if (selectionHelper.get(key).equals(testObj.has(key) ? testObj.get(key) : null)) {
-                    matches += 1;
+                if (selectionHelper.get(key) instanceof Integer) {
+                    requiredMatches += 1;
+
+                    if (testObj.has(key) && testObj.getInt(key) == selectionHelper.getInt(key)) {
+                        matches += 1;
+                    }
                 }
             }
             if (matches >= requiredMatches && requiredMatches > 0) {
@@ -553,7 +568,7 @@ public class NahimaManager extends AbstractRestClient {
             // create
             JSONObject toCreate = wrapForCreation(inner, objectType, mask, omitPool);
             JSONObject createdResponse = this.createObjectInNahima(toCreate, objectType);
-            Thread.sleep(250); // this is a heuristic number and is here to improve reliability, as Nahima does not usually claim creation immediately.
+            Thread.sleep(50); // this is a heuristic number and is here to improve reliability, as Nahima does not usually claim creation immediately.
             if (createdResponse.has("_uuid")) {
                 try {
                     results = this.findObjectByUuid(createdResponse.getString("_uuid"));
@@ -932,7 +947,8 @@ public class NahimaManager extends AbstractRestClient {
         return this.resolveOrCreateInteractive(searchString, "gazetteer", "gazetteer__all_fields", new JSONObject(new HashMap<>() {{
             put("ortsname", wrapInLan(specimen.getPrimaryDivison()));
             put("_id_parent", parentId == null ? JSONObject.NULL : parentId); // Might throw NullPointerException. If we find the location, it is never called, therefore, we only have a problem if neither location nor country are found
-            put("isocode3166_2", specimen.getPrimaryDivisonISO());
+//            put("isocode3166_2", specimen.getPrimaryDivisonISO());
+            put("isocode3166_alpha_2", specimen.getPrimaryDivisonISO());
         }}));
     }
 

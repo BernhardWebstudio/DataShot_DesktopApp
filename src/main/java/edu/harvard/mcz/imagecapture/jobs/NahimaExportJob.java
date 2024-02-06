@@ -131,6 +131,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                     try {
                         existingExport = manager.findObjectByGlobalObjectId(specimen.getNahimaId());
                     } catch (IOException | InterruptedException e) {
+                        log.warn("NoExport: skip specimen exception");
                         throw new SkipSpecimenException();
                     }
                     specimenJson = serializer.serialize2JSON(specimen, existingExport);
@@ -138,12 +139,14 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                     specimenJson = serializer.serialize2JSON(specimen);
                 }
             } catch (SkipSpecimenException e) {
+                log.debug("NoExport: skip specimen exception");
                 continue;
             }
 
             if (specimenJson == null) {
                 // might want to add some checks
                 // to make sure this only happens when the SkipSpecimenException is thrown
+                log.debug("NoExport: Specimen json null, cannot upload stuff");
                 continue;
             }
 
@@ -266,6 +269,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             specimen.setDateLastNahimaUpdated(new Date());
             if (specimen.getSpecimenId() != null && specimen.getSpecimenId() > 0) {
                 try {
+                    log.debug("No specimen id, will not update the database");
                     sls.attachDirty(specimen);
                 } catch (SaveFailedException e) {
                     lastError = e;
@@ -273,6 +277,8 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                     this.status = STATUS_DATASHOT_FAILED;
                     return;
                 }
+            } else {
+                log.debug("No specimen id, will not update the database");
             }
             notifyProgressChanged();
         }

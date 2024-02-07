@@ -52,6 +52,7 @@ public class SpecimenController {
     private TableModel model =
             null; // model in which specimen can be found along with other specimens.
     private int currentRow = -1;     // row of this specimen in the table model.
+    private int currentColumn = -1; // column of this specimen in the table model
     private boolean inTable = false; // true if model/row apply and specimen one
     // of list in a table model.
     private List<DataChangeListener> listeners;
@@ -64,7 +65,6 @@ public class SpecimenController {
                     "Can't create a specimen controller with a null specimen");
         }
         specimen = aSpecimen;
-        currentRow = -1;
         inTable = false;
     }
 
@@ -80,7 +80,7 @@ public class SpecimenController {
      * @throws NoSuchRecordException
      */
     public SpecimenController(Specimen aSpecimen, SpecimenListTableModel aModel,
-                              JTable aTable, int theCurrentRow)
+                              JTable aTable, int theCurrentRow, int theCurrentColumn)
             throws NoSuchRecordException {
         if (aSpecimen == null) {
             throw new NoSuchRecordException(
@@ -91,6 +91,7 @@ public class SpecimenController {
         if (aModel != null) {
             model = aModel;
             currentRow = theCurrentRow;
+            currentColumn = theCurrentColumn;
             table = aTable;
             inTable = true;
         }
@@ -103,7 +104,6 @@ public class SpecimenController {
             throw new NoSuchRecordException("No specimen found with SpecimenId = [" +
                     aSpecimenID.toString() + "]");
         }
-        currentRow = -1;
         inTable = false;
     }
 
@@ -328,6 +328,14 @@ public class SpecimenController {
         if (updatedSpecimen != null) {
             specimen = updatedSpecimen;
         }
+
+        updateModel();
+    }
+
+    public void updateModel() {
+        if (inTable) {
+            model.setValueAt(specimen, currentRow, currentColumn);
+        }
     }
 
     public void save(Specimen copiedSpecimen) throws SaveFailedException {
@@ -348,6 +356,7 @@ public class SpecimenController {
         // reload the specimen
         // Why???
         // specimen = s.findById(specimen.getSpecimenId());
+        updateModel();
     }
 
     public void displayInEditor() {

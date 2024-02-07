@@ -34,6 +34,7 @@ import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.MouseWheelScrollListener;
 import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor;
 import edu.harvard.mcz.imagecapture.ui.component.JAccordionPanel;
+import edu.harvard.mcz.imagecapture.ui.component.JTableCellTabbing;
 import edu.harvard.mcz.imagecapture.ui.component.JTableWithRowBorder;
 import edu.harvard.mcz.imagecapture.ui.dialog.CitedInDialog;
 import edu.harvard.mcz.imagecapture.ui.dialog.GeoreferenceDialog;
@@ -1766,6 +1767,18 @@ public class SpecimenDetailsViewPane extends JPanel {
             try {
                 jTableNumbers = new JTableWithRowBorder(
                         new NumberTableModel(specimen.getNumbers()));
+//                {
+//                    public void changeSelection(final int row, final int column, boolean toggle, boolean extend) {
+//                        super.changeSelection(row, column, toggle, extend);
+//                        jTableNumbers.editCellAt(row, column);
+//                        jTableNumbers.transferFocus();
+//                    }
+//                };
+                if (specimen.getNumbers().size() > 0) {
+                    JTableCellTabbing.setTabMapping(
+                            jTableNumbers, 0, specimen.getNumbers().size(), 0, 2
+                    );
+                }
             } catch (NullPointerException e) {
                 jTableNumbers = new JTableWithRowBorder(new NumberTableModel());
             }
@@ -1796,6 +1809,8 @@ public class SpecimenDetailsViewPane extends JPanel {
         field1.setInputVerifier(
                 MetadataRetriever.getInputVerifier(Number.class, "Number", field1));
         field1.setVerifyInputWhenFocusTarget(true);
+        jTableNumbers.setColumnSelectionAllowed(true);
+        jTableNumbers.setRowSelectionAllowed(true);
         jTableNumbers.getColumnModel()
                 .getColumn(NumberTableModel.COLUMN_NUMBER)
                 .setCellEditor(new ValidatingTableCellEditor(field1));
@@ -1840,6 +1855,10 @@ public class SpecimenDetailsViewPane extends JPanel {
                                 ((NumberTableModel) jTableNumbers.getModel())
                                         .addNumber(new Number(specimen, "", ""));
                                 thisPane.setStateToDirty();
+
+                                JTableCellTabbing.setTabMapping(
+                                        jTableNumbers, 0, jTableNumbers.getRowCount(), 0, 2
+                                );
                             }
                         });
             } catch (Exception e) {
@@ -2596,7 +2615,7 @@ georeference_pre.getLongDegString()); if
      */
     private JTextField getQuestionsJTextField() {
         if (jTextFieldQuestions == null) {
-            jTextFieldQuestions =this.getBasicJTextField();
+            jTextFieldQuestions = this.getBasicJTextField();
             jTextFieldQuestions.setBackground(MainFrame.BG_COLOR_QC_FIELD);
             jTextFieldQuestions.setInputVerifier(MetadataRetriever.getInputVerifier(
                     Specimen.class, "Questions", jTextFieldQuestions));

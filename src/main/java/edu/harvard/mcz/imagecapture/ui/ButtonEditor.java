@@ -159,6 +159,7 @@ public class ButtonEditor
             log.debug("Debug {}", e.getSource());
             log.debug("Debug {}", table);
             int row = table.getEditingRow();
+            int col = table.getEditingColumn();
             // Stop editing - note, we need to have gotten e.getSource.getParent and
             // getEditingRow first.
             fireEditingStopped(); // Make the renderer reappear.
@@ -182,7 +183,7 @@ public class ButtonEditor
                                 try {
                                     SpecimenController sc = new SpecimenController(
                                             (Specimen) targetId,
-                                            (SpecimenListTableModel) table.getModel(), table, row);
+                                            (SpecimenListTableModel) table.getModel(), table, row, col);
                                     if (table.getParent()
                                             .getParent()
                                             .getParent()
@@ -206,7 +207,7 @@ public class ButtonEditor
                                     // Request isn't coming from a SpecimenListTableModel
                                     // View just the specimen record.
                                     SpecimenController sc =
-                                            new SpecimenController((Specimen) targetId);
+                                            new SpecimenController((Specimen) targetId, (SpecimenListTableModel) table.getModel(), table, row, col);
                                     sc.displayInEditor();
                                 }
                             } else {
@@ -264,7 +265,7 @@ public class ButtonEditor
                     SpecimenController verbCont;
                     try {
                         verbCont =
-                                new SpecimenController(toTranscribe.get(0), stm, stable, 0);
+                                new SpecimenController(toTranscribe.get(0), stm, stable, 0, 0);
                         VerbatimCaptureDialog dialog =
                                 new VerbatimCaptureDialog(toTranscribe.get(0), verbCont);
                         dialog.setVisible(true);

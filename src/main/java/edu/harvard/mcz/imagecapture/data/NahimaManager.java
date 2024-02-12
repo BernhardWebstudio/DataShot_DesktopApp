@@ -143,7 +143,7 @@ public class NahimaManager extends AbstractRestClient {
         for (ICImage image : specimen.getICImages()) {
             // first, filter whether this particular image is already online, part of this specimen
             boolean foundExisting = false;
-            if (existingExport != null) {
+            if (existingExport != null && existingExport.getJSONObject("entomologie").has("_reverse_nested:entomologie_mediaassetpublic:entomologie")) {
                 // check if the image has already been uploaded
                 JSONArray mediaassets = existingExport.getJSONObject("entomologie").getJSONArray("_reverse_nested:entomologie_mediaassetpublic:entomologie");
                 for (int i = 0; i < mediaassets.length(); ++i) {

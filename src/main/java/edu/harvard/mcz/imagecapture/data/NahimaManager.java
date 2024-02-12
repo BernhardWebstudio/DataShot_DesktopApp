@@ -460,6 +460,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     protected JSONObject findSimilarMatch(JSONArray foundObjects, String objectType, JSONObject selectionHelper, boolean allowDuplicates) {
         ArrayList<Integer> possiblyCorrectIndices = new ArrayList<Integer>();
+        ArrayList<Integer> nrOfAdditionalKeysForPossiblyCorrectIndices = new ArrayList<Integer>();
         ArrayList<Integer> carefulPossiblyCorrectIndices = new ArrayList<Integer>();
         ArrayList<JSONObject> objectsToCompare = new ArrayList<JSONObject>();
         HashMap<Integer, Integer> newIndicesToOldIndices = new HashMap<Integer, Integer>();
@@ -472,43 +473,58 @@ public class NahimaManager extends AbstractRestClient {
                 newIndicesToOldIndices.put(objectsToCompare.size() - 1, i);
             }
         }
+        int requiredMatches = 0;
+        ArrayList<String> keysToMatch = new ArrayList<String>();
+        for (Iterator<String> it = selectionHelper.keys(); it.hasNext(); ) {
+            String key = it.next();
+            if (key.startsWith("_")) {
+                continue;
+            }
+            if (selectionHelper.get(key) instanceof JSONObject && selectionHelper.getJSONObject(key).has("en-US")) {
+                requiredMatches += 1;
+                keysToMatch.add(key);
+            } else if (selectionHelper.get(key) instanceof String && !((String) selectionHelper.get(key)).contains("DataShot")) {
+                keysToMatch.add(key);
+                requiredMatches += 1;
+            }
+        }
+
         for (int i = 0; i < objectsToCompare.size(); ++i) {
             JSONObject testObj = objectsToCompare.get(i);
             int matches = 0;
-            int requiredMatches = 0;
-            for (Iterator<String> it = selectionHelper.keys(); it.hasNext(); ) {
-                String key = it.next();
-                if (key.startsWith("_")) {
-                    continue;
-                }
+            for (String key : keysToMatch) {
                 if (selectionHelper.get(key) instanceof JSONObject && selectionHelper.getJSONObject(key).has("en-US")) {
-                    requiredMatches += 1;
-
                     if (testObj.has(key) && Objects.equals(testObj.getJSONObject(key).getString("en-US"), selectionHelper.getJSONObject(key).getString("en-US"))) {
                         matches += 1;
                     }
                 }
                 // TODO: compare more than just Strings, Integers and
                 if (selectionHelper.get(key) instanceof String && !((String) selectionHelper.get(key)).contains("DataShot")) {
-                    requiredMatches += 1;
-
                     if (selectionHelper.get(key).equals(testObj.has(key) ? testObj.get(key) : null)) {
                         matches += 1;
                     }
                 }
                 if (selectionHelper.get(key) instanceof Integer) {
-                    requiredMatches += 1;
-
                     if (testObj.has(key) && testObj.getInt(key) == selectionHelper.getInt(key)) {
                         matches += 1;
                     }
                 }
             }
             if (matches >= requiredMatches && requiredMatches > 0) {
+                int numAdditionalKeys = -matches;
+                for (Iterator<String> it = testObj.keys(); it.hasNext(); ) {
+                    String key = it.next();
+                    if (key.startsWith("_")) {
+                        continue;
+                    }
+                    numAdditionalKeys += 1;
+                }
+
                 try {
                     JSONObject pool = (JSONObject) testObj.get("_pool");
                     if (((JSONObject) pool.get("pool")).getInt("_id") == NahimaManager.defaultPoolId) {
                         possiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
+                        nrOfAdditionalKeysForPossiblyCorrectIndices.add(numAdditionalKeys);
                     }
                 } catch (Exception e) {
                     log.error("Could not verify pool", e);
@@ -527,6 +543,8 @@ public class NahimaManager extends AbstractRestClient {
             if (allowDuplicates || (possiblyCorrectIndices.size() == 0 && carefulPossiblyCorrectIndices.size() == 1)) {
                 return foundObjects.getJSONObject(carefulPossiblyCorrectIndices.get(0));
             }
+        } else {
+            log.warn("Did not find any similar matches. Required matches: " + requiredMatches);
         }
         return null;
     }
@@ -574,7 +592,7 @@ public class NahimaManager extends AbstractRestClient {
                     results = this.findObjectByUuid(createdResponse.getString("_uuid"));
                 } catch (IOException ex) {
                     // maybe handle? don't know...
-                    log.error("Failed to find object: {}", ex);
+                    log.error("Failed to find object with name '" + name + "' of type '" + objectType + "' by uuid: {}", ex);
                 }
             } else {
                 // TODO: it would be simpler to store the created in cache. But well... current format does not allow
@@ -644,7 +662,8 @@ public class NahimaManager extends AbstractRestClient {
             // TODO: check compliance, does it really match well? We use "must", so let's hope so, but the resolution could still go wrong.
             return (JSONObject) foundObjects.get(0);
         } else {
-            log.info("Got " + foundObjects.length() + " != 1 " + objectType + " status. {}", results);
+            boolean createSpecimen = false;
+            log.info("Got " + foundObjects.length() + " != 1 objects of type '" + objectType + "'. {}", results);
             // create / select correct
             if (foundObjects.length() > 1) {
                 JSONObject perfectMatch = findExactMatch(foundObjects, objectType, inner);
@@ -657,6 +676,8 @@ public class NahimaManager extends AbstractRestClient {
                 if (bestMatch != null) {
                     log.info("Found 1 best match, using it.");
                     return bestMatch;
+                } else {
+                    log.info("Did not find similar match");
                 }
                 log.info("Asking user to select " + name + " (" + objectType + ") from results.", results);
                 // otherwise, ask the user to select the correct one
@@ -665,19 +686,26 @@ public class NahimaManager extends AbstractRestClient {
                 )) {
                     return foundObjects.getJSONObject(0);
                 }
-                return this.askToChooseObject(foundObjects, name, objectType, mask, inner, omitPool);
+
+                if (!this.interactive) {
+                    createSpecimen = true;
+                } else {
+                    return this.askToChooseObject(foundObjects, name, objectType, mask, inner, omitPool);
+                }
             } else {
                 assert (foundObjects.length() == 0);
-                JSONObject created = askToCreate(inner, name, objectType, mask, omitPool);
-                // TODO: the following could fail if the search and created object do not really align
-                JSONObject found = this.resolveStringSearchToOne(name, objectType, true);
-                if (found == null && created != null) {
-                    return created;
-                }
-                return found;
+                createSpecimen = true;
             }
+
+            assert(createSpecimen);
+            JSONObject created = askToCreate(inner, name, objectType, mask, omitPool);
+            // TODO: the following could fail if the search and created object do not really align
+            JSONObject found = this.resolveStringSearchToOne(name, objectType, true);
+            if (found == null && created != null) {
+                return created;
+            }
+            return found;
         }
-        // return null;
     }
 
     public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
@@ -720,6 +748,7 @@ public class NahimaManager extends AbstractRestClient {
                 case VerifyJSONDialog.RETURN_CHANGE_SEARCH:
                     return askToChangeSearch(name, objectType, inner, mask, omitPool);
                 case VerifyJSONDialog.RETURN_SKIP:
+                    log.debug("NoExport: User requested skip specimen");
                     throw new SkipSpecimenException();
             }
         } else {
@@ -743,7 +772,8 @@ public class NahimaManager extends AbstractRestClient {
     public JSONObject askToChooseObject(JSONArray foundObjects, String name, String objectType, String mask, JSONObject inner, boolean omitPool) throws SkipSpecimenException, IOException, InterruptedException, InvocationTargetException {
         // TODO: implement a better auto-choose algorithm
         if (!this.interactive) {
-            throw new SkipSpecimenException();
+            log.debug("NoExport: askToChooseObject will not be run without interactive. To choose from: " + foundObjects.toString() + " for " + inner.toString());
+//            throw new SkipSpecimenException();
         }
 
         final int[] choice = new int[1];
@@ -763,7 +793,7 @@ public class NahimaManager extends AbstractRestClient {
                 assert (selection[0] != null && !selection[0].isEmpty());
                 return selection[0];
             case ChooseFromJArrayDialog.RETURN_SKIP:
-                log.debug("User chose to skip specimen");
+                log.debug("NoExport: User chose to skip specimen");
                 throw new SkipSpecimenException();
             case ChooseFromJArrayDialog.RETURN_CREATE_NEW:
                 log.debug("User chose to create new");
@@ -835,9 +865,9 @@ public class NahimaManager extends AbstractRestClient {
             actualNamePart = personNameSplit[0];
             String datePart = personNameSplit[1];
             String[] splitDatePart = Arrays.stream(datePart.split("-")).map(String::trim).toArray(String[]::new);
-            birthdate = splitDatePart[0].replace("(", "").replace(")", "");
+            birthdate = splitDatePart[0].replace("(", "").replace(")", "").replace("*", "").trim();
             if (splitDatePart.length > 1) {
-                deathdate = splitDatePart[1].replace(")", "");
+                deathdate = splitDatePart[1].replace(")", "").trim();
             }
         }
         if (actualNamePart.contains(",")) {
@@ -850,7 +880,7 @@ public class NahimaManager extends AbstractRestClient {
             lastName = splitName.length > 1 ? splitName[splitName.length - 1] : "";
         }
         // inner class stuff
-        String finalActualNamePart = actualNamePart;
+        String finalActualNamePart = actualNamePart.trim();
         String finalFirstName = firstName;
         String finalLastName = lastName;
         HashMap<String, Object> personHashMap = new HashMap<>() {{
@@ -945,10 +975,10 @@ public class NahimaManager extends AbstractRestClient {
         JSONObject finalParent = parent;
         Integer parentId = resolveId(finalParent, "gazetteer");
         return this.resolveOrCreateInteractive(searchString, "gazetteer", "gazetteer__all_fields", new JSONObject(new HashMap<>() {{
-            put("ortsname", wrapInLan(specimen.getPrimaryDivison()));
+            put("ortsname", wrapInLan(specimen.getPrimaryDivison().trim()));
             put("_id_parent", parentId == null ? JSONObject.NULL : parentId); // Might throw NullPointerException. If we find the location, it is never called, therefore, we only have a problem if neither location nor country are found
 //            put("isocode3166_2", specimen.getPrimaryDivisonISO());
-            put("isocode3166_alpha_2", specimen.getPrimaryDivisonISO());
+            put("isocode3166_alpha_2", specimen.getPrimaryDivisonISO().trim());
         }}));
     }
 
@@ -960,7 +990,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolveTypeStatus(String status) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return this.resolveOrCreateInteractive(status, "typusstatus", "typusstatus_all_fields_1", new JSONObject(new HashMap<>() {{
-            put("name", status);
+            put("name", status.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}), false, 0);
     }
@@ -973,7 +1003,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolveUnitFor(String unit, String unitSubject) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return this.resolveOrCreateInteractive(unit, unitSubject, unitSubject + "_all_fields", new JSONObject(new HashMap<>() {{
-            put("name", unit);
+            put("name", unit.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}));
     }
@@ -985,7 +1015,7 @@ public class NahimaManager extends AbstractRestClient {
      * @return the nahima returned object if only one
      */
     public JSONObject resolveOtherNrType(String nrType) throws IOException, InterruptedException {
-        return this.resolveNameBemerkungObject(nrType, "id_typen", "id_typen_all_fields");
+        return this.resolveNameBemerkungObject(nrType.trim(), "id_typen", "id_typen_all_fields");
     }
 
     /**
@@ -995,7 +1025,7 @@ public class NahimaManager extends AbstractRestClient {
      * @return the nahima returned object if only one
      */
     public JSONObject resolveCollectionMethod(String method) throws IOException, InterruptedException {
-        return resolveNameBemerkungObject(method, "sammlungsmethoden", "sammlungsmethoden__all_fields");
+        return resolveNameBemerkungObject(method.trim(), "sammlungsmethoden", "sammlungsmethoden__all_fields");
     }
 
     /**
@@ -1005,7 +1035,7 @@ public class NahimaManager extends AbstractRestClient {
      * @return the nahima returned object if only one
      */
     public JSONObject resolveUnitForHeight(String unit) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
-        return resolveUnitFor(unit, "einheitenfuerhoehe");
+        return resolveUnitFor(unit.trim(), "einheitenfuerhoehe");
     }
 
     /**
@@ -1015,7 +1045,7 @@ public class NahimaManager extends AbstractRestClient {
      * @return the nahima returned object if only one
      */
     public JSONObject resolveUnitForErrorRadius(String unit) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
-        return resolveUnitFor(unit, "einheitenfuerdenfehlerradius");
+        return resolveUnitFor(unit.trim(), "einheitenfuerdenfehlerradius");
     }
 
     /**
@@ -1024,7 +1054,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param family the family to search for resp. create
      */
     public JSONObject resolveFamily(String family) throws IOException, InterruptedException {
-        return resolveOrCreate(family, "familien", "familien_all_fields", new JSONObject(new HashMap<>() {{
+        return resolveOrCreate(family.trim(), "familien", "familien_all_fields", new JSONObject(new HashMap<>() {{
             put("familielat", family);
         }}));
     }
@@ -1035,7 +1065,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param family the subfamily's name to resolve
      */
     public JSONObject resolveSubFamily(String family) throws IOException, InterruptedException {
-        return resolveOrCreate(family, "unterfamilien", "unterfamilien_all_fields", new JSONObject(new HashMap<>() {{
+        return resolveOrCreate(family.trim(), "unterfamilien", "unterfamilien_all_fields", new JSONObject(new HashMap<>() {{
             put("unterfamilielat", family);
         }}));
     }
@@ -1047,7 +1077,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolveSpecificEpithet(String specificEpithet) throws IOException, InterruptedException {
         return resolveOrCreate(specificEpithet, "art", "art_all_fields", new JSONObject(new HashMap<>() {{
-            put("artlat", specificEpithet);
+            put("artlat", specificEpithet.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}));
     }
@@ -1059,7 +1089,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolveSubSpecificEpithet(String subspecificEpithet) throws IOException, InterruptedException {
         return resolveOrCreate(subspecificEpithet, "subspezifischeart", "subspezifischeart_all_fields", new JSONObject(new HashMap<>() {{
-            put("subspezifischeart", subspecificEpithet);
+            put("subspezifischeart", subspecificEpithet.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}));
     }
@@ -1072,7 +1102,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolveAuthorship(String authorship) throws IOException, InterruptedException {
         return resolveOrCreate(authorship, "authors", "author__all_fields", new JSONObject(new HashMap<>() {{
-            put("autor", authorship);
+            put("autor", authorship.trim());
             put("_nested:authors__personen", new JSONArray());
         }}), true);
     }
@@ -1084,7 +1114,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolveInfraspecificEpithet(String infraspecificEpithet) throws IOException, InterruptedException {
         return resolveOrCreate(infraspecificEpithet, "infraspezifischetaxon", "infraspezifischetaxon_all_fields", new JSONObject(new HashMap<>() {{
-            put("infraspezifischetaxon", infraspecificEpithet);
+            put("infraspezifischetaxon", infraspecificEpithet.trim());
             put("abkuerzung", JSONObject.NULL);
             put("_nested:infraspezifischetaxon__trivialnamen", new JSONArray());
             put("_nested:infraspezifischetaxon__referenzenfuerintraspezifischestaxon", new JSONArray());
@@ -1107,10 +1137,10 @@ public class NahimaManager extends AbstractRestClient {
                 put("value", (citedInPublicationYear != null && !citedInPublication.equals("")) ? citedInPublicationYear : "0000");
             }}));
             put("publikationstitel", new JSONObject(new HashMap<>() {{
-                put("en-US", citedInPublication);
+                put("en-US", citedInPublication.trim());
             }}));
-            put("publikationsreferenzzbdoi", citedInPublicationLink);
-            put("publikationskommentar", citedInPublicationComment);
+            put("publikationsreferenzzbdoi", citedInPublicationLink.trim());
+            put("publikationskommentar", citedInPublicationComment.trim());
         }}));
     }
 
@@ -1120,7 +1150,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param infraspecificRank the subfamily's name to resolve
      */
     public JSONObject resolveInfraspecificRank(String infraspecificRank) throws IOException, InterruptedException {
-        return resolveNameBemerkungObject(infraspecificRank, "infraspezifischerrang", "id_typen_all_fields_1");
+        return resolveNameBemerkungObject(infraspecificRank.trim(), "infraspezifischerrang", "id_typen_all_fields_1");
     }
 
     /**
@@ -1129,7 +1159,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param genus the genus to search for or create (lat)
      */
     public JSONObject resolveGenus(String genus) throws IOException, InterruptedException {
-        return resolveOrCreate(genus, "genus", "genus_all_fields", new JSONObject(new HashMap<>() {{
+        return resolveOrCreate(genus.trim(), "genus", "genus_all_fields", new JSONObject(new HashMap<>() {{
             put("genuslat", genus);
             put("_nested:genus__trivialnamen", new JSONArray());
             put("_nested:genus__referenzenfuergenus", new JSONArray());
@@ -1142,7 +1172,7 @@ public class NahimaManager extends AbstractRestClient {
      * Find or create a sex in Nahima
      */
     public JSONObject resolveSex(String sex) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
-        return resolveOrCreateInteractive(sex, "geschlechter", "geschlechter_all_fields_1", new JSONObject(new HashMap<>() {{
+        return resolveOrCreateInteractive(sex.trim(), "geschlechter", "geschlechter_all_fields_1", new JSONObject(new HashMap<>() {{
             put("name", sex);
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}), true, 0);
@@ -1152,7 +1182,7 @@ public class NahimaManager extends AbstractRestClient {
      * Find or create a life stage in Nahima
      */
     public JSONObject resolveLifeStage(String lifeStage) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
-        return resolveOrCreateInteractive(lifeStage, "lebensabschnitte", "lebensabschnitte_all_fields", new JSONObject(new HashMap<>() {{
+        return resolveOrCreateInteractive(lifeStage.trim(), "lebensabschnitte", "lebensabschnitte_all_fields", new JSONObject(new HashMap<>() {{
             put("name", lifeStage);
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}), true, 0);
@@ -1163,13 +1193,13 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolveTaxon(String associatedTaxon) throws IOException, InterruptedException {
         return resolveOrCreate(associatedTaxon, "taxonnamen", "taxonnamen__all_fields", new JSONObject(new HashMap<>() {{
-            put("dddtaxonnamelat", associatedTaxon);
+            put("dddtaxonnamelat", associatedTaxon.trim());
             put("taxonnamelat", new JSONObject(new HashMap<>() {{
-                put("scientificName", associatedTaxon);
+                put("scientificName", associatedTaxon.trim());
                 put("redList", false); // TODO: use the redlist api to check
                 put("unclear", true);
                 put("_standard", new JSONObject(new HashMap<>() {{
-                    put("text", associatedTaxon);
+                    put("text", associatedTaxon.trim());
                 }}));
             }}));
             put("_nested:taxonnamen__trivialnamen", new JSONArray());
@@ -1183,7 +1213,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolveTribe(String tribe) throws IOException, InterruptedException {
         return resolveOrCreate(tribe, "tribus", "tribus_all_fields", new JSONObject(new HashMap<>() {{
-            put("tribuslat", tribe);
+            put("tribuslat", tribe.trim());
             put("_nested:tribus__trivialnamen", new JSONArray());
             put("_nested:tribus__referenzenfuertribus", new JSONArray());
             put("abkuerzung", JSONObject.NULL);
@@ -1193,13 +1223,13 @@ public class NahimaManager extends AbstractRestClient {
 
     public JSONObject resolveOrder(String higherOrder) throws IOException, InterruptedException {
         return resolveOrCreate(higherOrder, "ordnungen", "ordnungen_all_fields", new JSONObject(new HashMap<>() {{
-            put("ordnunglat", higherOrder);
+            put("ordnunglat", higherOrder.trim());
         }}));
     }
 
     public JSONObject resolveCollectionDateIndicator(String indicator) throws IOException, InterruptedException {
         return resolveOrCreate(indicator, "indikatorfuersammeldatum", "indikatorfuersammeldatum_all_fields", new JSONObject(new HashMap<>() {{
-            put("name", indicator);
+            put("name", indicator.trim());
         }}));
     }
 
@@ -1211,7 +1241,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolveDatumFormat(String format) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveOrCreateInteractive(format, "datumsformate", "datumsformate", new JSONObject(new HashMap<>() {{
-            put("name", format);
+            put("name", format.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}));
     }
@@ -1221,7 +1251,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolvePreparationPart(String partName) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveOrCreateInteractive(partName, "praeparatteile", "praeparatteile_all_fields", new JSONObject(new HashMap<>() {{
-            put("name", partName);
+            put("name", partName.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}), true, 0);
     }
@@ -1234,8 +1264,8 @@ public class NahimaManager extends AbstractRestClient {
             return new JSONObject();
         }
         return resolveOrCreateInteractive(NullHandlingUtility.joinNonNull(" ", attributeName, attributeValue), "probenteilattribute", "probenteilattribute_all_fields", new JSONObject(new HashMap<>() {{
-            put("attribute", attributeName);
-            put("einheit", attributeValue == null ? JSONObject.NULL : attributeValue);
+            put("attribute", attributeName.trim());
+            put("einheit", attributeValue == null ? JSONObject.NULL : attributeValue.trim());
         }}), true, 0);
     }
 
@@ -1244,7 +1274,7 @@ public class NahimaManager extends AbstractRestClient {
      */
     public JSONObject resolveMountingMethod(String method) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         return resolveOrCreateInteractive(method, "montierungsmethoden", "montierungsmethoden_all_fields", new JSONObject(new HashMap<>() {{
-            put("name", method);
+            put("name", method.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
         }}), true, 0);
     }

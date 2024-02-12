@@ -131,9 +131,10 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                     try {
                         existingExport = manager.findObjectByGlobalObjectId(specimen.getNahimaId());
                     } catch (IOException | InterruptedException e) {
-                        log.warn("NoExport: skip specimen exception");
+                        log.warn("NoExport: skip specimen exception when searching by global object");
                         throw new SkipSpecimenException();
                     }
+                    log.debug("Found specimen to update in Nahima");
                     specimenJson = serializer.serialize2JSON(specimen, existingExport);
                 } else {
                     specimenJson = serializer.serialize2JSON(specimen);

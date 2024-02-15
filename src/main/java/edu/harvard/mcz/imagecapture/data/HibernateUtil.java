@@ -157,6 +157,7 @@ public class HibernateUtil {
                     try {
                         sessionFactory = configuration.buildSessionFactory();
                     } catch (JDBCConnectionException | ServiceException ex) {
+                        log.error("Failed to login: " + ex.getMessage(), ex);
                         configuration = new Configuration().configure();
                         success = false;
                         sessionFactory = null;
@@ -169,6 +170,7 @@ public class HibernateUtil {
                                     "Database connection failed.");
                         }
                         System.out.println("Initial SessionFactory creation failed." + ex);
+                        return;
                     } catch (Throwable ex) {
                         // Make sure you log the exception, as it might be swallowed
                         System.out.println("Initial SessionFactory creation failed." + ex);
@@ -177,9 +179,9 @@ public class HibernateUtil {
                     }
                     try {
                         // Check database authentication by beginning a transaction.
-                        Session session = sessionFactory.getCurrentSession();
-                        session.beginTransaction();
-                        session.close();
+                            Session session = sessionFactory.getCurrentSession();
+                            session.beginTransaction();
+                            session.close();
                         // If an exception hasn't been thrown, dbuser/dbpassword has
                         // successfully authenticated against the database.
                         // Now try authenticating the individual user by the email
@@ -212,7 +214,7 @@ public class HibernateUtil {
                             if (loginDialog.getUsername() != null) {
                                 log.debug("Login failed for " + loginDialog.getUsername());
                             }
-                            sessionFactory.close();
+                                sessionFactory.close();
                             sessionFactory = null;
                             configuration = new Configuration().configure();
                             try {

@@ -139,8 +139,9 @@ public class BatchUpdateDialog extends JDialog {
             // ask for confirmation
             int dialogButton = JOptionPane.YES_NO_OPTION;
             int dialogResult = JOptionPane.showConfirmDialog(this, nrOfChanges + " Specimen would be affected. Continue?", "Warning", dialogButton);
-            if (dialogResult == JOptionPane.NO_OPTION) {
+            if (!(dialogResult == JOptionPane.YES_OPTION)) {
                 log.debug("Will not do batch update. Confirmation denied.");
+                session.getTransaction().rollback();
                 return;
             }
         } catch (Exception e) {

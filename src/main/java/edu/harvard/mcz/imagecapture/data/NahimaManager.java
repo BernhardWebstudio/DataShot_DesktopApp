@@ -1472,7 +1472,7 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     public JSONArray resolveWorkflowStatusTags(String workFlowStatus) throws IOException {
-        if (Objects.equals(workFlowStatus, WorkFlowStatus.STAGE_CLEAN)) {
+        if (Objects.equals(workFlowStatus, WorkFlowStatus.STAGE_CLEAN) || Objects.equals(workFlowStatus, WorkFlowStatus.STAGE_DONE)) {
             return new JSONArray();
         }
 

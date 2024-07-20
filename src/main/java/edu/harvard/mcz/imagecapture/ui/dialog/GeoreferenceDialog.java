@@ -368,6 +368,9 @@ public class GeoreferenceDialog extends JDialog {
      * Update the marker on the map
      */
     private void updateMap() {
+        if (textFieldDecimalLat.getText().isEmpty() || textFieldDecimalLong.getText().isEmpty()) {
+            return;
+        }
         try {
             GeoPosition address =
                     new GeoPosition(Double.parseDouble(textFieldDecimalLat.getText()),
@@ -377,7 +380,7 @@ public class GeoreferenceDialog extends JDialog {
             WaypointPainter<Waypoint> waypointPainter =
                     new WaypointPainter<Waypoint>();
             waypointPainter.setWaypoints(
-                    new HashSet<Waypoint>(Arrays.asList(new DefaultWaypoint(address))));
+                    new HashSet<Waypoint>(List.of(new DefaultWaypoint(address))));
 
             // Create a compound painter that uses both the route-painter and the
             // waypoint-painter

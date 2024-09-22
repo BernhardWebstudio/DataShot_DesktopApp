@@ -466,7 +466,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
             // Elevations
             Long min_elev;
-            if (jTextFieldMinElevation.getText().trim().length() == 0) {
+            if (jTextFieldMinElevation.getText().trim().isEmpty()) {
                 min_elev = null;
             } else {
                 try {
@@ -477,7 +477,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             }
             specimen.setMinimum_elevation(min_elev);
             Long max_elev;
-            if (jTextFieldMaxElevation.getText().trim().length() == 0) {
+            if (jTextFieldMaxElevation.getText().trim().isEmpty()) {
                 max_elev = null;
             } else {
                 try {
@@ -547,11 +547,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 
             specimen.setQuestions(jTextFieldQuestions.getText());
             try {
-                // make sure specimen controller does not throw null pointer exception –
-                // whyever
-                if (specimenController.getSpecimen() == null) {
-                    specimenController.setSpecimen(specimen);
-                }
+                // make sure specimen controller knows about the latest changes
+                specimenController.setSpecimen(specimen);
                 specimenController.save(); // save the record
                 setStateToClean();         // enable the navigation buttons
                 this.setStatus("Saved");   // inform the user
@@ -1774,7 +1771,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 //                        jTableNumbers.transferFocus();
 //                    }
 //                };
-                if (specimen.getNumbers().size() > 0) {
+                if (!specimen.getNumbers().isEmpty()) {
                     JTableCellTabbing.setTabMapping(
                             jTableNumbers, 0, specimen.getNumbers().size(), 0, 2
                     );

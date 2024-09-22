@@ -697,7 +697,7 @@ public class NahimaManager extends AbstractRestClient {
                 createSpecimen = true;
             }
 
-            assert(createSpecimen);
+            assert (createSpecimen);
             JSONObject created = askToCreate(inner, name, objectType, mask, omitPool);
             // TODO: the following could fail if the search and created object do not really align
             JSONObject found = this.resolveStringSearchToOne(name, objectType, true);
@@ -974,12 +974,24 @@ public class NahimaManager extends AbstractRestClient {
 
         JSONObject finalParent = parent;
         Integer parentId = resolveId(finalParent, "gazetteer");
-        return this.resolveOrCreateInteractive(searchString, "gazetteer", "gazetteer__all_fields", new JSONObject(new HashMap<>() {{
-            put("ortsname", wrapInLan(specimen.getPrimaryDivison().trim()));
+
+        HashMap<String, Object> paramMap = new HashMap<>() {{
+            put("ortsname", wrapInLan(stringTrimOrJSONNull(specimen.getPrimaryDivison())));
             put("_id_parent", parentId == null ? JSONObject.NULL : parentId); // Might throw NullPointerException. If we find the location, it is never called, therefore, we only have a problem if neither location nor country are found
 //            put("isocode3166_2", specimen.getPrimaryDivisonISO());
-            put("isocode3166_alpha_2", specimen.getPrimaryDivisonISO().trim());
-        }}));
+        }};
+        if (specimen.getPrimaryDivisonISO() != null) {
+            paramMap.put("isocode3166_alpha_2", stringTrimOrJSONNull(specimen.getPrimaryDivisonISO()));
+        }
+
+        return this.resolveOrCreateInteractive(searchString, "gazetteer", "gazetteer__all_fields", new JSONObject(paramMap));
+    }
+
+    private Object stringTrimOrJSONNull(String val) {
+        if (val == null) {
+            return JSONObject.NULL;
+        }
+        return val.trim();
     }
 
     /**

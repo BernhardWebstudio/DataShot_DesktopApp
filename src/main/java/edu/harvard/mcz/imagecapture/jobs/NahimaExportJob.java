@@ -65,7 +65,6 @@ public class NahimaExportJob implements RunnableJob, Runnable {
         if (specimenToExport == null) {
             if (this.oneSpecimenBarcode != null && !this.oneSpecimenBarcode.equals("")) {
                 Map<String, Object> queryParams = new HashMap<>();
-                queryParams.put("nahimaExported", false);
                 queryParams.put("barcode", this.oneSpecimenBarcode);
                 specimenToExport = sls.findBy(queryParams).stream().map(spec -> spec.getSpecimenId()).collect(Collectors.toList());
             } else {
@@ -99,7 +98,8 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             Specimen specimen = sls.findById(specimenId);
             currentIndex = currentIndex + 1;
             // check if it hasn't been exported by another instance already
-            if (specimen.getDateLastNahimaUpdated() != null && specimen.getDateLastNahimaUpdated().after(specimen.getDateLastUpdated())) {
+            if (specimen.getDateLastNahimaUpdated() != null && specimen.getDateLastNahimaUpdated().after(specimen.getDateLastUpdated()) && this.oneSpecimenBarcode == null) {
+                log.debug("Skipping export of specimen " + currentIndex + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + ".");
                 continue;
             }
 
@@ -120,6 +120,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                 }
             }
             if (!allFound) {
+                log.debug("Skipping export of specimen " + currentIndex + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + " because not all images were found.");
                 continue;
             }
 

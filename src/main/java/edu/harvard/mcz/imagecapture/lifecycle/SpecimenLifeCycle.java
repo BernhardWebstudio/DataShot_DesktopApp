@@ -565,21 +565,25 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     }
 
     public String findSpecimenCountThrows() throws ConnectionException {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         try {
             String sql =
                     "SELECT COUNT(*), workFlowStatus from Specimen GROUP BY workFlowStatus ";
             Session session = this.getSession();
             try {
-                result.append("Specimen records: \n");
+                long total = 0;
                 session.beginTransaction();
                 Iterator results = session.createQuery(sql).list().iterator();
+                ArrayList<String> resultStrings = new ArrayList();
                 while (results.hasNext()) {
                     Object[] row = (Object[]) results.next();
                     Long count = (Long) row[0];
+                    total += count;
                     String status = (String) row[1];
-                    result.append(" " + status + "=" + count.toString() + "\n");
+                    resultStrings.add(count.toString() + " " + status);
                 }
+                result.append(total + " Specimen records: \n");
+                result.append(String.join(", ", resultStrings));
                 session.getTransaction().commit();
             } catch (HibernateException e) {
                 session.getTransaction().rollback();

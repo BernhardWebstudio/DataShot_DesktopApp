@@ -1170,6 +1170,15 @@ public class Specimen implements Serializable {
         this.numbers = numbers;
     }
 
+    public String getFirstNumberWithType(String type) {
+        for (Number number : numbers) {
+            if (number.getNumberType().equals(type)) {
+                return number.getNumber();
+            }
+        }
+        return null;
+    }
+
     public Set<ICImage> getICImages() {
         return this.ICImages;
     }

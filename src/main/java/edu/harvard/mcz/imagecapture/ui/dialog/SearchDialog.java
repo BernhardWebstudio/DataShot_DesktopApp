@@ -63,6 +63,7 @@ public class SearchDialog extends JDialog {
     private JTextField jTextFieldFamily = null;
     private JTextField jTextFieldGenus = null;
     private JTextField jTextFieldSpecies = null;
+    private JTextField jTextFieldCollectionNr = null;
     private JComboBox<String> jComboBoxCollection = null;
     private JComboBox<Object> jComboBoxWorkflowStatus = null;
     private JTextField jTextFieldImageFilename = null;
@@ -283,6 +284,10 @@ public class SearchDialog extends JDialog {
                             );
                         }
                     }
+                    if (jTextFieldCollectionNr.getText() != null && jTextFieldCollectionNr.getText().length() > 0) {
+                        query.put("numbers.numberType", "Collection Number");
+                        query.put("numbers.number", jTextFieldCollectionNr.getText());
+                    }
                     if (jComboBoxEntryBy.getSelectedItem() != null) {
                         if (!jComboBoxEntryBy.getSelectedItem().toString().equals("")) {
                             query.put(
@@ -342,6 +347,7 @@ public class SearchDialog extends JDialog {
                     "State/Province",
                     "Country",
                     "Collection",
+                    "Collection Nr.",
                     "Collector",
                     "Interpreted Date",
                     "Workflow Status",
@@ -370,6 +376,7 @@ public class SearchDialog extends JDialog {
                     this.getPrimaryDivisionJComboBox(),
                     this.getCountryJComboBox(),
                     this.getCollectionJComboBox(),
+                    this.getCollectionNrJTextField(),
                     this.getCollectorsJComboBox(),
                     this.getInterpretedDateTextField(),
                     this.getWorkflowsJComboBox(),
@@ -406,6 +413,18 @@ public class SearchDialog extends JDialog {
             scrollPane.setBorder(BorderFactory.createEmptyBorder());
         }
         return scrollPane;
+    }
+
+    private JTextField getCollectionNrJTextField() {
+        if (jTextFieldCollectionNr == null) {
+            jTextFieldCollectionNr = new JTextField();
+            jTextFieldCollectionNr.setColumns(10);
+            // jTextFieldCollectionNr.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class,
+            // "CollectionNr", jTextFieldCollectionNr));
+//            jTextFieldCollectionNr.setToolTipText(
+//                    MetadataRetriever.getFieldHelp(Specimen.class, "CollectionNr"));
+        }
+        return jTextFieldCollectionNr;
     }
 
     private JComboBox<String> getOrderJTextField() {

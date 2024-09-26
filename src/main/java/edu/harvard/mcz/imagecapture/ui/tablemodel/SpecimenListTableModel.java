@@ -44,7 +44,9 @@ public class SpecimenListTableModel extends AbstractTableModel {
     public static final int COL_COUNTRY = 10;
     public static final int COL_DIVISION = 11;
     public static final int COL_VERBLOCALITY = 12;
-    public static final int COLUMCOUNT = 13;
+    public static final int COL_COLLECTION = 13;
+    public static final int COL_COLLECTION_NR = 14;
+    public static final int COLUMCOUNT = 15;
     private static final Logger log =
             LoggerFactory.getLogger(SpecimenListTableModel.class);
     private static final long serialVersionUID = -8394267503927374758L;
@@ -134,6 +136,12 @@ public class SpecimenListTableModel extends AbstractTableModel {
                 case COL_DIVISION:
                     result = s.getPrimaryDivison();
                     break;
+                case COL_COLLECTION:
+                    result = s.getCollection();
+                    break;
+                case COL_COLLECTION_NR:
+                    result = s.getFirstNumberWithType("Collection Number");
+                    break;
             }
         }
         return result;
@@ -205,6 +213,12 @@ public class SpecimenListTableModel extends AbstractTableModel {
                     break;
                 case COL_DIVISION:
                     result = "State/Province";
+                    break;
+                case COL_COLLECTION:
+                    result = "Collection";
+                    break;
+                case COL_COLLECTION_NR:
+                    result = "Collection Nr.";
                     break;
             }
         }

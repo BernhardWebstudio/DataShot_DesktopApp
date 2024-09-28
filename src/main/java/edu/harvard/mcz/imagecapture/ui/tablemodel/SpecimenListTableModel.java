@@ -140,7 +140,14 @@ public class SpecimenListTableModel extends AbstractTableModel {
                     result = s.getCollection();
                     break;
                 case COL_COLLECTION_NR:
-                    result = s.getFirstNumberWithType("Collection Number");
+                    String collectionNr = s.getFirstNumberWithType("Collection Number");
+                    if (collectionNr != null) {
+                        try {
+                            result = Double.parseDouble(collectionNr);
+                        } catch (NumberFormatException e) {
+                            result = collectionNr;
+                        }
+                    }
                     break;
             }
         }
@@ -157,6 +164,9 @@ public class SpecimenListTableModel extends AbstractTableModel {
         // needs to return Long for ID column that is to contain button
         // and ** Must Not ** return Long for any other column).
         Class result = String.class; // Default value to return when table is empty.
+        if (c == COL_COLLECTION_NR) {
+            return Double.class;
+        }
         try {
             result = getValueAt(0, c).getClass();
         } catch (NullPointerException e) {

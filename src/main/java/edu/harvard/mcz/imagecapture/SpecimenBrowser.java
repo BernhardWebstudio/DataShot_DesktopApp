@@ -28,6 +28,7 @@ import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.CopyRowButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
+import edu.harvard.mcz.imagecapture.ui.tablemodel.TableColumnManager;
 import org.hibernate.SessionException;
 import org.hibernate.TransactionException;
 import org.slf4j.Logger;
@@ -133,6 +134,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
                 model = new SpecimenListTableModel(s.findAll());
             }
             jTable.setModel(model);
+            new TableColumnManager(jTable);
             sorter = new TableRowSorter<>(model);
             sorter.toggleSortOrder(SpecimenListTableModel.COL_BARCODE - 1);
             jTable.setRowSorter(sorter);

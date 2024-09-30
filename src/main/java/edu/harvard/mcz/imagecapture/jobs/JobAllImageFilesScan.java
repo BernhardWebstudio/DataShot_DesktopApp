@@ -272,7 +272,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
 
         SpecimenLifeCycle sls = new SpecimenLifeCycle();
         Singleton.getSingletonInstance().getMainFrame().setCount(
-                sls.findSpecimenCount());
+                sls.findSpecimenCount(", "));
 
         done();
     }

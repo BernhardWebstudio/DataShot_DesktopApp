@@ -555,9 +555,9 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
         return runQueryToGetStrings(collections, sql, log);
     }
 
-    public String findSpecimenCount() {
+    public String findSpecimenCount(String delimiter) {
         try {
-            return findSpecimenCountThrows();
+            return findSpecimenCountThrows(delimiter);
         } catch (ConnectionException e) {
             log.error(e.getMessage(), e);
         }
@@ -565,6 +565,10 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
     }
 
     public String findSpecimenCountThrows() throws ConnectionException {
+        return findSpecimenCountThrows(", ");
+    }
+
+    public String findSpecimenCountThrows(String delimiter) throws ConnectionException {
         StringBuilder result = new StringBuilder();
         try {
             String sql =
@@ -583,7 +587,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                     resultStrings.add(count.toString() + " " + status);
                 }
                 result.append(total + " Specimen records: \n");
-                result.append(String.join(", ", resultStrings));
+                result.append(String.join(delimiter, resultStrings));
                 session.getTransaction().commit();
             } catch (HibernateException e) {
                 session.getTransaction().rollback();

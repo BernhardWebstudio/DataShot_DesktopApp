@@ -29,6 +29,7 @@ import edu.harvard.mcz.imagecapture.ui.CopyRowButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.TableColumnManager;
+import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.SessionException;
 import org.hibernate.TransactionException;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ import javax.swing.*;
 import javax.swing.table.TableRowSorter;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Map;
 
 /**
@@ -136,7 +138,33 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             jTable.setModel(model);
             new TableColumnManager(jTable);
             sorter = new TableRowSorter<>(model);
-            sorter.toggleSortOrder(SpecimenListTableModel.COL_BARCODE - 1);
+            int copyPasteOffset = BooleanUtils.toInteger(!SpecimenDetailsViewPane.copyPasteActivated);
+            sorter.toggleSortOrder(SpecimenListTableModel.COL_BARCODE - copyPasteOffset);
+            sorter.setComparator(SpecimenListTableModel.COL_COLLECTION_NR - copyPasteOffset, new Comparator<Object>() {
+                @Override
+                public int compare(Object o1, Object o2) {
+                    if (o1 instanceof String && ((String) o1).trim().equals("")) {
+                        o1 = Double.valueOf(0);
+                    }
+                    if (o2 instanceof String && ((String) o2).trim().equals("")) {
+                        o2 = Double.valueOf(0);
+                    }
+                    if (o1 instanceof String && o2 instanceof String) {
+                        return ((String) o1).compareToIgnoreCase((String) o2);
+                    }
+                    if (o1 instanceof Double && o2 instanceof Double) {
+                        return ((Double) o1).compareTo((Double) o2);
+                    }
+                    if (o1 instanceof Double && o2 instanceof String) {
+                        return -1;
+                    }
+                    if (o2 instanceof Double && o1 instanceof String) {
+                        return 1;
+                    }
+                    log.error("Unexpected type in compare: {} - {}", o1, o2);
+                    return 0;
+                }
+            });
             jTable.setRowSorter(sorter);
             jTable.setDefaultRenderer(Specimen.class, new ButtonRenderer());
             jTable.setDefaultEditor(Specimen.class, new ButtonEditor());

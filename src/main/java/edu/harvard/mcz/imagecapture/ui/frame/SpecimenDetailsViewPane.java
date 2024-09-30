@@ -564,7 +564,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             }
             SpecimenLifeCycle sls = new SpecimenLifeCycle();
             Singleton.getSingletonInstance().getMainFrame().setCount(
-                    sls.findSpecimenCount());
+                    sls.findSpecimenCount(", "));
         } catch (OptimisticLockException e) {
             // Oh, well. Issues with foreign keys already deleting items, which are
             // not found afterwards. We catch these here and silence them. TODO:
@@ -952,10 +952,15 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPanel.add(this.getDetsJButton(), "sizegroup datedet");
             // section: family, classification
             // row
+            this.addBasicJLabel(jPanel, "Order");
+            jPanel.add(this.getOrderJTextField(), "grow");
             this.addBasicJLabel(jPanel, "Family");
             jPanel.add(this.getFamilyJTextField(), "grow");
+            // row
             this.addBasicJLabel(jPanel, "Subfamily");
             jPanel.add(this.getJTextFieldSubfamily(), "grow");
+            this.addBasicJLabel(jPanel, "Tribe");
+            jPanel.add(this.getJTextFieldTribe(), "grow");
             // row
             this.addBasicJLabel(jPanel, "Genus");
             jPanel.add(this.getGenusJTextField(), "grow");
@@ -964,16 +969,11 @@ public class SpecimenDetailsViewPane extends JPanel {
             // row
             this.addBasicJLabel(jPanel, "Subspecies");
             jPanel.add(this.getSubspecifcEpithetJTextField(), "grow");
-            this.addBasicJLabel(jPanel, "Tribe");
-            jPanel.add(this.getJTextFieldTribe(), "grow");
-            // row
             this.addBasicJLabel(jPanel, "Infrasubspecific Name");
             jPanel.add(this.getJTextFieldInfraspecificName(), "grow");
+            // row
             this.addBasicJLabel(jPanel, "Infrasubspecific Rank");
             jPanel.add(this.getJTextFieldInfraspecificRank(), "grow");
-            // row
-            this.addBasicJLabel(jPanel, "Author");
-            jPanel.add(this.getJTextFieldAuthorship(), "grow");
             this.addBasicJLabel(jPanel, "TypeStatus");
             jPanel.add(this.getCbTypeStatus());
             // section: locale
@@ -1013,8 +1013,8 @@ public class SpecimenDetailsViewPane extends JPanel {
             jPanel.add(this.getComboBoxElevUnits(), "sizegroup elevation");
             // section: collection
             // row
-            this.addBasicJLabel(jPanel, "Order");
-            jPanel.add(this.getOrderJTextField(), "grow");
+            this.addBasicJLabel(jPanel, "Author");
+            jPanel.add(this.getJTextFieldAuthorship(), "grow");
             this.addBasicJLabel(jPanel, "Collection");
             jPanel.add(this.getJTextFieldCollection(), "grow"); // "span 3"
             // double row:
@@ -1830,6 +1830,23 @@ public class SpecimenDetailsViewPane extends JPanel {
         DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
         renderer.setToolTipText("Click for pick list of number types.");
         typeColumn.setCellRenderer(renderer);
+
+        // enable tabbing (does not work yet)
+//        field1.addKeyListener(new KeyAdapter() {
+//            @Override
+//            public void keyPressed(KeyEvent e) {
+//                if (e.getKeyCode() == KeyEvent.VK_TAB) {
+//                    int row = jTableNumbers.getSelectedRow();
+//                    int col = jTableNumbers.getSelectedColumn();
+//                    assert( col == 0);
+//                    jTableNumbers.changeSelection(row, 1, false, false);
+//                    jTableNumbers.editCellAt(row, 1);
+//                    jTableNumbers.transferFocus();
+//                } else {
+//                    super.keyPressed(e);
+//                }
+//            }
+//        });
     }
 
     /**

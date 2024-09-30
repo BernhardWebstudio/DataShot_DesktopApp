@@ -64,6 +64,7 @@ public class JTableCellTabbing {
                 // Move cell selection
                 theTable.changeSelection(row, col, false, false);
                 theTable.editCellAt(row, col);
+//                theTable.getCellEditor(row, col).getTableCellEditorComponent(theTable, ).requestFocus();
             }
         });
 
@@ -93,6 +94,7 @@ public class JTableCellTabbing {
                 // Move cell selection
                 if (theTable.editCellAt(row, col)) {
                     theTable.changeSelection(row, col, false, false);
+                    theTable.editCellAt(row, col);
                 };
             }
         });

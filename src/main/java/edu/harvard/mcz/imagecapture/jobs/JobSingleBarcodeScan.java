@@ -159,7 +159,7 @@ public class JobSingleBarcodeScan extends AbstractFileScanJob {
         Singleton.getSingletonInstance().getMainFrame().setStatusMessage("");
         SpecimenLifeCycle sls = new SpecimenLifeCycle();
         Singleton.getSingletonInstance().getMainFrame().setCount(
-                sls.findSpecimenCount());
+                sls.findSpecimenCount(", "));
         Singleton.getSingletonInstance().getJobList().removeJob(this);
     }
 

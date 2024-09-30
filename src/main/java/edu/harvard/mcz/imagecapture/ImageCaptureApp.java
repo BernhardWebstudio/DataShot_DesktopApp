@@ -190,7 +190,7 @@ public class ImageCaptureApp {
         SpecimenLifeCycle sls = new SpecimenLifeCycle();
         try {
             Singleton.getSingletonInstance().getMainFrame().setCount(
-                    sls.findSpecimenCountThrows());
+                    sls.findSpecimenCountThrows(", "));
             ImageCaptureApp.doStartUp();
         } catch (ConnectionException e) {
             log.error(e.getMessage());

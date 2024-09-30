@@ -423,7 +423,7 @@ public class MainFrame extends JFrame implements RunnerListener {
                 // Force a login dialog by connecting to obtain record count;
                 SpecimenLifeCycle sls = new SpecimenLifeCycle();
                 try {
-                    setCount(sls.findSpecimenCountThrows());
+                    setCount(sls.findSpecimenCountThrows(", "));
                     ImageCaptureApp.doStartUp();
                 } catch (ConnectionException e1) {
                     log.error(e1.getMessage(), e1);
@@ -1580,7 +1580,7 @@ public class MainFrame extends JFrame implements RunnerListener {
                 SpecimenLifeCycle sls = new SpecimenLifeCycle();
                 JOptionPane.showMessageDialog(
                         Singleton.getSingletonInstance().getMainFrame(),
-                        sls.findSpecimenCount(), "Record counts",
+                        sls.findSpecimenCount(",\n- "), "Record counts",
                         JOptionPane.INFORMATION_MESSAGE);
             });
         }

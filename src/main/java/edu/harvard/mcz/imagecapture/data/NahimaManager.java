@@ -279,6 +279,7 @@ public class NahimaManager extends AbstractRestClient {
                     put("in", new JSONArray() {{
                         put(globalObjectId);
                     }});
+                    put("language", "en");
                 }});
             }});
         }};

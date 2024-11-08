@@ -279,7 +279,7 @@ public class NahimaManager extends AbstractRestClient {
                     put("in", new JSONArray() {{
                         put(globalObjectId);
                     }});
-                    put("language", "en");
+                    put("language", "en-US");
                 }});
             }});
         }};
@@ -382,6 +382,7 @@ public class NahimaManager extends AbstractRestClient {
         superSuperSearch.put(superSearch);
         JSONObject query = new JSONObject();
         query.put("type", "object");
+        query.put("language", "en-US");
         query.put("objecttypes", new JSONArray(new String[]{objectType}));
         query.put("search", superSuperSearch);
 

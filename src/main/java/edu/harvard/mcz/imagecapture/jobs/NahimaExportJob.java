@@ -271,7 +271,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             specimen.setDateLastNahimaUpdated(new Date());
             if (specimen.getSpecimenId() != null && specimen.getSpecimenId() > 0) {
                 try {
-                    log.debug("No specimen id, will not update the database");
+                    log.debug("Will update the specimen with id " + specimen.getSpecimenId() + " in the database after export.");
                     sls.attachDirty(specimen);
                 } catch (SaveFailedException e) {
                     lastError = e;

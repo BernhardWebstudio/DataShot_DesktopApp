@@ -173,7 +173,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                     mediaAsset = imageJsonObj;
                 } else {
                     Map<String, Object> reducedMediaAssetMap = new HashMap<>() {{
-                        put("_pool", NahimaManager.defaultPool);
+                        put("_pool", NahimaManager.entomologyPool);
                         put("_id", JSONObject.NULL);
                         put("_version", 1);
                         put("datei", (new JSONArray()).put(new JSONObject(new HashMap<>() {{

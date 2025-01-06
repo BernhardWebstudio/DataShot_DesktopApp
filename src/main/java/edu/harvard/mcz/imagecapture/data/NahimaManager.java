@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
 
 public class NahimaManager extends AbstractRestClient {
     public static final int defaultPoolId = 7;
-    public static final JSONObject defaultPool = new JSONObject("{ \"pool\": { \"_id\": 7 } }");
+    public static final JSONObject zoologyPool = new JSONObject("{ \"pool\": { \"_id\": 4 } }");
+    public static final JSONObject entomologyPool = new JSONObject("{ \"pool\": { \"_id\": 7 } }");
     private static final Logger log = LoggerFactory.getLogger(NahimaManager.class);
     private final String url;
     private final String username;
@@ -573,11 +574,7 @@ public class NahimaManager extends AbstractRestClient {
      * @param inner      the object with the properties intended for the newly created object
      * @return the matching or new object
      */
-    public JSONObject resolveOrCreate(String name, String objectType, String mask, JSONObject inner) throws IOException, InterruptedException {
-        return resolveOrCreate(name, objectType, mask, inner, false);
-    }
-
-    public JSONObject resolveOrCreate(String name, String objectType, String mask, JSONObject inner, boolean omitPool) throws IOException, InterruptedException {
+    public JSONObject resolveOrCreate(String name, String objectType, String mask, JSONObject inner, JSONObject pool) throws IOException, InterruptedException {
         if (name == null || name.equals("")) {
             return null;
         }
@@ -586,7 +583,7 @@ public class NahimaManager extends AbstractRestClient {
         // TODO: select correct
         if (results == null) {
             // create
-            JSONObject toCreate = wrapForCreation(inner, objectType, mask, omitPool);
+            JSONObject toCreate = wrapForCreation(inner, objectType, mask, pool);
             JSONObject createdResponse = this.createObjectInNahima(toCreate, objectType);
             Thread.sleep(50); // this is a heuristic number and is here to improve reliability, as Nahima does not usually claim creation immediately.
             if (createdResponse.has("_uuid")) {
@@ -642,11 +639,11 @@ public class NahimaManager extends AbstractRestClient {
      * @param objectType the type of object to search
      * @param mask       the mask of the field (the mapping), required for creation
      * @param inner      the object with the properties intended for the newly created object
-     * @param omitPool   whether to add a pool field when creating the object new
+     * @param pool       the pool to create the new object in, if creating anew
      * @param recurse    the number of times we are searching already for the object
      * @return the matching or new object
      */
-    public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner, boolean omitPool, int recurse) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
+    public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner, JSONObject pool, int recurse) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         if (name == null || objectType == null || name.equals("")) {
             log.warn("Cannot search as search " + name + " or objectType " + objectType + " is null or empty");
             return null;
@@ -692,7 +689,7 @@ public class NahimaManager extends AbstractRestClient {
                 if (!this.interactive) {
                     createSpecimen = true;
                 } else {
-                    return this.askToChooseObject(foundObjects, name, objectType, mask, inner, omitPool);
+                    return this.askToChooseObject(foundObjects, name, objectType, mask, inner, pool);
                 }
             } else {
                 assert (foundObjects.length() == 0);
@@ -700,7 +697,7 @@ public class NahimaManager extends AbstractRestClient {
             }
 
             assert (createSpecimen);
-            JSONObject created = askToCreate(inner, name, objectType, mask, omitPool);
+            JSONObject created = askToCreate(inner, name, objectType, mask, pool);
             // TODO: the following could fail if the search and created object do not really align
             JSONObject found = this.resolveStringSearchToOne(name, objectType, true);
             if (found == null && created != null) {
@@ -710,8 +707,8 @@ public class NahimaManager extends AbstractRestClient {
         }
     }
 
-    public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
-        return resolveOrCreateInteractive(name, objectType, mask, inner, false, 0);
+    public JSONObject resolveOrCreateInteractive(String name, String objectType, String mask, JSONObject inner, JSONObject pool) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
+        return resolveOrCreateInteractive(name, objectType, mask, inner, pool, 0);
     }
 
     /**
@@ -721,14 +718,14 @@ public class NahimaManager extends AbstractRestClient {
      * @param name       the name of the object
      * @param objectType the type of the object
      * @param mask       the mask to create the object with
-     * @param omitPool   whether to add the pool to the creation query or not
+     * @param pool       the pool to create the object in, if creating anew
      * @return the created object
      * @throws IOException
      * @throws InterruptedException
      * @throws SkipSpecimenException
      * @throws InvocationTargetException
      */
-    public JSONObject askToCreate(JSONObject inner, String name, String objectType, String mask, boolean omitPool) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
+    public JSONObject askToCreate(JSONObject inner, String name, String objectType, String mask, JSONObject pool) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         // ask whether to create the object like this
         final int[] choice = new int[1];
         final JSONObject[] resultingObj = new JSONObject[1];
@@ -748,7 +745,7 @@ public class NahimaManager extends AbstractRestClient {
                     inner = resultingObj[0];
                     break;
                 case VerifyJSONDialog.RETURN_CHANGE_SEARCH:
-                    return askToChangeSearch(name, objectType, inner, mask, omitPool);
+                    return askToChangeSearch(name, objectType, inner, mask, pool);
                 case VerifyJSONDialog.RETURN_SKIP:
                     log.debug("NoExport: User requested skip specimen");
                     throw new SkipSpecimenException();
@@ -756,7 +753,7 @@ public class NahimaManager extends AbstractRestClient {
         } else {
             resultingObj[0] = inner;
         }
-        JSONObject toCreate = wrapForCreation(inner, objectType, mask, omitPool);
+        JSONObject toCreate = wrapForCreation(inner, objectType, mask, pool);
         // It would be simpler to store the created in cache. But well... current format does not allow
         return this.createObjectInNahima(toCreate, objectType);
     }
@@ -769,9 +766,9 @@ public class NahimaManager extends AbstractRestClient {
      * @param objectType   the object type
      * @param mask         the mask for when creating the object
      * @param inner        the object to use for creation when applicable
-     * @param omitPool     whether to omit the pool when wrapping the object for creation
+     * @param pool         the pool to use, to save the object in, when creating the object
      */
-    public JSONObject askToChooseObject(JSONArray foundObjects, String name, String objectType, String mask, JSONObject inner, boolean omitPool) throws SkipSpecimenException, IOException, InterruptedException, InvocationTargetException {
+    public JSONObject askToChooseObject(JSONArray foundObjects, String name, String objectType, String mask, JSONObject inner, JSONObject pool) throws SkipSpecimenException, IOException, InterruptedException, InvocationTargetException {
         // TODO: implement a better auto-choose algorithm
         if (!this.interactive) {
             log.debug("NoExport: askToChooseObject will not be run without interactive. To choose from: " + foundObjects.toString() + " for " + inner.toString());
@@ -799,10 +796,10 @@ public class NahimaManager extends AbstractRestClient {
                 throw new SkipSpecimenException();
             case ChooseFromJArrayDialog.RETURN_CREATE_NEW:
                 log.debug("User chose to create new");
-                return askToCreate(inner, name, objectType, mask, omitPool);
+                return askToCreate(inner, name, objectType, mask, pool);
             case ChooseFromJArrayDialog.RETURN_CHANGE_SEARCH:
                 log.debug("User chose to change search");
-                return askToChangeSearch(name, objectType, inner, mask, omitPool);
+                return askToChangeSearch(name, objectType, inner, mask, pool);
             default:
                 throw new RuntimeException("Undefined result type: " + choice[0]);
         }
@@ -815,16 +812,16 @@ public class NahimaManager extends AbstractRestClient {
      * @param objectType the type of object to search for
      * @param inner      the object to use to create anew if applicable
      * @param mask       the mask to use when creating anew
-     * @param omitPool   whether to omit the pool when wrapping the object for creation
+     * @param pool       the pool to use, to save the object in, when creating anew
      */
-    private JSONObject askToChangeSearch(String name, String objectType, JSONObject inner, String mask, boolean omitPool) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
+    private JSONObject askToChangeSearch(String name, String objectType, JSONObject inner, String mask, JSONObject pool) throws IOException, InterruptedException, SkipSpecimenException, InvocationTargetException {
         final String[] newSearch = new String[1];
         SwingUtilities.invokeAndWait(new Runnable() {
             public void run() {
                 newSearch[0] = (String) JOptionPane.showInputDialog(Singleton.getSingletonInstance().getMainFrame(), "Search for " + objectType, "Change Search", JOptionPane.QUESTION_MESSAGE, null, null, name);
             }
         });
-        return resolveOrCreateInteractive(newSearch[0], objectType, mask, inner, omitPool, 1);
+        return resolveOrCreateInteractive(newSearch[0], objectType, mask, inner, pool, 1);
     }
 
     /**
@@ -840,7 +837,7 @@ public class NahimaManager extends AbstractRestClient {
         return this.resolveOrCreate(name, objectType, mask, new JSONObject(new HashMap<>() {{
             put("name", name);
             put("bemerkung", getCreatedByThisSoftwareIndication());
-        }}));
+        }}), null);
     }
 
     public JSONObject resolveNameBemerkungObject(String name, String objectType) throws IOException, InterruptedException {
@@ -905,7 +902,7 @@ public class NahimaManager extends AbstractRestClient {
             }}));
         }
         log.debug("Resolved person " + personName + " to first name " + finalFirstName + ", last name " + finalLastName + ", birth date " + birthdate + ", and death date " + deathdate);
-        return this.resolveOrCreateInteractive(personName, "person", "person__public", new JSONObject(personHashMap), true, 0);
+        return this.resolveOrCreateInteractive(personName, "person", "person__public", new JSONObject(personHashMap), null, 0);
     }
 
     public JSONObject resolveRegionType(String type) throws IOException, InterruptedException {
@@ -986,7 +983,7 @@ public class NahimaManager extends AbstractRestClient {
             paramMap.put("isocode3166_alpha_2", stringTrimOrJSONNull(specimen.getPrimaryDivisonISO()));
         }
 
-        return this.resolveOrCreateInteractive(searchString, "gazetteer", "gazetteer__all_fields", new JSONObject(paramMap));
+        return this.resolveOrCreateInteractive(searchString, "gazetteer", "gazetteer__all_fields", new JSONObject(paramMap), null);
     }
 
     private Object stringTrimOrJSONNull(String val) {
@@ -1006,7 +1003,7 @@ public class NahimaManager extends AbstractRestClient {
         return this.resolveOrCreateInteractive(status, "typusstatus", "typusstatus_all_fields_1", new JSONObject(new HashMap<>() {{
             put("name", status.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
-        }}), false, 0);
+        }}), null, 0);
     }
 
     /**
@@ -1019,7 +1016,7 @@ public class NahimaManager extends AbstractRestClient {
         return this.resolveOrCreateInteractive(unit, unitSubject, unitSubject + "_all_fields", new JSONObject(new HashMap<>() {{
             put("name", unit.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
-        }}));
+        }}), null);
     }
 
     /**
@@ -1070,7 +1067,7 @@ public class NahimaManager extends AbstractRestClient {
     public JSONObject resolveFamily(String family) throws IOException, InterruptedException {
         return resolveOrCreate(family.trim(), "familien", "familien_all_fields", new JSONObject(new HashMap<>() {{
             put("familielat", family);
-        }}));
+        }}), zoologyPool);
     }
 
     /**
@@ -1081,7 +1078,7 @@ public class NahimaManager extends AbstractRestClient {
     public JSONObject resolveSubFamily(String family) throws IOException, InterruptedException {
         return resolveOrCreate(family.trim(), "unterfamilien", "unterfamilien_all_fields", new JSONObject(new HashMap<>() {{
             put("unterfamilielat", family);
-        }}));
+        }}), zoologyPool);
     }
 
     /**
@@ -1093,7 +1090,7 @@ public class NahimaManager extends AbstractRestClient {
         return resolveOrCreate(specificEpithet, "art", "art_all_fields", new JSONObject(new HashMap<>() {{
             put("artlat", specificEpithet.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
-        }}));
+        }}), zoologyPool);
     }
 
     /**
@@ -1105,7 +1102,7 @@ public class NahimaManager extends AbstractRestClient {
         return resolveOrCreate(subspecificEpithet, "subspezifischeart", "subspezifischeart_all_fields", new JSONObject(new HashMap<>() {{
             put("subspezifischeart", subspecificEpithet.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
-        }}));
+        }}), zoologyPool);
     }
 
     /**
@@ -1118,7 +1115,7 @@ public class NahimaManager extends AbstractRestClient {
         return resolveOrCreate(authorship, "authors", "author__all_fields", new JSONObject(new HashMap<>() {{
             put("autor", authorship.trim());
             put("_nested:authors__personen", new JSONArray());
-        }}), true);
+        }}), null);
     }
 
     /**
@@ -1133,7 +1130,7 @@ public class NahimaManager extends AbstractRestClient {
             put("_nested:infraspezifischetaxon__trivialnamen", new JSONArray());
             put("_nested:infraspezifischetaxon__referenzenfuerintraspezifischestaxon", new JSONArray());
 //            put("beschreibung", getCreatedByThisSoftwareIndication());
-        }}));
+        }}), zoologyPool);
     }
 
     /**
@@ -1155,7 +1152,7 @@ public class NahimaManager extends AbstractRestClient {
             }}));
             put("publikationsreferenzzbdoi", citedInPublicationLink.trim());
             put("publikationskommentar", citedInPublicationComment.trim());
-        }}));
+        }}), entomologyPool);
     }
 
     /**
@@ -1179,7 +1176,7 @@ public class NahimaManager extends AbstractRestClient {
             put("_nested:genus__referenzenfuergenus", new JSONArray());
             put("abkuerzung", JSONObject.NULL);
 //            put("beschreibung", getCreatedByThisSoftwareIndication());
-        }}));
+        }}), zoologyPool);
     }
 
     /**
@@ -1189,7 +1186,7 @@ public class NahimaManager extends AbstractRestClient {
         return resolveOrCreateInteractive(sex.trim(), "geschlechter", "geschlechter_all_fields_1", new JSONObject(new HashMap<>() {{
             put("name", sex);
             put("bemerkung", getCreatedByThisSoftwareIndication());
-        }}), true, 0);
+        }}), null, 0);
     }
 
     /**
@@ -1199,7 +1196,7 @@ public class NahimaManager extends AbstractRestClient {
         return resolveOrCreateInteractive(lifeStage.trim(), "lebensabschnitte", "lebensabschnitte_all_fields", new JSONObject(new HashMap<>() {{
             put("name", lifeStage);
             put("bemerkung", getCreatedByThisSoftwareIndication());
-        }}), true, 0);
+        }}), null, 0);
     }
 
     /**
@@ -1219,7 +1216,7 @@ public class NahimaManager extends AbstractRestClient {
             put("_nested:taxonnamen__trivialnamen", new JSONArray());
             put("_nested:taxonnamen__referenzenfuertribus", new JSONArray());
             put("bemerkung", getCreatedByThisSoftwareIndication());
-        }}));
+        }}), zoologyPool);
     }
 
     /**
@@ -1232,19 +1229,19 @@ public class NahimaManager extends AbstractRestClient {
             put("_nested:tribus__referenzenfuertribus", new JSONArray());
             put("abkuerzung", JSONObject.NULL);
 //            put("beschreibung", getCreatedByThisSoftwareIndication());
-        }}));
+        }}), zoologyPool);
     }
 
     public JSONObject resolveOrder(String higherOrder) throws IOException, InterruptedException {
         return resolveOrCreate(higherOrder, "ordnungen", "ordnungen_all_fields", new JSONObject(new HashMap<>() {{
             put("ordnunglat", higherOrder.trim());
-        }}));
+        }}), zoologyPool);
     }
 
     public JSONObject resolveCollectionDateIndicator(String indicator) throws IOException, InterruptedException {
         return resolveOrCreate(indicator, "indikatorfuersammeldatum", "indikatorfuersammeldatum_all_fields", new JSONObject(new HashMap<>() {{
             put("name", indicator.trim());
-        }}));
+        }}), null);
     }
 
     /**
@@ -1257,7 +1254,7 @@ public class NahimaManager extends AbstractRestClient {
         return resolveOrCreateInteractive(format, "datumsformate", "datumsformate", new JSONObject(new HashMap<>() {{
             put("name", format.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
-        }}));
+        }}), null);
     }
 
     /**
@@ -1267,7 +1264,7 @@ public class NahimaManager extends AbstractRestClient {
         return resolveOrCreateInteractive(partName, "praeparatteile", "praeparatteile_all_fields", new JSONObject(new HashMap<>() {{
             put("name", partName.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
-        }}), true, 0);
+        }}), null, 0);
     }
 
     /**
@@ -1280,7 +1277,7 @@ public class NahimaManager extends AbstractRestClient {
         return resolveOrCreateInteractive(NullHandlingUtility.joinNonNull(" ", attributeName, attributeValue), "probenteilattribute", "probenteilattribute_all_fields", new JSONObject(new HashMap<>() {{
             put("attribute", attributeName.trim());
             put("einheit", attributeValue == null ? JSONObject.NULL : attributeValue.trim());
-        }}), true, 0);
+        }}), null, 0);
     }
 
     /**
@@ -1290,7 +1287,7 @@ public class NahimaManager extends AbstractRestClient {
         return resolveOrCreateInteractive(method, "montierungsmethoden", "montierungsmethoden_all_fields", new JSONObject(new HashMap<>() {{
             put("name", method.trim());
             put("bemerkung", getCreatedByThisSoftwareIndication());
-        }}), true, 0);
+        }}), null, 0);
     }
 
     /**
@@ -1367,8 +1364,8 @@ public class NahimaManager extends AbstractRestClient {
      * @return the wrapped object, ready to be created
      */
 
-    public JSONObject wrapForCreation(JSONObject inner, JSONObject existing, String objectType, String mask, boolean omitPool) {
-        inner = this.addDefaultValuesForCreation(inner, omitPool, existing);
+    public JSONObject wrapForCreation(JSONObject inner, JSONObject existing, String objectType, String mask, JSONObject pool) {
+        inner = this.addDefaultValuesForCreation(inner, pool, existing);
         JSONObject result = new JSONObject(new HashMap<>() {{
             put("_mask", mask);
             put("_objecttype", objectType);
@@ -1378,16 +1375,8 @@ public class NahimaManager extends AbstractRestClient {
         return result;
     }
 
-    public JSONObject wrapForCreation(JSONObject inner, String objectType, String mask, boolean omitPool) {
-        return wrapForCreation(inner, null, objectType, mask, omitPool);
-    }
-
-    public JSONObject wrapForCreation(JSONObject inner, String objectType, String mask) {
-        return wrapForCreation(inner, objectType, mask, false);
-    }
-
-    public JSONObject wrapForCreation(JSONObject inner, String objectType) {
-        return wrapForCreation(inner, objectType, objectType + "_all_fields");
+    public JSONObject wrapForCreation(JSONObject inner, String objectType, String mask, JSONObject pool) {
+        return wrapForCreation(inner, null, objectType, mask, pool);
     }
 
     /**
@@ -1396,28 +1385,20 @@ public class NahimaManager extends AbstractRestClient {
      * @param inner the object to add the fields to
      * @return the object with the adjusted/added fields
      */
-    public JSONObject addDefaultValuesForCreation(JSONObject inner) {
-        return addDefaultValuesForCreation(inner, false);
-    }
-
-    public JSONObject addDefaultValuesForCreation(JSONObject inner, JSONObject existing) {
-        return addDefaultValuesForCreation(inner, false, existing);
-    }
-
-    public JSONObject addDefaultValuesForCreation(JSONObject inner, boolean omitPool) {
-        return addDefaultValuesForCreation(inner, omitPool, null);
+    public JSONObject addDefaultValuesForCreation(JSONObject inner, JSONObject pool) {
+        return addDefaultValuesForCreation(inner, pool);
     }
 
     /**
      * Add default values, such as _id and _version, for creation
      *
-     * @param inner    the object to add the
-     * @param omitPool whether to *not* add the property _pool
+     * @param inner the object to add the
+     * @param pool  what to add as the property _pool
      * @return the object with the new values
      */
-    public JSONObject addDefaultValuesForCreation(JSONObject inner, boolean omitPool, JSONObject existing) {
-        if (!omitPool) {
-            inner.put("_pool", defaultPool);
+    public JSONObject addDefaultValuesForCreation(JSONObject inner, JSONObject pool, JSONObject existing) {
+        if (pool != null && !pool.equals(JSONObject.NULL)) {
+            inner.put("_pool", pool);
         }
         inner.put("_id", existing == null ? JSONObject.NULL : resolveId(existing));
         inner.put("_version", existing == null ? 1 : existing.getInt("_version") + 1);

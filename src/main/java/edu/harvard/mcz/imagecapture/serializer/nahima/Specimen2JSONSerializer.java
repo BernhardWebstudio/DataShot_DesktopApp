@@ -146,7 +146,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             }
 
             JSONObject reverseNestedDetermination = new JSONObject(reverseNestedCollectionMap);
-            reverseNestedDetermination = nahimaManager.addDefaultValuesForCreation(reverseNestedDetermination);
+            reverseNestedDetermination = nahimaManager.addDefaultValuesForCreation(reverseNestedDetermination, NahimaManager.entomologyPool);
 //            reverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
 
             if (det.getRemarks() != null && !det.getRemarks().equals("")) {
@@ -198,7 +198,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
             put("__idx", 0);
             put("_version", finalExisting == null ? 1 : finalExisting.getJSONArray("_reverse_nested:aufsammlung:entomologie").getJSONObject(0).getInt("_version") + 1);
             put("_id", finalExisting == null ? JSONObject.NULL : NahimaManager.resolveId(finalExisting.getJSONArray("_reverse_nested:aufsammlung:entomologie").getJSONObject(0)));
-            put("_pool", NahimaManager.defaultPool);
+            put("_pool", NahimaManager.entomologyPool);
         }};
         if (comments != null) {
             reverseNestedCollectionMap.put("_nested:aufsammlung__kommentare", new JSONArray(comments));
@@ -330,7 +330,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         tryUserSkippableResolve(result, "lebensabschnitt", () -> nahimaManager.resolveLifeStage(toSerialize.getLifeStage()));
 
         // finally, wrap everything in the pool (might want to do somewhere else)
-        JSONObject wrapper = nahimaManager.wrapForCreation(result, existing, "entomologie", "entomologie__complete", false);
+        JSONObject wrapper = nahimaManager.wrapForCreation(result, existing, "entomologie", "entomologie__complete", NahimaManager.entomologyPool);
 
         // and add tags if needed
         tryUserSkippableResolve(wrapper, "_tags", () -> nahimaManager.resolveWorkflowStatusTags(toSerialize.getWorkFlowStatus()));

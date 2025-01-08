@@ -486,7 +486,7 @@ public class NahimaManager extends AbstractRestClient {
             if (selectionHelper.get(key) instanceof JSONObject && selectionHelper.getJSONObject(key).has("en-US")) {
                 requiredMatches += 1;
                 keysToMatch.add(key);
-            } else if (selectionHelper.get(key) instanceof String && !((String) selectionHelper.get(key)).contains("DataShot")) {
+            } else if (selectionHelper.get(key) instanceof String && !((String) selectionHelper.get(key)).contains("Created by DataShot")) {
                 keysToMatch.add(key);
                 requiredMatches += 1;
             }
@@ -547,7 +547,7 @@ public class NahimaManager extends AbstractRestClient {
                 return foundObjects.getJSONObject(carefulPossiblyCorrectIndices.get(0));
             }
         } else {
-            log.warn("Did not find any similar matches. Required matches: " + requiredMatches);
+            log.warn("Did not find any similar matches in " + objectsToCompare.size() + " results of " + objectType + ". Required matches: " + requiredMatches);
         }
         return null;
     }
@@ -1386,7 +1386,7 @@ public class NahimaManager extends AbstractRestClient {
      * @return the object with the adjusted/added fields
      */
     public JSONObject addDefaultValuesForCreation(JSONObject inner, JSONObject pool) {
-        return addDefaultValuesForCreation(inner, pool);
+        return addDefaultValuesForCreation(inner, pool, null);
     }
 
     /**

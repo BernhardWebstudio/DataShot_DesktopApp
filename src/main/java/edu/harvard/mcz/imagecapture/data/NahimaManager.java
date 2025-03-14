@@ -29,6 +29,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class NahimaManager extends AbstractRestClient {
+    public static final int zoologyPoolId = 4;
     public static final int defaultPoolId = 7;
     public static final JSONObject zoologyPool = new JSONObject("{ \"pool\": { \"_id\": 4 } }");
     public static final JSONObject entomologyPool = new JSONObject("{ \"pool\": { \"_id\": 7 } }");
@@ -439,8 +440,17 @@ public class NahimaManager extends AbstractRestClient {
         } else {
             // TODO: create / select correct
             log.info("Got " + String.valueOf(foundObjects.length()) + " != 1 " + objectType + " objects when searching for '" + search + "'. {}", results);
+
+
             if (selectionHelper != null) {
                 log.info("Using selectionHelper {}", selectionHelper);
+                JSONObject perfectMatch = findExactMatch(foundObjects, objectType, selectionHelper);
+
+                if (perfectMatch != null) {
+                    log.info("Found one best match, using it.");
+                    return perfectMatch;
+                }
+
                 return findSimilarMatch(foundObjects, objectType, selectionHelper, true);
             }
             return null;
@@ -466,14 +476,18 @@ public class NahimaManager extends AbstractRestClient {
         ArrayList<Integer> nrOfAdditionalKeysForPossiblyCorrectIndices = new ArrayList<Integer>();
         ArrayList<Integer> carefulPossiblyCorrectIndices = new ArrayList<Integer>();
         ArrayList<JSONObject> objectsToCompare = new ArrayList<JSONObject>();
-        HashMap<Integer, Integer> newIndicesToOldIndices = new HashMap<Integer, Integer>();
+        ArrayList<Integer> newIndicesToOldIndices = new ArrayList<Integer>();
         for (int i = 0; i < foundObjects.length(); ++i) {
             JSONObject testObj = foundObjects.getJSONObject(i);
             objectsToCompare.add(testObj);
-            newIndicesToOldIndices.put(objectsToCompare.size() - 1, i);
+            newIndicesToOldIndices.add(i);
             if (testObj.has(objectType)) {
                 objectsToCompare.add(testObj.getJSONObject(objectType));
-                newIndicesToOldIndices.put(objectsToCompare.size() - 1, i);
+                newIndicesToOldIndices.add(i);
+            }
+            if (testObj.has("_objecttype") && !testObj.getString("_objecttype").equals(objectType)) {
+                objectsToCompare.add(testObj.getJSONObject(testObj.getString("_objecttype")));
+                newIndicesToOldIndices.add(i);
             }
         }
         int requiredMatches = 0;
@@ -502,8 +516,8 @@ public class NahimaManager extends AbstractRestClient {
                     }
                 }
                 // TODO: compare more than just Strings, Integers and
-                if (selectionHelper.get(key) instanceof String && !((String) selectionHelper.get(key)).contains("DataShot")) {
-                    if (selectionHelper.get(key).equals(testObj.has(key) ? testObj.get(key) : null)) {
+                if (selectionHelper.get(key) instanceof String) {
+                    if (selectionHelper.getString(key).equals(testObj.has(key) ? testObj.getString(key) : null)) {
                         matches += 1;
                     }
                 }
@@ -524,8 +538,9 @@ public class NahimaManager extends AbstractRestClient {
                 }
 
                 try {
-                    JSONObject pool = (JSONObject) testObj.get("_pool");
-                    if (((JSONObject) pool.get("pool")).getInt("_id") == NahimaManager.defaultPoolId) {
+                    JSONObject pool = (JSONObject) testObj.getJSONObject("_pool").getJSONObject("pool");
+                    if ((pool.getInt("_id") == NahimaManager.defaultPoolId)
+                            || (pool.getInt("_id") == NahimaManager.zoologyPoolId)) {
                         possiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
                         nrOfAdditionalKeysForPossiblyCorrectIndices.add(numAdditionalKeys);
                     }
@@ -539,15 +554,15 @@ public class NahimaManager extends AbstractRestClient {
         if (possiblyCorrectIndices.size() == 1) {
             return foundObjects.getJSONObject(possiblyCorrectIndices.get(0));
         } else if (possiblyCorrectIndices.size() > 1 && allowDuplicates) {
-            log.warn("Found multiple " + objectType + " that match all fields. Using first one.");
+            log.warn("Found multiple " + objectType + " that match all fields (" + String.join(", ", keysToMatch) + "). Using first one.");
             return foundObjects.getJSONObject(possiblyCorrectIndices.get(0));
         } else if (carefulPossiblyCorrectIndices.size() > 0) {
-            log.warn("Found " + carefulPossiblyCorrectIndices.size() + " " + objectType + " that match all fields, but without verifying pool. Using first one.");
+            log.warn("Found " + carefulPossiblyCorrectIndices.size() + " " + objectType + " that match all fields (" + String.join(", ", keysToMatch) + "), but without verifying pool. Using first one.");
             if (allowDuplicates || (possiblyCorrectIndices.size() == 0 && carefulPossiblyCorrectIndices.size() == 1)) {
                 return foundObjects.getJSONObject(carefulPossiblyCorrectIndices.get(0));
             }
         } else {
-            log.warn("Did not find any similar matches in " + objectsToCompare.size() + " results of " + objectType + ". Required matches: " + requiredMatches);
+            log.warn("Did not find any similar matches in " + objectsToCompare.size() + " results of " + objectType + ". Required matches: " + requiredMatches + " in keys " + String.join(", ", keysToMatch));
         }
         return null;
     }

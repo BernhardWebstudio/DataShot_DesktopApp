@@ -141,32 +141,37 @@ public class NahimaManager extends AbstractRestClient {
         // https://docs.easydb.de/en/sysadmin/eas/api/put/
         String baseQueryUrl = this.url + "eas/put?token=" + this.token;
         ArrayList<JSONObject> results = new ArrayList<>();
+        HashMap<String, JSONObject> existingFilenames = new HashMap<>();
+        if (existingExport != null && existingExport.getJSONObject("entomologie").has("_reverse_nested:entomologie_mediaassetpublic:entomologie")) {
+            // check if the image has already been uploaded
+            JSONArray mediaassets = existingExport.getJSONObject("entomologie").getJSONArray("_reverse_nested:entomologie_mediaassetpublic:entomologie");
+            for (int i = 0; i < mediaassets.length(); ++i) {
+                JSONObject std = mediaassets.getJSONObject(i).getJSONObject("mediaassetpublic").getJSONObject("_standard").getJSONObject("eas");
+                Iterator<String> keys = std.keys();
 
-        for (ICImage image : specimen.getICImages()) {
-            // first, filter whether this particular image is already online, part of this specimen
-            boolean foundExisting = false;
-            if (existingExport != null && existingExport.getJSONObject("entomologie").has("_reverse_nested:entomologie_mediaassetpublic:entomologie")) {
-                // check if the image has already been uploaded
-                JSONArray mediaassets = existingExport.getJSONObject("entomologie").getJSONArray("_reverse_nested:entomologie_mediaassetpublic:entomologie");
-                for (int i = 0; i < mediaassets.length(); ++i) {
-                    JSONObject std = mediaassets.getJSONObject(i).getJSONObject("mediaassetpublic").getJSONObject("_standard").getJSONObject("eas");
-                    Iterator<String> keys = std.keys();
-
-                    while (keys.hasNext()) {
-                        String key = keys.next();
-                        String filename = std.getJSONArray(key).getJSONObject(0).getString("original_filename");
-                        if (Objects.equals(filename, image.getFilename())) {
-                            // file has been uploaded already
-                            results.add(
-                                    mediaassets.getJSONObject(i)
-                            );
-                            foundExisting = true;
-                            break;
-                        }
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    String filename = std.getJSONArray(key).getJSONObject(0).getString("original_filename");
+                    // 3D files are not in DataShot, but only in Nahima.
+                    // keep them there!
+                    if (filename.endsWith(".p3v") || filename.endsWith(".zip")) {
+                        results.add(
+                                mediaassets.getJSONObject(i)
+                        );
+                    } else {
+                        existingFilenames.put(filename, mediaassets.getJSONObject(i));
                     }
                 }
             }
-            if (foundExisting) {
+        }
+
+
+        for (ICImage image : specimen.getICImages()) {
+            // first, filter whether this particular image is already online, part of this specimen
+            if (existingFilenames.containsKey(image.getFilename())) {
+                results.add(
+                        existingFilenames.get(image.getFilename())
+                );
                 continue;
             }
 

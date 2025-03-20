@@ -52,6 +52,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 /**
  * Display parts of images (and possibly a data entry form) of a specimen and
@@ -160,16 +161,14 @@ public class ImageDisplayFrame extends JFrame {
      */
     public void loadImagesFromFiles(Set<ICImage> imageFiles) {
         log.debug("Loading images from files with size {}", imageFiles.size());
-        ArrayList<String> fileNames = new ArrayList<String>();
-        Iterator<ICImage> i = imageFiles.iterator();
-        ICImage image = null;
-        int fileCount = imageFiles.size();
-        while (i.hasNext()) {
-            image = i.next();
-            fileNames.add(image.getFilename());
-            log.debug("Adding image to picklist: " + image.getPath() +
-                    image.getFilename());
-        }
+        ArrayList<ICImage> imageFilesArray = new ArrayList<>(imageFiles);
+        // sort by image id to get oldest first
+        imageFilesArray.sort(Comparator.comparingLong(ICImage::getImageId));
+        ArrayList<String> fileNames = (ArrayList<String>) imageFilesArray.stream().map(
+                ICImage::getFilename
+        ).collect(Collectors.toList());
+        ICImage image = imageFilesArray.get(0);
+        int fileCount = imageFilesArray.size();
         // TODO: stored path may need separator conversion for different systems.
         // String startPointName =
         // Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE);

@@ -333,7 +333,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         JSONObject wrapper = nahimaManager.wrapForCreation(result, existing, "entomologie", "entomologie__complete", NahimaManager.entomologyPool);
 
         // and add tags if needed
-        tryUserSkippableResolve(wrapper, "_tags", () -> nahimaManager.resolveWorkflowStatusTags(toSerialize.getWorkFlowStatus()));
+        tryUserSkippableResolve(wrapper, "_tags", () -> nahimaManager.resolveAppropriateTags(toSerialize.getWorkFlowStatus(), finalExisting));
 
         return wrapper;
     }

@@ -1468,38 +1468,51 @@ public class NahimaManager extends AbstractRestClient {
                 }
             }
         }
-        JSONObject responseObject = (new JSONArray(response)).getJSONObject(0);
-        JSONArray tagArray = responseObject.getJSONArray("_tags");
-        for (int tagIdx = 0; tagIdx < tagArray.length(); ++tagIdx) {
-            JSONObject tag = tagArray.getJSONObject(tagIdx).getJSONObject("tag");
-            JSONObject tag_names = tag.getJSONObject("displayname");
-            Iterator<String> keys = tag_names.keys();
-            while (keys.hasNext()) {
-                String key = keys.next();
-                String tag_name = tag_names.getString(key);
-                if (Objects.equals(tag_name.toLowerCase(), name.toLowerCase())) {
-                    storeInCache(name, "_tag", tag);
-                    return tag;
+        JSONArray tagGroups = (new JSONArray(response));
+        for (int tagGroupIdx = 0; tagGroupIdx < tagGroups.length(); ++tagGroupIdx) {
+            JSONArray tagArray = tagGroups.getJSONObject(tagGroupIdx).getJSONArray("_tags");
+            for (int tagIdx = 0; tagIdx < tagArray.length(); ++tagIdx) {
+                JSONObject tag = tagArray.getJSONObject(tagIdx).getJSONObject("tag");
+                JSONObject tag_names = tag.getJSONObject("displayname");
+                Iterator<String> keys = tag_names.keys();
+                while (keys.hasNext()) {
+                    String key = keys.next();
+                    String tag_name = tag_names.getString(key);
+                    if (Objects.equals(tag_name.toLowerCase(), name.toLowerCase())) {
+                        storeInCache(name, "_tag", tag);
+                        return tag;
+                    }
                 }
             }
         }
         throw new RuntimeException("Could not find tag with name " + name);
     }
 
-    public JSONArray resolveWorkflowStatusTags(String workFlowStatus) throws IOException {
-        if (Objects.equals(workFlowStatus, WorkFlowStatus.STAGE_CLEAN) || Objects.equals(workFlowStatus, WorkFlowStatus.STAGE_DONE)) {
-            return new JSONArray();
+    public JSONArray resolveAppropriateTags(String workFlowStatus, JSONObject existing) throws IOException {
+        JSONArray existingTags = existing == null ? new JSONArray() : existing.getJSONArray("_tags");
+        JSONObject draftTag = findTagWithName("Entwurf");
+        JSONArray newTags = new JSONArray();
+        if (draftTag == null) {
+            throw new RuntimeException("Could not find Entwurf tag");
         }
 
-        JSONObject tag = findTagWithName("Entwurf");
-        if (tag != null) {
-            return new JSONArray() {{
-                put(new JSONObject() {{
-                    put("_id", tag.getInt("_id"));
+        // add all existing tags except draft
+        existingTags.forEach(tag -> {
+            if (((JSONObject) tag).getInt("_id") != draftTag.getInt("_id")) {
+                newTags.put(new JSONObject() {{
+                    put("_id", draftTag.getInt("_id"));
                 }});
-            }};
-        } else {
-            throw new RuntimeException("Cound not find Entwurf tag");
+            }
+        });
+        // return these, no draft needed
+        if (Objects.equals(workFlowStatus, WorkFlowStatus.STAGE_CLEAN) || Objects.equals(workFlowStatus, WorkFlowStatus.STAGE_DONE)) {
+            return newTags;
         }
+
+        // draft also needed -> (re)add it
+        newTags.put(new JSONObject() {{
+            put("_id", draftTag.getInt("_id"));
+        }});
+        return newTags;
     }
 }

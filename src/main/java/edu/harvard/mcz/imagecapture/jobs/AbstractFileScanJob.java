@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -565,7 +564,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                     gyneCaste.setSpecimenPart(gyne);
                     s.getSpecimenParts().add(gyne);
                     gyne.setSpecimen(s);
-                }  else {
+                } else {
                     s.setSex(sex);
                 }
                 s.setDateIdentified(parser.getIdentifiedDate());
@@ -731,7 +730,11 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
      */
     @Override
     public void run() {
-        start();
+        try {
+            start();
+        } catch (Exception e) {
+            throw new RuntimeException("Runner has been interrupted due to error: " + e.getMessage());
+        }
     }
 
     /**

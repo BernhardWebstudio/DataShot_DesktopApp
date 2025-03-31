@@ -18,6 +18,7 @@
  */
 package edu.harvard.mcz.imagecapture.interfaces;
 
+import java.io.IOException;
 import java.util.Date;
 
 
@@ -34,7 +35,7 @@ public interface RunnableJob {
     /**
      * Start the RunnableJob.
      */
-    void start();
+    void start() throws Exception;
 
     /**
      * If possible, pause the job.  May be implemented to always return false and take no action.

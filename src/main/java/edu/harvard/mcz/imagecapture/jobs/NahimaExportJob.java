@@ -54,7 +54,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     }
 
     @Override
-    public void start() {
+    public void start() throws Exception {
         this.start = new Date();
         // fetch specimen to be exported
         notifyWorkStatusChanged("Loading specimens to export.");
@@ -89,7 +89,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             lastError = e;
             log.error("Failed to instantiate NahimaManager", e);
             this.status = STATUS_NAHIMA_FAILED;
-            return;
+            throw e;
         }
 
         Specimen2JSONSerializer serializer = new Specimen2JSONSerializer(manager);
@@ -160,7 +160,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                 lastError = e;
                 log.error("Failed to upload images", e);
                 this.status = STATUS_NAHIMA_FAILED;
-                return;
+                throw e;
             }
 
             notifyWorkStatusChanged("Uploaded " + uploadedImages.size() + " images for specimen " + currentIndex + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
@@ -259,7 +259,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                 lastError = e;
                 log.error("Failed to create new Nahima specimen", e);
                 this.status = STATUS_NAHIMA_FAILED;
-                return;
+                throw e;
             }
 
             // then, finally, mark specimen as exported
@@ -277,7 +277,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                     lastError = e;
                     log.error("Failed to store Nahima export status", e);
                     this.status = STATUS_DATASHOT_FAILED;
-                    return;
+                    throw e;
                 }
             } else {
                 log.debug("No specimen id, will not update the database");
@@ -331,7 +331,14 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 
     @Override
     public void run() {
-        start();
+        try {
+            start();
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new RuntimeException("Runner has been interrupted due to error: " + e.getMessage());
+        }
     }
 
     /**

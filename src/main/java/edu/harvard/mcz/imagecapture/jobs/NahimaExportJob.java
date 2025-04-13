@@ -154,13 +154,31 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 
             // upload images
             ArrayList<JSONObject> uploadedImages = new ArrayList<>();
-            try {
-                uploadedImages = manager.uploadImagesForSpecimen(specimen, existingExport);
-            } catch (Exception e) {
-                lastError = e;
-                log.error("Failed to upload images", e);
-                this.status = STATUS_NAHIMA_FAILED;
-                throw e;
+            boolean uploadSucceeded = false;
+            int attempts = 0;
+            while (!uploadSucceeded) {
+                attempts += 1;
+                try {
+                    uploadedImages = manager.uploadImagesForSpecimen(specimen, existingExport);
+                    uploadSucceeded = true;
+                } catch (Exception e) {
+                    lastError = e;
+                    log.error("Failed to upload images", e);
+                    notifyWorkStatusChanged("Failed to upload images for specimen " + currentIndex + "/"
+                            + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode()
+                            + " (attempt " + attempts + "). "
+                            + "Retrying in " + 5 * attempts + " minutes...\n"
+                            + "Error message: " + e.getMessage());
+                    try {
+                        Thread.sleep((long) attempts * 5 * 60000); // wait 5 minute before retrying
+                    } catch (InterruptedException e1) {
+                        log.error("Interrupted while waiting for retry", e1);
+                    }
+                    if (attempts > 10) {
+                        this.status = STATUS_NAHIMA_FAILED;
+                        throw new RuntimeException("Failed to upload images – 10 attempts failed.", e);
+                    }
+                }
             }
 
             notifyWorkStatusChanged("Uploaded " + uploadedImages.size() + " images for specimen " + currentIndex + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());

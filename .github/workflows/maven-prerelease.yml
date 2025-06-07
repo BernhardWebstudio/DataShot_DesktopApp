@@ -22,45 +22,50 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 12
-      uses: actions/setup-java@v2
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: 'maven'
-    - name: Build with Maven
-      # without -DskipTests, we also run tests, which should prevent 
-      # the package from being packaged if tests fail
-      run: mvn -B package --file pom.xml -P dist
-    - name: Determine Prerelease Name
-      id: name_determiner
-      run: echo "##[set-output name=name;]DataShot-$(date +'%Y%m%d-%H%M')-beta"
-    - name: Create Pre-release
-      id: create_prerelease
-      if: success()
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: untagged-${{ steps.name_determiner.outputs.name }}-${{ github.sha }}
-        release_name: ${{ steps.name_determiner.outputs.name }}
-        body: "Momentary Snapshot Version. Refer to the git history, [commit log](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commits/master) for current changes"
-        draft: false
-        prerelease: true
-    - name: Upload Pre-release
-      id: upload_prerelease
-      if: success()
-      #uses: actions/upload-release-asset@v1
-      #env:
-      #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #with: 
-      #  upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-      #  asset_path: ./my-artifact.zip
-      #  asset_name: my-artifact.zip
-      #  asset_content_type: application/zip
-      uses: csexton/release-asset-action@v2
-      with:
-        pattern: "target/DataShot*.jar"
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        release-url: ${{ steps.create_prerelease.outputs.upload_url }}
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build with Maven
+        # without -DskipTests, we also run tests, which should prevent
+        # the package from being packaged if tests fail
+        run: mvn -B package --file pom.xml -P dist
+
+      - name: Determine Prerelease Name
+        id: name_determiner
+        run: echo "##[set-output name=name;]DataShot-$(date +'%Y%m%d-%H%M')-beta"
+
+      - name: Create Pre-release
+        id: create_prerelease
+        if: success()
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: untagged-${{ steps.name_determiner.outputs.name }}-${{ github.sha }}
+          release_name: ${{ steps.name_determiner.outputs.name }}
+          body: "Momentary Snapshot Version. Refer to the git history, [commit log](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commits/master) for current changes"
+          draft: false
+          prerelease: true
+
+      - name: Upload Pre-release
+        id: upload_prerelease
+        if: success()
+        #uses: actions/upload-release-asset@v1
+        #env:
+        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #with:
+        #  upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        #  asset_path: ./my-artifact.zip
+        #  asset_name: my-artifact.zip
+        #  asset_content_type: application/zip
+        uses: csexton/release-asset-action@v2
+        with:
+          pattern: "target/DataShot*.jar"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          release-url: ${{ steps.create_prerelease.outputs.upload_url }}

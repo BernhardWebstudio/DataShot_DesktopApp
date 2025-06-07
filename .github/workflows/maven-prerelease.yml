@@ -12,6 +12,9 @@ on:
       - 'bin/'
       - 'docs_manual/'
       - '.github/'
+    # allow manual triggering
+    workflow_dispatch:
+
 
 jobs:
   build:

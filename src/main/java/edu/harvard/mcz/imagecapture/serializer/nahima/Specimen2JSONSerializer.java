@@ -38,6 +38,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         assert target instanceof Specimen;
         JSONObject result = new JSONObject();
         Specimen toSerialize = (Specimen) target;
+        final JSONObject parentExisting = existing;
         if (existing != null) {
             if (existing.has("entomologie")) {
                 existing = existing.getJSONObject("entomologie");
@@ -333,7 +334,7 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         JSONObject wrapper = nahimaManager.wrapForCreation(result, existing, "entomologie", "entomologie__complete", NahimaManager.entomologyPool);
 
         // and add tags if needed
-        tryUserSkippableResolve(wrapper, "_tags", () -> nahimaManager.resolveAppropriateTags(toSerialize.getWorkFlowStatus(), finalExisting));
+        tryUserSkippableResolve(wrapper, "_tags", () -> nahimaManager.resolveAppropriateTags(toSerialize.getWorkFlowStatus(), parentExisting));
 
         return wrapper;
     }

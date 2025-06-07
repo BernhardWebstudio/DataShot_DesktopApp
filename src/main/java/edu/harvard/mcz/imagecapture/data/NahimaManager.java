@@ -177,7 +177,7 @@ public class NahimaManager extends AbstractRestClient {
 
             // if not existing, continue with uploading
             String queryUrl = baseQueryUrl + "&original_filename=" + image.getFilename() + "&instance=image";
-            log.debug("Running image upload to URL " + queryUrl);
+            log.debug("Running image upload to URL {}", queryUrl);
 
             String imagePath = FileUtility.findValidFilepath(
                     ImageCaptureProperties.assemblePathWithBase(image.getPath(), image.getFilename()),
@@ -191,7 +191,7 @@ public class NahimaManager extends AbstractRestClient {
             log.debug("Built request to upload...");
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            log.debug("Response from uploading image: " + response.body());
+            log.debug("Response from uploading image: {}", response.body());
 
             // check for errors
             if (!response.body().startsWith("[")) {
@@ -1489,7 +1489,12 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     public JSONArray resolveAppropriateTags(String workFlowStatus, JSONObject existing) throws IOException {
-        JSONArray existingTags = existing == null ? new JSONArray() : existing.getJSONArray("_tags");
+        JSONArray existingTags = (existing == null || !existing.has("_tags")) ?
+                new JSONArray() :
+                existing.getJSONArray("_tags");
+        if (existing != null && !existing.has("_tags")) {
+            log.warn("Existing object does not have _tags", existing);
+        }
         JSONObject draftTag = findTagWithName("Entwurf");
         JSONArray newTags = new JSONArray();
         if (draftTag == null) {

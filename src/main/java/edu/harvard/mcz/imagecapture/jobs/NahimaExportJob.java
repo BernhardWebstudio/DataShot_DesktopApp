@@ -46,7 +46,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     }
 
     public void setSpecimenToExport(List<Specimen> specimenToExport) {
-        this.specimenToExport = specimenToExport.stream().map(spec -> spec.getSpecimenId()).collect(Collectors.toList());
+        this.specimenToExport = specimenToExport.stream().map(Specimen::getSpecimenId).collect(Collectors.toList());
     }
 
     public void goAnon() {
@@ -63,10 +63,10 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             sls.goAnon();
         }
         if (specimenToExport == null) {
-            if (this.oneSpecimenBarcode != null && !this.oneSpecimenBarcode.equals("")) {
+            if (this.oneSpecimenBarcode != null && !this.oneSpecimenBarcode.isEmpty()) {
                 Map<String, Object> queryParams = new HashMap<>();
                 queryParams.put("barcode", this.oneSpecimenBarcode);
-                specimenToExport = sls.findBy(queryParams).stream().map(spec -> spec.getSpecimenId()).collect(Collectors.toList());
+                specimenToExport = sls.findBy(queryParams).stream().map(Specimen::getSpecimenId).collect(Collectors.toList());
             } else {
                 specimenToExport = sls.findIdsToExport();
             }
@@ -115,7 +115,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
                         image.getPath()
                 );
                 if (!(new File(imagePath)).exists()) {
-                    log.warn("Image file " + imagePath + " was not found.");
+                    log.warn("Image file {} was not found.", imagePath);
                     allFound = false;
                 }
             }
@@ -128,7 +128,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             JSONObject specimenJson;
             JSONObject existingExport = null;
             try {
-                if (specimen.getNahimaId() != null && !specimen.getNahimaId().equals("")) {
+                if (specimen.getNahimaId() != null && !specimen.getNahimaId().isEmpty()) {
                     try {
                         existingExport = manager.findObjectByGlobalObjectId(specimen.getNahimaId());
                     } catch (IOException | InterruptedException e) {

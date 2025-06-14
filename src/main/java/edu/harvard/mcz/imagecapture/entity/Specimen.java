@@ -89,7 +89,7 @@ public class Specimen implements Serializable {
     private String locationInCollection;
     private String workFlowStatus;
     private String createdBy;
-    private Date dateCreated;
+    private Date dateCreated = new Date();
     private Date dateLastUpdated;
     private String lastUpdatedBy;
     private Boolean validDistributionFlag;
@@ -112,7 +112,7 @@ public class Specimen implements Serializable {
     private Boolean nahimaExported = false;
     // need to call it higherOrder as "order" alone gives issues with SQL
     private String higherOrder;
-    private String nahimaId;
+    private String nahimaId = "";
     private String citedInPublicationLink;
     private String citedInPublicationComment;
     private String citedInPublicationYear;

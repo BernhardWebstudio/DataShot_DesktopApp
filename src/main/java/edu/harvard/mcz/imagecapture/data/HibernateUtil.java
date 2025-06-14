@@ -113,6 +113,10 @@ public class HibernateUtil {
      * @see edu.harvard.mcz.imagecapture.data.HibernateUtil#getSessionFactory
      */
     private static void createSessionFactory() {
+        createSessionFactory(false);
+    }
+
+    private static void createSessionFactory(boolean testEnv) {
         try {
             if (sessionFactory != null) {
                 terminateSessionFactory();
@@ -121,8 +125,17 @@ public class HibernateUtil {
             log.error(e.getMessage());
         }
         try {
+            String testEnvEnv = System.getProperty("test.env");
+            Configuration configuration;
+            if ("true".equalsIgnoreCase(testEnvEnv) || testEnv) {
+                // Use test config for in-memory DB
+                configuration = new Configuration().configure("hibernate-test.cfg.xml");
+                sessionFactory = configuration.buildSessionFactory();
+                return;
+            }
+            // Normal (production) config and login dialog
             // Create the Configuration from hibernate.cfg.xml
-            Configuration configuration = new Configuration().configure();
+            configuration = new Configuration().configure();
             // Add authentication properties obtained from the user
             boolean success = false;
             boolean mainFrameAvailable = Singleton.getSingletonInstance().getMainFrame() != null;
@@ -179,9 +192,9 @@ public class HibernateUtil {
                     }
                     try {
                         // Check database authentication by beginning a transaction.
-                            Session session = sessionFactory.getCurrentSession();
-                            session.beginTransaction();
-                            session.close();
+                        Session session = sessionFactory.getCurrentSession();
+                        session.beginTransaction();
+                        session.close();
                         // If an exception hasn't been thrown, dbuser/dbpassword has
                         // successfully authenticated against the database.
                         // Now try authenticating the individual user by the email
@@ -214,7 +227,7 @@ public class HibernateUtil {
                             if (loginDialog.getUsername() != null) {
                                 log.debug("Login failed for " + loginDialog.getUsername());
                             }
-                                sessionFactory.close();
+                            sessionFactory.close();
                             sessionFactory = null;
                             configuration = new Configuration().configure();
                             try {
@@ -329,7 +342,15 @@ public class HibernateUtil {
     }
 
     public static SessionFactory getSessionFactory() {
-        return getSessionFactory(false);
+        return getSessionFactory(false, false);
+    }
+
+    public static SessionFactory getSessionFactory(boolean anon) {
+        return getSessionFactory(anon, false);
+    }
+
+    public static SessionFactory getTestSessionFactory() {
+        return getSessionFactory(false, true);
     }
 
     /**
@@ -343,12 +364,15 @@ public class HibernateUtil {
      *
      * @return the Hibernate SessionFactory.
      */
-    public static SessionFactory getSessionFactory(boolean anon) {
+    public static SessionFactory getSessionFactory(boolean anon, boolean testEnv) {
+        if (anon && testEnv) {
+            throw new IllegalArgumentException("Cannot create an anonymous session factory in test environment.");
+        }
         if (sessionFactory == null) {// || sessionFactory.isClosed()) {
             if (anon) {
                 createAnonSessionFactory();
             } else {
-                createSessionFactory();
+                createSessionFactory(testEnv);
             }
         }
         return sessionFactory;

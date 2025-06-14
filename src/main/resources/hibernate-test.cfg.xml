@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!-- profile specific db config -->
+        <property name="hibernate.dialect">org.hibernate.dialect.H2Dialect</property>
+        <property name="hibernate.connection.driver_class">org.h2.Driver</property>
+        <property name="hibernate.connection.url">jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1</property>
+        <property name="hibernate.hbm2ddl.auto">create-drop</property>
+        <property name="hibernate.show_sql">true</property>
+        <!-- c3p0 config http://www.hibernate.org/214.html -->
+        <!-- configuration pool via c3p0-->
+        <property name="c3p0.acquire_increment">5</property>
+        <property name="c3p0.idle_test_period">100</property> <!-- seconds -->
+        <property name="c3p0.max_size">256</property>
+        <property name="c3p0.max_statements">0</property>
+        <property name="c3p0.min_size">5</property>
+        <property name="c3p0.timeout">1800</property> <!-- seconds -->
+        <!--        <property name="hbm2ddl.auto">update</property>-->
+        <!--        <property name="cache.use_second_level_cache">true</property>-->
+        <!--        <property name="cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory</property>-->
+        <!--        <property name="cache.use_query_cache">true</property>-->
+        <property name="hibernate.connection.CharSet">utf8</property>
+        <property name="hibernate.connection.characterEncoding">utf8</property>
+        <property name="hibernate.connection.useUnicode">true</property>
+        <!-- entities -->
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Number.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/ISO3166.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Specimen.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/SpecimenPart.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/SpecimenPartAttribute.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Tracking.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Determination.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Collector.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Image.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Users.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/Template.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/HigherTaxon.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/UnitTrayLabel.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/MCZbaseGeogAuthRec.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/MCZbaseAuthAgentName.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/LatLong.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/AllowedVersion.hbm.xml"/>
+        <mapping resource="/edu/harvard/mcz/imagecapture/entity/ExternalHistory.hbm.xml"/>
+    </session-factory>
+</hibernate-configuration>

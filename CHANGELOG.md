@@ -1,5 +1,36 @@
 # Changelog
 
+## v1.18.0
+* [[`17906e5444`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/17906e5444)] - Update changelog to publish Version v1.17.0 (Tim Bernhard)
+* [[`43fe06ca0c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/43fe06ca0c)] - Merge branch 'master' of github.com:BernhardWebstudio/DataShot\_DesktopApp (Tim Bernhard)
+* [[`38b80add74`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/38b80add74)] - Improve tabbing in the number table (Tim Bernhard)
+* [[`8f4bd20e8a`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8f4bd20e8a)] - Merge pull request #42 from BernhardWebstudio/dependabot/maven/com.mysql-mysql-connector-j-8.2.0 (Tim Bernhard)
+* [[`f68d19f90e`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f68d19f90e)] - Bump com.mysql:mysql-connector-j from 8.1.0 to 8.2.0 (dependabot[bot])
+* [[`14e5687511`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/14e5687511)] - Fix issue where collectors would not be deleted with their specimen (Tim Bernhard)
+* [[`1fe78ec8dc`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/1fe78ec8dc)] - Update some workflow dependencies (Tim Bernhard)
+* [[`f3813ff9ad`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f3813ff9ad)] - Allow manual trigger of the prerelease (Tim Bernhard)
+* [[`1b3fb301d3`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/1b3fb301d3)] - Fix issue where tags were not removed upon export (Tim Bernhard)
+* [[`8cbadeb341`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8cbadeb341)] - Wait some minutes before trying again if upload failed (Tim Bernhard)
+* [[`18de89004d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/18de89004d)] - Fix issue where compilation might not work (Tim Bernhard)
+* [[`03555e089e`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/03555e089e)] - Fix issue where errors would not be thrown correctly in export job (Tim Bernhard)
+* [[`fa008ab7ea`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/fa008ab7ea)] - Try to make sure that we also keep tags that were set when exporting (Tim Bernhard)
+* [[`17fa1b9319`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/17fa1b9319)] - Show older image first in Specimen view (Tim Bernhard)
+* [[`9680a45fb9`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/9680a45fb9)] - Make sure updating specimen does not remove their 3D files (Tim Bernhard)
+* [[`907b2c5bf5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/907b2c5bf5)] - Improve similarity matching (Tim Bernhard)
+* [[`d29db81022`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d29db81022)] - Fix another one or two mistakes (Tim Bernhard)
+* [[`45226231be`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/45226231be)] - Adjust the pools in which certain objects are exported to in Nahima (Tim Bernhard)
+* [[`620c1638dc`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/620c1638dc)] - Fix incorrect log string (Tim Bernhard)
+* [[`eed1a08a3d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/eed1a08a3d)] - Force language search even more (Tim Bernhard)
+* [[`6cee80009d`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/6cee80009d)] - Explicitly specify language of search (Tim Bernhard)
+* [[`0a91e2d359`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/0a91e2d359)] - Various minor re-orderings and improvements (Tim Bernhard)
+* [[`32b9ab824c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/32b9ab824c)] - Add possibility to switch columns in result, make sure collection nr is sorted as numbers (Tim Bernhard)
+* [[`8e8bf7f7be`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8e8bf7f7be)] - Implement column and filter for collection nr (Tim Bernhard)
+* [[`f271ba02ad`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f271ba02ad)] - Merge branch 'master' of github.com:BernhardWebstudio/DataShot\_DesktopApp (Tim Bernhard)
+* [[`01ef0ae6d2`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/01ef0ae6d2)] - Fix an issue where gazetteer would not be exported properly if iso was missing (Tim Bernhard)
+* [[`b338d71b80`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b338d71b80)] - Minor changes that might fix using scripts to automate things (Tim Bernhard)
+* [[`724d7350fe`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/724d7350fe)] - Update changelog to publish Version v1.17.0 (Tim Bernhard)
+
+
 ## v1.17.0
 * [[`43fe06ca0c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/43fe06ca0c)] - Merge branch 'master' of github.com:BernhardWebstudio/DataShot\_DesktopApp (Tim Bernhard)
 * [[`38b80add74`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/38b80add74)] - Improve tabbing in the number table (Tim Bernhard)

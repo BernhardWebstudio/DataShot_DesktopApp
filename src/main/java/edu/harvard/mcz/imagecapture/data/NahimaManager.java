@@ -1503,9 +1503,11 @@ public class NahimaManager extends AbstractRestClient {
 
         // add all existing tags except draft
         existingTags.forEach(tag -> {
-            if (((JSONObject) tag).getInt("_id") != draftTag.getInt("_id")) {
+            assert tag instanceof JSONObject;
+            int tagId = ((JSONObject) tag).getInt("_id");
+            if (tagId != draftTag.getInt("_id")) {
                 newTags.put(new JSONObject() {{
-                    put("_id", draftTag.getInt("_id"));
+                    put("_id", tagId);
                 }});
             }
         });
@@ -1518,6 +1520,18 @@ public class NahimaManager extends AbstractRestClient {
         newTags.put(new JSONObject() {{
             put("_id", draftTag.getInt("_id"));
         }});
-        return newTags;
+
+        // remove duplicate tags
+        Set<Integer> uniqueTagIds = new HashSet<>();
+        JSONArray deduplicatedTags = new JSONArray();
+        for (int i = 0; i < newTags.length(); i++) {
+            JSONObject tag = newTags.getJSONObject(i);
+            int tagId = tag.getInt("_id");
+            if (!uniqueTagIds.contains(tagId)) {
+                uniqueTagIds.add(tagId);
+                deduplicatedTags.put(tag);
+            }
+        }
+        return deduplicatedTags;
     }
 }

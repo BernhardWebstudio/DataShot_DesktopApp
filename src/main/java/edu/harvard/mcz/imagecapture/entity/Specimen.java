@@ -113,6 +113,7 @@ public class Specimen implements Serializable {
     // need to call it higherOrder as "order" alone gives issues with SQL
     private String higherOrder;
     private String nahimaId = "";
+    private String gbifTaxonId = "";
     private String citedInPublicationLink;
     private String citedInPublicationComment;
     private String citedInPublicationYear;
@@ -256,6 +257,14 @@ public class Specimen implements Serializable {
 
     public void setNahimaId(String nahimaId) {
         this.nahimaId = nahimaId;
+    }
+
+    public String getGBIFTaxonId() {
+        return gbifTaxonId;
+    }
+
+    public void setGBIFTaxonId(String gbifTaxonId) {
+        this.gbifTaxonId = gbifTaxonId;
     }
 
     public Date getDateLastNahimaUpdated() {

@@ -223,6 +223,9 @@
         <property name="externalWorkflowDate" type="java.util.Date">
             <column name="externalWorkflowDate"/>
         </property>
+        <property name="gbifTaxonId" type="string">
+            <column name="GBIF_taxon_id" />
+        </property>
         <!-- TODO: rethink nullability of related columns -->
         <set name="collectors" cascade="all-delete-orphan" inverse="true" fetch="join" order-by="collectorName asc">
             <key>

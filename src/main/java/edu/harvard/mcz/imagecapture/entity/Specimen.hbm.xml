@@ -223,7 +223,7 @@
         <property name="externalWorkflowDate" type="java.util.Date">
             <column name="externalWorkflowDate"/>
         </property>
-        <property name="gbifTaxonId" type="string">
+        <property name="GBIFTaxonId" type="string">
             <column name="GBIF_taxon_id" />
         </property>
         <!-- TODO: rethink nullability of related columns -->

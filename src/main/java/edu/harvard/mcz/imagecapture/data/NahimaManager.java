@@ -41,7 +41,11 @@ public class NahimaManager extends AbstractRestClient {
     private final Map<String, Map<String, JSONObject>> resolveCache = new HashMap<>();
     private String token;
 
-    public NahimaManager(String url, String username, String password, boolean interactive) throws IOException, InterruptedException, RuntimeException {
+    public NahimaManager(String url, String username, String password, boolean interactive) throws IOException, InterruptedException {
+        this(url, username, password, interactive, true);
+    }
+
+    public NahimaManager(String url, String username, String password, boolean interactive, boolean requiresLogin) throws IOException, InterruptedException, RuntimeException {
         // normalize URL
         if (!url.endsWith("/")) {
             url = url + "/";
@@ -1532,6 +1536,9 @@ public class NahimaManager extends AbstractRestClient {
                 deduplicatedTags.put(tag);
             }
         }
+        // actually, we expect that there were not duplicates
+        assert deduplicatedTags.length() == newTags.length();
+
         return deduplicatedTags;
     }
 }

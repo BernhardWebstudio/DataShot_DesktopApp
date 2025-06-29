@@ -31,6 +31,7 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -115,6 +116,19 @@ public class AllowedVersionLifeCycle {
                 Flyway.configure().dataSource(url, username, password).load();
         // Start the migration
         try {
+            // output checksum and version of each migration we are about to run
+            log.info("Starting migration to {} from version {}. All migrations: {}",
+                    String.join(", ",
+                            Arrays.stream(flyway.info().pending()).map((m) -> m.getVersion().toString() + " " + m.getChecksum().toString())
+                                    .toArray(String[]::new)
+                    ),
+                    flyway.info().current().getVersion(),
+                    String.join(", ",
+                            Arrays.stream(flyway.info().all()).map((m) -> m.getVersion().toString() + " " + m.getChecksum().toString())
+                                    .toArray(String[]::new)
+                    )
+            );
+
             flyway.migrate();
         } catch (FlywayException e) {
             log.error("Error", e); //

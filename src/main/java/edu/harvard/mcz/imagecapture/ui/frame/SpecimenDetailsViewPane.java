@@ -598,6 +598,7 @@ public class SpecimenDetailsViewPane extends JPanel {
         textFieldMicrohabitat.setText(previousSpecimen.getMicrohabitat());
         jTextAreaSpecimenNotes.setText(previousSpecimen.getSpecimenNotes());
         jTextFieldInferences.setText(previousSpecimen.getInferences());
+        jTextFieldGBIFTaxonId.setText(previousSpecimen.getGBIFTaxonId());
 
         //+numbers
         specimen.getNumbers().clear();
@@ -708,6 +709,8 @@ public class SpecimenDetailsViewPane extends JPanel {
         getJTextFieldInfraspecificName().setText(specimen.getInfraspecificEpithet());
         getJTextFieldInfraspecificRank().setText(specimen.getInfraspecificRank());
         getJTextFieldAuthorship().setText(specimen.getAuthorship());
+        getjTextFieldGBIFTaxonId().setText(specimen.getGBIFTaxonId());
+
         getTextFieldMicrohabitat().setText(specimen.getMicrohabitat());
 
         getJTextFieldIdRemarks().setText(specimen.getIdentificationRemarks());

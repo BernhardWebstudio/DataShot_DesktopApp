@@ -926,7 +926,7 @@ public class NahimaManager extends AbstractRestClient {
             }}));
         }
         log.debug("Resolved person " + personName + " to first name " + finalFirstName + ", last name " + finalLastName + ", birth date " + birthdate + ", and death date " + deathdate);
-        return this.resolveOrCreateInteractive(personName, "person", "person__public", new JSONObject(personHashMap), null, 0);
+        return this.resolveOrCreateInteractive(personName, "person", "person__private", new JSONObject(personHashMap), null, 0);
     }
 
     public JSONObject resolveRegionType(String type) throws IOException, InterruptedException {

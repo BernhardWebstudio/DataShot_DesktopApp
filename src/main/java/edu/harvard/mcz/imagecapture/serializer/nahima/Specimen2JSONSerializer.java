@@ -1,23 +1,34 @@
 package edu.harvard.mcz.imagecapture.serializer.nahima;
 
-import edu.harvard.mcz.imagecapture.ImageCaptureApp;
-import edu.harvard.mcz.imagecapture.data.NahimaManager;
-import edu.harvard.mcz.imagecapture.entity.Number;
-import edu.harvard.mcz.imagecapture.entity.*;
-import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
-import edu.harvard.mcz.imagecapture.serializer.ToJSONSerializerInterface;
-import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 import org.apache.commons.lang3.time.DateUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import edu.harvard.mcz.imagecapture.ImageCaptureApp;
+import edu.harvard.mcz.imagecapture.data.NahimaManager;
+import edu.harvard.mcz.imagecapture.entity.Collector;
+import edu.harvard.mcz.imagecapture.entity.Determination;
+import edu.harvard.mcz.imagecapture.entity.LatLong;
+import edu.harvard.mcz.imagecapture.entity.Number;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.SpecimenPart;
+import edu.harvard.mcz.imagecapture.entity.SpecimenPartAttribute;
+import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
+import edu.harvard.mcz.imagecapture.serializer.ToJSONSerializerInterface;
+import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
 
 public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
     private static final Logger log = LoggerFactory.getLogger(Specimen2JSONSerializer.class);
@@ -99,11 +110,33 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         tryNonUserSkippableResolve(mainReverseNestedDetermination, "ordnung", () -> nahimaManager.resolveOrder(toSerialize.getHigherOrder()));
 
         String taxonName = NullHandlingUtility.joinNonNull(" ", toSerialize.getGenus(), toSerialize.getSpecificEpithet(), toSerialize.getSubspecificEpithet(), toSerialize.getInfraspecificRank(), toSerialize.getInfraspecificEpithet()).trim().replace("  ", " ");
-        if (!taxonName.equals("")) {
+        if (!taxonName.isEmpty()) {
             tryNonUserSkippableResolve(mainReverseNestedDetermination, "taxonname", () -> nahimaManager.resolveTaxon(taxonName));
         }
 
-        if (toSerialize.getIdentificationRemarks() != null && !toSerialize.getIdentificationRemarks().equals("")) {
+        // the publication will be exported to the publication events, 
+        // but since those are quite hidden, we also add it here
+        // if the authorship contains a colon
+        if (toSerialize.getAuthorship().contains(":") && (
+                (toSerialize.getCitedInPublication() != null && !toSerialize.getCitedInPublication().isEmpty()) ||
+                        (toSerialize.getCitedInPublicationLink() != null && !toSerialize.getCitedInPublicationLink().isEmpty()) ||
+                        (toSerialize.getCitedInPublicationYear() != null && !toSerialize.getCitedInPublicationYear().isEmpty()) ||
+                        (toSerialize.getCitedInPublicationComment() != null && !toSerialize.getCitedInPublicationComment().isEmpty())
+        )) {
+            mainReverseNestedDetermination.put("_nested:bestimmung__bestimmungsreferenzen", new JSONArray(new JSONObject[]{
+                    new JSONObject(new HashMap<String, String>() {{
+                        // comma separated components of the publication reference
+                        put("bestimmungsreferenz", String.join(", ", Arrays.stream(new String[]{
+                                toSerialize.getCitedInPublication(),
+                                toSerialize.getCitedInPublicationLink(),
+                                toSerialize.getCitedInPublicationYear(),
+                                toSerialize.getCitedInPublicationComment()
+                        }).filter(s -> s != null && !s.isEmpty()).toArray(String[]::new)));
+                    }})
+            }));
+        }
+
+        if (toSerialize.getIdentificationRemarks() != null && !toSerialize.getIdentificationRemarks().isEmpty()) {
             mainReverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung", new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
         }
         // try to parse and set the date correctly

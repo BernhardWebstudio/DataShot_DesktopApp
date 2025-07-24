@@ -117,7 +117,8 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
         // the publication will be exported to the publication events, 
         // but since those are quite hidden, we also add it here
         // if the authorship contains a colon
-        if (toSerialize.getAuthorship().contains(":") && (
+        String authorship = toSerialize.getAuthorship();
+        if (authorship != null && authorship.contains(":") && (
                 (toSerialize.getCitedInPublication() != null && !toSerialize.getCitedInPublication().isEmpty()) ||
                         (toSerialize.getCitedInPublicationLink() != null && !toSerialize.getCitedInPublicationLink().isEmpty()) ||
                         (toSerialize.getCitedInPublicationYear() != null && !toSerialize.getCitedInPublicationYear().isEmpty()) ||

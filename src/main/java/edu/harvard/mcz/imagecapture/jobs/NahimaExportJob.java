@@ -56,9 +56,15 @@ public class NahimaExportJob implements RunnableJob, Runnable {
   private ExecutorService executorService;
   private static final int DEFAULT_THREAD_POOL_SIZE = 8;
   private final AtomicInteger processedCount = new AtomicInteger(0);
+  private final AtomicInteger newlyExportedCount = new AtomicInteger(0);
+  private final AtomicInteger updatedCount = new AtomicInteger(0);
   private final AtomicInteger skippedCount = new AtomicInteger(0);
   private final AtomicInteger failedCount = new AtomicInteger(0);
   private volatile String overallStatus = "Initializing...";
+
+  // ThreadLocal instances for thread safety
+  private ThreadLocal<NahimaManager> threadLocalNahimaManager;
+  private ThreadLocal<SpecimenLifeCycle> threadLocalSpecimenLifeCycle;
 
   public void setOneSpecimenToExportBarcode(String oneSpecimenBarcode) {
     this.oneSpecimenBarcode = oneSpecimenBarcode;
@@ -117,17 +123,41 @@ public class NahimaExportJob implements RunnableJob, Runnable {
         "Loaded " + nrOfSpecimenToProcess +
         " specimen to export to Nahima. This can take a while.");
 
-    // initialize Nahima manager
+    // initialize Nahima manager and ThreadLocal instances
     Properties properties =
         Singleton.getSingletonInstance().getProperties().getProperties();
-    NahimaManager manager;
+
+    // Initialize ThreadLocal instances for thread-safe access
+    this.threadLocalNahimaManager = ThreadLocal.withInitial(() -> {
+      try {
+        NahimaManager manager = new NahimaManager(
+            properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL),
+            properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_USER),
+            properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_PASSWORD),
+            CastUtility.castToBoolean(properties.getOrDefault(
+                ImageCaptureProperties.KEY_NAHIMA_INTERACTIVE, true)));
+        return manager;
+      } catch (IOException | InterruptedException e) {
+        log.error("Failed to create thread-local NahimaManager", e);
+        throw new RuntimeException(
+            "Failed to create thread-local NahimaManager", e);
+      }
+    });
+
+    this.threadLocalSpecimenLifeCycle = ThreadLocal.withInitial(() -> {
+      SpecimenLifeCycle slc = new SpecimenLifeCycle();
+      if (this.anon) {
+        slc.goAnon();
+      }
+      return slc;
+    });
+
+    // Test the main thread manager creation to ensure configuration is valid
     try {
-      manager = new NahimaManager(
-          properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL),
-          properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_USER),
-          properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_PASSWORD),
-          CastUtility.castToBoolean(properties.getOrDefault(
-              ImageCaptureProperties.KEY_NAHIMA_INTERACTIVE, true)));
+      NahimaManager testManager = this.threadLocalNahimaManager.get();
+      // Validate that the manager was created successfully
+      log.debug(
+          "Successfully created NahimaManager for thread safety validation");
     } catch (Exception e) {
       lastError = e;
       log.error("Failed to instantiate NahimaManager", e);
@@ -148,7 +178,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
       List<Future<Void>> futures = new ArrayList<>();
       for (Long specimenId : specimenToExport) {
         Future<Void> future = executorService.submit(() -> {
-          processSpecimen(specimenId, sls, manager);
+          processSpecimen(specimenId);
           return null;
         });
         futures.add(future);
@@ -174,13 +204,21 @@ public class NahimaExportJob implements RunnableJob, Runnable {
       }
 
       this.status = STATUS_FINISHED;
-      overallStatus =
-          String.format("Export completed! Processed: %d, Skipped: %d, " +
-                        "Failed: %d of %d total specimens",
-                        processedCount.get(), skippedCount.get(),
-                        failedCount.get(), nrOfSpecimenToProcess);
+      overallStatus = String.format(
+          "Export completed! Newly Exported: %d, Updated: %d, Skipped: %d, "
+              + "Failed: %d of %d total specimens",
+          newlyExportedCount.get(), updatedCount.get(), skippedCount.get(),
+          failedCount.get(), nrOfSpecimenToProcess);
       notifyWorkStatusChanged(overallStatus);
     } finally {
+      // Clean up ThreadLocal instances to prevent memory leaks
+      if (threadLocalNahimaManager != null) {
+        threadLocalNahimaManager.remove();
+      }
+      if (threadLocalSpecimenLifeCycle != null) {
+        threadLocalSpecimenLifeCycle.remove();
+      }
+
       if (executorService != null) {
         executorService.shutdown();
         try {
@@ -195,17 +233,10 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     }
   }
 
-  private void processSpecimen(Long specimenId, SpecimenLifeCycle sls,
-                               NahimaManager manager) throws Exception {
-    // Create a separate NahimaManager instance for thread safety
-    Properties properties =
-        Singleton.getSingletonInstance().getProperties().getProperties();
-    NahimaManager threadLocalManager = new NahimaManager(
-        properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL),
-        properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_USER),
-        properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_PASSWORD),
-        CastUtility.castToBoolean(properties.getOrDefault(
-            ImageCaptureProperties.KEY_NAHIMA_INTERACTIVE, true)));
+  private void processSpecimen(Long specimenId) throws Exception {
+    // Use thread-local instances for thread safety
+    NahimaManager threadLocalManager = this.threadLocalNahimaManager.get();
+    SpecimenLifeCycle sls = this.threadLocalSpecimenLifeCycle.get();
 
     Specimen specimen = sls.findById(specimenId);
     int index = currentIndex.incrementAndGet();
@@ -258,6 +289,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     // map, associate where possible/needed
     JSONObject specimenJson;
     JSONObject existingExport = null;
+    boolean isUpdate = false; // Track whether this is an update or new export
     try {
       if (specimen.getNahimaId() != null && !specimen.getNahimaId().isEmpty()) {
         try {
@@ -269,6 +301,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
           throw new SkipSpecimenException();
         }
         log.debug("Found specimen to update in Nahima");
+        isUpdate = true;
         specimenJson = serializer.serialize2JSON(specimen, existingExport);
       } else {
         specimenJson = serializer.serialize2JSON(specimen);
@@ -486,12 +519,27 @@ public class NahimaExportJob implements RunnableJob, Runnable {
       log.debug("No specimen id, will not update the database");
     }
     processedCount.incrementAndGet();
+    // Increment the appropriate specific counter based on whether this was an
+    // update or new export
+    if (isUpdate) {
+      updatedCount.incrementAndGet();
+    } else {
+      newlyExportedCount.incrementAndGet();
+    }
     updateOverallStatus();
     notifyProgressChanged();
   }
 
   @Override
   public boolean stop() {
+    // Clean up ThreadLocal instances to prevent memory leaks
+    if (threadLocalNahimaManager != null) {
+      threadLocalNahimaManager.remove();
+    }
+    if (threadLocalSpecimenLifeCycle != null) {
+      threadLocalSpecimenLifeCycle.remove();
+    }
+
     if (executorService != null && !executorService.isShutdown()) {
       executorService.shutdown();
       try {
@@ -589,9 +637,10 @@ public class NahimaExportJob implements RunnableJob, Runnable {
   private synchronized void updateOverallStatus() {
     int total = processedCount.get() + skippedCount.get() + failedCount.get();
     overallStatus = String.format(
-        "Progress: %d/%d specimens | Processed: %d | Skipped: %d | Failed: %d",
-        total, nrOfSpecimenToProcess, processedCount.get(), skippedCount.get(),
-        failedCount.get());
+        "Progress: %d/%d specimens | Newly Exported: %d | Updated: %d | " +
+        "Skipped: %d | Failed: %d",
+        total, nrOfSpecimenToProcess, newlyExportedCount.get(),
+        updatedCount.get(), skippedCount.get(), failedCount.get());
     notifyWorkStatusChanged(overallStatus);
   }
 
@@ -609,6 +658,16 @@ public class NahimaExportJob implements RunnableJob, Runnable {
    * @return the number of specimen successfully processed
    */
   public int getProcessedCount() { return processedCount.get(); }
+
+  /**
+   * @return the number of specimen newly exported
+   */
+  public int getNewlyExportedCount() { return newlyExportedCount.get(); }
+
+  /**
+   * @return the number of specimen updated
+   */
+  public int getUpdatedCount() { return updatedCount.get(); }
 
   /**
    * @return the number of specimen skipped

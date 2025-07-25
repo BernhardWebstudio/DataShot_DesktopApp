@@ -55,6 +55,10 @@ public class NahimaExportJob implements RunnableJob, Runnable {
   private boolean anon = false;
   private ExecutorService executorService;
   private static final int DEFAULT_THREAD_POOL_SIZE = 8;
+  private final AtomicInteger processedCount = new AtomicInteger(0);
+  private final AtomicInteger skippedCount = new AtomicInteger(0);
+  private final AtomicInteger failedCount = new AtomicInteger(0);
+  private volatile String overallStatus = "Initializing...";
 
   public void setOneSpecimenToExportBarcode(String oneSpecimenBarcode) {
     this.oneSpecimenBarcode = oneSpecimenBarcode;
@@ -67,6 +71,22 @@ public class NahimaExportJob implements RunnableJob, Runnable {
   }
 
   public void goAnon() { this.anon = true; }
+
+  private int getConfiguredThreadPoolSize() {
+    Properties properties =
+        Singleton.getSingletonInstance().getProperties().getProperties();
+    String threadPoolSizeStr = properties.getProperty(
+        ImageCaptureProperties.KEY_NAHIMA_THREAD_POOL_SIZE,
+        String.valueOf(DEFAULT_THREAD_POOL_SIZE));
+    try {
+      int size = Integer.parseInt(threadPoolSizeStr);
+      return Math.max(1, size); // Ensure at least 1 thread
+    } catch (NumberFormatException e) {
+      log.warn("Invalid thread pool size configuration '{}', using default: {}",
+               threadPoolSizeStr, DEFAULT_THREAD_POOL_SIZE);
+      return DEFAULT_THREAD_POOL_SIZE;
+    }
+  }
 
   @Override
   public void start() throws Exception {
@@ -116,9 +136,12 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     }
 
     // Create thread pool for parallel processing
-    int threadPoolSize =
-        Math.min(DEFAULT_THREAD_POOL_SIZE, nrOfSpecimenToProcess);
+    int threadPoolSize = getConfiguredThreadPoolSize();
+    threadPoolSize = Math.min(threadPoolSize, nrOfSpecimenToProcess);
     executorService = Executors.newFixedThreadPool(threadPoolSize);
+
+    overallStatus = "Starting export with " + threadPoolSize + " threads...";
+    notifyWorkStatusChanged(overallStatus);
 
     try {
       // Submit all specimen processing tasks
@@ -143,12 +166,20 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             throw (Exception)cause;
           } else {
             throw new RuntimeException(
-                "Unexpected error during specimen processing", cause);
+                "Unexpected error during specimen processing (\"" +
+                    cause.getLocalizedMessage() + "\")",
+                cause);
           }
         }
       }
 
       this.status = STATUS_FINISHED;
+      overallStatus =
+          String.format("Export completed! Processed: %d, Skipped: %d, " +
+                        "Failed: %d of %d total specimens",
+                        processedCount.get(), skippedCount.get(),
+                        failedCount.get(), nrOfSpecimenToProcess);
+      notifyWorkStatusChanged(overallStatus);
     } finally {
       if (executorService != null) {
         executorService.shutdown();
@@ -187,6 +218,8 @@ public class NahimaExportJob implements RunnableJob, Runnable {
       log.debug("Skipping export of specimen " + index + "/" +
                 nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() +
                 ".");
+      skippedCount.incrementAndGet();
+      updateOverallStatus();
       notifyProgressChanged();
       return;
     }
@@ -194,10 +227,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
     log.debug("Exporting specimen " + index + "/" + nrOfSpecimenToProcess +
               " with id " + specimen.getSpecimenId() + " and barcode " +
               specimen.getBarcode());
-    notifyWorkStatusChanged("Exporting specimen " + index + "/" +
-                            nrOfSpecimenToProcess + " with id " +
-                            specimen.getSpecimenId() + " and barcode " +
-                            specimen.getBarcode());
+    updateOverallStatus();
 
     // check if all images are present, otherwise, can skip anyway
     boolean allFound = true;
@@ -216,6 +246,8 @@ public class NahimaExportJob implements RunnableJob, Runnable {
       log.debug("Skipping export of specimen " + index + "/" +
                 nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() +
                 " because not all images were found.");
+      skippedCount.incrementAndGet();
+      updateOverallStatus();
       notifyProgressChanged();
       return;
     }
@@ -243,12 +275,16 @@ public class NahimaExportJob implements RunnableJob, Runnable {
       }
     } catch (SkipSpecimenException e) {
       log.debug("NoExport: skip specimen exception");
+      skippedCount.incrementAndGet();
+      updateOverallStatus();
       notifyProgressChanged();
       return;
     }
 
     if (specimenJson == null) {
       log.debug("NoExport: Specimen json null, cannot upload stuff");
+      skippedCount.incrementAndGet();
+      updateOverallStatus();
       notifyProgressChanged();
       return;
     }
@@ -266,13 +302,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
       } catch (Exception e) {
         lastError = e;
         log.error("Failed to upload images", e);
-        notifyWorkStatusChanged(
-            "Failed to upload images for specimen " + index + "/" +
-            nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() +
-            " and barcode " + specimen.getBarcode() + " (attempt " +
-            attempts + "). "
-            + "Retrying in " + 5 * attempts + " minutes...\n"
-            + "Error message: " + e.getMessage());
+        // Don't update UI for individual thread retries - too noisy
         try {
           Thread.sleep((long)attempts * 5 *
                        60000); // wait 5 minute before retrying
@@ -284,16 +314,18 @@ public class NahimaExportJob implements RunnableJob, Runnable {
         }
         if (attempts > 10) {
           this.status = STATUS_NAHIMA_FAILED;
+          failedCount.incrementAndGet();
+          updateOverallStatus();
           throw new RuntimeException(
               "Failed to upload images – 10 attempts failed.", e);
         }
       }
     }
 
-    notifyWorkStatusChanged(
-        "Uploaded " + uploadedImages.size() + " images for specimen " + index +
-        "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId() +
-        " and barcode " + specimen.getBarcode());
+    log.debug("Uploaded " + uploadedImages.size() + " images for specimen " +
+              index + "/" + nrOfSpecimenToProcess + " with id " +
+              specimen.getSpecimenId() + " and barcode " +
+              specimen.getBarcode());
 
     // add images
     JSONArray mediaAssets = new JSONArray();
@@ -424,6 +456,8 @@ public class NahimaExportJob implements RunnableJob, Runnable {
       lastError = e;
       log.error("Failed to create new Nahima specimen", e);
       this.status = STATUS_NAHIMA_FAILED;
+      failedCount.incrementAndGet();
+      updateOverallStatus();
       throw e;
     }
 
@@ -444,11 +478,15 @@ public class NahimaExportJob implements RunnableJob, Runnable {
         lastError = e;
         log.error("Failed to store Nahima export status", e);
         this.status = STATUS_DATASHOT_FAILED;
+        failedCount.incrementAndGet();
+        updateOverallStatus();
         throw e;
       }
     } else {
       log.debug("No specimen id, will not update the database");
     }
+    processedCount.incrementAndGet();
+    updateOverallStatus();
     notifyProgressChanged();
   }
 
@@ -546,6 +584,18 @@ public class NahimaExportJob implements RunnableJob, Runnable {
   }
 
   /**
+   * Update the overall status message based on current progress
+   */
+  private synchronized void updateOverallStatus() {
+    int total = processedCount.get() + skippedCount.get() + failedCount.get();
+    overallStatus = String.format(
+        "Progress: %d/%d specimens | Processed: %d | Skipped: %d | Failed: %d",
+        total, nrOfSpecimenToProcess, processedCount.get(), skippedCount.get(),
+        failedCount.get());
+    notifyWorkStatusChanged(overallStatus);
+  }
+
+  /**
    * @return the last (and probably only) Exception encountered.
    */
   public Exception getLastException() { return lastError; }
@@ -554,4 +604,19 @@ public class NahimaExportJob implements RunnableJob, Runnable {
    * @return the total nr. of specimen to process/export
    */
   public int getTotalCount() { return nrOfSpecimenToProcess; }
+
+  /**
+   * @return the number of specimen successfully processed
+   */
+  public int getProcessedCount() { return processedCount.get(); }
+
+  /**
+   * @return the number of specimen skipped
+   */
+  public int getSkippedCount() { return skippedCount.get(); }
+
+  /**
+   * @return the number of specimen that failed to process
+   */
+  public int getFailedCount() { return failedCount.get(); }
 }

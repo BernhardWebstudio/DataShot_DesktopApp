@@ -1174,7 +1174,7 @@ public class NahimaManager extends AbstractRestClient {
         };
         return this.resolveStringSearchToOne(type, "region_verwaltungseinheiten",
                 false,
-                new JSObject(regionTypeHashmap));
+                new JSONObject(regionTypeHashmap));
     }
 
     public JSONObject resolveCountry(String countryName)

@@ -63,6 +63,14 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
+// Additional imports for Python fallback
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Image File that might contain text that can be extracted by OCR or a barcode
@@ -1162,7 +1170,7 @@ public class CandidateImageFile {
      * @param detection
      * @return
      */
-    private String decompressMessageIfNecessary(QrCode detection) {
+    public static String decompressMessageIfNecessary(QrCode detection) {
         String result = "";
         byte[] dataBytes = detection.corrected;
         if (GZipCompressor.isCompressed(dataBytes)) {
@@ -1581,8 +1589,23 @@ public class CandidateImageFile {
                     if (returnValue != null && returnValue.length() > 0) {
                         barcodeStatus = RESULT_BARCODE_SCANNED;
                     } else {
-                        returnValue = "Failed to read a barcode from templated location.";
-                        barcodeStatus = RESULT_ERROR;
+                        // Try Python fallback if templated location failed
+                        log.debug("Attempting Python QR fallback for templated location");
+                        List<String> pythonResults = tryPythonQRCodeFallback(image);
+                        if (!pythonResults.isEmpty()) {
+                            processPythonQRResults(pythonResults);
+                            // Use the appropriate barcode for the template context
+                            returnValue = findBestBarcodeForTemplate(pythonResults);
+                            if (returnValue != null) {
+                                barcodeStatus = RESULT_BARCODE_SCANNED;
+                            } else {
+                                returnValue = "Failed to read a barcode from templated location.";
+                                barcodeStatus = RESULT_ERROR;
+                            }
+                        } else {
+                            returnValue = "Failed to read a barcode from templated location.";
+                            barcodeStatus = RESULT_ERROR;
+                        }
                     }
                     log.debug("Debug {}", returnValue);
                     log.debug("barcodeStatus=" + barcodeStatus);
@@ -1632,6 +1655,18 @@ public class CandidateImageFile {
                 returnValue = null;
                 log.error("Error", e);
                 barcodeStatus = RESULT_ERROR;
+                
+                // Try Python fallback if Java-based QR reading failed
+                log.debug("Attempting Python QR fallback");
+                List<String> pythonResults = tryPythonQRCodeFallback(image);
+                if (!pythonResults.isEmpty()) {
+                    processPythonQRResults(pythonResults);
+                    // Return the first found code for backward compatibility
+                    returnValue = pythonResults.get(0);
+                    barcodeStatus = RESULT_BARCODE_SCANNED;
+                } else {
+                    log.debug("Python QR fallback also failed");
+                }
             }
         }
         return returnValue;
@@ -1677,6 +1712,222 @@ public class CandidateImageFile {
      */
     public void setTemplateUsed(PositionTemplate templateUsed) {
         this.templateUsed = templateUsed;
+    }
+
+    /**
+     * Fallback method to use Python qreader for QR code detection.
+     * This method applies contrast enhancement similar to the QRCodeDiagnosticTest
+     * and then uses the Python qrscan_using_python.py script to detect QR codes.
+     *
+     * @param image The BufferedImage to process
+     * @return A list of detected QR code texts, or empty list if none found
+     */
+    private List<String> tryPythonQRCodeFallback(BufferedImage image) {
+        List<String> results = new ArrayList<>();
+        
+        try {
+            // Check if Python is available
+            if (!isPythonAvailable()) {
+                log.debug("Python not available, skipping Python QR fallback");
+                return results;
+            }
+            
+            // Scale and enhance contrast similar to QRCodeDiagnosticTest
+            BufferedImage processedImage = scaleAndEnhanceContrast(image);
+            
+            // Create temporary file for the processed image
+            Path tempImagePath = Files.createTempFile("qr_scan_", ".jpg");
+            try {
+                ImageIO.write(processedImage, "jpg", tempImagePath.toFile());
+                
+                // Get the path to the Python script
+                String pythonScriptPath = findPythonScript();
+                if (pythonScriptPath == null) {
+                    log.debug("Python QR script not found");
+                    return results;
+                }
+                
+                // Execute Python script
+                ProcessBuilder pb = new ProcessBuilder("python", pythonScriptPath, tempImagePath.toString());
+                Process process = pb.start();
+                
+                // Read the output
+                BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                StringBuilder output = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
+                
+                int exitCode = process.waitFor();
+                if (exitCode == 0) {
+                    // Parse JSON output
+                    results = parseQRCodeResults(output.toString());
+                    log.debug("Python QR fallback found {} codes", results.size());
+                } else {
+                    log.debug("Python QR script exited with code: {}", exitCode);
+                }
+                
+            } finally {
+                // Clean up temporary file
+                Files.deleteIfExists(tempImagePath);
+            }
+            
+        } catch (Exception e) {
+            log.debug("Python QR fallback failed: {}", e.getMessage());
+        }
+        
+        return results;
+    }
+    
+    /**
+     * Scale and enhance contrast of the image similar to QRCodeDiagnosticTest
+     */
+    private BufferedImage scaleAndEnhanceContrast(BufferedImage image) {
+        // Scale image to at most 750px width or height
+        int maxDimension = 750;
+        BufferedImage scaledImage = image;
+        
+        if (image.getWidth() > maxDimension || image.getHeight() > maxDimension) {
+            double scale = Math.min((double) maxDimension / image.getWidth(), 
+                                   (double) maxDimension / image.getHeight());
+            int newWidth = (int) (image.getWidth() * scale);
+            int newHeight = (int) (image.getHeight() * scale);
+            scaledImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+            scaledImage.getGraphics().drawImage(image, 0, 0, newWidth, newHeight, null);
+        }
+        
+        // Enhance contrast
+        BufferedImage contrastImage = new BufferedImage(scaledImage.getWidth(), scaledImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+        for (int y = 0; y < scaledImage.getHeight(); y++) {
+            for (int x = 0; x < scaledImage.getWidth(); x++) {
+                int rgb = scaledImage.getRGB(x, y);
+                int r = (rgb >> 16) & 0xFF;
+                int g = (rgb >> 8) & 0xFF;
+                int b = rgb & 0xFF;
+                
+                if ((r + g + b) > 3 * 180) {
+                    r = (int) (r * 1.2); // Lighten bright pixels
+                    g = (int) (g * 1.2);
+                    b = (int) (b * 1.2);
+                } else {
+                    r = (int) (r * 0.8); // Darken dark pixels
+                    g = (int) (g * 0.8);
+                    b = (int) (b * 0.8);
+                }
+                
+                r = Math.min(255, Math.max(0, r));
+                g = Math.min(255, Math.max(0, g));
+                b = Math.min(255, Math.max(0, b));
+                contrastImage.setRGB(x, y, (r << 16) | (g << 8) | b);
+            }
+        }
+        
+        return contrastImage;
+    }
+    
+    /**
+     * Check if Python is available on the system
+     */
+    private boolean isPythonAvailable() {
+        try {
+            ProcessBuilder pb = new ProcessBuilder("python", "--version");
+            Process process = pb.start();
+            int exitCode = process.waitFor();
+            return exitCode == 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    /**
+     * Find the Python QR scanning script
+     */
+    private String findPythonScript() {
+        // Try to find the script in the resources folder
+        String[] possiblePaths = {
+            "src/main/resources/qrscan_using_python.py",
+            "qrscan_using_python.py",
+            System.getProperty("user.dir") + "/src/main/resources/qrscan_using_python.py"
+        };
+        
+        for (String path : possiblePaths) {
+            if (Files.exists(Paths.get(path))) {
+                return path;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Parse the JSON output from the Python script
+     */
+    private List<String> parseQRCodeResults(String jsonOutput) {
+        List<String> results = new ArrayList<>();
+        
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode rootNode = mapper.readTree(jsonOutput);
+            
+            if (rootNode.isArray()) {
+                for (JsonNode node : rootNode) {
+                    if (node.isTextual()) {
+                        String text = node.asText();
+                        if (text != null && !text.trim().isEmpty()) {
+                            results.add(text);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Failed to parse JSON output: {}", e.getMessage());
+        }
+        
+        return results;
+    }
+    
+    /**
+     * Process QR codes found by Python fallback and set appropriate fields
+     */
+    private void processPythonQRResults(List<String> qrCodes) {
+        String jsonCode = null;
+        String ethCode = null;
+        
+        for (String code : qrCodes) {
+            if (code.startsWith("{") && code.endsWith("}")) {
+                // This looks like JSON data (label text)
+                jsonCode = code;
+            } else if (code.startsWith("ETHZ-ENT") || code.startsWith("ETH-ENT")) {
+                // This looks like a catalog number
+                ethCode = code;
+            }
+        }
+        
+        // Set the fields appropriately
+        if (jsonCode != null) {
+            this.labelText = jsonCode;
+            this.unitTrayTaxonLabelTextStatus = RESULT_BARCODE_SCANNED;
+        }
+        
+        if (ethCode != null) {
+            this.catalogNumberBarcodeText = ethCode;
+            this.catalogNumberBarcodeStatus = RESULT_BARCODE_SCANNED;
+        }
+    }
+    
+    /**
+     * Find the best barcode from Python results for the current template context
+     */
+    private String findBestBarcodeForTemplate(List<String> qrCodes) {
+        // Prefer ETH-ENT codes for catalog number contexts
+        for (String code : qrCodes) {
+            if (code.startsWith("ETHZ-ENT") || code.startsWith("ETH-ENT")) {
+                return code;
+            }
+        }
+        // Fall back to first found code
+        return qrCodes.isEmpty() ? null : qrCodes.get(0);
     }
 
     /**

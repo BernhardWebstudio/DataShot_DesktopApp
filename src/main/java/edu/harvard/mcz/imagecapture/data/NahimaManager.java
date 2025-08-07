@@ -39,7 +39,7 @@ public class NahimaManager extends AbstractRestClient {
     private final String password;
     private final boolean interactive;
     private final Map<String, Map<String, JSONObject>> resolveCache = new HashMap<>();
-    private String token;
+    private String token = "";
 
     public NahimaManager(String url, String username, String password, boolean interactive) throws IOException, InterruptedException {
         this(url, username, password, interactive, true);
@@ -59,8 +59,10 @@ public class NahimaManager extends AbstractRestClient {
         this.password = password;
         this.interactive = interactive;
 
-        this.startSessionAndRetrieveToken();
-        this.login();
+        if (requiresLogin) {
+            this.startSessionAndRetrieveToken();
+            this.login();
+        }
     }
 
     /**
@@ -993,6 +995,7 @@ public class NahimaManager extends AbstractRestClient {
         try {
             parent = resolveCountry(specimen.getCountry());
         } catch (Exception ignored) {
+            log.debug("Failed to resolve country {} for primary division {}", specimen.getCountry(), specimen.getPrimaryDivison());
         }
 
         JSONObject finalParent = parent;

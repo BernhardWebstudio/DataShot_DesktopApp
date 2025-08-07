@@ -1816,7 +1816,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                     try {
                         Properties properties = Singleton.getSingletonInstance().getProperties().getProperties();
 
-                        urlString = properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL);
+                        urlString = properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL, "https://nahima.ethz.ch");
 
                         // need to first convert he global object id to the uuid for the link
                         NahimaManager nahimaManager = new NahimaManager(properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL), properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_USER), properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_PASSWORD), false, false);

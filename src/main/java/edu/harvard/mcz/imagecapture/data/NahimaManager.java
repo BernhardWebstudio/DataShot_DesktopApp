@@ -1,22 +1,5 @@
 package edu.harvard.mcz.imagecapture.data;
 
-import com.github.mizosoft.methanol.MediaType;
-import com.github.mizosoft.methanol.MultipartBodyPublisher;
-import com.github.mizosoft.methanol.MutableRequest;
-import edu.harvard.mcz.imagecapture.ImageCaptureApp;
-import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
-import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.entity.ICImage;
-import edu.harvard.mcz.imagecapture.entity.Specimen;
-import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
-import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
-import edu.harvard.mcz.imagecapture.ui.dialog.ChooseFromJArrayDialog;
-import edu.harvard.mcz.imagecapture.ui.dialog.VerifyJSONDialog;
-import edu.harvard.mcz.imagecapture.utility.AbstractRestClient;
-import edu.harvard.mcz.imagecapture.utility.FileUtility;
-import edu.harvard.mcz.imagecapture.utility.JSONUtility;
-import edu.harvard.mcz.imagecapture.utility.ListUtility;
-import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -33,13 +16,34 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.mizosoft.methanol.MediaType;
+import com.github.mizosoft.methanol.MultipartBodyPublisher;
+import com.github.mizosoft.methanol.MutableRequest;
+
+import edu.harvard.mcz.imagecapture.ImageCaptureApp;
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.entity.ICImage;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
+import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
+import edu.harvard.mcz.imagecapture.ui.dialog.ChooseFromJArrayDialog;
+import edu.harvard.mcz.imagecapture.ui.dialog.VerifyJSONDialog;
+import edu.harvard.mcz.imagecapture.utility.AbstractRestClient;
+import edu.harvard.mcz.imagecapture.utility.FileUtility;
+import edu.harvard.mcz.imagecapture.utility.JSONUtility;
+import edu.harvard.mcz.imagecapture.utility.ListUtility;
+import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
 
 public class NahimaManager extends AbstractRestClient {
   public static final int zoologyPoolId = 4;
@@ -1162,9 +1166,23 @@ public class NahimaManager extends AbstractRestClient {
         null, 0);
   }
 
+  public JSONArray resolveRegionTypes(String type)
+      throws IOException, InterruptedException {
+    JSONObject results = this.searchByString(type, "region_verwaltungseinheiten");
+    
+    if (results == null || 
+        (results.has("code") && results.getString("code").startsWith("error")) ||
+        !results.has("objects")) {
+      return new JSONArray();
+    }
+    
+    return results.getJSONArray("objects");
+  }
+
   public JSONObject resolveRegionType(String type)
       throws IOException, InterruptedException {
-    return this.resolveStringSearchToOne(type, "region_verwaltungseinheiten");
+    JSONArray regionTypes = resolveRegionTypes(type);
+    return regionTypes.length() > 0 ? regionTypes.getJSONObject(0) : null;
   }
 
   public JSONObject resolveCountry(String countryName)
@@ -1180,8 +1198,16 @@ public class NahimaManager extends AbstractRestClient {
         "gazetteer.region_verwaltungseinheit._global_object_id");
     additionalFilter.put("fields", filterFieldsFields);
     JSONArray filterFieldsIn = new JSONArray();
-    filterFieldsIn.put(
-        resolveRegionType("Land").getString("_global_object_id"));
+    
+    // Get all region types with name "Land" and add their global object ids
+    JSONArray landRegionTypes = resolveRegionTypes("Land");
+    for (int i = 0; i < landRegionTypes.length(); i++) {
+      JSONObject regionType = landRegionTypes.getJSONObject(i);
+      if (regionType.has("_global_object_id")) {
+        filterFieldsIn.put(regionType.getString("_global_object_id"));
+      }
+    }
+    
     additionalFilter.put("in", filterFieldsIn);
 
     JSONObject results = this.searchByString(
@@ -1250,11 +1276,7 @@ public class NahimaManager extends AbstractRestClient {
         put("_id_parent",
             parentId == null
                 ? JSONObject.NULL
-                : parentId); // Might throw NullPointerException. If we find the
-                             // location, it is never called, therefore, we only
-                             // have a problem if neither location nor country
-                             // are found
-        //            put("isocode3166_2", specimen.getPrimaryDivisonISO());
+                : parentId);
       }
     };
     if (specimen.getPrimaryDivisonISO() != null) {
@@ -1262,9 +1284,26 @@ public class NahimaManager extends AbstractRestClient {
                    stringTrimOrJSONNull(specimen.getPrimaryDivisonISO()));
     }
 
-    return this.resolveOrCreateInteractive(searchString, "gazetteer",
-                                           "gazetteer__all_fields",
-                                           new JSONObject(paramMap), null);
+    // First try to resolve with the full search string (primary division + country)
+    JSONObject result = this.resolveStringSearchToOne(searchString, "gazetteer", false, new JSONObject(paramMap));
+    
+    // If not found and we have a primary division, try searching for just the primary division
+    if (result == null && specimen.getPrimaryDivison() != null && 
+        !specimen.getPrimaryDivison().trim().equals("") && 
+        !specimen.getPrimaryDivison().equals("unknown")) {
+      
+      String primaryDivisionOnly = specimen.getPrimaryDivison().trim();
+      result = this.resolveStringSearchToOne(primaryDivisionOnly, "gazetteer", false, new JSONObject(paramMap));
+    }
+    
+    // If still not found, create interactively
+    if (result == null) {
+      return this.resolveOrCreateInteractive(searchString, "gazetteer",
+                                             "gazetteer__all_fields",
+                                             new JSONObject(paramMap), null);
+    }
+    
+    return result;
   }
 
   private Object stringTrimOrJSONNull(String val) {

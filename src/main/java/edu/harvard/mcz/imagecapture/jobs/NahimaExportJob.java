@@ -54,7 +54,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
   private List<Long> specimenToExport = null;
   private boolean anon = false;
   private ExecutorService executorService;
-  private static final int DEFAULT_THREAD_POOL_SIZE = 8;
+  private static final int DEFAULT_THREAD_POOL_SIZE = 4;
   private final AtomicInteger processedCount = new AtomicInteger(0);
   private final AtomicInteger newlyExportedCount = new AtomicInteger(0);
   private final AtomicInteger updatedCount = new AtomicInteger(0);

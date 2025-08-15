@@ -1,5 +1,22 @@
 package edu.harvard.mcz.imagecapture.data;
 
+import com.github.mizosoft.methanol.MediaType;
+import com.github.mizosoft.methanol.MultipartBodyPublisher;
+import com.github.mizosoft.methanol.MutableRequest;
+import edu.harvard.mcz.imagecapture.ImageCaptureApp;
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.entity.ICImage;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
+import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
+import edu.harvard.mcz.imagecapture.ui.dialog.ChooseFromJArrayDialog;
+import edu.harvard.mcz.imagecapture.ui.dialog.VerifyJSONDialog;
+import edu.harvard.mcz.imagecapture.utility.AbstractRestClient;
+import edu.harvard.mcz.imagecapture.utility.FileUtility;
+import edu.harvard.mcz.imagecapture.utility.JSONUtility;
+import edu.harvard.mcz.imagecapture.utility.ListUtility;
+import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -16,34 +33,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.github.mizosoft.methanol.MediaType;
-import com.github.mizosoft.methanol.MultipartBodyPublisher;
-import com.github.mizosoft.methanol.MutableRequest;
-
-import edu.harvard.mcz.imagecapture.ImageCaptureApp;
-import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
-import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.entity.ICImage;
-import edu.harvard.mcz.imagecapture.entity.Specimen;
-import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
-import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
-import edu.harvard.mcz.imagecapture.ui.dialog.ChooseFromJArrayDialog;
-import edu.harvard.mcz.imagecapture.ui.dialog.VerifyJSONDialog;
-import edu.harvard.mcz.imagecapture.utility.AbstractRestClient;
-import edu.harvard.mcz.imagecapture.utility.FileUtility;
-import edu.harvard.mcz.imagecapture.utility.JSONUtility;
-import edu.harvard.mcz.imagecapture.utility.ListUtility;
-import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
 
 public class NahimaManager extends AbstractRestClient {
   public static final int zoologyPoolId = 4;
@@ -60,7 +56,7 @@ public class NahimaManager extends AbstractRestClient {
   private final boolean interactive;
   private final ConcurrentHashMap<String, Map<String, JSONObject>>
       resolveCache = new ConcurrentHashMap<>();
-  private String token;
+  private String token = "";
 
   public NahimaManager(String url, String username, String password,
                        boolean interactive)
@@ -428,7 +424,7 @@ public class NahimaManager extends AbstractRestClient {
    * @param objectType   the objecttype we search for
    * @param searchMode   e.g. "fulltext", "token", ...
    * @param ignoreCache  cache speeds things up, but is annoying when we just
-   *     created a new object
+   *                     created a new object
    * @return Nahima's response
    */
   public JSONObject searchByString(String searchString,
@@ -728,9 +724,9 @@ public class NahimaManager extends AbstractRestClient {
    * @param name       the string to search by
    * @param objectType the type of object to search
    * @param mask       the mask of the field (the mapping), required for
-   *     creation
+   *                   creation
    * @param inner      the object with the properties intended for the newly
-   *     created object
+   *                   created object
    * @return the matching or new object
    */
   public JSONObject resolveOrCreate(String name, String objectType, String mask,
@@ -750,7 +746,7 @@ public class NahimaManager extends AbstractRestClient {
           this.createObjectInNahima(toCreate, objectType);
       Thread.sleep(
           50); // this is a heuristic number and is here to improve reliability,
-               // as Nahima does not usually claim creation immediately.
+      // as Nahima does not usually claim creation immediately.
       if (createdResponse.has("_uuid")) {
         try {
           results = this.findObjectByUuid(createdResponse.getString("_uuid"));
@@ -808,12 +804,12 @@ public class NahimaManager extends AbstractRestClient {
    * @param name       the string to search by
    * @param objectType the type of object to search
    * @param mask       the mask of the field (the mapping), required for
-   *     creation
+   *                   creation
    * @param inner      the object with the properties intended for the newly
-   *     created object
+   *                   created object
    * @param pool       the pool to create the new object in, if creating anew
    * @param recurse    the number of times we are searching already for the
-   *     object
+   *                   object
    * @return the matching or new object
    */
   public JSONObject resolveOrCreateInteractive(String name, String objectType,
@@ -977,7 +973,7 @@ public class NahimaManager extends AbstractRestClient {
    * @param mask         the mask for when creating the object
    * @param inner        the object to use for creation when applicable
    * @param pool         the pool to use, to save the object in, when creating
-   *     the object
+   *                     the object
    */
   public JSONObject askToChooseObject(JSONArray foundObjects, String name,
                                       String objectType, String mask,
@@ -986,9 +982,9 @@ public class NahimaManager extends AbstractRestClient {
              InvocationTargetException {
     // TODO: implement a better auto-choose algorithm
     if (!this.interactive) {
-      log.debug("NoExport: askToChooseObject will not be run without " +
-                "interactive. To choose from: " +
-                foundObjects.toString() + " for " + inner.toString());
+      log.debug("NoExport: askToChooseObject will not be run without "
+                + "interactive. To choose from: " + foundObjects.toString() +
+                " for " + inner.toString());
       //            throw new SkipSpecimenException();
     }
 
@@ -1032,7 +1028,7 @@ public class NahimaManager extends AbstractRestClient {
    * @param inner      the object to use to create anew if applicable
    * @param mask       the mask to use when creating anew
    * @param pool       the pool to use, to save the object in, when creating
-   *     anew
+   *                   anew
    */
   private JSONObject askToChangeSearch(String name, String objectType,
                                        JSONObject inner, String mask,
@@ -1138,7 +1134,7 @@ public class NahimaManager extends AbstractRestClient {
         put("nachname",
             finalLastName.equals("") ? JSONObject.NULL : finalLastName);
         put("mitlerername", JSONObject.NULL); // TODO: split first name into
-                                              // these here where appropriate
+        // these here where appropriate
         put("nismpersonid", JSONObject.NULL);
       }
     };
@@ -1168,14 +1164,21 @@ public class NahimaManager extends AbstractRestClient {
 
   public JSONArray resolveRegionTypes(String type)
       throws IOException, InterruptedException {
-    JSONObject results = this.searchByString(type, "region_verwaltungseinheiten");
-    
-    if (results == null || 
-        (results.has("code") && results.getString("code").startsWith("error")) ||
+    HashMap<String, Object> regionTypeHashmap = new HashMap<>() {
+      {
+        put("name", type);
+      }
+    };
+    JSONObject results =
+        this.searchByString(type, "region_verwaltungseinheiten");
+
+    if (results == null ||
+        (results.has("code") &&
+         results.getString("code").startsWith("error")) ||
         !results.has("objects")) {
       return new JSONArray();
     }
-    
+
     return results.getJSONArray("objects");
   }
 
@@ -1198,17 +1201,28 @@ public class NahimaManager extends AbstractRestClient {
         "gazetteer.region_verwaltungseinheit._global_object_id");
     additionalFilter.put("fields", filterFieldsFields);
     JSONArray filterFieldsIn = new JSONArray();
-    
+
     // Get all region types with name "Land" and add their global object ids
     JSONArray landRegionTypes = resolveRegionTypes("Land");
     for (int i = 0; i < landRegionTypes.length(); i++) {
       JSONObject regionType = landRegionTypes.getJSONObject(i);
-      if (regionType.has("_global_object_id")) {
+      if (regionType.has("_global_object_id") &&
+          regionType.getJSONObject("region_verwaltungseinheiten") != null &&
+          regionType.getJSONObject("region_verwaltungseinheiten")
+              .getString("name")
+              .equals("Land")) {
         filterFieldsIn.put(regionType.getString("_global_object_id"));
       }
     }
-    
+
     additionalFilter.put("in", filterFieldsIn);
+
+    if (filterFieldsIn.length() == 0) {
+      log.error(
+          "No region types with name 'Land' found. Cannot resolve country " +
+          countryName);
+      additionalFilter = null;
+    }
 
     JSONObject results = this.searchByString(
         countryName, fields, "gazetteer", "fulltext", false, additionalFilter);
@@ -1276,7 +1290,11 @@ public class NahimaManager extends AbstractRestClient {
         put("_id_parent",
             parentId == null
                 ? JSONObject.NULL
-                : parentId);
+                : parentId); // Might throw NullPointerException. If we find the
+                             // location, it is never called, therefore, we only
+                             // have a problem if neither location nor country
+                             // are found
+        //            put("isocode3166_2", specimen.getPrimaryDivisonISO());
       }
     };
     if (specimen.getPrimaryDivisonISO() != null) {
@@ -1284,25 +1302,29 @@ public class NahimaManager extends AbstractRestClient {
                    stringTrimOrJSONNull(specimen.getPrimaryDivisonISO()));
     }
 
-    // First try to resolve with the full search string (primary division + country)
-    JSONObject result = this.resolveStringSearchToOne(searchString, "gazetteer", false, new JSONObject(paramMap));
-    
-    // If not found and we have a primary division, try searching for just the primary division
-    if (result == null && specimen.getPrimaryDivison() != null && 
-        !specimen.getPrimaryDivison().trim().equals("") && 
+    // First try to resolve with the full search string (primary division +
+    // country)
+    JSONObject result = this.resolveStringSearchToOne(
+        searchString, "gazetteer", false, new JSONObject(paramMap));
+
+    // If not found and we have a primary division, try searching for just the
+    // primary division
+    if (result == null && specimen.getPrimaryDivison() != null &&
+        !specimen.getPrimaryDivison().trim().equals("") &&
         !specimen.getPrimaryDivison().equals("unknown")) {
-      
+
       String primaryDivisionOnly = specimen.getPrimaryDivison().trim();
-      result = this.resolveStringSearchToOne(primaryDivisionOnly, "gazetteer", false, new JSONObject(paramMap));
+      result = this.resolveStringSearchToOne(primaryDivisionOnly, "gazetteer",
+                                             false, new JSONObject(paramMap));
     }
-    
+
     // If still not found, create interactively
     if (result == null) {
       return this.resolveOrCreateInteractive(searchString, "gazetteer",
                                              "gazetteer__all_fields",
                                              new JSONObject(paramMap), null);
     }
-    
+
     return result;
   }
 
@@ -1503,8 +1525,8 @@ public class NahimaManager extends AbstractRestClient {
             put("infraspezifischetaxon", infraspecificEpithet.trim());
             put("abkuerzung", JSONObject.NULL);
             put("_nested:infraspezifischetaxon__trivialnamen", new JSONArray());
-            put("_nested:infraspezifischetaxon__" +
-                "referenzenfuerintraspezifischestaxon",
+            put("_nested:infraspezifischetaxon__"
+                    + "referenzenfuerintraspezifischestaxon",
                 new JSONArray());
             //            put("beschreibung",
             //            getCreatedByThisSoftwareIndication());

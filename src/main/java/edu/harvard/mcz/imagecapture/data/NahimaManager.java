@@ -1,23 +1,5 @@
 package edu.harvard.mcz.imagecapture.data;
 
-import com.github.mizosoft.methanol.MediaType;
-import com.github.mizosoft.methanol.MultipartBodyPublisher;
-import com.github.mizosoft.methanol.MutableRequest;
-import edu.harvard.mcz.imagecapture.ImageCaptureApp;
-import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
-import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.entity.ICImage;
-import edu.harvard.mcz.imagecapture.entity.Specimen;
-import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
-import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
-import edu.harvard.mcz.imagecapture.ui.dialog.ChooseFromJArrayDialog;
-import edu.harvard.mcz.imagecapture.ui.dialog.VerifyJSONDialog;
-import edu.harvard.mcz.imagecapture.utility.AbstractRestClient;
-import edu.harvard.mcz.imagecapture.utility.FileUtility;
-import edu.harvard.mcz.imagecapture.utility.JSONUtility;
-import edu.harvard.mcz.imagecapture.utility.ListUtility;
-import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -34,6 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
@@ -42,6 +25,25 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.github.mizosoft.methanol.MediaType;
+import com.github.mizosoft.methanol.MultipartBodyPublisher;
+import com.github.mizosoft.methanol.MutableRequest;
+
+import edu.harvard.mcz.imagecapture.ImageCaptureApp;
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.entity.ICImage;
+import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
+import edu.harvard.mcz.imagecapture.exceptions.SkipSpecimenException;
+import edu.harvard.mcz.imagecapture.ui.dialog.ChooseFromJArrayDialog;
+import edu.harvard.mcz.imagecapture.ui.dialog.VerifyJSONDialog;
+import edu.harvard.mcz.imagecapture.utility.AbstractRestClient;
+import edu.harvard.mcz.imagecapture.utility.FileUtility;
+import edu.harvard.mcz.imagecapture.utility.JSONUtility;
+import edu.harvard.mcz.imagecapture.utility.ListUtility;
+import edu.harvard.mcz.imagecapture.utility.NullHandlingUtility;
 
 public class NahimaManager extends AbstractRestClient {
     public static final int zoologyPoolId = 4;
@@ -686,12 +688,12 @@ public class NahimaManager extends AbstractRestClient {
             log.warn("Found multiple " + objectType + " that match all fields (" +
                     String.join(", ", keysToMatch) + "). Using first one.");
             return foundObjects.getJSONObject(possiblyCorrectIndices.get(0));
-        } else if (carefulPossiblyCorrectIndices.size() > 0) {
+        } else if (!carefulPossiblyCorrectIndices.isEmpty()) {
             log.warn("Found " + carefulPossiblyCorrectIndices.size() + " " +
                     objectType + " that match all fields (" +
                     String.join(", ", keysToMatch) +
                     "), but without verifying pool. Using first one.");
-            if (allowDuplicates || (possiblyCorrectIndices.size() == 0 &&
+            if (allowDuplicates || (possiblyCorrectIndices.isEmpty() &&
                     carefulPossiblyCorrectIndices.size() == 1)) {
                 return foundObjects.getJSONObject(carefulPossiblyCorrectIndices.get(0));
             }
@@ -1190,22 +1192,25 @@ public class NahimaManager extends AbstractRestClient {
         return this.resolveStringSearchToOne(type, "region_verwaltungseinheiten", false, new JSONObject(regionTypeHashmap));
     }
 
-    public JSONObject resolveCountry(String countryName)
+    public JSONObject resolveCountry(String countryName, String isoCountryCode)
             throws IOException, InterruptedException, SkipSpecimenException {
-        // need to make the filter as specific as possible
-        ArrayList<String> fields = new ArrayList<String>();
-        fields.add("gazetteer.ortsname");
-        JSONObject additionalFilter = new JSONObject();
-        additionalFilter.put("type", "in");
-        additionalFilter.put("bool", "must");
-        JSONArray filterFieldsFields = new JSONArray();
-        filterFieldsFields.put(
-                "gazetteer.region_verwaltungseinheit._global_object_id");
-        additionalFilter.put("fields", filterFieldsFields);
-        JSONArray filterFieldsIn = new JSONArray();
+        if (countryName == null || countryName.trim().isEmpty()) {
+            return null;
+        }
+
+        // Create cache key that includes both country name and ISO code
+        String cacheKey = countryName.trim() + (isoCountryCode != null ? "|" + isoCountryCode.trim() : "");
+
+        // Check cache for results
+        JSONObject fromCache = loadFromCache(cacheKey, "gazetteer_country");
+        if (fromCache != null) {
+            return fromCache;
+        }
 
         // Get all region types with name "Land" and add their global object ids
         JSONArray landRegionTypes = resolveRegionTypes("Land");
+        JSONArray filterFieldsIn = new JSONArray();
+
         for (int i = 0; i < landRegionTypes.length(); i++) {
             JSONObject regionType = landRegionTypes.getJSONObject(i);
             if (regionType.has("_global_object_id") &&
@@ -1217,29 +1222,112 @@ public class NahimaManager extends AbstractRestClient {
             }
         }
 
-        additionalFilter.put("in", filterFieldsIn);
-
         if (filterFieldsIn.length() == 0) {
-            log.error(
-                    "No region types with name 'Land' found. Cannot resolve country " +
-                            countryName);
-            additionalFilter = null;
+            log.error("No region types with name 'Land' found. Cannot resolve country " + countryName);
+            return null;
         }
 
-        JSONObject results = this.searchByString(
-                countryName, fields, "gazetteer", "fulltext", false, additionalFilter);
+        // Build complex search query
+        JSONArray searchArray = new JSONArray();
 
-        if (results.has("code") && results.getString("code").startsWith("error")) {
+        // Add region type filter
+        JSONObject regionTypeFilter = new JSONObject();
+        regionTypeFilter.put("type", "in");
+        regionTypeFilter.put("fields", new JSONArray().put("gazetteer.region_verwaltungseinheit._global_object_id"));
+        regionTypeFilter.put("in", filterFieldsIn);
+        regionTypeFilter.put("bool", "must");
+        searchArray.put(regionTypeFilter);
+
+        // Add ISO code filter if available
+        if (isoCountryCode != null && !isoCountryCode.trim().isEmpty()) {
+            JSONObject isoFilter = new JSONObject();
+            isoFilter.put("type", "match");
+            isoFilter.put("mode", "fulltext");
+            isoFilter.put("fields", new JSONArray().put("gazetteer.isocode3166_2"));
+            isoFilter.put("string", isoCountryCode.trim());
+            isoFilter.put("phrase", false);
+            isoFilter.put("bool", "must");
+            searchArray.put(isoFilter);
+        }
+
+        // Build name search - complex nested search for both main name and alternative names
+        JSONObject nameSearchComplex = new JSONObject();
+        nameSearchComplex.put("type", "complex");
+
+        JSONArray nameSearchArray = new JSONArray();
+
+        // Search in alternative names (nested)
+        JSONObject altNameSearchComplex = new JSONObject();
+        altNameSearchComplex.put("type", "complex");
+
+        JSONArray altNameSearchArray = new JSONArray();
+        JSONObject altNameMatch = new JSONObject();
+        altNameMatch.put("type", "match");
+        altNameMatch.put("mode", "fulltext");
+        altNameMatch.put("fields", new JSONArray().put("gazetteer._nested:gazetteer__andereortsnamen.andereortsname"));
+        altNameMatch.put("string", countryName.trim());
+        altNameMatch.put("phrase", false);
+        altNameSearchArray.put(altNameMatch);
+
+        altNameSearchComplex.put("search", altNameSearchArray);
+        altNameSearchComplex.put("bool", "should");
+        nameSearchArray.put(altNameSearchComplex);
+
+        // Search in main name field
+        JSONObject mainNameMatch = new JSONObject();
+        mainNameMatch.put("type", "match");
+        mainNameMatch.put("mode", "fulltext");
+        mainNameMatch.put("fields", new JSONArray().put("gazetteer.ortsname"));
+        mainNameMatch.put("string", countryName.trim());
+        mainNameMatch.put("phrase", false);
+        mainNameMatch.put("bool", "should");
+        nameSearchArray.put(mainNameMatch);
+
+        nameSearchComplex.put("search", nameSearchArray);
+        // If no ISO code, name search must match; if ISO code available, name search should match
+        nameSearchComplex.put("bool", (isoCountryCode != null && !isoCountryCode.trim().isEmpty()) ? "should" : "must");
+        searchArray.put(nameSearchComplex);
+
+        // Build the complete query
+        JSONObject complexSearch = new JSONObject();
+        complexSearch.put("type", "complex");
+        complexSearch.put("search", searchArray);
+
+        JSONObject query = new JSONObject();
+        query.put("search", new JSONArray().put(complexSearch));
+        query.put("format", "standard");
+        query.put("sort", new JSONArray().put(new JSONObject()
+                .put("field", "_score")
+                .put("order", "DESC")
+                .put("_level", 0)));
+        query.put("objecttypes", new JSONArray().put("gazetteer"));
+
+        // Execute the search
+        String queryURL = this.url + "search?token=" + token;
+        JSONObject result = this.postRequest(queryURL, query);
+
+        if (result.has("code") && result.getString("code").startsWith("error")) {
             throw new RuntimeException(
-                    "Failed to resolve search for '" + countryName +
-                            "'. Error code: " + results.getString("code"));
+                    "Failed to resolve search for country '" + countryName +
+                            "'. Error code: " + result.getString("code"));
         }
 
-        JSONArray foundObjects = (JSONArray) results.get("objects");
-        if (foundObjects != null && foundObjects.length() == 1) {
-            return (JSONObject) foundObjects.get(0);
+        JSONObject countryResult = null;
+        if (result.has("objects") && result.getJSONArray("objects").length() == 1) {
+            countryResult = result.getJSONArray("objects").getJSONObject(0);
+        } else if (result.has("objects") && result.getJSONArray("objects").length() > 1) {
+            log.warn("Found multiple countries matching '{}', using first one", countryName);
+            countryResult = result.getJSONArray("objects").getJSONObject(0);
+        } else {
+            log.error("No country found matching '{}'. Response: {}", countryName, result);
+            throw new RuntimeException(
+                    "Did not find any country matching '" + countryName + "'");
         }
-        return null;
+
+        // Store result in cache (even if null, to avoid repeated failed searches)
+        storeInCache(cacheKey, "gazetteer_country", countryResult);
+
+        return countryResult;
     }
 
     /**
@@ -1278,7 +1366,11 @@ public class NahimaManager extends AbstractRestClient {
 
         JSONObject parent = null;
         try {
-            parent = resolveCountry(specimen.getCountry());
+            String countryIso = specimen.getPrimaryDivisonISO();
+            if (countryIso != null && !countryIso.isEmpty()) {
+                countryIso = countryIso.split("-")[0];
+            }
+            parent = resolveCountry(specimen.getCountry(), countryIso);
         } catch (Exception ignored) {
         }
 
@@ -1561,7 +1653,7 @@ public class NahimaManager extends AbstractRestClient {
                         put("publikationsjahr", new JSONObject(new HashMap<>() {
                             {
                                 put("value", (citedInPublicationYear != null &&
-                                        !citedInPublication.equals(""))
+                                        !citedInPublication.isEmpty())
                                         ? citedInPublicationYear
                                         : "0000");
                             }

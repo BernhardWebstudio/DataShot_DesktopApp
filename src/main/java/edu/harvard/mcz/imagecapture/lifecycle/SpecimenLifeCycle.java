@@ -3,6 +3,21 @@
  */
 package edu.harvard.mcz.imagecapture.lifecycle;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import org.hibernate.HibernateException;
+import org.hibernate.LockMode;
+import org.hibernate.Session;
+import org.hibernate.SessionException;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
@@ -22,16 +37,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import org.hibernate.*;
-import org.hibernate.query.Query;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 
 // Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
@@ -897,6 +902,16 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 
                     query = session.createQuery(
                             "DELETE FROM SpecimenPart WHERE specimenId = :specimen");
+                    query.setParameter("specimen", specimen);
+                    query.executeUpdate();
+
+                    query = session.createQuery(
+                            "DELETE FROM Collector WHERE specimen = :specimen");
+                    query.setParameter("specimen", specimen);
+                    query.executeUpdate();
+
+                    query = session.createQuery(
+                            "DELETE FROM ExternalHistory WHERE specimen = :specimen");
                     query.setParameter("specimen", specimen);
                     query.executeUpdate();
 

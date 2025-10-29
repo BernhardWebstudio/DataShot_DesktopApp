@@ -190,11 +190,44 @@ public class CollectorLifeCycle extends GenericLifeCycle {
         collections.add(""); // put blank at top of list.
         try {
             String sql =
-                    "Select distinct collectorName from Collector col where col.collectorName is not null order by col.collectorName";
+                    "Select distinct collectorName from Collector col where col.collectorName is not null and col.specimen is not null order by col.collectorName";
             return runQueryToGetStrings(collections, sql, log);
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
+        }
+    }
+
+    /**
+     * Delete orphaned collector records (collectors without an associated specimen).
+     * This can happen due to data inconsistencies or if specimen deletion doesn't properly cascade.
+     * 
+     * @return the number of orphaned collectors deleted
+     */
+    public int deleteOrphanedCollectors() {
+        log.debug("Deleting orphaned collector records");
+        try {
+            Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+            session.beginTransaction();
+            int deletedCount = 0;
+            try {
+                Query query = session.createQuery(
+                        "DELETE FROM Collector c WHERE c.specimen IS NULL");
+                deletedCount = query.executeUpdate();
+                session.getTransaction().commit();
+                log.debug("Deleted " + deletedCount + " orphaned collector records");
+            } catch (HibernateException e) {
+                session.getTransaction().rollback();
+                log.error("Failed to delete orphaned collectors", e);
+            }
+            try {
+                session.close();
+            } catch (SessionException e) {
+            }
+            return deletedCount;
+        } catch (RuntimeException re) {
+            log.error("Delete orphaned collectors failed", re);
+            throw re;
         }
     }
 

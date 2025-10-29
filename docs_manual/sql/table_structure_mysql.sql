@@ -89,7 +89,7 @@ CREATE INDEX DeterminationIDX1 ON Determination(SpecimenId);
 CREATE TABLE Collector
   (
     CollectorId    BIGINT         not null auto_increment,
-    CollectorName  VARCHAR(255),
+    CollectorName  VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
     SpecimenId     BIGINT         not null,
 
     primary key(CollectorId),

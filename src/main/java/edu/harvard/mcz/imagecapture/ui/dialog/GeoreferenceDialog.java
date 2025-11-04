@@ -515,7 +515,7 @@ public class GeoreferenceDialog extends JDialog {
         JPanel mapPanel = new JPanel(new MigLayout("wrap 1, fill, insets 0"));
         mapViewer = new JXMapViewer();
         // Create a TileFactoryInfo for OpenStreetMap
-        TileFactoryInfo info = new OSMTileFactoryInfo();
+        TileFactoryInfo info = new OSMTileFactoryInfo("OpenStreetMap", "https://tile.openstreetmap.org");
         DefaultTileFactory tileFactory = new DefaultTileFactory(info);
         mapViewer.setTileFactory(tileFactory);
         // Use 8 threads in parallel to load the tiles

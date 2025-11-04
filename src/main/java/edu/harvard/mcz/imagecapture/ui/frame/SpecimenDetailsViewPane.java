@@ -923,7 +923,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             this.addBasicJLabel(jPanel, "State/Province");
             jPanel.add(this.getPrimaryDivisionJTextField(), "grow");
             // row
-            jPanel.add(this.getJButtonSpecificLocality(), "align label");
+            jPanel.add(this.getJButtonSpecificLocality(), "align right");
             jPanel.add(this.getSpecificLocalityJTextField(), "grow, span 2");
             // row
             this.addBasicJLabel(jPanel, "Latitude");

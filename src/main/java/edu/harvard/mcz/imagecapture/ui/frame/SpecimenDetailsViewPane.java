@@ -1401,7 +1401,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
     private JComboBox getMethodComboBox() {
         if (cbMethod == null) {
-            cbMethod = new JComboBox<>(new DefaultComboBoxModel<>(new String[]{"not recorded", "unknown", "GEOLocate", "Geoportal", "Google Earth", "Google Maps", "Gazeteer", "GPS", "Label Data", "Wikipedia", "MaNIS/HertNet/ORNIS Georeferencing Guidelines"}));
+            cbMethod = new JComboBox<>(new DefaultComboBoxModel<>(new String[]{"not recorded", "unknown", "GEOLocate", "Geoportal", "Google Earth", "Google Maps", "Gazeteer", "GPS", "Label Data", "Open Street Map", "Wikipedia", "MaNIS/HertNet/ORNIS Georeferencing Guidelines"}));
             cbMethod.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     getGeoreferenceDialog().getGeoReference().setGeorefmethod((String) cbMethod.getSelectedItem());

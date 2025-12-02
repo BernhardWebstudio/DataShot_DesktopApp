@@ -55,20 +55,28 @@ public class ImageCaptureApp {
     public static final String APP_COPYRIGHT =
             "Copyright © 2009-2017 President and Fellows of Harvard College";
     public static final String APP_LICENSE =
-            "This program is free software; you can redistribute it and/or modify \n "
-                    + "it under the terms of Version 2 of the GNU General Public License \n"
-                    + "as published by the Free Software Foundation"
-                    + " \n "
-                    + "This program is distributed in the hope that it will be useful,\n "
-                    + "but WITHOUT ANY WARRANTY; without even the implied warranty of\n "
-                    + "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n "
-                    + "GNU General Public License for more details.\n "
-                    + "\n "
-                    +
-                    "You should have received a copy of the GNU General Public License along\n "
-                    +
-                    "with this program; if not, write to the Free Software Foundation, Inc.,\n "
-                    + "51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.\n ";
+            """
+            This program is free software; you can redistribute it and/or modify\s
+             \
+            it under the terms of Version 2 of the GNU General Public License\s
+            as published by the Free Software Foundation\
+            \s
+             \
+            This program is distributed in the hope that it will be useful,
+             \
+            but WITHOUT ANY WARRANTY; without even the implied warranty of
+             \
+            MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+             \
+            GNU General Public License for more details.
+            \s
+             \
+            You should have received a copy of the GNU General Public License along
+             \
+            with this program; if not, write to the Free Software Foundation, Inc.,
+             \
+            51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+             """;
     public static final String APP_CONTRIBUTORS =
             "Brendan Haley, Linda Ford, Rodney Eastwood, Paul J. Morris, Tim Bernhard.";
     public static final String APP_LIBRARIES =

@@ -38,6 +38,7 @@ import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.RunStatus;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
 import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
+import edu.harvard.mcz.imagecapture.interfaces.ScanCounterInterface;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialog;
 import edu.harvard.mcz.imagecapture.utility.FileUtility;
@@ -250,7 +251,8 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
             // walk through directory tree
             Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
                     "Scanning path: " + startPoint.getPath());
-            Counter counter = new Counter();
+                Counter counter = new Counter();
+                AtomicCounter workerCounter = new AtomicCounter();
             // count files to scan
             countFiles(startPoint, counter);
             setPercentComplete(0);
@@ -273,7 +275,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                     locks[i] = new ReentrantLock();
                 }
                 
-                checkFiles(startPoint, counter);
+                checkFiles(startPoint, counter, workerCounter);
                 
                 // Shutdown executor and wait for all tasks to complete
                 executorService.shutdown();
@@ -289,6 +291,9 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                     executorService.shutdownNow();
                     Thread.currentThread().interrupt();
                 }
+
+                // Merge results from threaded counter after all tasks are done
+                counter.mergeIn(workerCounter);
             }
             // report
 
@@ -352,7 +357,8 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
      * @param startPoint the directory with all files to handle
      * @param counter    the counter to increment
      */
-    private void checkFiles(File startPoint, Counter counter) {
+    private void checkFiles(File startPoint, Counter counter,
+                            ScanCounterInterface workerCounter) {
         // pick jpeg files
         // for each file check name against database, if not found, check barcodes,
         // scan and parse text, create records.
@@ -363,8 +369,6 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
         }
         log.debug("Scanning directory: " + startPoint.getPath() + " containing " +
                 containedFiles.length + " files.");
-
-        AtomicCounter localCounter = new AtomicCounter();
 
         // create thumbnails in a separate thread (if requested)
         if (Singleton.getSingletonInstance()
@@ -385,7 +389,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                     if (containedFile.canRead()) {
                         // Skip thumbs directories
                         if (!containedFile.getName().equals("thumbs")) {
-                            checkFiles(containedFile, counter);
+                            checkFiles(containedFile, counter, workerCounter);
                             counter.incrementDirectories();
                         }
                     } else {
@@ -415,7 +419,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                         executorService.execute(new Runnable() {
                             @Override
                             public void run() {
-                                checkFile(containedFile, localCounter, locks);
+                                checkFile(containedFile, workerCounter, locks);
                             }
                         });
                     }
@@ -423,7 +427,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                 // report progress
                 Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
                         "Scanned: " + containedFile.getName());
-                Float seen = 0.0f + localCounter.getFilesSeen();
+                Float seen = 0.0f + workerCounter.getFilesSeen();
                 Float total = 0.0f + counter.getTotal();
                 // thumbPercentComplete = (int) ((seen/total)*100);
                 setPercentComplete((int) ((seen / total) * 100));
@@ -437,7 +441,6 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                     this);
         }
 
-        counter.mergeIn(localCounter);
     }
 
     /**
@@ -448,11 +451,16 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
         if (scan == SCAN_ALL) {
             return "Preprocess all image files";
         } else {
-            String sp = startPoint.getPath();
-            if (sp == null || sp.length() == 0) {
+            // Guard against null start points when the dialog hasn't run or the
+            // scan was cancelled.  Previously this caused a NullPointerException
+            // when the UI queried the job name before a directory was chosen.
+            String sp = null;
+            if (startPoint != null && startPoint.getPath() != null && startPoint.getPath().length() > 0) {
+                sp = startPoint.getPath();
+            } else if (startPointSpecific != null && startPointSpecific.getPath() != null && startPointSpecific.getPath().length() > 0) {
                 sp = startPointSpecific.getPath();
             }
-            return "Preprocess images in " + sp;
+            return sp != null ? "Preprocess images in " + sp : "Preprocess images";
         }
     }
 

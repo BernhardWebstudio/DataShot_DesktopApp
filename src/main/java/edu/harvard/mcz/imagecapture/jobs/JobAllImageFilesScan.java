@@ -18,18 +18,6 @@
  */
 package edu.harvard.mcz.imagecapture.jobs;
 
-import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
-import edu.harvard.mcz.imagecapture.Singleton;
-import edu.harvard.mcz.imagecapture.data.RunStatus;
-import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
-import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
-import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
-import edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialog;
-import edu.harvard.mcz.imagecapture.utility.FileUtility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +27,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.swing.JOptionPane;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.data.RunStatus;
+import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
+import edu.harvard.mcz.imagecapture.interfaces.RunnerListener;
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
+import edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialog;
+import edu.harvard.mcz.imagecapture.utility.FileUtility;
 
 /**
  * Check all image files either under the image root directory or in a selected
@@ -70,6 +72,8 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
     private int runStatus = RunStatus.STATUS_NEW;
     private AtomicInteger thumbnailCounter;
     private Date startTime = null;
+    private ExecutorService executorService = null; // shared executor for all recursive calls
+    private Lock[] locks; // locks for thread safety
 
     /**
      * Default constructor, creates a job to scan all of imagebase, unless
@@ -255,7 +259,36 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
             counter.incrementDirectories();
             // scan
             if (runStatus != RunStatus.STATUS_TERMINATED) {
+                // Create executor service once for entire scan to prevent premature
+                // shutdown during recursive directory traversal (fixes issue where only
+                // a few files were processed when scanning many files)
+                int concurrencyLevel = Integer.parseInt(
+                        Singleton.getSingletonInstance()
+                                .getProperties()
+                                .getProperties()
+                                .getProperty(ImageCaptureProperties.KEY_CONCURRENCY_LEVEL, "8"));
+                executorService = Executors.newFixedThreadPool(concurrencyLevel);
+                locks = new ReentrantLock[concurrencyLevel];
+                for (int i = 0; i < locks.length; ++i) {
+                    locks[i] = new ReentrantLock();
+                }
+                
                 checkFiles(startPoint, counter);
+                
+                // Shutdown executor and wait for all tasks to complete
+                executorService.shutdown();
+                try {
+                    if (!executorService.awaitTermination(60, TimeUnit.MINUTES)) {
+                        executorService.shutdownNow();
+                        if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
+                            log.error("Execution pool did not terminate");
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    log.error("Execution pool did not terminate", e);
+                    executorService.shutdownNow();
+                    Thread.currentThread().interrupt();
+                }
             }
             // report
 
@@ -333,25 +366,13 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
 
         AtomicCounter localCounter = new AtomicCounter();
 
-        // limit number of parallel threads because we can. And to help Hibernate
-        // from dying
-        int concurrencyLevel = Integer.parseInt(
-                Singleton.getSingletonInstance()
-                        .getProperties()
-                        .getProperties()
-                        .getProperty(ImageCaptureProperties.KEY_CONCURRENCY_LEVEL, "16"));
-        ExecutorService es = Executors.newFixedThreadPool(concurrencyLevel);
-        final Lock[] locks = new ReentrantLock[concurrencyLevel];
-        for (int i = 0; i < locks.length; ++i) {
-            locks[i] = new ReentrantLock();
-        }
         // create thumbnails in a separate thread (if requested)
         if (Singleton.getSingletonInstance()
                 .getProperties()
                 .getProperties()
                 .getProperty(ImageCaptureProperties.KEY_GENERATE_THUMBNAILS)
                 .equals("true")) {
-            es.execute(new ThumbnailBuilderJob(startPoint, thumbnailCounter));
+            executorService.execute(new ThumbnailBuilderJob(startPoint, thumbnailCounter));
         }
         // loop files
         for (File containedFile : containedFiles) {
@@ -391,7 +412,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                         // images belonging to the same specimen creating the same specimen
                         // resp. looking for it that's why we have here a rather ugly lock
                         // handling mechanism
-                        es.execute(new Runnable() {
+                        executorService.execute(new Runnable() {
                             @Override
                             public void run() {
                                 checkFile(containedFile, localCounter, locks);
@@ -408,25 +429,12 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                 setPercentComplete((int) ((seen / total) * 100));
                 log.debug("Setting percent complete: " + (seen / total * 100) +
                         " based on seen: " + seen + ", total: " + total);
+            } else {
+                log.warn("Terminating scan as requested, not scanning file '" + containedFile.getName() + "' and after.");
+                break;
             }
             Singleton.getSingletonInstance().getMainFrame().notifyListener(runStatus,
                     this);
-        }
-
-        // assemble all threads
-        es.shutdown(); // Disable new tasks from being submitted
-        try {
-            if (!es.awaitTermination(60, TimeUnit.MINUTES)) {
-                es.shutdownNow(); // Cancel currently executing tasks
-                // Wait a while for tasks to respond to being cancelled
-                if (!es.awaitTermination(60, TimeUnit.SECONDS)) {
-                    System.err.println("Execution pool did not terminate");
-                }
-            }
-        } catch (InterruptedException e) {
-            log.error("Execution pool did not terminate", e);
-            es.shutdownNow();
-            Thread.currentThread().interrupt();
         }
 
         counter.mergeIn(localCounter);

@@ -264,6 +264,19 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                 // Create executor service once for entire scan to prevent premature
                 // shutdown during recursive directory traversal (fixes issue where only
                 // a few files were processed when scanning many files)
+                
+                // Clean up any existing executor service from previous runs
+                if (executorService != null && !executorService.isTerminated()) {
+                    log.warn("Executor service from previous run still exists, shutting it down");
+                    executorService.shutdownNow();
+                    try {
+                        executorService.awaitTermination(10, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        log.error("Failed to shutdown previous executor service", e);
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                
                 int concurrencyLevel = Integer.parseInt(
                         Singleton.getSingletonInstance()
                                 .getProperties()
@@ -275,25 +288,42 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                     locks[i] = new ReentrantLock();
                 }
                 
+                log.info("Starting file scan with " + concurrencyLevel + " threads, total files to process: " + counter.getTotal());
                 checkFiles(startPoint, counter, workerCounter);
                 
                 // Shutdown executor and wait for all tasks to complete
+                log.info("File scanning completed, shutting down executor and waiting for " + 
+                        workerCounter.getFilesSeen() + " processing tasks to finish");
                 executorService.shutdown();
                 try {
-                    if (!executorService.awaitTermination(60, TimeUnit.MINUTES)) {
+                    // Increased timeout to 12 hours to handle large batches of images
+                    // Previous 60-minute timeout was causing premature termination
+                    // when processing several hundred images with barcode reading
+                    long startWait = System.currentTimeMillis();
+                    if (!executorService.awaitTermination(12, TimeUnit.HOURS)) {
+                        long waitedMinutes = (System.currentTimeMillis() - startWait) / 60000;
+                        log.warn("Execution pool did not terminate within 12 hours (waited " + 
+                                waitedMinutes + " minutes), forcing shutdown. " +
+                                "Files processed: " + workerCounter.getFilesSeen() + " of " + counter.getTotal());
                         executorService.shutdownNow();
                         if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-                            log.error("Execution pool did not terminate");
+                            log.error("Execution pool did not terminate even after forced shutdown");
                         }
+                    } else {
+                        long waitedSeconds = (System.currentTimeMillis() - startWait) / 1000;
+                        log.info("All processing tasks completed successfully after " + waitedSeconds + " seconds");
                     }
                 } catch (InterruptedException e) {
-                    log.error("Execution pool did not terminate", e);
+                    log.error("Execution pool interrupted during termination, processed " + 
+                            workerCounter.getFilesSeen() + " of " + counter.getTotal() + " files", e);
                     executorService.shutdownNow();
                     Thread.currentThread().interrupt();
                 }
 
                 // Merge results from threaded counter after all tasks are done
                 counter.mergeIn(workerCounter);
+                log.info("Preprocessing complete (total " + counter.getTotal() + "): " + counter.getFilesSeen() + " files processed, " +
+                        counter.getFilesUpdated() + " updated, " + counter.getFilesFailed() + " failed");
             }
             // report
 

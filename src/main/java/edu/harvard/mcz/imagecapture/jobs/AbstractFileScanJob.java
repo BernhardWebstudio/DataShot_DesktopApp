@@ -594,7 +594,6 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                     parser.getIdentifiedBy().length() > 0) {
                 s.setIdentifiedBy(parser.getIdentifiedBy());
             }
-            log.debug("Debug {}", s.getCollection());
 
             s.setCreatedBy(ImageCaptureApp.APP_NAME + " " +
                     ImageCaptureApp.getAppVersion());
@@ -605,11 +604,12 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                 counter.incrementSpecimenDatabased();
                 s.attachNewPart();
             } catch (SpecimenExistsException e) {
-                log.debug("Debug {}", e.getMessage());
+                log.debug("SpecimenExistsException Debug {}", e.getMessage());
                 // Expected case on scanning a second image for a specimen.
                 // Doesn't need to be reported as a parsing error.
                 //
                 // Look up the existing record to link this specimen to it.
+                counter.incrementSpecimenExisting();
                 try {
                     List<Specimen> checkResult = specimenLifeCycle.findByBarcode(barcode);
                     if (checkResult.size() == 1) {
@@ -635,6 +635,9 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                     List<Specimen> checkResult = specimenLifeCycle.findByBarcode(barcode);
                     if (checkResult.size() == 1) {
                         s = checkResult.get(0);
+                        counter.incrementSpecimenExisting();
+                    } else {
+                        counter.incrementFilesFailed();
                     }
                     // Drawer number with length limit (and specimen that fails to save at
                     // over this length makes a good canary for labels that parse very

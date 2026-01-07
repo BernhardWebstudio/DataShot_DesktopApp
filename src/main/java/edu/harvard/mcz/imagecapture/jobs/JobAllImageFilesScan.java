@@ -442,6 +442,8 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                                         .getProperties()
                                         .getProperties()
                                         .getProperty(ImageCaptureProperties.KEY_IMAGEREGEX));
+                        workerCounter.incrementFilesSeen();
+                        workerCounter.incrementFilesExisting();
                     } else {
                         // images belonging to the same specimen creating the same specimen
                         // resp. looking for it that's why we have here a rather ugly lock
@@ -449,7 +451,17 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                         executorService.execute(new Runnable() {
                             @Override
                             public void run() {
-                                checkFile(containedFile, workerCounter, locks);
+                                try {
+                                    checkFile(containedFile, workerCounter, locks);
+                                } catch (Exception e) {
+                                    // Catch any unchecked exceptions that might occur during processing
+                                    // to ensure they're properly counted and don't silently fail
+                                    log.error("Unexpected error processing file: " + containedFile.getName(), e);
+                                    workerCounter.incrementFilesFailed();
+                                    workerCounter.appendError(new RunnableJobError(
+                                            containedFile.getName(), "", "Unexpected error: " + e.getMessage(),
+                                            e, RunnableJobError.TYPE_FILE_READ));
+                                }
                             }
                         });
                     }

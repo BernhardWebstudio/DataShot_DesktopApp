@@ -405,10 +405,7 @@ public class JobRecheckForTemplates implements RunnableJob, Runnable {
     private void report() {
         String report =
                 "Results of template check on Image files missing templates (WholeImageOnly).\n";
-        report += "Found  " + counter.getFilesSeen() +
-                " image file database records without templates.\n";
-        report += "Updated " + counter.getFilesUpdated() +
-                " image records to a template.\n";
+        report += counter.toString();
         Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
                 "Check for templates complete.");
         RunnableJobReportDialog errorReportDialog = new RunnableJobReportDialog(

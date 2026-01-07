@@ -95,7 +95,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                     BarcodeBuilder builder =
                             Singleton.getSingletonInstance().getBarcodeBuilder();
                     missing.add(builder.makeFromNumber(value.toBigInteger().intValue()));
-                    log.debug("Debug {}", value);
+                    log.debug("Barcode value: {}", value);
                 }
                 session.getTransaction().commit();
             } catch (HibernateException e) {
@@ -190,11 +190,11 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
             }
         } catch (SpecimenExistsException | SaveFailedException see) {
             // Pass on upwards unchanged
-            log.error("persist failed see", see);
+            log.error("Specimen persist failed see", see);
             throw see;
         } catch (RuntimeException re) {
             // Catch, log, and pass on any other exception.
-            log.error("persist failed", re);
+            log.error("Specimen persist failed", re);
             throw re;
         }
     }
@@ -284,7 +284,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
                     ((SpecimenPart) instance.getSpecimenParts().toArray()[0])
                             .getPartAttributeValuesConcat());
         } catch (Exception e) {
-            log.debug("Debug {}", e.getMessage());
+            log.debug("Exception message: {}", e.getMessage());
         }
     }
 

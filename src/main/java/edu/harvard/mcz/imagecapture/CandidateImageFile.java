@@ -386,7 +386,7 @@ public class CandidateImageFile {
             String exif = file.getExifUserCommentText();
             String scan = file.getBarcodeText();
             String madeDate = file.getExifDateCreated();
-            log.debug("Debug {}", madeDate);
+            log.debug("EXIF made date: {}", madeDate);
             if (madeDate != null) {
                 result.setMadeDate(madeDate);
             }
@@ -420,14 +420,14 @@ public class CandidateImageFile {
                             preview_file.getName());
                 }
             }
-            log.debug("Debug {}", madeDate);
+            log.debug("Made date: {}", madeDate);
         } catch (UnreadableFileException e) {
             log.error(e.getMessage());
             System.out.println("Unable To Read  " + filename);
         } catch (NoSuchTemplateException e) {
             log.error(e.getMessage());
         }
-        log.debug("Debug {}", result);
+        log.debug("Parsed bulk media result: {}", result);
         return result;
     }
 
@@ -466,12 +466,12 @@ public class CandidateImageFile {
                                           PositionTemplate positionTemplate,
                                           boolean quickCheck) {
 
-        log.debug("Debug {}", positionTemplate.getName());
+        log.debug("Position template name: {}", positionTemplate.getName());
         String returnValue = "";
         if (positionTemplate.getTemplateId().equals(
                 PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS)) {
             // Check the entire image for a barcode and return.
-            log.debug("Debug {}", image.getType());
+            log.debug("Image type: {}", image.getType());
             LuminanceSource source = new BufferedImageLuminanceSource(image);
             CandidateImageFile temp = new CandidateImageFile();
             TextStatus checkResult = temp.checkSourceForBarcode(source, true);
@@ -1217,9 +1217,9 @@ public class CandidateImageFile {
      */
     public UnitTrayLabel getTaxonLabelQRText(PositionTemplate positionTemplate) {
         log.info("2 template ID is.........." + positionTemplate.getTemplateId());
-        log.debug("Debug {}", unitTrayLabel);
-        log.debug("Debug {}", unitTrayTaxonLabelTextStatus);
-        log.debug("Debug {}", labelText);
+        log.debug("Current unit tray label: {}", unitTrayLabel);
+        log.debug("Unit tray taxon label text status: {}", unitTrayTaxonLabelTextStatus);
+        log.debug("Current label text: {}", labelText);
         if (unitTrayLabel != null &&
                 unitTrayTaxonLabelTextStatus == RESULT_BARCODE_SCANNED &&
                 labelText != null && labelText.length() > 0) {
@@ -1239,7 +1239,7 @@ public class CandidateImageFile {
             barcodeStatus = RESULT_ERROR;
             try {
                 image = ImageIO.read(candidateFile);
-                log.debug("Debug {}", candidateFile.getCanonicalFile());
+                log.debug("Candidate file canonical path: {}", candidateFile.getCanonicalFile());
             } catch (IOException e) {
                 error = e + " " + e.getMessage();
                 returnValue = error;
@@ -1281,8 +1281,7 @@ public class CandidateImageFile {
                         returnValue = "Failed to read a barcode from templated location.";
                         barcodeStatus = RESULT_ERROR;
                     }
-                    log.debug("Debug {}", returnValue);
-                    log.debug("barcodeStatus=" + barcodeStatus);
+                    log.debug("Result of barcode scan: {}, status: {}", returnValue, barcodeStatus);
 
                 } else {
                     // image is narrower than templated area.
@@ -1448,7 +1447,7 @@ public class CandidateImageFile {
                                     "http://purl.org/dc/elements/1.1/", "dc:description", 1);
                             if (descriptionProp != null) {
                                 String description = descriptionProp.getValue();
-                                log.debug("Debug {}", description);
+                                log.debug("XMP description: {}", description);
                                 if (description != null && description.trim().length() > 0) {
                                     exifComment = description;
                                 }
@@ -1543,9 +1542,8 @@ public class CandidateImageFile {
      * Check for error states with a call to getBarcodeStatus();
      */
     public String getBarcodeText(PositionTemplate positionTemplate) {
+        log.debug("CatalogNumberBarcodeText: {}, CatalogNumberBarcodeStatus: {}", catalogNumberBarcodeText, catalogNumberBarcodeStatus);
 
-        log.debug("Debug {}", catalogNumberBarcodeText);
-        log.debug("Debug {}", catalogNumberBarcodeStatus);
         if (catalogNumberBarcodeText != null &&
                 catalogNumberBarcodeText.trim().length() > 0 &&
                 catalogNumberBarcodeStatus == RESULT_BARCODE_SCANNED) {
@@ -1607,7 +1605,7 @@ public class CandidateImageFile {
                             barcodeStatus = RESULT_ERROR;
                         }
                     }
-                    log.debug("Debug {}", returnValue);
+                    log.debug("Barcode return value: {}", returnValue);
                     log.debug("barcodeStatus=" + barcodeStatus);
                 } else {
                     // image is narrower than templated area.

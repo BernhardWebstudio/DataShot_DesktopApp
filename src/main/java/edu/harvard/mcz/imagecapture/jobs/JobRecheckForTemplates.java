@@ -252,7 +252,7 @@ public class JobRecheckForTemplates implements RunnableJob, Runnable {
                         pattern.setTemplateId(PositionTemplate.TEMPLATE_NO_COMPONENT_PARTS);
                         files = ils.findByExample(pattern);
                         if (files != null) {
-                            log.debug("Debug {}", files.size());
+                            log.debug("Number of files found: {}", files.size());
                         }
                     }
                 }
@@ -263,7 +263,7 @@ public class JobRecheckForTemplates implements RunnableJob, Runnable {
                 ICImageLifeCycle ils = new ICImageLifeCycle();
                 files = ICImageLifeCycle.findNotDrawerNoTemplateImages();
                 if (files != null) {
-                    log.debug("Debug {}", files.size());
+                    log.debug("Number of files found: {}", files.size());
                 }
             } catch (HibernateException e) {
                 log.error(e.getMessage());

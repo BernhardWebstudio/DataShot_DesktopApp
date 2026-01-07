@@ -158,7 +158,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
         if (listeners == null) {
             init();
         }
-        log.debug("Debug {}", jobListener);
+        log.debug("Job listener: {}", jobListener);
         return listeners.add(jobListener);
     }
 
@@ -288,14 +288,14 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
         }
         String message =
                 "Found " + files.size() + " Specimen records on which to repeat OCR.";
-        log.debug("Debug {}", message);
+        log.debug("Message: {}", message);
         Singleton.getSingletonInstance().getMainFrame().setStatusMessage(message);
 
         return files;
     }
 
     private void redoOCR(File file) {
-        log.debug("Debug {}", file);
+        log.debug("File for OCR: {}", file);
         String filename = file.getName();
 
         String rawOCR = "";
@@ -361,7 +361,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
                     parser = new UnitTrayLabelParser(rawOCR);
                     foundQRText = ((UnitTrayLabelParser) parser).isParsedFromJSON();
                 }
-                log.debug("Debug {}", rawOCR);
+                log.debug("Raw OCR text: {}", rawOCR);
 
                 // Test this image to see if is a specimen image
                 String barcode = scannableFile.getBarcodeText(templateToUse);
@@ -445,7 +445,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
                                     parser.getIdentifiedBy().length() > 0) {
                                 s.setIdentifiedBy(parser.getIdentifiedBy());
                             }
-                            log.debug("Debug {}", s.getCollection());
+                            log.debug("Specimen collection: {}", s.getCollection());
 
                             // TODO: non-general workflows
                             s.setLocationInCollection(
@@ -463,13 +463,13 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
                                     // if we managed to read JSON, then we can move the specimen
                                     // to text entered.
                                     s.setWorkFlowStatus(WorkFlowStatus.STAGE_1);
-                                    log.debug("Debug {}", s.getWorkFlowStatus());
+                                    log.debug("Workflow status: {}", s.getWorkFlowStatus());
                                 }
                                 sh.attachDirty(s);
                                 counter.incrementSpecimensUpdated();
                             } catch (SaveFailedException e) {
                                 // couldn't save, try to figure out why and report
-                                log.debug("Debug {}", e);
+                                log.debug("Exception: {}", e);
                                 try {
                                     String badParse = "";
                                     // Drawer number with length limit (and specimen that fails to
@@ -585,7 +585,7 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
     private void setPercentComplete(int aPercentage) {
         // set value
         percentComplete = aPercentage;
-        log.debug("Debug {}", percentComplete);
+        log.debug("Percent complete: {}", percentComplete);
         // notify listeners
         Singleton.getSingletonInstance().getMainFrame().notifyListener(
                 percentComplete, this);

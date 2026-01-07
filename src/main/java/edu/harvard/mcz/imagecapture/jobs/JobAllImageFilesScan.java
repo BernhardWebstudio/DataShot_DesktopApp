@@ -18,21 +18,6 @@
  */
 package edu.harvard.mcz.imagecapture.jobs;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import javax.swing.JOptionPane;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.RunStatus;
@@ -42,6 +27,20 @@ import edu.harvard.mcz.imagecapture.interfaces.ScanCounterInterface;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.dialog.RunnableJobReportDialog;
 import edu.harvard.mcz.imagecapture.utility.FileUtility;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import javax.swing.JOptionPane;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Check all image files either under the image root directory or in a selected
@@ -73,7 +72,8 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
     private int runStatus = RunStatus.STATUS_NEW;
     private AtomicInteger thumbnailCounter;
     private Date startTime = null;
-    private ExecutorService executorService = null; // shared executor for all recursive calls
+    private ExecutorService executorService =
+            null;             // shared executor for all recursive calls
     private Lock[] locks; // locks for thread safety
 
     /**
@@ -161,7 +161,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
      * @see edu.harvard.mcz.imagecapture.interfaces.RunnableJob#start()
      */
     @Override
-    public void start() {
+    public void start() throws InterruptedException {
         startTime = new Date();
         Singleton.getSingletonInstance().getJobList().addJob(this);
         runStatus = RunStatus.STATUS_RUNNING;
@@ -182,7 +182,8 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
         if (imageBase == null || !imageBase.canRead()) {
             JOptionPane.showMessageDialog(
                     Singleton.getSingletonInstance().getMainFrame(),
-                    "Can't start scan. Don't know where images are stored or can't read. Set imagebase property '" +
+                    "Can't start scan. Don't know where images are stored or can't " +
+                            "read. Set imagebase property '" +
                             ImageCaptureProperties.KEY_IMAGEBASE + "'. Does the path exist?",
                     "Can't Scan.", JOptionPane.ERROR_MESSAGE);
             return;
@@ -231,9 +232,9 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                     .getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
             log.error("Tried to scan directory (" + startPoint.getPath() +
                     ") outside of base image directory (" + base + ")");
-            String message =
-                    "Should and will not scan and database files outside of base image directory (" +
-                            base + ")";
+            String message = "Should and will not scan and database files outside " +
+                    "of base image directory (" +
+                    base + ")";
             JOptionPane.showMessageDialog(
                     Singleton.getSingletonInstance().getMainFrame(), message,
                     "Won't scan outside image base directory.",
@@ -269,7 +270,8 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
 
                 // Clean up any existing executor service from previous runs
                 if (executorService != null && !executorService.isTerminated()) {
-                    log.warn("Executor service from previous run still exists, shutting it down");
+                    log.warn("Executor service from previous run still exists, " +
+                            "shutting it down");
                     executorService.shutdownNow();
                     try {
                         executorService.awaitTermination(10, TimeUnit.SECONDS);
@@ -283,19 +285,22 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                         Singleton.getSingletonInstance()
                                 .getProperties()
                                 .getProperties()
-                                .getProperty(ImageCaptureProperties.KEY_CONCURRENCY_LEVEL, "8"));
+                                .getProperty(ImageCaptureProperties.KEY_CONCURRENCY_LEVEL,
+                                        "8"));
                 executorService = Executors.newFixedThreadPool(concurrencyLevel);
                 locks = new ReentrantLock[concurrencyLevel];
                 for (int i = 0; i < locks.length; ++i) {
                     locks[i] = new ReentrantLock();
                 }
 
-                log.info("Starting file scan with " + concurrencyLevel + " threads, total files to process: " + counter.getTotal());
+                log.info("Starting file scan with " + concurrencyLevel +
+                        " threads, total files to process: " + counter.getTotal());
                 checkFiles(startPoint, counter, workerCounter);
 
                 // Shutdown executor and wait for all tasks to complete
-                log.info("File scanning completed, shutting down executor and waiting for " +
-                        workerCounter.getFilesSeen() + " processing tasks to finish");
+                log.info(
+                        "File scanning completed, shutting down executor and waiting for " +
+                                workerCounter.getFilesSeen() + " (" + workerCounter.getTotal() + ") processing tasks to finish");
                 executorService.shutdown();
                 try {
                     // Increased timeout to 12 hours to handle large batches of images
@@ -303,29 +308,40 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                     // when processing several hundred images with barcode reading
                     long startWait = System.currentTimeMillis();
                     if (!executorService.awaitTermination(12, TimeUnit.HOURS)) {
-                        long waitedMinutes = (System.currentTimeMillis() - startWait) / 60000;
-                        log.warn("Execution pool did not terminate within 12 hours (waited " +
-                                waitedMinutes + " minutes), forcing shutdown. " +
-                                "Files processed: " + workerCounter.getFilesSeen() + " of " + counter.getTotal());
+                        long waitedMinutes =
+                                (System.currentTimeMillis() - startWait) / 60000;
+                        log.warn(
+                                "Execution pool did not terminate within 12 hours (waited " +
+                                        waitedMinutes + " minutes), forcing shutdown. "
+                                        + "Files processed: " + workerCounter.getFilesSeen() +
+                                        " of " + counter.getTotal());
                         executorService.shutdownNow();
                         if (!executorService.awaitTermination(60, TimeUnit.SECONDS)) {
-                            log.error("Execution pool did not terminate even after forced shutdown");
+                            log.error("Execution pool did not terminate even after forced " +
+                                    "shutdown");
                         }
                     } else {
-                        long waitedSeconds = (System.currentTimeMillis() - startWait) / 1000;
-                        log.info("All processing tasks completed successfully after " + waitedSeconds + " seconds");
+                        long waitedSeconds =
+                                (System.currentTimeMillis() - startWait) / 1000;
+                        log.info("All processing tasks completed successfully after " +
+                                waitedSeconds + " seconds");
                     }
                 } catch (InterruptedException e) {
-                    log.error("Execution pool interrupted during termination, processed " +
-                            workerCounter.getFilesSeen() + " of " + counter.getTotal() + " files", e);
+                    log.error(
+                            "Execution pool interrupted during termination, processed " +
+                                    workerCounter.getFilesSeen() + " of " + counter.getTotal() +
+                                    " files",
+                            e);
                     executorService.shutdownNow();
                     Thread.currentThread().interrupt();
                 }
 
                 // Merge results from threaded counter after all tasks are done
                 counter.mergeIn(workerCounter);
-                log.info("Preprocessing complete (total " + counter.getTotal() + "): " + counter.getFilesSeen() + " files processed, " +
-                        counter.getFilesUpdated() + " updated, " + counter.getFilesFailed() + " failed");
+                log.info("Preprocessing complete (total " + counter.getTotal() +
+                        "): " + counter.getFilesSeen() + " files processed, " +
+                        counter.getFilesUpdated() + " updated, " +
+                        counter.getFilesFailed() + " failed");
             }
             // report
 
@@ -336,7 +352,8 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                     this);
             RunnableJobReportDialog errorReportDialog = new RunnableJobReportDialog(
                     Singleton.getSingletonInstance().getMainFrame(), counter.toString(),
-                    counter.getErrors(), "Preprocessing Results", counter.getNumbersToCopy());
+                    counter.getErrors(), "Preprocessing Results",
+                    counter.getNumbersToCopy());
             errorReportDialog.setVisible(true);
         }
 
@@ -408,7 +425,8 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                 .getProperties()
                 .getProperty(ImageCaptureProperties.KEY_GENERATE_THUMBNAILS)
                 .equals("true")) {
-            executorService.execute(new ThumbnailBuilderJob(startPoint, thumbnailCounter));
+            executorService.execute(
+                    new ThumbnailBuilderJob(startPoint, thumbnailCounter));
         }
         // loop files
         for (File containedFile : containedFiles) {
@@ -456,13 +474,17 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                                 try {
                                     checkFile(containedFile, workerCounter, locks);
                                 } catch (Exception e) {
-                                    // Catch any unchecked exceptions that might occur during processing
-                                    // to ensure they're properly counted and don't silently fail
-                                    log.error("Unexpected error processing file: " + containedFile.getName(), e);
+                                    // Catch any unchecked exceptions that might occur during
+                                    // processing to ensure they're properly counted and don't
+                                    // silently fail
+                                    log.error("Unexpected error processing file: " +
+                                                    containedFile.getName(),
+                                            e);
                                     workerCounter.incrementFilesFailed();
                                     workerCounter.appendError(new RunnableJobError(
-                                            containedFile.getName(), "", "Unexpected error: " + e.getMessage(),
-                                            e, RunnableJobError.TYPE_FILE_READ));
+                                            containedFile.getName(), "",
+                                            "Unexpected error: " + e.getMessage(), e,
+                                            RunnableJobError.TYPE_FILE_READ));
                                 }
                             }
                         });
@@ -478,13 +500,13 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                 log.debug("Setting percent complete: " + (seen / total * 100) +
                         " based on seen: " + seen + ", total: " + total);
             } else {
-                log.warn("Terminating scan as requested, not scanning file '" + containedFile.getName() + "' and after.");
+                log.warn("Terminating scan as requested, not scanning file '" +
+                        containedFile.getName() + "' and after.");
                 break;
             }
             Singleton.getSingletonInstance().getMainFrame().notifyListener(runStatus,
                     this);
         }
-
     }
 
     /**
@@ -499,9 +521,12 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
             // scan was cancelled.  Previously this caused a NullPointerException
             // when the UI queried the job name before a directory was chosen.
             String sp = null;
-            if (startPoint != null && startPoint.getPath() != null && startPoint.getPath().length() > 0) {
+            if (startPoint != null && startPoint.getPath() != null &&
+                    startPoint.getPath().length() > 0) {
                 sp = startPoint.getPath();
-            } else if (startPointSpecific != null && startPointSpecific.getPath() != null && startPointSpecific.getPath().length() > 0) {
+            } else if (startPointSpecific != null &&
+                    startPointSpecific.getPath() != null &&
+                    startPointSpecific.getPath().length() > 0) {
                 sp = startPointSpecific.getPath();
             }
             return sp != null ? "Preprocess images in " + sp : "Preprocess images";

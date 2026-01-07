@@ -251,8 +251,10 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
             // walk through directory tree
             Singleton.getSingletonInstance().getMainFrame().setStatusMessage(
                     "Scanning path: " + startPoint.getPath());
-                Counter counter = new Counter();
-                AtomicCounter workerCounter = new AtomicCounter();
+            log.info("Starting preprocess scan of image files in: " +
+                    startPoint.getPath());
+            Counter counter = new Counter();
+            AtomicCounter workerCounter = new AtomicCounter();
             // count files to scan
             countFiles(startPoint, counter);
             setPercentComplete(0);
@@ -264,7 +266,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                 // Create executor service once for entire scan to prevent premature
                 // shutdown during recursive directory traversal (fixes issue where only
                 // a few files were processed when scanning many files)
-                
+
                 // Clean up any existing executor service from previous runs
                 if (executorService != null && !executorService.isTerminated()) {
                     log.warn("Executor service from previous run still exists, shutting it down");
@@ -276,7 +278,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                         Thread.currentThread().interrupt();
                     }
                 }
-                
+
                 int concurrencyLevel = Integer.parseInt(
                         Singleton.getSingletonInstance()
                                 .getProperties()
@@ -287,12 +289,12 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                 for (int i = 0; i < locks.length; ++i) {
                     locks[i] = new ReentrantLock();
                 }
-                
+
                 log.info("Starting file scan with " + concurrencyLevel + " threads, total files to process: " + counter.getTotal());
                 checkFiles(startPoint, counter, workerCounter);
-                
+
                 // Shutdown executor and wait for all tasks to complete
-                log.info("File scanning completed, shutting down executor and waiting for " + 
+                log.info("File scanning completed, shutting down executor and waiting for " +
                         workerCounter.getFilesSeen() + " processing tasks to finish");
                 executorService.shutdown();
                 try {
@@ -302,7 +304,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                     long startWait = System.currentTimeMillis();
                     if (!executorService.awaitTermination(12, TimeUnit.HOURS)) {
                         long waitedMinutes = (System.currentTimeMillis() - startWait) / 60000;
-                        log.warn("Execution pool did not terminate within 12 hours (waited " + 
+                        log.warn("Execution pool did not terminate within 12 hours (waited " +
                                 waitedMinutes + " minutes), forcing shutdown. " +
                                 "Files processed: " + workerCounter.getFilesSeen() + " of " + counter.getTotal());
                         executorService.shutdownNow();
@@ -314,7 +316,7 @@ public class JobAllImageFilesScan extends AbstractFileScanJob {
                         log.info("All processing tasks completed successfully after " + waitedSeconds + " seconds");
                     }
                 } catch (InterruptedException e) {
-                    log.error("Execution pool interrupted during termination, processed " + 
+                    log.error("Execution pool interrupted during termination, processed " +
                             workerCounter.getFilesSeen() + " of " + counter.getTotal() + " files", e);
                     executorService.shutdownNow();
                     Thread.currentThread().interrupt();

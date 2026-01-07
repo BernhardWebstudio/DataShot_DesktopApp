@@ -54,7 +54,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                         .getProperty(ImageCaptureProperties.KEY_REDUNDANT_COMMENT_BARCODE)
                         .equals("true")) {
             // If so configured, or if image metadata contains a barcode that doesn't
-            // match the barcode in the image report on barcode/comment missmatch as
+            // match the barcode in the image report on barcode/comment mismatch as
             // an error condition.
             try {
                 RunnableJobError error = new RunnableJobError(
@@ -71,8 +71,7 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
             // This would normally the case where the image metadata doesn't contain a
             // barcode but the image does, and reporting of this state as an error has
             // been turned off.
-            log.debug("Barcode/Comment mismatch: [" + barcode + "]!=[" + exifComment +
-                    "]");
+            log.debug("Barcode/Comment mismatch: [{}]!=[{}]", barcode, exifComment);
         }
     }
 
@@ -387,7 +386,14 @@ abstract public class AbstractFileScanJob implements RunnableJob, Runnable {
                                 null, null, null, RunnableJobError.TYPE_MISMATCH);
                     }
                     counter.appendError(error);
-                    counter.incrementFilesFailed();
+                    // If this is an existing file we're trying to update (reattach=true),
+                    // count it as existing, not as a new failure
+                    if (reattach) {
+                        counter.incrementFilesExisting();
+                        log.debug("Existing image record for file {} still has problems, counted as existing", containedFile.getName());
+                    } else {
+                        counter.incrementFilesFailed();
+                    }
                     return;
                 }
             }

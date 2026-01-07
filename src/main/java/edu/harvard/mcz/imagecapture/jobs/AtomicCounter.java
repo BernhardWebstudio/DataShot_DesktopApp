@@ -19,6 +19,8 @@
 package edu.harvard.mcz.imagecapture.jobs;
 
 import edu.harvard.mcz.imagecapture.interfaces.ScanCounterInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,8 @@ public class AtomicCounter implements ScanCounterInterface {
     private List<RunnableJobError> errors = null;
     private ArrayList<String> barcodes = null;
 
+    private static final Logger log = LoggerFactory.getLogger(AtomicCounter.class.getName());
+
     public AtomicCounter() {
         totalCount = new AtomicInteger(0);
         filesSeen = new AtomicInteger(0);
@@ -64,9 +68,11 @@ public class AtomicCounter implements ScanCounterInterface {
     @Override
     public void logBarcode(String barcode) {
         barcodes.add(barcode);
+        log.debug("Logging barcode: {}, have {} now", barcode, barcodes.size());
     }
 
     public synchronized void appendError(RunnableJobError anError) {
+        log.debug("appendError: {}", anError);
         errors.add(anError);
         errorReport.append(anError.toString());
         errorReport.append("\n");

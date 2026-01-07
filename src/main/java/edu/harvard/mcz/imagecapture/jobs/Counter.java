@@ -68,6 +68,7 @@ public class Counter implements ScanCounterInterface {
     }
 
     public void appendError(RunnableJobError anError) {
+        log.debug("appendError: {}", anError);
         errors.add(anError);
         errorReport.append(anError.toString());
         errorReport.append("\n");

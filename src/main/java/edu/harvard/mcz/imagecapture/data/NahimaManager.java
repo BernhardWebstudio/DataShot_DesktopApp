@@ -55,8 +55,13 @@ public class NahimaManager extends AbstractRestClient {
     private static final Logger log =
             LoggerFactory.getLogger(NahimaManager.class);
     private final String url;
+    private final String baseUrl;
     private final String username;
     private final String password;
+    private final String clientId;
+    private final String clientSecret;
+    private final boolean useOAuth;
+    private final String tokenParamName;
     private final boolean interactive;
     private final ConcurrentHashMap<String, Map<String, JSONObject>>
             resolveCache = new ConcurrentHashMap<>();
@@ -65,27 +70,49 @@ public class NahimaManager extends AbstractRestClient {
     public NahimaManager(String url, String username, String password,
                          boolean interactive)
             throws IOException, InterruptedException {
-        this(url, username, password, interactive, true);
+        this(url, username, password, null, null, interactive, true);
     }
 
     public NahimaManager(String url, String username, String password,
+                         boolean interactive, boolean requiresLogin)
+            throws IOException, InterruptedException, RuntimeException {
+        this(url, username, password, null, null, interactive, requiresLogin);
+    }
+
+    public NahimaManager(String url, String username, String password,
+                         String clientId, String clientSecret,
+                         boolean interactive)
+            throws IOException, InterruptedException, RuntimeException {
+        this(url, username, password, clientId, clientSecret, interactive, true);
+    }
+
+    public NahimaManager(String url, String username, String password,
+                         String clientId, String clientSecret,
                          boolean interactive, boolean requiresLogin)
             throws IOException, InterruptedException, RuntimeException {
         // normalize URL
         if (!url.endsWith("/")) {
             url = url + "/";
         }
-        if (!url.endsWith("api/v1/")) {
-            url = url + "api/v1/";
-        }
+
+        this.baseUrl = url;
+        this.clientId = clientId;
+        this.clientSecret = clientSecret;
+        this.useOAuth = !isNullOrBlank(clientId) && !isNullOrBlank(clientSecret);
+        this.tokenParamName = useOAuth ? "access_token" : "token";
+
         // store properties
-        this.url = url;
+        this.url = this.baseUrl + (useOAuth ? "api/" : "api/v1/");
         this.username = username;
         this.password = password;
         this.interactive = interactive;
 
-        this.startSessionAndRetrieveToken();
-        this.login();
+        if (useOAuth) {
+            this.retrieveOAuthToken();
+        } else {
+            this.startSessionAndRetrieveToken();
+            this.login();
+        }
     }
 
     /**
@@ -146,6 +173,9 @@ public class NahimaManager extends AbstractRestClient {
      */
     protected void login()
             throws IOException, InterruptedException, RuntimeException {
+        if (useOAuth) {
+            return;
+        }
         String queryUrl =
                 this.url + "session/authenticate?method=easydb&token=" + this.token;
         HashMap<String, String> params = new HashMap<>();
@@ -167,6 +197,56 @@ public class NahimaManager extends AbstractRestClient {
         }
     }
 
+    protected void retrieveOAuthToken()
+            throws IOException, InterruptedException, RuntimeException {
+        String queryUrl = this.baseUrl + "api/oauth2/token";
+        HashMap<String, String> params = new HashMap<>();
+        params.put("grant_type", "password");
+        params.put("username", this.username);
+        params.put("password", this.password);
+        params.put("client_id", this.clientId);
+        params.put("client_secret", this.clientSecret);
+
+        String response = this.postRequest(queryUrl, params);
+        JSONObject responseObject = new JSONObject(response);
+        if (responseObject.has("error")) {
+            throw new RuntimeException(
+                    "Failed to acquire OAuth2 token. Error: " +
+                            responseObject.optString("error") +
+                            (responseObject.has("error_description")
+                                    ? ": " + responseObject.optString("error_description")
+                                    : ""));
+        }
+        if (!responseObject.has("access_token")) {
+            throw new RuntimeException(
+                    "Failed to acquire OAuth2 token: missing access_token in response.");
+        }
+        this.token = responseObject.getString("access_token");
+    }
+
+    private boolean isNullOrBlank(String value) {
+        return value == null || value.trim().isEmpty();
+    }
+
+    private String buildAuthenticatedUrl(String endpoint) {
+        return buildAuthenticatedUrl(endpoint, null);
+    }
+
+    private String buildAuthenticatedUrl(String endpoint, String queryParams) {
+        StringBuilder urlBuilder = new StringBuilder();
+        urlBuilder.append(this.url);
+        urlBuilder.append(endpoint);
+        urlBuilder.append("?");
+        urlBuilder.append(tokenParamName);
+        urlBuilder.append("=");
+        urlBuilder.append(this.token);
+        if (queryParams != null && !queryParams.trim().isEmpty()) {
+            urlBuilder.append("&");
+            urlBuilder.append(queryParams);
+        }
+        return urlBuilder.toString();
+    }
+
     /**
      * This function loops the images in a Specimen and uploads them to Nahima
      *
@@ -179,7 +259,7 @@ public class NahimaManager extends AbstractRestClient {
         // docs:
         // https://docs.easydb.de/en/technical/api/eas/
         // https://docs.easydb.de/en/sysadmin/eas/api/put/
-        String baseQueryUrl = this.url + "eas/put?token=" + this.token;
+        String baseQueryUrl = buildAuthenticatedUrl("eas/put");
         ArrayList<JSONObject> results = new ArrayList<>();
         HashMap<String, JSONObject> existingFilenames = new HashMap<>();
         if (existingExport != null &&
@@ -274,7 +354,7 @@ public class NahimaManager extends AbstractRestClient {
             throws IOException, InterruptedException {
         // docs:
         // https://docs.easydb.de/en/technical/api/db/
-        String queryURL = this.url + "db/" + objType + "?token=" + token;
+        String queryURL = buildAuthenticatedUrl("db/" + objType);
         // EasyDB seems to have mixed up PUT & POST, but well, we don't care
         String returnValue = this.putRequest(
                 queryURL, (new JSONArray()).put(object).toString(), new HashMap<>() {
@@ -308,7 +388,7 @@ public class NahimaManager extends AbstractRestClient {
     }
 
     public JSONObject findObjectByUuid(String uuid) throws IOException {
-        String queryURL = this.url + "objects/uuid/" + uuid + "?token=" + token;
+        String queryURL = buildAuthenticatedUrl("objects/uuid/" + uuid);
         String returnValue = this.getRequest(queryURL, new HashMap<>() {
             {
                 put("Content-Type", "application/json");
@@ -343,8 +423,7 @@ public class NahimaManager extends AbstractRestClient {
             return null;
         }
 
-        String queryURL = this.url + "search"
-                + "?token=" + token;
+        String queryURL = buildAuthenticatedUrl("search");
         JSONObject query = new JSONObject() {
             {
                 put("best_mask_filter", true);
@@ -449,8 +528,7 @@ public class NahimaManager extends AbstractRestClient {
         }
 
         // load fresh
-        String queryURL = this.url + "search"
-                + "?token=" + token;
+        String queryURL = buildAuthenticatedUrl("search");
         JSONArray search = new JSONArray();
 
         String[] splitName = searchString.split(" ");
@@ -1303,7 +1381,7 @@ public class NahimaManager extends AbstractRestClient {
         query.put("objecttypes", new JSONArray().put("gazetteer"));
 
         // Execute the search
-        String queryURL = this.url + "search?token=" + token;
+        String queryURL = buildAuthenticatedUrl("search");
         JSONObject result = this.postRequest(queryURL, query);
 
         if (result.has("code") && result.getString("code").startsWith("error")) {
@@ -2048,7 +2126,7 @@ public class NahimaManager extends AbstractRestClient {
             return tagFromCache;
         }
 
-        String queryUrl = this.url + "tags?token=" + this.token;
+        String queryUrl = buildAuthenticatedUrl("tags");
 
         String response = this.getRequest(queryUrl);
         if (!response.startsWith("[")) {

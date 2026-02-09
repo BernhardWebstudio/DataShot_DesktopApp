@@ -1822,7 +1822,14 @@ public class SpecimenDetailsViewPane extends JPanel {
                         urlString = properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL, "https://nahima.ethz.ch");
 
                         // need to first convert he global object id to the uuid for the link
-                        NahimaManager nahimaManager = new NahimaManager(properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL), properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_USER), properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_PASSWORD), false, false);
+                        NahimaManager nahimaManager = new NahimaManager(
+                            properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL),
+                            properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_USER),
+                            properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_PASSWORD),
+                            properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_CLIENT_ID),
+                            properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_CLIENT_SECRET),
+                            false,
+                            false);
 
                         JSONObject nahimaEntry = nahimaManager.findObjectByGlobalObjectId(specimen.getNahimaId());
 

@@ -134,6 +134,8 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_URL),
             properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_USER),
             properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_PASSWORD),
+          properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_CLIENT_ID),
+          properties.getProperty(ImageCaptureProperties.KEY_NAHIMA_CLIENT_SECRET),
             CastUtility.castToBoolean(properties.getOrDefault(
                 ImageCaptureProperties.KEY_NAHIMA_INTERACTIVE, true)));
         return manager;

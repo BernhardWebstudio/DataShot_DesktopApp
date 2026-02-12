@@ -102,7 +102,7 @@ public class NahimaManager extends AbstractRestClient {
         this.tokenParamName = useOAuth ? "access_token" : "token";
 
         // store properties
-        this.url = this.baseUrl + (useOAuth ? "api/" : "api/v1/");
+        this.url = this.baseUrl + "api/v1/";
         this.username = username;
         this.password = password;
         this.interactive = interactive;

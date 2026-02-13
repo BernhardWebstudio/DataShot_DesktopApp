@@ -356,7 +356,8 @@ public class NahimaManager extends AbstractRestClient {
         // https://docs.easydb.de/en/technical/api/db/
         String queryURL = buildAuthenticatedUrl("db/" + objType);
         // EasyDB seems to have mixed up PUT & POST, but well, we don't care
-        String returnValue = this.putRequest(
+        // fylr not anymore though possibly
+        String returnValue = this.postRequest(//this.putRequest(
                 queryURL, (new JSONArray()).put(object).toString(), new HashMap<>() {
                     {
                         put("Content-Type", "application/json");

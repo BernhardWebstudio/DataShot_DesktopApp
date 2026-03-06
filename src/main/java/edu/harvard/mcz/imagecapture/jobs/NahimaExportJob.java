@@ -381,7 +381,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
               }
             })));
             put("barcode", specimen.getBarcode());
-            put("urspruelicherdateiname",
+            put("urspruenglicherdateiname",
                 imageJsonObj.get("original_filename"));
             // empty, potentially later relevant stuff
             put("mediaassettyp", JSONObject.NULL);
@@ -399,7 +399,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
             put("_reverse_nested:entomologie_mediaassetpublic:mediaassetpublic",
                 new JSONArray());
             put("_reverse_nested:entomologie_mediaassetnonpublic:"
-                    + "mediaassetpublic",
+                    + "mediaassetnonpublic",
                 new JSONArray());
             put("_reverse_nested:entomologie_mediaassetdeleted:"
                     + "mediaassetdeleted",

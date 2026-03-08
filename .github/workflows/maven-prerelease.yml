@@ -1,25 +1,39 @@
-# This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
-
 name: Prerelease Publisher
 
 on:
   push:
     branches: [ master ]
     tags-ignore:
-      - 'v*' # do not run on tags, as we run the full publish then
+      - 'v*'
     paths-ignore:
       - 'bin/'
       - 'docs_manual/'
       - '.github/'
-    # allow manual triggering
-    workflow_dispatch:
-
+  workflow_dispatch:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    name: Build ${{ matrix.artifact_suffix }}
+    runs-on: ${{ matrix.os }}
+    env:
+      APPLE_CODESIGN_CERT_P12_BASE64: ${{ secrets.APPLE_CODESIGN_CERT_P12_BASE64 }}
+      APPLE_CODESIGN_CERT_PASSWORD: ${{ secrets.APPLE_CODESIGN_CERT_PASSWORD }}
+      APPLE_CODESIGN_IDENTITY: ${{ secrets.APPLE_CODESIGN_IDENTITY }}
+      APPLE_NOTARY_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
+      APPLE_NOTARY_ISSUER_ID: ${{ secrets.APPLE_NOTARY_ISSUER_ID }}
+      APPLE_NOTARY_API_KEY_P8_BASE64: ${{ secrets.APPLE_NOTARY_API_KEY_P8_BASE64 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_suffix: linux-generic
+          - os: windows-latest
+            artifact_suffix: windows-x64
+          - os: macos-13
+            artifact_suffix: macos-x64
+          - os: macos-14
+            artifact_suffix: macos-arm64
 
     steps:
       - uses: actions/checkout@v4
@@ -32,13 +46,109 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        # without -DskipTests, we also run tests, which should prevent
-        # the package from being packaged if tests fail
         run: mvn -B package --file pom.xml -P dist
+
+      - name: Build macOS Vision Helper
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p native/bin
+          swiftc -O native/macos-vision-scanner/main.swift \
+            -framework Vision \
+            -framework CoreGraphics \
+            -framework ImageIO \
+            -o native/bin/qr-native-macos
+
+      - name: Import Apple Code Signing Certificate
+        if: runner.os == 'macOS' && env.APPLE_CODESIGN_CERT_P12_BASE64 != '' && env.APPLE_CODESIGN_CERT_PASSWORD != '' && env.APPLE_CODESIGN_IDENTITY != ''
+        shell: bash
+        env:
+          KEYCHAIN_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}-codesign
+        run: |
+          set -euo pipefail
+          cert_path="$RUNNER_TEMP/codesign-cert.p12"
+          keychain_path="$RUNNER_TEMP/datashot-signing.keychain-db"
+
+          echo "$APPLE_CODESIGN_CERT_P12_BASE64" | base64 -D > "$cert_path"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
+          security set-keychain-settings -lut 21600 "$keychain_path"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$keychain_path"
+          security import "$cert_path" -k "$keychain_path" -P "$APPLE_CODESIGN_CERT_PASSWORD" -A -t cert -f pkcs12
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$keychain_path"
+          security list-keychains -d user -s "$keychain_path"
+
+      - name: Sign macOS Native Helper
+        if: runner.os == 'macOS' && env.APPLE_CODESIGN_CERT_P12_BASE64 != '' && env.APPLE_CODESIGN_CERT_PASSWORD != '' && env.APPLE_CODESIGN_IDENTITY != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          codesign --force --options runtime --timestamp --sign "$APPLE_CODESIGN_IDENTITY" native/bin/qr-native-macos
+          codesign --verify --strict --verbose=2 native/bin/qr-native-macos
+
+      - name: Build Windows QR Helper
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cmake -S native/windows-qr-scanner -B native/windows-qr-scanner/build -A x64
+          cmake --build native/windows-qr-scanner/build --config Release
+          New-Item -ItemType Directory -Path native/bin -Force | Out-Null
+          Copy-Item native/windows-qr-scanner/build/Release/qr-native-windows.exe native/bin/qr-native-windows.exe -Force
+
+      - name: Determine Build Version
+        id: version
+        shell: bash
+        run: |
+          version="$(grep -m1 '<version>' pom.xml | sed -E 's/.*<version>([^<]+)<\/version>.*/\1/')"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Package OS Artifact
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
+          bundle_dir="$(./bin/package-os-artifact.sh "${{ matrix.artifact_suffix }}" "$version")"
+          archive="dist/DataShot-${version}-${{ matrix.artifact_suffix }}.zip"
+          tar -a -cf "$archive" -C dist "$(basename "$bundle_dir")"
+          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+
+      - name: Notarize macOS Artifact
+        if: runner.os == 'macOS' && env.APPLE_CODESIGN_CERT_P12_BASE64 != '' && env.APPLE_CODESIGN_CERT_PASSWORD != '' && env.APPLE_CODESIGN_IDENTITY != '' && env.APPLE_NOTARY_KEY_ID != '' && env.APPLE_NOTARY_ISSUER_ID != '' && env.APPLE_NOTARY_API_KEY_P8_BASE64 != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          key_path="$RUNNER_TEMP/AuthKey_${APPLE_NOTARY_KEY_ID}.p8"
+          echo "$APPLE_NOTARY_API_KEY_P8_BASE64" | base64 -D > "$key_path"
+          xcrun notarytool submit "${{ steps.package.outputs.archive }}" \
+            --key "$key_path" \
+            --key-id "$APPLE_NOTARY_KEY_ID" \
+            --issuer "$APPLE_NOTARY_ISSUER_ID" \
+            --wait
+
+      - name: Upload Matrix Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: prerelease-${{ matrix.artifact_suffix }}
+          path: ${{ steps.package.outputs.archive }}
+          if-no-files-found: error
+
+  publish:
+    name: Publish Prerelease
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Determine Prerelease Name
         id: name_determiner
-        run: echo "##[set-output name=name;]DataShot-$(date +'%Y%m%d-%H%M')-beta"
+        run: echo "name=DataShot-$(date +'%Y%m%d-%H%M')-beta" >> "$GITHUB_OUTPUT"
+
+      - name: Download Matrix Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist-assets
 
       - name: Create Pre-release
         id: create_prerelease
@@ -53,19 +163,11 @@ jobs:
           draft: false
           prerelease: true
 
-      - name: Upload Pre-release
+      - name: Upload Pre-release Assets
         id: upload_prerelease
         if: success()
-        #uses: actions/upload-release-asset@v1
-        #env:
-        #  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #with:
-        #  upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-        #  asset_path: ./my-artifact.zip
-        #  asset_name: my-artifact.zip
-        #  asset_content_type: application/zip
         uses: csexton/release-asset-action@v2
         with:
-          pattern: "target/DataShot*.jar"
+          pattern: "dist-assets/**/*.zip"
           github-token: ${{ secrets.GITHUB_TOKEN }}
           release-url: ${{ steps.create_prerelease.outputs.upload_url }}

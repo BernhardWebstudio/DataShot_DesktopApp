@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>DataShot Chromium QR Probe</title>
+</head>
+<body>
+<pre id="result">ERROR:not-started</pre>
+<script>
+(async () => {
+  const output = document.getElementById("result");
+  const params = new URLSearchParams(window.location.search);
+  const imageUrl = params.get("image");
+
+  if (!imageUrl) {
+    output.textContent = "ERROR:missing-image";
+    return;
+  }
+
+  if (!window.isSecureContext) {
+    output.textContent = "ERROR:insecure-context";
+    return;
+  }
+
+  if (!("BarcodeDetector" in window)) {
+    output.textContent = "ERROR:barcode-detector-unavailable";
+    return;
+  }
+
+  const supported = await BarcodeDetector.getSupportedFormats();
+  if (!supported.includes("qr_code")) {
+    output.textContent = "ERROR:qr-format-not-supported";
+    return;
+  }
+
+  const image = new Image();
+  image.src = imageUrl;
+  await image.decode();
+
+  const detector = new BarcodeDetector({ formats: ["qr_code"] });
+  const found = await detector.detect(image);
+  const detections = found.map((entry) => ({
+    rawValue: entry.rawValue || "",
+    format: entry.format || "",
+    boundingBox: {
+      x: entry.boundingBox ? entry.boundingBox.x : 0,
+      y: entry.boundingBox ? entry.boundingBox.y : 0,
+      width: entry.boundingBox ? entry.boundingBox.width : 0,
+      height: entry.boundingBox ? entry.boundingBox.height : 0
+    }
+  }));
+
+  output.textContent = "JSON:" + JSON.stringify(detections);
+})().catch((error) => {
+  const output = document.getElementById("result");
+  output.textContent = "ERROR:" + (error && error.message ? error.message : String(error));
+});
+</script>
+</body>
+</html>

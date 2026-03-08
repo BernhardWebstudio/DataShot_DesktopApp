@@ -18,11 +18,47 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import boofcv.abst.fiducial.QrCodeDetector;
-import boofcv.alg.fiducial.qrcode.QrCode;
-import boofcv.factory.fiducial.FactoryFiducial;
-import boofcv.io.image.ConvertBufferedImage;
-import boofcv.struct.image.GrayU8;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
+import java.awt.image.RescaleOp;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.TimeUnit;
+
+import javax.imageio.ImageIO;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.adobe.internal.xmp.XMPException;
 import com.adobe.internal.xmp.XMPMeta;
 import com.adobe.internal.xmp.properties.XMPProperty;
@@ -38,10 +74,25 @@ import com.drew.metadata.exif.ExifSubIFDDescriptor;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.drew.metadata.xmp.XmpDirectory;
-import com.google.zxing.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.zxing.BinaryBitmap;
+import com.google.zxing.ChecksumException;
+import com.google.zxing.DecodeHintType;
+import com.google.zxing.FormatException;
+import com.google.zxing.LuminanceSource;
+import com.google.zxing.NotFoundException;
+import com.google.zxing.ReaderException;
+import com.google.zxing.Result;
 import com.google.zxing.client.j2se.BufferedImageLuminanceSource;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.QRCodeReader;
+
+import boofcv.abst.fiducial.QrCodeDetector;
+import boofcv.alg.fiducial.qrcode.QrCode;
+import boofcv.factory.fiducial.FactoryFiducial;
+import boofcv.io.image.ConvertBufferedImage;
+import boofcv.struct.image.GrayU8;
 import edu.harvard.mcz.imagecapture.data.BulkMedia;
 import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
@@ -50,27 +101,6 @@ import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
 import edu.harvard.mcz.imagecapture.ui.frame.BulkMediaFrame;
 import edu.harvard.mcz.imagecapture.utility.GZipCompressor;
 import georegression.struct.shapes.Polygon2D_F64;
-import org.apache.commons.cli.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.*;
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.*;
-// Additional imports for Python fallback
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Image File that might contain text that can be extracted by OCR or a barcode
@@ -1273,13 +1303,27 @@ public class CandidateImageFile {
                     // coordinate of the bottommost pixels to decode
                     int height = positionTemplate.getUtBarcodeSize().height;
 
-                    returnValue =
-                            readBarcodeFromLocation(image, left, top, width, height, false);
-                    if (returnValue.length() > 0) {
+                    Rectangle preferredRegion = new Rectangle(left, top, width,
+                            height);
+                    List<QrDetection> providerDetections = tryOptionalQrProviders(
+                            image, preferredRegion);
+                    String providerValue = selectUnitTrayDetectionText(
+                            providerDetections, preferredRegion);
+                    if (providerValue != null && providerValue.length() > 0) {
+                        processDetectedQrResults(collectDetectionTexts(
+                                providerDetections));
+                        returnValue = providerValue;
                         barcodeStatus = RESULT_BARCODE_SCANNED;
                     } else {
-                        returnValue = "Failed to read a barcode from templated location.";
-                        barcodeStatus = RESULT_ERROR;
+                        returnValue = readBarcodeFromLocation(
+                                image, left, top, width, height, false);
+                        if (returnValue.length() > 0) {
+                            barcodeStatus = RESULT_BARCODE_SCANNED;
+                        } else {
+                            returnValue =
+                                    "Failed to read a barcode from templated location.";
+                            barcodeStatus = RESULT_ERROR;
+                        }
                     }
                     log.debug("Result of barcode scan: {}, status: {}", returnValue, barcodeStatus);
 
@@ -1582,27 +1626,39 @@ public class CandidateImageFile {
                     //*  pixels whose x coordinate is in [left,right)
                     int width = positionTemplate.getBarcodeSize().width;
                     int height = positionTemplate.getBarcodeSize().height;
-                    returnValue =
-                            readBarcodeFromLocation(image, left, top, width, height, false);
-                    if (returnValue != null && returnValue.length() > 0) {
+                    Rectangle preferredRegion = new Rectangle(left, top, width,
+                            height);
+                    List<QrDetection> providerDetections = tryOptionalQrProviders(
+                            image, preferredRegion);
+                    returnValue = selectCatalogDetectionText(providerDetections,
+                            preferredRegion);
+                    if (returnValue != null && returnValue.trim().length() > 0) {
+                        processDetectedQrResults(collectDetectionTexts(
+                                providerDetections));
                         barcodeStatus = RESULT_BARCODE_SCANNED;
                     } else {
-                        // Try Python fallback if templated location failed
-                        log.debug("Attempting Python QR fallback for templated location");
-                        List<String> pythonResults = tryPythonQRCodeFallback(image);
-                        if (!pythonResults.isEmpty()) {
-                            processPythonQRResults(pythonResults);
-                            // Use the appropriate barcode for the template context
-                            returnValue = findBestBarcodeForTemplate(pythonResults);
-                            if (returnValue != null) {
-                                barcodeStatus = RESULT_BARCODE_SCANNED;
+                        returnValue = readBarcodeFromLocation(
+                                image, left, top, width, height, false);
+                        if (returnValue != null && returnValue.length() > 0) {
+                            barcodeStatus = RESULT_BARCODE_SCANNED;
+                        } else {
+                            // Try Python fallback if templated location failed
+                            log.debug("Attempting Python QR fallback for templated location");
+                            List<String> pythonResults = tryPythonQRCodeFallback(image);
+                            if (!pythonResults.isEmpty()) {
+                                processPythonQRResults(pythonResults);
+                                // Use the appropriate barcode for the template context
+                                returnValue = findBestBarcodeForTemplate(pythonResults);
+                                if (returnValue != null) {
+                                    barcodeStatus = RESULT_BARCODE_SCANNED;
+                                } else {
+                                    returnValue = "Failed to read a barcode from templated location.";
+                                    barcodeStatus = RESULT_ERROR;
+                                }
                             } else {
                                 returnValue = "Failed to read a barcode from templated location.";
                                 barcodeStatus = RESULT_ERROR;
                             }
-                        } else {
-                            returnValue = "Failed to read a barcode from templated location.";
-                            barcodeStatus = RESULT_ERROR;
                         }
                     }
                     log.debug("Barcode return value: {}", returnValue);
@@ -1644,6 +1700,16 @@ public class CandidateImageFile {
             log.error("Image could not be decoded: is null");
             barcodeStatus = RESULT_ERROR;
         } else {
+            List<QrDetection> providerDetections = tryOptionalQrProviders(image,
+                    null);
+            String providerBarcode = selectCatalogDetectionText(providerDetections,
+                    null);
+            if (providerBarcode != null && providerBarcode.trim().length() > 0) {
+                processDetectedQrResults(collectDetectionTexts(providerDetections));
+                barcodeStatus = RESULT_BARCODE_SCANNED;
+                return providerBarcode;
+            }
+
             LuminanceSource source = new BufferedImageLuminanceSource(image);
             try {
                 BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
@@ -1659,8 +1725,11 @@ public class CandidateImageFile {
                 List<String> pythonResults = tryPythonQRCodeFallback(image);
                 if (!pythonResults.isEmpty()) {
                     processPythonQRResults(pythonResults);
-                    // Return the first found code for backward compatibility
-                    returnValue = pythonResults.get(0);
+                    // Prefer values that match configured barcode patterns.
+                    returnValue = findBestBarcodeForTemplate(pythonResults);
+                    if (returnValue == null) {
+                        returnValue = pythonResults.get(0);
+                    }
                     barcodeStatus = RESULT_BARCODE_SCANNED;
                 } else {
                     log.debug("Python QR fallback also failed");
@@ -1710,6 +1779,673 @@ public class CandidateImageFile {
      */
     public void setTemplateUsed(PositionTemplate templateUsed) {
         this.templateUsed = templateUsed;
+    }
+
+    /**
+     * Provider abstraction for optional external scanners.
+     */
+    private interface QrScannerProvider {
+        String getName();
+
+        boolean isEnabled();
+
+        List<QrDetection> detect(BufferedImage image, Rectangle preferredRegion);
+    }
+
+    /**
+     * Carries one decoded value and optional bounds from a scanner provider.
+     */
+    private static class QrDetection {
+        private final String text;
+        private final Rectangle bounds;
+
+        QrDetection(String text, Rectangle bounds) {
+            this.text = text;
+            this.bounds = bounds;
+        }
+
+        String getText() {
+            return text;
+        }
+
+        Rectangle getBounds() {
+            return bounds;
+        }
+    }
+
+    /**
+     * Native helper provider (macOS/Windows) invoked as an external process.
+     */
+    private class NativeQrScannerProvider implements QrScannerProvider {
+
+        @Override
+        public String getName() {
+            return "native";
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return getBooleanProperty(ImageCaptureProperties.KEY_QR_NATIVE_ENABLED, true);
+        }
+
+        @Override
+        public List<QrDetection> detect(BufferedImage image, Rectangle preferredRegion) {
+            String helperPath = resolveNativeHelperPath();
+            if (helperPath == null) {
+                log.debug("Native QR helper unavailable on this system");
+                return Collections.emptyList();
+            }
+            long timeoutMs = getLongProperty(
+                    ImageCaptureProperties.KEY_QR_NATIVE_TIMEOUT_MS,
+                    2500L);
+            return runExternalQrHelper(helperPath, image, preferredRegion, timeoutMs,
+                    getName());
+        }
+    }
+
+    /**
+     * Optional Chromium BarcodeDetector provider using a local probe page.
+     */
+    private class ChromiumQrScannerProvider implements QrScannerProvider {
+
+        @Override
+        public String getName() {
+            return "chromium";
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return getBooleanProperty(ImageCaptureProperties.KEY_QR_CHROMIUM_ENABLED,
+                    false);
+        }
+
+        @Override
+        public List<QrDetection> detect(BufferedImage image, Rectangle preferredRegion) {
+            String chromiumExecutable = resolveChromiumExecutable();
+            if (chromiumExecutable == null) {
+                log.debug("Chromium executable unavailable");
+                return Collections.emptyList();
+            }
+            String scanPage = findChromiumScanPage();
+            if (scanPage == null) {
+                log.debug("Chromium scan page not found");
+                return Collections.emptyList();
+            }
+
+            long timeoutMs = getLongProperty(
+                    ImageCaptureProperties.KEY_QR_CHROMIUM_TIMEOUT_MS,
+                    4000L);
+
+            Path tempImagePath = null;
+            try {
+                tempImagePath = Files.createTempFile("qr_chromium_", ".png");
+                ImageIO.write(image, "png", tempImagePath.toFile());
+
+                String imageUri = tempImagePath.toUri().toString();
+                String pageUri = Paths.get(scanPage).toUri().toString() +
+                        "?image=" + URLEncoder.encode(imageUri, StandardCharsets.UTF_8);
+
+                List<String> command = new ArrayList<>();
+                command.add(chromiumExecutable);
+                command.add("--headless");
+                command.add("--disable-gpu");
+                command.add("--allow-file-access-from-files");
+                command.add("--virtual-time-budget=" + timeoutMs);
+                command.add("--dump-dom");
+                command.add(pageUri);
+
+                String dumpDom = runExternalCommandForOutput(
+                        command,
+                        timeoutMs + 1000L,
+                        getName());
+                if (dumpDom == null) {
+                    return Collections.emptyList();
+                }
+
+                String jsonPayload = extractChromiumJsonPayload(dumpDom);
+                if (jsonPayload == null) {
+                    return Collections.emptyList();
+                }
+
+                return parseQrDetectionsFromJson(jsonPayload, getName());
+            } catch (IOException e) {
+                log.debug("Chromium provider failed: {}", e.getMessage());
+                return Collections.emptyList();
+            } finally {
+                if (tempImagePath != null) {
+                    try {
+                        Files.deleteIfExists(tempImagePath);
+                    } catch (IOException e) {
+                        log.trace("Failed to remove temporary Chromium image: {}",
+                                e.getMessage());
+                    }
+                }
+            }
+        }
+    }
+
+    private List<QrDetection> tryOptionalQrProviders(BufferedImage image,
+                                                     Rectangle preferredRegion) {
+        List<QrScannerProvider> providers = Arrays.asList(
+                new NativeQrScannerProvider(),
+                new ChromiumQrScannerProvider());
+        for (QrScannerProvider provider : providers) {
+            if (!provider.isEnabled()) {
+                continue;
+            }
+            try {
+                List<QrDetection> detections = provider.detect(image, preferredRegion);
+                if (!detections.isEmpty()) {
+                    log.info("QR provider '{}' returned {} detection(s)",
+                            provider.getName(), detections.size());
+                    return detections;
+                }
+            } catch (Exception e) {
+                log.debug("QR provider '{}' failed: {}", provider.getName(),
+                        e.getMessage());
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    private List<QrDetection> runExternalQrHelper(String executable,
+                                                  BufferedImage image,
+                                                  Rectangle preferredRegion,
+                                                  long timeoutMs,
+                                                  String providerName) {
+        Path tempImagePath = null;
+        try {
+            tempImagePath = Files.createTempFile("qr_external_", ".png");
+            ImageIO.write(image, "png", tempImagePath.toFile());
+
+            List<String> command = new ArrayList<>();
+            command.add(executable);
+            command.add(tempImagePath.toString());
+            if (preferredRegion != null) {
+                command.add("--preferred-left");
+                command.add(Integer.toString(preferredRegion.x));
+                command.add("--preferred-top");
+                command.add(Integer.toString(preferredRegion.y));
+                command.add("--preferred-width");
+                command.add(Integer.toString(preferredRegion.width));
+                command.add("--preferred-height");
+                command.add(Integer.toString(preferredRegion.height));
+            }
+
+            String output = runExternalCommandForOutput(command, timeoutMs,
+                    providerName);
+            if (output == null) {
+                return Collections.emptyList();
+            }
+
+            String jsonPayload = extractJsonPayload(output);
+            if (jsonPayload == null) {
+                log.debug("{} provider produced no parseable JSON payload",
+                        providerName);
+                return Collections.emptyList();
+            }
+
+            return parseQrDetectionsFromJson(jsonPayload, providerName);
+        } catch (IOException e) {
+            log.debug("{} provider failed to execute: {}", providerName,
+                    e.getMessage());
+            return Collections.emptyList();
+        } finally {
+            if (tempImagePath != null) {
+                try {
+                    Files.deleteIfExists(tempImagePath);
+                } catch (IOException e) {
+                    log.trace("Failed to remove temporary external helper image: {}",
+                            e.getMessage());
+                }
+            }
+        }
+    }
+
+    private String runExternalCommandForOutput(List<String> command,
+                                               long timeoutMs,
+                                               String providerName) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(command);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            boolean finished = process.waitFor(timeoutMs, TimeUnit.MILLISECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                log.debug("{} provider timed out after {}ms", providerName,
+                        timeoutMs);
+                return null;
+            }
+            String output = readStream(process.getInputStream());
+            if (process.exitValue() != 0) {
+                log.debug("{} provider exited with code {} and output: {}",
+                        providerName, process.exitValue(), output);
+                return null;
+            }
+            return output;
+        } catch (IOException e) {
+            log.debug("Unable to launch {} provider command {}: {}", providerName,
+                    command, e.getMessage());
+            return null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.debug("Interrupted while waiting for {} provider", providerName);
+            return null;
+        }
+    }
+
+    private String readStream(InputStream stream) throws IOException {
+        StringBuilder output = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(stream, StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+        }
+        return output.toString();
+    }
+
+    private String extractJsonPayload(String output) {
+        if (output == null) {
+            return null;
+        }
+        String candidate = output.trim();
+        if (candidate.startsWith("ERROR:")) {
+            log.debug("External scanner reported error: {}", candidate);
+            return null;
+        }
+        if (candidate.startsWith("JSON:")) {
+            candidate = candidate.substring("JSON:".length()).trim();
+        }
+        if (candidate.startsWith("[") || candidate.startsWith("{")) {
+            return candidate;
+        }
+
+        int objectStart = candidate.indexOf('{');
+        int arrayStart = candidate.indexOf('[');
+        int start = -1;
+        if (objectStart >= 0 && arrayStart >= 0) {
+            start = Math.min(objectStart, arrayStart);
+        } else if (objectStart >= 0) {
+            start = objectStart;
+        } else if (arrayStart >= 0) {
+            start = arrayStart;
+        }
+        int endObject = candidate.lastIndexOf('}');
+        int endArray = candidate.lastIndexOf(']');
+        int end = Math.max(endObject, endArray);
+        if (start >= 0 && end > start) {
+            return candidate.substring(start, end + 1).trim();
+        }
+        return null;
+    }
+
+    private String extractChromiumJsonPayload(String dumpDom) {
+        if (dumpDom == null) {
+            return null;
+        }
+        int errorAt = dumpDom.indexOf("ERROR:");
+        if (errorAt >= 0) {
+            int end = dumpDom.indexOf("</pre>", errorAt);
+            String error = end > errorAt ? dumpDom.substring(errorAt, end) :
+                    dumpDom.substring(errorAt);
+            log.debug("Chromium scan page reported: {}", error);
+            return null;
+        }
+        int jsonAt = dumpDom.indexOf("JSON:");
+        if (jsonAt < 0) {
+            return null;
+        }
+        int end = dumpDom.indexOf("</pre>", jsonAt);
+        String payload = end > jsonAt ? dumpDom.substring(jsonAt + 5, end) :
+                dumpDom.substring(jsonAt + 5);
+        return payload.trim();
+    }
+
+    private List<QrDetection> parseQrDetectionsFromJson(String json,
+                                                        String providerName) {
+        List<QrDetection> detections = new ArrayList<>();
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(json);
+
+            if (root.isArray()) {
+                appendQrDetections(detections, root);
+            } else if (root.isObject() && root.has("detections") &&
+                    root.get("detections").isArray()) {
+                appendQrDetections(detections, root.get("detections"));
+            } else if (root.isObject() && root.has("barcodes") &&
+                    root.get("barcodes").isArray()) {
+                appendQrDetections(detections, root.get("barcodes"));
+            } else {
+                QrDetection detection = mapDetectionNode(root);
+                if (detection != null) {
+                    detections.add(detection);
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Unable to parse {} provider JSON: {}", providerName,
+                    e.getMessage());
+        }
+        return detections;
+    }
+
+    private void appendQrDetections(List<QrDetection> target, JsonNode node) {
+        if (!node.isArray()) {
+            return;
+        }
+        for (JsonNode item : node) {
+            QrDetection detection = mapDetectionNode(item);
+            if (detection != null) {
+                target.add(detection);
+            }
+        }
+    }
+
+    private QrDetection mapDetectionNode(JsonNode node) {
+        if (node == null || node.isNull()) {
+            return null;
+        }
+        if (node.isTextual()) {
+            String text = node.asText();
+            return text == null || text.trim().isEmpty() ? null :
+                    new QrDetection(text, null);
+        }
+
+        String text = null;
+        if (node.has("text") && node.get("text").isTextual()) {
+            text = node.get("text").asText();
+        } else if (node.has("rawValue") && node.get("rawValue").isTextual()) {
+            text = node.get("rawValue").asText();
+        }
+        if (text == null || text.trim().isEmpty()) {
+            return null;
+        }
+
+        Rectangle bounds = null;
+        JsonNode bbox = node.has("bbox") ? node.get("bbox") :
+                node.get("boundingBox");
+        if (bbox != null && bbox.isObject() &&
+                bbox.has("x") && bbox.has("y") &&
+                bbox.has("width") && bbox.has("height")) {
+            int x = (int) Math.round(bbox.get("x").asDouble());
+            int y = (int) Math.round(bbox.get("y").asDouble());
+            int w = (int) Math.round(bbox.get("width").asDouble());
+            int h = (int) Math.round(bbox.get("height").asDouble());
+            bounds = new Rectangle(x, y, Math.max(0, w), Math.max(0, h));
+        }
+
+        return new QrDetection(text, bounds);
+    }
+
+    private List<String> collectDetectionTexts(List<QrDetection> detections) {
+        List<String> texts = new ArrayList<>();
+        for (QrDetection detection : detections) {
+            if (detection != null && detection.getText() != null &&
+                    !detection.getText().trim().isEmpty()) {
+                texts.add(detection.getText());
+            }
+        }
+        return texts;
+    }
+
+    private String selectCatalogDetectionText(List<QrDetection> detections,
+                                              Rectangle preferredRegion) {
+        if (detections == null || detections.isEmpty()) {
+            return null;
+        }
+        List<QrDetection> ordered = sortByPreferredRegion(detections,
+                preferredRegion);
+        for (QrDetection detection : ordered) {
+            if (matchesBarcodePattern(detection.getText())) {
+                return detection.getText();
+            }
+        }
+        for (QrDetection detection : ordered) {
+            if (!looksLikeJsonObject(detection.getText())) {
+                return detection.getText();
+            }
+        }
+        return null;
+    }
+
+    private String selectUnitTrayDetectionText(List<QrDetection> detections,
+                                               Rectangle preferredRegion) {
+        if (detections == null || detections.isEmpty()) {
+            return null;
+        }
+        List<QrDetection> ordered = sortByPreferredRegion(detections,
+                preferredRegion);
+        for (QrDetection detection : ordered) {
+            if (isUnitTrayJson(detection.getText())) {
+                return detection.getText();
+            }
+        }
+        return null;
+    }
+
+    private List<QrDetection> sortByPreferredRegion(List<QrDetection> detections,
+                                                    Rectangle preferredRegion) {
+        if (preferredRegion == null) {
+            return detections;
+        }
+        List<QrDetection> ordered = new ArrayList<>(detections);
+        ordered.sort((left, right) -> Double.compare(
+                overlapScore(preferredRegion, right.getBounds()),
+                overlapScore(preferredRegion, left.getBounds())));
+        return ordered;
+    }
+
+    private double overlapScore(Rectangle preferredRegion, Rectangle candidate) {
+        if (preferredRegion == null || candidate == null ||
+                candidate.width <= 0 || candidate.height <= 0) {
+            return -1d;
+        }
+        Rectangle overlap = preferredRegion.intersection(candidate);
+        if (overlap.width <= 0 || overlap.height <= 0) {
+            return 0d;
+        }
+        double overlapArea = (double) overlap.width * (double) overlap.height;
+        double candidateArea = (double) candidate.width * (double) candidate.height;
+        return overlapArea / candidateArea;
+    }
+
+    private boolean matchesBarcodePattern(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return false;
+        }
+        try {
+            return Singleton.getSingletonInstance().getBarcodeMatcher()
+                    .matchesPattern(value);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean looksLikeJsonObject(String value) {
+        if (value == null) {
+            return false;
+        }
+        String trimmed = value.trim();
+        return trimmed.startsWith("{") && trimmed.endsWith("}");
+    }
+
+    private boolean isUnitTrayJson(String value) {
+        if (!looksLikeJsonObject(value)) {
+            return false;
+        }
+        try {
+            return UnitTrayLabel.createFromJSONString(value) != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean getBooleanProperty(String key, boolean defaultValue) {
+        String value = getPropertyValue(key);
+        if (value == null) {
+            return defaultValue;
+        }
+        return Boolean.parseBoolean(value.trim());
+    }
+
+    private long getLongProperty(String key, long defaultValue) {
+        String value = getPropertyValue(key);
+        if (value == null || value.trim().isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Long.parseLong(value.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private String getPropertyValue(String key) {
+        try {
+            return Singleton.getSingletonInstance()
+                    .getProperties()
+                    .getProperties()
+                    .getProperty(key);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String resolveNativeHelperPath() {
+        String os = getOsKey();
+        String configuredPath = null;
+        if ("macos".equals(os)) {
+            configuredPath = getPropertyValue(
+                    ImageCaptureProperties.KEY_QR_NATIVE_MACOS_EXECUTABLE);
+        } else if ("windows".equals(os)) {
+            configuredPath = getPropertyValue(
+                    ImageCaptureProperties.KEY_QR_NATIVE_WINDOWS_EXECUTABLE);
+        }
+        if (configuredPath != null && !configuredPath.trim().isEmpty()) {
+            String trimmed = configuredPath.trim();
+            Path configured = Paths.get(trimmed);
+            if (Files.exists(configured) || canLaunchCommand(trimmed)) {
+                return trimmed;
+            }
+        }
+
+        String[] candidates = {
+                "native/bin/qr-native-" + os,
+                "native/bin/qr-native-" + os + ".exe",
+                "qr-native-" + os,
+                "qr-native-" + os + ".exe"
+        };
+        for (String candidate : candidates) {
+            Path candidatePath = Paths.get(candidate);
+            if (Files.exists(candidatePath) || canLaunchCommand(candidate)) {
+                return candidatePath.toString();
+            }
+        }
+        return null;
+    }
+
+    private String resolveChromiumExecutable() {
+        String configured = getPropertyValue(
+                ImageCaptureProperties.KEY_CHROMIUM_EXECUTABLE);
+        if (configured != null && !configured.trim().isEmpty()) {
+            return configured.trim();
+        }
+
+        String[] candidates = {
+                "google-chrome",
+                "chromium",
+                "chromium-browser",
+                "msedge",
+                "chrome"
+        };
+        for (String candidate : candidates) {
+            if (canLaunchCommand(candidate)) {
+                return candidate;
+            }
+        }
+        return null;
+    }
+
+    private boolean canLaunchCommand(String command) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(command, "--version");
+            Process process = pb.start();
+            boolean finished = process.waitFor(1500, TimeUnit.MILLISECONDS);
+            if (!finished) {
+                process.destroyForcibly();
+                return false;
+            }
+            return process.exitValue() == 0;
+        } catch (IOException e) {
+            return false;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
+        }
+    }
+
+    private String findChromiumScanPage() {
+        String[] candidates = {
+                "src/main/resources/qrscan_chromium.html",
+                "qrscan_chromium.html",
+                System.getProperty("user.dir") +
+                        "/src/main/resources/qrscan_chromium.html"
+        };
+        for (String candidate : candidates) {
+            if (candidate == null) {
+                continue;
+            }
+            Path path = Paths.get(candidate);
+            if (Files.exists(path)) {
+                return path.toString();
+            }
+        }
+        return null;
+    }
+
+    private String getOsKey() {
+        String osName = System.getProperty("os.name", "").toLowerCase(
+                Locale.ROOT);
+        if (osName.contains("mac")) {
+            return "macos";
+        }
+        if (osName.contains("win")) {
+            return "windows";
+        }
+        if (osName.contains("nux") || osName.contains("nix")) {
+            return "linux";
+        }
+        return "unknown";
+    }
+
+    private void processDetectedQrResults(List<String> qrCodes) {
+        String labelJson = null;
+        String catalogBarcode = null;
+
+        for (String code : qrCodes) {
+            if (code == null || code.trim().isEmpty()) {
+                continue;
+            }
+            if (labelJson == null && looksLikeJsonObject(code) &&
+                    isUnitTrayJson(code)) {
+                labelJson = code;
+            }
+            if (catalogBarcode == null && matchesBarcodePattern(code)) {
+                catalogBarcode = code;
+            }
+        }
+
+        if (labelJson != null) {
+            labelText = labelJson;
+            unitTrayTaxonLabelTextStatus = RESULT_BARCODE_SCANNED;
+        }
+
+        if (catalogBarcode != null) {
+            catalogNumberBarcodeText = catalogBarcode;
+            catalogNumberBarcodeStatus = RESULT_BARCODE_SCANNED;
+        }
     }
 
     /**
@@ -1889,43 +2625,26 @@ public class CandidateImageFile {
      * Process QR codes found by Python fallback and set appropriate fields
      */
     private void processPythonQRResults(List<String> qrCodes) {
-        String jsonCode = null;
-        String ethCode = null;
-        
-        for (String code : qrCodes) {
-            if (code.startsWith("{") && code.endsWith("}")) {
-                // This looks like JSON data (label text)
-                jsonCode = code;
-            } else if (code.startsWith("ETHZ-ENT") || code.startsWith("ETH-ENT")) {
-                // This looks like a catalog number
-                ethCode = code;
-            }
-        }
-        
-        // Set the fields appropriately
-        if (jsonCode != null) {
-            this.labelText = jsonCode;
-            this.unitTrayTaxonLabelTextStatus = RESULT_BARCODE_SCANNED;
-        }
-        
-        if (ethCode != null) {
-            this.catalogNumberBarcodeText = ethCode;
-            this.catalogNumberBarcodeStatus = RESULT_BARCODE_SCANNED;
-        }
+        processDetectedQrResults(qrCodes);
     }
     
     /**
      * Find the best barcode from Python results for the current template context
      */
     private String findBestBarcodeForTemplate(List<String> qrCodes) {
-        // Prefer ETH-ENT codes for catalog number contexts
+        // Prefer configured barcode patterns for catalog number contexts.
         for (String code : qrCodes) {
-            if (code.startsWith("ETHZ-ENT") || code.startsWith("ETH-ENT")) {
+            if (matchesBarcodePattern(code)) {
                 return code;
             }
         }
-        // Fall back to first found code
-        return qrCodes.isEmpty() ? null : qrCodes.get(0);
+        for (String code : qrCodes) {
+            if (code != null && !looksLikeJsonObject(code) &&
+                    code.trim().length() > 0) {
+                return code;
+            }
+        }
+        return null;
     }
 
     /**

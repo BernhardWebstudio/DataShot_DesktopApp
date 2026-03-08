@@ -18,7 +18,6 @@
  */
 package edu.harvard.mcz.imagecapture;
 
-import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -28,9 +27,13 @@ import java.security.CodeSource;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.swing.table.AbstractTableModel;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
 
 /**
  * Filesystem persistence and retrieval of properties for ImageCapture
@@ -96,6 +99,40 @@ public class ImageCaptureProperties extends AbstractTableModel {
    */
   public static final String KEY_IMAGEZXINGALSOTRYHARDER =
       "images.zxingalsotryharder";
+    /**
+     * Enable optional native QR scanner provider.
+     */
+    public static final String KEY_QR_NATIVE_ENABLED = "images.qr.native.enabled";
+    /**
+     * Timeout in milliseconds for native QR helper invocations.
+     */
+    public static final String KEY_QR_NATIVE_TIMEOUT_MS =
+      "images.qr.native.timeout.ms";
+    /**
+     * Executable path for macOS native QR helper.
+     */
+    public static final String KEY_QR_NATIVE_MACOS_EXECUTABLE =
+      "program.qr.native.macos";
+    /**
+     * Executable path for Windows native QR helper.
+     */
+    public static final String KEY_QR_NATIVE_WINDOWS_EXECUTABLE =
+      "program.qr.native.windows";
+    /**
+     * Enable optional Chromium BarcodeDetector provider.
+     */
+    public static final String KEY_QR_CHROMIUM_ENABLED =
+      "images.qr.chromium.enabled";
+    /**
+     * Timeout in milliseconds for Chromium BarcodeDetector invocations.
+     */
+    public static final String KEY_QR_CHROMIUM_TIMEOUT_MS =
+      "images.qr.chromium.timeout.ms";
+    /**
+     * Path to Chromium/Chrome executable for optional barcode scanning provider.
+     */
+    public static final String KEY_CHROMIUM_EXECUTABLE =
+      "program.chromium.path";
   /**
    * The path and name of the tesseract executable for OCR failover.
    */
@@ -644,6 +681,29 @@ public class ImageCaptureProperties extends AbstractTableModel {
       // Default value for choosing whether or not to also try harder with
       // xzing.
       properties.setProperty(KEY_IMAGEZXINGALSOTRYHARDER, "true");
+    }
+    if (!properties.containsKey(KEY_QR_NATIVE_ENABLED)) {
+      // Use native helpers first when available, with fallback to current chain.
+      properties.setProperty(KEY_QR_NATIVE_ENABLED, "true");
+    }
+    if (!properties.containsKey(KEY_QR_NATIVE_TIMEOUT_MS)) {
+      properties.setProperty(KEY_QR_NATIVE_TIMEOUT_MS, "2500");
+    }
+    if (!properties.containsKey(KEY_QR_NATIVE_MACOS_EXECUTABLE)) {
+      properties.setProperty(KEY_QR_NATIVE_MACOS_EXECUTABLE, "");
+    }
+    if (!properties.containsKey(KEY_QR_NATIVE_WINDOWS_EXECUTABLE)) {
+      properties.setProperty(KEY_QR_NATIVE_WINDOWS_EXECUTABLE, "");
+    }
+    if (!properties.containsKey(KEY_QR_CHROMIUM_ENABLED)) {
+      // Chromium provider remains opt-in while support is platform-dependent.
+      properties.setProperty(KEY_QR_CHROMIUM_ENABLED, "false");
+    }
+    if (!properties.containsKey(KEY_QR_CHROMIUM_TIMEOUT_MS)) {
+      properties.setProperty(KEY_QR_CHROMIUM_TIMEOUT_MS, "4000");
+    }
+    if (!properties.containsKey(KEY_CHROMIUM_EXECUTABLE)) {
+      properties.setProperty(KEY_CHROMIUM_EXECUTABLE, "");
     }
     if (!properties.containsKey(KEY_TESSERACT_EXECUTABLE)) {
       // name of the tesseract executable, probably tesseract on unix,

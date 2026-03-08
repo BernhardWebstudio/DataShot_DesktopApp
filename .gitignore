@@ -26,3 +26,4 @@ imagecapture*.log
 datashot*.log
 cleanupLog.regex
 imagecapture-shortcuts.properties
+native/bin/

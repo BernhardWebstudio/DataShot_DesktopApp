@@ -2350,16 +2350,37 @@ public class CandidateImageFile {
         String configured = getPropertyValue(
                 ImageCaptureProperties.KEY_CHROMIUM_EXECUTABLE);
         if (configured != null && !configured.trim().isEmpty()) {
-            return configured.trim();
+            String trimmed = configured.trim();
+            if (canLaunchCommand(trimmed)) {
+                return trimmed;
+            }
         }
 
-        String[] candidates = {
+        List<String> candidates = new ArrayList<>(Arrays.asList(
                 "google-chrome",
                 "chromium",
                 "chromium-browser",
                 "msedge",
                 "chrome"
-        };
+        ));
+
+        String os = getOsKey();
+        if ("macos".equals(os)) {
+            candidates.add("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome");
+            candidates.add("/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge");
+            candidates.add("/Applications/Chromium.app/Contents/MacOS/Chromium");
+        } else if ("windows".equals(os)) {
+            candidates.add("C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe");
+            candidates.add("C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe");
+            candidates.add("C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe");
+            candidates.add("C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe");
+        } else if ("linux".equals(os)) {
+            candidates.add("/usr/bin/google-chrome");
+            candidates.add("/usr/bin/chromium");
+            candidates.add("/usr/bin/chromium-browser");
+            candidates.add("/usr/bin/microsoft-edge");
+        }
+
         for (String candidate : candidates) {
             if (canLaunchCommand(candidate)) {
                 return candidate;

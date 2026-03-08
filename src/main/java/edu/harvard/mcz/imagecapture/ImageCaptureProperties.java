@@ -387,22 +387,10 @@ public class ImageCaptureProperties extends AbstractTableModel {
       filePath = aFile.getParent();
     }
     log.debug("Provided path to test: " + filePath);
-    if (File.separator.equals("\\")) {
-      if (!base.endsWith("\\")) {
-        base = base + "\\";
-      }
-      // the separator "\" is represented in java as "\\" and in a java regular
-      // expression as "\\\\"
-      base = base.replaceAll("\\\\", "\\\\\\\\");
-      filePath = filePath.replaceAll("\\\\", "\\\\\\\\");
-    } else {
-      if (!base.endsWith("/")) {
-        base = base + "/";
-      }
-      if (!filePath.endsWith("/")) {
-        filePath = filePath + "/";
-      }
-    }
+    base = ensureTrailingSeparator(normalizePathSeparators(base, File.separator),
+                                   File.separator);
+    filePath = ensureTrailingSeparator(
+        normalizePathSeparators(filePath, File.separator), File.separator);
     log.debug("Base path for test: " + base);
     if (filePath.startsWith(base)) {
       result = true;
@@ -435,30 +423,23 @@ public class ImageCaptureProperties extends AbstractTableModel {
       result = aFilename.getParent();
     }
 
-    if (fileSeparator.equals("\\")) {
-      if (!base.endsWith("\\")) {
-        base = base + "\\\\";
-      }
-      // the separator "\" is represented in java as "\\" and in a java regular
-      // expression as "\\\\"
-      base = base.replaceAll("\\\\", "\\\\\\\\");
-    } else {
-      if (!base.endsWith("/")) {
-        base = base + "/";
-      }
-      if (!result.endsWith("/")) {
-        result = result + "/";
-      }
-    }
+    base = ensureTrailingSeparator(normalizePathSeparators(base, fileSeparator),
+                                   fileSeparator);
+    result = ensureTrailingSeparator(normalizePathSeparators(result, fileSeparator),
+                                     fileSeparator);
     log.debug("Base path to remove: " + base);
     // strip base out of canonical form of aFilename
     if (base.equals(result)) {
       result = "";
+    } else if (result.startsWith(base)) {
+      result = result.substring(base.length());
     } else {
-      result = result.replaceFirst(base, "");
+      // If a file path isn't below base, preserve historical behavior by
+      // returning a normalized path value.
+      result = normalizePathSeparators(result, fileSeparator);
     }
     // make sure that path ends with fileSeparator
-    if (!result.endsWith(fileSeparator)) {
+    if (!result.isEmpty() && !result.endsWith(fileSeparator)) {
       result = result + fileSeparator;
     }
 
@@ -518,10 +499,10 @@ public class ImageCaptureProperties extends AbstractTableModel {
     // log.debug("Debug {}", base);
     if (fileSeparator.equals("/")) {
       // unix filesystem
-      path = path.replaceAll("\\\\", "/");
+      path = path.replace('\\', '/');
     } else {
       // windows filesystem
-      path = path.replaceAll("/", "\\\\");
+      path = path.replace('/', '\\');
     }
     // Second, if base path doesn't end with a file separator, add one.
     if (!base.endsWith(fileSeparator)) {
@@ -535,6 +516,33 @@ public class ImageCaptureProperties extends AbstractTableModel {
     }
     log.debug("Assembled path with base: {}", result);
     return result;
+  }
+
+  /**
+   * Normalize slashes in a path to a requested separator so string comparison
+   * and assembly logic can be cross-platform and regex-free.
+   */
+  private static String normalizePathSeparators(String path,
+                                                String fileSeparator) {
+    if (path == null || path.isEmpty()) {
+      return "";
+    }
+    String normalized = path.replace('\\', '/');
+    if ("\\".equals(fileSeparator)) {
+      normalized = normalized.replace('/', '\\');
+    }
+    return normalized;
+  }
+
+  /**
+   * Ensure a directory path uses a trailing separator when non-empty.
+   */
+  private static String ensureTrailingSeparator(String path,
+                                                String fileSeparator) {
+    if (path == null || path.isEmpty() || path.endsWith(fileSeparator)) {
+      return path == null ? "" : path;
+    }
+    return path + fileSeparator;
   }
 
   /* (non-Javadoc)
@@ -700,7 +708,7 @@ public class ImageCaptureProperties extends AbstractTableModel {
       properties.setProperty(KEY_QR_CHROMIUM_ENABLED, "false");
     }
     if (!properties.containsKey(KEY_QR_CHROMIUM_TIMEOUT_MS)) {
-      properties.setProperty(KEY_QR_CHROMIUM_TIMEOUT_MS, "4000");
+      properties.setProperty(KEY_QR_CHROMIUM_TIMEOUT_MS, "20000");
     }
     if (!properties.containsKey(KEY_CHROMIUM_EXECUTABLE)) {
       properties.setProperty(KEY_CHROMIUM_EXECUTABLE, "");

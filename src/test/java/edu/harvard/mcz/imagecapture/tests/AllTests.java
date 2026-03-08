@@ -20,8 +20,6 @@ package edu.harvard.mcz.imagecapture.tests;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import java.io.File;
-
 /**
  * AllTests invokes the suite of unit tests for edu.harvard.mcz.imagecapture classes.
  * <p>
@@ -32,7 +30,8 @@ public class AllTests {
 
     // Filename constants for tests
     public static final String FILE_VALID_BARCODE_FILENAME = "141515321.jpg";
-    public static final String FILE_VALID_BARCODE_PATH = "resources" + File.separator;
+    // Classpath resource lookup always uses '/' separators, even on Windows.
+    public static final String FILE_VALID_BARCODE_PATH = "resources/";
     public static final String FILE_VALID_BARCODE = FILE_VALID_BARCODE_PATH + FILE_VALID_BARCODE_FILENAME;
     public static final String BARCODE_IN_FILE_VALID_BARCODE = "141515321";
     public static final String FILE_INVALID_NAME = FILE_VALID_BARCODE_PATH + "nosuchfile.bad";

@@ -6,11 +6,18 @@
 </head>
 <body>
 <pre id="result">ERROR:not-started</pre>
-<script>
+<script type="module">
 (async () => {
   const output = document.getElementById("result");
   const params = new URLSearchParams(window.location.search);
   const imageUrl = params.get("image");
+  const polyfillMode = (params.get("polyfill") || "auto").toLowerCase();
+  const polyfillUrl = params.get("polyfillUrl") ||
+    "https://fastly.jsdelivr.net/npm/barcode-detector@3/dist/es/ponyfill.min.js";
+  const imageTimeoutMs = Number(params.get("imageTimeoutMs") || "10000");
+  const detectTimeoutMs = Number(params.get("detectTimeoutMs") || "12000");
+  const polyfillTimeoutMs = Number(params.get("polyfillTimeoutMs") || "45000");
+  const maxImageSize = Number(params.get("maxImageSize") || "2200");
 
   if (!imageUrl) {
     output.textContent = "ERROR:missing-image";
@@ -22,33 +29,204 @@
     return;
   }
 
-  if (!("BarcodeDetector" in window)) {
-    output.textContent = "ERROR:barcode-detector-unavailable";
-    return;
-  }
-
-  const supported = await BarcodeDetector.getSupportedFormats();
-  if (!supported.includes("qr_code")) {
-    output.textContent = "ERROR:qr-format-not-supported";
-    return;
-  }
-
-  const image = new Image();
-  image.src = imageUrl;
-  await image.decode();
-
-  const detector = new BarcodeDetector({ formats: ["qr_code"] });
-  const found = await detector.detect(image);
-  const detections = found.map((entry) => ({
+  const mapDetections = (found, engine, scaleX, scaleY) => found.map((entry) => ({
     rawValue: entry.rawValue || "",
     format: entry.format || "",
+    engine,
     boundingBox: {
-      x: entry.boundingBox ? entry.boundingBox.x : 0,
-      y: entry.boundingBox ? entry.boundingBox.y : 0,
-      width: entry.boundingBox ? entry.boundingBox.width : 0,
-      height: entry.boundingBox ? entry.boundingBox.height : 0
+      x: entry.boundingBox ? entry.boundingBox.x * scaleX : 0,
+      y: entry.boundingBox ? entry.boundingBox.y * scaleY : 0,
+      width: entry.boundingBox ? entry.boundingBox.width * scaleX : 0,
+      height: entry.boundingBox ? entry.boundingBox.height * scaleY : 0
     }
   }));
+
+  const area = (d) => Math.max(0, d.boundingBox.width) * Math.max(0, d.boundingBox.height);
+  const distanceSq = (left, right) => {
+    const lx = left.boundingBox.x + left.boundingBox.width / 2;
+    const ly = left.boundingBox.y + left.boundingBox.height / 2;
+    const rx = right.boundingBox.x + right.boundingBox.width / 2;
+    const ry = right.boundingBox.y + right.boundingBox.height / 2;
+    const dx = lx - rx;
+    const dy = ly - ry;
+    return dx * dx + dy * dy;
+  };
+
+  const mergeDetections = (base, extra) => {
+    const merged = base.slice();
+    for (const item of extra) {
+      const matchAt = merged.findIndex((existing) =>
+        existing.rawValue === item.rawValue && distanceSq(existing, item) <= (40 * 40)
+      );
+      if (matchAt >= 0) {
+        if (area(item) > area(merged[matchAt])) {
+          merged[matchAt] = item;
+        }
+      } else {
+        merged.push(item);
+      }
+    }
+    return merged;
+  };
+
+  const detectWith = async (DetectorCtor, engine) => {
+    const supported = await DetectorCtor.getSupportedFormats();
+    if (!supported.includes("qr_code")) {
+      return [];
+    }
+    const detector = new DetectorCtor({ formats: ["qr_code"] });
+    const found = await detector.detect(detectionSource.source);
+    return mapDetections(
+      found,
+      engine,
+      detectionSource.scaleX,
+      detectionSource.scaleY
+    );
+  };
+
+  const withTimeout = async (promise, timeoutMs, label) => {
+    let timer = null;
+    try {
+      return await Promise.race([
+        promise,
+        new Promise((_, reject) => {
+          timer = setTimeout(() => {
+            reject(new Error(label + "-timeout"));
+          }, timeoutMs);
+        })
+      ]);
+    } finally {
+      if (timer !== null) {
+        clearTimeout(timer);
+      }
+    }
+  };
+
+  const loadImage = (url, timeoutMs) => new Promise((resolve, reject) => {
+    const img = new Image();
+    const timer = setTimeout(() => {
+      img.onload = null;
+      img.onerror = null;
+      reject(new Error("image-load-timeout"));
+    }, timeoutMs);
+
+    img.onload = () => {
+      clearTimeout(timer);
+      resolve(img);
+    };
+    img.onerror = () => {
+      clearTimeout(timer);
+      reject(new Error("image-load-failed"));
+    };
+    img.src = url;
+  });
+
+  const loadPolyfill = async () => {
+    const module = await import(polyfillUrl);
+    if (typeof module.prepareZXingModule === "function" &&
+        typeof module.ZXING_WASM_VERSION === "string") {
+      const wasmBase = params.get("polyfillWasmBase") ||
+        `https://fastly.jsdelivr.net/npm/zxing-wasm@${module.ZXING_WASM_VERSION}/dist/reader/`;
+      module.prepareZXingModule({
+        overrides: {
+          locateFile: (path, prefix) => {
+            if (path.endsWith(".wasm")) {
+              return `${wasmBase}${path}`;
+            }
+            return prefix + path;
+          }
+        }
+      });
+    }
+    return module.BarcodeDetector;
+  };
+
+  const prepareDetectionSource = (img, maxSize) => {
+    const width = img.naturalWidth || img.width;
+    const height = img.naturalHeight || img.height;
+    const maxDim = Math.max(width, height);
+
+    if (!Number.isFinite(maxSize) || maxSize <= 0 || maxDim <= maxSize) {
+      return {
+        source: img,
+        scaleX: 1,
+        scaleY: 1
+      };
+    }
+
+    const ratio = maxSize / maxDim;
+    const targetWidth = Math.max(1, Math.round(width * ratio));
+    const targetHeight = Math.max(1, Math.round(height * ratio));
+    const canvas = document.createElement("canvas");
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      return {
+        source: img,
+        scaleX: 1,
+        scaleY: 1
+      };
+    }
+
+    context.drawImage(img, 0, 0, targetWidth, targetHeight);
+    return {
+      source: canvas,
+      scaleX: width / targetWidth,
+      scaleY: height / targetHeight
+    };
+  };
+
+  const image = await loadImage(imageUrl, imageTimeoutMs);
+  const detectionSource = prepareDetectionSource(image, maxImageSize);
+  output.textContent = "ERROR:running";
+
+  let detections = [];
+  let nativeError = null;
+
+  if ("BarcodeDetector" in window) {
+    try {
+      detections = await withTimeout(
+        detectWith(BarcodeDetector, "native"),
+        detectTimeoutMs,
+        "native-detect"
+      );
+    } catch (error) {
+      nativeError = error;
+    }
+  }
+
+  const shouldTryPolyfill =
+    polyfillMode === "always" ||
+    (polyfillMode !== "off" && detections.length < 2);
+
+  if (shouldTryPolyfill) {
+    try {
+      const PolyfillDetector = await withTimeout(
+        loadPolyfill(),
+        polyfillTimeoutMs,
+        "polyfill-load"
+      );
+      if (typeof PolyfillDetector === "function") {
+        const polyfillDetections = await withTimeout(
+          detectWith(PolyfillDetector, "polyfill"),
+          polyfillTimeoutMs,
+          "polyfill-detect"
+        );
+        detections = mergeDetections(detections, polyfillDetections);
+      }
+    } catch (error) {
+      if (detections.length === 0) {
+        output.textContent = "ERROR:polyfill-failed:" + (error && error.message ? error.message : String(error));
+        return;
+      }
+    }
+  }
+
+  if (detections.length === 0 && nativeError) {
+    output.textContent = "ERROR:native-failed:" + (nativeError && nativeError.message ? nativeError.message : String(nativeError));
+    return;
+  }
 
   output.textContent = "JSON:" + JSON.stringify(detections);
 })().catch((error) => {

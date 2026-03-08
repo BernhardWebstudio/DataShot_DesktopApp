@@ -294,7 +294,7 @@ The following optional configuration parameters enable external QR scanner provi
     program.qr.native.macos=
     program.qr.native.windows=
     images.qr.chromium.enabled=false
-    images.qr.chromium.timeout.ms=4000
+    images.qr.chromium.timeout.ms=20000
     program.chromium.path=
 
 `images.qr.native.enabled` enables an external native helper for QR detection on macOS/Windows if a helper binary is available. `program.qr.native.macos` and `program.qr.native.windows` can point to explicit helper executables; if left empty, DataShot looks for default helper names in the working directory.

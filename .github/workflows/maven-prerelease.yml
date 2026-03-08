@@ -30,9 +30,9 @@ jobs:
             artifact_suffix: linux-generic
           - os: windows-latest
             artifact_suffix: windows-x64
-          - os: macos-13
+          - os: macos-15
             artifact_suffix: macos-x64
-          - os: macos-14
+          - os: macos-15
             artifact_suffix: macos-arm64
 
     steps:

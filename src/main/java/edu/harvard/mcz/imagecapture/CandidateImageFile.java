@@ -2331,12 +2331,13 @@ public class CandidateImageFile {
             }
         }
 
-        String[] candidates = {
-                "native/bin/qr-native-" + os,
-                "native/bin/qr-native-" + os + ".exe",
-                "qr-native-" + os,
-                "qr-native-" + os + ".exe"
-        };
+        List<String> candidates = new ArrayList<>();
+        for (String archSuffix : getNativeHelperArchSuffixes()) {
+            candidates.add("native/bin/qr-native-" + os + archSuffix);
+            candidates.add("native/bin/qr-native-" + os + archSuffix + ".exe");
+            candidates.add("qr-native-" + os + archSuffix);
+            candidates.add("qr-native-" + os + archSuffix + ".exe");
+        }
         for (String candidate : candidates) {
             Path candidatePath = Paths.get(candidate);
             if (Files.exists(candidatePath) || canLaunchCommand(candidate)) {
@@ -2344,6 +2345,18 @@ public class CandidateImageFile {
             }
         }
         return null;
+    }
+
+    private String[] getNativeHelperArchSuffixes() {
+        String arch = System.getProperty("os.arch", "").toLowerCase(Locale.ROOT);
+        if (arch.contains("arm64") || arch.contains("aarch64")) {
+            return new String[]{"-arm64", "-aarch64", "-x64", "-amd64", ""};
+        }
+        if (arch.contains("x86_64") || arch.contains("amd64") ||
+                arch.contains("x64")) {
+            return new String[]{"-x64", "-amd64", "-arm64", "-aarch64", ""};
+        }
+        return new String[]{"-x64", "-amd64", "-arm64", "-aarch64", ""};
     }
 
     private String resolveChromiumExecutable() {

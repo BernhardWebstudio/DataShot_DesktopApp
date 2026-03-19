@@ -13,7 +13,7 @@ on:
 
 jobs:
   build:
-    name: Build ${{ matrix.artifact_suffix }}
+    name: Build macOS ${{ matrix.macos_arch }}
     runs-on: ${{ matrix.os }}
     env:
       APPLE_CODESIGN_CERT_P12_BASE64: ${{ secrets.APPLE_CODESIGN_CERT_P12_BASE64 }}
@@ -26,14 +26,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
-            artifact_suffix: linux-generic
-          - os: windows-latest
-            artifact_suffix: windows-x64
           - os: macos-15
-            artifact_suffix: macos-x64
+            macos_arch: x64
+            swift_target: x86_64-apple-macos12.0
+            include_jars: true
           - os: macos-15
-            artifact_suffix: macos-arm64
+            macos_arch: arm64
+            swift_target: arm64-apple-macos12.0
+            include_jars: false
 
     steps:
       - uses: actions/checkout@v4
@@ -54,11 +54,13 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p native/bin
+          binary_path="native/bin/qr-native-macos-${{ matrix.macos_arch }}"
           swiftc -O native/macos-vision-scanner/main.swift \
+            -target "${{ matrix.swift_target }}" \
             -framework Vision \
             -framework CoreGraphics \
             -framework ImageIO \
-            -o native/bin/qr-native-macos
+            -o "$binary_path"
 
       - name: Import Apple Code Signing Certificate
         if: runner.os == 'macOS' && env.APPLE_CODESIGN_CERT_P12_BASE64 != '' && env.APPLE_CODESIGN_CERT_PASSWORD != '' && env.APPLE_CODESIGN_IDENTITY != ''
@@ -83,17 +85,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          codesign --force --options runtime --timestamp --sign "$APPLE_CODESIGN_IDENTITY" native/bin/qr-native-macos
-          codesign --verify --strict --verbose=2 native/bin/qr-native-macos
-
-      - name: Build Windows QR Helper
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          cmake -S native/windows-qr-scanner -B native/windows-qr-scanner/build -A x64
-          cmake --build native/windows-qr-scanner/build --config Release
-          New-Item -ItemType Directory -Path native/bin -Force | Out-Null
-          Copy-Item native/windows-qr-scanner/build/Release/qr-native-windows.exe native/bin/qr-native-windows.exe -Force
+          binary_path="native/bin/qr-native-macos-${{ matrix.macos_arch }}"
+          codesign --force --options runtime --timestamp --sign "$APPLE_CODESIGN_IDENTITY" "$binary_path"
+          codesign --verify --strict --verbose=2 "$binary_path"
 
       - name: Determine Build Version
         id: version
@@ -102,35 +96,65 @@ jobs:
           version="$(grep -m1 '<version>' pom.xml | sed -E 's/.*<version>([^<]+)<\/version>.*/\1/')"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      - name: Package OS Artifact
-        id: package
+      - name: Prepare Upload Assets
+        id: assets
         shell: bash
         run: |
           set -euo pipefail
           version="${{ steps.version.outputs.version }}"
-          bundle_dir="$(./bin/package-os-artifact.sh "${{ matrix.artifact_suffix }}" "$version")"
-          archive="dist/DataShot-${version}-${{ matrix.artifact_suffix }}.zip"
-          tar -a -cf "$archive" -C dist "$(basename "$bundle_dir")"
-          echo "archive=$archive" >> "$GITHUB_OUTPUT"
+          mkdir -p dist-assets
 
-      - name: Notarize macOS Artifact
+          binary_src="native/bin/qr-native-macos-${{ matrix.macos_arch }}"
+          binary_dst="dist-assets/DataShot-${version}-qr-native-macos-${{ matrix.macos_arch }}"
+          cp "$binary_src" "$binary_dst"
+          chmod +x "$binary_dst"
+          echo "binary=$binary_dst" >> "$GITHUB_OUTPUT"
+
+          if [[ "${{ matrix.include_jars }}" == "true" ]]; then
+            fat_jar="$(find target -maxdepth 1 -type f -name '*-jar-with-dependencies.jar' | head -n1)"
+            thin_jar="$(find target -maxdepth 1 -type f -name '*.jar' ! -name '*-jar-with-dependencies.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' | head -n1)"
+
+            if [[ -z "$fat_jar" ]]; then
+              echo "Unable to locate fat JAR in target/." >&2
+              exit 1
+            fi
+
+            cp "$fat_jar" "dist-assets/DataShot-${version}-app-fat.jar"
+            if [[ -n "$thin_jar" ]]; then
+              cp "$thin_jar" "dist-assets/DataShot-${version}-app.jar"
+            fi
+          fi
+
+      - name: Notarize macOS Binary
         if: runner.os == 'macOS' && env.APPLE_CODESIGN_CERT_P12_BASE64 != '' && env.APPLE_CODESIGN_CERT_PASSWORD != '' && env.APPLE_CODESIGN_IDENTITY != '' && env.APPLE_NOTARY_KEY_ID != '' && env.APPLE_NOTARY_ISSUER_ID != '' && env.APPLE_NOTARY_API_KEY_P8_BASE64 != ''
         shell: bash
         run: |
           set -euo pipefail
           key_path="$RUNNER_TEMP/AuthKey_${APPLE_NOTARY_KEY_ID}.p8"
+          binary_path="${{ steps.assets.outputs.binary }}"
+          notary_zip="$RUNNER_TEMP/$(basename "$binary_path").zip"
+
           echo "$APPLE_NOTARY_API_KEY_P8_BASE64" | base64 -D > "$key_path"
-          xcrun notarytool submit "${{ steps.package.outputs.archive }}" \
+          ditto -c -k --sequesterRsrc --keepParent "$binary_path" "$notary_zip"
+          xcrun notarytool submit "$notary_zip" \
             --key "$key_path" \
             --key-id "$APPLE_NOTARY_KEY_ID" \
             --issuer "$APPLE_NOTARY_ISSUER_ID" \
             --wait
 
-      - name: Upload Matrix Artifact
+      - name: Upload macOS Binary Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: prerelease-${{ matrix.artifact_suffix }}
-          path: ${{ steps.package.outputs.archive }}
+          name: prerelease-macos-${{ matrix.macos_arch }}-binary
+          path: ${{ steps.assets.outputs.binary }}
+          if-no-files-found: error
+
+      - name: Upload JAR Artifacts
+        if: matrix.include_jars
+        uses: actions/upload-artifact@v4
+        with:
+          name: prerelease-jars
+          path: dist-assets/*.jar
           if-no-files-found: error
 
   publish:
@@ -149,6 +173,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: dist-assets
+          merge-multiple: true
 
       - name: Create Pre-release
         id: create_prerelease
@@ -168,6 +193,6 @@ jobs:
         if: success()
         uses: csexton/release-asset-action@v2
         with:
-          pattern: "dist-assets/**/*.zip"
+          pattern: "dist-assets/*"
           github-token: ${{ secrets.GITHUB_TOKEN }}
           release-url: ${{ steps.create_prerelease.outputs.upload_url }}

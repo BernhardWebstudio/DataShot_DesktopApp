@@ -105,7 +105,7 @@ jobs:
           mkdir -p dist-assets
 
           binary_src="native/bin/qr-native-macos-${{ matrix.macos_arch }}"
-          binary_dst="dist-assets/DataShot-${version}-qr-native-macos-${{ matrix.macos_arch }}"
+          binary_dst="dist-assets/qr-native-macos-${{ matrix.macos_arch }}"
           cp "$binary_src" "$binary_dst"
           chmod +x "$binary_dst"
           echo "binary=$binary_dst" >> "$GITHUB_OUTPUT"
@@ -119,7 +119,7 @@ jobs:
               exit 1
             fi
 
-            cp "$fat_jar" "dist-assets/DataShot-${version}-app-fat.jar"
+            cp "$fat_jar" "dist-assets/DataShot-${version}-app-with-dependencies.jar"
             if [[ -n "$thin_jar" ]]; then
               cp "$thin_jar" "dist-assets/DataShot-${version}-app.jar"
             fi

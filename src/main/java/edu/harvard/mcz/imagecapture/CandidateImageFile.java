@@ -38,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2436,7 +2437,30 @@ public class CandidateImageFile {
                 return path.toString();
             }
         }
-        return null;
+        return copyClasspathResourceToTempFile(
+                "qrscan_chromium.html",
+                "qrscan_chromium_",
+                ".html");
+    }
+
+    private String copyClasspathResourceToTempFile(String resourceName,
+                                                   String tempPrefix,
+                                                   String tempSuffix) {
+        try (InputStream stream = CandidateImageFile.class
+                .getClassLoader()
+                .getResourceAsStream(resourceName)) {
+            if (stream == null) {
+                return null;
+            }
+            Path tempFile = Files.createTempFile(tempPrefix, tempSuffix);
+            Files.copy(stream, tempFile, StandardCopyOption.REPLACE_EXISTING);
+            tempFile.toFile().deleteOnExit();
+            return tempFile.toString();
+        } catch (IOException e) {
+            log.debug("Unable to stage classpath resource {}: {}", resourceName,
+                    e.getMessage());
+            return null;
+        }
     }
 
     private String getOsKey() {
@@ -2624,8 +2648,11 @@ public class CandidateImageFile {
                 return path;
             }
         }
-        
-        return null;
+
+        return copyClasspathResourceToTempFile(
+                "qrscan_using_python.py",
+                "qrscan_using_python_",
+                ".py");
     }
     
     /**

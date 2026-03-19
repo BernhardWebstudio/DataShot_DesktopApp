@@ -49,9 +49,9 @@ public class NahimaManager extends AbstractRestClient {
     public static final int zoologyPoolId = 4;
     public static final int defaultPoolId = 7;
     public static final JSONObject zoologyPool =
-            new JSONObject("{ \"pool\": { \"_id\": 4 } }");
+            new JSONObject("{ \"pool\": { \"_id\": 5 } }");
     public static final JSONObject entomologyPool =
-            new JSONObject("{ \"pool\": { \"_id\": 7 } }");
+            new JSONObject("{ \"pool\": { \"_id\": 8 } }");
     private static final Logger log =
             LoggerFactory.getLogger(NahimaManager.class);
     private final String url;

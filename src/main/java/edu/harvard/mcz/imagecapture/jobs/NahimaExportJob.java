@@ -454,7 +454,6 @@ public class NahimaExportJob implements RunnableJob, Runnable {
         Map<String, Object> mediaAssetMap = new HashMap<>() {
           {
             put("_id", JSONObject.NULL);
-            put("source_reference", JSONObject.NULL);
             put("__idx", 0);
             put("_version", 1);
             put("mediaassetpublic", publicMediaAsset);

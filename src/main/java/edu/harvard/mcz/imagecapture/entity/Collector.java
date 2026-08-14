@@ -74,8 +74,12 @@ public class Collector implements java.io.Serializable, Cloneable, Comparable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Collector collector = (Collector) o;
         if (collectorId != null && collector.collectorId != null) {
             return java.util.Objects.equals(collectorId, collector.collectorId);

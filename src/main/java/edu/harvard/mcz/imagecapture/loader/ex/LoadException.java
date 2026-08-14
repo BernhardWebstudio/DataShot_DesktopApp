@@ -39,7 +39,7 @@ public class LoadException extends Exception {
      * @param writableStackTrace
      */
     public LoadException(String message, Throwable cause,
-                         boolean enableSuppression, boolean writableStackTrace) {
+                    boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
         // TODO Auto-generated constructor stub
     }

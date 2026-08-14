@@ -47,79 +47,81 @@ See: https://github.com/MCZbase/DataShot_DesktopApp/wiki
 # Building
 
 Use maven to build (ant is optionally invoked by maven to build executable jar files).
+### Requirements
 
-You will need to do some preparation work in order to build.
+- **Java JDK**: Version 17 or higher
+- **Maven**: Version 3.8 or higher
+- **Database**: MySQL / MariaDB (or in-memory H2 for testing/development)
 
-1. Create a test database. A dump of the schema of a working
-   test database (as of version 1.2.2) is in `docs_manual/sql/mysql_ver1.2.2.sql`
-   the expected name, user and location of this database are in
-   `src/main/java/hibernate.cfg.xml` (you will need to create a database `lepidoptera`).  
-   (The default name of the database is `lepidoptera`, but this can be changed, and one database
-   can be configured for testing and another for production use).
+### Database Setup & Migrations
 
-```shell script
-mysql lepidoptera -p < docs_manual/sql/mysql_ver1.2.2.sql
-```
+Database migrations are managed automatically using [Flyway](https://flywaydb.org/).
+Migration scripts are located under `src/main/resources/db/migration/`.
 
-Once this database has been created, you'll need to create a user that the
-application will use to connect to the database, that is (in the default configuration) a user LEPIDOPTERA
-with select/insert/update/delete privileges on the lepidoptera schema on localhost.
+1. Create a MySQL database (default schema name: `lepidoptera`) and grant permissions to a user (e.g., `LEPIDOPTERA`):
 
 ```SQL
-grant select, insert, update, delete on lepidoptera.* to 'LEPIDOPTERA'@'localhost';
+CREATE DATABASE lepidoptera CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+GRANT ALL PRIVILEGES ON lepidoptera.* TO 'LEPIDOPTERA'@'localhost' IDENTIFIED BY 'your_password';
+FLUSH PRIVILEGES;
 ```
 
-And then insert a row for a DataShot administrator into the `LEPIDPTERA.Users` table.
+2. When the application starts, Flyway will automatically apply all pending migrations up to the current schema version.
+
+3. Insert an initial administrator account into the `Users` table:
 
 ```SQL
-insert into Users (username,fullname,role,hash,description) values
-      ('useremail','full name','Administrator',sha1('password'),'the users role in the project');
+INSERT INTO Users (username, fullname, role, hash, description) VALUES
+    ('admin@example.org', 'Admin User', 'Administrator', SHA1('your_password'), 'Project Administrator');
 ```
 
-Once you have inserted the first administrator user, you should enter any additional users
-through the user interface in the application (Configuration/Users on the main menu).
+Additional users can be managed directly via the application UI (**Configuration -> Users**).
 
-1. Create a the configuration properties files for the used profiles.
+### Configuration Profiles
+
+Create profile configuration property files from the templates:
 
 ```shell script
-$ cp profiles/dist/config.properties profiles/dev/config.properties
-$ cp profiles/dist/config.properties profiles/prod/config.properties
-$ cp profiles/dist/config.properties profiles/tes/config.properties
+cp profiles/dist/config.properties profiles/dev/config.properties
+cp profiles/dist/config.properties profiles/prod/config.properties
+cp profiles/dist/config.properties profiles/test/config.properties
 ```
 
-Edit the files to add the configured credentials, then build with:..
+Edit each `config.properties` file with the respective database connection URL, credentials, and image mount paths.
+
+### Running Tests
+
+Run the complete test suite against the in-memory H2 database with:
 
 ```shell script
-mvn package -P prod
+mvn test
 ```
 
-An executable jar file will be found in the build/ directory (and in the target/ directory).
+### Packaging & Running
 
-If you are working with an IDE (such as eclipse), you will probably want to use the following somewhat
-bizarre incantation to create the executable jar file including the not*vcs/ configuration files,
-and then to clean out the target/ directory so that your IDE will use the configuration files
-from src/main/java rather than not_vcs (in target/classes) (letting your build with the IDE use
-the default hibernate and log4j configurations, rather than the production ones, which get placed
-where the IDE will used them by \_mvn clean install -P production*).
+To build an executable fat JAR:
 
 ```shell script
-mvn clean install clean compile -P production
+mvn clean package -P prod
 ```
 
-You can also run integration tests once you have your local database and a user set up using the integrationTests profile:
+The resulting executable JAR will be located in the `target/` and `build/` directories:
 
 ```shell script
-mvn package -P integrationTests
+java -jar build/DataShot-1.9.4-jar-with-dependencies.jar
 ```
 
-This will present you with a login dialog to run the tests, populated from the values in your src/main/java/hibernate.cfg.xml file.
+### Automated Code Modernization (Rector for Java)
 
-The resulting executable jar file will be in build/Datashot{version}-jar-with-dependencies.jar,
-you can run it, for example, with:
+This repository includes [OpenRewrite](https://docs.openrewrite.org/) (`rewrite-maven-plugin`) to automate code modernization, static analysis cleanup, and Java migrations:
 
-````shell script
-java -jar DataShot-1.9.4-jar-with-dependencies.jar
-``
+```shell script
+# Preview proposed automated refactorings
+mvn rewrite:dryRun
+
+# Apply automated code modernizations directly
+mvn rewrite:run
+```
 
 Note: If using maven 2, and you get a build error in the form of dependency problem about jai-image-io-core:
 

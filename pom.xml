@@ -13,6 +13,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <timestamp>${maven.build.timestamp}</timestamp>
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <build.profile.id>dev</build.profile.id>
     </properties>
     <!-- Profile configuration -->
     <profiles>
@@ -20,9 +21,9 @@
         <profile>
             <id>dev</id>
             <!-- The development profile is active by default -->
-            <!--			<activation>-->
-            <!--				<activeByDefault>true</activeByDefault>-->
-            <!--			</activation>-->
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
             <properties>
                 <!--
                     Specifies the build.profile.id property that must be equal than the name of
@@ -392,15 +393,21 @@
             <!-- (2) Assembles an executable jar file (jar-with-dependencies), then -->
             <!-- (3) Copies the executable jar file into the build/ directory. -->
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.7</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.shared</groupId>
-                        <artifactId>maven-filtering</artifactId>
-                        <version>1.3</version>
-                    </dependency>
-                </dependencies>
+                <version>3.3.1</version>
+                <configuration>
+                    <nonFilteredFileExtensions>
+                        <nonFilteredFileExtension>xcf</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>png</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>jpg</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>jpeg</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>gif</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>ico</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>tif</nonFilteredFileExtension>
+                        <nonFilteredFileExtension>tiff</nonFilteredFileExtension>
+                    </nonFilteredFileExtensions>
+                </configuration>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -430,12 +437,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>3.13.0</version>
                 <configuration>
                     <verbose>true</verbose>
                     <fork>true</fork>
-                    <source>16</source>
-                    <target>16</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -443,20 +450,40 @@
                     profile) -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M3</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.maven.surefire</groupId>
-                        <artifactId>surefire-junit47</artifactId>
-                        <version>3.0.0-M3</version>
-                    </dependency>
-                </dependencies>
+                <version>3.2.5</version>
                 <configuration>
+                    <systemPropertyVariables>
+                        <test.env>true</test.env>
+                    </systemPropertyVariables>
                     <includes>
-                        <include>**/*.class</include>
+                        <include>**/*Test.java</include>
+                        <include>**/Test*.java</include>
                     </includes>
                     <excludedGroups>edu.harvard.mcz.imagecapture.tests.IntegrationTest</excludedGroups>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openrewrite.maven</groupId>
+                <artifactId>rewrite-maven-plugin</artifactId>
+                <version>5.45.0</version>
+                <configuration>
+                    <activeRecipes>
+                        <recipe>org.openrewrite.java.cleanup.CommonStaticAnalysis</recipe>
+                        <recipe>org.openrewrite.java.cleanup.UseTryWithResources</recipe>
+                    </activeRecipes>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.openrewrite.recipe</groupId>
+                        <artifactId>rewrite-migrate-java</artifactId>
+                        <version>2.29.0</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.openrewrite.recipe</groupId>
+                        <artifactId>rewrite-static-analysis</artifactId>
+                        <version>1.18.0</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <!-- Copy project dependency -->
             <plugin>

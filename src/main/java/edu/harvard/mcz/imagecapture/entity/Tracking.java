@@ -113,4 +113,25 @@ public class Tracking implements Serializable {
             this.eventDateTime = (Date) eventDateTime.clone();
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tracking tracking = (Tracking) o;
+        if (trackingId != null && tracking.trackingId != null) {
+            return java.util.Objects.equals(trackingId, tracking.trackingId);
+        }
+        return java.util.Objects.equals(user, tracking.user) &&
+                java.util.Objects.equals(eventType, tracking.eventType) &&
+                java.util.Objects.equals(eventDateTime, tracking.eventDateTime);
+    }
+
+    @Override
+    public int hashCode() {
+        if (trackingId != null) {
+            return java.util.Objects.hash(trackingId);
+        }
+        return java.util.Objects.hash(user, eventType, eventDateTime);
+    }
 }

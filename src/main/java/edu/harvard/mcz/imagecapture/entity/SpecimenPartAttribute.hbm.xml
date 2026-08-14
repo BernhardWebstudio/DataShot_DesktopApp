@@ -17,19 +17,19 @@
             <column name="Attribute_Date" default="CURRENT_TIMESTAMP"/>
         </property>
         <property name="attributeType" type="string">
-            <column name="Attribute_Type" not-null="true" length="30" default="caste"/>
+            <column name="Attribute_Type" not-null="true" length="30"/>
         </property>
         <property name="attributeValue" type="string">
-            <column name="Attribute_Value" not-null="true" length="255" default="caste"/>
+            <column name="Attribute_Value" not-null="true" length="255"/>
         </property>
         <property name="attributeUnits" type="string">
-            <column name="Attribute_Units" length="30" default="caste"/>
+            <column name="Attribute_Units" length="30"/>
         </property>
         <property name="attributeRemark" type="string">
-            <column name="Attribute_Remark" length="4000" default="caste"/>
+            <column name="Attribute_Remark" length="4000"/>
         </property>
         <property name="attributeDeterminer" type="string">
-            <column name="Attribute_Determiner" not-null="true" length="255" default="caste"/>
+            <column name="Attribute_Determiner" not-null="true" length="255"/>
         </property>
     </class>
 </hibernate-mapping>

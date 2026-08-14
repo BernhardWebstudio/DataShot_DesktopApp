@@ -259,4 +259,26 @@ public class SpecimenPart implements Cloneable {
         newPart.setAttributeCollection(newAttributeCollection);
         return newPart;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SpecimenPart that = (SpecimenPart) o;
+        if (specimenPartId != null && that.specimenPartId != null) {
+            return java.util.Objects.equals(specimenPartId, that.specimenPartId);
+        }
+        return lotCount == that.lotCount &&
+                java.util.Objects.equals(partName, that.partName) &&
+                java.util.Objects.equals(preserveMethod, that.preserveMethod) &&
+                java.util.Objects.equals(lotCountModifier, that.lotCountModifier);
+    }
+
+    @Override
+    public int hashCode() {
+        if (specimenPartId != null) {
+            return java.util.Objects.hash(specimenPartId);
+        }
+        return java.util.Objects.hash(partName, preserveMethod, lotCount, lotCountModifier);
+    }
 }

@@ -14,7 +14,7 @@
             <column name="SpecimenId"/>
         </many-to-one>
         <property name="partName" type="string">
-            <column name="Part_Name" not-null="true" length="255" default="whole animal"/>
+            <column name="Part_Name" not-null="true" length="255" default="'whole animal'"/>
         </property>
         <property name="preserveMethod" type="string">
             <column name="Preserve_Method" length="60"/>

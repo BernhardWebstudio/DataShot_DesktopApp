@@ -51,10 +51,10 @@ public class UsersLifeCycle {
         session.beginTransaction();
         try {
             List<Users> results =
-                    (List<Users>) session
-                            .createQuery("from Users as u where role = '" +
-                                    Users.ROLE_ADMINISTRATOR + "' and u.userid = '" +
-                                    aUserID + "'")
+                    session
+                            .createQuery("from Users as u where role = :role and u.userid = :userid", Users.class)
+                            .setParameter("role", Users.ROLE_ADMINISTRATOR)
+                            .setParameter("userid", aUserID)
                             .list();
             session.getTransaction().commit();
             if (results.size() == 1) {

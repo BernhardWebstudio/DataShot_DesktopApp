@@ -203,4 +203,23 @@ public class Users implements Serializable {
         return result;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Users users = (Users) o;
+        if (userid != null && users.userid != null) {
+            return java.util.Objects.equals(userid, users.userid);
+        }
+        return java.util.Objects.equals(username, users.username);
+    }
+
+    @Override
+    public int hashCode() {
+        if (userid != null) {
+            return java.util.Objects.hash(userid);
+        }
+        return java.util.Objects.hash(username);
+    }
+
 }

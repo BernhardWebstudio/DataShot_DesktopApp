@@ -81,7 +81,9 @@ import org.slf4j.LoggerFactory;
  */
 public class SpecimenDetailsViewPane extends JPanel {
 
-    public static final boolean copyPasteActivated = Singleton.getSingletonInstance().getUser() != null && Singleton.getSingletonInstance().getUser().canCopyPaste();
+    public static boolean isCopyPasteActivated() {
+        return Singleton.getSingletonInstance().getUser() != null && Singleton.getSingletonInstance().getUser().canCopyPaste();
+    }
     private static final Logger log = LoggerFactory.getLogger(SpecimenDetailsViewPane.class);
     private static final long serialVersionUID = 3716072190995030749L;
     private static final int STATE_CLEAN = 0;
@@ -280,7 +282,7 @@ public class SpecimenDetailsViewPane extends JPanel {
                 gotoPreviousSpecimen();
             }
         });
-        if (copyPasteActivated) {
+        if (isCopyPasteActivated()) {
             registerShortcut("specimen.copyThis", "ctrl alt C", new AbstractAction() {
                 @Override
                 public void actionPerformed(ActionEvent actionEvent) {
@@ -1030,7 +1032,7 @@ public class SpecimenDetailsViewPane extends JPanel {
             // row
             jPanel.add(this.getAccordionDetailsPanel(), "grow, span 4");
             // section: controls
-            int splitSize = copyPasteActivated ? 6 : 4;
+            int splitSize = isCopyPasteActivated() ? 6 : 4;
             if (this.supportsLinkToNahima()) {
                 splitSize += 1;
             }
@@ -1038,13 +1040,13 @@ public class SpecimenDetailsViewPane extends JPanel {
             if (this.supportsLinkToNahima()) {
                 jPanel.add(this.getLinkToNahima());
             }
-            if (copyPasteActivated) {
+            if (isCopyPasteActivated()) {
                 jPanel.add(this.getJButtonPaste()); //, sizegroup controls");
             }
             // controls");
             jPanel.add(this.getJButtonPrevious(), "tag back");
             jPanel.add(this.getJButtonNext(), "tag next");
-            if (copyPasteActivated) {
+            if (isCopyPasteActivated()) {
                 jPanel.add(this.getJButtonCopySave(), "tag apply"); //, "sizegroup controls");
             }
             jPanel.add(this.getSaveJButton(), "tag apply"); //, "sizegroup controls");

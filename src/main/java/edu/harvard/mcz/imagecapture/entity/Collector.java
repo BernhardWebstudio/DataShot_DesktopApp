@@ -57,8 +57,37 @@ public class Collector implements java.io.Serializable, Cloneable, Comparable {
     @Override
     public int compareTo(Object o) {
         if (!(o instanceof Collector)) {
-            throw new UnsupportedOperationException("Cannot compare Collector to " + o.getClass());
+            throw new UnsupportedOperationException("Cannot compare Collector to " + (o == null ? "null" : o.getClass()));
         }
-        return this.getCollectorName().compareTo(((Collector) o).getCollectorName());
+        String otherName = ((Collector) o).getCollectorName();
+        if (this.collectorName == null && otherName == null) {
+            return 0;
+        }
+        if (this.collectorName == null) {
+            return -1;
+        }
+        if (otherName == null) {
+            return 1;
+        }
+        return this.collectorName.compareTo(otherName);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Collector collector = (Collector) o;
+        if (collectorId != null && collector.collectorId != null) {
+            return java.util.Objects.equals(collectorId, collector.collectorId);
+        }
+        return java.util.Objects.equals(collectorName, collector.collectorName);
+    }
+
+    @Override
+    public int hashCode() {
+        if (collectorId != null) {
+            return java.util.Objects.hash(collectorId);
+        }
+        return java.util.Objects.hash(collectorName);
     }
 }

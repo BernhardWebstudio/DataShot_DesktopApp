@@ -61,7 +61,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
      */
     @Override
     public int getColumnCount() {
-        return SpecimenDetailsViewPane.copyPasteActivated ? COLUMCOUNT : COLUMCOUNT - 1;
+        return SpecimenDetailsViewPane.isCopyPasteActivated() ? COLUMCOUNT : COLUMCOUNT - 1;
     }
 
     /* (non-Javadoc)
@@ -92,7 +92,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
             result = s;
 //            result = s.getSpecimenId();
         } else {
-            if (!SpecimenDetailsViewPane.copyPasteActivated) {
+            if (!SpecimenDetailsViewPane.isCopyPasteActivated()) {
                 columnIndex += 1;
             }
             switch (columnIndex) {
@@ -184,7 +184,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
         if (columnIndex == COL_ID) {
             result = "Edit";
         } else {
-            if (!SpecimenDetailsViewPane.copyPasteActivated) {
+            if (!SpecimenDetailsViewPane.isCopyPasteActivated()) {
                 columnIndex += 1;
             }
             switch (columnIndex) {
@@ -242,7 +242,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
      */
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean result = columnIndex == COL_ID || (SpecimenDetailsViewPane.copyPasteActivated && columnIndex == COL_COPY);
+        boolean result = columnIndex == COL_ID || (SpecimenDetailsViewPane.isCopyPasteActivated() && columnIndex == COL_COPY);
         return result;
     }
 

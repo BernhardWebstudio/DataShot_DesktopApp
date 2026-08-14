@@ -35,17 +35,15 @@ public class HigherTaxonLifeCycle {
     public static String[] selectDistinctSubfamily(String family) {
         List<String> result = new ArrayList<String>();
         try {
-            String sql = "";
-            if (family == null || family.equals("")) {
-                sql =
+            if (family == null || family.trim().isEmpty()) {
+                String sql =
                         " Select distinct subfamily from Specimen s where s.subfamily is not null order by subfamily";
+                return addStrings(result, sql, null, null);
             } else {
-                sql =
-                        " Select distinct subfamily from Specimen s where s.family = '" +
-                                family.trim() +
-                                "' and s.subfamily is not null order by subfamily ";
+                String sql =
+                        " Select distinct subfamily from Specimen s where s.family = :family and s.subfamily is not null order by subfamily ";
+                return addStrings(result, sql, "family", family.trim());
             }
-            return addStrings(result, sql);
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
@@ -56,9 +54,8 @@ public class HigherTaxonLifeCycle {
         List<String> result = new ArrayList<String>();
         try {
             String sql =
-                    " Select distinct tribe from Specimen s where s.subfamily = '" +
-                            subfamily.trim() + "' and s.tribe is not null ";
-            return addStrings(result, sql);
+                    " Select distinct tribe from Specimen s where s.subfamily = :subfamily and s.tribe is not null ";
+            return addStrings(result, sql, "subfamily", subfamily == null ? "" : subfamily.trim());
         } catch (RuntimeException re) {
             log.error("Error", re);
             return new String[]{};
@@ -78,10 +75,17 @@ public class HigherTaxonLifeCycle {
     }
 
     private static String[] addStrings(List<String> result, String sql) {
+        return addStrings(result, sql, null, null);
+    }
+
+    private static String[] addStrings(List<String> result, String sql, String paramName, Object paramValue) {
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
         try {
             session.beginTransaction();
             Query q = session.createQuery(sql);
+            if (paramName != null && paramValue != null) {
+                q.setParameter(paramName, paramValue);
+            }
             result.addAll(q.list());
             session.getTransaction().commit();
         } catch (HibernateException e) {
@@ -318,13 +322,14 @@ public class HigherTaxonLifeCycle {
         boolean result = false;
         try {
             String sql =
-                    "Select distinct family, subfamily from HigherTaxon ht  where soundex(ht.family) = soundex('" +
-                            aFamily + "') and soundex(ht.subfamily) = soundex('" + aSubfamily +
-                            "')  ";
+                    "Select distinct family, subfamily from HigherTaxon ht where soundex(ht.family) = soundex(:family) and soundex(ht.subfamily) = soundex(:subfamily)";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
-                result = session.createQuery(sql).list().size() > 0;
+                Query q = session.createQuery(sql);
+                q.setParameter("family", aFamily);
+                q.setParameter("subfamily", aSubfamily);
+                result = q.list().size() > 0;
                 session.getTransaction().commit();
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
@@ -346,13 +351,15 @@ public class HigherTaxonLifeCycle {
         boolean result = false;
         try {
             String sql =
-                    "Select distinct family, subfamily from HigherTaxon ht where soundex(ht.family) = soundex('" +
-                            aFamily + "') and soundex(ht.subfamily) = soundex('" + aSubfamily +
-                            "') and soundex(ht.tribe) = soundex('" + aTribe + "')  ";
+                    "Select distinct family, subfamily from HigherTaxon ht where soundex(ht.family) = soundex(:family) and soundex(ht.subfamily) = soundex(:subfamily) and soundex(ht.tribe) = soundex(:tribe)";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
-                result = session.createQuery(sql).list().size() > 0;
+                Query q = session.createQuery(sql);
+                q.setParameter("family", aFamily);
+                q.setParameter("subfamily", aSubfamily);
+                q.setParameter("tribe", aTribe);
+                result = q.list().size() > 0;
                 session.getTransaction().commit();
             } catch (HibernateException e) {
                 session.getTransaction().rollback();
@@ -381,12 +388,12 @@ public class HigherTaxonLifeCycle {
         String result = null;
         try {
             String sql =
-                    "SELECT DISTINCT family FROM HigherTaxon ht WHERE soundex(ht.family) = soundex('" +
-                            aFamily + "')  ";
+                    "SELECT DISTINCT family FROM HigherTaxon ht WHERE soundex(ht.family) = soundex(:family)";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
                 Query q = session.createQuery(sql);
+                q.setParameter("family", aFamily);
                 Iterator results = q.list().iterator();
                 if (results.hasNext()) {
                     // retrieve one row.
@@ -427,13 +434,13 @@ public class HigherTaxonLifeCycle {
         String[] result = null;
         try {
             String sql =
-                    "Select distinct family, subfamily from HigherTaxon ht  where soundex(ht.family) = soundex('" +
-                            aFamily + "') and soundex(ht.subfamily) = soundex('" + aSubfamily +
-                            "')  ";
+                    "Select distinct family, subfamily from HigherTaxon ht where soundex(ht.family) = soundex(:family) and soundex(ht.subfamily) = soundex(:subfamily)";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
                 Query q = session.createQuery(sql);
+                q.setParameter("family", aFamily);
+                q.setParameter("subfamily", aSubfamily);
                 Iterator results = q.list().iterator();
                 if (results.hasNext()) {
                     // create a two element string array.
@@ -478,14 +485,17 @@ public class HigherTaxonLifeCycle {
         String[] result = null;
         try {
             String sql =
-                    "Select distinct family, subfamily, tribe from HigherTaxon ht  where "
-                            + "soundex(ht.family) = soundex('" + aFamily + "') and "
-                            + "soundex(ht.subfamily) = soundex('" + aSubfamily + "')and "
-                            + "soundex(ht.tribe) = soundex('" + aTribe + "')  ";
+                    "Select distinct family, subfamily, tribe from HigherTaxon ht where "
+                            + "soundex(ht.family) = soundex(:family) and "
+                            + "soundex(ht.subfamily) = soundex(:subfamily) and "
+                            + "soundex(ht.tribe) = soundex(:tribe)";
             Session session = HibernateUtil.getSessionFactory().getCurrentSession();
             try {
                 session.beginTransaction();
                 Query q = session.createQuery(sql);
+                q.setParameter("family", aFamily);
+                q.setParameter("subfamily", aSubfamily);
+                q.setParameter("tribe", aTribe);
                 Iterator results = q.list().iterator();
                 if (results.hasNext()) {
                     // create a two element string array.
@@ -518,15 +528,23 @@ public class HigherTaxonLifeCycle {
     public boolean isFamilyWithCastes(String family) {
         boolean result = false;
         Session session = HibernateUtil.getSessionFactory().getCurrentSession();
-        Query q = session.createQuery(
-                "select count(h) from HigherTaxon h where h.hasCaste = 1 and h.Family = ? ");
-        q.setParameter(0, family);
-        Iterator results = q.list().iterator();
-        while (results.hasNext()) {
-            Object[] row = (Object[]) results.next();
-            Integer value = (Integer) row[0];
-            if (value > 0) {
+        try {
+            session.beginTransaction();
+            Query q = session.createQuery(
+                    "select count(h) from HigherTaxon h where h.hasCastes = 1 and h.family = :family", Long.class);
+            q.setParameter("family", family);
+            Long value = (Long) q.getSingleResult();
+            if (value != null && value > 0) {
                 result = true;
+            }
+            session.getTransaction().commit();
+        } catch (HibernateException e) {
+            session.getTransaction().rollback();
+            log.error(e.getMessage());
+        } finally {
+            try {
+                session.close();
+            } catch (SessionException e) {
             }
         }
         return result;

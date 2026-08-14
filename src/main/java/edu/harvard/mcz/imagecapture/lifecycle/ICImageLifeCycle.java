@@ -343,9 +343,9 @@ public class ICImageLifeCycle extends GenericLifeCycle<ICImage> {
             session.beginTransaction();
             List<ICImage> results = null;
             try {
-                results = (List<ICImage>) session
-                        .createQuery("From ICImage i where path = '" + path +
-                                "' order by i.filename")
+                results = session
+                        .createQuery("From ICImage i where path = :path order by i.filename", ICImage.class)
+                        .setParameter("path", path)
                         .list();
                 log.debug("find in directory successful, result size: " +
                         results.size());

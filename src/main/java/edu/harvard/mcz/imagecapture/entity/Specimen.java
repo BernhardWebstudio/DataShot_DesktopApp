@@ -384,6 +384,8 @@ public class Specimen implements Serializable {
         this.flagAncilaryAlsoInMCZbase = null;
         // this.preparationType = null;
         this.natureOfId = null;
+        this.dateCreated = null;
+        this.nahimaExported = null;
     }
 
     public Long getSpecimenId() {
@@ -1299,15 +1301,47 @@ public class Specimen implements Serializable {
      * @return
      */
     public String assembleScientificName() {
-        StringBuffer result = new StringBuffer();
-        result.append(genus)
-                .append(" ")
-                .append(specificEpithet)
-                .append(" ")
-                .append(this.infraspecificRank)
-                .append(" ")
-                .append(this.infraspecificEpithet);
-
+        StringBuilder result = new StringBuilder();
+        if (genus != null && !genus.isEmpty()) {
+            result.append(genus);
+        }
+        if (specificEpithet != null && !specificEpithet.isEmpty()) {
+            if (result.length() > 0) result.append(" ");
+            result.append(specificEpithet);
+        }
+        if (this.infraspecificRank != null && !this.infraspecificRank.isEmpty()) {
+            if (result.length() > 0) result.append(" ");
+            result.append(this.infraspecificRank);
+        }
+        if (this.infraspecificEpithet != null && !this.infraspecificEpithet.isEmpty()) {
+            if (result.length() > 0) result.append(" ");
+            result.append(this.infraspecificEpithet);
+        }
         return result.toString().trim();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Specimen specimen = (Specimen) o;
+        if (specimenId != null && specimen.specimenId != null) {
+            return java.util.Objects.equals(specimenId, specimen.specimenId);
+        }
+        if (barcode != null && specimen.barcode != null) {
+            return java.util.Objects.equals(barcode, specimen.barcode);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        if (specimenId != null) {
+            return java.util.Objects.hash(specimenId);
+        }
+        if (barcode != null) {
+            return java.util.Objects.hash(barcode);
+        }
+        return System.identityHashCode(this);
     }
 }

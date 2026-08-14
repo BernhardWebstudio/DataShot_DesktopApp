@@ -138,7 +138,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             jTable.setModel(model);
             new TableColumnManager(jTable);
             sorter = new TableRowSorter<>(model);
-            int copyPasteOffset = BooleanUtils.toInteger(!SpecimenDetailsViewPane.copyPasteActivated);
+            int copyPasteOffset = BooleanUtils.toInteger(!SpecimenDetailsViewPane.isCopyPasteActivated());
             sorter.toggleSortOrder(SpecimenListTableModel.COL_BARCODE - copyPasteOffset);
             sorter.setComparator(SpecimenListTableModel.COL_COLLECTION_NR - copyPasteOffset, new Comparator<Object>() {
                 @Override
@@ -168,7 +168,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
             jTable.setRowSorter(sorter);
             jTable.setDefaultRenderer(Specimen.class, new ButtonRenderer());
             jTable.setDefaultEditor(Specimen.class, new ButtonEditor());
-            if (SpecimenDetailsViewPane.copyPasteActivated) {
+            if (SpecimenDetailsViewPane.isCopyPasteActivated()) {
                 jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY))
                         .setCellRenderer(new ButtonRenderer("Copy"));
                 jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY))

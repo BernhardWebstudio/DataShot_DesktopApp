@@ -669,7 +669,7 @@ public class UnitTrayLabel
      */
     public Integer getOrdinal() {
         if (ordinal == null) {
-            ordinal = new Integer(0);
+            ordinal = Integer.valueOf(0);
         }
         return ordinal;
     }
@@ -679,7 +679,7 @@ public class UnitTrayLabel
      */
     public void setOrdinal(Integer ordinal) {
         if (ordinal == null) {
-            this.ordinal = new Integer(0);
+            this.ordinal = Integer.valueOf(0);
         } else {
             this.ordinal = ordinal;
         }
@@ -697,5 +697,28 @@ public class UnitTrayLabel
      */
     public void setIdentifiedBy(String identifiedBy) {
         this.identifiedBy = identifiedBy;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UnitTrayLabel that = (UnitTrayLabel) o;
+        if (id != null && that.id != null) {
+            return java.util.Objects.equals(id, that.id);
+        }
+        return java.util.Objects.equals(family, that.family) &&
+                java.util.Objects.equals(genus, that.genus) &&
+                java.util.Objects.equals(specificEpithet, that.specificEpithet) &&
+                java.util.Objects.equals(subspecificEpithet, that.subspecificEpithet) &&
+                java.util.Objects.equals(drawerNumber, that.drawerNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        if (id != null) {
+            return java.util.Objects.hash(id);
+        }
+        return java.util.Objects.hash(family, genus, specificEpithet, subspecificEpithet, drawerNumber);
     }
 }

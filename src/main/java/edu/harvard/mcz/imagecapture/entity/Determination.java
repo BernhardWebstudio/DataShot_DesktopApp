@@ -230,4 +230,27 @@ public class Determination implements java.io.Serializable, Cloneable {
         return newDet;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Determination that = (Determination) o;
+        if (determinationId != null && that.determinationId != null) {
+            return java.util.Objects.equals(determinationId, that.determinationId);
+        }
+        return java.util.Objects.equals(genus, that.genus) &&
+                java.util.Objects.equals(specificEpithet, that.specificEpithet) &&
+                java.util.Objects.equals(subspecificEpithet, that.subspecificEpithet) &&
+                java.util.Objects.equals(authorship, that.authorship) &&
+                java.util.Objects.equals(identifiedBy, that.identifiedBy);
+    }
+
+    @Override
+    public int hashCode() {
+        if (determinationId != null) {
+            return java.util.Objects.hash(determinationId);
+        }
+        return java.util.Objects.hash(genus, specificEpithet, subspecificEpithet, authorship, identifiedBy);
+    }
+
 }

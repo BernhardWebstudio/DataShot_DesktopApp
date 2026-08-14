@@ -530,8 +530,28 @@ public class LatLong implements Serializable, Cloneable {
      * @see LatLong#equalsOneD(LatLong, LatLong)
      * TODO: not used, but if, please refactor.
      */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        LatLong other = (LatLong) obj;
+        if (this.latLongId != null && other.latLongId != null) {
+            return java.util.Objects.equals(this.latLongId, other.latLongId);
+        }
+        return this.equalsOneD(other, this) && this.equalsOneD(this, other);
+    }
+
     public boolean equals(LatLong coord) {
+        if (coord == null) return false;
         return this.equalsOneD(coord, this) && this.equalsOneD(this, coord);
+    }
+
+    @Override
+    public int hashCode() {
+        if (latLongId != null) {
+            return java.util.Objects.hash(latLongId);
+        }
+        return java.util.Objects.hash(decLat, decLong, datum, georefmethod);
     }
 
     /**

@@ -201,7 +201,7 @@ public abstract class GenericLifeCycle<T> {
     // from
     // https://stackoverflow.com/questions/43499887/hibernate-5-2-get-natural-id-properties-from-metamodel
     MetamodelImplementor metamodel =
-        (MetamodelImplementor)this.getSession().getMetamodel();
+        (MetamodelImplementor)HibernateUtil.getSessionFactory().getMetamodel();
     ClassMetadata classMetadata =
         (ClassMetadata)metamodel.entityPersister(instance.getClass().getName());
     String[] propertyNames = classMetadata.getPropertyNames();
@@ -235,7 +235,7 @@ public abstract class GenericLifeCycle<T> {
                    "' to findByExample: " + e.getMessage());
         }
         // TODO: handle relations
-        if (propertyValue != null && propertyValue != "" &&
+        if (propertyValue != null && !propertyValue.equals("") &&
             !(propertyValue instanceof List &&
               ((List)propertyValue).isEmpty())) {
           // if not, add a where

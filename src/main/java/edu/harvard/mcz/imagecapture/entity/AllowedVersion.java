@@ -24,53 +24,54 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-//@Entity
-//@Table(name = "allowed_version", catalog = "lepidoptera", schema = "")
-//@NamedQueries({
-//    @NamedQuery(name = "AllowedVersion.findAll", query = "SELECT a FROM
-//    AllowedVersion a")
-//    })
+// @Entity
+// @Table(name = "allowed_version", catalog = "lepidoptera", schema = "")
+// @NamedQueries({
+// @NamedQuery(name = "AllowedVersion.findAll", query = "SELECT a FROM
+// AllowedVersion a")
+// })
 public class AllowedVersion {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(AllowedVersion.class);
+	private static final Logger log = LoggerFactory.getLogger(AllowedVersion.class);
 
-    //@Id
-    //@GeneratedValue(generator="AllowedNumberSeq")
-    //@SequenceGenerator(name="AllowedNumberSeq",sequenceName="SEQ_ALLOWEDVERSIONID",
-    // allocationSize=1)
-    //@Basic(optional = false)
-    //@Column(name = "allowed_version_id", nullable = false)
-    private Long allowedVersionId;
+	// @Id
+	// @GeneratedValue(generator="AllowedNumberSeq")
+	// @SequenceGenerator(name="AllowedNumberSeq",sequenceName="SEQ_ALLOWEDVERSIONID",
+	// allocationSize=1)
+	// @Basic(optional = false)
+	// @Column(name = "allowed_version_id", nullable = false)
+	private Long allowedVersionId;
 
-    //@Column(name="version", nullable=false)
-    private String version;
+	// @Column(name="version", nullable=false)
+	private String version;
 
-    /**
-     * @return the allowedVersionId
-     */
-    public Long getAllowedVersionId() {
-        return allowedVersionId;
-    }
+	/**
+	 * @return the allowedVersionId
+	 */
+	public Long getAllowedVersionId() {
+		return allowedVersionId;
+	}
 
-    /**
-     * @param allowedVersionId the allowedVersionId to set
-     */
-    public void setAllowedVersionId(Long allowedVersionId) {
-        this.allowedVersionId = allowedVersionId;
-    }
+	/**
+	 * @param allowedVersionId
+	 *            the allowedVersionId to set
+	 */
+	public void setAllowedVersionId(Long allowedVersionId) {
+		this.allowedVersionId = allowedVersionId;
+	}
 
-    /**
-     * @return the version
-     */
-    public String getVersion() {
-        return version;
-    }
+	/**
+	 * @return the version
+	 */
+	public String getVersion() {
+		return version;
+	}
 
-    /**
-     * @param version the version to set
-     */
-    public void setVersion(String version) {
-        this.version = version;
-    }
+	/**
+	 * @param version
+	 *            the version to set
+	 */
+	public void setVersion(String version) {
+		this.version = version;
+	}
 }

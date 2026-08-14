@@ -10,98 +10,99 @@ import java.util.List;
  */
 public class Number implements java.io.Serializable, Cloneable, Comparable {
 
-    private static final long serialVersionUID = -7325097435841353006L;
+	private static final long serialVersionUID = -7325097435841353006L;
 
-    private Long numberId;
-    private Specimen specimen;
-    private String number;
-    private String numberType;
-    private String temporaryComment = null;
+	private Long numberId;
+	private Specimen specimen;
+	private String number;
+	private String numberType;
+	private String temporaryComment = null;
 
-    public Number() {
-    }
+	public Number() {
+	}
 
-    public Number(Specimen specimen) {
-        this.specimen = specimen;
-    }
+	public Number(Specimen specimen) {
+		this.specimen = specimen;
+	}
 
-    public Number(Specimen specimen, String number, String numberType) {
-        this.specimen = specimen;
-        this.number = number;
-        this.numberType = numberType;
-    }
+	public Number(Specimen specimen, String number, String numberType) {
+		this.specimen = specimen;
+		this.number = number;
+		this.numberType = numberType;
+	}
 
-    //New: add “GBIFCH barcode tag”; “CSCF barcode tag”; “Swiss Grid”
-    //New: remove “MCZ Slide number”; “Drawer number”; “Lycaenidae Morphology Ref.”; “MCZ Butterfly Exhibit, 2000”.
-    public static List<String> getNumberTypeValues() {
-        List<String> result = new ArrayList<String>();
-        result.add("");
-        result.add("Unknown");
-        result.add("Species Number");
-        result.add("Collector Number");
-        result.add("Collection Number");
-        //result.add("MCZ Slide Number");
-        result.add("Genitalia Preparation");
-        result.add("DNA Sample Number");
-        //result.add("Drawer Number");
-        //result.add("Lycaenidae Morphology Ref.");
-        //result.add("MCZ Butterfly Exhibit, 2000");
-        result.add("GBIFCH barcode tag");
-        result.add("CSCF barcode tag");
-        result.add("Swiss Grid coordinates");
-        return result;
-    }
+	// New: add “GBIFCH barcode tag”; “CSCF barcode tag”; “Swiss Grid”
+	// New: remove “MCZ Slide number”; “Drawer number”; “Lycaenidae Morphology
+	// Ref.”; “MCZ Butterfly Exhibit, 2000”.
+	public static List<String> getNumberTypeValues() {
+		List<String> result = new ArrayList<String>();
+		result.add("");
+		result.add("Unknown");
+		result.add("Species Number");
+		result.add("Collector Number");
+		result.add("Collection Number");
+		// result.add("MCZ Slide Number");
+		result.add("Genitalia Preparation");
+		result.add("DNA Sample Number");
+		// result.add("Drawer Number");
+		// result.add("Lycaenidae Morphology Ref.");
+		// result.add("MCZ Butterfly Exhibit, 2000");
+		result.add("GBIFCH barcode tag");
+		result.add("CSCF barcode tag");
+		result.add("Swiss Grid coordinates");
+		return result;
+	}
 
-    public Long getNumberId() {
-        return this.numberId;
-    }
+	public Long getNumberId() {
+		return this.numberId;
+	}
 
-    public void setNumberId(Long numberId) {
-        this.numberId = numberId;
-    }
+	public void setNumberId(Long numberId) {
+		this.numberId = numberId;
+	}
 
-    public Specimen getSpecimen() {
-        return this.specimen;
-    }
+	public Specimen getSpecimen() {
+		return this.specimen;
+	}
 
-    public void setSpecimen(Specimen specimen) {
-        this.specimen = specimen;
-    }
+	public void setSpecimen(Specimen specimen) {
+		this.specimen = specimen;
+	}
 
-    public String getNumber() {
-        return this.number;
-    }
+	public String getNumber() {
+		return this.number;
+	}
 
-    public void setNumber(String number) {
-        this.number = number;
-    }
+	public void setNumber(String number) {
+		this.number = number;
+	}
 
-    public String getNumberType() {
-        return this.numberType;
-    }
+	public String getNumberType() {
+		return this.numberType;
+	}
 
-    public void setNumberType(String numberType) {
-        this.numberType = numberType;
-    }
+	public void setNumberType(String numberType) {
+		this.numberType = numberType;
+	}
 
-    @Override
-    public Object clone() {
-        return new Number(specimen, number, numberType);
-    }
+	@Override
+	public Object clone() {
+		return new Number(specimen, number, numberType);
+	}
 
-    @Override
-    public int compareTo(Object o) {
-        if (!(o instanceof Number)) {
-            throw new UnsupportedOperationException("Cannot compare Number to " + o.getClass());
-        }
-        return this.getNumber().compareTo(((Number) o).getNumber());
-    }
+	@Override
+	public int compareTo(Object o) {
+		if (!(o instanceof Number)) {
+			throw new UnsupportedOperationException("Cannot compare Number to " + o.getClass());
+		}
+		return this.getNumber().compareTo(((Number) o).getNumber());
+	}
 
-    public String getTemporaryComment() {
-        return temporaryComment;
-    }
+	public String getTemporaryComment() {
+		return temporaryComment;
+	}
 
-    public void setTemporaryComment(String temporaryComment) {
-        this.temporaryComment = temporaryComment;
-    }
+	public void setTemporaryComment(String temporaryComment) {
+		this.temporaryComment = temporaryComment;
+	}
 }

@@ -6,5 +6,5 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 
 public interface Specification<T, S> {
-    Predicate toPredicate(Root<T> queryRoot, CriteriaQuery<S> query, CriteriaBuilder cb);
+	Predicate toPredicate(Root<T> queryRoot, CriteriaQuery<S> query, CriteriaBuilder cb);
 }

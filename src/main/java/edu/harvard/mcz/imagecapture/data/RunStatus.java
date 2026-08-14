@@ -23,23 +23,25 @@ package edu.harvard.mcz.imagecapture.data;
  */
 public class RunStatus {
 
-    // use values less than STATUS_FAILED for jobs that aren't complete.
-    public static final int STATUS_NEW = 0;
-    public static final int STATUS_RUNNING = 1;
-    public static final int STATUS_CANCEL_REQUESTED = 50;
-    // use values greater than or equal to STATUS_FAILED for completed jobs.
-    public static final int STATUS_FAILED = 100;
-    public static final int STATUS_TERMINATED = 102;
-    public static final int STATUS_DONE = 101;
+	// use values less than STATUS_FAILED for jobs that aren't complete.
+	public static final int STATUS_NEW = 0;
+	public static final int STATUS_RUNNING = 1;
+	public static final int STATUS_CANCEL_REQUESTED = 50;
+	// use values greater than or equal to STATUS_FAILED for completed jobs.
+	public static final int STATUS_FAILED = 100;
+	public static final int STATUS_TERMINATED = 102;
+	public static final int STATUS_DONE = 101;
 
-    /**
-     * @param aStatus status code to test, from one of the RunStatus.STATUS_* constants.
-     * @return false if aStatus is that of a still running job, true if aStatus is that
-     * of a job that has completed either successfully or with an error state.
-     */
-    public static boolean testComplete(int aStatus) {
-        boolean returnValue = aStatus >= STATUS_FAILED;
-        return returnValue;
-    }
+	/**
+	 * @param aStatus
+	 *            status code to test, from one of the RunStatus.STATUS_* constants.
+	 * @return false if aStatus is that of a still running job, true if aStatus is
+	 *         that of a job that has completed either successfully or with an error
+	 *         state.
+	 */
+	public static boolean testComplete(int aStatus) {
+		boolean returnValue = aStatus >= STATUS_FAILED;
+		return returnValue;
+	}
 
 }

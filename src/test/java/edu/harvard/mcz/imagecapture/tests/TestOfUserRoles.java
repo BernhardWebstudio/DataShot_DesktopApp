@@ -25,41 +25,41 @@ import junit.framework.TestCase;
  */
 public class TestOfUserRoles extends TestCase {
 
-    /**
-     * Test method for {@link Users#isUserRole(java.lang.String)}.
-     */
-    public void testIsUserRole() {
-        Users user = new Users();
-        user.setRole(Users.ROLE_DATAENTRY);
-        assertTrue(user.isUserRole(Users.ROLE_DATAENTRY));
-        assertFalse(user.isUserRole(Users.ROLE_FULL));
-        assertFalse(user.isUserRole(Users.ROLE_EDITOR));
-        assertFalse(user.isUserRole(Users.ROLE_CHIEF_EDITOR));
-        assertFalse(user.isUserRole(Users.ROLE_ADMINISTRATOR));
-        user.setRole(Users.ROLE_FULL);
-        assertTrue(user.isUserRole(Users.ROLE_DATAENTRY));
-        assertTrue(user.isUserRole(Users.ROLE_FULL));
-        assertFalse(user.isUserRole(Users.ROLE_EDITOR));
-        assertFalse(user.isUserRole(Users.ROLE_CHIEF_EDITOR));
-        assertFalse(user.isUserRole(Users.ROLE_ADMINISTRATOR));
-        user.setRole(Users.ROLE_EDITOR);
-        assertTrue(user.isUserRole(Users.ROLE_DATAENTRY));
-        assertTrue(user.isUserRole(Users.ROLE_FULL));
-        assertTrue(user.isUserRole(Users.ROLE_EDITOR));
-        assertFalse(user.isUserRole(Users.ROLE_CHIEF_EDITOR));
-        assertFalse(user.isUserRole(Users.ROLE_ADMINISTRATOR));
-        user.setRole(Users.ROLE_CHIEF_EDITOR);
-        assertTrue(user.isUserRole(Users.ROLE_DATAENTRY));
-        assertTrue(user.isUserRole(Users.ROLE_FULL));
-        assertTrue(user.isUserRole(Users.ROLE_EDITOR));
-        assertTrue(user.isUserRole(Users.ROLE_CHIEF_EDITOR));
-        assertFalse(user.isUserRole(Users.ROLE_ADMINISTRATOR));
-        user.setRole(Users.ROLE_ADMINISTRATOR);
-        assertTrue(user.isUserRole(Users.ROLE_DATAENTRY));
-        assertTrue(user.isUserRole(Users.ROLE_FULL));
-        assertTrue(user.isUserRole(Users.ROLE_EDITOR));
-        assertTrue(user.isUserRole(Users.ROLE_CHIEF_EDITOR));
-        assertTrue(user.isUserRole(Users.ROLE_ADMINISTRATOR));
-    }
+	/**
+	 * Test method for {@link Users#isUserRole(java.lang.String)}.
+	 */
+	public void testIsUserRole() {
+		Users user = new Users();
+		user.setRole(Users.ROLE_DATAENTRY);
+		assertTrue(user.isUserRole(Users.ROLE_DATAENTRY));
+		assertFalse(user.isUserRole(Users.ROLE_FULL));
+		assertFalse(user.isUserRole(Users.ROLE_EDITOR));
+		assertFalse(user.isUserRole(Users.ROLE_CHIEF_EDITOR));
+		assertFalse(user.isUserRole(Users.ROLE_ADMINISTRATOR));
+		user.setRole(Users.ROLE_FULL);
+		assertTrue(user.isUserRole(Users.ROLE_DATAENTRY));
+		assertTrue(user.isUserRole(Users.ROLE_FULL));
+		assertFalse(user.isUserRole(Users.ROLE_EDITOR));
+		assertFalse(user.isUserRole(Users.ROLE_CHIEF_EDITOR));
+		assertFalse(user.isUserRole(Users.ROLE_ADMINISTRATOR));
+		user.setRole(Users.ROLE_EDITOR);
+		assertTrue(user.isUserRole(Users.ROLE_DATAENTRY));
+		assertTrue(user.isUserRole(Users.ROLE_FULL));
+		assertTrue(user.isUserRole(Users.ROLE_EDITOR));
+		assertFalse(user.isUserRole(Users.ROLE_CHIEF_EDITOR));
+		assertFalse(user.isUserRole(Users.ROLE_ADMINISTRATOR));
+		user.setRole(Users.ROLE_CHIEF_EDITOR);
+		assertTrue(user.isUserRole(Users.ROLE_DATAENTRY));
+		assertTrue(user.isUserRole(Users.ROLE_FULL));
+		assertTrue(user.isUserRole(Users.ROLE_EDITOR));
+		assertTrue(user.isUserRole(Users.ROLE_CHIEF_EDITOR));
+		assertFalse(user.isUserRole(Users.ROLE_ADMINISTRATOR));
+		user.setRole(Users.ROLE_ADMINISTRATOR);
+		assertTrue(user.isUserRole(Users.ROLE_DATAENTRY));
+		assertTrue(user.isUserRole(Users.ROLE_FULL));
+		assertTrue(user.isUserRole(Users.ROLE_EDITOR));
+		assertTrue(user.isUserRole(Users.ROLE_CHIEF_EDITOR));
+		assertTrue(user.isUserRole(Users.ROLE_ADMINISTRATOR));
+	}
 
 }

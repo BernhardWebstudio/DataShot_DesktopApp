@@ -21,15 +21,15 @@ package edu.harvard.mcz.imagecapture.interfaces;
 import edu.harvard.mcz.imagecapture.exceptions.OCRReadException;
 
 /**
- * Interface for a class that can deliver a string from the result
- * of some Optical Character Recognition operation, and may throw an
- * exception as a result of that operation.
+ * Interface for a class that can deliver a string from the result of some
+ * Optical Character Recognition operation, and may throw an exception as a
+ * result of that operation.
  * <p>
  * This interface doesn't include a defined setOCRSource method, as this might
  * be a method or a constructor providing one of a variety of sources, and is
- * thus left up to the implementation.  Compare how ConvertTesseractOCR is constructed
- * and is used as a wrapper for TesseractOCR to see why the OCR interface was
- * defined this way.
+ * thus left up to the implementation. Compare how ConvertTesseractOCR is
+ * constructed and is used as a wrapper for TesseractOCR to see why the OCR
+ * interface was defined this way.
  *
  * @see edu.harvard.mcz.imagecapture.exceptions.OCRReadException
  * @see edu.harvard.mcz.imagecapture.ConvertTesseractOCR
@@ -37,10 +37,10 @@ import edu.harvard.mcz.imagecapture.exceptions.OCRReadException;
  */
 public interface OCR {
 
-    /**
-     * @return the text from the OCR source.
-     * @throws OCRReadException
-     */
-    String getOCRText() throws OCRReadException;
+	/**
+	 * @return the text from the OCR source.
+	 * @throws OCRReadException
+	 */
+	String getOCRText() throws OCRReadException;
 
 }

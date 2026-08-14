@@ -19,143 +19,152 @@
 package edu.harvard.mcz.imagecapture.ui.tablemodel;
 
 import edu.harvard.mcz.imagecapture.entity.Collector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.HashSet;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Table Model for Collector objects showing just the name of the Collector.
  */
 public class CollectorTableModel extends AbstractDeleteableTableModel {
 
-    private static final long serialVersionUID = -3022078380872976717L;
+	private static final long serialVersionUID = -3022078380872976717L;
 
-    private static final Logger log =
-            LoggerFactory.getLogger(CollectorTableModel.class);
+	private static final Logger log = LoggerFactory.getLogger(CollectorTableModel.class);
 
-    private final Set<Collector> collectors;
+	private final Set<Collector> collectors;
 
-    public CollectorTableModel() {
-        collectors = new HashSet<>();
-    }
+	public CollectorTableModel() {
+		collectors = new HashSet<>();
+	}
 
-    public CollectorTableModel(Set<Collector> aCollectorList) {
-        collectors = aCollectorList;
-    }
+	public CollectorTableModel(Set<Collector> aCollectorList) {
+		collectors = aCollectorList;
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getColumnClass(int)
-     */
-    @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        return String.class;
-    }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.TableModel#getColumnClass(int)
+	 */
+	@Override
+	public Class<?> getColumnClass(int columnIndex) {
+		return String.class;
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getColumnCount()
-     */
-    @Override
-    public int getColumnCount() {
-        return 1;
-    }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.TableModel#getColumnCount()
+	 */
+	@Override
+	public int getColumnCount() {
+		return 1;
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getColumnName(int)
-     */
-    @Override
-    public String getColumnName(int columnIndex) {
-        String returnvalue = null;
-        returnvalue = "Name";
-        return returnvalue;
-    }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.TableModel#getColumnName(int)
+	 */
+	@Override
+	public String getColumnName(int columnIndex) {
+		String returnvalue = null;
+		returnvalue = "Name";
+		return returnvalue;
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getRowCount()
-     */
-    @Override
-    public int getRowCount() {
-        if (collectors == null) {
-            return 0;
-        } else {
-            return collectors.size();
-        }
-    }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.TableModel#getRowCount()
+	 */
+	@Override
+	public int getRowCount() {
+		if (collectors == null) {
+			return 0;
+		} else {
+			return collectors.size();
+		}
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getValueAt(int, int)
-     */
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        if (rowIndex >= collectors.size()) {
-            log.warn("Cannot get value at row, col: " + rowIndex + ", " +
-                    columnIndex + " due to size " + collectors.size() +
-                    " in CollectorTable");
-            return null;
-        }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.TableModel#getValueAt(int, int)
+	 */
+	@Override
+	public Object getValueAt(int rowIndex, int columnIndex) {
+		if (rowIndex >= collectors.size()) {
+			log.warn("Cannot get value at row, col: " + rowIndex + ", " + columnIndex + " due to size "
+					+ collectors.size() + " in CollectorTable");
+			return null;
+		}
 
-        Object returnvalue = null;
-        returnvalue =
-                ((Collector) collectors.toArray()[rowIndex]).getCollectorName();
-        return returnvalue;
-    }
+		Object returnvalue = null;
+		returnvalue = ((Collector) collectors.toArray()[rowIndex]).getCollectorName();
+		return returnvalue;
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#isCellEditable(int, int)
-     */
-    @Override
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return true;
-    }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.TableModel#isCellEditable(int, int)
+	 */
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+		return true;
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#setValueAt(java.lang.Object, int, int)
-     */
-    @Override
-    public void setValueAt(Object value, int rowIndex, int columnIndex) {
-        if (rowIndex >= collectors.size()) {
-            log.warn("Cannot set value " + value.toString() + " due to size " +
-                    collectors.size() + " in CollectorTable at row, col: " +
-                    rowIndex + ", " + columnIndex);
-            return;
-        }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.TableModel#setValueAt(java.lang.Object, int, int)
+	 */
+	@Override
+	public void setValueAt(Object value, int rowIndex, int columnIndex) {
+		if (rowIndex >= collectors.size()) {
+			log.warn("Cannot set value " + value.toString() + " due to size " + collectors.size()
+					+ " in CollectorTable at row, col: " + rowIndex + ", " + columnIndex);
+			return;
+		}
 
-        try {
-            ((Collector) collectors.toArray()[rowIndex])
-                    .setCollectorName(value.toString());
+		try {
+			((Collector) collectors.toArray()[rowIndex]).setCollectorName(value.toString());
 
-        } catch (Exception e) {
-            log.debug(
-                    "Exception found in CollectorTableModel.setValueAt: unable to get or convert value");
-            // Original code from Paul - caused issues
-            // Object is an agentname not a string.
-            //((Collector)collectors.toArray()[rowIndex]).setCollectorName(((MCZbaseAuthAgentName)value).getAgent_name());
-        }
-    }
+		} catch (Exception e) {
+			log.debug("Exception found in CollectorTableModel.setValueAt: unable to get or convert value");
+			// Original code from Paul - caused issues
+			// Object is an agentname not a string.
+			// ((Collector)collectors.toArray()[rowIndex]).setCollectorName(((MCZbaseAuthAgentName)value).getAgent_name());
+		}
+	}
 
-    /**
-     * addCollector adds a Collector to this model as a new row
-     *
-     * @param collector the collector to add to the table model.
-     */
-    public void addCollector(Collector collector) {
-        collectors.add(collector);
-        this.fireTableDataChanged();
-    }
+	/**
+	 * addCollector adds a Collector to this model as a new row
+	 *
+	 * @param collector
+	 *            the collector to add to the table model.
+	 */
+	public void addCollector(Collector collector) {
+		collectors.add(collector);
+		this.fireTableDataChanged();
+	}
 
-    /**
-     * @param rowIndex row to be deleted
-     */
-    public void deleteRow(int rowIndex) {
-        Collector toRemove = ((Collector) collectors.toArray()[rowIndex]);
-//        CollectorLifeCycle spals = new CollectorLifeCycle();
-        try {
-//            spals.delete(toRemove);
-            collectors.remove(toRemove);
-            fireTableDataChanged();
-        } catch (Exception e) {
-            log.error("Failed to remove collector", e);
-        }
-    }
+	/**
+	 * @param rowIndex
+	 *            row to be deleted
+	 */
+	public void deleteRow(int rowIndex) {
+		Collector toRemove = ((Collector) collectors.toArray()[rowIndex]);
+		// CollectorLifeCycle spals = new CollectorLifeCycle();
+		try {
+			// spals.delete(toRemove);
+			collectors.remove(toRemove);
+			fireTableDataChanged();
+		} catch (Exception e) {
+			log.error("Failed to remove collector", e);
+		}
+	}
 }

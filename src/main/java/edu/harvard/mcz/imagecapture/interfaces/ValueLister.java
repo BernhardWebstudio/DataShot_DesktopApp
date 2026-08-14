@@ -19,17 +19,18 @@
 package edu.harvard.mcz.imagecapture.interfaces;
 
 /**
- * Interface for providing a string array of values that can be used
- * for purposes such as populating a pick list.
+ * Interface for providing a string array of values that can be used for
+ * purposes such as populating a pick list.
  */
 public interface ValueLister {
 
-    /**
-     * Obtain a list of Valid values in a controlled vocabulary, or a list of values in current use in a user
-     * extendible controlled vocabulary.
-     *
-     * @return a string array where each entry in the array is a valid value within a controlled vocabulary.
-     */
-    String[] getValues();
+	/**
+	 * Obtain a list of Valid values in a controlled vocabulary, or a list of values
+	 * in current use in a user extendible controlled vocabulary.
+	 *
+	 * @return a string array where each entry in the array is a valid value within
+	 *         a controlled vocabulary.
+	 */
+	String[] getValues();
 
 }

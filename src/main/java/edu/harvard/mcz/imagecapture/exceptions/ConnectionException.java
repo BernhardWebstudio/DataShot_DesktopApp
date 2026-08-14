@@ -26,40 +26,39 @@ import org.slf4j.LoggerFactory;
  */
 public class ConnectionException extends Exception {
 
-    private static final long serialVersionUID = 5218215421281921931L;
+	private static final long serialVersionUID = 5218215421281921931L;
 
-    private static final Logger log =
-            LoggerFactory.getLogger(ConnectionException.class);
+	private static final Logger log = LoggerFactory.getLogger(ConnectionException.class);
 
-    /**
-     *
-     */
-    public ConnectionException() {
-        log.debug("Debug {}", ConnectionException.class.getName());
-    }
+	/**
+	 *
+	 */
+	public ConnectionException() {
+		log.debug("Debug {}", ConnectionException.class.getName());
+	}
 
-    /**
-     * @param message
-     */
-    public ConnectionException(String message) {
-        super(message);
-        log.debug("Debug {}", message);
-    }
+	/**
+	 * @param message
+	 */
+	public ConnectionException(String message) {
+		super(message);
+		log.debug("Debug {}", message);
+	}
 
-    /**
-     * @param cause
-     */
-    public ConnectionException(Throwable cause) {
-        super(cause);
-        log.debug("Debug {}", cause.toString());
-    }
+	/**
+	 * @param cause
+	 */
+	public ConnectionException(Throwable cause) {
+		super(cause);
+		log.debug("Debug {}", cause.toString());
+	}
 
-    /**
-     * @param message
-     * @param cause
-     */
-    public ConnectionException(String message, Throwable cause) {
-        super(message, cause);
-        log.debug("Debug {}", message);
-    }
+	/**
+	 * @param message
+	 * @param cause
+	 */
+	public ConnectionException(String message, Throwable cause) {
+		super(message, cause);
+		log.debug("Debug {}", message);
+	}
 }

@@ -23,6 +23,6 @@ package edu.harvard.mcz.imagecapture.interfaces;
  */
 public interface DataChangeListener {
 
-    void notifyDataHasChanged();
+	void notifyDataHasChanged();
 
 }

@@ -7,91 +7,92 @@ package edu.harvard.mcz.imagecapture.entity;
  */
 public class Collector implements java.io.Serializable, Cloneable, Comparable {
 
-    private static final long serialVersionUID = 4879266496355071312L;
+	private static final long serialVersionUID = 4879266496355071312L;
 
-    private Long collectorId;
-    private Specimen specimen;
-    private String collectorName;
+	private Long collectorId;
+	private Specimen specimen;
+	private String collectorName;
 
-    public Collector() {
-    }
+	public Collector() {
+	}
 
-    public Collector(Specimen specimen) {
-        this.specimen = specimen;
-    }
+	public Collector(Specimen specimen) {
+		this.specimen = specimen;
+	}
 
-    public Collector(Specimen specimen, String collectorName) {
-        this.specimen = specimen;
-        this.collectorName = collectorName;
-    }
+	public Collector(Specimen specimen, String collectorName) {
+		this.specimen = specimen;
+		this.collectorName = collectorName;
+	}
 
-    public Long getCollectorId() {
-        return this.collectorId;
-    }
+	public Long getCollectorId() {
+		return this.collectorId;
+	}
 
-    public void setCollectorId(Long collectorId) {
-        this.collectorId = collectorId;
-    }
+	public void setCollectorId(Long collectorId) {
+		this.collectorId = collectorId;
+	}
 
-    public Specimen getSpecimen() {
-        return this.specimen;
-    }
+	public Specimen getSpecimen() {
+		return this.specimen;
+	}
 
-    public void setSpecimen(Specimen specimen) {
-        this.specimen = specimen;
-    }
+	public void setSpecimen(Specimen specimen) {
+		this.specimen = specimen;
+	}
 
-    public String getCollectorName() {
-        return this.collectorName;
-    }
+	public String getCollectorName() {
+		return this.collectorName;
+	}
 
-    public void setCollectorName(String collectorName) {
-        this.collectorName = collectorName;
-    }
+	public void setCollectorName(String collectorName) {
+		this.collectorName = collectorName;
+	}
 
-    @Override
-    public Object clone() {
-        return new Collector(this.specimen, this.collectorName);
-    }
+	@Override
+	public Object clone() {
+		return new Collector(this.specimen, this.collectorName);
+	}
 
-    @Override
-    public int compareTo(Object o) {
-        if (!(o instanceof Collector)) {
-            throw new UnsupportedOperationException("Cannot compare Collector to " + (o == null ? "null" : o.getClass()));
-        }
-        String otherName = ((Collector) o).getCollectorName();
-        if (this.collectorName == null && otherName == null) {
-            return 0;
-        }
-        if (this.collectorName == null) {
-            return -1;
-        }
-        if (otherName == null) {
-            return 1;
-        }
-        return this.collectorName.compareTo(otherName);
-    }
+	@Override
+	public int compareTo(Object o) {
+		if (!(o instanceof Collector)) {
+			throw new UnsupportedOperationException(
+					"Cannot compare Collector to " + (o == null ? "null" : o.getClass()));
+		}
+		String otherName = ((Collector) o).getCollectorName();
+		if (this.collectorName == null && otherName == null) {
+			return 0;
+		}
+		if (this.collectorName == null) {
+			return -1;
+		}
+		if (otherName == null) {
+			return 1;
+		}
+		return this.collectorName.compareTo(otherName);
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Collector collector = (Collector) o;
-        if (collectorId != null && collector.collectorId != null) {
-            return java.util.Objects.equals(collectorId, collector.collectorId);
-        }
-        return java.util.Objects.equals(collectorName, collector.collectorName);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Collector collector = (Collector) o;
+		if (collectorId != null && collector.collectorId != null) {
+			return java.util.Objects.equals(collectorId, collector.collectorId);
+		}
+		return java.util.Objects.equals(collectorName, collector.collectorName);
+	}
 
-    @Override
-    public int hashCode() {
-        if (collectorId != null) {
-            return java.util.Objects.hash(collectorId);
-        }
-        return java.util.Objects.hash(collectorName);
-    }
+	@Override
+	public int hashCode() {
+		if (collectorId != null) {
+			return java.util.Objects.hash(collectorId);
+		}
+		return java.util.Objects.hash(collectorName);
+	}
 }

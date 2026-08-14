@@ -23,13 +23,13 @@ package edu.harvard.mcz.imagecapture.exceptions;
  */
 public class PrintFailedException extends Exception {
 
-    private static final long serialVersionUID = 9031801441033382725L;
+	private static final long serialVersionUID = 9031801441033382725L;
 
-    /**
-     * @param message
-     */
-    public PrintFailedException(String message) {
-        super(message);
-    }
+	/**
+	 * @param message
+	 */
+	public PrintFailedException(String message) {
+		super(message);
+	}
 
 }

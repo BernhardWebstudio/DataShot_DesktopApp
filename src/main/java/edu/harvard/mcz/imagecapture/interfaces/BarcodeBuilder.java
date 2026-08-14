@@ -19,22 +19,22 @@
 package edu.harvard.mcz.imagecapture.interfaces;
 
 /**
- * BarcodeBuilder, an interface for retrieving the formatted text found in a barcode label given
- * the numeric part of that barcode text. Only concerns the text string found in a barcode, not
- * the actual barcode encoding of that text.
+ * BarcodeBuilder, an interface for retrieving the formatted text found in a
+ * barcode label given the numeric part of that barcode text. Only concerns the
+ * text string found in a barcode, not the actual barcode encoding of that text.
  */
 public interface BarcodeBuilder {
 
+	/**
+	 * Make a formated string (e.g. "MCZ-ENT01234567") in the form of a barcode
+	 * number when given a number (e.g. 1234567) to include in that formatted
+	 * string.
+	 *
+	 * @param aNumber
+	 * @return
+	 */
+	String makeFromNumber(Integer aNumber);
 
-    /**
-     * Make a formated string (e.g. "MCZ-ENT01234567") in the form of a barcode number
-     * when given a number (e.g. 1234567) to include in that formatted string.
-     *
-     * @param aNumber
-     * @return
-     */
-    String makeFromNumber(Integer aNumber);
-
-    String makeGuidFromBarcode(String barcode);
+	String makeGuidFromBarcode(String barcode);
 
 }

@@ -11,10 +11,8 @@ package edu.harvard.mcz.imagecapture.entity.fixed;
  */
 public class Sex {
 
-    public static String[] getSexValues() {
-        String[] values = {
-                "", "Male", "Female", "NotApplicable", "Gynandromorph",
-                "Intersex", "unknown"};
-        return values;
-    }
+	public static String[] getSexValues() {
+		String[] values = {"", "Male", "Female", "NotApplicable", "Gynandromorph", "Intersex", "unknown"};
+		return values;
+	}
 }

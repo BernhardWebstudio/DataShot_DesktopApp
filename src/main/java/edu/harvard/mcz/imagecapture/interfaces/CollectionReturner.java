@@ -23,11 +23,11 @@ package edu.harvard.mcz.imagecapture.interfaces;
  */
 public interface CollectionReturner {
 
-    /**
-     * Get the Collection from which a collection object came.
-     *
-     * @return A text string representing the name of the collection.
-     */
-    String getCollection();
+	/**
+	 * Get the Collection from which a collection object came.
+	 *
+	 * @return A text string representing the name of the collection.
+	 */
+	String getCollection();
 
 }

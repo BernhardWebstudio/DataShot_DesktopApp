@@ -19,98 +19,106 @@
 package edu.harvard.mcz.imagecapture.ui.tablemodel;
 
 import edu.harvard.mcz.imagecapture.PositionTemplate;
-
-import javax.swing.table.AbstractTableModel;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.table.AbstractTableModel;
 
 /**
  * TemplateTableModel
  */
 public class PositionTemplateTableModel extends AbstractTableModel {
 
-    private static final long serialVersionUID = -6485594139102438531L;
+	private static final long serialVersionUID = -6485594139102438531L;
 
-    private List<PositionTemplate> templates = null;
+	private List<PositionTemplate> templates = null;
 
-    /**
-     * Default constructor with an initially empty set of templates.
-     */
-    public PositionTemplateTableModel() {
-        templates = new ArrayList<PositionTemplate>();
-    }
+	/**
+	 * Default constructor with an initially empty set of templates.
+	 */
+	public PositionTemplateTableModel() {
+		templates = new ArrayList<PositionTemplate>();
+	}
 
-    /**
-     * Constructor with an initial set of templates.
-     */
-    public PositionTemplateTableModel(List<PositionTemplate> aTemplateSet) {
-        templates = aTemplateSet;
-    }
+	/**
+	 * Constructor with an initial set of templates.
+	 */
+	public PositionTemplateTableModel(List<PositionTemplate> aTemplateSet) {
+		templates = aTemplateSet;
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getColumnCount()
-     */
-    @Override
-    public int getColumnCount() {
-        return 3;
-    }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.TableModel#getColumnCount()
+	 */
+	@Override
+	public int getColumnCount() {
+		return 3;
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getRowCount()
-     */
-    @Override
-    public int getRowCount() {
-        return templates.size();
-    }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.TableModel#getRowCount()
+	 */
+	@Override
+	public int getRowCount() {
+		return templates.size();
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableModel#getValueAt(int, int)
-     */
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        Object returnvalue = null;
-        switch (columnIndex) {
-            case 0:
-                returnvalue = ((PositionTemplate) templates.toArray()[rowIndex]).getTemplateId();
-                break;
-            case 1:
-                returnvalue = ((PositionTemplate) templates.toArray()[rowIndex]).getTemplateId();
-                break;
-            case 2:
-                returnvalue = ((PositionTemplate) templates.toArray()[rowIndex]).getName();
-                break;
-        }
-        return returnvalue;
-    }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.TableModel#getValueAt(int, int)
+	 */
+	@Override
+	public Object getValueAt(int rowIndex, int columnIndex) {
+		Object returnvalue = null;
+		switch (columnIndex) {
+			case 0 :
+				returnvalue = ((PositionTemplate) templates.toArray()[rowIndex]).getTemplateId();
+				break;
+			case 1 :
+				returnvalue = ((PositionTemplate) templates.toArray()[rowIndex]).getTemplateId();
+				break;
+			case 2 :
+				returnvalue = ((PositionTemplate) templates.toArray()[rowIndex]).getName();
+				break;
+		}
+		return returnvalue;
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.AbstractTableModel#getColumnName(int)
-     */
-    @Override
-    public String getColumnName(int columnIndex) {
-        String returnvalue = null;
-        switch (columnIndex) {
-            case 0:
-                returnvalue = "";
-                break;
-            case 1:
-                returnvalue = "TemplateId";
-                break;
-            case 2:
-                returnvalue = "Name";
-                break;
-        }
-        return returnvalue;
-    }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.AbstractTableModel#getColumnName(int)
+	 */
+	@Override
+	public String getColumnName(int columnIndex) {
+		String returnvalue = null;
+		switch (columnIndex) {
+			case 0 :
+				returnvalue = "";
+				break;
+			case 1 :
+				returnvalue = "TemplateId";
+				break;
+			case 2 :
+				returnvalue = "Name";
+				break;
+		}
+		return returnvalue;
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
-     */
-    @Override
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-        boolean result = columnIndex == 0;
-        return result;
-    }
-
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see javax.swing.table.AbstractTableModel#isCellEditable(int, int)
+	 */
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex) {
+		boolean result = columnIndex == 0;
+		return result;
+	}
 
 }

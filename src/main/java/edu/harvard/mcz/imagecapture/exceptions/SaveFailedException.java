@@ -10,38 +10,38 @@ package edu.harvard.mcz.imagecapture.exceptions;
  */
 public class SaveFailedException extends Exception {
 
-    private static final long serialVersionUID = -4963776101118122744L;
+	private static final long serialVersionUID = -4963776101118122744L;
 
-    /**
-     *
-     */
-    public SaveFailedException() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 *
+	 */
+	public SaveFailedException() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
-    /**
-     * @param message
-     * @param cause
-     */
-    public SaveFailedException(String message, Throwable cause) {
-        super(message, cause);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param message
+	 * @param cause
+	 */
+	public SaveFailedException(String message, Throwable cause) {
+		super(message, cause);
+		// TODO Auto-generated constructor stub
+	}
 
-    /**
-     * @param message
-     */
-    public SaveFailedException(String message) {
-        super(message);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param message
+	 */
+	public SaveFailedException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
 
-    /**
-     * @param cause
-     */
-    public SaveFailedException(Throwable cause) {
-        super(cause);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param cause
+	 */
+	public SaveFailedException(Throwable cause) {
+		super(cause);
+		// TODO Auto-generated constructor stub
+	}
 }

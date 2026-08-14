@@ -18,47 +18,46 @@
  */
 package edu.harvard.mcz.imagecapture.ui;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
-import java.awt.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  */
 public class ProgressBarRenderer implements TableCellRenderer {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(ProgressBarRenderer.class);
+	private static final Logger log = LoggerFactory.getLogger(ProgressBarRenderer.class);
 
-    private static final long serialVersionUID = 2860749265938403343L;
+	private static final long serialVersionUID = 2860749265938403343L;
 
-    private JProgressBar progressBar = null;
+	private JProgressBar progressBar = null;
 
-    public ProgressBarRenderer() {
-        progressBar = new JProgressBar();
-    }
+	public ProgressBarRenderer() {
+		progressBar = new JProgressBar();
+	}
 
-    /* (non-Javadoc)
-     * @see
-     *     javax.swing.table.TableCellRenderer#getTableCellRendererComponent(javax.swing.JTable,
-     *     java.lang.Object, boolean, boolean, int, int)
-     */
-    @Override
-    public Component
-    getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
-                                  boolean hasFocus, int row, int column) {
-        log.debug("Debug {}", value);
-        if (value != null) {
-            try {
-                progressBar.setValue((int) value);
-            } catch (ClassCastException e) {
-                log.error(e.getMessage());
-            }
-        }
-        log.debug("Debug {}", progressBar.getValue());
-        return progressBar;
-    }
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see
+	 * javax.swing.table.TableCellRenderer#getTableCellRendererComponent(javax.swing
+	 * .JTable, java.lang.Object, boolean, boolean, int, int)
+	 */
+	@Override
+	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+			int row, int column) {
+		log.debug("Debug {}", value);
+		if (value != null) {
+			try {
+				progressBar.setValue((int) value);
+			} catch (ClassCastException e) {
+				log.error(e.getMessage());
+			}
+		}
+		log.debug("Debug {}", progressBar.getValue());
+		return progressBar;
+	}
 }

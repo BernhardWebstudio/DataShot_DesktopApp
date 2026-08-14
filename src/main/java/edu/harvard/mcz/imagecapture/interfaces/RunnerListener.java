@@ -22,10 +22,10 @@ package edu.harvard.mcz.imagecapture.interfaces;
  *
  */
 public interface RunnerListener {
-    /**
-     * @param anEvent
-     * @param notifyingJob
-     */
-    void notifyListener(int anEvent, RunnableJob notifyingJob);
+	/**
+	 * @param anEvent
+	 * @param notifyingJob
+	 */
+	void notifyListener(int anEvent, RunnableJob notifyingJob);
 
 }

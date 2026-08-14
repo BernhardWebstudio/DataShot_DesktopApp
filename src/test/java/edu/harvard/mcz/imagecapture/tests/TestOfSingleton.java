@@ -25,25 +25,25 @@ import junit.framework.TestCase;
  */
 public class TestOfSingleton extends TestCase {
 
-    /**
-     * @param name
-     */
-    public TestOfSingleton(String name) {
-        super(name);
-    }
+	/**
+	 * @param name
+	 */
+	public TestOfSingleton(String name) {
+		super(name);
+	}
 
-    /**
-     * Test method for {@link edu.harvard.mcz.imagecapture.Singleton#getSingletonInstance()}.
-     */
-    public void testGetSingletonInstance() {
-        Singleton instance = Singleton.getSingletonInstance();
-        assertEquals(instance, Singleton.getSingletonInstance());
-    }
+	/**
+	 * Test method for
+	 * {@link edu.harvard.mcz.imagecapture.Singleton#getSingletonInstance()}.
+	 */
+	public void testGetSingletonInstance() {
+		Singleton instance = Singleton.getSingletonInstance();
+		assertEquals(instance, Singleton.getSingletonInstance());
+	}
 
-    public void testGetSingletonInstanceThreadSafety() {
-        // JUnit alone isn't able to handle multiple threads.
-        // Need to explore extensions to JUnit for thread tests.
-    }
-
+	public void testGetSingletonInstanceThreadSafety() {
+		// JUnit alone isn't able to handle multiple threads.
+		// Need to explore extensions to JUnit for thread tests.
+	}
 
 }

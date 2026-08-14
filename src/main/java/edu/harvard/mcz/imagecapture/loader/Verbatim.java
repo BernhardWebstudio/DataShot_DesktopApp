@@ -25,13 +25,11 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class Verbatim {
-    public static final String NO_PIN_LABELS = "No Pin Labels";
-    public static final String PARTLY_ILLEGIBLE = "Partly illegible";
-    public static final String ENTIRELY_ILLEGIBLE = "Entirely illegible";
-    public static final String TRUNCATED_BY_IMAGE =
-            "Edge of image truncates label";
-    public static final String NO_LOCALITY_DATA =
-            "[No specific locality data][No higher geography data]";
-    public static final String SEPARATOR = "|";
-    private static final Logger log = LoggerFactory.getLogger(Verbatim.class);
+	public static final String NO_PIN_LABELS = "No Pin Labels";
+	public static final String PARTLY_ILLEGIBLE = "Partly illegible";
+	public static final String ENTIRELY_ILLEGIBLE = "Entirely illegible";
+	public static final String TRUNCATED_BY_IMAGE = "Edge of image truncates label";
+	public static final String NO_LOCALITY_DATA = "[No specific locality data][No higher geography data]";
+	public static final String SEPARATOR = "|";
+	private static final Logger log = LoggerFactory.getLogger(Verbatim.class);
 }

@@ -1,7 +1,7 @@
 package edu.harvard.mcz.imagecapture.interfaces;
 
 public interface ProgressListener {
-    void progressChanged(int progress);
+	void progressChanged(int progress);
 
-    void currentWorkStatusChanged(String status);
+	void currentWorkStatusChanged(String status);
 }

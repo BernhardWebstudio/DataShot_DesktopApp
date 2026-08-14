@@ -22,123 +22,123 @@ import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.ProgressBarRenderer;
-
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 
 /**
  * RunnableJobFrame
  */
 public class RunnableJobFrame extends JFrame {
 
-    private static final long serialVersionUID = -8754185517572012300L;
+	private static final long serialVersionUID = -8754185517572012300L;
 
-    private JPanel jContentPane = null;
-    private JButton jButton = null;
-    private JPanel jPanel = null;
-    private JScrollPane jScrollPane = null;
-    private JTable jTable = null;
+	private JPanel jContentPane = null;
+	private JButton jButton = null;
+	private JPanel jPanel = null;
+	private JScrollPane jScrollPane = null;
+	private JTable jTable = null;
 
-    /**
-     * This is the default constructor
-     */
-    public RunnableJobFrame() {
-        super();
-        initialize();
-    }
+	/**
+	 * This is the default constructor
+	 */
+	public RunnableJobFrame() {
+		super();
+		initialize();
+	}
 
-    /**
-     * This method initializes this
-     *
-     * @return void
-     */
-    private void initialize() {
-        this.setSize(522, 310);
-        this.setPreferredSize(new Dimension(600, 300));
-        this.setContentPane(getJContentPane());
-        this.setTitle("Running Jobs");
-        this.pack();
-    }
+	/**
+	 * This method initializes this
+	 *
+	 * @return void
+	 */
+	private void initialize() {
+		this.setSize(522, 310);
+		this.setPreferredSize(new Dimension(600, 300));
+		this.setContentPane(getJContentPane());
+		this.setTitle("Running Jobs");
+		this.pack();
+	}
 
-    /**
-     * This method initializes jContentPane
-     *
-     * @return javax.swing.JPanel
-     */
-    private JPanel getJContentPane() {
-        if (jContentPane == null) {
-            jContentPane = new JPanel();
-            jContentPane.setLayout(new BorderLayout());
-            jContentPane.add(getJPanel(), BorderLayout.SOUTH);
-            jContentPane.add(getJScrollPane(), BorderLayout.CENTER);
-        }
-        return jContentPane;
-    }
+	/**
+	 * This method initializes jContentPane
+	 *
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJContentPane() {
+		if (jContentPane == null) {
+			jContentPane = new JPanel();
+			jContentPane.setLayout(new BorderLayout());
+			jContentPane.add(getJPanel(), BorderLayout.SOUTH);
+			jContentPane.add(getJScrollPane(), BorderLayout.CENTER);
+		}
+		return jContentPane;
+	}
 
-    /**
-     * This method initializes jButton
-     *
-     * @return javax.swing.JButton
-     */
-    private JButton getJButton() {
-        if (jButton == null) {
-            jButton = new JButton();
-            jButton.setText("Close");
-            jButton.addActionListener(new java.awt.event.ActionListener() {
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    setVisible(false);
-                }
-            });
-        }
-        return jButton;
-    }
+	/**
+	 * This method initializes jButton
+	 *
+	 * @return javax.swing.JButton
+	 */
+	private JButton getJButton() {
+		if (jButton == null) {
+			jButton = new JButton();
+			jButton.setText("Close");
+			jButton.addActionListener(new java.awt.event.ActionListener() {
+				public void actionPerformed(java.awt.event.ActionEvent e) {
+					setVisible(false);
+				}
+			});
+		}
+		return jButton;
+	}
 
-    /**
-     * This method initializes jPanel
-     *
-     * @return javax.swing.JPanel
-     */
-    private JPanel getJPanel() {
-        if (jPanel == null) {
-            jPanel = new JPanel();
-            jPanel.setLayout(new GridBagLayout());
-            jPanel.add(getJButton(), new GridBagConstraints());
-        }
-        return jPanel;
-    }
+	/**
+	 * This method initializes jPanel
+	 *
+	 * @return javax.swing.JPanel
+	 */
+	private JPanel getJPanel() {
+		if (jPanel == null) {
+			jPanel = new JPanel();
+			jPanel.setLayout(new GridBagLayout());
+			jPanel.add(getJButton(), new GridBagConstraints());
+		}
+		return jPanel;
+	}
 
-    /**
-     * This method initializes jScrollPane
-     *
-     * @return javax.swing.JScrollPane
-     */
-    private JScrollPane getJScrollPane() {
-        if (jScrollPane == null) {
-            jScrollPane = new JScrollPane();
-            jScrollPane.setViewportView(getJTable());
-        }
-        return jScrollPane;
-    }
+	/**
+	 * This method initializes jScrollPane
+	 *
+	 * @return javax.swing.JScrollPane
+	 */
+	private JScrollPane getJScrollPane() {
+		if (jScrollPane == null) {
+			jScrollPane = new JScrollPane();
+			jScrollPane.setViewportView(getJTable());
+		}
+		return jScrollPane;
+	}
 
-    /**
-     * This method initializes jTable
-     *
-     * @return javax.swing.JTable
-     */
-    private JTable getJTable() {
-        if (jTable == null) {
-            jTable = new JTable(Singleton.getSingletonInstance().getJobList());
-            jTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-            jTable.getColumn(" ").setCellRenderer(new ButtonRenderer("Cancel"));
-            jTable.getColumn(" ").setCellEditor(new ButtonEditor(ButtonEditor.ACTION_CANCEL_JOB, this));
-            //jTable.setDefaultRenderer(Integer.class, new ButtonRenderer("Cancel"));
-            //jTable.setDefaultEditor(Integer.class, new ButtonEditor(ButtonEditor.ACTION_CANCEL_JOB,this));
-            // jTable.setDefaultRenderer(int.class, new ProgressBarRenderer());
-            jTable.getColumn("Progress").setCellRenderer(new ProgressBarRenderer());
-            int characterWidth = Singleton.getSingletonInstance().getCharacterWidth();
-            jTable.getColumnModel().getColumn(0).setPreferredWidth(characterWidth * 6);
-        }
-        return jTable;
-    }
+	/**
+	 * This method initializes jTable
+	 *
+	 * @return javax.swing.JTable
+	 */
+	private JTable getJTable() {
+		if (jTable == null) {
+			jTable = new JTable(Singleton.getSingletonInstance().getJobList());
+			jTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
+			jTable.getColumn(" ").setCellRenderer(new ButtonRenderer("Cancel"));
+			jTable.getColumn(" ").setCellEditor(new ButtonEditor(ButtonEditor.ACTION_CANCEL_JOB, this));
+			// jTable.setDefaultRenderer(Integer.class, new ButtonRenderer("Cancel"));
+			// jTable.setDefaultEditor(Integer.class, new
+			// ButtonEditor(ButtonEditor.ACTION_CANCEL_JOB,this));
+			// jTable.setDefaultRenderer(int.class, new ProgressBarRenderer());
+			jTable.getColumn("Progress").setCellRenderer(new ProgressBarRenderer());
+			int characterWidth = Singleton.getSingletonInstance().getCharacterWidth();
+			jTable.getColumnModel().getColumn(0).setPreferredWidth(characterWidth * 6);
+		}
+		return jTable;
+	}
 
-}  //  @jve:decl-index=0:visual-constraint="10,10"
+} // @jve:decl-index=0:visual-constraint="10,10"

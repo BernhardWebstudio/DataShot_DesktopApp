@@ -25,27 +25,26 @@ import edu.harvard.mcz.imagecapture.entity.UnitTrayLabel;
  */
 public class QREncoder {
 
-    /**
-     * @param args
-     */
-    public static void main(String[] args) {
-        UnitTrayLabel label = new UnitTrayLabel();
-        label.setDrawerNumber("112.5");
-        label.setFamily("Family");
-        label.setSubfamily("");
-        label.setTribe("");
-        label.setGenus("Generic");
-        label.setSpecificEpithet("Specific");
-        label.setSubspecificEpithet("subspecificEpithet");
-        label.setInfraspecificEpithet("");
-        label.setInfraspecificRank("");
-        label.setAuthorship("");
+	/**
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		UnitTrayLabel label = new UnitTrayLabel();
+		label.setDrawerNumber("112.5");
+		label.setFamily("Family");
+		label.setSubfamily("");
+		label.setTribe("");
+		label.setGenus("Generic");
+		label.setSpecificEpithet("Specific");
+		label.setSubspecificEpithet("subspecificEpithet");
+		label.setInfraspecificEpithet("");
+		label.setInfraspecificRank("");
+		label.setAuthorship("");
 
-        LabelEncoder encoder = new LabelEncoder(label);
+		LabelEncoder encoder = new LabelEncoder(label);
 
-        //TODO: iText for pdf?
+		// TODO: iText for pdf?
 
-
-    }
+	}
 
 }

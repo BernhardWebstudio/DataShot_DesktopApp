@@ -21,46 +21,48 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 /**
- * AllTests invokes the suite of unit tests for edu.harvard.mcz.imagecapture classes.
+ * AllTests invokes the suite of unit tests for edu.harvard.mcz.imagecapture
+ * classes.
  * <p>
- * AllTests includes class constants for resources within edu.harvard.mcz.imagecapture.tests.resources
- * that are used repeatedly in the unit tests themselves.
+ * AllTests includes class constants for resources within
+ * edu.harvard.mcz.imagecapture.tests.resources that are used repeatedly in the
+ * unit tests themselves.
  */
 public class AllTests {
 
-    // Filename constants for tests
-    public static final String FILE_VALID_BARCODE_FILENAME = "141515321.jpg";
-    // Classpath resource lookup always uses '/' separators, even on Windows.
-    public static final String FILE_VALID_BARCODE_PATH = "resources/";
-    public static final String FILE_VALID_BARCODE = FILE_VALID_BARCODE_PATH + FILE_VALID_BARCODE_FILENAME;
-    public static final String BARCODE_IN_FILE_VALID_BARCODE = "141515321";
-    public static final String FILE_INVALID_NAME = FILE_VALID_BARCODE_PATH + "nosuchfile.bad";
-    public static final String FILE_EMPTY = FILE_VALID_BARCODE_PATH + "emptyfile.jpg";
+	// Filename constants for tests
+	public static final String FILE_VALID_BARCODE_FILENAME = "141515321.jpg";
+	// Classpath resource lookup always uses '/' separators, even on Windows.
+	public static final String FILE_VALID_BARCODE_PATH = "resources/";
+	public static final String FILE_VALID_BARCODE = FILE_VALID_BARCODE_PATH + FILE_VALID_BARCODE_FILENAME;
+	public static final String BARCODE_IN_FILE_VALID_BARCODE = "141515321";
+	public static final String FILE_INVALID_NAME = FILE_VALID_BARCODE_PATH + "nosuchfile.bad";
+	public static final String FILE_EMPTY = FILE_VALID_BARCODE_PATH + "emptyfile.jpg";
 
-    /**
-     * Run the JUnit tests (but not integration tests).
-     *
-     * @return Test
-     */
-    public static Test suite() {
-        TestSuite suite = new TestSuite("Tests in edu.harvard.mcz.imagecapture.tests");
-        //$JUnit-BEGIN$
-        suite.addTestSuite(TestBarcodeScanning.class);
-        suite.addTestSuite(TestOfSingleton.class);
-        // suite.addTestSuite(TestOfPositionTemplate.class);
-        // suite.addTestSuite(TestOfCandidateImageFile.class);
-        // suite.addTestSuite(TestOfTemplateDetection.class);
-        suite.addTestSuite(TestOfUnitTrayLabel.class);
-        suite.addTestSuite(TestOfUnitTrayLabelParser.class);
-        suite.addTestSuite(TestOfSpecimen.class);
-        suite.addTestSuite(TestOfImageCaptureProperties.class);
-        suite.addTestSuite(TestMCZENTBarcodeMatching.class);
-        suite.addTestSuite(TestETHZBarcodeMatching.class);
-        suite.addTestSuite(TestofHashUtility.class);
-        suite.addTestSuite(TestOfUserRoles.class);
-        suite.addTestSuite(TestOfPasswordComplexity.class);
-        //$JUnit-END$
-        return suite;
-    }
+	/**
+	 * Run the JUnit tests (but not integration tests).
+	 *
+	 * @return Test
+	 */
+	public static Test suite() {
+		TestSuite suite = new TestSuite("Tests in edu.harvard.mcz.imagecapture.tests");
+		// $JUnit-BEGIN$
+		suite.addTestSuite(TestBarcodeScanning.class);
+		suite.addTestSuite(TestOfSingleton.class);
+		// suite.addTestSuite(TestOfPositionTemplate.class);
+		// suite.addTestSuite(TestOfCandidateImageFile.class);
+		// suite.addTestSuite(TestOfTemplateDetection.class);
+		suite.addTestSuite(TestOfUnitTrayLabel.class);
+		suite.addTestSuite(TestOfUnitTrayLabelParser.class);
+		suite.addTestSuite(TestOfSpecimen.class);
+		suite.addTestSuite(TestOfImageCaptureProperties.class);
+		suite.addTestSuite(TestMCZENTBarcodeMatching.class);
+		suite.addTestSuite(TestETHZBarcodeMatching.class);
+		suite.addTestSuite(TestofHashUtility.class);
+		suite.addTestSuite(TestOfUserRoles.class);
+		suite.addTestSuite(TestOfPasswordComplexity.class);
+		// $JUnit-END$
+		return suite;
+	}
 
 }

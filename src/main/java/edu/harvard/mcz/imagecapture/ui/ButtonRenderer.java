@@ -18,47 +18,49 @@
  */
 package edu.harvard.mcz.imagecapture.ui;
 
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;
-import java.awt.*;
 
 /**
- * ButtonRenderer works together with ButonEditor and a TableModel that implements
- * isCellEditable() for relevant cells to produce a clickable button in a cell.
+ * ButtonRenderer works together with ButonEditor and a TableModel that
+ * implements isCellEditable() for relevant cells to produce a clickable button
+ * in a cell.
  *
  * @see edu.harvard.mcz.imagecapture.ui.ButtonEditor
  */
 public class ButtonRenderer extends JButton implements TableCellRenderer {
 
-    private static final long serialVersionUID = 7522359895927187088L;
-    JButton thisButton = null;
-    private String buttonText = "Edit";
+	private static final long serialVersionUID = 7522359895927187088L;
+	JButton thisButton = null;
+	private String buttonText = "Edit";
 
-    public ButtonRenderer() {
-    }
+	public ButtonRenderer() {
+	}
 
-    public ButtonRenderer(String aButtonText) {
-        buttonText = aButtonText;
-    }
+	public ButtonRenderer(String aButtonText) {
+		buttonText = aButtonText;
+	}
 
-    /* (non-Javadoc)
-     * @see javax.swing.table.TableCellRenderer#getTableCellRendererComponent(javax.swing.JTable, java.lang.Object, boolean, boolean, int, int)
-     */
-    @Override
-    public Component getTableCellRendererComponent(JTable table, Object value,
-                                                   boolean isSelected, boolean hasFocus, int row, int column) {
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see
+	 * javax.swing.table.TableCellRenderer#getTableCellRendererComponent(javax.swing
+	 * .JTable, java.lang.Object, boolean, boolean, int, int)
+	 */
+	@Override
+	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+			int row, int column) {
 
-        if (thisButton == null) {
-            // only need to create one instance of a button for this
-            // instance of ButtonRenderer.
-            thisButton = new JButton();
-            thisButton.setText(buttonText);
-        }
-        thisButton.setEnabled(isSelected);
-        return thisButton;
-    }
+		if (thisButton == null) {
+			// only need to create one instance of a button for this
+			// instance of ButtonRenderer.
+			thisButton = new JButton();
+			thisButton.setText(buttonText);
+		}
+		thisButton.setEnabled(isSelected);
+		return thisButton;
+	}
 
 }
-
-
-

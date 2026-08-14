@@ -18,35 +18,35 @@
 package edu.harvard.mcz.imagecapture.exceptions;
 
 /**
- * Exeptions produced by trying to create a specimen record when a record
- * for that specimen already exists.
+ * Exeptions produced by trying to create a specimen record when a record for
+ * that specimen already exists.
  */
 public class SpecimenExistsException extends Exception {
 
-    private static final long serialVersionUID = 931483814304020341L;
+	private static final long serialVersionUID = 931483814304020341L;
 
-    /**
-     *
-     */
-    public SpecimenExistsException() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 *
+	 */
+	public SpecimenExistsException() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
-    /**
-     * @param message
-     * @param cause
-     */
-    public SpecimenExistsException(String message, Throwable cause) {
-        super(message, cause);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param message
+	 * @param cause
+	 */
+	public SpecimenExistsException(String message, Throwable cause) {
+		super(message, cause);
+		// TODO Auto-generated constructor stub
+	}
 
-    /**
-     * @param message
-     */
-    public SpecimenExistsException(String message) {
-        super(message);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param message
+	 */
+	public SpecimenExistsException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
 }

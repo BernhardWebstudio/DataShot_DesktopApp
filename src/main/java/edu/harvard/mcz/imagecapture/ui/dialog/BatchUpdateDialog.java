@@ -3,213 +3,212 @@ package edu.harvard.mcz.imagecapture.ui.dialog;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.utility.CastUtility;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
 public class BatchUpdateDialog extends JDialog {
-    private static final Logger log =
-            LoggerFactory.getLogger(MaliaStatisticsDialog.class);
-    private JPanel jContentPanel;
-    private JTextField valueToJTextField;
-    private JTextField valueFromJTextField;
-    private JComboBox fieldSelectionJComboBox;
-    private JButton applyChangeJButton;
+	private static final Logger log = LoggerFactory.getLogger(MaliaStatisticsDialog.class);
+	private JPanel jContentPanel;
+	private JTextField valueToJTextField;
+	private JTextField valueFromJTextField;
+	private JComboBox fieldSelectionJComboBox;
+	private JButton applyChangeJButton;
 
-    public BatchUpdateDialog(Frame owner) {
-        super(owner);
-        initialize();
-    }
+	public BatchUpdateDialog(Frame owner) {
+		super(owner);
+		initialize();
+	}
 
-    private void initialize() {
-        this.setTitle("Batch Update Field");
-        this.setContentPane(getJContentPane());
-        this.pack();
-    }
+	private void initialize() {
+		this.setTitle("Batch Update Field");
+		this.setContentPane(getJContentPane());
+		this.pack();
+	}
 
-    private JPanel getJContentPane() {
-        if (jContentPanel == null) {
+	private JPanel getJContentPane() {
+		if (jContentPanel == null) {
 
-            jContentPanel = new JPanel(new BorderLayout());
-            JPanel jScrollPaneContent = new JPanel();
-            jScrollPaneContent.setLayout(new MigLayout("wrap 2, fillx"));
-            // add contents
-            String[] labels = {
-                    "Change Field",
-                    "Where value is",
-                    "To value"
-            };
-            Component[] fields = {
-                    this.getFieldSelectionJComboBox(),
-                    this.getValueFromJTextField(),
-                    this.getValueToJTextField()
-            };
+			jContentPanel = new JPanel(new BorderLayout());
+			JPanel jScrollPaneContent = new JPanel();
+			jScrollPaneContent.setLayout(new MigLayout("wrap 2, fillx"));
+			// add contents
+			String[] labels = {"Change Field", "Where value is", "To value"};
+			Component[] fields = {this.getFieldSelectionJComboBox(), this.getValueFromJTextField(),
+					this.getValueToJTextField()};
 
-            assert (fields.length == labels.length);
-            for (int i = 0; i < labels.length; i++) {
-                JLabel label = new JLabel();
-                label.setText(labels[i].concat(":"));
-                jScrollPaneContent.add(label, "right"); //"align label");
-                jScrollPaneContent.add(fields[i], "grow");
-            }
+			assert (fields.length == labels.length);
+			for (int i = 0; i < labels.length; i++) {
+				JLabel label = new JLabel();
+				label.setText(labels[i].concat(":"));
+				jScrollPaneContent.add(label, "right"); // "align label");
+				jScrollPaneContent.add(fields[i], "grow");
+			}
 
-            jScrollPaneContent.add(getDoChangeButton(), "wrap");
+			jScrollPaneContent.add(getDoChangeButton(), "wrap");
 
-            // add the scroll pane content to the panel
-            JScrollPane scrollPane = new JScrollPane(jScrollPaneContent);
-            scrollPane.setBorder(BorderFactory.createEmptyBorder());
-            jContentPanel.add(scrollPane, BorderLayout.CENTER);
-        }
-        return jContentPanel;
-    }
+			// add the scroll pane content to the panel
+			JScrollPane scrollPane = new JScrollPane(jScrollPaneContent);
+			scrollPane.setBorder(BorderFactory.createEmptyBorder());
+			jContentPanel.add(scrollPane, BorderLayout.CENTER);
+		}
+		return jContentPanel;
+	}
 
-    private JButton getDoChangeButton() {
-        if (applyChangeJButton == null) {
-            applyChangeJButton = new JButton("Apply Change");
+	private JButton getDoChangeButton() {
+		if (applyChangeJButton == null) {
+			applyChangeJButton = new JButton("Apply Change");
 
-            applyChangeJButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent actionEvent) {
-                    doApplyChange();
-                }
-            });
-        }
-        return applyChangeJButton;
-    }
+			applyChangeJButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent actionEvent) {
+					doApplyChange();
+				}
+			});
+		}
+		return applyChangeJButton;
+	}
 
-    private JTextField getValueToJTextField() {
-        if (valueToJTextField == null) {
-            valueToJTextField = new JTextField();
-        }
-        return valueToJTextField;
-    }
+	private JTextField getValueToJTextField() {
+		if (valueToJTextField == null) {
+			valueToJTextField = new JTextField();
+		}
+		return valueToJTextField;
+	}
 
-    private JTextField getValueFromJTextField() {
-        if (valueFromJTextField == null) {
-            valueFromJTextField = new JTextField();
-        }
-        return valueFromJTextField;
-    }
+	private JTextField getValueFromJTextField() {
+		if (valueFromJTextField == null) {
+			valueFromJTextField = new JTextField();
+		}
+		return valueFromJTextField;
+	}
 
-    private JComboBox getFieldSelectionJComboBox() {
-        if (fieldSelectionJComboBox == null) {
-            fieldSelectionJComboBox = new JComboBox();
-            for (UpdateableField field : UpdateableField.values()) {
-                fieldSelectionJComboBox.addItem(field);
-            }
-        }
-        return fieldSelectionJComboBox;
-    }
+	private JComboBox getFieldSelectionJComboBox() {
+		if (fieldSelectionJComboBox == null) {
+			fieldSelectionJComboBox = new JComboBox();
+			for (UpdateableField field : UpdateableField.values()) {
+				fieldSelectionJComboBox.addItem(field);
+			}
+		}
+		return fieldSelectionJComboBox;
+	}
 
-    private void doApplyChange() {
-        String fieldName = ((UpdateableField) this.getFieldSelectionJComboBox().getSelectedItem()).getDatabaseDescription();
-        String conditionQuery = "WHERE " + fieldName + " LIKE :fromValue"; //  AND (s.nahimaExported = FALSE OR s.nahimaExported IS NULL)
+	private void doApplyChange() {
+		String fieldName = ((UpdateableField) this.getFieldSelectionJComboBox().getSelectedItem())
+				.getDatabaseDescription();
+		String conditionQuery = "WHERE " + fieldName + " LIKE :fromValue"; // AND (s.nahimaExported = FALSE OR
+																			// s.nahimaExported IS NULL)
 
-        Session session;
-        try {
-            session = HibernateUtil.getSessionFactory().getCurrentSession();
-            session.beginTransaction();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Failed to start Database transaction: " + e.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+		Session session;
+		try {
+			session = HibernateUtil.getSessionFactory().getCurrentSession();
+			session.beginTransaction();
+		} catch (Exception e) {
+			JOptionPane.showMessageDialog(this, "Failed to start Database transaction: " + e.getMessage(), "Error",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 
-        try {
-            Query selectQuery;
-            // count how many specimen would be influenced
-            if (fieldName.startsWith("s.")) {
-                selectQuery = session.createQuery("SELECT count(DISTINCT s.specimenId) FROM Specimen s LEFT JOIN s.collectors AS c " + conditionQuery);
-            } else if (fieldName.startsWith("c.")) {
-                selectQuery = session.createQuery("SELECT count(DISTINCT c.collectorId) FROM Collector c LEFT JOIN c.specimen AS s " + conditionQuery);
-            } else {
-                log.error("Unhandled updateable field prefix");
-                return;
-            }
+		try {
+			Query selectQuery;
+			// count how many specimen would be influenced
+			if (fieldName.startsWith("s.")) {
+				selectQuery = session
+						.createQuery("SELECT count(DISTINCT s.specimenId) FROM Specimen s LEFT JOIN s.collectors AS c "
+								+ conditionQuery);
+			} else if (fieldName.startsWith("c.")) {
+				selectQuery = session
+						.createQuery("SELECT count(DISTINCT c.collectorId) FROM Collector c LEFT JOIN c.specimen AS s "
+								+ conditionQuery);
+			} else {
+				log.error("Unhandled updateable field prefix");
+				return;
+			}
 
-            selectQuery.setParameter("fromValue", getValueFromJTextField().getText());
-            String nrOfChanges = CastUtility.castToString(selectQuery.getSingleResult());
-            // ask for confirmation
-            int dialogButton = JOptionPane.YES_NO_OPTION;
-            int dialogResult = JOptionPane.showConfirmDialog(this, nrOfChanges + " Specimen would be affected. Continue?", "Warning", dialogButton);
-            if (!(dialogResult == JOptionPane.YES_OPTION)) {
-                log.debug("Will not do batch update. Confirmation denied.");
-                session.getTransaction().rollback();
-                return;
-            }
-        } catch (Exception e) {
-            log.error("Failed to do query (" + conditionQuery + ") update: " + e.getMessage(), e);
-            JOptionPane.showMessageDialog(this, "Failed to query: " + e.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
-            session.getTransaction().rollback();
-            return;
-        }
+			selectQuery.setParameter("fromValue", getValueFromJTextField().getText());
+			String nrOfChanges = CastUtility.castToString(selectQuery.getSingleResult());
+			// ask for confirmation
+			int dialogButton = JOptionPane.YES_NO_OPTION;
+			int dialogResult = JOptionPane.showConfirmDialog(this,
+					nrOfChanges + " Specimen would be affected. Continue?", "Warning", dialogButton);
+			if (!(dialogResult == JOptionPane.YES_OPTION)) {
+				log.debug("Will not do batch update. Confirmation denied.");
+				session.getTransaction().rollback();
+				return;
+			}
+		} catch (Exception e) {
+			log.error("Failed to do query (" + conditionQuery + ") update: " + e.getMessage(), e);
+			JOptionPane.showMessageDialog(this, "Failed to query: " + e.getMessage(), "Error",
+					JOptionPane.ERROR_MESSAGE);
+			session.getTransaction().rollback();
+			return;
+		}
 
-        try {
-            Query updateQuery;
-            // do the change
-            if (fieldName.startsWith("s.")) {
-                updateQuery = session.createQuery("UPDATE Specimen s SET " + fieldName + "= :toValue, dateLastUpdated = NOW(), lastUpdatedBy = :updatingUser " + conditionQuery);
-                updateQuery.setParameter("fromValue", getValueFromJTextField().getText());
-                updateQuery.setParameter("updatingUser", Singleton.getSingletonInstance().getUser().getFullname());
-            } else if (fieldName.startsWith("c.")) {
-                Query idsToUpdateQuery = session.createQuery("SELECT c.collectorId FROM Collector c LEFT JOIN c.specimen AS s " + conditionQuery);
-                idsToUpdateQuery.setParameter("fromValue", getValueFromJTextField().getText());
-                updateQuery = session.createQuery("UPDATE Collector c SET " + fieldName + " = :toValue WHERE c.collectorId IN (:toUpdateIds)");
-                updateQuery.setParameter("toUpdateIds", idsToUpdateQuery.getResultList());
-            } else {
-                log.error("Unhandled updateable field prefix");
-                return;
-            }
-            updateQuery.setParameter("toValue", getValueToJTextField().getText());
+		try {
+			Query updateQuery;
+			// do the change
+			if (fieldName.startsWith("s.")) {
+				updateQuery = session.createQuery("UPDATE Specimen s SET " + fieldName
+						+ "= :toValue, dateLastUpdated = NOW(), lastUpdatedBy = :updatingUser " + conditionQuery);
+				updateQuery.setParameter("fromValue", getValueFromJTextField().getText());
+				updateQuery.setParameter("updatingUser", Singleton.getSingletonInstance().getUser().getFullname());
+			} else if (fieldName.startsWith("c.")) {
+				Query idsToUpdateQuery = session.createQuery(
+						"SELECT c.collectorId FROM Collector c LEFT JOIN c.specimen AS s " + conditionQuery);
+				idsToUpdateQuery.setParameter("fromValue", getValueFromJTextField().getText());
+				updateQuery = session.createQuery(
+						"UPDATE Collector c SET " + fieldName + " = :toValue WHERE c.collectorId IN (:toUpdateIds)");
+				updateQuery.setParameter("toUpdateIds", idsToUpdateQuery.getResultList());
+			} else {
+				log.error("Unhandled updateable field prefix");
+				return;
+			}
+			updateQuery.setParameter("toValue", getValueToJTextField().getText());
 
-            int numAffected = updateQuery.executeUpdate();
-            session.getTransaction().commit();
-            JOptionPane.showMessageDialog(this, "Changed " + numAffected + " values", "Success",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception e) {
-            log.error("Failed to do query update: " + e.getMessage(), e);
-            JOptionPane.showMessageDialog(this, "Failed to do update: " + e.getMessage(), "Error",
-                    JOptionPane.ERROR_MESSAGE);
-            session.getTransaction().rollback();
-            return;
-        }
-    }
+			int numAffected = updateQuery.executeUpdate();
+			session.getTransaction().commit();
+			JOptionPane.showMessageDialog(this, "Changed " + numAffected + " values", "Success",
+					JOptionPane.INFORMATION_MESSAGE);
+		} catch (Exception e) {
+			log.error("Failed to do query update: " + e.getMessage(), e);
+			JOptionPane.showMessageDialog(this, "Failed to do update: " + e.getMessage(), "Error",
+					JOptionPane.ERROR_MESSAGE);
+			session.getTransaction().rollback();
+			return;
+		}
+	}
 
-    protected enum UpdateableField {
-        COUNTRY("Country", "s.country"),
-        PROVINCE("Province (Primary Division)", "s.primaryDivison"),
-        SPECIFIC_LOCALITY("Specific locality", "s.specificLocality"),
-        VERBATIM_LOCALITY("Verbatim locality", "s.verbatimLocality"),
-        COLLECTOR("Collector's Name", "c.collectorName"),
-        COLLECTION("Collection", "s.collection");
+	protected enum UpdateableField {
+		COUNTRY("Country", "s.country"), PROVINCE("Province (Primary Division)", "s.primaryDivison"), SPECIFIC_LOCALITY(
+				"Specific locality",
+				"s.specificLocality"), VERBATIM_LOCALITY("Verbatim locality", "s.verbatimLocality"), COLLECTOR(
+						"Collector's Name", "c.collectorName"), COLLECTION("Collection", "s.collection");
 
-        private final String name;
-        private final String dbDescription;
+		private final String name;
+		private final String dbDescription;
 
-        UpdateableField(String name, String dbDescription) {
-            this.name = name;
-            this.dbDescription = dbDescription;
-        }
+		UpdateableField(String name, String dbDescription) {
+			this.name = name;
+			this.dbDescription = dbDescription;
+		}
 
-        public String getName() {
-            return this.name;
-        }
+		public String getName() {
+			return this.name;
+		}
 
-        public String getDatabaseDescription() {
-            return this.dbDescription;
-        }
+		public String getDatabaseDescription() {
+			return this.dbDescription;
+		}
 
-        @Override
-        public String toString() {
-            return name;
-        }
-    }
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
 }

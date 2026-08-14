@@ -22,20 +22,20 @@ import junit.framework.TestCase;
 
 public class TestOfPasswordComplexity extends TestCase {
 
-    public void testTestProposedPassword() {
-        String proposal = "A";
-        Users user = new Users();
-        user.setUsername("username");
-        assertFalse(Users.testProposedPassword(proposal, user.getUsername()));
+	public void testTestProposedPassword() {
+		String proposal = "A";
+		Users user = new Users();
+		user.setUsername("username");
+		assertFalse(Users.testProposedPassword(proposal, user.getUsername()));
 
-        proposal = "A9a";
-        assertFalse(Users.testProposedPassword(proposal, user.getUsername()));
+		proposal = "A9a";
+		assertFalse(Users.testProposedPassword(proposal, user.getUsername()));
 
-        proposal = user.getUsername();
-        assertFalse(Users.testProposedPassword(proposal, user.getUsername()));
+		proposal = user.getUsername();
+		assertFalse(Users.testProposedPassword(proposal, user.getUsername()));
 
-        proposal = "123456789Aa";
-        assertTrue(Users.testProposedPassword(proposal, user.getUsername()));
-    }
+		proposal = "123456789Aa";
+		assertTrue(Users.testProposedPassword(proposal, user.getUsername()));
+	}
 
 }

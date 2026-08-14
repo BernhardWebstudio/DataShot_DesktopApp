@@ -23,38 +23,38 @@ package edu.harvard.mcz.imagecapture.exceptions;
  */
 public class ImageLoadException extends Exception {
 
-    private static final long serialVersionUID = -5230684298896173469L;
+	private static final long serialVersionUID = -5230684298896173469L;
 
-    /**
-     *
-     */
-    public ImageLoadException() {
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 *
+	 */
+	public ImageLoadException() {
+		// TODO Auto-generated constructor stub
+	}
 
-    /**
-     * @param message
-     */
-    public ImageLoadException(String message) {
-        super(message);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param message
+	 */
+	public ImageLoadException(String message) {
+		super(message);
+		// TODO Auto-generated constructor stub
+	}
 
-    /**
-     * @param cause
-     */
-    public ImageLoadException(Throwable cause) {
-        super(cause);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param cause
+	 */
+	public ImageLoadException(Throwable cause) {
+		super(cause);
+		// TODO Auto-generated constructor stub
+	}
 
-    /**
-     * @param message
-     * @param cause
-     */
-    public ImageLoadException(String message, Throwable cause) {
-        super(message, cause);
-        // TODO Auto-generated constructor stub
-    }
+	/**
+	 * @param message
+	 * @param cause
+	 */
+	public ImageLoadException(String message, Throwable cause) {
+		super(message, cause);
+		// TODO Auto-generated constructor stub
+	}
 
 }

@@ -18,68 +18,71 @@
  */
 package edu.harvard.mcz.imagecapture.interfaces;
 
-import java.io.IOException;
 import java.util.Date;
 
-
 /**
- * Interface for batch scans of files and other operations for which starting the operation,
- * stopping, the operation, and finding out the status and completeness of the operation may
- * be desirable.  All implementations should have some non trivial start() method, but may or
- * may not have functional code behind the other methods.
+ * Interface for batch scans of files and other operations for which starting
+ * the operation, stopping, the operation, and finding out the status and
+ * completeness of the operation may be desirable. All implementations should
+ * have some non trivial start() method, but may or may not have functional code
+ * behind the other methods.
  * <p>
  * TODO: Break this into multiple interfaces (StartableJob, StoppableJob, etc.)
  */
 public interface RunnableJob {
 
-    /**
-     * Start the RunnableJob.
-     */
-    void start() throws Exception;
+	/**
+	 * Start the RunnableJob.
+	 */
+	void start() throws Exception;
 
-    /**
-     * If possible, pause the job.  May be implemented to always return false and take no action.
-     *
-     * @return true if job has been stopped, false otherwise.
-     */
-    boolean stop();
+	/**
+	 * If possible, pause the job. May be implemented to always return false and
+	 * take no action.
+	 *
+	 * @return true if job has been stopped, false otherwise.
+	 */
+	boolean stop();
 
-    /**
-     * If possible, permanently stop the job.  May be implemented to always return false and take no action.
-     *
-     * @return true if job has been canceled, false otherwise.
-     */
-    boolean cancel();
+	/**
+	 * If possible, permanently stop the job. May be implemented to always return
+	 * false and take no action.
+	 *
+	 * @return true if job has been canceled, false otherwise.
+	 */
+	boolean cancel();
 
-    /**
-     * Report on the status of the job.
-     *
-     * @return integer from the RunStatus.STATUS_ constants indicating current status of the job.
-     */
-    int getStatus();
+	/**
+	 * Report on the status of the job.
+	 *
+	 * @return integer from the RunStatus.STATUS_ constants indicating current
+	 *         status of the job.
+	 */
+	int getStatus();
 
-    /**
-     * Report the percentage of the job that has been completed.
-     *
-     * @return integer between 0 and 100 representing the percent of the job that is complete.
-     */
-    int percentComplete();
+	/**
+	 * Report the percentage of the job that has been completed.
+	 *
+	 * @return integer between 0 and 100 representing the percent of the job that is
+	 *         complete.
+	 */
+	int percentComplete();
 
-    boolean registerListener(RunnerListener aJobListener);
+	boolean registerListener(RunnerListener aJobListener);
 
-    /**
-     * Get a brief description of what sort of job this is in
-     * a form understandable by a user.
-     *
-     * @return a string representing to the user what sort of job this is.
-     */
-    String getName();
+	/**
+	 * Get a brief description of what sort of job this is in a form understandable
+	 * by a user.
+	 *
+	 * @return a string representing to the user what sort of job this is.
+	 */
+	String getName();
 
-    /**
-     * Get the timestamp for when this job was started.
-     *
-     * @return a date representing the time this job started.
-     */
-    Date getStartTime();
+	/**
+	 * Get the timestamp for when this job was started.
+	 *
+	 * @return a date representing the time this job started.
+	 */
+	Date getStartTime();
 
 }

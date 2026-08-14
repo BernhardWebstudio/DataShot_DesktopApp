@@ -2,7 +2,6 @@ package edu.harvard.mcz.imagecapture.entity;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.Singleton;
-
 import java.io.Serializable;
 import java.util.Date;
 
@@ -11,127 +10,128 @@ import java.util.Date;
  */
 public class Tracking implements Serializable {
 
-    private static final long serialVersionUID = 3045144335474980280L;
+	private static final long serialVersionUID = 3045144335474980280L;
 
-    private Long trackingId;
-    private Specimen specimen;
-    private String user;
-    private String eventType;
-    private Date eventDateTime;
-    private String datashotVersion;
-    private Boolean couldCopyPaste;
+	private Long trackingId;
+	private Specimen specimen;
+	private String user;
+	private String eventType;
+	private Date eventDateTime;
+	private String datashotVersion;
+	private Boolean couldCopyPaste;
 
-    /**
-     * Utility constructor if no date is needed
-     */
-    public Tracking() {
-        try {
-            this.datashotVersion = ImageCaptureApp.getAppVersion();
-            this.couldCopyPaste = Singleton.getSingletonInstance().getUser() != null && Singleton.getSingletonInstance().getUser().canCopyPaste();
-        } catch (Exception e) {
-        }
-    }
+	/**
+	 * Utility constructor if no date is needed
+	 */
+	public Tracking() {
+		try {
+			this.datashotVersion = ImageCaptureApp.getAppVersion();
+			this.couldCopyPaste = Singleton.getSingletonInstance().getUser() != null
+					&& Singleton.getSingletonInstance().getUser().canCopyPaste();
+		} catch (Exception e) {
+		}
+	}
 
-    public Tracking(Specimen specimen, Date eventDateTime) {
-        this();
-        this.specimen = specimen;
-        if (eventDateTime == null) {
-            this.eventDateTime = new Date();
-        } else {
-            this.eventDateTime = (Date) eventDateTime.clone();
-        }
-    }
+	public Tracking(Specimen specimen, Date eventDateTime) {
+		this();
+		this.specimen = specimen;
+		if (eventDateTime == null) {
+			this.eventDateTime = new Date();
+		} else {
+			this.eventDateTime = (Date) eventDateTime.clone();
+		}
+	}
 
-    public Tracking(Specimen specimen, String user, String eventType) {
-        this(specimen, user, eventType, null);
-    }
+	public Tracking(Specimen specimen, String user, String eventType) {
+		this(specimen, user, eventType, null);
+	}
 
-    public Tracking(Specimen specimen, String user, String eventType,
-                    Date eventDateTime) {
-        this(specimen, eventDateTime);
-        this.user = user;
-        this.eventType = eventType;
-    }
+	public Tracking(Specimen specimen, String user, String eventType, Date eventDateTime) {
+		this(specimen, eventDateTime);
+		this.user = user;
+		this.eventType = eventType;
+	}
 
-    public Boolean isCouldCopyPaste() {
-        return couldCopyPaste;
-    }
+	public Boolean isCouldCopyPaste() {
+		return couldCopyPaste;
+	}
 
-    public void setCouldCopyPaste(Boolean couldCopyPaste) {
-        this.couldCopyPaste = couldCopyPaste;
-    }
+	public void setCouldCopyPaste(Boolean couldCopyPaste) {
+		this.couldCopyPaste = couldCopyPaste;
+	}
 
-    public Long getTrackingId() {
-        return this.trackingId;
-    }
+	public Long getTrackingId() {
+		return this.trackingId;
+	}
 
-    public void setTrackingId(Long trackingId) {
-        this.trackingId = trackingId;
-    }
+	public void setTrackingId(Long trackingId) {
+		this.trackingId = trackingId;
+	}
 
-    public Specimen getSpecimen() {
-        return this.specimen;
-    }
+	public Specimen getSpecimen() {
+		return this.specimen;
+	}
 
-    public void setSpecimen(Specimen specimen) {
-        this.specimen = specimen;
-    }
+	public void setSpecimen(Specimen specimen) {
+		this.specimen = specimen;
+	}
 
-    public String getUser() {
-        return this.user;
-    }
+	public String getUser() {
+		return this.user;
+	}
 
-    public void setUser(String user) {
-        this.user = user;
-    }
+	public void setUser(String user) {
+		this.user = user;
+	}
 
-    public String getEventType() {
-        return this.eventType;
-    }
+	public String getEventType() {
+		return this.eventType;
+	}
 
-    public void setEventType(String eventType) {
-        this.eventType = eventType;
-    }
+	public void setEventType(String eventType) {
+		this.eventType = eventType;
+	}
 
-    public String getDatashotVersion() {
-        return datashotVersion;
-    }
+	public String getDatashotVersion() {
+		return datashotVersion;
+	}
 
-    public void setDatashotVersion(String datashotVersion) {
-        this.datashotVersion = datashotVersion;
-    }
+	public void setDatashotVersion(String datashotVersion) {
+		this.datashotVersion = datashotVersion;
+	}
 
-    public Date getEventDateTime() {
-        Date result = this.eventDateTime;
-        return result;
-    }
+	public Date getEventDateTime() {
+		Date result = this.eventDateTime;
+		return result;
+	}
 
-    public void setEventDateTime(Date eventDateTime) {
-        if (eventDateTime == null) {
-            this.eventDateTime = null;
-        } else {
-            this.eventDateTime = (Date) eventDateTime.clone();
-        }
-    }
+	public void setEventDateTime(Date eventDateTime) {
+		if (eventDateTime == null) {
+			this.eventDateTime = null;
+		} else {
+			this.eventDateTime = (Date) eventDateTime.clone();
+		}
+	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Tracking tracking = (Tracking) o;
-        if (trackingId != null && tracking.trackingId != null) {
-            return java.util.Objects.equals(trackingId, tracking.trackingId);
-        }
-        return java.util.Objects.equals(user, tracking.user) &&
-                java.util.Objects.equals(eventType, tracking.eventType) &&
-                java.util.Objects.equals(eventDateTime, tracking.eventDateTime);
-    }
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Tracking tracking = (Tracking) o;
+		if (trackingId != null && tracking.trackingId != null) {
+			return java.util.Objects.equals(trackingId, tracking.trackingId);
+		}
+		return java.util.Objects.equals(user, tracking.user) && java.util.Objects.equals(eventType, tracking.eventType)
+				&& java.util.Objects.equals(eventDateTime, tracking.eventDateTime);
+	}
 
-    @Override
-    public int hashCode() {
-        if (trackingId != null) {
-            return java.util.Objects.hash(trackingId);
-        }
-        return java.util.Objects.hash(user, eventType, eventDateTime);
-    }
+	@Override
+	public int hashCode() {
+		if (trackingId != null) {
+			return java.util.Objects.hash(trackingId);
+		}
+		return java.util.Objects.hash(user, eventType, eventDateTime);
+	}
 }

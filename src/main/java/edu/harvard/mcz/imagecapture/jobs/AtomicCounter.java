@@ -19,219 +19,218 @@
 package edu.harvard.mcz.imagecapture.jobs;
 
 import edu.harvard.mcz.imagecapture.interfaces.ScanCounterInterface;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Counter
  */
 public class AtomicCounter implements ScanCounterInterface {
 
-    private final StringBuffer errorReport;
-    private AtomicInteger totalCount = new AtomicInteger(0);
-    private AtomicInteger filesSeen = new AtomicInteger(0);
-    private AtomicInteger filesDatabased = new AtomicInteger(0);
-    private AtomicInteger filesExisting = new AtomicInteger(0);
-    private AtomicInteger filesFailed = new AtomicInteger(0);
-    private AtomicInteger directories = new AtomicInteger(0);
-    private AtomicInteger directoriesFailed = new AtomicInteger(0);
-    private AtomicInteger specimensExisting = new AtomicInteger(0);
-    private AtomicInteger specimensUpdated = new AtomicInteger(0);
-    private AtomicInteger specimensDatabased = new AtomicInteger(0);
-    private AtomicInteger filesUpdated = new AtomicInteger(0);
-    private List<RunnableJobError> errors = null;
-    private ArrayList<String> barcodes = null;
+	private final StringBuffer errorReport;
+	private AtomicInteger totalCount = new AtomicInteger(0);
+	private AtomicInteger filesSeen = new AtomicInteger(0);
+	private AtomicInteger filesDatabased = new AtomicInteger(0);
+	private AtomicInteger filesExisting = new AtomicInteger(0);
+	private AtomicInteger filesFailed = new AtomicInteger(0);
+	private AtomicInteger directories = new AtomicInteger(0);
+	private AtomicInteger directoriesFailed = new AtomicInteger(0);
+	private AtomicInteger specimensExisting = new AtomicInteger(0);
+	private AtomicInteger specimensUpdated = new AtomicInteger(0);
+	private AtomicInteger specimensDatabased = new AtomicInteger(0);
+	private AtomicInteger filesUpdated = new AtomicInteger(0);
+	private List<RunnableJobError> errors = null;
+	private ArrayList<String> barcodes = null;
 
-    private static final Logger log = LoggerFactory.getLogger(AtomicCounter.class.getName());
+	private static final Logger log = LoggerFactory.getLogger(AtomicCounter.class.getName());
 
-    public AtomicCounter() {
-        totalCount = new AtomicInteger(0);
-        filesSeen = new AtomicInteger(0);
-        filesDatabased = new AtomicInteger(0);
-        filesExisting = new AtomicInteger(0);
-        filesFailed = new AtomicInteger(0);
-        specimensDatabased = new AtomicInteger(0);
-        specimensExisting = new AtomicInteger(0);
-        directories = new AtomicInteger(0);
-        directoriesFailed = new AtomicInteger(0);
-        specimensUpdated = new AtomicInteger(0);
-        filesUpdated = new AtomicInteger(0);
-        errorReport = new StringBuffer();
-        errors = new ArrayList<RunnableJobError>();
-        barcodes = new ArrayList<String>();
-    }
+	public AtomicCounter() {
+		totalCount = new AtomicInteger(0);
+		filesSeen = new AtomicInteger(0);
+		filesDatabased = new AtomicInteger(0);
+		filesExisting = new AtomicInteger(0);
+		filesFailed = new AtomicInteger(0);
+		specimensDatabased = new AtomicInteger(0);
+		specimensExisting = new AtomicInteger(0);
+		directories = new AtomicInteger(0);
+		directoriesFailed = new AtomicInteger(0);
+		specimensUpdated = new AtomicInteger(0);
+		filesUpdated = new AtomicInteger(0);
+		errorReport = new StringBuffer();
+		errors = new ArrayList<RunnableJobError>();
+		barcodes = new ArrayList<String>();
+	}
 
-    @Override
-    public void logBarcode(String barcode) {
-        barcodes.add(barcode);
-        log.debug("Logging barcode: {}, have {} now", barcode, barcodes.size());
-    }
+	@Override
+	public void logBarcode(String barcode) {
+		barcodes.add(barcode);
+		log.debug("Logging barcode: {}, have {} now", barcode, barcodes.size());
+	}
 
-    public synchronized void appendError(RunnableJobError anError) {
-        log.debug("appendError: {}", anError);
-        errors.add(anError);
-        errorReport.append(anError.toString());
-        errorReport.append("\n");
-    }
+	public synchronized void appendError(RunnableJobError anError) {
+		log.debug("appendError: {}", anError);
+		errors.add(anError);
+		errorReport.append(anError.toString());
+		errorReport.append("\n");
+	}
 
-    public String getErrorReport() {
-        return errorReport.toString();
-    }
+	public String getErrorReport() {
+		return errorReport.toString();
+	}
 
-    public void incrementSpecimenDatabased() {
-        specimensDatabased.incrementAndGet();
-    }
+	public void incrementSpecimenDatabased() {
+		specimensDatabased.incrementAndGet();
+	}
 
-    public void incrementSpecimenExisting() {
-        specimensExisting.incrementAndGet();
-    }
+	public void incrementSpecimenExisting() {
+		specimensExisting.incrementAndGet();
+	}
 
-    public void incrementTotal() {
-        totalCount.incrementAndGet();
-    }
+	public void incrementTotal() {
+		totalCount.incrementAndGet();
+	}
 
-    public void incrementFilesSeen() {
-        filesSeen.incrementAndGet();
-    }
+	public void incrementFilesSeen() {
+		filesSeen.incrementAndGet();
+	}
 
-    /**
-     * TODO: automatically increment upon addition of an error, filter by filename if necessary for the number of failed files
-     */
-    public void incrementFilesFailed() {
-        filesFailed.incrementAndGet();
-    }
+	/**
+	 * TODO: automatically increment upon addition of an error, filter by filename
+	 * if necessary for the number of failed files
+	 */
+	public void incrementFilesFailed() {
+		filesFailed.incrementAndGet();
+	}
 
-    public void incrementFilesDatabased() {
-        filesDatabased.incrementAndGet();
-    }
+	public void incrementFilesDatabased() {
+		filesDatabased.incrementAndGet();
+	}
 
-    public void incrementFilesExisting() {
-        filesExisting.incrementAndGet();
-    }
+	public void incrementFilesExisting() {
+		filesExisting.incrementAndGet();
+	}
 
-    public void incrementDirectories() {
-        directories.incrementAndGet();
-    }
+	public void incrementDirectories() {
+		directories.incrementAndGet();
+	}
 
-    public void incrementDirectoriesFailed() {
-        directoriesFailed.incrementAndGet();
-    }
+	public void incrementDirectoriesFailed() {
+		directoriesFailed.incrementAndGet();
+	}
 
-    public int getSpecimens() {
-        return specimensDatabased.get();
-    }
+	public int getSpecimens() {
+		return specimensDatabased.get();
+	}
 
-    public int getTotal() {
-        return totalCount.get();
-    }
+	public int getTotal() {
+		return totalCount.get();
+	}
 
-    /**
-     * @return the files checked
-     */
-    public int getFilesSeen() {
-        return filesSeen.get();
-    }
+	/**
+	 * @return the files checked
+	 */
+	public int getFilesSeen() {
+		return filesSeen.get();
+	}
 
-    /**
-     * @return the files for which new database records were created
-     */
-    public int getFilesDatabased() {
-        return filesDatabased.get();
-    }
+	/**
+	 * @return the files for which new database records were created
+	 */
+	public int getFilesDatabased() {
+		return filesDatabased.get();
+	}
 
-    /**
-     * @return the files for which database records allready existed
-     */
-    public int getFilesExisting() {
-        return filesExisting.get();
-    }
+	/**
+	 * @return the files for which database records allready existed
+	 */
+	public int getFilesExisting() {
+		return filesExisting.get();
+	}
 
-    /**
-     * @return the files for which a check for information needed to create a record Failed.
-     */
-    public int getFilesFailed() {
-        return filesFailed.get();
-    }
+	/**
+	 * @return the files for which a check for information needed to create a record
+	 *         Failed.
+	 */
+	public int getFilesFailed() {
+		return filesFailed.get();
+	}
 
+	/**
+	 * @return the directories
+	 */
+	public int getDirectories() {
+		return directories.get();
+	}
 
-    /**
-     * @return the directories
-     */
-    public int getDirectories() {
-        return directories.get();
-    }
+	/**
+	 * @return the directoriesFailed
+	 */
+	public int getDirectoriesFailed() {
+		return directoriesFailed.get();
+	}
 
+	/**
+	 * @return the specimensUpdated
+	 */
+	public int getSpecimensUpdated() {
+		return specimensUpdated.get();
+	}
 
-    /**
-     * @return the directoriesFailed
-     */
-    public int getDirectoriesFailed() {
-        return directoriesFailed.get();
-    }
+	/**
+	 * @return
+	 */
+	public int getSpecimensExisting() {
+		return specimensExisting.get();
+	}
 
-    /**
-     * @return the specimensUpdated
-     */
-    public int getSpecimensUpdated() {
-        return specimensUpdated.get();
-    }
+	/**
+	 *
+	 */
+	public void incrementSpecimensUpdated() {
+		this.specimensUpdated.incrementAndGet();
+	}
 
-    /**
-     * @return
-     */
-    public int getSpecimensExisting() {
-        return specimensExisting.get();
-    }
+	/**
+	 * @return the filesUpdated
+	 */
+	public int getFilesUpdated() {
+		return filesUpdated.get();
+	}
 
-    /**
-     *
-     */
-    public void incrementSpecimensUpdated() {
-        this.specimensUpdated.incrementAndGet();
-    }
+	/**
+	 *
+	 */
+	public void incrementFilesUpdated() {
+		this.filesUpdated.incrementAndGet();
+	}
 
-    /**
-     * @return the filesUpdated
-     */
-    public int getFilesUpdated() {
-        return filesUpdated.get();
-    }
+	public List<RunnableJobError> getErrors() {
+		return errors;
+	}
 
-    /**
-     *
-     */
-    public void incrementFilesUpdated() {
-        this.filesUpdated.incrementAndGet();
-    }
+	@Override
+	public List<String> getBarcodes() {
+		return barcodes;
+	}
 
-    public List<RunnableJobError> getErrors() {
-        return errors;
-    }
+	@Override
+	public String toString() {
+		String report = "Scanned " + this.getDirectories() + " directories.\n";
+		report += "Scanned  " + this.getFilesSeen() + " files.\n";
+		report += "Created  " + this.getFilesDatabased() + " new image records.\n";
+		if (this.getFilesUpdated() > 0) {
+			report += "Updated  " + this.getFilesUpdated() + " image records.\n";
 
-    @Override
-    public List<String> getBarcodes() {
-        return barcodes;
-    }
+		}
+		report += "Created  " + this.getSpecimens() + " new specimen records.\n";
+		if (this.getSpecimensUpdated() > 0) {
+			report += "Updated  " + this.getSpecimensUpdated() + " specimen records.\n";
 
-    @Override
-    public String toString() {
-        String report = "Scanned " + this.getDirectories() + " directories.\n";
-        report += "Scanned  " + this.getFilesSeen() + " files.\n";
-        report += "Created  " + this.getFilesDatabased() + " new image records.\n";
-        if (this.getFilesUpdated() > 0) {
-            report += "Updated  " + this.getFilesUpdated() + " image records.\n";
-
-        }
-        report += "Created  " + this.getSpecimens() + " new specimen records.\n";
-        if (this.getSpecimensUpdated() > 0) {
-            report += "Updated  " + this.getSpecimensUpdated() + " specimen records.\n";
-
-        }
-        report += "Found " + this.getFilesFailed() + " files with problems.\n";
-        return report;
-    }
+		}
+		report += "Found " + this.getFilesFailed() + " files with problems.\n";
+		return report;
+	}
 }

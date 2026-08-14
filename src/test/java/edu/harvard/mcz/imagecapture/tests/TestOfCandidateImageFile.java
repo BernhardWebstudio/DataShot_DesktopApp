@@ -20,95 +20,101 @@ package edu.harvard.mcz.imagecapture.tests;
 import edu.harvard.mcz.imagecapture.CandidateImageFile;
 import edu.harvard.mcz.imagecapture.PositionTemplate;
 import edu.harvard.mcz.imagecapture.exceptions.UnreadableFileException;
+import java.io.File;
 import junit.framework.TestCase;
 import org.junit.experimental.categories.Category;
 
-import java.io.File;
-
 /**
- * TestOfCandidateImageFile tests construction and some capabilities of CandidateImageFile.
+ * TestOfCandidateImageFile tests construction and some capabilities of
+ * CandidateImageFile.
  *
  * @see edu.harvard.mcz.imagecapture.CandidateImageFile
  */
 @Category(IntegrationTest.class)
 public class TestOfCandidateImageFile extends TestCase {
 
-    /**
-     * @param name
-     */
-    public TestOfCandidateImageFile(String name) {
-        super(name);
-    }
+	/**
+	 * @param name
+	 */
+	public TestOfCandidateImageFile(String name) {
+		super(name);
+	}
 
-    /**
-     * Test method for {@link edu.harvard.mcz.imagecapture.CandidateImageFile#CandidateImageFile(java.io.File, edu.harvard.mcz.imagecapture.PositionTemplate)}.
-     */
-    public void testCandidateImageFile() {
-        CandidateImageFile file;
-        try {
-            file = new CandidateImageFile(new File(this.getClass().getResource(AllTests.FILE_EMPTY).getFile()), new PositionTemplate());
-            file.getClass(); // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
-        } catch (UnreadableFileException e) {
-            fail("Threw unexpected UnreadableFileException. " + e.getMessage());
-        }
-        try {
-            file = new CandidateImageFile(new File(AllTests.FILE_INVALID_NAME), new PositionTemplate());
-            file.getClass(); // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
-            fail("Failed to throw UnreadableFileException for nonexistent file.");
-        } catch (UnreadableFileException e) {
-            // pass
-        }
-    }
+	/**
+	 * Test method for
+	 * {@link edu.harvard.mcz.imagecapture.CandidateImageFile#CandidateImageFile(java.io.File, edu.harvard.mcz.imagecapture.PositionTemplate)}.
+	 */
+	public void testCandidateImageFile() {
+		CandidateImageFile file;
+		try {
+			file = new CandidateImageFile(new File(this.getClass().getResource(AllTests.FILE_EMPTY).getFile()),
+					new PositionTemplate());
+			file.getClass(); // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
+		} catch (UnreadableFileException e) {
+			fail("Threw unexpected UnreadableFileException. " + e.getMessage());
+		}
+		try {
+			file = new CandidateImageFile(new File(AllTests.FILE_INVALID_NAME), new PositionTemplate());
+			file.getClass(); // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
+			fail("Failed to throw UnreadableFileException for nonexistent file.");
+		} catch (UnreadableFileException e) {
+			// pass
+		}
+	}
 
-    /**
-     * Test method for {@link edu.harvard.mcz.imagecapture.CandidateImageFile#isFileReadable()}.
-     */
-    public void testIsFileReadable() {
-        CandidateImageFile file = null;
-        try {
-            file = new CandidateImageFile(new File(this.getClass().getResource(AllTests.FILE_EMPTY).getFile()), new PositionTemplate());
-        } catch (UnreadableFileException e) {
-            fail("Threw unexpected UnreadableFileException. " + e.getMessage());
-        }
-        boolean ok = false;
-        try {
-            ok = file.isFileReadable();
-        } catch (UnreadableFileException e) {
-            fail("Threw unexpected UnreadableFileException. " + e.getMessage());
-        }
-        assertTrue(ok);
-        try {
-            file = new CandidateImageFile(new File(AllTests.FILE_INVALID_NAME), new PositionTemplate());
-            file.getClass();  // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
-            fail("Failed to throw UnreadableFileException for invalid filename");
-            try {
-                ok = file.isFileReadable();
-                fail("Failed to throw UnreadableFileException for invalid filename");
-            } catch (UnreadableFileException e) {
-                // pass - sort of, but we shouldn't have been able to get here.
-            }
-        } catch (UnreadableFileException e) {
-            // pass
-        }
-    }
+	/**
+	 * Test method for
+	 * {@link edu.harvard.mcz.imagecapture.CandidateImageFile#isFileReadable()}.
+	 */
+	public void testIsFileReadable() {
+		CandidateImageFile file = null;
+		try {
+			file = new CandidateImageFile(new File(this.getClass().getResource(AllTests.FILE_EMPTY).getFile()),
+					new PositionTemplate());
+		} catch (UnreadableFileException e) {
+			fail("Threw unexpected UnreadableFileException. " + e.getMessage());
+		}
+		boolean ok = false;
+		try {
+			ok = file.isFileReadable();
+		} catch (UnreadableFileException e) {
+			fail("Threw unexpected UnreadableFileException. " + e.getMessage());
+		}
+		assertTrue(ok);
+		try {
+			file = new CandidateImageFile(new File(AllTests.FILE_INVALID_NAME), new PositionTemplate());
+			file.getClass(); // added to suppress FindBugs DLS_DEAD_LOCAL_STORE
+			fail("Failed to throw UnreadableFileException for invalid filename");
+			try {
+				ok = file.isFileReadable();
+				fail("Failed to throw UnreadableFileException for invalid filename");
+			} catch (UnreadableFileException e) {
+				// pass - sort of, but we shouldn't have been able to get here.
+			}
+		} catch (UnreadableFileException e) {
+			// pass
+		}
+	}
 
-    /**
-     * Test method for {@link edu.harvard.mcz.imagecapture.CandidateImageFile#setFile(java.io.File, edu.harvard.mcz.imagecapture.PositionTemplate)}.
-     */
-    public void testSetFile() {
-        CandidateImageFile file;
-        try {
-            file = new CandidateImageFile(new File(this.getClass().getResource(AllTests.FILE_EMPTY).getFile()), new PositionTemplate());
-            try {
-                file.setFile(new File(AllTests.FILE_INVALID_NAME), new PositionTemplate());
-                fail("Failed to throw UnreadableFileException for invalid filename.");
-            } catch (UnreadableFileException e) {
-                // pass
-            }
-        } catch (UnreadableFileException e) {
-            fail("Threw unexpected UnreadableFileException. " + e.getMessage());
-        }
+	/**
+	 * Test method for
+	 * {@link edu.harvard.mcz.imagecapture.CandidateImageFile#setFile(java.io.File, edu.harvard.mcz.imagecapture.PositionTemplate)}.
+	 */
+	public void testSetFile() {
+		CandidateImageFile file;
+		try {
+			file = new CandidateImageFile(new File(this.getClass().getResource(AllTests.FILE_EMPTY).getFile()),
+					new PositionTemplate());
+			try {
+				file.setFile(new File(AllTests.FILE_INVALID_NAME), new PositionTemplate());
+				fail("Failed to throw UnreadableFileException for invalid filename.");
+			} catch (UnreadableFileException e) {
+				// pass
+			}
+		} catch (UnreadableFileException e) {
+			fail("Threw unexpected UnreadableFileException. " + e.getMessage());
+		}
 
-    }
+	}
 
 }

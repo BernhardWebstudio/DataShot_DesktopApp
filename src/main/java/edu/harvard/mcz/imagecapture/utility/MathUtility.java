@@ -23,15 +23,17 @@ package edu.harvard.mcz.imagecapture.utility;
  *
  */
 public class MathUtility {
-    /**
-     * Test for equality of double precision numbers with values near 1
-     *
-     * @param a one double to test
-     * @param b the other double to test.
-     * @return True if a and b are equal when rounded out to ten decimal places.
-     */
-    public static boolean equalTenPlaces(double a, double b) {
-        return Math.round(a * 10000000000d) == Math.round(b * 10000000000d);
-    }
+	/**
+	 * Test for equality of double precision numbers with values near 1
+	 *
+	 * @param a
+	 *            one double to test
+	 * @param b
+	 *            the other double to test.
+	 * @return True if a and b are equal when rounded out to ten decimal places.
+	 */
+	public static boolean equalTenPlaces(double a, double b) {
+		return Math.round(a * 10000000000d) == Math.round(b * 10000000000d);
+	}
 
 }

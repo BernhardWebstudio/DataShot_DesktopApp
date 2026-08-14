@@ -23,70 +23,70 @@ package edu.harvard.mcz.imagecapture.interfaces;
  * Intended as the return interface from a taxon name parser, and thus doesn't
  * include methods to set a string to parse or to parse the string, these can be
  * included in the instantiation of a concrete instance of a parser class, for
- * example:
- * TaxonNameReturner parser = new ConcreteTaxonNameParser(aStringToParse);
- * String authorship = parser.getAuthorship();
+ * example: TaxonNameReturner parser = new
+ * ConcreteTaxonNameParser(aStringToParse); String authorship =
+ * parser.getAuthorship();
  */
 public interface TaxonNameReturner {
 
-    /**
-     * @return the authorship
-     */
-    String getAuthorship();
+	/**
+	 * @return the authorship
+	 */
+	String getAuthorship();
 
-    /**
-     * @return the family
-     */
-    String getFamily();
+	/**
+	 * @return the family
+	 */
+	String getFamily();
 
-    /**
-     * @return the subfamily
-     */
-    String getSubfamily();
+	/**
+	 * @return the subfamily
+	 */
+	String getSubfamily();
 
-    /**
-     * @return the tribe
-     */
-    String getTribe();
+	/**
+	 * @return the tribe
+	 */
+	String getTribe();
 
-    /**
-     * @return the genus
-     */
-    String getGenus();
+	/**
+	 * @return the genus
+	 */
+	String getGenus();
 
-    /**
-     * @return the specificEpithet
-     */
-    String getSpecificEpithet();
+	/**
+	 * @return the specificEpithet
+	 */
+	String getSpecificEpithet();
 
-    /**
-     * @return the subspecificEpithet
-     */
-    String getSubspecificEpithet();
+	/**
+	 * @return the subspecificEpithet
+	 */
+	String getSubspecificEpithet();
 
-    /**
-     * @return the infraspecificEpithet
-     */
-    String getInfraspecificEpithet();
+	/**
+	 * @return the infraspecificEpithet
+	 */
+	String getInfraspecificEpithet();
 
-    /**
-     * @return the infraspecificRank
-     */
-    String getInfraspecificRank();
+	/**
+	 * @return the infraspecificRank
+	 */
+	String getInfraspecificRank();
 
-    /**
-     * @return the determiner
-     */
-    String getIdentifiedBy();
+	/**
+	 * @return the determiner
+	 */
+	String getIdentifiedBy();
 
-    /**
-     * @return the determiner
-     */
-    String getIdentifiedDate();
+	/**
+	 * @return the determiner
+	 */
+	String getIdentifiedDate();
 
-    /**
-     * @return the sex (male, female, worker)
-     */
-    String getSex();
+	/**
+	 * @return the sex (male, female, worker)
+	 */
+	String getSex();
 
 }

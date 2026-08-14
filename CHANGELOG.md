@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.1
+* [[`0e90afc150`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/0e90afc150)] - **style**: apply Spotless Eclipse code formatting across repository (Tim Bernhard)
+* [[`de6618644e`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/de6618644e)] - Update changelog to publish Version v2.0.0 (Tim Bernhard)
+
+
 ## v2.0.0
 * [[`ef0ed909c4`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/ef0ed909c4)] - **ci**: configure Spotless, pre-commit hooks, and modernize GitHub Actions (Tim Bernhard)
 * [[`46df16b962`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/46df16b962)] - chore(rewrite): configure AutoFormat, OrderImports, and RemoveUnusedImports recipes (Tim Bernhard)

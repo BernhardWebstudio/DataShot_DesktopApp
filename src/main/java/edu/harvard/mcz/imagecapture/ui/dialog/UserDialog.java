@@ -22,13 +22,15 @@ import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.entity.Users;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycle;
+import edu.harvard.mcz.imagecapture.ui.binding.FormBindingContext;
 import java.awt.*;
 import java.util.List;
 import javax.swing.*;
+import net.miginfocom.swing.MigLayout;
 
 /**
  * UserDialog is a user interface for editing metadata about participants in the
- * project.
+ * project, using declarative form bindings.
  *
  * @see Users
  */
@@ -36,32 +38,25 @@ public class UserDialog extends JDialog {
 
 	private static final long serialVersionUID = -8881672324009775369L;
 
-	private UserDialog thisDialog = null; // allow reference to this in button event methods
-	private JPanel jPanel = null;
-	private JPanel jPanel1 = null;
-	private JButton jButtonSave = null;
-	private JButton jButtonCancel = null;
-	private JPanel jPanel2 = null;
-	private JLabel jLabel = null;
-	private JTextField jTextFieldUsername = null;
-	private JLabel jLabel1 = null;
-	private JTextField jTextFieldFullname = null;
-	private JTextField jTextFieldDescription = null;
-	private JLabel jLabel2 = null;
-	private JLabel jLabelMessage = null;
-	private Users userToEdit = null;
+	private final UserDialog thisDialog;
+	private final FormBindingContext<Users> bindingContext;
+	private final Users userToEdit;
 	private boolean wasCancled = true;
+
+	private JLabel jLabelMessage;
+	private JTextField jTextFieldUsername;
 
 	/**
 	 * Default constructor. Dialog is built as modal off of MainFrame.
 	 */
 	public UserDialog() {
-		super(Singleton.getSingletonInstance().getMainFrame(), true); // construct as modal dialog
+		super(Singleton.getSingletonInstance().getMainFrame(), true);
 		thisDialog = this;
 		userToEdit = new Users();
 		userToEdit.setRole("undefined");
+		bindingContext = new FormBindingContext<>(Users.class, true);
 		initialize();
-		setValues();
+		bindingContext.readFrom(userToEdit);
 	}
 
 	/**
@@ -69,12 +64,15 @@ public class UserDialog extends JDialog {
 	 * MainFrame.
 	 */
 	public UserDialog(Users aUser) {
-		super(Singleton.getSingletonInstance().getMainFrame(), true); // construct as modal dialog
+		super(Singleton.getSingletonInstance().getMainFrame(), true);
 		thisDialog = this;
-		userToEdit = aUser;
+		userToEdit = aUser != null ? aUser : new Users();
+		bindingContext = new FormBindingContext<>(Users.class, true);
 		initialize();
-		setValues();
-		jTextFieldUsername.setEditable(false);
+		bindingContext.readFrom(userToEdit);
+		if (jTextFieldUsername != null) {
+			jTextFieldUsername.setEditable(false);
+		}
 	}
 
 	/**
@@ -91,219 +89,63 @@ public class UserDialog extends JDialog {
 		return wasCancled;
 	}
 
-	private void setValues() {
-		if (userToEdit != null) {
-			jTextFieldUsername.setText(userToEdit.getUsername());
-			jTextFieldFullname.setText(userToEdit.getFullname());
-			jTextFieldDescription.setText(userToEdit.getDescription());
-		}
-	}
-
-	/**
-	 * This method initializes this, setting up the layout of the dialog. Built with
-	 * VisualEditor in Eclipse.
-	 */
 	private void initialize() {
-		this.setSize(new Dimension(504, 188));
-		this.setPreferredSize(new Dimension(504, 188));
+		this.setSize(new Dimension(504, 210));
+		this.setPreferredSize(new Dimension(504, 210));
 		this.setTitle("Details about a person");
-		this.setContentPane(getJPanel());
+
+		JPanel mainPanel = new JPanel(new BorderLayout());
+
+		JPanel formPanel = new JPanel(new MigLayout("wrap 2, fillx, insets 10"));
+		jLabelMessage = new JLabel("Who is this?");
+		formPanel.add(jLabelMessage, "span 2, center, gapbottom 10");
+
+		formPanel.add(new JLabel("Database Username:"), "tag label, right");
+		jTextFieldUsername = bindingContext.bindTextField("username", Users::getUsername, Users::setUsername);
+		formPanel.add(jTextFieldUsername, "grow");
+
+		formPanel.add(new JLabel("Full Name:"), "tag label, right");
+		formPanel.add(bindingContext.bindTextField("fullname", Users::getFullname, Users::setFullname), "grow");
+
+		formPanel.add(new JLabel("About this person:"), "tag label, right");
+		formPanel.add(bindingContext.bindTextField("description", Users::getDescription, Users::setDescription),
+				"grow");
+
+		mainPanel.add(formPanel, BorderLayout.CENTER);
+
+		JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JButton jButtonCancel = new JButton("Cancel");
+		jButtonCancel.addActionListener(e -> thisDialog.setVisible(false));
+		buttonPanel.add(jButtonCancel);
+
+		JButton jButtonSave = new JButton("Save");
+		jButtonSave.addActionListener(e -> {
+			bindingContext.writeTo(userToEdit);
+			userToEdit.setRole("undefined");
+			UsersLifeCycle u = new UsersLifeCycle();
+			Users check = new Users();
+			check.setUsername(userToEdit.getUsername());
+			try {
+				List<Users> usersToCheck = u.findByNames(check.getUsername(), check.getFullname());
+				if (usersToCheck.isEmpty()) {
+					u.persist(userToEdit);
+				} else {
+					u.attachDirty(userToEdit);
+				}
+				wasCancled = false;
+				thisDialog.setVisible(false);
+			} catch (SaveFailedException ex) {
+				setMessage("Unable to save this record. Name or About may be too long; " + ex.getMessage());
+			}
+		});
+		buttonPanel.add(jButtonSave);
+		getRootPane().setDefaultButton(jButtonSave);
+
+		mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+		this.setContentPane(mainPanel);
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setLocation((screenSize.width - this.getWidth()) / 2, (screenSize.height - this.getHeight()) / 2);
-	}
-
-	/**
-	 * This method initializes jPanel
-	 *
-	 * @return javax.swing.JPanel
-	 */
-	private JPanel getJPanel() {
-		if (jPanel == null) {
-			jPanel = new JPanel();
-			jPanel.setLayout(new BorderLayout());
-			jPanel.add(getJPanel1(), BorderLayout.SOUTH);
-			jPanel.add(getJPanel2(), BorderLayout.CENTER);
-		}
-		return jPanel;
-	}
-
-	/**
-	 * This method initializes jPanel1
-	 *
-	 * @return javax.swing.JPanel
-	 */
-	private JPanel getJPanel1() {
-		if (jPanel1 == null) {
-			GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-			gridBagConstraints1.gridx = 1;
-			GridBagConstraints gridBagConstraints = new GridBagConstraints();
-			gridBagConstraints.gridx = 0;
-			gridBagConstraints.gridy = 0;
-			jPanel1 = new JPanel();
-			jPanel1.setLayout(new GridBagLayout());
-			jPanel1.add(getJButtonSave(), gridBagConstraints1);
-			jPanel1.add(getJButtonCancel(), gridBagConstraints);
-		}
-		return jPanel1;
-	}
-
-	/**
-	 * This method initializes jButtonSave
-	 *
-	 * @return javax.swing.JButton
-	 */
-	private JButton getJButtonSave() {
-		if (jButtonSave == null) {
-			jButtonSave = new JButton();
-			jButtonSave.setText("Save");
-			jButtonSave.addActionListener(new java.awt.event.ActionListener() {
-				public void actionPerformed(java.awt.event.ActionEvent e) {
-					userToEdit.setFullname(jTextFieldFullname.getText());
-					userToEdit.setUsername(jTextFieldUsername.getText());
-					userToEdit.setDescription(jTextFieldDescription.getText());
-					userToEdit.setRole("undefined");
-					UsersLifeCycle u = new UsersLifeCycle();
-					// find out if a matching record exists, if it does, update it, if it doesn't
-					// add one.
-					Users check = new Users();
-					check.setUsername(userToEdit.getUsername());
-					try {
-						List<Users> usersToCheck = u.findByNames(check.getUsername(), check.getFullname());
-						if (usersToCheck.isEmpty()) {
-							u.persist(userToEdit);
-						} else {
-							u.attachDirty(userToEdit);
-						}
-						wasCancled = false;
-						thisDialog.setVisible(false);
-					} catch (SaveFailedException ex) {
-						setMessage("Unable to save this record. Name or About may be too long; " + ex.getMessage());
-					}
-				}
-			});
-		}
-		return jButtonSave;
-	}
-
-	/**
-	 * This method initializes jButtonCancel
-	 *
-	 * @return javax.swing.JButton
-	 */
-	private JButton getJButtonCancel() {
-		if (jButtonCancel == null) {
-			jButtonCancel = new JButton();
-			jButtonCancel.setText("Cancel");
-			jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
-				public void actionPerformed(java.awt.event.ActionEvent e) {
-					thisDialog.setVisible(false);
-				}
-			});
-		}
-		return jButtonCancel;
-	}
-
-	/**
-	 * This method initializes jPanel2
-	 *
-	 * @return javax.swing.JPanel
-	 */
-	private JPanel getJPanel2() {
-		if (jPanel2 == null) {
-			GridBagConstraints gridBagConstraints8 = new GridBagConstraints();
-			gridBagConstraints8.gridx = 0;
-			gridBagConstraints8.anchor = GridBagConstraints.NORTH;
-			gridBagConstraints8.gridwidth = 2;
-			gridBagConstraints8.weightx = 0.0;
-			gridBagConstraints8.insets = new Insets(0, 0, 20, 0);
-			gridBagConstraints8.fill = GridBagConstraints.NONE;
-			gridBagConstraints8.gridy = 0;
-			jLabelMessage = new JLabel();
-			jLabelMessage.setText("Who is this?");
-			GridBagConstraints gridBagConstraints6 = new GridBagConstraints();
-			gridBagConstraints6.gridx = 0;
-			gridBagConstraints6.anchor = GridBagConstraints.EAST;
-			gridBagConstraints6.gridy = 3;
-			jLabel2 = new JLabel();
-			jLabel2.setText("About this person");
-			GridBagConstraints gridBagConstraints7 = new GridBagConstraints();
-			gridBagConstraints7.fill = GridBagConstraints.BOTH;
-			gridBagConstraints7.gridy = 3;
-			gridBagConstraints7.weightx = 1.0;
-			gridBagConstraints7.anchor = GridBagConstraints.WEST;
-			gridBagConstraints7.gridx = 1;
-			GridBagConstraints gridBagConstraints5 = new GridBagConstraints();
-			gridBagConstraints5.fill = GridBagConstraints.BOTH;
-			gridBagConstraints5.gridy = 2;
-			gridBagConstraints5.weightx = 1.0;
-			gridBagConstraints5.anchor = GridBagConstraints.WEST;
-			gridBagConstraints5.gridx = 1;
-			GridBagConstraints gridBagConstraints4 = new GridBagConstraints();
-			gridBagConstraints4.gridx = 0;
-			gridBagConstraints4.anchor = GridBagConstraints.EAST;
-			gridBagConstraints4.gridy = 2;
-			jLabel1 = new JLabel();
-			jLabel1.setText("Full Name");
-			GridBagConstraints gridBagConstraints3 = new GridBagConstraints();
-			gridBagConstraints3.fill = GridBagConstraints.BOTH;
-			gridBagConstraints3.gridy = 1;
-			gridBagConstraints3.weightx = 1.0;
-			gridBagConstraints3.anchor = GridBagConstraints.WEST;
-			gridBagConstraints3.gridx = 1;
-			GridBagConstraints gridBagConstraints2 = new GridBagConstraints();
-			gridBagConstraints2.gridx = 0;
-			gridBagConstraints2.anchor = GridBagConstraints.EAST;
-			gridBagConstraints2.insets = new Insets(0, 6, 0, 0);
-			gridBagConstraints2.gridy = 1;
-			jLabel = new JLabel();
-			jLabel.setText("Database Username");
-			jPanel2 = new JPanel();
-			jPanel2.setLayout(new GridBagLayout());
-			jPanel2.add(jLabel, gridBagConstraints2);
-			jPanel2.add(getJTextFieldUsername(), gridBagConstraints3);
-			jPanel2.add(jLabel1, gridBagConstraints4);
-			jPanel2.add(getJTextFieldFullname(), gridBagConstraints5);
-			jPanel2.add(getJTextFieldDescription(), gridBagConstraints7);
-			jPanel2.add(jLabel2, gridBagConstraints6);
-			jPanel2.add(jLabelMessage, gridBagConstraints8);
-		}
-		return jPanel2;
-	}
-
-	/**
-	 * This method initializes jTextFieldUsername
-	 *
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getJTextFieldUsername() {
-		if (jTextFieldUsername == null) {
-			jTextFieldUsername = new JTextField();
-		}
-		return jTextFieldUsername;
-	}
-
-	/**
-	 * This method initializes jTextFieldFullname
-	 *
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getJTextFieldFullname() {
-		if (jTextFieldFullname == null) {
-			jTextFieldFullname = new JTextField();
-		}
-		return jTextFieldFullname;
-	}
-
-	/**
-	 * This method initializes jTextFieldDescription
-	 *
-	 * @return javax.swing.JTextField
-	 */
-	private JTextField getJTextFieldDescription() {
-		if (jTextFieldDescription == null) {
-			jTextFieldDescription = new JTextField();
-		}
-		return jTextFieldDescription;
 	}
 
 	/**
@@ -313,7 +155,8 @@ public class UserDialog extends JDialog {
 	 *            the text of the message.
 	 */
 	public void setMessage(String text) {
-		jLabelMessage.setText(text);
+		if (jLabelMessage != null) {
+			jLabelMessage.setText(text);
+		}
 	}
-
-} // @jve:decl-index=0:visual-constraint="10,10"
+}

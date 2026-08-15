@@ -43,7 +43,6 @@ import java.net.URL;
 import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -157,8 +156,7 @@ public class ImageDisplayFrame extends JFrame {
 		ArrayList<ICImage> imageFilesArray = new ArrayList<>(imageFiles);
 		// sort by image id to get oldest first
 		imageFilesArray.sort(Comparator.comparingLong(ICImage::getImageId));
-		ArrayList<String> fileNames = (ArrayList<String>) imageFilesArray.stream().map(ICImage::getFilename)
-				.collect(Collectors.toList());
+		java.util.List<String> fileNames = imageFilesArray.stream().map(ICImage::getFilename).toList();
 		ICImage image = imageFilesArray.get(0);
 		int fileCount = imageFilesArray.size();
 		// TODO: stored path may need separator conversion for different systems.

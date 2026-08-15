@@ -27,7 +27,6 @@ import edu.harvard.mcz.imagecapture.entity.fixed.VerbatimCount;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchRecordException;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchTemplateException;
-import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.dialog.SpecimenPartAttributeDialog;
 import edu.harvard.mcz.imagecapture.ui.dialog.VerbatimCaptureDialog;
@@ -189,20 +188,10 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor,
 								try {
 									SpecimenController sc = new SpecimenController((Specimen) targetId,
 											(SpecimenListTableModel) table.getModel(), table, row, col);
-									if (table.getParent().getParent().getParent().getParent()
-											.getClass() == SpecimenBrowser.class) {
-										sc.addListener((DataChangeListener) table.getParent());
-									} else {
-										Component x = table;
-										boolean done = false;
-										while (!done) {
-											log.debug("Debug {}", x.getParent());
-											x = x.getParent();
-											if (x.getClass() == SpecimenBrowser.class) {
-												sc.addListener((DataChangeListener) x);
-												done = true;
-											}
-										}
+									SpecimenBrowser browser = (SpecimenBrowser) SwingUtilities
+											.getAncestorOfClass(SpecimenBrowser.class, table);
+									if (browser != null) {
+										sc.addListener(browser);
 									}
 									sc.displayInEditor();
 								} catch (ClassCastException eNotSp) {
@@ -286,7 +275,6 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor,
 			}
 			Singleton.getSingletonInstance().getMainFrame()
 					.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-			System.gc();
 		}
 	}
 }

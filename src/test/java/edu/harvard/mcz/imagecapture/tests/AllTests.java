@@ -61,6 +61,7 @@ public class AllTests {
 		suite.addTestSuite(TestofHashUtility.class);
 		suite.addTestSuite(TestOfUserRoles.class);
 		suite.addTestSuite(TestOfPasswordComplexity.class);
+		suite.addTestSuite(TestFormBindingContext.class);
 		// $JUnit-END$
 		return suite;
 	}

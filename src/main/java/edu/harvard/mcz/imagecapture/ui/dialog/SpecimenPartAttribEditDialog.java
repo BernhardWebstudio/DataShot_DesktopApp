@@ -18,173 +18,108 @@
  */
 package edu.harvard.mcz.imagecapture.ui.dialog;
 
-import com.privatejgoodies.forms.layout.ColumnSpec;
-import com.privatejgoodies.forms.layout.FormLayout;
-import com.privatejgoodies.forms.layout.FormSpecs;
-import com.privatejgoodies.forms.layout.RowSpec;
 import edu.harvard.mcz.imagecapture.entity.SpecimenPartAttribute;
 import edu.harvard.mcz.imagecapture.entity.fixed.Caste;
 import edu.harvard.mcz.imagecapture.entity.fixed.LifeStage;
 import edu.harvard.mcz.imagecapture.entity.fixed.Sex;
+import edu.harvard.mcz.imagecapture.ui.binding.FormBindingContext;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.miginfocom.swing.MigLayout;
 
 /**
- *
+ * Dialog for editing a single SpecimenPartAttribute using declarative form
+ * bindings.
  */
 public class SpecimenPartAttribEditDialog extends JDialog {
-	private static final long serialVersionUID = -549010965241755136L;
 
-	private static final Logger log = LoggerFactory.getLogger(SpecimenPartAttribEditDialog.class);
+	private static final long serialVersionUID = -549010965241755136L;
 
 	private final SpecimenPartAttribEditDialog thisDialog;
 	private final SpecimenPartAttribute targetAttribute;
-	private final JPanel contentPanel = new JPanel();
-	private JButton okButton;
+	private final FormBindingContext<SpecimenPartAttribute> bindingContext;
+
 	private JComboBox<String> comboBoxType;
 	private JComboBox<String> comboBoxValue;
-	private JTextField textFieldUnits;
-	private JTextField textFieldRemarks;
 
-	/**
-	 * Create the dialog.
-	 */
 	public SpecimenPartAttribEditDialog() {
-		thisDialog = this;
-		targetAttribute = new SpecimenPartAttribute();
-		init();
+		this(new SpecimenPartAttribute());
 	}
 
 	public SpecimenPartAttribEditDialog(SpecimenPartAttribute attribute) {
-		thisDialog = this;
-		targetAttribute = attribute;
+		this.thisDialog = this;
+		this.targetAttribute = attribute != null ? attribute : new SpecimenPartAttribute();
+		this.bindingContext = new FormBindingContext<>(SpecimenPartAttribute.class, true);
 		init();
-		comboBoxType.setSelectedItem(targetAttribute.getAttributeType());
-		configureComboBoxValue(targetAttribute.getAttributeType());
-		comboBoxValue.setSelectedItem(targetAttribute.getAttributeValue());
-		textFieldUnits.setText(targetAttribute.getAttributeUnits());
-		textFieldRemarks.setText(targetAttribute.getAttributeRemark());
+		bindingContext.readFrom(targetAttribute);
+		if (targetAttribute.getAttributeType() != null) {
+			configureComboBoxValue(targetAttribute.getAttributeType());
+			comboBoxValue.setSelectedItem(targetAttribute.getAttributeValue());
+		}
 	}
 
 	private void init() {
 		setTitle("Edit Part Attribute");
-		setBounds(100, 100, 420, 200);
+		setBounds(100, 100, 440, 230);
 		getContentPane().setLayout(new BorderLayout());
+
+		JPanel contentPanel = new JPanel(new MigLayout("wrap 2, fillx, insets 10"));
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 
-		{
-			JPanel buttonPane = new JPanel();
-			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-			getContentPane().add(buttonPane, BorderLayout.SOUTH);
-			{
-				okButton = new JButton("OK");
-				okButton.setActionCommand("OK");
-				okButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						okButton.grabFocus();
-						if (comboBoxType.getSelectedIndex() > -1) {
-							targetAttribute.setAttributeType(comboBoxType.getSelectedItem().toString());
-						}
-						targetAttribute.setAttributeValue(comboBoxValue.getSelectedItem().toString());
-
-						targetAttribute.setAttributeUnits(textFieldUnits.getText());
-						targetAttribute.setAttributeRemark(textFieldRemarks.getText());
-
-						thisDialog.setVisible(false);
+		contentPanel.add(new JLabel("Attribute Type:"), "tag label, right");
+		comboBoxType = bindingContext.bindComboBox("attributeType",
+				new String[]{"caste", "scientific name", "sex", "life stage"}, SpecimenPartAttribute::getAttributeType,
+				SpecimenPartAttribute::setAttributeType, cb -> cb.addActionListener(e -> {
+					if (cb.getSelectedItem() != null) {
+						configureComboBoxValue(cb.getSelectedItem().toString());
 					}
-				});
-				buttonPane.add(okButton);
-				getRootPane().setDefaultButton(okButton);
-			}
-			{
-				JButton cancelButton = new JButton("Cancel");
-				cancelButton.setActionCommand("Cancel");
-				cancelButton.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						thisDialog.setVisible(false);
-					}
-				});
-				buttonPane.add(cancelButton);
-			}
-		}
-		{
-			JPanel panel = new JPanel();
-			getContentPane().add(panel, BorderLayout.CENTER);
-			panel.setLayout(new FormLayout(
-					new ColumnSpec[]{FormSpecs.RELATED_GAP_COLSPEC, FormSpecs.DEFAULT_COLSPEC,
-							FormSpecs.RELATED_GAP_COLSPEC, ColumnSpec.decode("default:grow"),},
-					new RowSpec[]{FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-							FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC,
-							FormSpecs.DEFAULT_ROWSPEC, FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,
-							FormSpecs.RELATED_GAP_ROWSPEC, FormSpecs.DEFAULT_ROWSPEC,}));
-			{
-				JLabel lblAttributeType = new JLabel("Attribute Type");
-				panel.add(lblAttributeType, "2, 2, right, default");
-			}
-			{
-				comboBoxType = new JComboBox();
-				comboBoxType.setModel(
-						new DefaultComboBoxModel(new String[]{"caste", "scientific name", "sex", "life stage"}));
-				comboBoxType.addActionListener(new ActionListener() {
-					@Override
-					public void actionPerformed(ActionEvent e) {
-						String item = comboBoxType.getSelectedItem().toString();
-						if (item != null) {
-							configureComboBoxValue(item);
-						}
-					}
-				});
-				panel.add(comboBoxType, "4, 2, fill, default");
-			}
-			{
-				JLabel lblValue = new JLabel("Value");
-				panel.add(lblValue, "2, 4, right, default");
-			}
-			{
-				comboBoxValue = new JComboBox();
-				comboBoxValue.setModel(new DefaultComboBoxModel(Caste.getCasteValues()));
+				}));
+		contentPanel.add(comboBoxType, "grow");
 
-				panel.add(comboBoxValue, "4, 4, fill, default");
-			}
-			{
-				JLabel lblUnits = new JLabel("Units");
-				panel.add(lblUnits, "2, 6, right, default");
-			}
-			{
-				textFieldUnits = new JTextField();
-				panel.add(textFieldUnits, "4, 6, fill, default");
-				textFieldUnits.setColumns(10);
-			}
-			{
-				JLabel lblRemarks = new JLabel("Remarks");
-				panel.add(lblRemarks, "2, 8, right, default");
-			}
-			{
-				textFieldRemarks = new JTextField();
-				panel.add(textFieldRemarks, "4, 8, fill, default");
-				textFieldRemarks.setColumns(10);
-			}
-		}
+		contentPanel.add(new JLabel("Value:"), "tag label, right");
+		comboBoxValue = bindingContext.bindComboBox("attributeValue", Caste.getCasteValues(),
+				SpecimenPartAttribute::getAttributeValue, SpecimenPartAttribute::setAttributeValue);
+		contentPanel.add(comboBoxValue, "grow");
+
+		contentPanel.add(new JLabel("Units:"), "tag label, right");
+		contentPanel.add(bindingContext.bindTextField("attributeUnits", SpecimenPartAttribute::getAttributeUnits,
+				SpecimenPartAttribute::setAttributeUnits), "grow");
+
+		contentPanel.add(new JLabel("Remarks:"), "tag label, right");
+		contentPanel.add(bindingContext.bindTextField("attributeRemark", SpecimenPartAttribute::getAttributeRemark,
+				SpecimenPartAttribute::setAttributeRemark), "grow");
+
+		getContentPane().add(contentPanel, BorderLayout.CENTER);
+
+		JPanel buttonPane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		JButton cancelButton = new JButton("Cancel");
+		cancelButton.setActionCommand("Cancel");
+		cancelButton.addActionListener(e -> thisDialog.setVisible(false));
+		buttonPane.add(cancelButton);
+
+		JButton okButton = new JButton("OK");
+		okButton.setActionCommand("OK");
+		okButton.addActionListener(e -> {
+			bindingContext.writeTo(targetAttribute);
+			thisDialog.setVisible(false);
+		});
+		buttonPane.add(okButton);
+		getRootPane().setDefaultButton(okButton);
+
+		getContentPane().add(buttonPane, BorderLayout.SOUTH);
 	}
 
 	private void configureComboBoxValue(String item) {
 		comboBoxValue.setEditable(false);
-		if (item.equals("scientific name")) {
+		if ("scientific name".equalsIgnoreCase(item)) {
 			comboBoxValue.setEditable(true);
-		}
-		if (item.equals("sex")) {
-			comboBoxValue.setModel(new DefaultComboBoxModel(Sex.getSexValues()));
-		}
-		if (item.equals("life stage")) {
-			comboBoxValue.setModel(new DefaultComboBoxModel(LifeStage.getLifeStageValues()));
-		}
-		if (item.equals("caste")) {
-			comboBoxValue.setModel(new DefaultComboBoxModel(Caste.getCasteValues()));
+		} else if ("sex".equalsIgnoreCase(item)) {
+			comboBoxValue.setModel(new DefaultComboBoxModel<>(Sex.getSexValues()));
+		} else if ("life stage".equalsIgnoreCase(item)) {
+			comboBoxValue.setModel(new DefaultComboBoxModel<>(LifeStage.getLifeStageValues()));
+		} else if ("caste".equalsIgnoreCase(item)) {
+			comboBoxValue.setModel(new DefaultComboBoxModel<>(Caste.getCasteValues()));
 		}
 	}
 }

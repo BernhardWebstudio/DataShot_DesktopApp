@@ -689,7 +689,7 @@ public class SearchDialog extends JDialog {
 	private JComboBox<String> getCollectorsJComboBox() {
 		if (jComboBoxCollector == null) {
 			CollectorLifeCycle cls = new CollectorLifeCycle();
-			jComboBoxCollector = new JComboBox<>(cls.getDistinctCollectors());
+			jComboBoxCollector = new JComboBox<>();
 			// lazily load the collectors
 			(new Thread(() -> {
 				String[] collectors = cls.getDistinctCollectors();

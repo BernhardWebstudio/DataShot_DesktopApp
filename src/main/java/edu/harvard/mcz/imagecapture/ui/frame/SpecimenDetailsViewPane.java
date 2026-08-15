@@ -52,6 +52,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.event.*;
 import java.math.BigDecimal;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -1525,19 +1526,19 @@ public class SpecimenDetailsViewPane extends JPanel {
 	}
 
 	private JButton getJButtonHistory() {
-		if (jButtonGetHistory == null) {
-			jButtonGetHistory = new JButton();
-			jButtonGetHistory.setText("History");
-			jButtonGetHistory.setToolTipText("Show the history of who edited this record");
-			jButtonGetHistory.setMnemonic(KeyEvent.VK_H);
-			jButtonGetHistory.addActionListener(e -> {
+		if (jButtonHistory == null) {
+			jButtonHistory = new JButton();
+			jButtonHistory.setText("History");
+			jButtonHistory.setToolTipText("Show the history of who edited this record");
+			jButtonHistory.setMnemonic(KeyEvent.VK_H);
+			jButtonHistory.addActionListener(e -> {
 				TrackingLifeCycle tls = new TrackingLifeCycle();
 				EventLogFrame logViewer = new EventLogFrame(tls.findBySpecimen(specimen));
 				logViewer.pack();
 				logViewer.setVisible(true);
 			});
 		}
-		return jButtonGetHistory;
+		return jButtonHistory;
 	}
 
 	private JButton getJButtonPaste() {

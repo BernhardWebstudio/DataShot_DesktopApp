@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.2
+* [[`6589bfd2c5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/6589bfd2c5)] - Fix changelog extraction (Tim Bernhard)
+* [[`6104466384`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/6104466384)] - Update changelog to publish Version v2.0.1 (Tim Bernhard)
+
+
 ## v2.0.1
 * [[`0e90afc150`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/0e90afc150)] - **style**: apply Spotless Eclipse code formatting across repository (Tim Bernhard)
 * [[`de6618644e`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/de6618644e)] - Update changelog to publish Version v2.0.0 (Tim Bernhard)

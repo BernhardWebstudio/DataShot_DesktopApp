@@ -194,13 +194,14 @@ public class SpecimenListTableModel extends AbstractTableModel {
 	@Override
 	public String getColumnName(int columnIndex) {
 		String result = null;
+		int effectiveCol = columnIndex;
 		if (columnIndex == COL_ID) {
 			result = "Edit";
 		} else {
 			if (!SpecimenDetailsViewPane.isCopyPasteActivated()) {
-				columnIndex += 1;
+				effectiveCol = columnIndex + 1;
 			}
-			switch (columnIndex) {
+			switch (effectiveCol) {
 				case COL_COPY :
 					result = "Copy";
 					break;
@@ -228,14 +229,14 @@ public class SpecimenListTableModel extends AbstractTableModel {
 				case COL_SUBSPECIFIC :
 					result = "Subspecies";
 					break;
-				case COL_VERBLOCALITY :
-					result = "Verbatim Locality";
-					break;
 				case COL_COUNTRY :
 					result = "Country";
 					break;
 				case COL_DIVISION :
 					result = "State/Province";
+					break;
+				case COL_VERBLOCALITY :
+					result = "Verbatim Locality";
 					break;
 				case COL_COLLECTION :
 					result = "Collection";
@@ -245,10 +246,7 @@ public class SpecimenListTableModel extends AbstractTableModel {
 					break;
 			}
 		}
-		int modelCol = (!SpecimenDetailsViewPane.isCopyPasteActivated() && columnIndex != COL_ID)
-				? columnIndex + 1
-				: columnIndex;
-		if (result != null && sortColumn >= 0 && modelCol == sortColumn) {
+		if (result != null && sortColumn >= 0 && effectiveCol == sortColumn) {
 			result += sortAscending ? " ▲" : " ▼";
 		}
 		return result;

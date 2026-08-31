@@ -4,6 +4,8 @@ import edu.harvard.mcz.imagecapture.SpecimenBrowser;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
+import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
+import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
 import java.awt.GraphicsEnvironment;
 import java.util.ArrayList;
 import java.util.Date;
@@ -195,5 +197,29 @@ public class TestSpecimenBrowser extends TestCase {
 		List<Specimen> page3 = sls.findBy(criteria, 2, 4, false);
 		assertNotNull(page3);
 		assertEquals(1, page3.size());
+	}
+
+	@Test
+	public void testTableHeaderSortArrowPosition() {
+		SpecimenListTableModel model = new SpecimenListTableModel(new ArrayList<>());
+		// Sort by Country (COL_COUNTRY = 10)
+		model.setSortInfo(SpecimenListTableModel.COL_COUNTRY, true);
+
+		// When copy-paste is inactive, COL_COUNTRY is at view/table column index 9
+		// (since COL_COPY is omitted)
+		int countryColIndex = SpecimenDetailsViewPane.isCopyPasteActivated()
+				? SpecimenListTableModel.COL_COUNTRY
+				: SpecimenListTableModel.COL_COUNTRY - 1;
+		int subspeciesColIndex = SpecimenDetailsViewPane.isCopyPasteActivated()
+				? SpecimenListTableModel.COL_SUBSPECIFIC
+				: SpecimenListTableModel.COL_SUBSPECIFIC - 1;
+
+		assertEquals("Country ▲", model.getColumnName(countryColIndex));
+		assertEquals("Subspecies", model.getColumnName(subspeciesColIndex));
+
+		// Sort DESC
+		model.setSortInfo(SpecimenListTableModel.COL_COUNTRY, false);
+		assertEquals("Country ▼", model.getColumnName(countryColIndex));
+		assertEquals("Subspecies", model.getColumnName(subspeciesColIndex));
 	}
 }

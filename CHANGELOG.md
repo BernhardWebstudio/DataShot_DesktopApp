@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.0.4
+* [[`cae714044c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/cae714044c)] - **fix**: merge Flyway ServiceLoader plugins in shaded jar and pass classloader (Tim Bernhard)
+* [[`f12939e438`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f12939e438)] - **chore**: bump version to 2.0.4-SNAPSHOT (Tim Bernhard)
+* [[`b7eb382c2f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b7eb382c2f)] - Update changelog to publish Version v2.0.3 (Tim Bernhard)
+
+
 ## v2.0.3
 * [[`357fb7893f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/357fb7893f)] - **perf**: optimize specimen search query and add missing database indexes (Tim Bernhard)
 * [[`66a75f63a8`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/66a75f63a8)] - Fix CI (Tim Bernhard)

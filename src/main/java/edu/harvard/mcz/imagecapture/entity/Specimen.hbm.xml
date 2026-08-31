@@ -226,49 +226,49 @@
         <property name="GBIFTaxonId" type="string">
             <column name="GBIF_taxon_id" />
         </property>
-        <set name="collectors" cascade="all-delete-orphan" inverse="true" batch-size="250">
+        <set name="collectors" cascade="all-delete-orphan" inverse="true" batch-size="1000">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.Collector"/>
         </set>
-        <set name="determinations" cascade="all" batch-size="250">
+        <set name="determinations" cascade="all" batch-size="1000">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.Determination"/>
         </set>
-        <set name="trackings" inverse="true" batch-size="250">
+        <set name="trackings" inverse="true" batch-size="1000">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.Tracking"/>
         </set>
-        <set name="numbers" cascade="all" batch-size="250">
+        <set name="numbers" cascade="all" batch-size="1000">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.Number"/>
         </set>
-        <set name="ICImages" cascade="all" batch-size="250">
+        <set name="ICImages" cascade="all" batch-size="1000">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.ICImage"/>
         </set>
-        <set name="specimenParts" cascade="all" batch-size="250">
+        <set name="specimenParts" cascade="all" batch-size="1000">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.SpecimenPart"/>
         </set>
-        <set name="LatLong" cascade="all" batch-size="250">
+        <set name="LatLong" cascade="all" batch-size="1000">
             <key>
                 <column name="SpecimenId"/>
             </key>
             <one-to-many class="edu.harvard.mcz.imagecapture.entity.LatLong"/>
         </set>
-        <set name="externalHistory" cascade="all" batch-size="250">
+        <set name="externalHistory" cascade="all" batch-size="1000">
             <key>
                 <column name="SpecimenId"/>
             </key>

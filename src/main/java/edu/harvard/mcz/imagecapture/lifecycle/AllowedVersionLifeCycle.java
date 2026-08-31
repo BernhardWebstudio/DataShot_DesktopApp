@@ -54,8 +54,8 @@ public class AllowedVersionLifeCycle {
 		String url = properties.getProperty(ImageCaptureProperties.KEY_DB_URL);
 		String username = properties.getProperty(ImageCaptureProperties.KEY_DB_USER);
 		String password = properties.getProperty(ImageCaptureProperties.KEY_DB_PASSWORD);
-		return Flyway.configure(AllowedVersionLifeCycle.class.getClassLoader()).dataSource(url, username, password).baselineOnMigrate(true).baselineVersion("1.9.0")
-				.load();
+		return Flyway.configure(AllowedVersionLifeCycle.class.getClassLoader()).dataSource(url, username, password)
+				.baselineOnMigrate(true).baselineVersion("1.9.0").load();
 	}
 
 	/**

@@ -88,12 +88,23 @@ public class TestSpecimenPersistence extends TestCase {
 		assertTrue(foundByExample.size() >= 1);
 		assertEquals("ETHZ_SPEC_42", foundByExample.get(0).getBarcode());
 
-		// 4. Test equals & hashCode
+		// 4. Test findByIds with single and multiple IDs
+		List<Specimen> foundByIds = sls.findByIds(List.of(loaded.getSpecimenId()));
+		assertNotNull(foundByIds);
+		assertEquals(1, foundByIds.size());
+		assertEquals("ETHZ_SPEC_42", foundByIds.get(0).getBarcode());
+
+		// Test findByIds with empty list
+		List<Specimen> foundByEmpty = sls.findByIds(List.of());
+		assertNotNull(foundByEmpty);
+		assertEquals(0, foundByEmpty.size());
+
+		// 5. Test equals & hashCode
 		Specimen loadedCopy = sls.findById(loaded.getSpecimenId());
 		assertEquals(loaded, loadedCopy);
 		assertEquals(loaded.hashCode(), loadedCopy.hashCode());
 
-		// 5. Test clean up / deletion
+		// 6. Test clean up / deletion
 		sls.delete(loaded);
 		Specimen deleted = sls.findById(loaded.getSpecimenId());
 		assertNull(deleted);

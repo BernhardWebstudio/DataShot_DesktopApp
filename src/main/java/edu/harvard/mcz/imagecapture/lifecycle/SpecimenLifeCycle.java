@@ -24,6 +24,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -990,16 +991,19 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 
 	@Override
 	public List<Specimen> findByIds(List<Long> ids) {
+		if (ids == null || ids.isEmpty()) {
+			return new ArrayList<>();
+		}
+		if (ids.size() == 1) {
+			Specimen specimen = this.findById(ids.get(0));
+			return specimen != null ? new ArrayList<>(Arrays.asList(specimen)) : new ArrayList<>();
+		}
 		try {
 			List<Specimen> results = null;
 			Session session = this.getSession();
 			try {
 				Transaction txn = session.beginTransaction();
-				Query<Specimen> query = session.createQuery("SELECT s FROM Specimen s " + "LEFT JOIN FETCH s.ICImages "
-						+ "LEFT JOIN FETCH s.collectors " + "LEFT JOIN FETCH s.specimenParts "
-						+ "LEFT JOIN FETCH s.numbers " + "LEFT JOIN FETCH s.trackings "
-						+ "LEFT JOIN FETCH s.externalHistory " + "LEFT JOIN FETCH s.LatLong "
-						+ "LEFT JOIN FETCH s.determinations " + "WHERE s.specimenId IN (?1)");
+				Query<Specimen> query = session.createQuery("SELECT s FROM Specimen s WHERE s.specimenId IN (?1)");
 				query.setParameter(1, ids);
 				results = query.list();
 				txn.commit();
@@ -1007,7 +1011,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				session.getTransaction().rollback();
 				log.error(e.getMessage());
 			}
-			return results;
+			return results != null ? results : new ArrayList<>();
 		} catch (RuntimeException re) {
 			log.error("find by ids failed", re);
 			throw re;

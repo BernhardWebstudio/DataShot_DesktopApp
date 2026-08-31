@@ -23,11 +23,13 @@ import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.AllowedVersion;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
+import org.flywaydb.core.api.MigrationInfo;
+import org.flywaydb.core.api.MigrationInfoService;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionException;
@@ -43,29 +45,64 @@ public class AllowedVersionLifeCycle {
 	private static final Logger log = LoggerFactory.getLogger(AllowedVersionLifeCycle.class);
 
 	/**
-	 * Check to see if the allowed versions in the database include the version of
-	 * the current ImageCaptureApp.
+	 * Configure and get a Flyway instance pointing to the configured database.
 	 *
-	 * @return true if an AllowedVersion.version in the database is found at the
-	 *         beginning of ImageCaptureApp.APP_VERSION, otherwise false.
+	 * @return Flyway instance
+	 */
+	public static Flyway getFlyway() {
+		Properties properties = HibernateUtil.getProperties();
+		String url = properties.getProperty(ImageCaptureProperties.KEY_DB_URL);
+		String username = properties.getProperty(ImageCaptureProperties.KEY_DB_USER);
+		String password = properties.getProperty(ImageCaptureProperties.KEY_DB_PASSWORD);
+		return Flyway.configure().dataSource(url, username, password).baselineOnMigrate(true).baselineVersion("1.9.0")
+				.load();
+	}
+
+	/**
+	 * Check to see if the database schema is compatible with the current
+	 * ImageCaptureApp. First checks if Flyway has any pending migrations. If Flyway
+	 * is not configured or fails, falls back to checking the legacy allowed_version
+	 * table.
+	 *
+	 * @return true if the database schema is up-to-date and compatible, otherwise
+	 *         false.
 	 */
 	public static boolean isCurrentAllowed() throws HibernateException {
-		boolean result = false;
-		AllowedVersionLifeCycle als = new AllowedVersionLifeCycle();
+		// 1. Primary check: Flyway pending migrations
+		try {
+			Flyway flyway = getFlyway();
+			MigrationInfoService info = flyway.info();
+			if (info != null) {
+				MigrationInfo[] pending = info.pending();
+				if (pending != null && pending.length == 0) {
+					log.debug("Flyway reports 0 pending migrations; database is up-to-date.");
+					return true;
+				} else if (pending != null && pending.length > 0) {
+					log.info("Flyway reports {} pending migration(s).", pending.length);
+					return false;
+				}
+			}
+		} catch (Exception e) {
+			log.warn("Flyway info check failed, falling back to legacy AllowedVersion check: {}", e.getMessage());
+		}
 
+		// 2. Fallback check: legacy allowed_version table
+		AllowedVersionLifeCycle als = new AllowedVersionLifeCycle();
 		List<AllowedVersion> allowedVersions = als.findAll();
-		Iterator<AllowedVersion> i = allowedVersions.iterator();
-		while (i.hasNext()) {
-			// cut away build nr. etc.
-			String version = i.next().getVersion().split("[ \\-]")[0];
-			String currentVersion = ImageCaptureApp.getAppVersion();
-			if (version != null && currentVersion != null && version.length() <= currentVersion.length()
-					&& currentVersion.startsWith(version)) {
-				result = true;
+		if (allowedVersions != null) {
+			for (AllowedVersion av : allowedVersions) {
+				if (av.getVersion() != null) {
+					String version = av.getVersion().split("[ \\-]")[0];
+					String currentVersion = ImageCaptureApp.getAppVersion();
+					if (currentVersion != null && version.length() <= currentVersion.length()
+							&& currentVersion.startsWith(version)) {
+						return true;
+					}
+				}
 			}
 		}
 
-		return result;
+		return false;
 	}
 
 	/**
@@ -75,17 +112,31 @@ public class AllowedVersionLifeCycle {
 	 */
 	public static String listAllowedVersions() {
 		StringBuilder allowed = new StringBuilder();
-		AllowedVersionLifeCycle als = new AllowedVersionLifeCycle();
 		try {
-			List<AllowedVersion> allowedVersions = als.findAll();
-			Iterator<AllowedVersion> i = allowedVersions.iterator();
-			String separator = "";
-			while (i.hasNext()) {
-				allowed.append(separator).append(i.next().getVersion());
-				separator = ", ";
+			Flyway flyway = getFlyway();
+			MigrationInfo current = flyway.info().current();
+			if (current != null && current.getVersion() != null) {
+				allowed.append("Flyway schema v").append(current.getVersion());
 			}
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.debug("Could not get Flyway version: {}", e.getMessage());
+		}
+
+		try {
+			AllowedVersionLifeCycle als = new AllowedVersionLifeCycle();
+			List<AllowedVersion> allowedVersions = als.findAll();
+			if (allowedVersions != null && !allowedVersions.isEmpty()) {
+				if (allowed.length() > 0) {
+					allowed.append("; Legacy allowed_version: ");
+				}
+				String separator = "";
+				for (AllowedVersion av : allowedVersions) {
+					allowed.append(separator).append(av.getVersion());
+					separator = ", ";
+				}
+			}
+		} catch (Exception e) {
+			log.error("Error listing allowed versions: {}", e.getMessage());
 		}
 		return allowed.toString();
 	}
@@ -94,53 +145,47 @@ public class AllowedVersionLifeCycle {
 	 * Execute a migration, powered by FlyWay (https://flywaydb.org/)
 	 */
 	public static void upgrade() {
-		// Load the Configuration from hibernate.cfg.xml
-		/*
-		 * SessionFactoryImpl sessionFactory = (SessionFactoryImpl)
-		 * HibernateUtil.getSessionFactory(); Map<String, Object> properties =
-		 * sessionFactory.getProperties(); String url = (String)
-		 * properties.get("connection.url"); String username = (String)
-		 * properties.get("connection.username"); String password = (String)
-		 * properties.get("connection.password");
-		 */
-		Properties properties = HibernateUtil.getProperties();
-		String url = properties.getProperty(ImageCaptureProperties.KEY_DB_URL);
-		String username = properties.getProperty(ImageCaptureProperties.KEY_DB_USER);
-		String password = properties.getProperty(ImageCaptureProperties.KEY_DB_PASSWORD);
-		// Create the Flyway instance and point it to the database
-		Flyway flyway = Flyway.configure().dataSource(url, username, password).load();
+		Flyway flyway = getFlyway();
 		// Start the migration
 		try {
-			// output checksum and version of each migration we are about to run
-			log.info("Starting migration to {} from version {}. All migrations: {}",
-					String.join(", ",
-							Arrays.stream(flyway.info().pending())
-									.map((m) -> m.getVersion().toString() + " " + m.getChecksum().toString())
-									.toArray(String[]::new)),
-					flyway.info().current().getVersion(),
-					String.join(", ",
-							Arrays.stream(flyway.info().all())
-									.map((m) -> m.getVersion().toString() + " " + m.getChecksum().toString())
-									.toArray(String[]::new)));
+			MigrationInfo current = flyway.info().current();
+			String currentVersionStr = (current != null && current.getVersion() != null)
+					? current.getVersion().toString()
+					: "none";
+
+			MigrationInfo[] pending = flyway.info().pending();
+			String pendingStr = (pending != null && pending.length > 0)
+					? Arrays.stream(pending).map(m -> m.getVersion() != null ? m.getVersion().toString() : "unknown")
+							.collect(Collectors.joining(", "))
+					: "none";
+
+			MigrationInfo[] all = flyway.info().all();
+			String allStr = (all != null && all.length > 0)
+					? Arrays.stream(all).map(m -> m.getVersion() != null ? m.getVersion().toString() : "unknown")
+							.collect(Collectors.joining(", "))
+					: "none";
+
+			log.info("Starting migration. Current version: {}. Pending: {}. All migrations: {}", currentVersionStr,
+					pendingStr, allStr);
 
 			flyway.migrate();
 		} catch (FlywayException e) {
-			log.error("Error", e); //
-			// not the nice way, ok. Might throw again.
+			log.error("Flyway migration failed, attempting repair", e);
 			flyway.repair();
 			flyway.migrate();
 		}
-		// finally, remember that we migrated
-		String currentVersion = ImageCaptureApp.getAppVersion();
-		AllowedVersion allowedVersion = new AllowedVersion();
-		allowedVersion.setVersion(currentVersion);
+
+		// Also record that we migrated into allowed_version for backward compatibility
 		try {
+			String currentVersion = ImageCaptureApp.getAppVersion();
+			AllowedVersion allowedVersion = new AllowedVersion();
+			allowedVersion.setVersion(currentVersion);
 			Session session = HibernateUtil.getSessionFactory().getCurrentSession();
 			Transaction transaction = session.beginTransaction();
 			session.save(allowedVersion);
 			transaction.commit();
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.warn("Could not record current version in allowed_version table: {}", e.getMessage());
 		}
 	}
 

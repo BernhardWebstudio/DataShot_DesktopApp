@@ -131,6 +131,7 @@ public abstract class GenericLifeCycle<T> {
 				}
 				cr.where(cb.and(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()])));
 				cr.select(root.get(this.idProperty));
+				cr.orderBy(cb.asc(root.get(this.idProperty)));
 				Query q = session.createQuery(cr);
 				if (maxResults != 0) {
 					q = q.setMaxResults(maxResults);
@@ -142,6 +143,9 @@ public abstract class GenericLifeCycle<T> {
 				List<Long> ids = q.list();
 				log.debug("find by example successful, result size: " + ids.size());
 				session.getTransaction().commit();
+				if (ids == null || ids.isEmpty()) {
+					return new ArrayList<T>();
+				}
 				return this.findByIds(ids);
 
 			} catch (HibernateException e) {

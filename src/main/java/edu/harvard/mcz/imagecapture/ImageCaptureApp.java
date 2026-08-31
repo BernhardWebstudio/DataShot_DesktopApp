@@ -273,7 +273,7 @@ public class ImageCaptureApp {
 							+ "Are you ready to try the upgrade of the database? Make sure no one else will need the old version.",
 					"Update Required", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			log.error("Database does not allow version " + ImageCaptureApp.APP_VERSION + ". Upgrade will "
-					+ (response == JOptionPane.YES_OPTION ? "" : "not happen") + "happen.");
+					+ (response == JOptionPane.YES_OPTION ? "happen." : "not happen."));
 			log.error("Database recognises version(s): " + allowed);
 			if (response == JOptionPane.YES_OPTION) {
 				// try to upgrade the database scheme

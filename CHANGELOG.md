@@ -1,5 +1,14 @@
 # Changelog
 
+## v2.0.5
+* [[`16905405e1`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/16905405e1)] - **performance**: another batch size test (Tim Bernhard)
+* [[`af6fb25a50`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/af6fb25a50)] - fix(ui): fix table header sort arrow position calculation (Tim Bernhard)
+* [[`8ba3d18af1`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8ba3d18af1)] - feat(search): remove limit/offset fields, add total count, jump-to-page, and database-level sorting across pages (Tim Bernhard)
+* [[`d32df0b4db`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/d32df0b4db)] - **style**: format AllowedVersionLifeCycle with spotless (Tim Bernhard)
+* [[`fd6a5ee8ad`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/fd6a5ee8ad)] - **chore**: bump version to 2.0.5-SNAPSHOT (Tim Bernhard)
+* [[`a9264a12a8`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/a9264a12a8)] - Update changelog to publish Version v2.0.4 (Tim Bernhard)
+
+
 ## v2.0.4
 * [[`cae714044c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/cae714044c)] - **fix**: merge Flyway ServiceLoader plugins in shaded jar and pass classloader (Tim Bernhard)
 * [[`f12939e438`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f12939e438)] - **chore**: bump version to 2.0.4-SNAPSHOT (Tim Bernhard)

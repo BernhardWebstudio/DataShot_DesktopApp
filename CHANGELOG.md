@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.0.3
+* [[`357fb7893f`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/357fb7893f)] - **perf**: optimize specimen search query and add missing database indexes (Tim Bernhard)
+* [[`66a75f63a8`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/66a75f63a8)] - Fix CI (Tim Bernhard)
+* [[`41b22f5a34`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/41b22f5a34)] - **refactor**: introduce Fluent Form Binding DSL and modernize UI dialogs (Tim Bernhard)
+* [[`0a935a9865`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/0a935a9865)] - Update changelog to publish Version v2.0.2 (Tim Bernhard)
+
+
 ## v2.0.2
 * [[`6589bfd2c5`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/6589bfd2c5)] - Fix changelog extraction (Tim Bernhard)
 * [[`6104466384`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/6104466384)] - Update changelog to publish Version v2.0.1 (Tim Bernhard)

@@ -55,7 +55,7 @@ public class AllowedVersionLifeCycle {
 		String username = properties.getProperty(ImageCaptureProperties.KEY_DB_USER);
 		String password = properties.getProperty(ImageCaptureProperties.KEY_DB_PASSWORD);
 		return Flyway.configure(AllowedVersionLifeCycle.class.getClassLoader()).dataSource(url, username, password)
-				.baselineOnMigrate(true).baselineVersion("1.9.0").load();
+				.baselineOnMigrate(true).baselineVersion("1.9.0").outOfOrder(true).load();
 	}
 
 	/**
@@ -168,11 +168,11 @@ public class AllowedVersionLifeCycle {
 			log.info("Starting migration. Current version: {}. Pending: {}. All migrations: {}", currentVersionStr,
 					pendingStr, allStr);
 
-			flyway.migrate();
-		} catch (FlywayException e) {
-			log.error("Flyway migration failed, attempting repair", e);
 			flyway.repair();
 			flyway.migrate();
+		} catch (FlywayException e) {
+			log.error("Flyway migration failed after repair attempt", e);
+			throw e;
 		}
 
 		// Also record that we migrated into allowed_version for backward compatibility

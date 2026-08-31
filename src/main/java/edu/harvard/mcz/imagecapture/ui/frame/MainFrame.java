@@ -870,6 +870,10 @@ public class MainFrame extends JFrame implements RunnerListener {
 		jLabelStatus.setText("Status: " + aMessage.substring(0, maxLength));
 	}
 
+	public void setSpecimenBrowseList(Map<String, Object> criteria) {
+		setSpecimenBrowseList(criteria, SpecimenBrowser.DEFAULT_PAGE_SIZE, 0);
+	}
+
 	public void setSpecimenBrowseList(Map<String, Object> criteria, int limit, int offset) {
 		Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		slb = new SpecimenBrowser(criteria, true, limit, offset);

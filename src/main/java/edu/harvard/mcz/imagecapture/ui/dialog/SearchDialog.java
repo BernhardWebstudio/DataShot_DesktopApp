@@ -26,10 +26,6 @@ import edu.harvard.mcz.imagecapture.lifecycle.*;
 import edu.harvard.mcz.imagecapture.query.Specification;
 import edu.harvard.mcz.imagecapture.query.StringToDateQueryParser;
 import edu.harvard.mcz.imagecapture.ui.field.JIntegerField;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -103,12 +99,10 @@ public class SearchDialog extends JDialog {
 	 * @return void
 	 */
 	private void initialize() {
-		// this.setSize(500, 750);
-		// this.setLocationRelativeTo(parentFrame);
 		this.setTitle("Search For Specimens");
 		this.setContentPane(getJContentPane());
-		// this.setPreferredSize(new Dimension(500, 750));
 		this.pack();
+		this.setLocationRelativeTo(getOwner());
 	}
 
 	/**
@@ -149,7 +143,7 @@ public class SearchDialog extends JDialog {
 	 *
 	 * @return javax.swing.JButton
 	 */
-	private JButton getJButtonSearch() {
+	public JButton getJButtonSearch() {
 		if (jButton == null) {
 			jButton = new JButton();
 			jButton.setText("Search");
@@ -231,14 +225,10 @@ public class SearchDialog extends JDialog {
 						try {
 							StringToDateQueryParser parser = new StringToDateQueryParser(
 									jTextFieldDateModified.getText());
-							query.put("dateLastUpdated", new Specification<Specimen, Long>() {
-								@Override
-								public Predicate toPredicate(Root<Specimen> root, CriteriaQuery<Long> query,
-										CriteriaBuilder cb) {
-									return cb.between(root.get("dateLastUpdated"), parser.getDateLowerBound(),
-											parser.getDateUpperBound());
-								}
-							});
+							query.put("dateLastUpdated",
+									(Specification<Specimen, ?>) (root, q, cb) -> cb.between(
+											root.get("dateLastUpdated"), parser.getDateLowerBound(),
+											parser.getDateUpperBound()));
 						} catch (IllegalArgumentException exception) {
 							exception.printStackTrace();
 							Singleton.getSingletonInstance().getMainFrame()
@@ -301,8 +291,7 @@ public class SearchDialog extends JDialog {
 						}
 					}
 					log.debug("Starting search with criteria...");
-					Singleton.getSingletonInstance().getMainFrame().setSpecimenBrowseList(query,
-							jLimitNumberField.getIntValue(), jOffsetNumberField.getIntValue());
+					Singleton.getSingletonInstance().getMainFrame().setSpecimenBrowseList(query);
 				}
 			});
 		}
@@ -318,12 +307,12 @@ public class SearchDialog extends JDialog {
 		if (scrollPane == null) {
 			// set titles etc.
 
-			jPanel1 = new JPanel(new MigLayout("wrap 2, fillx"));
+			jPanel1 = new ScrollablePanel(new MigLayout("wrap 2, fillx", "[right][380::,grow,fill]"));
 			JLabel jLabelInstructions = new JLabel("Search for specimens. Use % as a wildcard.");
 			Font f = jLabelInstructions.getFont();
 			// bold
 			jLabelInstructions.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
-			jPanel1.add(jLabelInstructions, "span 2");
+			jPanel1.add(jLabelInstructions, "span 2, center");
 
 			// set fields
 			String[] labels = {"Image Filename", "Imaged Date/Path",
@@ -331,7 +320,7 @@ public class SearchDialog extends JDialog {
 					"Barcode", "Order", "Family", "Subfamily", "Tribe", "Genus", "Species", "Subspecies", "Country",
 					"State/Province", "Specific Locality", "Verbatim Locality", "Collection", "Collection Nr.",
 					"Collector", "Interpreted Date", "Workflow Status", "Questions", "Entry By", "Identified By",
-					"Date Last Updated", "Limit", "Offset"};
+					"Date Last Updated"};
 
 			Component[] fields = {this.getImageFileJTextField(), this.getImagePathJComboBox(),
 					// this.getDrawerNumberJTextField(),
@@ -342,15 +331,14 @@ public class SearchDialog extends JDialog {
 					this.getVerbatimLocalityJTextField(), this.getCollectionJComboBox(),
 					this.getCollectionNrJTextField(), this.getCollectorsJComboBox(), this.getInterpretedDateTextField(),
 					this.getWorkflowsJComboBox(), this.getQuestionJComboBox(), this.getUsersJComboBox(),
-					this.getIdentifiedByComboBox(), this.getLastUpdatedJTextField(), this.getLimitJIntegerField(),
-					this.getOffsetJIntegerField()};
+					this.getIdentifiedByComboBox(), this.getLastUpdatedJTextField()};
 
 			assert (fields.length == labels.length);
 			for (int i = 0; i < labels.length; i++) {
 				JLabel label = new JLabel();
 				label.setText(labels[i].concat(":"));
 				jPanel1.add(label, "right"); // "align label");
-				jPanel1.add(fields[i], "grow");
+				jPanel1.add(fields[i], "grow, wmin 0");
 			}
 			/*
 			 * GridBagConstraints gbc_lblHigherGeography = new GridBagConstraints();
@@ -364,7 +352,9 @@ public class SearchDialog extends JDialog {
 			 * gbc_textFieldHigherGeog.gridx = 1; gbc_textFieldHigherGeog.gridy = 12;
 			 */
 			// jPanel1.add(getTextFieldHigherGeog(), gbc_textFieldHigherGeog);
-			scrollPane = new JScrollPane(jPanel1);
+			scrollPane = new JScrollPane(jPanel1, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+					JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+			scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 			scrollPane.setBorder(BorderFactory.createEmptyBorder());
 		}
 		return scrollPane;
@@ -403,6 +393,7 @@ public class SearchDialog extends JDialog {
 			// jComboBoxHigherOrder.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class,
 			// "Order", jComboBoxHigherOrder));
 			jTextFieldOrder.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "HigherOrder"));
+			jTextFieldOrder.setMaximumSize(this.maxComboBoxDims);
 			AutoCompleteDecorator.decorate(jTextFieldOrder);
 		}
 		return jTextFieldOrder;
@@ -838,10 +829,10 @@ public class SearchDialog extends JDialog {
 		return jOffsetNumberField;
 	}
 
-	private JIntegerField getLimitJIntegerField() {
+	public JIntegerField getLimitJIntegerField() {
 		if (jLimitNumberField == null) {
 			jLimitNumberField = new JIntegerField();
-			jLimitNumberField.setValue(50000);
+			jLimitNumberField.setValue(1000);
 		}
 		return jLimitNumberField;
 	}
@@ -869,5 +860,36 @@ public class SearchDialog extends JDialog {
 			lblHigherGeography = new JLabel("Higher Geography");
 		}
 		return lblHigherGeography;
+	}
+
+	private static class ScrollablePanel extends JPanel implements Scrollable {
+		public ScrollablePanel(LayoutManager layout) {
+			super(layout);
+		}
+
+		@Override
+		public Dimension getPreferredScrollableViewportSize() {
+			return getPreferredSize();
+		}
+
+		@Override
+		public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+			return 16;
+		}
+
+		@Override
+		public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+			return 16;
+		}
+
+		@Override
+		public boolean getScrollableTracksViewportWidth() {
+			return true;
+		}
+
+		@Override
+		public boolean getScrollableTracksViewportHeight() {
+			return false;
+		}
 	}
 } // @jve:decl-index=0:visual-constraint="10,10"

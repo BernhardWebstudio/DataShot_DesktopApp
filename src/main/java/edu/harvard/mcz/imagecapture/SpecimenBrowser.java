@@ -26,16 +26,17 @@ import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.ButtonEditor;
 import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.CopyRowButtonEditor;
+import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
 import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.TableColumnManager;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.table.TableRowSorter;
-import org.apache.commons.lang3.BooleanUtils;
 import org.hibernate.SessionException;
 import org.hibernate.TransactionException;
 import org.slf4j.Logger;
@@ -64,21 +65,36 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 	private int maxResults = 0;
 	private int offset = 0;
 
+	public static final int DEFAULT_PAGE_SIZE = 1000;
+
+	private long totalCount = -1;
+	private String sortProperty = "barcode";
+	private boolean sortAscending = true;
+	private int currentSortModelCol = SpecimenListTableModel.COL_BARCODE;
+
+	private JPanel jPanelPagination = null;
+	private JButton jButtonFirst = null;
+	private JButton jButtonPrev = null;
+	private JButton jButtonNext = null;
+	private JButton jButtonLast = null;
+	private JLabel jLabelPage = null;
+	private JLabel jLabelJump = null;
+	private JTextField jTextFieldPage = null;
+	private JButton jButtonGo = null;
+
 	/**
 	 * This method initializes an instance of SpecimenBrowser
 	 */
 	public SpecimenBrowser() {
-		super();
-		useLike = false;
-		initialize();
+		this(null, false, DEFAULT_PAGE_SIZE, 0);
 	}
 
 	public SpecimenBrowser(Map<String, Object> criteria, boolean like, int limit, int offset) {
 		super();
 		this.useLike = like;
 		this.searchCriteria2 = criteria;
-		this.maxResults = limit;
-		this.offset = offset;
+		this.maxResults = limit > 0 ? limit : DEFAULT_PAGE_SIZE;
+		this.offset = Math.max(0, offset);
 		initialize();
 	}
 
@@ -88,6 +104,7 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 	private void initialize() {
 		this.setLayout(new BorderLayout());
 		this.setSize(new Dimension(444, 290));
+		this.add(getJPanelPagination(), BorderLayout.SOUTH);
 		this.add(getJScrollPane(), BorderLayout.CENTER);
 		this.add(getJPanel(), BorderLayout.NORTH);
 	}
@@ -104,7 +121,9 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 				jScrollPane.setViewportView(getJTable());
 			} catch (SessionException | TransactionException e) {
 				log.debug(e.getMessage(), e);
-				Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Database Connection Error.");
+				if (Singleton.getSingletonInstance().getMainFrame() != null) {
+					Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Database Connection Error.");
+				}
 				HibernateUtil.terminateSessionFactory();
 				this.setVisible(false);
 			}
@@ -118,49 +137,55 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 	 *
 	 * @return javax.swing.JTable
 	 */
-	private JTable getJTable() {
+	public JTable getJTable() {
 		if (jTable == null) {
 			jTable = new JTable();
 			jTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-			// jTable.setAutoCreateRowSorter(true);
 			SpecimenLifeCycle s = new SpecimenLifeCycle();
-			SpecimenListTableModel model = null;
-			if (searchCriteria2 != null) {
-				model = new SpecimenListTableModel(s.findBy(this.searchCriteria2, maxResults, offset, useLike));
-			} else {
-				model = new SpecimenListTableModel(s.findAll());
+			if (totalCount < 0) {
+				totalCount = (searchCriteria2 != null)
+						? s.countBy(this.searchCriteria2, useLike)
+						: s.countBy(Collections.emptyMap(), false);
 			}
+			List<Specimen> results = (searchCriteria2 != null)
+					? s.findBy(this.searchCriteria2, maxResults, offset, useLike, sortProperty, sortAscending)
+					: s.findBy(Collections.emptyMap(), maxResults, offset, false, sortProperty, sortAscending);
+			SpecimenListTableModel model = new SpecimenListTableModel(results);
+			model.setSortInfo(currentSortModelCol, sortAscending);
 			jTable.setModel(model);
 			new TableColumnManager(jTable);
 			sorter = new TableRowSorter<>(model);
-			int copyPasteOffset = BooleanUtils.toInteger(!SpecimenDetailsViewPane.isCopyPasteActivated());
-			sorter.toggleSortOrder(SpecimenListTableModel.COL_BARCODE - copyPasteOffset);
-			sorter.setComparator(SpecimenListTableModel.COL_COLLECTION_NR - copyPasteOffset, new Comparator<Object>() {
+			for (int c = 0; c < model.getColumnCount(); c++) {
+				sorter.setSortable(c, false);
+			}
+			jTable.setRowSorter(sorter);
+
+			jTable.getTableHeader().addMouseListener(new java.awt.event.MouseAdapter() {
 				@Override
-				public int compare(Object o1, Object o2) {
-					if (o1 instanceof String && ((String) o1).trim().equals("")) {
-						o1 = Double.valueOf(0);
+				public void mouseClicked(java.awt.event.MouseEvent e) {
+					int viewCol = jTable.getTableHeader().columnAtPoint(e.getPoint());
+					if (viewCol < 0) {
+						return;
 					}
-					if (o2 instanceof String && ((String) o2).trim().equals("")) {
-						o2 = Double.valueOf(0);
+					int modelCol = jTable.convertColumnIndexToModel(viewCol);
+					if (!SpecimenDetailsViewPane.isCopyPasteActivated()) {
+						modelCol += 1;
 					}
-					if (o1 instanceof String && o2 instanceof String) {
-						return ((String) o1).compareToIgnoreCase((String) o2);
+					if (modelCol == SpecimenListTableModel.COL_ID || modelCol == SpecimenListTableModel.COL_COPY) {
+						return;
 					}
-					if (o1 instanceof Double && o2 instanceof Double) {
-						return ((Double) o1).compareTo((Double) o2);
+					if (modelCol == currentSortModelCol) {
+						sortAscending = !sortAscending;
+					} else {
+						currentSortModelCol = modelCol;
+						sortAscending = true;
 					}
-					if (o1 instanceof Double && o2 instanceof String) {
-						return -1;
-					}
-					if (o2 instanceof Double && o1 instanceof String) {
-						return 1;
-					}
-					log.error("Unexpected type in compare: {} - {}", o1, o2);
-					return 0;
+					sortProperty = getPropertyNameForColumn(modelCol);
+					offset = 0;
+					loadData();
 				}
 			});
-			jTable.setRowSorter(sorter);
+
 			jTable.setDefaultRenderer(Specimen.class, new ButtonRenderer());
 			jTable.setDefaultEditor(Specimen.class, new ButtonEditor());
 			if (SpecimenDetailsViewPane.isCopyPasteActivated()) {
@@ -174,8 +199,258 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 			jTable.getColumnModel().getColumn(0).setPreferredWidth(characterWidth * 3);
 			jTable.getColumnModel().getColumn(1).setPreferredWidth(characterWidth * 3);
 			jTable.getColumnModel().getColumn(2).setPreferredWidth(characterWidth * 14);
+
+			updatePaginationControls(results.size());
 		}
 		return jTable;
+	}
+
+	private String getPropertyNameForColumn(int modelColumnIndex) {
+		switch (modelColumnIndex) {
+			case SpecimenListTableModel.COL_BARCODE :
+				return "barcode";
+			case SpecimenListTableModel.COL_WORKFLOW :
+				return "workFlowStatus";
+			case SpecimenListTableModel.COL_FAMILY :
+				return "family";
+			case SpecimenListTableModel.COL_SUBFAMILY :
+				return "subfamily";
+			case SpecimenListTableModel.COL_TRIBE :
+				return "tribe";
+			case SpecimenListTableModel.COL_GENUS :
+				return "genus";
+			case SpecimenListTableModel.COL_SPECIFIC :
+				return "specificEpithet";
+			case SpecimenListTableModel.COL_SUBSPECIFIC :
+				return "subspecificEpithet";
+			case SpecimenListTableModel.COL_COUNTRY :
+				return "country";
+			case SpecimenListTableModel.COL_DIVISION :
+				return "primaryDivison";
+			case SpecimenListTableModel.COL_VERBLOCALITY :
+				return "verbatimLocality";
+			case SpecimenListTableModel.COL_COLLECTION :
+				return "collection";
+			case SpecimenListTableModel.COL_COLLECTION_NR :
+				return "numbers.number";
+			case SpecimenListTableModel.COL_ID :
+			case SpecimenListTableModel.COL_COPY :
+			default :
+				return "specimenId";
+		}
+	}
+
+	public JPanel getJPanelPagination() {
+		if (jPanelPagination == null) {
+			jPanelPagination = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 5));
+
+			jButtonFirst = new JButton("|◀");
+			jButtonFirst.setToolTipText("First page");
+			jButtonFirst.setEnabled(offset > 0);
+			jButtonFirst.addActionListener(e -> {
+				offset = 0;
+				loadData();
+			});
+
+			jButtonPrev = new JButton("◀ Prev");
+			jButtonPrev.setToolTipText("Previous page");
+			jButtonPrev.setEnabled(offset > 0);
+			jButtonPrev.addActionListener(e -> {
+				if (offset > 0) {
+					offset = Math.max(0, offset - maxResults);
+					loadData();
+				}
+			});
+
+			jLabelPage = new JLabel("Loading specimens...");
+
+			jLabelJump = new JLabel("Page:");
+			jTextFieldPage = new JTextField(4);
+			jTextFieldPage.setHorizontalAlignment(JTextField.CENTER);
+			jTextFieldPage.addActionListener(e -> jumpToPage());
+
+			jButtonGo = new JButton("Go");
+			jButtonGo.addActionListener(e -> jumpToPage());
+
+			jButtonNext = new JButton("Next ▶");
+			jButtonNext.setToolTipText("Next page");
+			jButtonNext.setEnabled(false);
+			jButtonNext.addActionListener(e -> {
+				offset = offset + maxResults;
+				loadData();
+			});
+
+			jButtonLast = new JButton("▶|");
+			jButtonLast.setToolTipText("Last page");
+			jButtonLast.setEnabled(false);
+			jButtonLast.addActionListener(e -> {
+				if (totalCount > 0) {
+					int totalPages = (int) Math.ceil((double) totalCount / maxResults);
+					offset = Math.max(0, (totalPages - 1) * maxResults);
+					loadData();
+				}
+			});
+
+			jPanelPagination.add(jButtonFirst);
+			jPanelPagination.add(jButtonPrev);
+			jPanelPagination.add(jLabelPage);
+			jPanelPagination.add(jLabelJump);
+			jPanelPagination.add(jTextFieldPage);
+			jPanelPagination.add(jButtonGo);
+			jPanelPagination.add(jButtonNext);
+			jPanelPagination.add(jButtonLast);
+
+			int rowCount = (jTable != null && jTable.getModel() != null) ? jTable.getModel().getRowCount() : 0;
+			updatePaginationControls(rowCount);
+		}
+		return jPanelPagination;
+	}
+
+	public void jumpToPage() {
+		if (jTextFieldPage == null) {
+			return;
+		}
+		try {
+			int targetPage = Integer.parseInt(jTextFieldPage.getText().trim());
+			long count = totalCount >= 0 ? totalCount : 0;
+			int totalPages = (int) Math.ceil((double) (count > 0 ? count : 1) / maxResults);
+			if (totalPages <= 0) {
+				totalPages = 1;
+			}
+			if (targetPage < 1) {
+				targetPage = 1;
+			}
+			if (targetPage > totalPages) {
+				targetPage = totalPages;
+			}
+			offset = (targetPage - 1) * maxResults;
+			loadData();
+		} catch (NumberFormatException ex) {
+			// ignore non-numeric input
+		}
+	}
+
+	public void loadData() {
+		MainFrame mainFrame = Singleton.getSingletonInstance().getMainFrame();
+		if (mainFrame != null) {
+			mainFrame.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		}
+		try {
+			SpecimenLifeCycle s = new SpecimenLifeCycle();
+			if (totalCount < 0) {
+				totalCount = (searchCriteria2 != null)
+						? s.countBy(this.searchCriteria2, useLike)
+						: s.countBy(Collections.emptyMap(), false);
+			}
+			List<Specimen> results = (searchCriteria2 != null)
+					? s.findBy(this.searchCriteria2, maxResults, offset, useLike, sortProperty, sortAscending)
+					: s.findBy(Collections.emptyMap(), maxResults, offset, false, sortProperty, sortAscending);
+			SpecimenListTableModel model = new SpecimenListTableModel(results);
+			model.setSortInfo(currentSortModelCol, sortAscending);
+			jTable.setModel(model);
+			sorter.setModel(model);
+			for (int c = 0; c < model.getColumnCount(); c++) {
+				sorter.setSortable(c, false);
+			}
+			updatePaginationControls(results.size());
+			if (jTable.getTableHeader() != null) {
+				jTable.getTableHeader().repaint();
+			}
+			if (mainFrame != null) {
+				int totalPages = (int) Math.ceil((double) (totalCount > 0 ? totalCount : 1) / maxResults);
+				mainFrame.setStatusMessage("Found " + totalCount + " matching specimens (Page "
+						+ ((offset / maxResults) + 1) + " of " + (totalPages > 0 ? totalPages : 1) + ")");
+			}
+		} finally {
+			if (mainFrame != null) {
+				mainFrame.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+			}
+		}
+	}
+
+	private void updatePaginationControls(int resultCount) {
+		long count = totalCount >= 0 ? totalCount : resultCount;
+		int totalPages = (int) Math.ceil((double) (count > 0 ? count : 1) / maxResults);
+		if (totalPages <= 0) {
+			totalPages = 1;
+		}
+		int currentPage = (offset / maxResults) + 1;
+		if (jLabelPage != null) {
+			if (count == 0) {
+				jLabelPage.setText("No matching specimens");
+			} else {
+				int start = offset + 1;
+				int end = Math.min(offset + resultCount, (int) count);
+				jLabelPage.setText("Specimens " + start + "-" + end + " of " + count + " (Page " + currentPage + " of "
+						+ totalPages + ")");
+			}
+		}
+		if (jTextFieldPage != null) {
+			jTextFieldPage.setText(String.valueOf(currentPage));
+		}
+		if (jButtonFirst != null) {
+			jButtonFirst.setEnabled(offset > 0);
+		}
+		if (jButtonPrev != null) {
+			jButtonPrev.setEnabled(offset > 0);
+		}
+		if (jButtonNext != null) {
+			jButtonNext.setEnabled(offset + maxResults < count);
+		}
+		if (jButtonLast != null) {
+			jButtonLast.setEnabled(offset + maxResults < count);
+		}
+		if (jButtonGo != null) {
+			jButtonGo.setEnabled(count > 0);
+		}
+	}
+
+	public JButton getJButtonFirst() {
+		return jButtonFirst;
+	}
+
+	public JButton getJButtonPrev() {
+		return jButtonPrev;
+	}
+
+	public JButton getJButtonNext() {
+		return jButtonNext;
+	}
+
+	public JButton getJButtonLast() {
+		return jButtonLast;
+	}
+
+	public JTextField getJTextFieldPage() {
+		return jTextFieldPage;
+	}
+
+	public JButton getJButtonGo() {
+		return jButtonGo;
+	}
+
+	public JLabel getJLabelPage() {
+		return jLabelPage;
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
+	public int getMaxResults() {
+		return maxResults;
+	}
+
+	public long getTotalCount() {
+		return totalCount;
+	}
+
+	public String getSortProperty() {
+		return sortProperty;
+	}
+
+	public boolean isSortAscending() {
+		return sortAscending;
 	}
 
 	/**

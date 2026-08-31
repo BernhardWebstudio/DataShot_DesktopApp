@@ -49,9 +49,16 @@ public class SpecimenListTableModel extends AbstractTableModel {
 	private static final Logger log = LoggerFactory.getLogger(SpecimenListTableModel.class);
 	private static final long serialVersionUID = -8394267503927374758L;
 	private List<Specimen> specimens = null;
+	private int sortColumn = -1;
+	private boolean sortAscending = true;
 
 	public SpecimenListTableModel(List<Specimen> specimenList) {
 		specimens = specimenList;
+	}
+
+	public void setSortInfo(int sortColumn, boolean sortAscending) {
+		this.sortColumn = sortColumn;
+		this.sortAscending = sortAscending;
 	}
 
 	/*
@@ -237,6 +244,12 @@ public class SpecimenListTableModel extends AbstractTableModel {
 					result = "Collection Nr.";
 					break;
 			}
+		}
+		int modelCol = (!SpecimenDetailsViewPane.isCopyPasteActivated() && columnIndex != COL_ID)
+				? columnIndex + 1
+				: columnIndex;
+		if (result != null && sortColumn >= 0 && modelCol == sortColumn) {
+			result += sortAscending ? " ▲" : " ▼";
 		}
 		return result;
 	}

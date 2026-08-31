@@ -80,8 +80,8 @@ public abstract class GenericLifeCycle<T> {
 
 	abstract public List<T> findByIds(List<Long> ids);
 
-	public List<T> findBy(Map<String, Object> propertyValueMap, int maxResults, int offset, boolean like) {
-		log.debug("finding " + this.tCLass.toGenericString() + " instance by hashmap: " + propertyValueMap.toString());
+	public long countBy(Map<String, Object> propertyValueMap, boolean like) {
+		log.debug("counting " + this.tCLass.toGenericString() + " instance by hashmap: " + propertyValueMap);
 		try {
 			Session session = this.getSession();
 			try {
@@ -90,63 +90,156 @@ public abstract class GenericLifeCycle<T> {
 				CriteriaQuery<Long> cr = cb.createQuery(Long.class);
 				Root<T> root = cr.from(this.tCLass);
 				List<Predicate> propertyValueRelations = new ArrayList<>();
-				for (Map.Entry<String, Object> entry : propertyValueMap.entrySet()) {
-					Expression<String> propertyToMatch = null;
-					// handle paths/joins etc.
-					String[] splitKey = entry.getKey().split("\\.");
-					if (splitKey.length > 1) {
-						Join<Object, Object> currentRoot = root.join(splitKey[0]);
-						for (int i = 1; i < splitKey.length - 1; i++) {
-							currentRoot = currentRoot.join(splitKey[i]);
+				if (propertyValueMap != null) {
+					for (Map.Entry<String, Object> entry : propertyValueMap.entrySet()) {
+						Expression<String> propertyToMatch = null;
+						String[] splitKey = entry.getKey().split("\\.");
+						if (splitKey.length > 1) {
+							Join<Object, Object> currentRoot = root.join(splitKey[0]);
+							for (int i = 1; i < splitKey.length - 1; i++) {
+								currentRoot = currentRoot.join(splitKey[i]);
+							}
+							propertyToMatch = currentRoot.get(splitKey[splitKey.length - 1]);
+						} else {
+							propertyToMatch = root.get(entry.getKey());
 						}
-						propertyToMatch = currentRoot.get(splitKey[splitKey.length - 1]);
-					} else {
-						propertyToMatch = root.get(entry.getKey());
-					}
 
-					Predicate p = null;
-					if (entry.getValue() instanceof Specification) {
-						p = ((Specification<T, Long>) entry.getValue()).toPredicate(root, cr, cb);
-					} else if (like && entry.getValue() instanceof String) {
-						// make case and accent sensitive if there is no wildcard / need for
-						// like by using equal
-						if (!((String) entry.getValue()).contains("%") && !((String) entry.getValue()).contains("_")) {
-							p = cb.equal(propertyToMatch, entry.getValue());
+						Predicate p = null;
+						if (entry.getValue() instanceof Specification) {
+							p = ((Specification) entry.getValue()).toPredicate(root, cr, cb);
+						} else if (like && entry.getValue() instanceof String) {
+							if (!((String) entry.getValue()).contains("%")
+									&& !((String) entry.getValue()).contains("_")) {
+								p = cb.equal(propertyToMatch, entry.getValue());
+							} else {
+								p = cb.like(propertyToMatch, (String) entry.getValue());
+							}
 						} else {
-							p = cb.like(propertyToMatch, (String) entry.getValue());
+							Object value = entry.getValue();
+							if (value instanceof Boolean || value instanceof String || value instanceof Date
+									|| value instanceof java.lang.Number) {
+								p = cb.equal(propertyToMatch, entry.getValue());
+							} else {
+								log.warn("Will not handle property: " + entry.getKey() + " with value type " + " "
+										+ value.getClass().toGenericString());
+							}
 						}
-					} else {
-						Object value = entry.getValue();
-						if (value instanceof Boolean || value instanceof String || value instanceof Date
-								|| value instanceof java.lang.Number) {
-							p = cb.equal(propertyToMatch, entry.getValue());
-						} else {
-							log.warn("Will not handle property: " + entry.getKey() + " with value type " + " "
-									+ value.getClass().toGenericString());
+						if (p != null) {
+							propertyValueRelations.add(p);
 						}
-					}
-					if (p != null) {
-						propertyValueRelations.add(p);
 					}
 				}
-				cr.where(cb.and(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()])));
-				cr.select(root.get(this.idProperty));
-				cr.orderBy(cb.asc(root.get(this.idProperty)));
-				Query q = session.createQuery(cr);
+				if (!propertyValueRelations.isEmpty()) {
+					cr.where(cb.and(propertyValueRelations.toArray(new Predicate[0])));
+				}
+				cr.select(cb.countDistinct(root.get(this.idProperty)));
+				Long count = session.createQuery(cr).getSingleResult();
+				session.getTransaction().commit();
+				return count != null ? count : 0L;
+
+			} catch (HibernateException e) {
+				session.getTransaction().rollback();
+				log.error(e.getMessage());
+			}
+			return 0L;
+		} catch (RuntimeException re) {
+			log.error("count by hashmap failed", re);
+			throw re;
+		}
+	}
+
+	public List<T> findBy(Map<String, Object> propertyValueMap, int maxResults, int offset, boolean like) {
+		return this.findBy(propertyValueMap, maxResults, offset, like, null, true);
+	}
+
+	public List<T> findBy(Map<String, Object> propertyValueMap, int maxResults, int offset, boolean like,
+			String sortProperty, boolean sortAscending) {
+		log.debug("finding " + this.tCLass.toGenericString() + " instance by hashmap: " + propertyValueMap);
+		try {
+			Session session = this.getSession();
+			try {
+				session.beginTransaction();
+				CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
+				CriteriaQuery<T> cr = cb.createQuery(this.tCLass);
+				Root<T> root = cr.from(this.tCLass);
+				List<Predicate> propertyValueRelations = new ArrayList<>();
+				if (propertyValueMap != null) {
+					for (Map.Entry<String, Object> entry : propertyValueMap.entrySet()) {
+						Expression<String> propertyToMatch = null;
+						// handle paths/joins etc.
+						String[] splitKey = entry.getKey().split("\\.");
+						if (splitKey.length > 1) {
+							Join<Object, Object> currentRoot = root.join(splitKey[0]);
+							for (int i = 1; i < splitKey.length - 1; i++) {
+								currentRoot = currentRoot.join(splitKey[i]);
+							}
+							propertyToMatch = currentRoot.get(splitKey[splitKey.length - 1]);
+						} else {
+							propertyToMatch = root.get(entry.getKey());
+						}
+
+						Predicate p = null;
+						if (entry.getValue() instanceof Specification) {
+							p = ((Specification) entry.getValue()).toPredicate(root, cr, cb);
+						} else if (like && entry.getValue() instanceof String) {
+							// make case and accent sensitive if there is no wildcard / need for
+							// like by using equal
+							if (!((String) entry.getValue()).contains("%")
+									&& !((String) entry.getValue()).contains("_")) {
+								p = cb.equal(propertyToMatch, entry.getValue());
+							} else {
+								p = cb.like(propertyToMatch, (String) entry.getValue());
+							}
+						} else {
+							Object value = entry.getValue();
+							if (value instanceof Boolean || value instanceof String || value instanceof Date
+									|| value instanceof java.lang.Number) {
+								p = cb.equal(propertyToMatch, entry.getValue());
+							} else {
+								log.warn("Will not handle property: " + entry.getKey() + " with value type " + " "
+										+ value.getClass().toGenericString());
+							}
+						}
+						if (p != null) {
+							propertyValueRelations.add(p);
+						}
+					}
+				}
+				if (!propertyValueRelations.isEmpty()) {
+					cr.where(cb.and(propertyValueRelations.toArray(new Predicate[0])));
+				}
+				cr.select(root);
+				cr.distinct(true);
+
+				List<Order> orders = new ArrayList<>();
+				if (sortProperty != null && !sortProperty.trim().isEmpty() && !sortProperty.equals(this.idProperty)) {
+					Expression<?> sortExpr = null;
+					String[] splitSort = sortProperty.split("\\.");
+					if (splitSort.length > 1) {
+						Join<Object, Object> currentSortRoot = root.join(splitSort[0], JoinType.LEFT);
+						for (int i = 1; i < splitSort.length - 1; i++) {
+							currentSortRoot = currentSortRoot.join(splitSort[i], JoinType.LEFT);
+						}
+						sortExpr = currentSortRoot.get(splitSort[splitSort.length - 1]);
+					} else {
+						sortExpr = root.get(sortProperty);
+					}
+					orders.add(sortAscending ? cb.asc(sortExpr) : cb.desc(sortExpr));
+				}
+				orders.add(sortAscending ? cb.asc(root.get(this.idProperty)) : cb.desc(root.get(this.idProperty)));
+				cr.orderBy(orders);
+
+				Query<T> q = session.createQuery(cr);
 				if (maxResults != 0) {
 					q = q.setMaxResults(maxResults);
 				}
 				if (offset != 0) {
 					q = q.setFirstResult(offset);
 				}
-				// then, do join all
-				List<Long> ids = q.list();
-				log.debug("find by example successful, result size: " + ids.size());
+				List<T> results = q.list();
+				log.debug("find by example successful, result size: " + (results != null ? results.size() : 0));
 				session.getTransaction().commit();
-				if (ids == null || ids.isEmpty()) {
-					return new ArrayList<T>();
-				}
-				return this.findByIds(ids);
+				return results != null ? results : new ArrayList<T>();
 
 			} catch (HibernateException e) {
 				session.getTransaction().rollback();

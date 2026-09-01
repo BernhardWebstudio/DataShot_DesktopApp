@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.0.6
+* [[`7946c1aa7c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/7946c1aa7c)] - **perf**: refactor specimen browser to use lightweight table projection query (Tim Bernhard)
+* [[`bbfeba3cd7`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/bbfeba3cd7)] - Update changelog to publish Version v2.0.5 (Tim Bernhard)
+
+
 ## v2.0.5
 * [[`16905405e1`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/16905405e1)] - **performance**: another batch size test (Tim Bernhard)
 * [[`af6fb25a50`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/af6fb25a50)] - fix(ui): fix table header sort arrow position calculation (Tim Bernhard)

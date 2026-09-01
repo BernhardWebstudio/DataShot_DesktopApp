@@ -121,6 +121,32 @@ public class Specimen implements Serializable {
 		setDefaults();
 	}
 
+	public Specimen(Long specimenId, String barcode, String workFlowStatus, String family, String subfamily,
+			String tribe, String genus, String specificEpithet, String subspecificEpithet, String country,
+			String primaryDivison, String verbatimLocality, String collection, String collectionNumber) {
+		this.specimenId = specimenId;
+		this.barcode = barcode;
+		this.workFlowStatus = workFlowStatus;
+		this.family = family;
+		this.subfamily = subfamily;
+		this.tribe = tribe;
+		this.genus = genus;
+		this.specificEpithet = specificEpithet;
+		this.subspecificEpithet = subspecificEpithet;
+		this.country = country;
+		this.primaryDivison = primaryDivison;
+		this.verbatimLocality = verbatimLocality;
+		this.collection = collection;
+		if (collectionNumber != null && !collectionNumber.isEmpty()) {
+			Number nr = new Number();
+			nr.setNumber(collectionNumber);
+			nr.setNumberType("Collection Number");
+			HashSet<Number> numSet = new HashSet<>();
+			numSet.add(nr);
+			this.numbers = numSet;
+		}
+	}
+
 	public Specimen(String barcode, String typeStatus, Date dateCreated) {
 		this.validDistributionFlag = true;
 		this.barcode = barcode;

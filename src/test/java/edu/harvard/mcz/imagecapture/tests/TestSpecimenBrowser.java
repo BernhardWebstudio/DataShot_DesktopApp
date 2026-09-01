@@ -177,6 +177,20 @@ public class TestSpecimenBrowser extends TestCase {
 	}
 
 	@Test
+	public void testFindSpecimensForTable() {
+		SpecimenLifeCycle sls = new SpecimenLifeCycle();
+		Map<String, Object> criteria = new HashMap<>();
+		criteria.put("genus", "Vanessa");
+
+		List<Specimen> results = sls.findSpecimensForTable(criteria, 2, 0, false, "specificEpithet", true);
+		assertNotNull(results);
+		assertEquals(2, results.size());
+		assertEquals("cardui_1", results.get(0).getSpecificEpithet());
+		assertEquals("cardui_2", results.get(1).getSpecificEpithet());
+		assertNotNull(results.get(0).getBarcode());
+	}
+
+	@Test
 	public void testDirectQueryFindBySingleStep() {
 		SpecimenLifeCycle sls = new SpecimenLifeCycle();
 		Map<String, Object> criteria = new HashMap<>();

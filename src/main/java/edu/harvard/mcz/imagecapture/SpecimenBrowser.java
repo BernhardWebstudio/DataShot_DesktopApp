@@ -147,9 +147,9 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 						? s.countBy(this.searchCriteria2, useLike)
 						: s.countBy(Collections.emptyMap(), false);
 			}
-			List<Specimen> results = (searchCriteria2 != null)
-					? s.findBy(this.searchCriteria2, maxResults, offset, useLike, sortProperty, sortAscending)
-					: s.findBy(Collections.emptyMap(), maxResults, offset, false, sortProperty, sortAscending);
+			List<Specimen> results = s.findSpecimensForTable(
+					(this.searchCriteria2 != null) ? this.searchCriteria2 : Collections.emptyMap(), maxResults, offset,
+					useLike, sortProperty, sortAscending);
 			SpecimenListTableModel model = new SpecimenListTableModel(results);
 			model.setSortInfo(currentSortModelCol, sortAscending);
 			jTable.setModel(model);
@@ -342,9 +342,9 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 						? s.countBy(this.searchCriteria2, useLike)
 						: s.countBy(Collections.emptyMap(), false);
 			}
-			List<Specimen> results = (searchCriteria2 != null)
-					? s.findBy(this.searchCriteria2, maxResults, offset, useLike, sortProperty, sortAscending)
-					: s.findBy(Collections.emptyMap(), maxResults, offset, false, sortProperty, sortAscending);
+			List<Specimen> results = s.findSpecimensForTable(
+					(this.searchCriteria2 != null) ? this.searchCriteria2 : Collections.emptyMap(), maxResults, offset,
+					useLike, sortProperty, sortAscending);
 			SpecimenListTableModel model = new SpecimenListTableModel(results);
 			model.setSortInfo(currentSortModelCol, sortAscending);
 			jTable.setModel(model);

@@ -84,6 +84,13 @@ public class SpecimenListTableModel extends AbstractTableModel {
 		return specimens.size();
 	}
 
+	public Specimen getSpecimenAt(int rowIndex) {
+		if (specimens == null || rowIndex < 0 || rowIndex >= specimens.size()) {
+			return null;
+		}
+		return specimens.get(rowIndex);
+	}
+
 	/*
 	 * (non-Javadoc)
 	 *

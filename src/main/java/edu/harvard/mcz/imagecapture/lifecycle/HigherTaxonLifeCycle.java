@@ -1,6 +1,7 @@
 package edu.harvard.mcz.imagecapture.lifecycle;
 
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.data.LookupCache;
 import edu.harvard.mcz.imagecapture.entity.HigherTaxon;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import java.util.ArrayList;
@@ -19,52 +20,62 @@ public class HigherTaxonLifeCycle {
 	private static final Logger log = LoggerFactory.getLogger(HigherTaxonLifeCycle.class);
 
 	public static String[] selectDistinctFamily() {
-		List<String> result = new ArrayList<String>();
-		try {
-			String sql = " Select distinct family from Specimen s where s.family is not null ";
-			return addStrings(result, sql);
-		} catch (RuntimeException re) {
-			log.error("Error", re);
-			return new String[]{};
-		}
+		return LookupCache.getOrLoad("higherTaxon.families", () -> {
+			List<String> result = new ArrayList<String>();
+			try {
+				String sql = " Select distinct family from Specimen s where s.family is not null ";
+				return addStrings(result, sql);
+			} catch (RuntimeException re) {
+				log.error("Error", re);
+				return new String[]{};
+			}
+		});
 	}
 
 	public static String[] selectDistinctSubfamily(String family) {
-		List<String> result = new ArrayList<String>();
-		try {
-			if (family == null || family.trim().isEmpty()) {
-				String sql = " Select distinct subfamily from Specimen s where s.subfamily is not null order by subfamily";
-				return addStrings(result, sql, null, null);
-			} else {
-				String sql = " Select distinct subfamily from Specimen s where s.family = :family and s.subfamily is not null order by subfamily ";
-				return addStrings(result, sql, "family", family.trim());
+		String cacheKey = "higherTaxon.subfamilies." + (family == null ? "" : family.trim());
+		return LookupCache.getOrLoad(cacheKey, () -> {
+			List<String> result = new ArrayList<String>();
+			try {
+				if (family == null || family.trim().isEmpty()) {
+					String sql = " Select distinct subfamily from Specimen s where s.subfamily is not null order by subfamily";
+					return addStrings(result, sql, null, null);
+				} else {
+					String sql = " Select distinct subfamily from Specimen s where s.family = :family and s.subfamily is not null order by subfamily ";
+					return addStrings(result, sql, "family", family.trim());
+				}
+			} catch (RuntimeException re) {
+				log.error("Error", re);
+				return new String[]{};
 			}
-		} catch (RuntimeException re) {
-			log.error("Error", re);
-			return new String[]{};
-		}
+		});
 	}
 
 	public static String[] selectDistinctTribe(String subfamily) {
-		List<String> result = new ArrayList<String>();
-		try {
-			String sql = " Select distinct tribe from Specimen s where s.subfamily = :subfamily and s.tribe is not null ";
-			return addStrings(result, sql, "subfamily", subfamily == null ? "" : subfamily.trim());
-		} catch (RuntimeException re) {
-			log.error("Error", re);
-			return new String[]{};
-		}
+		String cacheKey = "higherTaxon.tribes." + (subfamily == null ? "" : subfamily.trim());
+		return LookupCache.getOrLoad(cacheKey, () -> {
+			List<String> result = new ArrayList<String>();
+			try {
+				String sql = " Select distinct tribe from Specimen s where s.subfamily = :subfamily and s.tribe is not null ";
+				return addStrings(result, sql, "subfamily", subfamily == null ? "" : subfamily.trim());
+			} catch (RuntimeException re) {
+				log.error("Error", re);
+				return new String[]{};
+			}
+		});
 	}
 
 	public static String[] selectDistinctOrder() {
-		List<String> result = new ArrayList<String>();
-		try {
-			String sql = " Select distinct higherOrder from Specimen s where s.higherOrder is not null ";
-			return addStrings(result, sql);
-		} catch (RuntimeException re) {
-			log.error("Error", re);
-			return new String[]{};
-		}
+		return LookupCache.getOrLoad("higherTaxon.orders", () -> {
+			List<String> result = new ArrayList<String>();
+			try {
+				String sql = " Select distinct higherOrder from Specimen s where s.higherOrder is not null ";
+				return addStrings(result, sql);
+			} catch (RuntimeException re) {
+				log.error("Error", re);
+				return new String[]{};
+			}
+		});
 	}
 
 	private static String[] addStrings(List<String> result, String sql) {

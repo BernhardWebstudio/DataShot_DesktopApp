@@ -3,6 +3,7 @@ package edu.harvard.mcz.imagecapture.lifecycle;
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.data.LookupCache;
 import edu.harvard.mcz.imagecapture.entity.Number;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import java.util.ArrayList;
@@ -44,38 +45,39 @@ public class NumberLifeCycle {
 	 */
 
 	public static String[] getDistinctTypes() {
-		ArrayList<String> types = new ArrayList<String>();
-		if (Singleton.getSingletonInstance().getProperties().getProperties()
-				.getProperty(ImageCaptureProperties.KEY_SHOW_ALL_NUMBER_TYPES).equals("false")) {
-			return Number.getNumberTypeValues().toArray(new String[]{});
-		} else {
-			types.add(""); // put blank at top of list.
-			types.add("Unknown"); // follow with "Unknown", see below.
-			try {
-				String sql = "Select distinct numberType from Number num where num.numberType is not null order by num.numberType  ";
-				Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+		return LookupCache.getOrLoad("number.types", () -> {
+			ArrayList<String> types = new ArrayList<String>();
+			if (Singleton.getSingletonInstance().getProperties().getProperties()
+					.getProperty(ImageCaptureProperties.KEY_SHOW_ALL_NUMBER_TYPES).equals("false")) {
+				return Number.getNumberTypeValues().toArray(new String[]{});
+			} else {
+				types.add(""); // put blank at top of list.
+				types.add("Unknown"); // follow with "Unknown", see below.
 				try {
-					session.beginTransaction();
-					Query query = session.createQuery(sql);
-					types.addAll((Collection<String>) query.list().stream().filter(q -> !q.equals("Unknown"))
-							.collect(Collectors.toList()));
+					String sql = "Select distinct numberType from Number num where num.numberType is not null order by num.numberType  ";
+					Session session = HibernateUtil.getSessionFactory().getCurrentSession();
+					try {
+						session.beginTransaction();
+						Query query = session.createQuery(sql);
+						types.addAll((Collection<String>) query.list().stream().filter(q -> !q.equals("Unknown"))
+								.collect(Collectors.toList()));
 
-					session.getTransaction().commit();
-				} catch (HibernateException e) {
-					session.getTransaction().rollback();
-					log.error(e.getMessage());
+						session.getTransaction().commit();
+					} catch (HibernateException e) {
+						session.getTransaction().rollback();
+						log.error(e.getMessage());
+					}
+					try {
+						session.close();
+					} catch (SessionException e) {
+					}
+					return types.toArray(new String[]{});
+				} catch (RuntimeException re) {
+					log.error("Error", re);
+					return new String[]{};
 				}
-				try {
-					session.close();
-				} catch (SessionException e) {
-				}
-				String[] result = types.toArray(new String[]{});
-			} catch (RuntimeException re) {
-				log.error("Error", re);
-				types = new ArrayList<String>();
 			}
-		}
-		return types.toArray(new String[]{});
+		});
 	}
 
 	public void persist(Number transientInstance) throws SaveFailedException {

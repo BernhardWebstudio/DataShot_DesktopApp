@@ -110,9 +110,10 @@ public abstract class GenericLifeCycle<T> {
 						} else if (like && entry.getValue() instanceof String) {
 							if (!((String) entry.getValue()).contains("%")
 									&& !((String) entry.getValue()).contains("_")) {
-								p = cb.equal(propertyToMatch, entry.getValue());
+								p = cb.like(cb.lower(propertyToMatch.as(String.class)),
+										"%" + ((String) entry.getValue()).toLowerCase() + "%");
 							} else {
-								p = cb.like(propertyToMatch, (String) entry.getValue());
+								p = cb.like(propertyToMatch.as(String.class), (String) entry.getValue());
 							}
 						} else {
 							Object value = entry.getValue();
@@ -182,13 +183,12 @@ public abstract class GenericLifeCycle<T> {
 						if (entry.getValue() instanceof Specification) {
 							p = ((Specification) entry.getValue()).toPredicate(root, cr, cb);
 						} else if (like && entry.getValue() instanceof String) {
-							// make case and accent sensitive if there is no wildcard / need for
-							// like by using equal
 							if (!((String) entry.getValue()).contains("%")
 									&& !((String) entry.getValue()).contains("_")) {
-								p = cb.equal(propertyToMatch, entry.getValue());
+								p = cb.like(cb.lower(propertyToMatch.as(String.class)),
+										"%" + ((String) entry.getValue()).toLowerCase() + "%");
 							} else {
-								p = cb.like(propertyToMatch, (String) entry.getValue());
+								p = cb.like(propertyToMatch.as(String.class), (String) entry.getValue());
 							}
 						} else {
 							Object value = entry.getValue();

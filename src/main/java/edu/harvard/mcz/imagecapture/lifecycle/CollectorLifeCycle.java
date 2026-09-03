@@ -3,6 +3,7 @@ package edu.harvard.mcz.imagecapture.lifecycle;
 // Generated Jan 23, 2009 8:12:35 AM by Hibernate Tools 3.2.2.GA
 
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.data.LookupCache;
 import edu.harvard.mcz.imagecapture.entity.Collector;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import java.util.ArrayList;
@@ -178,15 +179,17 @@ public class CollectorLifeCycle extends GenericLifeCycle {
 	}
 
 	public String[] getDistinctCollectors() {
-		ArrayList<String> collections = new ArrayList<String>();
-		collections.add(""); // put blank at top of list.
-		try {
-			String sql = "Select distinct collectorName from Collector col where col.collectorName is not null and col.specimen is not null order by col.collectorName";
-			return runQueryToGetStrings(collections, sql, log);
-		} catch (RuntimeException re) {
-			log.error("Error", re);
-			return new String[]{};
-		}
+		return LookupCache.getOrLoad("collector.collectors", () -> {
+			ArrayList<String> collections = new ArrayList<String>();
+			collections.add(""); // put blank at top of list.
+			try {
+				String sql = "Select distinct collectorName from Collector col where col.collectorName is not null and col.specimen is not null order by col.collectorName";
+				return runQueryToGetStrings(collections, sql, log);
+			} catch (RuntimeException re) {
+				log.error("Error", re);
+				return new String[]{};
+			}
+		});
 	}
 
 	/**

@@ -18,6 +18,7 @@
  */
 package edu.harvard.mcz.imagecapture;
 
+import edu.harvard.mcz.imagecapture.data.SpecimenCache;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.exceptions.NoSuchRecordException;
@@ -60,7 +61,23 @@ public class SpecimenController {
 		if (aSpecimen == null) {
 			throw new NoSuchRecordException("Can't create a specimen controller with a null specimen");
 		}
-		specimen = aSpecimen;
+		if (aSpecimen.getSpecimenId() != null && !aSpecimen.isFullyLoaded()) {
+			Specimen full = SpecimenCache.get(aSpecimen.getSpecimenId());
+			if (full == null || !full.isFullyLoaded()) {
+				SpecimenLifeCycle sls = new SpecimenLifeCycle();
+				try {
+					full = sls.findById(aSpecimen.getSpecimenId());
+					if (full != null && full.isFullyLoaded()) {
+						SpecimenCache.put(full);
+					}
+				} catch (Exception ex) {
+					log.error("Failed to load full specimen for id " + aSpecimen.getSpecimenId(), ex);
+				}
+			}
+			specimen = (full != null && full.isFullyLoaded()) ? full : aSpecimen;
+		} else {
+			specimen = aSpecimen;
+		}
 		inTable = false;
 	}
 
@@ -84,7 +101,23 @@ public class SpecimenController {
 			throw new NoSuchRecordException("Can't create a specimen controller with a null specimen");
 		}
 		log.debug(theCurrentRow + " " + aSpecimen);
-		specimen = aSpecimen;
+		if (aSpecimen.getSpecimenId() != null && !aSpecimen.isFullyLoaded()) {
+			Specimen full = SpecimenCache.get(aSpecimen.getSpecimenId());
+			if (full == null || !full.isFullyLoaded()) {
+				SpecimenLifeCycle sls = new SpecimenLifeCycle();
+				try {
+					full = sls.findById(aSpecimen.getSpecimenId());
+					if (full != null && full.isFullyLoaded()) {
+						SpecimenCache.put(full);
+					}
+				} catch (Exception ex) {
+					log.error("Failed to load full specimen for id " + aSpecimen.getSpecimenId(), ex);
+				}
+			}
+			specimen = (full != null && full.isFullyLoaded()) ? full : aSpecimen;
+		} else {
+			specimen = aSpecimen;
+		}
 		if (aModel != null) {
 			model = aModel;
 			currentRow = theCurrentRow;
@@ -146,7 +179,23 @@ public class SpecimenController {
 			try {
 				Specimen temp = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow + 1), 0);
 				if (temp != null) {
-					specimen = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow + 1), 0);
+					if (temp.getSpecimenId() != null) {
+						Specimen full = SpecimenCache.get(temp.getSpecimenId());
+						if (full == null || !full.isFullyLoaded()) {
+							SpecimenLifeCycle sls = new SpecimenLifeCycle();
+							try {
+								full = sls.findById(temp.getSpecimenId());
+								if (full != null && full.isFullyLoaded()) {
+									SpecimenCache.put(full);
+								}
+							} catch (Exception ex) {
+								log.error("Failed to load next specimen for id " + temp.getSpecimenId(), ex);
+							}
+						}
+						specimen = (full != null && full.isFullyLoaded()) ? full : temp;
+					} else {
+						specimen = temp;
+					}
 				}
 				currentRow = currentRow + 1;
 				result = true;
@@ -187,7 +236,23 @@ public class SpecimenController {
 			try {
 				Specimen temp = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow - 1), 0);
 				if (temp != null) {
-					specimen = (Specimen) model.getValueAt(table.convertRowIndexToModel(currentRow - 1), 0);
+					if (temp.getSpecimenId() != null) {
+						Specimen full = SpecimenCache.get(temp.getSpecimenId());
+						if (full == null || !full.isFullyLoaded()) {
+							SpecimenLifeCycle sls = new SpecimenLifeCycle();
+							try {
+								full = sls.findById(temp.getSpecimenId());
+								if (full != null && full.isFullyLoaded()) {
+									SpecimenCache.put(full);
+								}
+							} catch (Exception ex) {
+								log.error("Failed to load previous specimen for id " + temp.getSpecimenId(), ex);
+							}
+						}
+						specimen = (full != null && full.isFullyLoaded()) ? full : temp;
+					} else {
+						specimen = temp;
+					}
 				}
 				currentRow = currentRow - 1;
 				result = true;
@@ -288,6 +353,9 @@ public class SpecimenController {
 	 * @throws SaveFailedException
 	 */
 	public void save() throws SaveFailedException {
+		if (specimen != null && !specimen.isFullyLoaded()) {
+			throw new SaveFailedException("Cannot save: specimen data was not fully loaded.");
+		}
 		SpecimenLifeCycle s = new SpecimenLifeCycle();
 		log.debug("in SpecimenControler.save: specimenId is " + specimen.getSpecimenId());
 		log.debug("in SpecimenControler.save: specimen barcode is " + specimen.getBarcode());
@@ -313,6 +381,7 @@ public class SpecimenController {
 		if (updatedSpecimen != null) {
 			specimen = updatedSpecimen;
 		}
+		SpecimenCache.put(specimen);
 
 		updateModel();
 	}
@@ -324,6 +393,9 @@ public class SpecimenController {
 	}
 
 	public void save(Specimen copiedSpecimen) throws SaveFailedException {
+		if (copiedSpecimen != null && !copiedSpecimen.isFullyLoaded()) {
+			throw new SaveFailedException("Cannot save: copied specimen data was not fully loaded.");
+		}
 		specimen = copiedSpecimen;
 		SpecimenLifeCycle s = new SpecimenLifeCycle();
 		if (specimen.getSpecimenId() != null) {
@@ -338,6 +410,7 @@ public class SpecimenController {
 		}
 		// }
 		notifyListeners();
+		SpecimenCache.put(specimen);
 		// reload the specimen
 		// Why???
 		// specimen = s.findById(specimen.getSpecimenId());

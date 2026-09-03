@@ -236,4 +236,45 @@ public class TestSpecimenBrowser extends TestCase {
 		assertEquals("Country ▼", model.getColumnName(countryColIndex));
 		assertEquals("Subspecies", model.getColumnName(subspeciesColIndex));
 	}
+
+	@Test
+	public void testTopFilterBarGlobalSearchAndPagination() {
+		if (GraphicsEnvironment.isHeadless()) {
+			System.out.println("Skipping UI test in headless environment");
+			return;
+		}
+		// Open browser with page size 2 over the 5 test specimens
+		SpecimenBrowser browser = new SpecimenBrowser(null, true, 2, 0);
+		assertTrue("Initial total count should be at least 5", browser.getTotalCount() >= 5);
+		assertEquals(2, browser.getRowCount());
+		assertEquals(0, browser.getOffset());
+
+		// Test finding a specimen that would have been on page 2 (index 3: TEST_PAGINATION_4)
+		browser.getJTextFieldBarcode().setText("TEST_PAGINATION_4");
+		browser.newFilter();
+
+		// Should find across entire DB, not just page 1
+		assertEquals(1, browser.getTotalCount());
+		assertEquals(1, browser.getRowCount());
+		SpecimenListTableModel model = (SpecimenListTableModel) browser.getJTable().getModel();
+		assertEquals("TEST_PAGINATION_4", model.getSpecimenAt(0).getBarcode());
+
+		// Clear filter and verify pagination is restored
+		browser.getJTextFieldBarcode().setText("");
+		browser.newFilter();
+		assertTrue(browser.getTotalCount() >= 5);
+		assertEquals(2, browser.getRowCount());
+
+		// Test family filter
+		browser.getJTextFieldFamily().setText("Nymphalidae");
+		browser.newFilter();
+		assertTrue(browser.getTotalCount() >= 5);
+		assertEquals(2, browser.getRowCount());
+
+		// Non-matching filter returns 0 results
+		browser.getJTextFieldBarcode().setText("NON_EXISTENT_BARCODE_XYZ");
+		browser.newFilter();
+		assertEquals(0, browser.getTotalCount());
+		assertEquals(0, browser.getRowCount());
+	}
 }

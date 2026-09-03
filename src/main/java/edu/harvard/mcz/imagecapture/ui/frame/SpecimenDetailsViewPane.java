@@ -23,6 +23,7 @@ import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.data.LocationInCollection;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.data.NahimaManager;
+import edu.harvard.mcz.imagecapture.data.SpecimenCache;
 import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.entity.Number;
 import edu.harvard.mcz.imagecapture.entity.fixed.*;
@@ -93,7 +94,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 				&& Singleton.getSingletonInstance().getUser().canCopyPaste();
 	}
 
-	private final Specimen specimen;
+	private Specimen specimen;
+	private boolean dataLoadedSuccessfully = true;
 	private final StringBuffer higherGeogNotFoundWarning = new StringBuffer();
 	private final KeyboardShortcutManager manager = KeyboardShortcutManager.getInstance();
 	private Specimen previousSpecimen = null;
@@ -179,15 +181,35 @@ public class SpecimenDetailsViewPane extends JPanel {
 		this.specimen = aSpecimenInstance;
 		this.specimenController = aController;
 		this.thisPane = this;
-		this.bindingContext = new FormBindingContext<>(Specimen.class, specimen.isEditable(), this::setStateToDirty);
+		this.bindingContext = new FormBindingContext<>(Specimen.class, specimen != null && specimen.isEditable(), this::setStateToDirty);
 
 		SpecimenLifeCycle s = new SpecimenLifeCycle();
 		setStateToClean();
 		try {
-			s.attachClean(specimen);
+			if (specimen != null && specimen.getSpecimenId() != null && !specimen.isFullyLoaded()) {
+				Specimen full = SpecimenCache.get(specimen.getSpecimenId());
+				if (full == null || !full.isFullyLoaded()) {
+					full = s.findById(specimen.getSpecimenId());
+					if (full != null && full.isFullyLoaded()) {
+						SpecimenCache.put(full);
+					}
+				}
+				if (full != null && full.isFullyLoaded()) {
+					this.specimen = full;
+					if (this.specimenController != null) {
+						this.specimenController.setSpecimen(full);
+					}
+				}
+			}
+
+			if (specimen != null && specimen.isFullyLoaded()) {
+				s.attachClean(specimen);
+			}
 			initialize();
 			setValues();
+			this.dataLoadedSuccessfully = (this.specimen != null && this.specimen.isFullyLoaded());
 		} catch (Exception e) {
+			this.dataLoadedSuccessfully = false;
 			String status = "Undefined error initializing SpecimenDetails. Restarting Database connection...";
 			if (e instanceof SessionException || e instanceof TransactionException) {
 				status = "Database Connection Error. Resetting connection... Try again.";
@@ -197,11 +219,14 @@ public class SpecimenDetailsViewPane extends JPanel {
 				status = "Error: last edited entry has been modified externally. Try again.";
 			}
 			log.debug(status);
-			Singleton.getSingletonInstance().getMainFrame().setStatusMessage(status);
+			if (Singleton.getSingletonInstance().getMainFrame() != null) {
+				Singleton.getSingletonInstance().getMainFrame().setStatusMessage(status);
+			}
 			log.debug(e.getMessage(), e);
 			HibernateUtil.restartSessionFactory();
 			this.setVisible(false);
 		}
+		updateSaveButtonState();
 	}
 
 	/**
@@ -303,6 +328,12 @@ public class SpecimenDetailsViewPane extends JPanel {
 	}
 
 	private boolean save() {
+		if (!dataLoadedSuccessfully || specimen == null || !specimen.isFullyLoaded()) {
+			JOptionPane.showMessageDialog(thisPane,
+					"Cannot save: Specimen data was not fully loaded. Save is disabled to prevent data loss.",
+					"Save Aborted", JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
 		if (!specimen.isEditable(Singleton.getSingletonInstance().getUser())) {
 			JOptionPane.showMessageDialog(thisPane, "This Specimen cannot be edited. No edit will be saved.", "Warning",
 					JOptionPane.WARNING_MESSAGE);
@@ -350,7 +381,9 @@ public class SpecimenDetailsViewPane extends JPanel {
 				return false;
 			}
 			SpecimenLifeCycle sls = new SpecimenLifeCycle();
-			Singleton.getSingletonInstance().getMainFrame().setCount(sls.findSpecimenCount(", "));
+			if (Singleton.getSingletonInstance().getMainFrame() != null) {
+				Singleton.getSingletonInstance().getMainFrame().setCount(sls.findSpecimenCount(", "));
+			}
 		} catch (OptimisticLockException e) {
 			log.error("OptimisticLockException in save()", e);
 			this.setWarning("Error: " + e.getMessage());
@@ -377,6 +410,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private void pastePreviousRecord() {
 		log.debug("calling pastePreviousRecord()");
 		if (previousSpecimen == null) {
+			return;
+		}
+		if (!previousSpecimen.isFullyLoaded()) {
+			log.warn("Cannot paste: previousSpecimen is not fully loaded");
+			this.setWarning("Cannot paste: source specimen is not fully loaded.");
 			return;
 		}
 
@@ -459,42 +497,59 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * Set the values of the fields to the ones of the specimen.
 	 */
 	private void setValues() {
-		log.debug("Setting values, specimenid is {}", specimen.getSpecimenId());
+		log.debug("Setting values, specimenid is {}", specimen != null ? specimen.getSpecimenId() : null);
 		this.setStatus("Setting values");
 
-		// Synchronize all declarative form fields from Specimen model to UI components
-		bindingContext.readFrom(specimen);
-
-		// Handle property-based initial default for location in collection
-		String locationInCollectionPropertiesVal = Singleton.getSingletonInstance().getProperties().getProperties()
-				.getProperty(ImageCaptureProperties.KEY_DISPLAY_COLLECTION);
-		if (jComboBoxLocationInCollection != null && locationInCollectionPropertiesVal != null
-				&& !locationInCollectionPropertiesVal.isEmpty()) {
-			jComboBoxLocationInCollection.setSelectedItem(locationInCollectionPropertiesVal);
+		if (specimen == null || !specimen.isFullyLoaded()) {
+			this.dataLoadedSuccessfully = false;
+			this.setStatus("Warning: Record not fully loaded. Save disabled.");
 		}
 
-		reloadGeoRefFieldValues();
+		try {
+			// Synchronize all declarative form fields from Specimen model to UI components
+			bindingContext.readFrom(specimen);
 
-		if (jTableNumbers != null) {
-			jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));
-			this.setupNumberJTableRenderer();
+			// Handle property-based initial default for location in collection
+			String locationInCollectionPropertiesVal = Singleton.getSingletonInstance().getProperties().getProperties()
+					.getProperty(ImageCaptureProperties.KEY_DISPLAY_COLLECTION);
+			if (jComboBoxLocationInCollection != null && locationInCollectionPropertiesVal != null
+					&& !locationInCollectionPropertiesVal.isEmpty()) {
+				jComboBoxLocationInCollection.setSelectedItem(locationInCollectionPropertiesVal);
+			}
+
+			reloadGeoRefFieldValues();
+
+			if (jTableNumbers != null) {
+				jTableNumbers.setModel(new NumberTableModel(specimen.getNumbers()));
+				this.setupNumberJTableRenderer();
+			}
+
+			if (jTableCollectors != null) {
+				jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));
+				this.setupCollectorJTableRenderer();
+			}
+
+			if (jTableSpecimenParts != null) {
+				jTableSpecimenParts.setModel(new SpecimenPartsTableModel(specimen.getSpecimenParts()));
+				setupSpecimenPartsJTableRenderer();
+			}
+
+			updateImageCount();
+			updateContentDependentLabels();
+			setWarnings();
+			this.setStateToClean();
+			if (dataLoadedSuccessfully) {
+				this.setStatus("Loaded");
+			} else {
+				this.setStatus("Warning: Record not fully loaded. Save disabled.");
+			}
+		} catch (Exception e) {
+			this.dataLoadedSuccessfully = false;
+			log.error("Error setting values in SpecimenDetailsViewPane", e);
+			this.setWarning("Error loading record values: " + e.getMessage());
+		} finally {
+			updateSaveButtonState();
 		}
-
-		if (jTableCollectors != null) {
-			jTableCollectors.setModel(new CollectorTableModel(specimen.getCollectors()));
-			this.setupCollectorJTableRenderer();
-		}
-
-		if (jTableSpecimenParts != null) {
-			jTableSpecimenParts.setModel(new SpecimenPartsTableModel(specimen.getSpecimenParts()));
-			setupSpecimenPartsJTableRenderer();
-		}
-
-		updateImageCount();
-		updateContentDependentLabels();
-		setWarnings();
-		this.setStateToClean();
-		this.setStatus("Loaded");
 	}
 
 	private void updateDeterminationCount() {
@@ -591,11 +646,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 					Specimen::getHigherOrder, (s, val) -> s.setHigherOrder(val == null ? "" : val)), "grow");
 
 			addBasicJLabel(jPanel, "Family");
-			jPanel.add(bindingContext.bindComboBox("Family", HigherTaxonLifeCycle.selectDistinctFamily(),
+			jPanel.add(bindingContext.bindComboBox("Family", () -> HigherTaxonLifeCycle.selectDistinctFamily(),
 					Specimen::getFamily, (s, val) -> s.setFamily(val == null ? "" : val)), "grow");
 
 			addBasicJLabel(jPanel, "Subfamily");
-			jPanel.add(bindingContext.bindComboBox("Subfamily", HigherTaxonLifeCycle.selectDistinctSubfamily(""),
+			jPanel.add(bindingContext.bindComboBox("Subfamily", () -> HigherTaxonLifeCycle.selectDistinctSubfamily(""),
 					Specimen::getSubfamily, (s, val) -> s.setSubfamily(val == null ? "" : val)), "grow");
 
 			addBasicJLabel(jPanel, "Tribe");
@@ -970,20 +1025,39 @@ public class SpecimenDetailsViewPane extends JPanel {
 		target.add(label, constraints);
 	}
 
-	private JButton getSaveJButton() {
+	public JButton getSaveJButton() {
 		if (jButtonSave == null) {
 			jButtonSave = new JButton("Save");
-			jButtonSave.setEnabled(specimen.isEditable());
-			if (!specimen.isEditable()) {
-				jButtonSave.setEnabled(false);
-				jButtonSave.setText(specimen.getWorkFlowStatus());
-			}
 			jButtonSave.setMnemonic(KeyEvent.VK_S);
-			jButtonSave.setToolTipText("Save changes to this record to the database. No fields should "
-					+ "have red backgrounds before you save.");
 			jButtonSave.addActionListener(e -> thisPane.save());
+			updateSaveButtonState();
 		}
 		return jButtonSave;
+	}
+
+	public void updateSaveButtonState() {
+		if (jButtonSave != null) {
+			if (!dataLoadedSuccessfully || specimen == null || !specimen.isFullyLoaded()) {
+				jButtonSave.setEnabled(false);
+				jButtonSave.setToolTipText("Save is disabled: Record was not fully loaded from database.");
+			} else if (!specimen.isEditable(Singleton.getSingletonInstance().getUser())) {
+				jButtonSave.setEnabled(false);
+				jButtonSave.setText(specimen.getWorkFlowStatus());
+			} else {
+				jButtonSave.setEnabled(true);
+				jButtonSave.setText("Save");
+				jButtonSave.setToolTipText("Save changes to this record to the database. No fields should "
+						+ "have red backgrounds before you save.");
+			}
+		}
+	}
+
+	public boolean isSaveButtonEnabled() {
+		return jButtonSave != null && jButtonSave.isEnabled();
+	}
+
+	public boolean isDataLoadedSuccessfully() {
+		return dataLoadedSuccessfully;
 	}
 
 	private JTextField getTextFieldDecimalLat() {
@@ -1828,6 +1902,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		updateDeterminationCount();
 		updateJButtonPaste();
 		updateDBIdLabel();
+		updateSaveButtonState();
 	}
 
 	/**

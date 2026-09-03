@@ -19,6 +19,7 @@
 package edu.harvard.mcz.imagecapture;
 
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.data.SpecimenCache;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.interfaces.DataChangeListener;
@@ -33,6 +34,7 @@ import edu.harvard.mcz.imagecapture.ui.tablemodel.TableColumnManager;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.*;
@@ -60,10 +62,12 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 	private TableRowSorter<SpecimenListTableModel> sorter;
 	private JTextField jTextFieldFamily = null;
 	private JTextField jTextFieldDrawerNumber = null;
+	private Map<String, Object> baseSearchCriteria = new HashMap<>();
 	private Map<String, Object> searchCriteria2 = null;
 	private boolean useLike = false;
 	private int maxResults = 0;
 	private int offset = 0;
+	private javax.swing.Timer filterDebounceTimer = null;
 
 	public static final int DEFAULT_PAGE_SIZE = 1000;
 
@@ -86,13 +90,14 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 	 * This method initializes an instance of SpecimenBrowser
 	 */
 	public SpecimenBrowser() {
-		this(null, false, DEFAULT_PAGE_SIZE, 0);
+		this(null, true, DEFAULT_PAGE_SIZE, 0);
 	}
 
 	public SpecimenBrowser(Map<String, Object> criteria, boolean like, int limit, int offset) {
 		super();
 		this.useLike = like;
-		this.searchCriteria2 = criteria;
+		this.baseSearchCriteria = (criteria != null) ? new HashMap<>(criteria) : new HashMap<>();
+		this.searchCriteria2 = new HashMap<>(this.baseSearchCriteria);
 		this.maxResults = limit > 0 ? limit : DEFAULT_PAGE_SIZE;
 		this.offset = Math.max(0, offset);
 		initialize();
@@ -194,6 +199,45 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 				jTable.getColumn(jTable.getColumnName(SpecimenListTableModel.COL_COPY))
 						.setCellEditor(new CopyRowButtonEditor(new JCheckBox()));
 			}
+
+			// Speculatively prefetch specimen on selection change
+			jTable.getSelectionModel().addListSelectionListener(e -> {
+				if (!e.getValueIsAdjusting()) {
+					int selectedRow = jTable.getSelectedRow();
+					if (selectedRow >= 0 && selectedRow < jTable.getRowCount()) {
+						int modelRow = jTable.convertRowIndexToModel(selectedRow);
+						Object val = jTable.getModel().getValueAt(modelRow, SpecimenListTableModel.COL_ID);
+						if (val instanceof Specimen) {
+							Specimen sp = (Specimen) val;
+							if (sp.getSpecimenId() != null) {
+								SpecimenCache.prefetchAsync(sp.getSpecimenId());
+							}
+						}
+					}
+				}
+			});
+
+			// Speculatively prefetch specimen on mouse hover
+			jTable.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+				private int lastHoverRow = -1;
+
+				@Override
+				public void mouseMoved(java.awt.event.MouseEvent e) {
+					int viewRow = jTable.rowAtPoint(e.getPoint());
+					if (viewRow >= 0 && viewRow < jTable.getRowCount() && viewRow != lastHoverRow) {
+						lastHoverRow = viewRow;
+						int modelRow = jTable.convertRowIndexToModel(viewRow);
+						Object val = jTable.getModel().getValueAt(modelRow, SpecimenListTableModel.COL_ID);
+						if (val instanceof Specimen) {
+							Specimen sp = (Specimen) val;
+							if (sp.getSpecimenId() != null) {
+								SpecimenCache.prefetchAsync(sp.getSpecimenId());
+							}
+						}
+					}
+				}
+			});
+
 			// set some column widths
 			int characterWidth = Singleton.getSingletonInstance().getCharacterWidth();
 			jTable.getColumnModel().getColumn(0).setPreferredWidth(characterWidth * 3);
@@ -520,9 +564,18 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 	private JTextField getJTextField() {
 		if (jTextField == null) {
 			jTextField = new JTextField();
-			jTextField.addKeyListener(new java.awt.event.KeyAdapter() {
-				public void keyTyped(java.awt.event.KeyEvent e) {
-					newFilter();
+			jTextField.addActionListener(e -> triggerFilterImmediately());
+			jTextField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+				public void insertUpdate(javax.swing.event.DocumentEvent e) {
+					triggerFilterDebounced();
+				}
+
+				public void removeUpdate(javax.swing.event.DocumentEvent e) {
+					triggerFilterDebounced();
+				}
+
+				public void changedUpdate(javax.swing.event.DocumentEvent e) {
+					triggerFilterDebounced();
 				}
 			});
 		}
@@ -541,38 +594,58 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 			jComboBox.setSelectedItem("");
 			jComboBox.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
-					jTextField.setText("");
-					newFilter();
+					triggerFilterImmediately();
 				}
 			});
 		}
 		return jComboBox;
 	}
 
-	private void newFilter() {
-		RowFilter<SpecimenListTableModel, Object> rf = null;
-		// If current expression doesn't parse, don't update.
-		try {
-			RowFilter<SpecimenListTableModel, Object> rf_family = null;
-			RowFilter<SpecimenListTableModel, Object> rf_barcode = null;
-			RowFilter<SpecimenListTableModel, Object> rf_drawer = null;
-			RowFilter<SpecimenListTableModel, Object> rf_workflow = null;
-			rf_family = RowFilter.regexFilter(jTextFieldFamily.getText(), SpecimenListTableModel.COL_FAMILY);
-			rf_barcode = RowFilter.regexFilter(jTextField.getText(), SpecimenListTableModel.COL_BARCODE);
-			// rf_drawer = RowFilter.regexFilter(jTextFieldDrawerNumber.getText(),
-			// SpecimenListTableModel.COL_DRAWER);
-			rf_workflow = RowFilter.regexFilter(jComboBox.getSelectedItem().toString(),
-					SpecimenListTableModel.COL_WORKFLOW);
-			ArrayList<RowFilter<SpecimenListTableModel, Object>> i = new ArrayList<>();
-			i.add(rf_family);
-			i.add(rf_barcode);
-			// i.add(rf_drawer);
-			i.add(rf_workflow);
-			rf = RowFilter.andFilter(i);
-		} catch (java.util.regex.PatternSyntaxException e) {
-			return;
+	public void triggerFilterImmediately() {
+		if (filterDebounceTimer != null && filterDebounceTimer.isRunning()) {
+			filterDebounceTimer.stop();
 		}
-		sorter.setRowFilter(rf);
+		newFilter();
+	}
+
+	public void triggerFilterDebounced() {
+		if (filterDebounceTimer == null) {
+			filterDebounceTimer = new javax.swing.Timer(350, e -> newFilter());
+			filterDebounceTimer.setRepeats(false);
+		}
+		filterDebounceTimer.restart();
+	}
+
+	public void newFilter() {
+		Map<String, Object> activeCriteria = new HashMap<>(
+				this.baseSearchCriteria != null ? this.baseSearchCriteria : Collections.emptyMap());
+		String barcode = jTextField != null ? jTextField.getText().trim() : "";
+		if (!barcode.isEmpty()) {
+			activeCriteria.put("barcode", barcode);
+		}
+		String workflow = (jComboBox != null && jComboBox.getSelectedItem() != null)
+				? jComboBox.getSelectedItem().toString().trim()
+				: "";
+		if (!workflow.isEmpty()) {
+			activeCriteria.put("workFlowStatus", workflow);
+		}
+		String family = jTextFieldFamily != null ? jTextFieldFamily.getText().trim() : "";
+		if (!family.isEmpty()) {
+			activeCriteria.put("family", family);
+		}
+		String drawer = jTextFieldDrawerNumber != null ? jTextFieldDrawerNumber.getText().trim() : "";
+		if (!drawer.isEmpty()) {
+			activeCriteria.put("drawerNumber", drawer);
+		}
+
+		if (sorter != null) {
+			sorter.setRowFilter(null);
+		}
+
+		this.searchCriteria2 = activeCriteria;
+		this.totalCount = -1;
+		this.offset = 0;
+		loadData();
 	}
 
 	/*
@@ -592,12 +665,21 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 	 *
 	 * @return javax.swing.JTextField
 	 */
-	private JTextField getJTextFieldFamily() {
+	public JTextField getJTextFieldFamily() {
 		if (jTextFieldFamily == null) {
 			jTextFieldFamily = new JTextField();
-			jTextFieldFamily.addKeyListener(new java.awt.event.KeyAdapter() {
-				public void keyTyped(java.awt.event.KeyEvent e) {
-					newFilter();
+			jTextFieldFamily.addActionListener(e -> triggerFilterImmediately());
+			jTextFieldFamily.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+				public void insertUpdate(javax.swing.event.DocumentEvent e) {
+					triggerFilterDebounced();
+				}
+
+				public void removeUpdate(javax.swing.event.DocumentEvent e) {
+					triggerFilterDebounced();
+				}
+
+				public void changedUpdate(javax.swing.event.DocumentEvent e) {
+					triggerFilterDebounced();
 				}
 			});
 		}
@@ -609,16 +691,41 @@ public class SpecimenBrowser extends JPanel implements DataChangeListener {
 	 *
 	 * @return javax.swing.JTextField
 	 */
-	private JTextField getJTextFieldDrawerNumber() {
+	public JTextField getJTextFieldDrawerNumber() {
 		if (jTextFieldDrawerNumber == null) {
 			jTextFieldDrawerNumber = new JTextField();
-			jTextFieldDrawerNumber.addKeyListener(new java.awt.event.KeyAdapter() {
-				public void keyTyped(java.awt.event.KeyEvent e) {
-					newFilter();
+			jTextFieldDrawerNumber.addActionListener(e -> triggerFilterImmediately());
+			jTextFieldDrawerNumber.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+				public void insertUpdate(javax.swing.event.DocumentEvent e) {
+					triggerFilterDebounced();
+				}
+
+				public void removeUpdate(javax.swing.event.DocumentEvent e) {
+					triggerFilterDebounced();
+				}
+
+				public void changedUpdate(javax.swing.event.DocumentEvent e) {
+					triggerFilterDebounced();
 				}
 			});
 		}
 		return jTextFieldDrawerNumber;
+	}
+
+	public JTextField getJTextFieldBarcode() {
+		return getJTextField();
+	}
+
+	public JComboBox getJComboBoxWorkflow() {
+		return getJComboBox();
+	}
+
+	public JTextField getJTextFieldDrawer() {
+		return getJTextFieldDrawerNumber();
+	}
+
+	public Map<String, Object> getSearchCriteria2() {
+		return this.searchCriteria2;
 	}
 
 	public int getRowCount() {

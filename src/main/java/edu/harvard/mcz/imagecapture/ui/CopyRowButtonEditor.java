@@ -2,7 +2,9 @@ package edu.harvard.mcz.imagecapture.ui;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.data.SpecimenCache;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -29,6 +31,14 @@ public class CopyRowButtonEditor extends DefaultCellEditor {
 
 	public CopyRowButtonEditor(JTextField textField) {
 		super(textField);
+		button = new JButton();
+		button.setOpaque(true);
+		button.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				fireEditingStopped();
+			}
+		});
 	}
 
 	@Override
@@ -55,11 +65,32 @@ public class CopyRowButtonEditor extends DefaultCellEditor {
 	public Object getCellEditorValue() {
 		if (isPushed) {
 			if (target != null) {
-				ImageCaptureApp.lastEditedSpecimenCache = target;
-				Singleton.getSingletonInstance().getMainFrame()
-						.setStatusMessage("Copied specimen with id " + target.getSpecimenId() + ".");
+				Specimen toCopy = target;
+				if (target.getSpecimenId() != null && !target.isFullyLoaded()) {
+					Specimen full = SpecimenCache.get(target.getSpecimenId());
+					if (full == null || !full.isFullyLoaded()) {
+						SpecimenLifeCycle sls = new SpecimenLifeCycle();
+						try {
+							full = sls.findById(target.getSpecimenId());
+							if (full != null && full.isFullyLoaded()) {
+								SpecimenCache.put(full);
+							}
+						} catch (Exception ex) {
+						}
+					}
+					if (full != null && full.isFullyLoaded()) {
+						toCopy = full;
+					}
+				}
+				ImageCaptureApp.lastEditedSpecimenCache = toCopy;
+				if (Singleton.getSingletonInstance().getMainFrame() != null) {
+					Singleton.getSingletonInstance().getMainFrame()
+							.setStatusMessage("Copied specimen with id " + toCopy.getSpecimenId() + ".");
+				}
 			} else {
-				Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Failed copying specimen.");
+				if (Singleton.getSingletonInstance().getMainFrame() != null) {
+					Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Failed copying specimen.");
+				}
 			}
 		}
 		isPushed = false;

@@ -19,6 +19,7 @@
 package edu.harvard.mcz.imagecapture.ui;
 
 import edu.harvard.mcz.imagecapture.*;
+import edu.harvard.mcz.imagecapture.data.SpecimenCache;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.SpecimenPart;
 import edu.harvard.mcz.imagecapture.entity.Users;
@@ -181,12 +182,29 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor,
 						// a specimen with this ID exists, bring up the details editor.
 						try {
 							// SpecimenControler sc = new SpecimenControler(specimen);
-							if (((Specimen) targetId).getSpecimenId() != null) {
+							Specimen targetSpecimen = (Specimen) targetId;
+							if (targetSpecimen.getSpecimenId() != null) {
+								Long specimenId = targetSpecimen.getSpecimenId();
+								Specimen fullSpecimen = SpecimenCache.get(specimenId);
+								if (fullSpecimen == null || !fullSpecimen.isFullyLoaded()) {
+									SpecimenLifeCycle sls = new SpecimenLifeCycle();
+									try {
+										fullSpecimen = sls.findById(specimenId);
+										if (fullSpecimen != null && fullSpecimen.isFullyLoaded()) {
+											SpecimenCache.put(fullSpecimen);
+										}
+									} catch (Exception ex) {
+										log.error("Failed to load specimen for id " + specimenId, ex);
+									}
+								}
+								if (fullSpecimen == null) {
+									fullSpecimen = targetSpecimen;
+								}
 								// Specimen is still editable
 								// Pass the specimen object for the row, the table model, and
 								// the row number on to the specimen controler.
 								try {
-									SpecimenController sc = new SpecimenController((Specimen) targetId,
+									SpecimenController sc = new SpecimenController(fullSpecimen,
 											(SpecimenListTableModel) table.getModel(), table, row, col);
 									SpecimenBrowser browser = (SpecimenBrowser) SwingUtilities
 											.getAncestorOfClass(SpecimenBrowser.class, table);
@@ -197,7 +215,7 @@ public class ButtonEditor extends AbstractCellEditor implements TableCellEditor,
 								} catch (ClassCastException eNotSp) {
 									// Request isn't coming from a SpecimenListTableModel
 									// View just the specimen record.
-									SpecimenController sc = new SpecimenController((Specimen) targetId,
+									SpecimenController sc = new SpecimenController(fullSpecimen,
 											(SpecimenListTableModel) table.getModel(), table, row, col);
 									sc.displayInEditor();
 								}

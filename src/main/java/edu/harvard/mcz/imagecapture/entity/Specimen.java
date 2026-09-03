@@ -117,6 +117,8 @@ public class Specimen implements Serializable {
 	private String citedInPublicationYear;
 	private Date dateLastNahimaUpdated;
 
+	private boolean isFullyLoaded = true;
+
 	public Specimen() {
 		setDefaults();
 	}
@@ -124,6 +126,7 @@ public class Specimen implements Serializable {
 	public Specimen(Long specimenId, String barcode, String workFlowStatus, String family, String subfamily,
 			String tribe, String genus, String specificEpithet, String subspecificEpithet, String country,
 			String primaryDivison, String verbatimLocality, String collection, String collectionNumber) {
+		this.isFullyLoaded = false;
 		this.specimenId = specimenId;
 		this.barcode = barcode;
 		this.workFlowStatus = workFlowStatus;
@@ -145,6 +148,14 @@ public class Specimen implements Serializable {
 			numSet.add(nr);
 			this.numbers = numSet;
 		}
+	}
+
+	public boolean isFullyLoaded() {
+		return this.isFullyLoaded;
+	}
+
+	public void setFullyLoaded(boolean isFullyLoaded) {
+		this.isFullyLoaded = isFullyLoaded;
 	}
 
 	public Specimen(String barcode, String typeStatus, Date dateCreated) {

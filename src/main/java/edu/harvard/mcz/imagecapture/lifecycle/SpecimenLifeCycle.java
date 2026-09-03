@@ -5,6 +5,8 @@ package edu.harvard.mcz.imagecapture.lifecycle;
 
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.data.LookupCache;
+import edu.harvard.mcz.imagecapture.data.SpecimenCache;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.SpecimenPart;
@@ -17,18 +19,25 @@ import edu.harvard.mcz.imagecapture.exceptions.ConnectionException;
 import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsException;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
+import edu.harvard.mcz.imagecapture.query.Specification;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.hibernate.Hibernate;
 import org.hibernate.HibernateException;
 import org.hibernate.LockMode;
 import org.hibernate.Session;
@@ -137,6 +146,9 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 	 * @throws SpecimenExistsException
 	 */
 	public void persist(Specimen transientInstance) throws SaveFailedException, SpecimenExistsException {
+		if (transientInstance != null && transientInstance.getSpecimenId() != null && !transientInstance.isFullyLoaded()) {
+			throw new SaveFailedException("Cannot persist incomplete specimen projection");
+		}
 		log.debug("persisting Specimen instance");
 		try {
 			Session session = this.getSession();
@@ -150,7 +162,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				session.getTransaction().rollback();
 				try {
 					session.close();
-				} catch (SessionException se) {
+				} catch (Exception se) {
 				}
 				String message = e.getMessage();
 				String pmessage = "";
@@ -171,7 +183,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			}
 			try {
 				session.close();
-			} catch (SessionException e) {
+			} catch (Exception e) {
 			}
 		} catch (SpecimenExistsException | SaveFailedException see) {
 			// Pass on upwards unchanged
@@ -192,6 +204,10 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 	 * @throws SaveFailedException
 	 */
 	public void attachDirty(Specimen instance) throws SaveFailedException {
+		if (instance == null || !instance.isFullyLoaded()) {
+			log.warn("attachDirty aborted: specimen is null or not fully loaded");
+			throw new SaveFailedException("Cannot save/attach incomplete specimen projection");
+		}
 		log.debug("attaching dirty Specimen instance with id " + instance.getSpecimenId());
 		try {
 			Session session = this.getSession();
@@ -208,7 +224,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			}
 			try {
 				session.close();
-			} catch (SessionException e) {
+			} catch (Exception e) {
 			}
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
@@ -222,12 +238,9 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 	 * @param instance
 	 */
 	public void attachClean(Specimen instance) {
-		try {
-			log.debug("Debug: Specimen parts size: {}", instance.getSpecimenParts().size());
-			log.debug("Debug: First Specimen part: {}",
-					((SpecimenPart) instance.getSpecimenParts().toArray()[0]).getPartAttributeValuesConcat());
-		} catch (Exception e) {
-			log.debug("Oh-oh: {}", e.getMessage());
+		if (instance == null || !instance.isFullyLoaded()) {
+			log.warn("attachClean skipped: specimen is null or not fully loaded");
+			return;
 		}
 		log.debug("attaching clean Specimen instance");
 		try {
@@ -247,28 +260,23 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 					attachDirty(instance);
 				} catch (SaveFailedException e1) {
 					log.error("attach failed", e1);
-					e1.printStackTrace();
 				}
 			}
 			try {
 				session.close();
-			} catch (SessionException e) {
+			} catch (Exception e) {
 			}
 		} catch (RuntimeException re) {
 			log.error("attach failed", re);
 			throw re;
 		}
-		try {
-			log.debug("Debug: Specimen parts size: {}", instance.getSpecimenParts().size());
-			log.debug("Debug: Specimen parts first: {}",
-					((SpecimenPart) instance.getSpecimenParts().toArray()[0]).getPartAttributeValuesConcat());
-		} catch (Exception e) {
-			log.debug("Exception message: {}", e.getMessage());
-		}
 	}
 
 	public void delete(Specimen persistentInstance) {
 		log.debug("deleting Specimen instance");
+		if (persistentInstance != null && persistentInstance.getSpecimenId() != null) {
+			SpecimenCache.invalidate(persistentInstance.getSpecimenId());
+		}
 		try {
 			Session session = this.getSession();
 			session.beginTransaction();
@@ -334,20 +342,31 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			Specimen instance = null;
 			try {
 				instance = session.get(Specimen.class, id);
-				session.getTransaction().commit();
-				if (instance == null) {
-					log.debug("get successful, no instance found");
+				if (instance != null) {
+					Hibernate.initialize(instance.getCollectors());
+					Hibernate.initialize(instance.getDeterminations());
+					Hibernate.initialize(instance.getNumbers());
+					Hibernate.initialize(instance.getSpecimenParts());
+					Hibernate.initialize(instance.getICImages());
+					Hibernate.initialize(instance.getLatLong());
+					Hibernate.initialize(instance.getTrackings());
+					Hibernate.initialize(instance.getExternalHistory());
+					for (SpecimenPart sp : instance.getSpecimenParts()) {
+						Hibernate.initialize(sp.getSpecimenPartAttributes());
+					}
+					instance.setFullyLoaded(true);
+					log.debug("get successful, instance found, parts size: {}", instance.getSpecimenParts().size());
 				} else {
-					log.debug("get successful, instance found");
-					log.debug("Debug: Specimen parts size", instance.getSpecimenParts().size());
+					log.debug("get successful, no instance found");
 				}
+				session.getTransaction().commit();
 			} catch (HibernateException e) {
 				session.getTransaction().rollback();
 				log.error("get failed", e);
 			}
 			try {
 				session.close();
-			} catch (SessionException e) {
+			} catch (Exception e) {
 			}
 			return instance;
 		} catch (RuntimeException re) {
@@ -809,15 +828,17 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 	}
 
 	public String[] getDistinctCountries() {
-		ArrayList<String> collections = new ArrayList<String>();
-		collections.add(""); // put blank at top of list.
-		try {
-			String sql = "Select distinct country from Specimen spe WHERE spe.country is not null ORDER BY spe.country  ";
-			return loadStringsBySQL(collections, sql);
-		} catch (RuntimeException re) {
-			log.error("Error", re);
-			return new String[]{};
-		}
+		return LookupCache.getOrLoad("specimen.countries", () -> {
+			ArrayList<String> collections = new ArrayList<String>();
+			collections.add(""); // put blank at top of list.
+			try {
+				String sql = "Select distinct country from Specimen spe WHERE spe.country is not null ORDER BY spe.country  ";
+				return loadStringsBySQL(collections, sql);
+			} catch (RuntimeException re) {
+				log.error("Error", re);
+				return new String[]{};
+			}
+		});
 	}
 
 	public int deleteSpecimenByBarcode(String barcode) {
@@ -832,6 +853,9 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			// this.delete(specimen);
 
 			Long specimenId = specimen.getSpecimenId();
+			if (specimenId != null) {
+				SpecimenCache.invalidate(specimenId);
+			}
 			try {
 				Session session = this.getSession();
 				Transaction transaction = session.beginTransaction();
@@ -897,97 +921,107 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 	}
 
 	public String[] getDistinctCollections() {
-		ArrayList<String> collections = new ArrayList<String>();
-		collections.add(""); // put blank at top of list.
-		try {
-			String sql = "Select distinct collection from Specimen spe WHERE spe.collection is not null ORDER BY spe.collection  ";
-			return loadStringsBySQL(collections, sql);
-		} catch (RuntimeException re) {
-			log.error("Error", re);
-			return new String[]{};
-		}
+		return LookupCache.getOrLoad("specimen.collections", () -> {
+			ArrayList<String> collections = new ArrayList<String>();
+			collections.add(""); // put blank at top of list.
+			try {
+				String sql = "Select distinct collection from Specimen spe WHERE spe.collection is not null ORDER BY spe.collection  ";
+				return loadStringsBySQL(collections, sql);
+			} catch (RuntimeException re) {
+				log.error("Error", re);
+				return new String[]{};
+			}
+		});
 	}
 
 	public String[] getDistinctDeterminers() {
-		ArrayList<String> collections = new ArrayList<String>();
-		collections.add(""); // put blank at top of list.
-		try {
-			String sql = "Select distinct identifiedBy from Specimen spe WHERE spe.identifiedBy is not null ORDER BY spe.identifiedBy";
-			// String sql = "Select distinct identifiedby from Specimen";
-			Session session = this.getSession();
+		return LookupCache.getOrLoad("specimen.determiners", () -> {
+			ArrayList<String> collections = new ArrayList<String>();
+			collections.add(""); // put blank at top of list.
 			try {
-				session.beginTransaction();
-				Query q = session.createQuery(sql);
-				collections.addAll(q.list());
-				session.getTransaction().commit();
-			} catch (HibernateException e) {
-				e.printStackTrace();
-				session.getTransaction().rollback();
-				log.error(e.getMessage());
+				String sql = "Select distinct identifiedBy from Specimen spe WHERE spe.identifiedBy is not null ORDER BY spe.identifiedBy";
+				// String sql = "Select distinct identifiedby from Specimen";
+				Session session = this.getSession();
+				try {
+					session.beginTransaction();
+					Query q = session.createQuery(sql);
+					collections.addAll(q.list());
+					session.getTransaction().commit();
+				} catch (HibernateException e) {
+					e.printStackTrace();
+					session.getTransaction().rollback();
+					log.error(e.getMessage());
+				}
+				try {
+					session.close();
+				} catch (SessionException e) {
+				}
+				String[] result = collections.toArray(new String[]{});
+				return result;
+			} catch (RuntimeException re) {
+				log.error("Error", re);
+				return new String[]{};
 			}
-			try {
-				session.close();
-			} catch (SessionException e) {
-			}
-			String[] result = collections.toArray(new String[]{});
-			return result;
-		} catch (RuntimeException re) {
-			log.error("Error", re);
-			return new String[]{};
-		}
+		});
 	}
 
 	public String[] getDistinctPrimaryDivisions() {
-		ArrayList<String> collections = new ArrayList<String>();
-		collections.add(""); // put blank at top of list.
-		try {
-			String sql = "Select distinct primaryDivison from Specimen spe WHERE spe.primaryDivison is not null ORDER BY spe.primaryDivison";
-			// String sql = "Select distinct identifiedby from Specimen";
-			Session session = this.getSession();
+		return LookupCache.getOrLoad("specimen.primaryDivisions", () -> {
+			ArrayList<String> collections = new ArrayList<String>();
+			collections.add(""); // put blank at top of list.
 			try {
-				session.beginTransaction();
-				Query q = session.createQuery(sql);
-				collections.addAll(q.list());
-				session.getTransaction().commit();
-			} catch (HibernateException e) {
-				e.printStackTrace();
-				session.getTransaction().rollback();
-				log.error(e.getMessage());
+				String sql = "Select distinct primaryDivison from Specimen spe WHERE spe.primaryDivison is not null ORDER BY spe.primaryDivison";
+				// String sql = "Select distinct identifiedby from Specimen";
+				Session session = this.getSession();
+				try {
+					session.beginTransaction();
+					Query q = session.createQuery(sql);
+					collections.addAll(q.list());
+					session.getTransaction().commit();
+				} catch (HibernateException e) {
+					e.printStackTrace();
+					session.getTransaction().rollback();
+					log.error(e.getMessage());
+				}
+				try {
+					session.close();
+				} catch (SessionException e) {
+				}
+				String[] result = collections.toArray(new String[]{});
+				return result;
+			} catch (RuntimeException re) {
+				log.error("Error", re);
+				return new String[]{};
 			}
-			try {
-				session.close();
-			} catch (SessionException e) {
-			}
-			String[] result = collections.toArray(new String[]{});
-			return result;
-		} catch (RuntimeException re) {
-			log.error("Error", re);
-			return new String[]{};
-		}
+		});
 	}
 
 	public String[] getDistinctQuestions() {
-		ArrayList<String> collections = new ArrayList<String>();
-		collections.add(""); // put blank at top of list.
-		try {
-			String sql = "Select distinct questions from Specimen spe WHERE spe.questions is not null ORDER BY spe.questions  ";
-			return loadStringsBySQL(collections, sql);
-		} catch (RuntimeException re) {
-			log.error("Error", re);
-			return new String[]{};
-		}
+		return LookupCache.getOrLoad("specimen.questions", () -> {
+			ArrayList<String> collections = new ArrayList<String>();
+			collections.add(""); // put blank at top of list.
+			try {
+				String sql = "Select distinct questions from Specimen spe WHERE spe.questions is not null ORDER BY spe.questions  ";
+				return loadStringsBySQL(collections, sql);
+			} catch (RuntimeException re) {
+				log.error("Error", re);
+				return new String[]{};
+			}
+		});
 	}
 
 	public String[] getDistinctSpecificLocality() {
-		ArrayList<String> collections = new ArrayList<String>();
-		collections.add(""); // put blank at top of list.
-		try {
-			String sql = "Select distinct specificLocality from Specimen spe WHERE spe.specificLocality is not null ORDER BY spe.specificLocality";
-			return loadStringsBySQL(collections, sql);
-		} catch (RuntimeException re) {
-			log.error("Error", re);
-			return new String[]{};
-		}
+		return LookupCache.getOrLoad("specimen.specificLocality", () -> {
+			ArrayList<String> collections = new ArrayList<String>();
+			collections.add(""); // put blank at top of list.
+			try {
+				String sql = "Select distinct specificLocality from Specimen spe WHERE spe.specificLocality is not null ORDER BY spe.specificLocality";
+				return loadStringsBySQL(collections, sql);
+			} catch (RuntimeException re) {
+				log.error("Error", re);
+				return new String[]{};
+			}
+		});
 	}
 
 	@Override
@@ -1007,6 +1041,22 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				Query<Specimen> query = session.createQuery("SELECT s FROM Specimen s WHERE s.specimenId IN (?1)");
 				query.setParameter(1, ids);
 				results = query.list();
+				if (results != null) {
+					for (Specimen s : results) {
+						Hibernate.initialize(s.getCollectors());
+						Hibernate.initialize(s.getDeterminations());
+						Hibernate.initialize(s.getNumbers());
+						Hibernate.initialize(s.getSpecimenParts());
+						Hibernate.initialize(s.getICImages());
+						Hibernate.initialize(s.getLatLong());
+						Hibernate.initialize(s.getTrackings());
+						Hibernate.initialize(s.getExternalHistory());
+						for (SpecimenPart sp : s.getSpecimenParts()) {
+							Hibernate.initialize(sp.getSpecimenPartAttributes());
+						}
+						s.setFullyLoaded(true);
+					}
+				}
 				txn.commit();
 			} catch (HibernateException e) {
 				session.getTransaction().rollback();
@@ -1019,6 +1069,145 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 		}
 	}
 
+	private boolean hasComplexCriteria(Map<String, Object> propertyValueMap) {
+		if (propertyValueMap == null || propertyValueMap.isEmpty()) {
+			return false;
+		}
+		for (Map.Entry<String, Object> entry : propertyValueMap.entrySet()) {
+			if (entry.getKey().contains(".") || entry.getValue() instanceof Specification) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private List<Long> findIdsByCriteria(Map<String, Object> propertyValueMap, int maxResults, int offset,
+			boolean like, String sortProperty, boolean sortAscending) {
+		try {
+			Session session = this.getSession();
+			try {
+				session.beginTransaction();
+				CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
+				CriteriaQuery<Long> cr = cb.createQuery(Long.class);
+				Root<Specimen> root = cr.from(Specimen.class);
+				List<Predicate> predicates = new ArrayList<>();
+				if (propertyValueMap != null) {
+					for (Map.Entry<String, Object> entry : propertyValueMap.entrySet()) {
+						Expression<String> propertyToMatch = null;
+						String[] splitKey = entry.getKey().split("\\.");
+						if (splitKey.length > 1) {
+							Join<Object, Object> currentRoot = root.join(splitKey[0]);
+							for (int i = 1; i < splitKey.length - 1; i++) {
+								currentRoot = currentRoot.join(splitKey[i]);
+							}
+							propertyToMatch = currentRoot.get(splitKey[splitKey.length - 1]);
+						} else {
+							propertyToMatch = root.get(entry.getKey());
+						}
+
+						Predicate p = null;
+						if (entry.getValue() instanceof Specification) {
+							p = ((Specification) entry.getValue()).toPredicate(root, cr, cb);
+						} else if (like && entry.getValue() instanceof String) {
+							if (!((String) entry.getValue()).contains("%")
+									&& !((String) entry.getValue()).contains("_")) {
+								p = cb.like(cb.lower(propertyToMatch.as(String.class)),
+										"%" + ((String) entry.getValue()).toLowerCase() + "%");
+							} else {
+								p = cb.like(propertyToMatch.as(String.class), (String) entry.getValue());
+							}
+						} else {
+							p = cb.equal(propertyToMatch, entry.getValue());
+						}
+						if (p != null) {
+							predicates.add(p);
+						}
+					}
+				}
+				if (!predicates.isEmpty()) {
+					cr.where(cb.and(predicates.toArray(new Predicate[0])));
+				}
+				cr.select(root.get("specimenId")).distinct(true);
+
+				List<Order> orders = new ArrayList<>();
+				if (sortProperty != null && !sortProperty.trim().isEmpty() && !sortProperty.equals("specimenId")
+						&& !"numbers.number".equals(sortProperty)) {
+					Expression<?> sortExpr = null;
+					String[] splitSort = sortProperty.split("\\.");
+					if (splitSort.length > 1) {
+						Join<Object, Object> currentSortRoot = root.join(splitSort[0], JoinType.LEFT);
+						for (int i = 1; i < splitSort.length - 1; i++) {
+							currentSortRoot = currentSortRoot.join(splitSort[i], JoinType.LEFT);
+						}
+						sortExpr = currentSortRoot.get(splitSort[splitSort.length - 1]);
+					} else {
+						sortExpr = root.get(sortProperty);
+					}
+					orders.add(sortAscending ? cb.asc(sortExpr) : cb.desc(sortExpr));
+				}
+				orders.add(sortAscending ? cb.asc(root.get("specimenId")) : cb.desc(root.get("specimenId")));
+				cr.orderBy(orders);
+
+				Query<Long> q = session.createQuery(cr);
+				if (maxResults > 0) {
+					q.setMaxResults(maxResults);
+				}
+				if (offset > 0) {
+					q.setFirstResult(offset);
+				}
+				List<Long> ids = q.list();
+				session.getTransaction().commit();
+				return ids != null ? ids : Collections.emptyList();
+			} catch (HibernateException e) {
+				session.getTransaction().rollback();
+				log.error("findIdsByCriteria failed", e);
+				throw e;
+			}
+		} catch (RuntimeException re) {
+			log.error("findIdsByCriteria failed", re);
+			throw re;
+		}
+	}
+
+	private List<Specimen> findSpecimensForTableByIds(List<Long> ids, String sortProperty, boolean sortAscending) {
+		try {
+			Session session = this.getSession();
+			Transaction txn = session.beginTransaction();
+			try {
+				StringBuilder hql = new StringBuilder();
+				hql.append("SELECT new edu.harvard.mcz.imagecapture.entity.Specimen(");
+				hql.append("s.specimenId, s.barcode, s.workFlowStatus, s.family, s.subfamily, ");
+				hql.append("s.tribe, s.genus, s.specificEpithet, s.subspecificEpithet, s.country, ");
+				hql.append("s.primaryDivison, s.verbatimLocality, s.collection, ");
+				hql.append(
+						"(SELECT n.number FROM Number n WHERE n.specimen = s AND n.numberType = 'Collection Number' ORDER BY n.numberId ASC LIMIT 1)) ");
+				hql.append("FROM Specimen s WHERE s.specimenId IN (:ids) ");
+				if (sortProperty != null && !sortProperty.isEmpty()) {
+					String orderProp = "numbers.number".equals(sortProperty) ? "s.specimenId" : "s." + sortProperty;
+					hql.append(" ORDER BY ").append(orderProp).append(sortAscending ? " ASC" : " DESC");
+					if (!"specimenId".equals(sortProperty)) {
+						hql.append(", s.specimenId ").append(sortAscending ? "ASC" : "DESC");
+					}
+				} else {
+					hql.append(" ORDER BY s.specimenId ASC");
+				}
+
+				Query<Specimen> query = session.createQuery(hql.toString(), Specimen.class);
+				query.setParameterList("ids", ids);
+				List<Specimen> results = query.list();
+				txn.commit();
+				return results != null ? results : new ArrayList<>();
+			} catch (HibernateException e) {
+				session.getTransaction().rollback();
+				log.error("findSpecimensForTableByIds failed", e);
+				throw e;
+			}
+		} catch (RuntimeException re) {
+			log.error("findSpecimensForTableByIds failed", re);
+			throw re;
+		}
+	}
+
 	/**
 	 * High-performance lightweight table projection query for specimen browsing.
 	 * Bypasses full entity graph hydration and loads only the columns needed for
@@ -1027,6 +1216,13 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 	 */
 	public List<Specimen> findSpecimensForTable(Map<String, Object> propertyValueMap, int maxResults, int offset,
 			boolean like, String sortProperty, boolean sortAscending) {
+		if (hasComplexCriteria(propertyValueMap)) {
+			List<Long> ids = findIdsByCriteria(propertyValueMap, maxResults, offset, like, sortProperty, sortAscending);
+			if (ids.isEmpty()) {
+				return new ArrayList<>();
+			}
+			return findSpecimensForTableByIds(ids, sortProperty, sortAscending);
+		}
 		try {
 			Session session = this.getSession();
 			Transaction txn = session.beginTransaction();

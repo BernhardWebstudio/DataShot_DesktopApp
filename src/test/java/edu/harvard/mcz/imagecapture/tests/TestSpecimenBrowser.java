@@ -249,7 +249,8 @@ public class TestSpecimenBrowser extends TestCase {
 		assertEquals(2, browser.getRowCount());
 		assertEquals(0, browser.getOffset());
 
-		// Test finding a specimen that would have been on page 2 (index 3: TEST_PAGINATION_4)
+		// Test finding a specimen that would have been on page 2 (index 3:
+		// TEST_PAGINATION_4)
 		browser.getJTextFieldBarcode().setText("TEST_PAGINATION_4");
 		browser.newFilter();
 

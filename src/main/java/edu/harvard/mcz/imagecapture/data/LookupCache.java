@@ -24,8 +24,8 @@ import java.util.function.Supplier;
 
 /**
  * Thread-safe cache for distinct database lookup queries (such as higher taxa,
- * countries, primary divisions, collectors, and number types) to avoid repetitive
- * full-table scans.
+ * countries, primary divisions, collectors, and number types) to avoid
+ * repetitive full-table scans.
  */
 public class LookupCache {
 

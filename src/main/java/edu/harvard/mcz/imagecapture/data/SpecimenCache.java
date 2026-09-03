@@ -28,9 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * LRU cache and speculative pre-fetcher for Specimen records.
- * Keeps recently visited or hovered specimen records in memory to provide
- * instantaneous details view pane loading.
+ * LRU cache and speculative pre-fetcher for Specimen records. Keeps recently
+ * visited or hovered specimen records in memory to provide instantaneous
+ * details view pane loading.
  */
 public class SpecimenCache {
 
@@ -81,10 +81,11 @@ public class SpecimenCache {
 	}
 
 	/**
-	 * Asynchronously pre-fetches the complete Specimen entity by ID in a background daemon thread
-	 * if it is not already present in the cache.
+	 * Asynchronously pre-fetches the complete Specimen entity by ID in a background
+	 * daemon thread if it is not already present in the cache.
 	 *
-	 * @param specimenId the ID of the specimen to prefetch
+	 * @param specimenId
+	 *            the ID of the specimen to prefetch
 	 */
 	public static void prefetchAsync(Long specimenId) {
 		if (specimenId == null) {

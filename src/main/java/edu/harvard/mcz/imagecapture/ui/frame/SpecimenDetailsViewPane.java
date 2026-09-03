@@ -181,7 +181,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 		this.specimen = aSpecimenInstance;
 		this.specimenController = aController;
 		this.thisPane = this;
-		this.bindingContext = new FormBindingContext<>(Specimen.class, specimen != null && specimen.isEditable(), this::setStateToDirty);
+		this.bindingContext = new FormBindingContext<>(Specimen.class, specimen != null && specimen.isEditable(),
+				this::setStateToDirty);
 
 		SpecimenLifeCycle s = new SpecimenLifeCycle();
 		setStateToClean();

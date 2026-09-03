@@ -35,12 +35,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * End-to-end tests for the search-to-Specimen pipeline:
- * 1. Verifies that searching produces projection items, but opening them via SpecimenController
- *    and SpecimenDetailsViewPane fully hydrates all scalar and relational fields.
- * 2. Verifies that the Save button is disabled when specimen data is not fully loaded.
- * 3. Verifies that table navigation (Next/Prev) loads fully populated Specimen entities.
- * 4. Verifies that CopyRowButtonEditor copies fully populated Specimen entities.
+ * End-to-end tests for the search-to-Specimen pipeline: 1. Verifies that
+ * searching produces projection items, but opening them via SpecimenController
+ * and SpecimenDetailsViewPane fully hydrates all scalar and relational fields.
+ * 2. Verifies that the Save button is disabled when specimen data is not fully
+ * loaded. 3. Verifies that table navigation (Next/Prev) loads fully populated
+ * Specimen entities. 4. Verifies that CopyRowButtonEditor copies fully
+ * populated Specimen entities.
  */
 public class TestSearchToSpecimenPipeline {
 
@@ -156,7 +157,8 @@ public class TestSearchToSpecimenPipeline {
 	}
 
 	/**
-	 * Requirement 2: Full pipeline test from search to Specimen, asserting that all fields are populated.
+	 * Requirement 2: Full pipeline test from search to Specimen, asserting that all
+	 * fields are populated.
 	 */
 	@Test
 	public void testFullPipelineSearchToSpecimenWithAllFieldsPopulated() throws Exception {
@@ -172,7 +174,8 @@ public class TestSearchToSpecimenPipeline {
 		assertEquals(1, searchResults.size());
 		Specimen tableProjection = searchResults.get(0);
 
-		// Table projection only has 13 table columns populated; isFullyLoaded must be false
+		// Table projection only has 13 table columns populated; isFullyLoaded must be
+		// false
 		assertFalse(tableProjection.isFullyLoaded());
 		assertNull(tableProjection.getHabitat());
 		assertNull(tableProjection.getMicrohabitat());
@@ -181,7 +184,8 @@ public class TestSearchToSpecimenPipeline {
 		assertNull(tableProjection.getIdentifiedBy());
 		assertNull(tableProjection.getMinimum_elevation());
 
-		// 2. Open specimen via SpecimenController (pipeline transition from table to details)
+		// 2. Open specimen via SpecimenController (pipeline transition from table to
+		// details)
 		SpecimenCache.clear(); // ensure we test loading through the controller
 		SpecimenController controller = new SpecimenController(tableProjection);
 		Specimen loadedSpecimen = controller.getSpecimen();
@@ -248,25 +252,28 @@ public class TestSearchToSpecimenPipeline {
 	}
 
 	/**
-	 * Requirement 1: Disable the save button if not all data was loaded/set correctly.
+	 * Requirement 1: Disable the save button if not all data was loaded/set
+	 * correctly.
 	 */
 	@Test
 	public void testSaveButtonDisabledWhenSpecimenNotFullyLoaded() {
 		// Create a projection specimen with an ID that does NOT exist in the database
-		Specimen incomplete = new Specimen(999999999L, "INCOMPLETE_BARCODE", WorkFlowStatus.STAGE_1,
-				"Family", "Subfamily", "Tribe", "Genus", "species", "subspecies",
-				"Country", "Division", "Locality", "Collection", "123");
+		Specimen incomplete = new Specimen(999999999L, "INCOMPLETE_BARCODE", WorkFlowStatus.STAGE_1, "Family",
+				"Subfamily", "Tribe", "Genus", "species", "subspecies", "Country", "Division", "Locality", "Collection",
+				"123");
 		assertFalse(incomplete.isFullyLoaded());
 
 		SpecimenDetailsViewPane pane = new SpecimenDetailsViewPane(incomplete, null);
-		assertFalse("Data should NOT be loaded successfully for an incomplete specimen", pane.isDataLoadedSuccessfully());
+		assertFalse("Data should NOT be loaded successfully for an incomplete specimen",
+				pane.isDataLoadedSuccessfully());
 		assertNotNull(pane.getSaveJButton());
 		assertFalse("Save button must be disabled when specimen data is incomplete", pane.getSaveJButton().isEnabled());
 		assertFalse("isSaveButtonEnabled() must return false", pane.isSaveButtonEnabled());
 	}
 
 	/**
-	 * Verifies table navigation (Next/Prev) transitions always produce fully populated Specimen entities.
+	 * Verifies table navigation (Next/Prev) transitions always produce fully
+	 * populated Specimen entities.
 	 */
 	@Test
 	public void testTableNavigationPipelineLoadsFullSpecimens() throws Exception {
@@ -298,7 +305,8 @@ public class TestSearchToSpecimenPipeline {
 	}
 
 	/**
-	 * Verifies CopyRowButtonEditor copies the fully loaded entity instead of the lightweight projection.
+	 * Verifies CopyRowButtonEditor copies the fully loaded entity instead of the
+	 * lightweight projection.
 	 */
 	@Test
 	public void testCopyRowButtonEditorCopiesFullSpecimen() throws Exception {

@@ -146,7 +146,8 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 	 * @throws SpecimenExistsException
 	 */
 	public void persist(Specimen transientInstance) throws SaveFailedException, SpecimenExistsException {
-		if (transientInstance != null && transientInstance.getSpecimenId() != null && !transientInstance.isFullyLoaded()) {
+		if (transientInstance != null && transientInstance.getSpecimenId() != null
+				&& !transientInstance.isFullyLoaded()) {
 			throw new SaveFailedException("Cannot persist incomplete specimen projection");
 		}
 		log.debug("persisting Specimen instance");
@@ -1081,8 +1082,8 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 		return false;
 	}
 
-	private List<Long> findIdsByCriteria(Map<String, Object> propertyValueMap, int maxResults, int offset,
-			boolean like, String sortProperty, boolean sortAscending) {
+	private List<Long> findIdsByCriteria(Map<String, Object> propertyValueMap, int maxResults, int offset, boolean like,
+			String sortProperty, boolean sortAscending) {
 		try {
 			Session session = this.getSession();
 			try {

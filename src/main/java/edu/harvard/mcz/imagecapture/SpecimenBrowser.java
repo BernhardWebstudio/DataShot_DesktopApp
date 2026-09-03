@@ -32,7 +32,6 @@ import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.TableColumnManager;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;

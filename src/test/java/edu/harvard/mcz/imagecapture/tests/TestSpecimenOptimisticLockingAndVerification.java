@@ -4,13 +4,17 @@ import static org.junit.Assert.*;
 
 import edu.harvard.mcz.imagecapture.SpecimenController;
 import edu.harvard.mcz.imagecapture.data.SpecimenCache;
+import edu.harvard.mcz.imagecapture.entity.LatLong;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +60,16 @@ public class TestSpecimenOptimisticLockingAndVerification {
 		s.setTypeStatus("Not a Type");
 		s.setWorkFlowStatus(WorkFlowStatus.STAGE_1);
 		s.setDateCreated(new Date());
+
+		Set<LatLong> latLongs = new HashSet<>();
+		LatLong ll = new LatLong();
+		ll.setDecLat(new BigDecimal("36.6177"));
+		ll.setDecLong(new BigDecimal("-121.9166"));
+		ll.setDatum("WGS84");
+		ll.setSpecimenId(s);
+		latLongs.add(ll);
+		s.setLatLong(latLongs);
+
 		sls.persist(s);
 		createdSpecimens.add(s);
 		return s;

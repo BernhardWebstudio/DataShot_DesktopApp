@@ -937,8 +937,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 				public void actionPerformed(ActionEvent actionEvent) {
 					Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
 					try {
-						self.getGeoreferenceDialog()
-								.pasteFromExcel((String) clipboard.getData(DataFlavor.stringFlavor));
+						GeoreferenceDialog dialog = self.getGeoreferenceDialog();
+						if (dialog != null) {
+							dialog.pasteFromExcel((String) clipboard.getData(DataFlavor.stringFlavor));
+						}
 					} catch (Exception e) {
 						log.error("Failed to paste clipboard data from excel", e);
 					}
@@ -1176,7 +1178,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	}
 
 	public boolean isSaveButtonEnabled() {
-		return jButtonSave != null && jButtonSave.isEnabled();
+		return getSaveJButton().isEnabled();
 	}
 
 	public boolean isDataLoadedSuccessfully() {
@@ -1190,13 +1192,16 @@ public class SpecimenDetailsViewPane extends JPanel {
 			textFieldDecimalLat.addFocusListener(new FocusAdapter() {
 				@Override
 				public void focusLost(FocusEvent e) {
-					if (!textFieldDecimalLat.getText().trim().isEmpty()) {
-						getGeoreferenceDialog().getGeoReference()
-								.setDecLat(BigDecimal.valueOf(Double.parseDouble(textFieldDecimalLat.getText())));
-					} else {
-						getGeoreferenceDialog().getGeoReference().setDecLat(null);
+					GeoreferenceDialog dialog = getGeoreferenceDialog();
+					if (dialog != null) {
+						if (!textFieldDecimalLat.getText().trim().isEmpty()) {
+							dialog.getGeoReference()
+									.setDecLat(BigDecimal.valueOf(Double.parseDouble(textFieldDecimalLat.getText())));
+						} else {
+							dialog.getGeoReference().setDecLat(null);
+						}
+						dialog.loadData();
 					}
-					getGeoreferenceDialog().loadData();
 				}
 			});
 			textFieldDecimalLat.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -1221,13 +1226,16 @@ public class SpecimenDetailsViewPane extends JPanel {
 			textFieldDecimalLong.addFocusListener(new FocusAdapter() {
 				@Override
 				public void focusLost(FocusEvent e) {
-					if (!textFieldDecimalLong.getText().trim().isEmpty()) {
-						getGeoreferenceDialog().getGeoReference()
-								.setDecLong(BigDecimal.valueOf(Double.parseDouble(textFieldDecimalLong.getText())));
-					} else {
-						getGeoreferenceDialog().getGeoReference().setDecLong(null);
+					GeoreferenceDialog dialog = getGeoreferenceDialog();
+					if (dialog != null) {
+						if (!textFieldDecimalLong.getText().trim().isEmpty()) {
+							dialog.getGeoReference()
+									.setDecLong(BigDecimal.valueOf(Double.parseDouble(textFieldDecimalLong.getText())));
+						} else {
+							dialog.getGeoReference().setDecLong(null);
+						}
+						dialog.loadData();
 					}
-					getGeoreferenceDialog().loadData();
 				}
 			});
 			textFieldDecimalLong.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -1252,9 +1260,12 @@ public class SpecimenDetailsViewPane extends JPanel {
 					"Wikipedia", "MaNIS/HertNet/ORNIS Georeferencing Guidelines"}));
 			cbMethod.setEditable(specimen.isEditable());
 			cbMethod.addActionListener(e -> {
-				getGeoreferenceDialog().getGeoReference().setGeorefmethod((String) cbMethod.getSelectedItem());
-				getGeoreferenceDialog().loadData();
-				getGeoreferenceDialog().setState();
+				GeoreferenceDialog dialog = getGeoreferenceDialog();
+				if (dialog != null) {
+					dialog.getGeoReference().setGeorefmethod((String) cbMethod.getSelectedItem());
+					dialog.loadData();
+					dialog.setState();
+				}
 				setStateToDirty();
 			});
 		}
@@ -1268,8 +1279,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 			cbDatum.setSelectedItem("WGS84");
 			cbDatum.setEditable(specimen.isEditable());
 			cbDatum.addActionListener(e -> {
-				getGeoreferenceDialog().getGeoReference().setDatum((String) cbDatum.getSelectedItem());
-				getGeoreferenceDialog().loadData();
+				GeoreferenceDialog dialog = getGeoreferenceDialog();
+				if (dialog != null) {
+					dialog.getGeoReference().setDatum((String) cbDatum.getSelectedItem());
+					dialog.loadData();
+				}
 				setStateToDirty();
 			});
 		}
@@ -1283,16 +1297,19 @@ public class SpecimenDetailsViewPane extends JPanel {
 			txtErrorRadius.addFocusListener(new FocusAdapter() {
 				@Override
 				public void focusLost(FocusEvent e) {
-					String result = txtErrorRadius.getText();
-					if (!result.trim().isEmpty()) {
-						try {
-							getGeoreferenceDialog().getGeoReference().setMaxErrorDistance(Integer.parseInt(result));
-						} catch (NumberFormatException ignored) {
+					GeoreferenceDialog dialog = getGeoreferenceDialog();
+					if (dialog != null) {
+						String result = txtErrorRadius.getText();
+						if (!result.trim().isEmpty()) {
+							try {
+								dialog.getGeoReference().setMaxErrorDistance(Integer.parseInt(result));
+							} catch (NumberFormatException ignored) {
+							}
+						} else {
+							dialog.getGeoReference().setMaxErrorDistance(null);
 						}
-					} else {
-						getGeoreferenceDialog().getGeoReference().setMaxErrorDistance(null);
+						dialog.loadData();
 					}
-					getGeoreferenceDialog().loadData();
 				}
 			});
 			txtErrorRadius.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
@@ -1316,9 +1333,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 			comboBoxErrorUnits.setSelectedItem("m");
 			comboBoxErrorUnits.setEditable(specimen.isEditable());
 			comboBoxErrorUnits.addActionListener(e -> {
-				getGeoreferenceDialog().getGeoReference()
-						.setMaxErrorUnits((String) comboBoxErrorUnits.getSelectedItem());
-				getGeoreferenceDialog().loadData();
+				GeoreferenceDialog dialog = getGeoreferenceDialog();
+				if (dialog != null) {
+					dialog.getGeoReference().setMaxErrorUnits((String) comboBoxErrorUnits.getSelectedItem());
+					dialog.loadData();
+				}
 				setStateToDirty();
 			});
 		}
@@ -1580,23 +1599,25 @@ public class SpecimenDetailsViewPane extends JPanel {
 				jButtonGeoReference.addActionListener(e -> {
 					thisPane.setStateToDirty();
 					GeoreferenceDialog georefDialog = self.getGeoreferenceDialog();
-					georefDialog.setVisible(true);
-					georefDialog.addCloseListener(new CloseListener() {
-						@Override
-						public void onClose(CloseType type, Component source) {
-							if (type == CloseType.OK) {
-								autocompleteGeoDataFromGeoreference();
+					if (georefDialog != null) {
+						georefDialog.setVisible(true);
+						georefDialog.addCloseListener(new CloseListener() {
+							@Override
+							public void onClose(CloseType type, Component source) {
+								if (type == CloseType.OK) {
+									autocompleteGeoDataFromGeoreference();
+								}
 							}
-						}
-					});
-					georefDialog.addComponentListener(new ComponentAdapter() {
-						@Override
-						public void componentHidden(ComponentEvent e1) {
-							updateJButtonGeoreference();
-							super.componentHidden(e1);
-							reloadGeoRefFieldValues();
-						}
-					});
+						});
+						georefDialog.addComponentListener(new ComponentAdapter() {
+							@Override
+							public void componentHidden(ComponentEvent e1) {
+								updateJButtonGeoreference();
+								super.componentHidden(e1);
+								reloadGeoRefFieldValues();
+							}
+						});
+					}
 				});
 			} catch (Exception e) {
 				log.error("Error creating georeference button", e);
@@ -1606,14 +1627,23 @@ public class SpecimenDetailsViewPane extends JPanel {
 	}
 
 	private GeoreferenceDialog getGeoreferenceDialog() {
+		if (GraphicsEnvironment.isHeadless()) {
+			return null;
+		}
 		if (this.georeferenceDialog == null) {
 			Set<LatLong> georeferences = specimen.getLatLong();
-			LatLong georeference = georeferences.iterator().next();
-			if (georeference.isEmpty()) {
-				georeference.setDatum((String) this.getDatumComboBox().getSelectedItem());
+			if (georeferences == null || georeferences.isEmpty()) {
+				LatLong defaultGeo = new LatLong();
+				defaultGeo.setSpecimen(specimen);
+				this.georeferenceDialog = new GeoreferenceDialog(defaultGeo, thisPane);
+			} else {
+				LatLong georeference = georeferences.iterator().next();
+				if (georeference.isEmpty()) {
+					georeference.setDatum((String) this.getDatumComboBox().getSelectedItem());
+				}
+				georeference.setSpecimen(specimen);
+				this.georeferenceDialog = new GeoreferenceDialog(georeference, thisPane);
 			}
-			georeference.setSpecimen(specimen);
-			this.georeferenceDialog = new GeoreferenceDialog(georeference, thisPane);
 		}
 		return this.georeferenceDialog;
 	}

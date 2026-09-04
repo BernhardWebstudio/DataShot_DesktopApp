@@ -59,6 +59,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
@@ -133,6 +135,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JComboBox<String> jComboBoxWorkflowStatus;
 	private JTextField jTextFieldLastUpdatedBy;
 	private JTextField jTextFieldDateLastUpdated;
+	private boolean isVerified = true;
 	private JTextField jTextFieldImageCount;
 	private JTextField jTextFieldMigrationStatus;
 	private JLabel jLabelDBId;
@@ -186,6 +189,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
 		SpecimenLifeCycle s = new SpecimenLifeCycle();
 		setStateToClean();
+		boolean wasFromCache = false;
 		try {
 			if (specimen != null && specimen.getSpecimenId() != null && !specimen.isFullyLoaded()) {
 				Specimen full = SpecimenCache.get(specimen.getSpecimenId());
@@ -194,6 +198,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 					if (full != null && full.isFullyLoaded()) {
 						SpecimenCache.put(full);
 					}
+				} else {
+					wasFromCache = true;
 				}
 				if (full != null && full.isFullyLoaded()) {
 					this.specimen = full;
@@ -227,7 +233,15 @@ public class SpecimenDetailsViewPane extends JPanel {
 			HibernateUtil.restartSessionFactory();
 			this.setVisible(false);
 		}
-		updateSaveButtonState();
+		boolean fromCache = wasFromCache || (specimenController != null && specimenController.isLoadedFromCache());
+		if (fromCache && dataLoadedSuccessfully && specimen != null && specimen.getSpecimenId() != null) {
+			this.isVerified = false;
+			updateSaveButtonState();
+			verifyFreshnessAsync();
+		} else {
+			this.isVerified = true;
+			updateSaveButtonState();
+		}
 	}
 
 	/**
@@ -328,7 +342,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 		jTextFieldStatus.setForeground(Color.BLACK);
 	}
 
-	private boolean save() {
+	public boolean save() {
+		if (!isVerified) {
+			this.setWarning("Cannot save: verifying latest version from database. Please wait a moment.");
+			return false;
+		}
 		if (!dataLoadedSuccessfully || specimen == null || !specimen.isFullyLoaded()) {
 			JOptionPane.showMessageDialog(thisPane,
 					"Cannot save: Specimen data was not fully loaded. Save is disabled to prevent data loss.",
@@ -387,7 +405,12 @@ public class SpecimenDetailsViewPane extends JPanel {
 			}
 		} catch (OptimisticLockException e) {
 			log.error("OptimisticLockException in save()", e);
-			this.setWarning("Error: " + e.getMessage());
+			setStateToDirty();
+			this.setWarning(
+					"Error: This record has been modified externally by another user. Please reload before saving.");
+			if (specimen != null && specimen.getSpecimenId() != null) {
+				SpecimenCache.invalidate(specimen.getSpecimenId());
+			}
 			return false;
 		} catch (Exception e) {
 			setStateToDirty();
@@ -1038,7 +1061,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 
 	public void updateSaveButtonState() {
 		if (jButtonSave != null) {
-			if (!dataLoadedSuccessfully || specimen == null || !specimen.isFullyLoaded()) {
+			if (!isVerified) {
+				jButtonSave.setEnabled(false);
+				jButtonSave.setToolTipText("Save is disabled: Verifying latest version from database...");
+			} else if (!dataLoadedSuccessfully || specimen == null || !specimen.isFullyLoaded()) {
 				jButtonSave.setEnabled(false);
 				jButtonSave.setToolTipText("Save is disabled: Record was not fully loaded from database.");
 			} else if (!specimen.isEditable(Singleton.getSingletonInstance().getUser())) {
@@ -1050,6 +1076,102 @@ public class SpecimenDetailsViewPane extends JPanel {
 				jButtonSave.setToolTipText("Save changes to this record to the database. No fields should "
 						+ "have red backgrounds before you save.");
 			}
+		}
+	}
+
+	public Specimen getSpecimen() {
+		return this.specimen;
+	}
+
+	public boolean isVerified() {
+		return this.isVerified;
+	}
+
+	public void setVerified(boolean verified) {
+		this.isVerified = verified;
+		updateSaveButtonState();
+	}
+
+	public String getStatusText() {
+		return jTextFieldStatus != null ? jTextFieldStatus.getText() : null;
+	}
+
+	public static boolean isSameTimestamp(Date d1, Date d2) {
+		if (d1 == null && d2 == null) {
+			return true;
+		}
+		if (d1 == null || d2 == null) {
+			return false;
+		}
+		return Math.abs(d1.getTime() - d2.getTime()) < 1000;
+	}
+
+	/**
+	 * Asynchronously verifies that the cached specimen currently shown is up to
+	 * date with the database. If stale, reloads the fresh entity and updates UI
+	 * bindings.
+	 *
+	 * @return CompletableFuture completing with true when verified/reloaded, false
+	 *         on error
+	 */
+	public CompletableFuture<Boolean> verifyFreshnessAsync() {
+		if (specimen == null || specimen.getSpecimenId() == null) {
+			this.isVerified = true;
+			updateSaveButtonState();
+			return CompletableFuture.completedFuture(true);
+		}
+		this.isVerified = false;
+		updateSaveButtonState();
+		this.setStatus("Verifying latest version from database...");
+
+		Long id = specimen.getSpecimenId();
+		Date cachedDate = specimen.getDateLastUpdated();
+		Integer cachedVersion = specimen.getVersion();
+
+		return CompletableFuture.supplyAsync(() -> {
+			SpecimenLifeCycle sls = new SpecimenLifeCycle();
+			Date dbDate = sls.findDateLastUpdated(id);
+			Integer dbVersion = sls.findVersion(id);
+			boolean isFresh = isSameTimestamp(cachedDate, dbDate) && Objects.equals(cachedVersion, dbVersion);
+			if (!isFresh) {
+				return sls.findById(id);
+			}
+			return null;
+		}).thenApplyAsync(freshSpecimen -> {
+			this.isVerified = true;
+			if (freshSpecimen != null && freshSpecimen.isFullyLoaded()) {
+				this.specimen = freshSpecimen;
+				if (this.specimenController != null) {
+					this.specimenController.setSpecimen(freshSpecimen);
+				}
+				SpecimenCache.put(freshSpecimen);
+				setValues();
+				this.setStatus("Reloaded latest version from database.");
+			} else {
+				this.setStatus("Loaded");
+				updateSaveButtonState();
+			}
+			return true;
+		}, SwingUtilities::invokeLater).exceptionally(ex -> {
+			log.error("Freshness verification failed for specimen id " + id, ex);
+			this.isVerified = true;
+			updateSaveButtonState();
+			return false;
+		});
+	}
+
+	/**
+	 * Synchronously waits for freshness verification to complete. Useful for tests.
+	 *
+	 * @return true if verification succeeded, false otherwise
+	 */
+	public boolean verifyFreshness() {
+		try {
+			CompletableFuture<Boolean> future = verifyFreshnessAsync();
+			return future != null && future.get(5, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			log.error("Freshness verification failed", e);
+			return false;
 		}
 	}
 

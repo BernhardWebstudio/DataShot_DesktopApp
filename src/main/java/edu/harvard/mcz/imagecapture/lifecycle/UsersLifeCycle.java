@@ -352,8 +352,8 @@ public class UsersLifeCycle {
 				Root<Users> root = query.from(Users.class);
 				query = query.select(root);
 				List<Predicate> propertyValueRelations = new ArrayList<Predicate>();
-				propertyValueRelations.add(builder.like(root.get("username"), username));
-				propertyValueRelations.add(builder.like(root.get("hash"), password));
+				propertyValueRelations.add(builder.equal(root.get("username"), username));
+				propertyValueRelations.add(builder.equal(root.get("hash"), password));
 				Predicate res = builder
 						.and(propertyValueRelations.toArray(new Predicate[propertyValueRelations.size()]));
 				query = query.where(res);

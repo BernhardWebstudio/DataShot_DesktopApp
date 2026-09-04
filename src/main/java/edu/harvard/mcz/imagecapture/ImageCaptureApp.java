@@ -23,8 +23,8 @@
  */
 package edu.harvard.mcz.imagecapture;
 
+import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
-import edu.harvard.mcz.imagecapture.exceptions.ConnectionException;
 import edu.harvard.mcz.imagecapture.lifecycle.AllowedVersionLifeCycle;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
@@ -163,13 +163,16 @@ public class ImageCaptureApp {
 			ImageCaptureApp.exit(EXIT_ERROR);
 		}
 
-		// Force a login dialog by connecting to obtain record count;
-		SpecimenLifeCycle sls = new SpecimenLifeCycle();
+		// Connect and authenticate via login dialog
 		try {
-			Singleton.getSingletonInstance().getMainFrame().setCount(sls.findSpecimenCountThrows(", "));
-			ImageCaptureApp.doStartUp();
-		} catch (ConnectionException e) {
-			log.error(e.getMessage());
+			if (HibernateUtil.getSessionFactory() != null) {
+				ImageCaptureApp.doStartUp();
+				ImageCaptureApp.updateSpecimenCountAsync();
+			} else {
+				ImageCaptureApp.doStartUpNot();
+			}
+		} catch (Exception e) {
+			log.error("Error during startup/login", e);
 			ImageCaptureApp.doStartUpNot();
 		}
 
@@ -296,6 +299,38 @@ public class ImageCaptureApp {
 
 		Singleton.getSingletonInstance().getMainFrame().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		Singleton.getSingletonInstance().getMainFrame().setState(MainFrame.STATE_RUNNING);
+	}
+
+	/**
+	 * Asynchronously load the specimen record count and update the MainFrame status
+	 * bar.
+	 */
+	public static void updateSpecimenCountAsync() {
+		MainFrame mainFrame = Singleton.getSingletonInstance().getMainFrame();
+		if (mainFrame != null) {
+			mainFrame.setCount("Loading record count...");
+			SwingWorker<String, Void> worker = new SwingWorker<>() {
+				@Override
+				protected String doInBackground() {
+					SpecimenLifeCycle sls = new SpecimenLifeCycle();
+					return sls.findSpecimenCount(", ");
+				}
+
+				@Override
+				protected void done() {
+					try {
+						String count = get();
+						MainFrame currentFrame = Singleton.getSingletonInstance().getMainFrame();
+						if (count != null && !count.trim().isEmpty() && currentFrame != null) {
+							currentFrame.setCount(count);
+						}
+					} catch (Exception e) {
+						log.warn("Failed to load specimen count asynchronously", e);
+					}
+				}
+			};
+			worker.execute();
+		}
 	}
 
 	/**

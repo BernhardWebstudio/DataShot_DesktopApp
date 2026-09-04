@@ -10,6 +10,7 @@
                 <param name="sequence">SEQ_SPECIMENID</param>
             </generator>
         </id>
+        <version name="version" column="version" type="integer"/>
         <property name="dateCreated" type="timestamp">
             <column name="DATECREATED" />
         </property>

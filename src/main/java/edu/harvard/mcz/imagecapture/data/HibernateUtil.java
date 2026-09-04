@@ -5,13 +5,12 @@ import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.entity.Users;
 import edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.dialog.LoginDialog;
-import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
 import java.awt.*;
 import java.awt.Dialog.ModalityType;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.exception.JDBCConnectionException;
@@ -129,107 +128,83 @@ public class HibernateUtil {
 			// Normal (production) config and login dialog
 			// Create the Configuration from hibernate.cfg.xml
 			configuration = new Configuration().configure();
-			// Add authentication properties obtained from the user
-			boolean success = false;
 			boolean mainFrameAvailable = Singleton.getSingletonInstance().getMainFrame() != null;
-			// retrieve the connection parameters from hibernate.cfg.xml and load into
-			// the LoginDialog
-			LoginDialog loginDialog = HibernateUtil.getLoginDialog(configuration, null);
-			while (!success && loginDialog.getResult() != LoginDialog.RESULT_CANCEL) {
-				// Check authentication (starting with the database
-				// user(schema)/password.
-				if (loginDialog.getResult() == LoginDialog.RESULT_LOGIN) {
-					if (mainFrameAvailable) {
-						Singleton.getSingletonInstance().getMainFrame()
-								.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-						Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Connecting to database");
+			if (mainFrameAvailable) {
+				Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Connecting to database");
+			}
+
+			LoginDialog loginDialog = new LoginDialog();
+			Properties settings = Singleton.getSingletonInstance().getProperties().getProperties();
+			// Detect usage of placeholders, replace with settings if available
+			loginDialog.setConnection(HibernateUtil.getConfigOrSettingsValue(configuration, settings,
+					ImageCaptureProperties.KEY_DB_URL, "URL_PLACEHOLDER"));
+			loginDialog.setDialect(HibernateUtil.getConfigOrSettingsValue(configuration, settings,
+					ImageCaptureProperties.KEY_DB_DIALECT, "DIALECT_PLACEHOLDER"));
+			loginDialog.setDriver(HibernateUtil.getConfigOrSettingsValue(configuration, settings,
+					ImageCaptureProperties.KEY_DB_DRIVER, "DRIVER_CLASS_PLACEHOLDER"));
+			loginDialog.setDBUserName(HibernateUtil.getConfigOrSettingsValue(configuration, settings,
+					ImageCaptureProperties.KEY_DB_USER, "USER_PLACEHOLDER"));
+			loginDialog.setDBPassword(HibernateUtil.getConfigOrSettingsValue(configuration, settings,
+					ImageCaptureProperties.KEY_DB_PASSWORD, "PASSWORD_PLACEHOLDER"));
+
+			loginDialog.setAuthenticationCallback(dialog -> {
+				String dbPass = dialog.getDBPassword();
+				String dbUser = dialog.getDBUserName();
+				String dbUrl = dialog.getConnection();
+				String dbDialect = dialog.getDialect();
+				String dbDriver = dialog.getDriver();
+
+				boolean needNewFactory = sessionFactory == null || sessionFactory.isClosed()
+						|| !Objects.equals(properties.getProperty(ImageCaptureProperties.KEY_DB_PASSWORD), dbPass)
+						|| !Objects.equals(properties.getProperty(ImageCaptureProperties.KEY_DB_USER), dbUser)
+						|| !Objects.equals(properties.getProperty(ImageCaptureProperties.KEY_DB_URL), dbUrl)
+						|| !Objects.equals(properties.getProperty(ImageCaptureProperties.KEY_DB_DIALECT), dbDialect)
+						|| !Objects.equals(properties.getProperty(ImageCaptureProperties.KEY_DB_DRIVER), dbDriver);
+
+				if (needNewFactory) {
+					if (sessionFactory != null) {
+						terminateSessionFactory();
 					}
-					properties.setProperty(ImageCaptureProperties.KEY_DB_PASSWORD, loginDialog.getDBPassword());
-					properties.setProperty(ImageCaptureProperties.KEY_DB_USER, loginDialog.getDBUserName());
-					properties.setProperty(ImageCaptureProperties.KEY_DB_URL, loginDialog.getConnection());
-					properties.setProperty(ImageCaptureProperties.KEY_DB_DIALECT, loginDialog.getDialect());
-					properties.setProperty(ImageCaptureProperties.KEY_DB_DRIVER, loginDialog.getDriver());
+					properties.setProperty(ImageCaptureProperties.KEY_DB_PASSWORD, dbPass);
+					properties.setProperty(ImageCaptureProperties.KEY_DB_USER, dbUser);
+					properties.setProperty(ImageCaptureProperties.KEY_DB_URL, dbUrl);
+					properties.setProperty(ImageCaptureProperties.KEY_DB_DIALECT, dbDialect);
+					properties.setProperty(ImageCaptureProperties.KEY_DB_DRIVER, dbDriver);
 					configuration.setProperties(properties);
-					// Now create the SessionFactory from this configuration
-					log.debug(configuration.getProperty(ImageCaptureProperties.KEY_DB_URL));
 					try {
 						sessionFactory = configuration.buildSessionFactory();
 					} catch (JDBCConnectionException | ServiceException ex) {
-						log.error("Failed to login: " + ex.getMessage(), ex);
-						configuration = new Configuration().configure();
-						success = false;
-						sessionFactory = null;
-						loginDialog = HibernateUtil.getLoginDialog(configuration,
-								"Initial SessionFactory creation failed. Database not connectable: " + ex.getMessage());
-						if (mainFrameAvailable) {
-							Singleton.getSingletonInstance().getMainFrame()
-									.setStatusMessage("Database connection failed.");
-						}
-						System.out.println("Initial SessionFactory creation failed." + ex);
-						return;
-					} catch (Throwable ex) {
-						// Make sure you log the exception, as it might be swallowed
-						System.out.println("Initial SessionFactory creation failed." + ex);
-						throw ex;
-						// throw new ExceptionInInitializerError(ex);
+						log.error("Failed to connect to database: " + ex.getMessage(), ex);
+						terminateSessionFactory();
+						String cause = (ex.getCause() != null && ex.getCause().getMessage() != null)
+								? ex.getCause().getMessage()
+								: ex.getMessage();
+						throw new Exception("Database connection failed: " + cause);
 					}
-					try {
-						// Check database authentication by beginning a transaction.
-						Session session = sessionFactory.getCurrentSession();
-						session.beginTransaction();
-						session.close();
-						// If an exception hasn't been thrown, dbuser/dbpassword has
-						// successfully authenticated against the database.
-						// Now try authenticating the individual user by the email
-						// address/password that they provided.
-						UsersLifeCycle uls = new UsersLifeCycle();
-						List<Users> foundUser = uls.findByCredentials(loginDialog.getUsername(),
-								loginDialog.getUserPasswordHash());
-						if (foundUser.size() == 1) {
-							// There should be one and only one user returned.
-							if (foundUser.get(0).getUsername().equals(loginDialog.getUsername())
-									&& foundUser.get(0).getHash().equals(loginDialog.getUserPasswordHash())) {
-								// and that user must have exactly the username/password hash
-								// provided in the dialog.
-								Singleton.getSingletonInstance().setCurrentUser(foundUser.get(0));
-								success = true;
-								if (mainFrameAvailable) {
-									Singleton.getSingletonInstance().getMainFrame().setState(MainFrame.STATE_RUNNING);
-								}
-							}
-						}
-						if (!success) {
-							loginDialog = HibernateUtil.getLoginDialog(configuration,
-									"Login failed: Incorrect Email and/or Password.");
-							success = false;
-							if (loginDialog.getUsername() != null) {
-								log.debug("Login failed for " + loginDialog.getUsername());
-							}
-							sessionFactory.close();
-							sessionFactory = null;
-							configuration = new Configuration().configure();
-							try {
-								Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Login failed.");
-							} catch (NullPointerException ex) {
-								// expected if we haven't instantiated a main frame.
-							}
-						}
-					} catch (Throwable e) {
-						log.error(e.getMessage(), e);
-						System.out.println("SessionFactory creation failed." + e.getMessage());
-						loginDialog = HibernateUtil.getLoginDialog(configuration, "Login failed: " + e.getCause());
-						success = false;
-						sessionFactory.close();
-						sessionFactory = null;
-						configuration = new Configuration().configure();
-						if (mainFrameAvailable) {
-							Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Login failed.");
-						}
+				}
+
+				UsersLifeCycle uls = new UsersLifeCycle();
+				List<Users> foundUser = uls.findByCredentials(dialog.getUsername(), dialog.getUserPasswordHash());
+				if (foundUser != null && foundUser.size() == 1) {
+					Users u = foundUser.get(0);
+					if (dialog.getUsername().equals(u.getUsername())
+							&& dialog.getUserPasswordHash().equals(u.getHash())) {
+						Singleton.getSingletonInstance().setCurrentUser(u);
+						return true;
 					}
-					if (mainFrameAvailable) {
-						Singleton.getSingletonInstance().getMainFrame()
-								.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
-					}
+				}
+				return false;
+			});
+
+			loginDialog.pack();
+			loginDialog.setSize(new Dimension(650, loginDialog.getHeight()));
+			loginDialog.setModalityType(ModalityType.APPLICATION_MODAL);
+			loginDialog.setVisible(true);
+
+			if (loginDialog.getResult() != LoginDialog.RESULT_LOGIN) {
+				log.info("Login canceled by user.");
+				if (sessionFactory != null) {
+					terminateSessionFactory();
 				}
 			}
 		} catch (Throwable ex) {
@@ -237,7 +212,6 @@ public class HibernateUtil {
 			ex.printStackTrace();
 			log.error("SessionFactory creation failed", ex);
 			System.out.println("SessionFactory creation failed." + ex);
-			ex.printStackTrace();
 			if (ex.getCause() != null) {
 				System.out.println("Cause: " + ex.getCause().getMessage());
 			}
@@ -258,7 +232,6 @@ public class HibernateUtil {
 	private static LoginDialog getLoginDialog(Configuration config, String status) {
 		LoginDialog loginDialog = new LoginDialog();
 		Properties settings = Singleton.getSingletonInstance().getProperties().getProperties();
-		Enumeration<Object> keys = settings.keys();
 		// Detect usage of placeholders, replace with settings if available
 		loginDialog.setConnection(HibernateUtil.getConfigOrSettingsValue(config, settings,
 				ImageCaptureProperties.KEY_DB_URL, "URL_PLACEHOLDER"));
@@ -272,12 +245,12 @@ public class HibernateUtil {
 				ImageCaptureProperties.KEY_DB_USER, "USER_PLACEHOLDER"));
 		loginDialog.setDBPassword(HibernateUtil.getConfigOrSettingsValue(config, settings,
 				ImageCaptureProperties.KEY_DB_PASSWORD, "PASSWORD_PLACEHOLDER"));
-		// Display the LoginDialog as a modal dialog
-		loginDialog.setModalityType(ModalityType.APPLICATION_MODAL);
-		loginDialog.setVisible(true);
 		if (status != null) {
 			loginDialog.setStatus(status);
 		}
+		// Display the LoginDialog as a modal dialog
+		loginDialog.setModalityType(ModalityType.APPLICATION_MODAL);
+		loginDialog.setVisible(true);
 		return loginDialog;
 	}
 

@@ -56,6 +56,15 @@ public class SpecimenController {
 	private List<DataChangeListener> listeners;
 
 	private ImageDisplayFrame resultFrame = null;
+	private boolean loadedFromCache = false;
+
+	public boolean isLoadedFromCache() {
+		return loadedFromCache;
+	}
+
+	public void setLoadedFromCache(boolean loadedFromCache) {
+		this.loadedFromCache = loadedFromCache;
+	}
 
 	public SpecimenController(Specimen aSpecimen) throws NoSuchRecordException {
 		if (aSpecimen == null) {
@@ -73,6 +82,8 @@ public class SpecimenController {
 				} catch (Exception ex) {
 					log.error("Failed to load full specimen for id " + aSpecimen.getSpecimenId(), ex);
 				}
+			} else {
+				loadedFromCache = true;
 			}
 			specimen = (full != null && full.isFullyLoaded()) ? full : aSpecimen;
 		} else {
@@ -113,6 +124,9 @@ public class SpecimenController {
 				} catch (Exception ex) {
 					log.error("Failed to load full specimen for id " + aSpecimen.getSpecimenId(), ex);
 				}
+				loadedFromCache = false;
+			} else {
+				loadedFromCache = true;
 			}
 			specimen = (full != null && full.isFullyLoaded()) ? full : aSpecimen;
 		} else {
@@ -191,6 +205,9 @@ public class SpecimenController {
 							} catch (Exception ex) {
 								log.error("Failed to load next specimen for id " + temp.getSpecimenId(), ex);
 							}
+							loadedFromCache = false;
+						} else {
+							loadedFromCache = true;
 						}
 						specimen = (full != null && full.isFullyLoaded()) ? full : temp;
 					} else {
@@ -248,6 +265,9 @@ public class SpecimenController {
 							} catch (Exception ex) {
 								log.error("Failed to load previous specimen for id " + temp.getSpecimenId(), ex);
 							}
+							loadedFromCache = false;
+						} else {
+							loadedFromCache = true;
 						}
 						specimen = (full != null && full.isFullyLoaded()) ? full : temp;
 					} else {

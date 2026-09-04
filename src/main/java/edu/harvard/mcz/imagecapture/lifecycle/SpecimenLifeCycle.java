@@ -20,6 +20,7 @@ import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.exceptions.SpecimenExistsException;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
 import edu.harvard.mcz.imagecapture.query.Specification;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -210,26 +211,37 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			throw new SaveFailedException("Cannot save/attach incomplete specimen projection");
 		}
 		log.debug("attaching dirty Specimen instance with id " + instance.getSpecimenId());
+		Session session = this.getSession();
 		try {
-			Session session = this.getSession();
 			session.beginTransaction();
 			try {
 				session.saveOrUpdate(instance);
 				session.getTransaction().commit();
 				log.debug("attach successful");
 				track(instance);
+			} catch (OptimisticLockException e) {
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
+				log.error("Optimistic lock conflict for specimen id " + instance.getSpecimenId(), e);
+				throw e;
 			} catch (HibernateException e) {
-				session.getTransaction().rollback();
+				if (session.getTransaction().isActive()) {
+					session.getTransaction().rollback();
+				}
 				log.error("attach failed", e);
-				throw new SaveFailedException("Unable to save specimen " + instance.getBarcode());
+				if (e instanceof org.hibernate.StaleObjectStateException
+						|| e.getCause() instanceof OptimisticLockException) {
+					throw new OptimisticLockException("Record has been modified externally by another user or session.",
+							e);
+				}
+				throw new SaveFailedException("Unable to save specimen " + instance.getBarcode(), e);
 			}
+		} finally {
 			try {
 				session.close();
 			} catch (Exception e) {
 			}
-		} catch (RuntimeException re) {
-			log.error("attach failed", re);
-			throw re;
 		}
 	}
 
@@ -373,6 +385,63 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 		} catch (RuntimeException re) {
 			log.error("get failed", re);
 			throw re;
+		}
+	}
+
+	/**
+	 * Fast lookup of the dateLastUpdated timestamp for a specimen by ID.
+	 *
+	 * @param specimenId
+	 *            ID of the specimen
+	 * @return the Date the specimen was last updated, or null
+	 */
+	public Date findDateLastUpdated(Long specimenId) {
+		if (specimenId == null) {
+			return null;
+		}
+		Session session = this.getSession();
+		try {
+			org.hibernate.query.Query<Date> query = session
+					.createQuery("SELECT s.dateLastUpdated FROM Specimen s WHERE s.specimenId = :id", Date.class);
+			query.setParameter("id", specimenId);
+			return query.uniqueResult();
+		} catch (Exception e) {
+			log.error("Failed to query dateLastUpdated for specimen id " + specimenId, e);
+			return null;
+		} finally {
+			try {
+				session.close();
+			} catch (Exception e) {
+			}
+		}
+	}
+
+	/**
+	 * Fast lookup of the version for a specimen by ID for optimistic lock
+	 * verification.
+	 *
+	 * @param specimenId
+	 *            ID of the specimen
+	 * @return the Integer version of the specimen, or null
+	 */
+	public Integer findVersion(Long specimenId) {
+		if (specimenId == null) {
+			return null;
+		}
+		Session session = this.getSession();
+		try {
+			org.hibernate.query.Query<Integer> query = session
+					.createQuery("SELECT s.version FROM Specimen s WHERE s.specimenId = :id", Integer.class);
+			query.setParameter("id", specimenId);
+			return query.uniqueResult();
+		} catch (Exception e) {
+			log.error("Failed to query version for specimen id " + specimenId, e);
+			return null;
+		} finally {
+			try {
+				session.close();
+			} catch (Exception e) {
+			}
 		}
 	}
 

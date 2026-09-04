@@ -26,7 +26,6 @@ import edu.harvard.mcz.imagecapture.encoder.UnitTrayLabelBrowser;
 import edu.harvard.mcz.imagecapture.entity.ICImage;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.entity.Users;
-import edu.harvard.mcz.imagecapture.exceptions.ConnectionException;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
 import edu.harvard.mcz.imagecapture.interfaces.BarcodeMatcher;
 import edu.harvard.mcz.imagecapture.interfaces.RunnableJob;
@@ -402,12 +401,15 @@ public class MainFrame extends JFrame implements RunnerListener {
 				Singleton.getSingletonInstance().unsetCurrentUser();
 				HibernateUtil.terminateSessionFactory();
 				Singleton.getSingletonInstance().getMainFrame().setStatusMessage("Logged out " + oldUser);
-				// Force a login dialog by connecting to obtain record count;
-				SpecimenLifeCycle sls = new SpecimenLifeCycle();
+				// Connect and authenticate via login dialog
 				try {
-					setCount(sls.findSpecimenCountThrows(", "));
-					ImageCaptureApp.doStartUp();
-				} catch (ConnectionException e1) {
+					if (HibernateUtil.getSessionFactory() != null) {
+						ImageCaptureApp.doStartUp();
+						ImageCaptureApp.updateSpecimenCountAsync();
+					} else {
+						ImageCaptureApp.doStartUpNot();
+					}
+				} catch (Exception e1) {
 					log.error(e1.getMessage(), e1);
 					ImageCaptureApp.doStartUpNot();
 				}

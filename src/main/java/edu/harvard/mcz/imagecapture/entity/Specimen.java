@@ -25,6 +25,7 @@ public class Specimen implements Serializable {
 	private static final Logger log = LoggerFactory.getLogger(Specimen.class);
 	private static final long serialVersionUID = -1321141594439433313L;
 	private Long specimenId;
+	private Integer version;
 	private String barcode;
 	private String drawerNumber;
 	private String typeStatus; // Types only
@@ -413,6 +414,14 @@ public class Specimen implements Serializable {
 
 	public void setSpecimenId(Long specimenId) {
 		this.specimenId = specimenId;
+	}
+
+	public Integer getVersion() {
+		return this.version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
 	}
 
 	public String getBarcode() {

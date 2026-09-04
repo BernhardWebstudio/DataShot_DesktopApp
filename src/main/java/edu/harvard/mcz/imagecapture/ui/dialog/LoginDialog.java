@@ -42,8 +42,19 @@ public class LoginDialog extends JDialog {
 	private static final long serialVersionUID = -2016769537635603794L;
 	private static final Logger log = LoggerFactory.getLogger(LoginDialog.class);
 	private JDialog self = null;
-	private int result = RESULT_LOGIN;
+	private int result = RESULT_CANCEL;
+	private boolean userCancelled = false;
 	private JPanel jPanel = null;
+
+	public interface AuthenticationCallback {
+		boolean authenticate(LoginDialog dialog) throws Exception;
+	}
+
+	private AuthenticationCallback authenticationCallback = null;
+
+	public void setAuthenticationCallback(AuthenticationCallback callback) {
+		this.authenticationCallback = callback;
+	}
 	private JTextField jTextFieldDBUsername = null;
 	private JPasswordField jPasswordFieldDB = null;
 	private JTextField jTextFieldDriver = null;
@@ -72,13 +83,19 @@ public class LoginDialog extends JDialog {
 	}
 
 	public static String decryptPassword(char[] password) {
-		AES256TextEncryptor textEncryptor = new AES256TextEncryptor();
-		textEncryptor.setPassword(encryptPassword);
+		if (password == null || password.length == 0) {
+			return "";
+		}
 		String passwordValue = String.valueOf(password);
 		try {
+			AES256TextEncryptor textEncryptor = new AES256TextEncryptor();
+			textEncryptor.setPassword(encryptPassword);
 			return textEncryptor.decrypt(passwordValue);
 		} catch (EncryptionOperationNotPossibleException exception) {
-			log.error("Failed to decrypt db password", exception);
+			log.debug("DB password is not encrypted, using plaintext password.");
+			return passwordValue;
+		} catch (Exception exception) {
+			log.debug("Unable to decrypt DB password, using plaintext: {}", exception.getMessage());
 			return passwordValue;
 		}
 	}
@@ -98,16 +115,24 @@ public class LoginDialog extends JDialog {
 		}
 		if (Singleton.getSingletonInstance().getProperties().getProperties()
 				.getProperty(ImageCaptureProperties.KEY_LOGIN_SHOW_ADVANCED).equalsIgnoreCase("false")) {
-			jPanelAdvanced.setVisible(false);
-			this.setSize(new Dimension(650, 225));
+			getJPanelAdvanced().setVisible(false);
 		} else {
-			jPanelAdvanced.setVisible(true);
-			this.setSize(new Dimension(650, 355));
+			getJPanelAdvanced().setVisible(true);
 		}
 		this.getRootPane().setDefaultButton(jButtonLogin);
+		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		this.addWindowListener(new java.awt.event.WindowAdapter() {
+			@Override
+			public void windowClosing(java.awt.event.WindowEvent e) {
+				userCancelled = true;
+				result = LoginDialog.RESULT_CANCEL;
+			}
+		});
+		this.setResizable(false);
+		this.pack();
+		this.setSize(new Dimension(650, this.getHeight()));
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		this.setLocation((screenSize.width - this.getWidth()) / 2, (screenSize.height - this.getHeight()) / 2);
-		// this.pack();
 	}
 
 	/**
@@ -118,44 +143,47 @@ public class LoginDialog extends JDialog {
 	private JPanel getJPanel() {
 		if (jPanel == null) {
 			jPanel = new JPanel();
-			jPanel.setLayout(new MigLayout("wrap 2, fill"));
+			jPanel.setLayout(new MigLayout("wrap 2, fillx, insets 15 20 15 20, hidemode 3", "[right][grow,fill]"));
 
 			JLabel keyImageLabel = new JLabel();
 			URL iconFile = this.getClass().getResource("/edu/harvard/mcz/imagecapture/resources/images/key_small.png");
 			try {
-				// this.setIconImage(new ImageIcon(iconFile).getImage());
 				keyImageLabel.setIcon(new ImageIcon(iconFile));
 			} catch (Exception e) {
 				System.out.println("Can't open icon file: " + iconFile);
 			}
-			// row
-			jPanel.add(keyImageLabel);
+			// row 1: Icon + Title
+			jPanel.add(keyImageLabel, "span 1");
 			JLabel loginPrompt = new JLabel("Login & connect to database");
 			Font f = loginPrompt.getFont();
-			// bold
-			loginPrompt.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
-			jPanel.add(loginPrompt);
-			// row
+			loginPrompt.setFont(f.deriveFont(f.getStyle() | Font.BOLD, f.getSize() + 2f));
+			jPanel.add(loginPrompt, "wrap 15");
+
+			// row 2: Email
 			JLabel emailLabel = new JLabel("E-Mail/Username");
 			jPanel.add(emailLabel);
-			System.out.println(this.getJTextFieldEmail());
 			jPanel.add(this.getJTextFieldEmail(), "growx");
-			// row
+
+			// row 3: Password
 			JLabel passwordLabel = new JLabel("Password");
 			jPanel.add(passwordLabel);
 			jPanel.add(this.getJPasswordFieldUser(), "growx");
-			// row
-			this.jLabelStatus = new JLabel();
-			jPanel.add(this.jLabelStatus, "span 2, wrap");
-			// row
+
+			// row 4: Database toggle
 			JLabel dbLabel = new JLabel("Database");
 			jPanel.add(dbLabel);
-			jPanel.add(this.getAdvancedSettingsJButton(), "wrap");
-			// row
-			jPanel.add(this.getJButtonCancel(), "tag cancel, align left");
-			jPanel.add(this.getJButtonLogin(), "tag ok, align right");
-			// row
-			jPanel.add(this.getJPanelAdvanced(), "grow, span 2, wrap");
+			jPanel.add(this.getAdvancedSettingsJButton(), "align left, wrap");
+
+			// row 5: Advanced panel
+			jPanel.add(this.getJPanelAdvanced(), "growx, span 2, wrap");
+
+			// row 6: Status
+			this.jLabelStatus = new JLabel(" ");
+			jPanel.add(this.jLabelStatus, "span 2, wrap, growx, gaptop 5");
+
+			// row 7: Buttons
+			jPanel.add(this.getJButtonCancel(), "span 2, split 2, align right, tag cancel, gaptop 15, gapbottom 5");
+			jPanel.add(this.getJButtonLogin(), "tag ok, gaptop 15, gapbottom 5");
 		}
 		return jPanel;
 	}
@@ -232,14 +260,99 @@ public class LoginDialog extends JDialog {
 			jButtonLogin.setMnemonic(KeyEvent.VK_L);
 			jButtonLogin.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
-					result = LoginDialog.RESULT_LOGIN;
-					jButtonLogin.grabFocus();
-					getUserPasswordHash();
-					self.setVisible(false);
+					onLogin();
 				}
 			});
 		}
 		return jButtonLogin;
+	}
+
+	private void onLogin() {
+		userCancelled = false;
+		if (authenticationCallback != null) {
+			setInputsEnabled(false);
+			setStatus("Connecting to database...", new Color(0, 102, 204));
+			self.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+			SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
+				private String failureReason = null;
+
+				@Override
+				protected Boolean doInBackground() {
+					try {
+						return authenticationCallback.authenticate(LoginDialog.this);
+					} catch (Exception ex) {
+						log.error("Authentication failed with exception", ex);
+						failureReason = ex.getMessage();
+						return false;
+					}
+				}
+
+				@Override
+				protected void done() {
+					if (userCancelled || !self.isVisible()) {
+						return;
+					}
+					self.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+					setInputsEnabled(true);
+					try {
+						boolean authenticated = get();
+						if (authenticated) {
+							result = LoginDialog.RESULT_LOGIN;
+							self.setVisible(false);
+							self.dispose();
+						} else {
+							if (failureReason != null) {
+								setStatus(failureReason, Color.RED);
+								if (jPanelAdvanced != null && !jPanelAdvanced.isVisible()) {
+									toggleAdvanced();
+								}
+							} else {
+								setStatus("Login failed: Incorrect Email and/or Password.", Color.RED);
+							}
+							if (jPasswordFieldUser != null) {
+								jPasswordFieldUser.selectAll();
+								jPasswordFieldUser.requestFocusInWindow();
+							}
+						}
+					} catch (Exception ex) {
+						setStatus("Error: " + ex.getMessage(), Color.RED);
+						if (jPasswordFieldUser != null) {
+							jPasswordFieldUser.selectAll();
+							jPasswordFieldUser.requestFocusInWindow();
+						}
+					}
+				}
+			};
+			worker.execute();
+		} else {
+			result = LoginDialog.RESULT_LOGIN;
+			jButtonLogin.grabFocus();
+			getUserPasswordHash();
+			self.setVisible(false);
+			self.dispose();
+		}
+	}
+
+	private void setInputsEnabled(boolean enabled) {
+		if (jButtonLogin != null)
+			jButtonLogin.setEnabled(enabled);
+		if (jTextFieldEmail != null)
+			jTextFieldEmail.setEnabled(enabled);
+		if (jPasswordFieldUser != null)
+			jPasswordFieldUser.setEnabled(enabled);
+		if (jButton2 != null)
+			jButton2.setEnabled(enabled);
+		if (jTextFieldConnection != null)
+			jTextFieldConnection.setEnabled(enabled);
+		if (jTextFieldDriver != null)
+			jTextFieldDriver.setEnabled(enabled);
+		if (jTextFieldDialect != null)
+			jTextFieldDialect.setEnabled(enabled);
+		if (jTextFieldDBUsername != null)
+			jTextFieldDBUsername.setEnabled(enabled);
+		if (jPasswordFieldDB != null)
+			jPasswordFieldDB.setEnabled(enabled);
 	}
 
 	/**
@@ -253,8 +366,10 @@ public class LoginDialog extends JDialog {
 			jButtonCancel.setMnemonic(KeyEvent.VK_C);
 			jButtonCancel.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
+					userCancelled = true;
 					result = LoginDialog.RESULT_CANCEL;
 					self.setVisible(false);
+					self.dispose();
 				}
 			});
 		}
@@ -293,7 +408,11 @@ public class LoginDialog extends JDialog {
 		jPasswordFieldDB.setText(aDBPassword);
 		// Force advanced panel to open if no database password is stored.
 		if (aDBPassword == null || aDBPassword.length() == 0) {
-			jPanelAdvanced.setVisible(true);
+			getJPanelAdvanced().setVisible(true);
+			if (this.isVisible()) {
+				this.pack();
+				this.setSize(new Dimension(650, this.getHeight()));
+			}
 		}
 	}
 
@@ -334,8 +453,16 @@ public class LoginDialog extends JDialog {
 	}
 
 	public void setStatus(String aStatus) {
-		this.jLabelStatus.setText(aStatus);
-		this.jLabelStatus.updateUI();
+		setStatus(aStatus, Color.RED);
+	}
+
+	public void setStatus(String aStatus, Color color) {
+		if (this.jLabelStatus != null) {
+			this.jLabelStatus.setForeground(color);
+			this.jLabelStatus.setText(aStatus != null ? aStatus : " ");
+			this.jLabelStatus.revalidate();
+			this.jLabelStatus.repaint();
+		}
 	}
 
 	public int getResult() {
@@ -386,14 +513,9 @@ public class LoginDialog extends JDialog {
 	}
 
 	public void toggleAdvanced() {
-		if (jPanelAdvanced.isVisible()) {
-			this.setSize(new Dimension(650, 225));
-			jPanelAdvanced.setVisible(false);
-		} else {
-			this.setSize(new Dimension(650, 355));
-			jPanelAdvanced.setVisible(true);
-		}
-		// this.pack();
+		getJPanelAdvanced().setVisible(!getJPanelAdvanced().isVisible());
+		this.pack();
+		this.setSize(new Dimension(650, this.getHeight()));
 	}
 
 	/**

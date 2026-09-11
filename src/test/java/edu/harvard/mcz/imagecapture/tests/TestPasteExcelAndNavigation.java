@@ -10,6 +10,7 @@ import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.dialog.GeoreferenceDialog;
 import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
+import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.lang.reflect.Field;
@@ -63,6 +64,9 @@ public class TestPasteExcelAndNavigation {
 
 	@Test
 	public void testPasteExcelDirectlyOnGeoreferenceDialog() {
+		if (GraphicsEnvironment.isHeadless()) {
+			return;
+		}
 		LatLong geo = new LatLong();
 		GeoreferenceDialog dialog = new GeoreferenceDialog(geo);
 		String excelData = "VerbatimLoc\tCol1\tCol2\tSwitzerland\tZurich\tZurich City\t47.3769, 8.5417\t50\tGPS";
@@ -74,6 +78,9 @@ public class TestPasteExcelAndNavigation {
 
 	@Test
 	public void testPasteExcelOnSpecimenDetailsViewPaneAfterEditingField() throws Exception {
+		if (GraphicsEnvironment.isHeadless()) {
+			return;
+		}
 		Specimen s = createSpecimen("TEST_EXCEL_001");
 		SpecimenController controller = new SpecimenController(s);
 		SpecimenDetailsViewPane pane = new SpecimenDetailsViewPane(controller.getSpecimen(), controller);
@@ -110,6 +117,9 @@ public class TestPasteExcelAndNavigation {
 
 	@Test
 	public void testPasteExcelAfterDatumSelection() throws Exception {
+		if (GraphicsEnvironment.isHeadless()) {
+			return;
+		}
 		Specimen s = createSpecimen("TEST_EXCEL_DATUM");
 		SpecimenController controller = new SpecimenController(s);
 		SpecimenDetailsViewPane pane = new SpecimenDetailsViewPane(controller.getSpecimen(), controller);
@@ -141,6 +151,9 @@ public class TestPasteExcelAndNavigation {
 
 	@Test
 	public void testPasteExcelAfterSave() throws Exception {
+		if (GraphicsEnvironment.isHeadless()) {
+			return;
+		}
 		Specimen s = createSpecimen("TEST_EXCEL_SAVE");
 		SpecimenController controller = new SpecimenController(s);
 		SpecimenDetailsViewPane pane = new SpecimenDetailsViewPane(controller.getSpecimen(), controller);
@@ -173,6 +186,9 @@ public class TestPasteExcelAndNavigation {
 
 	@Test
 	public void testPasteExcelAfterMethodOrDatumEdit() throws Exception {
+		if (GraphicsEnvironment.isHeadless()) {
+			return;
+		}
 		// Test editing method or datum first
 		Specimen s = createSpecimen("TEST_EX_M1");
 		SpecimenController controller = new SpecimenController(s);
@@ -201,6 +217,9 @@ public class TestPasteExcelAndNavigation {
 
 	@Test
 	public void testPasteExcelAfterLatFocusLost() throws Exception {
+		if (GraphicsEnvironment.isHeadless()) {
+			return;
+		}
 		Specimen s = createSpecimen("TEST_EX_F1");
 		SpecimenController controller = new SpecimenController(s);
 		SpecimenDetailsViewPane pane = new SpecimenDetailsViewPane(controller.getSpecimen(), controller);
@@ -228,6 +247,9 @@ public class TestPasteExcelAndNavigation {
 
 	@Test
 	public void testPasteExcelWhenSpecimenAlreadyHasLatLongInDB() throws Exception {
+		if (GraphicsEnvironment.isHeadless()) {
+			return;
+		}
 		Specimen s = createSpecimen("TEST_EX_DB1");
 		LatLong existingGeo = new LatLong();
 		existingGeo.setSpecimen(s);
@@ -345,6 +367,9 @@ public class TestPasteExcelAndNavigation {
 
 	@Test
 	public void testPasteExcelAfterEditingAndSavePersistsCoordinates() throws Exception {
+		if (GraphicsEnvironment.isHeadless()) {
+			return;
+		}
 		Specimen s = createSpecimen("TEST_ALL_001");
 		SpecimenController controller = new SpecimenController(s);
 		SpecimenDetailsViewPane pane = new SpecimenDetailsViewPane(controller.getSpecimen(), controller);
@@ -363,6 +388,45 @@ public class TestPasteExcelAndNavigation {
 		getPasteBtnMethod.setAccessible(true);
 		JButton pasteBtn = (JButton) getPasteBtnMethod.invoke(pane);
 		pasteBtn.doClick();
+
+		Method getLatFieldMethod = SpecimenDetailsViewPane.class.getDeclaredMethod("getTextFieldDecimalLat");
+		getLatFieldMethod.setAccessible(true);
+		JTextField latField = (JTextField) getLatFieldMethod.invoke(pane);
+
+		Method getLongFieldMethod = SpecimenDetailsViewPane.class.getDeclaredMethod("getTextFieldDecimalLong");
+		getLongFieldMethod.setAccessible(true);
+		JTextField longField = (JTextField) getLongFieldMethod.invoke(pane);
+
+		assertEquals("47.3769", latField.getText());
+		assertEquals("8.5417", longField.getText());
+
+		// Save
+		Method saveMethod = SpecimenDetailsViewPane.class.getDeclaredMethod("save");
+		saveMethod.setAccessible(true);
+		boolean saved = (boolean) saveMethod.invoke(pane);
+		assertTrue("Save should succeed", saved);
+
+		// Form should be clean
+		assertTrue("Form should be clean after save", pane.isClean());
+
+		// Verify database persistence of coordinates
+		Specimen loaded = sls.findById(s.getSpecimenId());
+		assertNotNull(loaded);
+		assertNotNull(loaded.getLatLong());
+		assertFalse("LatLong set should not be empty", loaded.getLatLong().isEmpty());
+		LatLong savedGeo = loaded.getLatLong().iterator().next();
+		assertEquals(0, new BigDecimal("47.3769").compareTo(savedGeo.getDecLat()));
+		assertEquals(0, new BigDecimal("8.5417").compareTo(savedGeo.getDecLong()));
+	}
+
+	@Test
+	public void testSetLocationDataAndSaveCoordinates() throws Exception {
+		Specimen s = createSpecimen("TEST_LOC_001");
+		SpecimenController controller = new SpecimenController(s);
+		SpecimenDetailsViewPane pane = new SpecimenDetailsViewPane(controller.getSpecimen(), controller);
+
+		// Transfer location data including coordinates
+		pane.setLocationData("VerbatimLoc", "Zurich City", "Switzerland", "Zurich", "47.3769", "8.5417");
 
 		Method getLatFieldMethod = SpecimenDetailsViewPane.class.getDeclaredMethod("getTextFieldDecimalLat");
 		getLatFieldMethod.setAccessible(true);

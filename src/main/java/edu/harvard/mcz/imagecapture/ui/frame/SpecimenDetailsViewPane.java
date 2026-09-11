@@ -1743,10 +1743,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 		defaultsMapImmutable.forEach((field, value) -> {
 			try {
 				if (field instanceof JTextField tf) {
-					boolean isCoordField = (field == getTextFieldDecimalLat() || field == getTextFieldDecimalLong());
 					if (tf.getText().trim().isEmpty()
-							|| settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")
-							|| (isCoordField && value != null && !value.trim().isEmpty())) {
+							|| settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
 						tf.setText(value);
 					}
 				} else if (field instanceof JComboBox<?> cb) {

@@ -505,12 +505,9 @@ public class GeoreferenceDialog extends JDialog {
 					return;
 				}
 				if (field instanceof JTextField tf) {
-					boolean isCoordField = (field == textFieldDecimalLat || field == textFieldDecimalLong);
-					String val = pasteValues.get(intKey);
 					if (tf.getText().trim().isEmpty()
-							|| settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")
-							|| (isCoordField && val != null && !val.trim().isEmpty())) {
-						tf.setText(val);
+							|| settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
+						tf.setText(pasteValues.get(intKey));
 					}
 				} else if (field instanceof JComboBox<?> cb) {
 					Object selected = cb.getSelectedItem();

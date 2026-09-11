@@ -20,10 +20,10 @@
             <column name="ORIG_LAT_LONG_UNITS" length="20"/>
         </property>
         <property name="decLat" type="java.math.BigDecimal">
-            <column name="DEC_LAT"/>
+            <column name="DEC_LAT" precision="12" scale="10"/>
         </property>
         <property name="decLong" type="java.math.BigDecimal">
-            <column name="DEC_LONG"/>
+            <column name="DEC_LONG" precision="13" scale="10"/>
         </property>
         <property name="georefmethod" type="string">
             <column name="GEOREFMETHOD" length="55"/>

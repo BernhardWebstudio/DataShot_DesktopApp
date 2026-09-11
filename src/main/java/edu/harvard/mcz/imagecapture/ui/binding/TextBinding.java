@@ -36,29 +36,31 @@ public class TextBinding<T, V> implements Binding<T> {
 		this.fromText = fromText;
 		this.context = context;
 
-		this.field.getDocument().addDocumentListener(new DocumentListener() {
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				notifyDirty();
-			}
+		if (this.setter != null) {
+			this.field.getDocument().addDocumentListener(new DocumentListener() {
+				@Override
+				public void insertUpdate(DocumentEvent e) {
+					notifyDirty();
+				}
 
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				notifyDirty();
-			}
+				@Override
+				public void removeUpdate(DocumentEvent e) {
+					notifyDirty();
+				}
 
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				notifyDirty();
-			}
-		});
+				@Override
+				public void changedUpdate(DocumentEvent e) {
+					notifyDirty();
+				}
+			});
 
-		this.field.addKeyListener(new KeyAdapter() {
-			@Override
-			public void keyTyped(KeyEvent e) {
-				notifyDirty();
-			}
-		});
+			this.field.addKeyListener(new KeyAdapter() {
+				@Override
+				public void keyTyped(KeyEvent e) {
+					notifyDirty();
+				}
+			});
+		}
 	}
 
 	private void notifyDirty() {

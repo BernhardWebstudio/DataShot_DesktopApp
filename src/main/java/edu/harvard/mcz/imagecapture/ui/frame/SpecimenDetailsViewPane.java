@@ -57,6 +57,7 @@ import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -94,6 +95,15 @@ public class SpecimenDetailsViewPane extends JPanel {
 	public static boolean isCopyPasteActivated() {
 		return Singleton.getSingletonInstance().getUser() != null
 				&& Singleton.getSingletonInstance().getUser().canCopyPaste();
+	}
+
+	public static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+
+	public static String formatDateTime(Date date) {
+		if (date == null) {
+			return "";
+		}
+		return new SimpleDateFormat(DATE_TIME_FORMAT).format(date);
 	}
 
 	private Specimen specimen;
@@ -375,6 +385,55 @@ public class SpecimenDetailsViewPane extends JPanel {
 				jTableNumbers.getCellEditor().stopCellEditing();
 			}
 
+			// Synchronize coordinates and geo fields from UI into specimen's LatLong
+			String latText = getTextFieldDecimalLat().getText().trim();
+			String longText = getTextFieldDecimalLong().getText().trim();
+			if (!latText.isEmpty() || !longText.isEmpty()) {
+				Set<LatLong> geos = specimen.getLatLong();
+				if (geos == null) {
+					geos = new HashSet<>();
+					specimen.setLatLong(geos);
+				}
+				LatLong targetGeo = geos.isEmpty() ? null : geos.iterator().next();
+				if (targetGeo == null) {
+					targetGeo = new LatLong();
+					targetGeo.setSpecimen(specimen);
+					geos.add(targetGeo);
+				}
+				if (!latText.isEmpty()) {
+					try {
+						targetGeo.setDecLat(BigDecimal.valueOf(Double.parseDouble(latText)));
+					} catch (NumberFormatException ignored) {
+					}
+				} else {
+					targetGeo.setDecLat(null);
+				}
+				if (!longText.isEmpty()) {
+					try {
+						targetGeo.setDecLong(BigDecimal.valueOf(Double.parseDouble(longText)));
+					} catch (NumberFormatException ignored) {
+					}
+				} else {
+					targetGeo.setDecLong(null);
+				}
+				if (getMethodComboBox().getSelectedItem() != null) {
+					targetGeo.setGeorefmethod((String) getMethodComboBox().getSelectedItem());
+				}
+				if (getDatumComboBox().getSelectedItem() != null) {
+					targetGeo.setDatum((String) getDatumComboBox().getSelectedItem());
+				}
+				String errRad = getTxtErrorRadius().getText().trim();
+				if (!errRad.isEmpty()) {
+					try {
+						targetGeo.setMaxErrorDistance(Integer.parseInt(errRad));
+					} catch (NumberFormatException ignored) {
+					}
+				}
+				if (getErrorUnitComboBox().getSelectedItem() != null) {
+					targetGeo.setMaxErrorUnits((String) getErrorUnitComboBox().getSelectedItem());
+				}
+			}
+
 			// Synchronize all declarative form fields from UI into the Specimen model
 			bindingContext.writeTo(specimen);
 
@@ -384,16 +443,16 @@ public class SpecimenDetailsViewPane extends JPanel {
 			try {
 				specimenController.setSpecimen(specimen);
 				specimenController.save();
-				setStateToClean();
-				this.setStatus("Saved");
-				jTextFieldStatus.setForeground(Color.BLACK);
-				setWarnings();
 				if (jTextFieldLastUpdatedBy != null) {
 					jTextFieldLastUpdatedBy.setText(specimen.getLastUpdatedBy());
 				}
 				if (jTextFieldDateLastUpdated != null && specimen.getDateLastUpdated() != null) {
-					jTextFieldDateLastUpdated.setText(specimen.getDateLastUpdated().toString());
+					jTextFieldDateLastUpdated.setText(formatDateTime(specimen.getDateLastUpdated()));
 				}
+				setStateToClean();
+				this.setStatus("Saved");
+				jTextFieldStatus.setForeground(Color.BLACK);
+				setWarnings();
 			} catch (SaveFailedException e) {
 				setStateToDirty();
 				this.setWarning("Error: " + e.getMessage());
@@ -496,6 +555,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 		}
 
 		// Georeference
+		this.georeferenceDialog = null;
 		specimen.getLatLong().clear();
 		HashSet<LatLong> latLongs = new HashSet<>();
 		for (LatLong prevgeo : previousSpecimen.getLatLong()) {
@@ -521,6 +581,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 * Set the values of the fields to the ones of the specimen.
 	 */
 	private void setValues() {
+		this.georeferenceDialog = null;
 		log.debug("Setting values, specimenid is {}", specimen != null ? specimen.getSpecimenId() : null);
 		this.setStatus("Setting values");
 
@@ -852,8 +913,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jPanel.add(bindingContext.bindReadOnlyTextField("Creator", Specimen::getCreatedBy), "grow");
 
 			addBasicJLabel(jPanel, "Creation date");
-			jPanel.add(bindingContext.bindReadOnlyTextField("DateCreated",
-					s -> s.getDateCreated() != null ? s.getDateCreated().toString() : ""), "grow");
+			jPanel.add(bindingContext.bindReadOnlyTextField("DateCreated", s -> formatDateTime(s.getDateCreated())),
+					"grow");
 
 			addBasicJLabel(jPanel, "Last updated by");
 			jTextFieldLastUpdatedBy = bindingContext.bindReadOnlyTextField("LastUpdatedBy", Specimen::getLastUpdatedBy);
@@ -861,7 +922,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
 			addBasicJLabel(jPanel, "Last edit date");
 			jTextFieldDateLastUpdated = bindingContext.bindReadOnlyTextField("DateLastUpdated",
-					s -> s.getDateLastUpdated() != null ? s.getDateLastUpdated().toString() : "");
+					s -> formatDateTime(s.getDateLastUpdated()));
 			jPanel.add(jTextFieldDateLastUpdated, "grow");
 
 			addBasicJLabel(jPanel, "Workflow Status");
@@ -1002,27 +1063,39 @@ public class SpecimenDetailsViewPane extends JPanel {
 	 */
 	private void reloadGeoRefFieldValues() {
 		Set<LatLong> geoReferences = specimen.getLatLong();
-		boolean resetFields = true;
-		if (!geoReferences.isEmpty()) {
-			LatLong geoReferencePre = geoReferences.iterator().next();
-			if (!geoReferencePre.isEmpty()) {
-				resetFields = false;
-				getTextFieldDecimalLat().setText(geoReferencePre.getDecLatString());
-				getTextFieldDecimalLong().setText(geoReferencePre.getDecLongString());
-				getMethodComboBox().setSelectedItem(geoReferencePre.getGeorefmethod());
-				getDatumComboBox().setSelectedItem(geoReferencePre.getDatum());
-				getTxtErrorRadius().setText(geoReferencePre.getMaxErrorDistanceString());
-				getErrorUnitComboBox().setSelectedItem(geoReferencePre.getMaxErrorUnits());
+		LatLong activeGeo = null;
+		if (geoReferences != null && !geoReferences.isEmpty()) {
+			for (LatLong g : geoReferences) {
+				if (!g.isEmpty()) {
+					activeGeo = g;
+					break;
+				}
+			}
+			if (activeGeo == null) {
+				activeGeo = geoReferences.iterator().next();
 			}
 		}
 
-		if (resetFields) {
-			getTextFieldDecimalLat().setText("");
-			getTextFieldDecimalLong().setText("");
-			getMethodComboBox().setSelectedItem("");
-			getDatumComboBox().setSelectedItem("");
-			getTxtErrorRadius().setText("");
-			getErrorUnitComboBox().setSelectedItem("");
+		if (activeGeo != null && !activeGeo.isEmpty()) {
+			getTextFieldDecimalLat().setText(activeGeo.getDecLatString());
+			getTextFieldDecimalLong().setText(activeGeo.getDecLongString());
+			getMethodComboBox().setSelectedItem(activeGeo.getGeorefmethod());
+			getDatumComboBox().setSelectedItem(activeGeo.getDatum());
+			getTxtErrorRadius().setText(activeGeo.getMaxErrorDistanceString());
+			getErrorUnitComboBox().setSelectedItem(activeGeo.getMaxErrorUnits());
+		} else {
+			if (getTextFieldDecimalLat().getText().trim().isEmpty()) {
+				getTextFieldDecimalLat().setText("");
+			}
+			if (getTextFieldDecimalLong().getText().trim().isEmpty()) {
+				getTextFieldDecimalLong().setText("");
+			}
+			if (activeGeo == null) {
+				getMethodComboBox().setSelectedItem("");
+				getDatumComboBox().setSelectedItem("");
+				getTxtErrorRadius().setText("");
+				getErrorUnitComboBox().setSelectedItem("");
+			}
 		}
 		this.updateJButtonGeoreference();
 	}
@@ -1635,6 +1708,11 @@ public class SpecimenDetailsViewPane extends JPanel {
 			if (georeferences == null || georeferences.isEmpty()) {
 				LatLong defaultGeo = new LatLong();
 				defaultGeo.setSpecimen(specimen);
+				if (georeferences == null) {
+					georeferences = new HashSet<>();
+					specimen.setLatLong(georeferences);
+				}
+				georeferences.add(defaultGeo);
 				this.georeferenceDialog = new GeoreferenceDialog(defaultGeo, thisPane);
 			} else {
 				LatLong georeference = georeferences.iterator().next();
@@ -1665,8 +1743,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 		defaultsMapImmutable.forEach((field, value) -> {
 			try {
 				if (field instanceof JTextField tf) {
+					boolean isCoordField = (field == getTextFieldDecimalLat() || field == getTextFieldDecimalLong());
 					if (tf.getText().trim().isEmpty()
-							|| settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
+							|| settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")
+							|| (isCoordField && value != null && !value.trim().isEmpty())) {
 						tf.setText(value);
 					}
 				} else if (field instanceof JComboBox<?> cb) {

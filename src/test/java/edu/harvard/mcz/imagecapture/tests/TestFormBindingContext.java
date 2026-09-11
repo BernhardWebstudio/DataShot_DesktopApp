@@ -183,6 +183,30 @@ public class TestFormBindingContext extends TestCase {
 	}
 
 	/**
+	 * Test that programmatic updates to read-only fields do NOT trigger the dirty
+	 * callback. This ensures that read-only fields (like LastUpdatedBy or
+	 * DateLastUpdated) do not mark the form as dirty after saving, preserving
+	 * navigation button state.
+	 */
+	public void testReadOnlyTextFieldDoesNotTriggerDirtyCallback() {
+		AtomicBoolean dirtyCalled = new AtomicBoolean(false);
+		FormBindingContext<Specimen> context = new FormBindingContext<>(Specimen.class, true,
+				() -> dirtyCalled.set(true));
+
+		JTextField readOnlyField = context.bindReadOnlyTextField("Barcode", Specimen::getBarcode);
+		assertFalse(readOnlyField.isEditable());
+
+		// Programmatic update to read-only field must not trigger dirty callback
+		readOnlyField.setText("NEW_VALUE");
+		assertFalse("ReadOnly text field must not trigger dirty callback", dirtyCalled.get());
+
+		// Compare with editable field which MUST trigger dirty callback
+		JTextField editableField = context.bindTextField("Genus", Specimen::getGenus, Specimen::setGenus);
+		editableField.setText("Papilio");
+		assertTrue("Editable text field must trigger dirty callback", dirtyCalled.get());
+	}
+
+	/**
 	 * Test Users entity binding used in UserDialog.
 	 */
 	public void testUsersBinding() {

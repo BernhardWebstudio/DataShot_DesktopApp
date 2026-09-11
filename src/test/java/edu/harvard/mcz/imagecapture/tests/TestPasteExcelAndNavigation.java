@@ -2,6 +2,8 @@ package edu.harvard.mcz.imagecapture.tests;
 
 import static org.junit.Assert.*;
 
+import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
+import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.SpecimenController;
 import edu.harvard.mcz.imagecapture.entity.LatLong;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
@@ -19,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
@@ -456,5 +459,93 @@ public class TestPasteExcelAndNavigation {
 		LatLong savedGeo = loaded.getLatLong().iterator().next();
 		assertEquals(0, new BigDecimal("47.3769").compareTo(savedGeo.getDecLat()));
 		assertEquals(0, new BigDecimal("8.5417").compareTo(savedGeo.getDecLong()));
+	}
+
+	@Test
+	public void testExcelOverwriteSettingHonoredForCoordinatesAndFields() throws Exception {
+		Specimen s = createSpecimen("TEST_OVERWRITE_001");
+		SpecimenController controller = new SpecimenController(s);
+		SpecimenDetailsViewPane pane = new SpecimenDetailsViewPane(controller.getSpecimen(), controller);
+
+		Properties props = Singleton.getSingletonInstance().getProperties().getProperties();
+		String originalOverwrite = props.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE);
+		try {
+			// Case 1: KEY_EXCEL_OVERWRITE is "false" (default / safe mode)
+			props.setProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE, "false");
+
+			// Set existing coordinate
+			Method getLatFieldMethod = SpecimenDetailsViewPane.class.getDeclaredMethod("getTextFieldDecimalLat");
+			getLatFieldMethod.setAccessible(true);
+			JTextField latField = (JTextField) getLatFieldMethod.invoke(pane);
+			latField.setText("12.3456");
+
+			Method getLongFieldMethod = SpecimenDetailsViewPane.class.getDeclaredMethod("getTextFieldDecimalLong");
+			getLongFieldMethod.setAccessible(true);
+			JTextField longField = (JTextField) getLongFieldMethod.invoke(pane);
+			longField.setText(""); // empty
+
+			// Calling setLocationData with new coordinates
+			pane.setLocationData("VerbatimLoc", "Zurich City", "Switzerland", "Zurich", "47.3769", "8.5417");
+
+			// Existing latitude should NOT be overwritten because overwrite is false
+			assertEquals("Existing latitude should NOT be overwritten when KEY_EXCEL_OVERWRITE is false", "12.3456",
+					latField.getText());
+			// Empty longitude SHOULD be populated
+			assertEquals("Empty longitude SHOULD be populated when KEY_EXCEL_OVERWRITE is false", "8.5417",
+					longField.getText());
+
+			// Case 2: KEY_EXCEL_OVERWRITE is "true"
+			props.setProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE, "true");
+			pane.setLocationData("VerbatimLoc", "Zurich City", "Switzerland", "Zurich", "47.3769", "8.5417");
+
+			// Existing latitude SHOULD now be overwritten because overwrite is true
+			assertEquals("Latitude SHOULD be overwritten when KEY_EXCEL_OVERWRITE is true", "47.3769",
+					latField.getText());
+			assertEquals("Longitude SHOULD be updated when KEY_EXCEL_OVERWRITE is true", "8.5417", longField.getText());
+		} finally {
+			if (originalOverwrite != null) {
+				props.setProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE, originalOverwrite);
+			} else {
+				props.setProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE, "false");
+			}
+		}
+	}
+
+	@Test
+	public void testGeoreferenceDialogPasteHonorsExcelOverwriteSetting() {
+		if (GraphicsEnvironment.isHeadless()) {
+			return;
+		}
+		LatLong geo = new LatLong();
+		geo.setDecLat(new BigDecimal("12.3456"));
+		GeoreferenceDialog dialog = new GeoreferenceDialog(geo);
+
+		Properties props = Singleton.getSingletonInstance().getProperties().getProperties();
+		String originalOverwrite = props.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE);
+		try {
+			// Case 1: KEY_EXCEL_OVERWRITE is "false"
+			props.setProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE, "false");
+			String excelData = "VerbatimLoc\tCol1\tCol2\tSwitzerland\tZurich\tZurich City\t47.3769, 8.5417\t50\tGPS";
+			dialog.pasteFromExcel(excelData);
+
+			// Existing DecLat must NOT be overwritten
+			assertEquals("Existing DecLat must NOT be overwritten when KEY_EXCEL_OVERWRITE is false",
+					new BigDecimal("12.3456"), dialog.getGeoReference().getDecLat());
+			// Empty DecLong SHOULD be populated
+			assertEquals("Empty DecLong should be populated", new BigDecimal("8.5417"),
+					dialog.getGeoReference().getDecLong());
+
+			// Case 2: KEY_EXCEL_OVERWRITE is "true"
+			props.setProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE, "true");
+			dialog.pasteFromExcel(excelData);
+			assertEquals("DecLat SHOULD be overwritten when KEY_EXCEL_OVERWRITE is true", new BigDecimal("47.3769"),
+					dialog.getGeoReference().getDecLat());
+		} finally {
+			if (originalOverwrite != null) {
+				props.setProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE, originalOverwrite);
+			} else {
+				props.setProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE, "false");
+			}
+		}
 	}
 }

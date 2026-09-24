@@ -31,14 +31,15 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests for SpecimenDetailsViewPane saving functionality and database transaction safety:
- * 1. Updating coordinates and georeference metadata on an existing Specimen (testing the UPDATE LAT_LONG path).
- * 2. Clearing coordinates on an existing Specimen.
- * 3. Saving modified SpecimenParts from the parts table.
- * 4. Saving modified Collectors from the collectors table.
- * 5. Error handling when save encounters SaveFailedException (dirty state retained, warning displayed).
- * 6. SpecimenLifeCycle.attachDirty cascaded transaction updates and rollback behavior.
- * 7. Verification that database schema migration V2.0.5 converts legacy MyISAM tables to InnoDB to avoid MySQL GTID errors.
+ * Tests for SpecimenDetailsViewPane saving functionality and database
+ * transaction safety: 1. Updating coordinates and georeference metadata on an
+ * existing Specimen (testing the UPDATE LAT_LONG path). 2. Clearing coordinates
+ * on an existing Specimen. 3. Saving modified SpecimenParts from the parts
+ * table. 4. Saving modified Collectors from the collectors table. 5. Error
+ * handling when save encounters SaveFailedException (dirty state retained,
+ * warning displayed). 6. SpecimenLifeCycle.attachDirty cascaded transaction
+ * updates and rollback behavior. 7. Verification that database schema migration
+ * V2.0.5 converts legacy MyISAM tables to InnoDB to avoid MySQL GTID errors.
  */
 public class TestSpecimenDetailsSaveAndTransactions {
 
@@ -65,7 +66,8 @@ public class TestSpecimenDetailsSaveAndTransactions {
 		createdSpecimens.clear();
 	}
 
-	private Specimen createAndPersistSpecimenWithCoords(String barcode, BigDecimal lat, BigDecimal lon) throws Exception {
+	private Specimen createAndPersistSpecimenWithCoords(String barcode, BigDecimal lat, BigDecimal lon)
+			throws Exception {
 		Specimen s = new Specimen();
 		s.setBarcode(barcode);
 		s.setGenus("Pieris");
@@ -112,13 +114,14 @@ public class TestSpecimenDetailsSaveAndTransactions {
 	}
 
 	/**
-	 * Test that updating coordinates on an existing Specimen in SpecimenDetailsViewPane
-	 * properly performs an update on the cascaded LatLong entity and persists into the database.
+	 * Test that updating coordinates on an existing Specimen in
+	 * SpecimenDetailsViewPane properly performs an update on the cascaded LatLong
+	 * entity and persists into the database.
 	 */
 	@Test
 	public void testSaveExistingSpecimenWithUpdatedLatLong() throws Exception {
-		Specimen s = createAndPersistSpecimenWithCoords("SAVE_TEST_COORD_001",
-				new BigDecimal("46.500000"), new BigDecimal("8.500000"));
+		Specimen s = createAndPersistSpecimenWithCoords("SAVE_TEST_COORD_001", new BigDecimal("46.500000"),
+				new BigDecimal("8.500000"));
 		Long id = s.getSpecimenId();
 
 		// Load fresh from database
@@ -169,8 +172,8 @@ public class TestSpecimenDetailsSaveAndTransactions {
 	 */
 	@Test
 	public void testClearCoordinatesOnExistingSpecimenAndSave() throws Exception {
-		Specimen s = createAndPersistSpecimenWithCoords("SAVE_TEST_CLEAR_001",
-				new BigDecimal("46.500000"), new BigDecimal("8.500000"));
+		Specimen s = createAndPersistSpecimenWithCoords("SAVE_TEST_CLEAR_001", new BigDecimal("46.500000"),
+				new BigDecimal("8.500000"));
 		Long id = s.getSpecimenId();
 
 		Specimen loaded = sls.findById(id);
@@ -252,8 +255,8 @@ public class TestSpecimenDetailsSaveAndTransactions {
 	}
 
 	/**
-	 * Test that saving updates to Collectors from SpecimenDetailsViewPane
-	 * properly persists into the database.
+	 * Test that saving updates to Collectors from SpecimenDetailsViewPane properly
+	 * persists into the database.
 	 */
 	@Test
 	public void testSaveSpecimenWithCollectorsModification() throws Exception {
@@ -294,8 +297,9 @@ public class TestSpecimenDetailsSaveAndTransactions {
 	}
 
 	/**
-	 * Test error handling in SpecimenDetailsViewPane.save() when SaveFailedException occurs:
-	 * ensures form remains dirty, warning status is shown, and save returns false.
+	 * Test error handling in SpecimenDetailsViewPane.save() when
+	 * SaveFailedException occurs: ensures form remains dirty, warning status is
+	 * shown, and save returns false.
 	 */
 	@Test
 	public void testSaveFailureErrorHandlingAndWarning() throws Exception {
@@ -314,7 +318,8 @@ public class TestSpecimenDetailsSaveAndTransactions {
 		SpecimenController failingController = new SpecimenController(loaded) {
 			@Override
 			public void save() throws SaveFailedException {
-				throw new SaveFailedException("Statement violates GTID consistency: Updates to non-transactional tables");
+				throw new SaveFailedException(
+						"Statement violates GTID consistency: Updates to non-transactional tables");
 			}
 		};
 
@@ -335,8 +340,8 @@ public class TestSpecimenDetailsSaveAndTransactions {
 	 */
 	@Test
 	public void testAttachDirtyCascadedUpdate() throws Exception {
-		Specimen s = createAndPersistSpecimenWithCoords("SAVE_TEST_ATTACH_001",
-				new BigDecimal("10.0"), new BigDecimal("20.0"));
+		Specimen s = createAndPersistSpecimenWithCoords("SAVE_TEST_ATTACH_001", new BigDecimal("10.0"),
+				new BigDecimal("20.0"));
 		Long id = s.getSpecimenId();
 
 		Specimen loaded = sls.findById(id);
@@ -356,8 +361,9 @@ public class TestSpecimenDetailsSaveAndTransactions {
 	}
 
 	/**
-	 * Test that Flyway migration V2.0.5 exists and converts all legacy MyISAM tables to InnoDB,
-	 * ensuring full GTID consistency and ACID transaction compatibility.
+	 * Test that Flyway migration V2.0.5 exists and converts all legacy MyISAM
+	 * tables to InnoDB, ensuring full GTID consistency and ACID transaction
+	 * compatibility.
 	 */
 	@Test
 	public void testFlywayMigrationInnoDBConversionScript() throws Exception {
@@ -367,20 +373,9 @@ public class TestSpecimenDetailsSaveAndTransactions {
 		String sql = Files.readString(migrationFile.toPath());
 
 		// Verify all 12 legacy MyISAM tables are converted to InnoDB
-		String[] requiredTables = {
-				"LAT_LONG",
-				"Specimen_Part",
-				"Specimen_Part_Attribute",
-				"HIGHER_TAXON",
-				"MCZBASE_AUTH_AGENT_NAME",
-				"MCZBASE_GEOG_AUTH_REC",
-				"UNIT_TRAY_LABEL",
-				"Users",
-				"Template",
-				"Label",
-				"LabelTag",
-				"Tag"
-		};
+		String[] requiredTables = {"LAT_LONG", "Specimen_Part", "Specimen_Part_Attribute", "HIGHER_TAXON",
+				"MCZBASE_AUTH_AGENT_NAME", "MCZBASE_GEOG_AUTH_REC", "UNIT_TRAY_LABEL", "Users", "Template", "Label",
+				"LabelTag", "Tag"};
 
 		for (String table : requiredTables) {
 			assertTrue("Migration must convert table " + table + " to InnoDB",
@@ -388,7 +383,6 @@ public class TestSpecimenDetailsSaveAndTransactions {
 							|| sql.contains("ALTER TABLE " + table + " ENGINE=InnoDB"));
 		}
 
-		assertTrue("Migration must register version 2.0.5 in allowed_version",
-				sql.contains("'2.0.5'"));
+		assertTrue("Migration must register version 2.0.5 in allowed_version", sql.contains("'2.0.5'"));
 	}
 }

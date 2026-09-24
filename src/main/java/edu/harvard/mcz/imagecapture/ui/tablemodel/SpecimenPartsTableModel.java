@@ -153,7 +153,16 @@ public class SpecimenPartsTableModel extends AbstractDeleteableTableModel {
 				((SpecimenPart) specimenParts.toArray()[rowIndex]).setPreserveMethod((String) aValue);
 				break;
 			case 2 :
-				((SpecimenPart) specimenParts.toArray()[rowIndex]).setLotCount(Integer.parseInt((String) aValue));
+				if (aValue instanceof Number) {
+					((SpecimenPart) specimenParts.toArray()[rowIndex]).setLotCount(((Number) aValue).intValue());
+				} else if (aValue != null && !aValue.toString().trim().isEmpty()) {
+					try {
+						((SpecimenPart) specimenParts.toArray()[rowIndex]).setLotCount(Integer.parseInt(aValue.toString().trim()));
+					} catch (NumberFormatException ignored) {
+					}
+				} else {
+					((SpecimenPart) specimenParts.toArray()[rowIndex]).setLotCount(0);
+				}
 				break;
 			case 3 :
 				break;

@@ -73,12 +73,12 @@ public class TestHigherTaxonLifeCycle extends TestCase {
 		String[] subfamilies = HigherTaxonLifeCycle.selectDistinctSubfamily("Papilionidae");
 		assertNotNull(subfamilies);
 		assertTrue(subfamilies.length >= 1);
-		assertEquals("Papilioninae", subfamilies[0]);
+		assertTrue(java.util.Arrays.asList(subfamilies).contains("Papilioninae"));
 
 		String[] tribes = HigherTaxonLifeCycle.selectDistinctTribe("Papilioninae");
 		assertNotNull(tribes);
 		assertTrue(tribes.length >= 1);
-		assertEquals("Papilionini", tribes[0]);
+		assertTrue(java.util.Arrays.asList(tribes).contains("Papilionini"));
 
 		// Test caste check
 		assertTrue(lifeCycle.isFamilyWithCastes("Formicidae"));

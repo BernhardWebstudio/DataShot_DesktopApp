@@ -79,7 +79,7 @@ CREATE TABLE `HIGHER_TAXON` (
   `hasCastes` int(11) DEFAULT '0',
   `usesdateemerged` int(11) DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -152,7 +152,7 @@ CREATE TABLE `LAT_LONG` (
   PRIMARY KEY (`LAT_LONG_ID`),
   UNIQUE KEY `FK_specimen_ID` (`specimenid`),
   KEY `LAT_LONG_DEC_ALL` (`DEC_LAT`,`DEC_LONG`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -172,7 +172,7 @@ CREATE TABLE `Label` (
   `verbatimtext` varchar(255) DEFAULT NULL,
   `interpretation` text,
   PRIMARY KEY (`labelid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -188,7 +188,7 @@ CREATE TABLE `LabelTag` (
   `value` varchar(255) NOT NULL,
   `tagname` varchar(255) NOT NULL,
   PRIMARY KEY (`labeltagid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -205,7 +205,7 @@ CREATE TABLE `MCZBASE_AUTH_AGENT_NAME` (
   `DONOR_CARD_PRESENT_FG` int(11) DEFAULT NULL,
   `AGENT_NAME` varchar(184) DEFAULT NULL,
   PRIMARY KEY (`AGENT_NAME_ID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -232,7 +232,7 @@ CREATE TABLE `MCZBASE_GEOG_AUTH_REC` (
   `OCEAN_REGION` varchar(50) DEFAULT NULL,
   `OCEAN_SUBREGION` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`GEOG_AUTH_REC_ID`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -347,7 +347,7 @@ CREATE TABLE `Specimen_Part` (
   `Lot_Count_Modifier` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`SpecimenPartId`),
   KEY `SpecimenId` (`SpecimenId`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -368,7 +368,7 @@ CREATE TABLE `Specimen_Part_Attribute` (
   `Attribute_Date` datetime DEFAULT NULL,
   PRIMARY KEY (`SpecimenPartAttributeID`),
   KEY `SpecimenPartId` (`SpecimenPartId`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -383,7 +383,7 @@ CREATE TABLE `Tag` (
   `tagname` varchar(255) NOT NULL,
   PRIMARY KEY (`tagid`),
   UNIQUE KEY `tagtagname` (`tagname`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -425,7 +425,7 @@ CREATE TABLE `Template` (
   `UtBarcodeSizeX` int(11) DEFAULT NULL,
   `UtBarcodeSizeY` int(11) DEFAULT NULL,
   PRIMARY KEY (`TemplateId`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -474,7 +474,7 @@ CREATE TABLE `UNIT_TRAY_LABEL` (
   `Collection` varchar(255) DEFAULT NULL,
   `ordinal` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -493,7 +493,7 @@ CREATE TABLE `Users` (
   `hash` varchar(41) DEFAULT NULL,
   PRIMARY KEY (`userid`),
   UNIQUE KEY `usernames` (`username`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 

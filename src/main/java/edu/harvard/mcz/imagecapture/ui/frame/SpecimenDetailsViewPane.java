@@ -388,18 +388,18 @@ public class SpecimenDetailsViewPane extends JPanel {
 			// Synchronize coordinates and geo fields from UI into specimen's LatLong
 			String latText = getTextFieldDecimalLat().getText().trim();
 			String longText = getTextFieldDecimalLong().getText().trim();
-			if (!latText.isEmpty() || !longText.isEmpty()) {
-				Set<LatLong> geos = specimen.getLatLong();
-				if (geos == null) {
-					geos = new HashSet<>();
-					specimen.setLatLong(geos);
-				}
-				LatLong targetGeo = geos.isEmpty() ? null : geos.iterator().next();
-				if (targetGeo == null) {
-					targetGeo = new LatLong();
-					targetGeo.setSpecimen(specimen);
-					geos.add(targetGeo);
-				}
+			Set<LatLong> geos = specimen.getLatLong();
+			if (geos == null) {
+				geos = new HashSet<>();
+				specimen.setLatLong(geos);
+			}
+			LatLong targetGeo = geos.isEmpty() ? null : geos.iterator().next();
+			if (targetGeo == null && (!latText.isEmpty() || !longText.isEmpty())) {
+				targetGeo = new LatLong();
+				targetGeo.setSpecimen(specimen);
+				geos.add(targetGeo);
+			}
+			if (targetGeo != null) {
 				if (!latText.isEmpty()) {
 					try {
 						targetGeo.setDecLat(BigDecimal.valueOf(Double.parseDouble(latText)));
@@ -428,6 +428,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 						targetGeo.setMaxErrorDistance(Integer.parseInt(errRad));
 					} catch (NumberFormatException ignored) {
 					}
+				} else {
+					targetGeo.setMaxErrorDistance(null);
 				}
 				if (getErrorUnitComboBox().getSelectedItem() != null) {
 					targetGeo.setMaxErrorUnits((String) getErrorUnitComboBox().getSelectedItem());
@@ -1744,7 +1746,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			try {
 				if (field instanceof JTextField tf) {
 					if (tf.getText().trim().isEmpty()
-							|| settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
+							|| "true".equals(settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE))) {
 						tf.setText(value);
 					}
 				} else if (field instanceof JComboBox<?> cb) {
@@ -1753,7 +1755,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 						content = cb.getSelectedItem().toString();
 					}
 					if (content.trim().isEmpty()
-							|| settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE).equals("true")) {
+							|| "true".equals(settings.getProperty(ImageCaptureProperties.KEY_EXCEL_OVERWRITE))) {
 						cb.setSelectedItem(value);
 					}
 				}

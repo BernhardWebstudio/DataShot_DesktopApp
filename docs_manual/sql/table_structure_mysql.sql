@@ -214,7 +214,7 @@ CREATE TABLE `HIGHER_TAXON` (
   `tribe` varchar(255) default NULL,
   `id` int(11) NOT NULL auto_increment,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM ;
+) ENGINE=InnoDB ;
 
 CREATE TABLE `UNIT_TRAY_LABEL` (
   `id` int(11) NOT NULL auto_increment,
@@ -231,4 +231,4 @@ CREATE TABLE `UNIT_TRAY_LABEL` (
   `UnNamedForm` varchar(40) default '',
   `Printed` int(11) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=UTF8;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8;

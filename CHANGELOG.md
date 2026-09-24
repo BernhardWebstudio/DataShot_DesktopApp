@@ -1,5 +1,11 @@
 # Changelog
 
+## v2.0.8
+* [[`3a9f91ba2e`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/3a9f91ba2e)] - **fix**: convert legacy MyISAM tables to InnoDB for GTID consistency and improve save tests (Tim Bernhard)
+* [[`8d38420a11`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/8d38420a11)] - Patch bump (Tim Bernhard)
+* [[`91c04db375`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/91c04db375)] - Update changelog to publish Version v2.0.7 (Tim Bernhard)
+
+
 ## v2.0.7
 * [[`76296dfda2`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/76296dfda2)] - **test**: add tests for read-only binding dirty behavior and KEY\_EXCEL\_OVERWRITE (Tim Bernhard)
 * [[`b543b06182`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b543b06182)] - **refactor**: preserve KEY\_EXCEL\_OVERWRITE setting for coordinate fields (Tim Bernhard)

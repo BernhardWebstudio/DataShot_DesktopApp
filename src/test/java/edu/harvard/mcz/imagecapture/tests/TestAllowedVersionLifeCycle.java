@@ -34,4 +34,23 @@ public class TestAllowedVersionLifeCycle extends TestCase {
 		String list = AllowedVersionLifeCycle.listAllowedVersions();
 		assertNotNull(list);
 	}
+
+	@Test
+	public void testListAllowedVersionsTruncation() {
+		Session session = HibernateUtil.getTestSessionFactory().openSession();
+		Transaction transaction = session.beginTransaction();
+		for (int i = 1; i <= 7; i++) {
+			AllowedVersion av = new AllowedVersion();
+			av.setVersion("1.0." + i);
+			session.persist(av);
+		}
+		transaction.commit();
+		session.close();
+
+		String list = AllowedVersionLifeCycle.listAllowedVersions();
+		assertNotNull(list);
+		if (!list.startsWith("Flyway")) {
+			assertTrue(list.contains("older versions"));
+		}
+	}
 }

@@ -255,8 +255,8 @@ public class ImageCaptureApp {
 				Singleton.getSingletonInstance().getMainFrame()
 						.setStatusMessage("Database does not support this version, schema update needed.");
 				JOptionPane.showMessageDialog(Singleton.getSingletonInstance().getMainFrame(),
-						"The database does not support" + APP_NAME + " version " + APP_VERSION
-								+ ".  A database schema update to version 1.3 is required.",
+						"<html><body style='width: 380px;'><p>The database does not support " + APP_NAME + " version " + APP_VERSION
+								+ ". A database schema update to version 1.3 is required.</p></body></html>",
 						"Schema Update Required", JOptionPane.OK_OPTION);
 				log.error("Database does not test for versioning. Added in 1.3.0 Schema, and required by "
 						+ ImageCaptureApp.APP_VERSION + "  Unable to Start");
@@ -269,11 +269,14 @@ public class ImageCaptureApp {
 			String allowed = AllowedVersionLifeCycle.listAllowedVersions();
 			Singleton.getSingletonInstance().getMainFrame()
 					.setStatusMessage("Database does not support version, update needed.");
+			String fromVersion = (allowed != null && !allowed.trim().isEmpty()) ? allowed : "the current schema";
+			String message = "<html><body style='width: 380px;'>"
+					+ "<p>The database does not support " + APP_NAME + " version " + APP_VERSION + ".</p>"
+					+ "<p style='margin-top: 8px;'>A software (or database) update from <b>" + fromVersion + "</b> is required.</p>"
+					+ "<p style='margin-top: 8px;'>Are you ready to try the upgrade of the database? Make sure no one else will need the old version.</p>"
+					+ "</body></html>";
 			int response = JOptionPane.showConfirmDialog(Singleton.getSingletonInstance().getMainFrame(),
-					"The database does not support" + APP_NAME + " version " + APP_VERSION + "."
-							+ System.lineSeparator() + "  A software (or database) update from " + allowed
-							+ " is required. " + System.lineSeparator()
-							+ "Are you ready to try the upgrade of the database? Make sure no one else will need the old version.",
+					message,
 					"Update Required", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 			log.error("Database does not allow version " + ImageCaptureApp.APP_VERSION + ". Upgrade will "
 					+ (response == JOptionPane.YES_OPTION ? "happen." : "not happen."));

@@ -111,12 +111,11 @@ public class AllowedVersionLifeCycle {
 	 * @return string listing allowed versions according to database.
 	 */
 	public static String listAllowedVersions() {
-		StringBuilder allowed = new StringBuilder();
 		try {
 			Flyway flyway = getFlyway();
 			MigrationInfo current = flyway.info().current();
 			if (current != null && current.getVersion() != null) {
-				allowed.append("Flyway schema v").append(current.getVersion());
+				return "Flyway schema v" + current.getVersion();
 			}
 		} catch (Exception e) {
 			log.debug("Could not get Flyway version: {}", e.getMessage());
@@ -126,19 +125,20 @@ public class AllowedVersionLifeCycle {
 			AllowedVersionLifeCycle als = new AllowedVersionLifeCycle();
 			List<AllowedVersion> allowedVersions = als.findAll();
 			if (allowedVersions != null && !allowedVersions.isEmpty()) {
-				if (allowed.length() > 0) {
-					allowed.append("; Legacy allowed_version: ");
-				}
-				String separator = "";
-				for (AllowedVersion av : allowedVersions) {
-					allowed.append(separator).append(av.getVersion());
-					separator = ", ";
+				int total = allowedVersions.size();
+				int maxToShow = 5;
+				if (total > maxToShow) {
+					List<AllowedVersion> recent = allowedVersions.subList(total - maxToShow, total);
+					return "... (" + (total - maxToShow) + " older versions), "
+							+ recent.stream().map(AllowedVersion::getVersion).collect(Collectors.joining(", "));
+				} else {
+					return allowedVersions.stream().map(AllowedVersion::getVersion).collect(Collectors.joining(", "));
 				}
 			}
 		} catch (Exception e) {
 			log.error("Error listing allowed versions: {}", e.getMessage());
 		}
-		return allowed.toString();
+		return "";
 	}
 
 	/**

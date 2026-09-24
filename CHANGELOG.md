@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.0.7
+* [[`76296dfda2`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/76296dfda2)] - **test**: add tests for read-only binding dirty behavior and KEY\_EXCEL\_OVERWRITE (Tim Bernhard)
+* [[`b543b06182`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b543b06182)] - **refactor**: preserve KEY\_EXCEL\_OVERWRITE setting for coordinate fields (Tim Bernhard)
+* [[`c2913993c7`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/c2913993c7)] - **test**: guard UI and clipboard operations in headless CI environment (Tim Bernhard)
+* [[`9dbe7d1a16`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/9dbe7d1a16)] - Fix navigation button state after save, Excel coordinate paste transfer, and last edit date format (Tim Bernhard)
+* [[`86b32e6be9`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/86b32e6be9)] - **fix**: guard georeference dialog against HeadlessException in CI (Tim Bernhard)
+* [[`b85fa471a1`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/b85fa471a1)] - **feat**: implement speculative cache freshness verification and optimistic locking for specimens (Tim Bernhard)
+* [[`f4f64d7d13`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/f4f64d7d13)] - **style**: format code with spotless (Tim Bernhard)
+* [[`e8da0be600`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/e8da0be600)] - **fix**: ensure complete specimen hydration, disable save on incomplete data, and integrate browser filters with pagination (Tim Bernhard)
+* [[`006a7553ac`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/006a7553ac)] - **chore**: bump version to 2.0.7-SNAPSHOT (Tim Bernhard)
+* [[`25f5ae46bb`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/25f5ae46bb)] - Update changelog to publish Version v2.0.6 (Tim Bernhard)
+
+
 ## v2.0.6
 * [[`7946c1aa7c`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/7946c1aa7c)] - **perf**: refactor specimen browser to use lightweight table projection query (Tim Bernhard)
 * [[`bbfeba3cd7`](https://github.com/BernhardWebstudio/DataShot_DesktopApp/commit/bbfeba3cd7)] - Update changelog to publish Version v2.0.5 (Tim Bernhard)

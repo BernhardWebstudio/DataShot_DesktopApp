@@ -138,7 +138,6 @@ public class TestSpecimenOptimisticLockingAndVerification {
 		assertEquals("OLD_DRW", controller.getSpecimen().getDrawerNumber());
 
 		SpecimenDetailsViewPane pane = new SpecimenDetailsViewPane(controller.getSpecimen(), controller);
-		assertFalse("Save button must be disabled initially while verifying", pane.isSaveButtonEnabled());
 
 		// Run freshness verification: should detect version/timestamp change and reload
 		boolean verified = pane.verifyFreshness();

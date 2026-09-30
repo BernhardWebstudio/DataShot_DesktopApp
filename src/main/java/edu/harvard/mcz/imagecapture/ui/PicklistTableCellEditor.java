@@ -20,7 +20,6 @@ package edu.harvard.mcz.imagecapture.ui;
 
 import java.awt.*;
 import javax.swing.*;
-import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
 
 /**
  * ValidatingTableCellEditor provides a JTextField with an inputVerifier as a
@@ -34,7 +33,7 @@ import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
  * jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ValidatingTableCellEditor(field));
  * </pre>
  */
-public class PicklistTableCellEditor extends ComboBoxCellEditor {
+public class PicklistTableCellEditor extends DefaultCellEditor {
 
 	private static final long serialVersionUID = -4777010317672887845L;
 

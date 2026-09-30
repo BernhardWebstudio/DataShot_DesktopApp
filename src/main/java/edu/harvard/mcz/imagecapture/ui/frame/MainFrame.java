@@ -84,6 +84,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 	private JMenuItem jMenuItemScanOneBarcodeSave = null;
 	private JMenu jMenuConfig = null;
 	private JMenu jMenuEdit = null;
+	private JMenu jMenuView = null;
 	private JMenuItem jMenuItemPreferences = null;
 	private JMenuItem jMenuItemCopy = null;
 	private JMenuItem jMenuItemPaste = null;
@@ -332,6 +333,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jJMenuBar = new JMenuBar();
 			jJMenuBar.add(getJMenuFile());
 			jJMenuBar.add(getJMenuEdit());
+			jJMenuBar.add(getJMenuView());
 			jJMenuBar.add(getJMenuAction());
 			jJMenuBar.add(getJMenuData());
 			jJMenuBar.add(getJMenuQualityControl());
@@ -339,6 +341,15 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jJMenuBar.add(getJMenuHelp());
 		}
 		return jJMenuBar;
+	}
+
+	private JMenu getJMenuView() {
+		if (jMenuView == null) {
+			jMenuView = new JMenu("View");
+			jMenuView.setMnemonic(KeyEvent.VK_V);
+			jMenuView.add(edu.harvard.mcz.imagecapture.ui.theme.ThemeManager.createThemeMenu());
+		}
+		return jMenuView;
 	}
 
 	/**
@@ -664,6 +675,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuConfig.setEnabled(true);
 			jMenuConfig.add(getJMenuItemEditTemplates());
 			jMenuConfig.add(getJMenuItemPreferences());
+			jMenuConfig.add(edu.harvard.mcz.imagecapture.ui.theme.ThemeManager.createThemeMenu());
 			jMenuConfig.add(getJMenuItemUsers());
 			jMenuConfig.add(getJMenuItemChangePassword());
 		}

@@ -18,6 +18,7 @@
  */
 package edu.harvard.mcz.imagecapture.ui.frame;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import edu.harvard.mcz.imagecapture.*;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.data.LocationInCollection;
@@ -36,6 +37,7 @@ import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.MouseWheelScrollListener;
 import edu.harvard.mcz.imagecapture.ui.ValidatingTableCellEditor;
 import edu.harvard.mcz.imagecapture.ui.binding.FormBindingContext;
+import edu.harvard.mcz.imagecapture.ui.component.AutoCompleteHelper;
 import edu.harvard.mcz.imagecapture.ui.component.JAccordionPanel;
 import edu.harvard.mcz.imagecapture.ui.component.JTableCellTabbing;
 import edu.harvard.mcz.imagecapture.ui.component.JTableWithRowBorder;
@@ -70,9 +72,6 @@ import javax.swing.table.TableColumn;
 import net.miginfocom.swing.MigLayout;
 import org.hibernate.SessionException;
 import org.hibernate.TransactionException;
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
-import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
-import org.jdesktop.swingx.combobox.ListComboBoxModel;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1349,7 +1348,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 
 	private JComboBox<String> getDatumComboBox() {
 		if (cbDatum == null) {
-			ComboBoxModel<String> datumModel = new ListComboBoxModel<>(LatLong.getDatumValues());
+			ComboBoxModel<String> datumModel = new DefaultComboBoxModel<>(
+					LatLong.getDatumValues().toArray(new String[0]));
 			cbDatum = new JComboBox<>(datumModel);
 			cbDatum.setSelectedItem("WGS84");
 			cbDatum.setEditable(specimen.isEditable());
@@ -1454,8 +1454,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 		CollectorLifeCycle cls = new CollectorLifeCycle();
 		JComboBox<String> jComboBoxCollector = new JComboBox<>(cls.getDistinctCollectors());
 		jComboBoxCollector.setEditable(specimen.isEditable());
-		AutoCompleteDecorator.decorate(jComboBoxCollector);
-		jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(jComboBoxCollector));
+		AutoCompleteHelper.decorate(jComboBoxCollector);
+		jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(jComboBoxCollector));
 	}
 
 	private JScrollPane getJScrollPaneSpecimenParts() {
@@ -1600,8 +1600,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 		jComboNumberTypes.setModel(new DefaultComboBoxModel<>(types));
 		jComboNumberTypes.setEditable(specimen.isEditable());
 		TableColumn typeColumn = jTableNumbers.getColumnModel().getColumn(NumberTableModel.COLUMN_TYPE);
-		AutoCompleteDecorator.decorate(jComboNumberTypes);
-		typeColumn.setCellEditor(new ComboBoxCellEditor(jComboNumberTypes));
+		AutoCompleteHelper.decorate(jComboNumberTypes);
+		typeColumn.setCellEditor(new DefaultCellEditor(jComboNumberTypes));
 		DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
 		renderer.setToolTipText("Click for pick list of number types.");
 		typeColumn.setCellRenderer(renderer);
@@ -2162,8 +2162,13 @@ public class SpecimenDetailsViewPane extends JPanel {
 									HTTP_CLIENT.sendAsync(request, HttpResponse.BodyHandlers.discarding())
 											.thenAccept(response -> SwingUtilities.invokeLater(() -> {
 												if (response.statusCode() == 404) {
+													jTextFieldGBIFTaxonId.putClientProperty(
+															FlatClientProperties.OUTLINE,
+															FlatClientProperties.OUTLINE_ERROR);
 													jTextFieldGBIFTaxonId.setBackground(MainFrame.BG_COLOR_ERROR);
 												} else {
+													jTextFieldGBIFTaxonId
+															.putClientProperty(FlatClientProperties.OUTLINE, null);
 													jTextFieldGBIFTaxonId.setBackground(Color.WHITE);
 												}
 												jTextFieldGBIFTaxonId.revalidate();

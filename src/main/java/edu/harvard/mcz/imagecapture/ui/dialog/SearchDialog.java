@@ -25,6 +25,7 @@ import edu.harvard.mcz.imagecapture.entity.fixed.WorkFlowStatus;
 import edu.harvard.mcz.imagecapture.lifecycle.*;
 import edu.harvard.mcz.imagecapture.query.Specification;
 import edu.harvard.mcz.imagecapture.query.StringToDateQueryParser;
+import edu.harvard.mcz.imagecapture.ui.component.AutoCompleteHelper;
 import edu.harvard.mcz.imagecapture.ui.field.JIntegerField;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -34,7 +35,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -394,7 +394,7 @@ public class SearchDialog extends JDialog {
 			// "Order", jComboBoxHigherOrder));
 			jTextFieldOrder.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "HigherOrder"));
 			jTextFieldOrder.setMaximumSize(this.maxComboBoxDims);
-			AutoCompleteDecorator.decorate(jTextFieldOrder);
+			AutoCompleteHelper.decorate(jTextFieldOrder);
 		}
 		return jTextFieldOrder;
 	}
@@ -525,7 +525,7 @@ public class SearchDialog extends JDialog {
 			jComboBoxCollection.setEditable(true);
 			jComboBoxCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Collection"));
 			jComboBoxCollection.setMaximumSize(this.maxComboBoxDims);
-			AutoCompleteDecorator.decorate(jComboBoxCollection);
+			AutoCompleteHelper.decorate(jComboBoxCollection);
 		}
 		return jComboBoxCollection;
 	}
@@ -545,7 +545,7 @@ public class SearchDialog extends JDialog {
 			jComboBoxWorkflowStatus.getModel().setSelectedItem("");
 			jComboBoxWorkflowStatus.setEditable(true);
 			jComboBoxWorkflowStatus.setMaximumSize(this.maxComboBoxDims);
-			AutoCompleteDecorator.decorate(jComboBoxWorkflowStatus);
+			AutoCompleteHelper.decorate(jComboBoxWorkflowStatus);
 		}
 		return jComboBoxWorkflowStatus;
 	}
@@ -576,7 +576,7 @@ public class SearchDialog extends JDialog {
 				SwingUtilities.invokeLater(() -> jComboBoxPath.setModel(new DefaultComboBoxModel<>(paths)));
 			})).start();
 			jComboBoxPath.setEditable(true);
-			AutoCompleteDecorator.decorate(jComboBoxPath);
+			AutoCompleteHelper.decorate(jComboBoxPath);
 			jComboBoxPath.setMaximumSize(this.maxComboBoxDims);
 		}
 		return jComboBoxPath;
@@ -597,7 +597,7 @@ public class SearchDialog extends JDialog {
 				SwingUtilities.invokeLater(() -> jComboBoxEntryBy.setModel(new DefaultComboBoxModel<>(users)));
 			})).start();
 			jComboBoxEntryBy.setEditable(true);
-			AutoCompleteDecorator.decorate(jComboBoxEntryBy);
+			AutoCompleteHelper.decorate(jComboBoxEntryBy);
 			jComboBoxEntryBy.setMaximumSize(this.maxComboBoxDims);
 		}
 		return jComboBoxEntryBy;
@@ -619,7 +619,7 @@ public class SearchDialog extends JDialog {
 						.invokeLater(() -> jComboBoxIdentifiedBy.setModel(new DefaultComboBoxModel<>(determiners)));
 			})).start();
 			jComboBoxIdentifiedBy.setEditable(true);
-			AutoCompleteDecorator.decorate(jComboBoxIdentifiedBy);
+			AutoCompleteHelper.decorate(jComboBoxIdentifiedBy);
 			jComboBoxIdentifiedBy.setMaximumSize(this.maxComboBoxDims);
 		}
 		return jComboBoxIdentifiedBy;
@@ -687,7 +687,7 @@ public class SearchDialog extends JDialog {
 				SwingUtilities.invokeLater(() -> jComboBoxCollector.setModel(new DefaultComboBoxModel<>(collectors)));
 			})).start();
 			jComboBoxCollector.setEditable(true);
-			AutoCompleteDecorator.decorate(jComboBoxCollector);
+			AutoCompleteHelper.decorate(jComboBoxCollector);
 			jComboBoxCollector.setMaximumSize(this.maxComboBoxDims);
 		}
 		return jComboBoxCollector;
@@ -725,7 +725,7 @@ public class SearchDialog extends JDialog {
 				});
 			})).start();
 			jComboBoxCountry.setEditable(true);
-			AutoCompleteDecorator.decorate(jComboBoxCountry);
+			AutoCompleteHelper.decorate(jComboBoxCountry);
 			jComboBoxCountry.setMaximumSize(this.maxComboBoxDims);
 		}
 		return jComboBoxCountry;
@@ -751,7 +751,7 @@ public class SearchDialog extends JDialog {
 				});
 			})).start();
 			jComboBoxSpecificLocality.setEditable(true);
-			AutoCompleteDecorator.decorate(jComboBoxSpecificLocality);
+			AutoCompleteHelper.decorate(jComboBoxSpecificLocality);
 			jComboBoxSpecificLocality.setMaximumSize(this.maxComboBoxDims);
 		}
 		return jComboBoxSpecificLocality;
@@ -777,7 +777,7 @@ public class SearchDialog extends JDialog {
 				});
 			})).start();
 			jComboBoxPrimaryDivision.setEditable(true);
-			AutoCompleteDecorator.decorate(jComboBoxPrimaryDivision);
+			AutoCompleteHelper.decorate(jComboBoxPrimaryDivision);
 			jComboBoxPrimaryDivision.setMaximumSize(this.maxComboBoxDims);
 		}
 		return jComboBoxPrimaryDivision;
@@ -803,7 +803,7 @@ public class SearchDialog extends JDialog {
 				});
 			})).start();
 			jComboBoxQuestions.setEditable(true);
-			AutoCompleteDecorator.decorate(jComboBoxQuestions);
+			AutoCompleteHelper.decorate(jComboBoxQuestions);
 			jComboBoxQuestions.setMaximumSize(this.maxComboBoxDims);
 		}
 		return jComboBoxQuestions;

@@ -28,6 +28,7 @@ import edu.harvard.mcz.imagecapture.exceptions.SaveFailedException;
 import edu.harvard.mcz.imagecapture.lifecycle.MCZbaseGeogAuthRecLifeCycle;
 import edu.harvard.mcz.imagecapture.lifecycle.NumberLifeCycle;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
+import edu.harvard.mcz.imagecapture.ui.component.AutoCompleteHelper;
 import edu.harvard.mcz.imagecapture.ui.field.FilteringAgentJComboBox;
 import edu.harvard.mcz.imagecapture.ui.field.FilteringGeogJComboBox;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.CollectorTableModel;
@@ -46,8 +47,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import org.filteredpush.qc.date.DateUtils;
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
-import org.jdesktop.swingx.autocomplete.ComboBoxCellEditor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -645,7 +644,7 @@ public class VerbatimClassifyDialog extends JDialog {
 			// Note: When setting the values, the table column editor needs to be
 			// reset there, as the model is replaced.
 			FilteringAgentJComboBox field = new FilteringAgentJComboBox();
-			jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new ComboBoxCellEditor(field));
+			jTableCollectors.getColumnModel().getColumn(0).setCellEditor(new DefaultCellEditor(field));
 			jTableCollectors.setRowHeight(jTableCollectors.getRowHeight() + 4);
 		}
 		return jTableCollectors;
@@ -664,7 +663,7 @@ public class VerbatimClassifyDialog extends JDialog {
 			jComboBoxCollection.setModel(new DefaultComboBoxModel<String>(sls.getDistinctCollections()));
 			jComboBoxCollection.setEditable(true);
 			jComboBoxCollection.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "Collection"));
-			AutoCompleteDecorator.decorate(jComboBoxCollection);
+			AutoCompleteHelper.decorate(jComboBoxCollection);
 		}
 		return jComboBoxCollection;
 	}

@@ -38,7 +38,6 @@ import java.util.*;
 import java.util.List;
 import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
-import org.jdesktop.swingx.combobox.ListComboBoxModel;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.painter.CompoundPainter;
@@ -250,7 +249,7 @@ public class GeoreferenceDialog extends JDialog {
 						"Gazeteer", "GPS", "Label Data", "Wikipedia", "MaNIS/HertNet/ORNIS Georeferencing Guidelines"},
 				LatLong::getGeorefmethod, LatLong::setGeorefmethod, cb -> cb.addActionListener(e -> setState()));
 
-		ComboBoxModel<String> datumModel = new ListComboBoxModel<>(LatLong.getDatumValues());
+		ComboBoxModel<String> datumModel = new DefaultComboBoxModel<>(LatLong.getDatumValues().toArray(new String[0]));
 		cbDatum = bindingContext.bindComboBox("Datum", datumModel, LatLong::getDatum, LatLong::setDatum,
 				cb -> cb.setSelectedItem("WGS84"));
 

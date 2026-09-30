@@ -1,6 +1,8 @@
 package edu.harvard.mcz.imagecapture.ui.binding;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
+import edu.harvard.mcz.imagecapture.ui.component.AutoCompleteHelper;
 import java.awt.Color;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -8,7 +10,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.swing.*;
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 /**
  * Context that manages declarative form bindings between Swing UI components
@@ -139,6 +140,8 @@ public class FormBindingContext<T> {
 			BiConsumer<T, String> setter, Consumer<JTextField> customizer) {
 		JTextField field = new JTextField();
 		field.setEditable(defaultEditable);
+		field.putClientProperty(FlatClientProperties.SELECT_ALL_ON_FOCUS_POLICY,
+				FlatClientProperties.SELECT_ALL_ON_FOCUS_POLICY_ALWAYS);
 		if (metadataClass != null && propertyName != null) {
 			try {
 				InputVerifier verifier = MetadataRetriever.getInputVerifier(metadataClass, propertyName, field);
@@ -202,6 +205,8 @@ public class FormBindingContext<T> {
 			Consumer<JTextField> customizer) {
 		JTextField field = new JTextField();
 		field.setEditable(defaultEditable);
+		field.putClientProperty(FlatClientProperties.SELECT_ALL_ON_FOCUS_POLICY,
+				FlatClientProperties.SELECT_ALL_ON_FOCUS_POLICY_ALWAYS);
 		if (propertyName != null) {
 			try {
 				String help = MetadataRetriever.getFieldHelp(entityClass, propertyName);
@@ -313,7 +318,7 @@ public class FormBindingContext<T> {
 			} catch (Exception ignored) {
 			}
 		}
-		AutoCompleteDecorator.decorate(comboBox);
+		AutoCompleteHelper.decorate(comboBox);
 		if (customizer != null) {
 			customizer.accept(comboBox);
 		}
@@ -378,7 +383,7 @@ public class FormBindingContext<T> {
 			});
 		})).start();
 
-		AutoCompleteDecorator.decorate(comboBox);
+		AutoCompleteHelper.decorate(comboBox);
 		if (customizer != null) {
 			customizer.accept(comboBox);
 		}
@@ -402,7 +407,7 @@ public class FormBindingContext<T> {
 			} catch (Exception ignored) {
 			}
 		}
-		AutoCompleteDecorator.decorate(comboBox);
+		AutoCompleteHelper.decorate(comboBox);
 		if (customizer != null) {
 			customizer.accept(comboBox);
 		}

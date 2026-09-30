@@ -116,14 +116,15 @@ public class ImageCaptureApp {
 	 */
 	public static void main(String[] args) {
 		try {
-			UIManager.setLookAndFeel(
-					// Use cross platform if native uses space on forms much too
-					// inefficiently UIManager.getCrossPlatformLookAndFeelClassName());
-					UIManager.getSystemLookAndFeelClassName());
-			// System.setProperty("apple.laf.useScreenMenuBar", "true");
-		} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException
-				| IllegalAccessException e) {
-			log.error("Error", e);
+			edu.harvard.mcz.imagecapture.ui.theme.ThemeManager.init();
+		} catch (Exception e) {
+			log.warn("Failed to initialize FlatLaf theme, falling back to system Look and Feel", e);
+			try {
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			} catch (UnsupportedLookAndFeelException | ClassNotFoundException | InstantiationException
+					| IllegalAccessException ex) {
+				log.error("Error setting system look and feel", ex);
+			}
 		}
 
 		log.debug(UIManager.getLookAndFeel().getID());

@@ -5,6 +5,7 @@ import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.lifecycle.HigherTaxonLifeCycle;
+import edu.harvard.mcz.imagecapture.ui.component.AutoCompleteHelper;
 import edu.harvard.mcz.imagecapture.utility.CastUtility;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -17,7 +18,6 @@ import javax.swing.*;
 import net.miginfocom.swing.MigLayout;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
-import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +87,7 @@ public class MaliaStatisticsDialog extends JDialog {
 			// jComboBoxHigherOrder.setInputVerifier(MetadataRetriever.getInputVerifier(Specimen.class,
 			// "Order", jComboBoxHigherOrder));
 			orderField.setToolTipText(MetadataRetriever.getFieldHelp(Specimen.class, "HigherOrder"));
-			AutoCompleteDecorator.decorate(orderField);
+			AutoCompleteHelper.decorate(orderField);
 		}
 		return orderField;
 	}

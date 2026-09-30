@@ -18,6 +18,7 @@
  */
 package edu.harvard.mcz.imagecapture.data;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.entity.Number;
@@ -158,6 +159,8 @@ public class MetadataRetriever {
 
 				public boolean shouldYieldFocus(JComponent input) {
 					boolean valid = super.shouldYieldFocus(input);
+					field.putClientProperty(FlatClientProperties.OUTLINE,
+							valid ? null : FlatClientProperties.OUTLINE_ERROR);
 					if (valid) {
 						field.setBackground(Color.WHITE);
 					} else {
@@ -181,6 +184,8 @@ public class MetadataRetriever {
 
 				public boolean shouldYieldFocus(JComponent input) {
 					boolean valid = super.shouldYieldFocus(input);
+					field.putClientProperty(FlatClientProperties.OUTLINE,
+							valid ? null : FlatClientProperties.OUTLINE_ERROR);
 					if (valid) {
 						if (fieldname.equalsIgnoreCase("Inferences")) {
 							field.setBackground(MainFrame.BG_COLOR_ENT_FIELD);

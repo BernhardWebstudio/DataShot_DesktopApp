@@ -30,6 +30,7 @@ public class JTableWithRowBorder extends JTable {
 	public JTableWithRowBorder(AbstractDeleteableTableModel tableModel) {
 		super(tableModel);
 		this.setShowGrid(true);
+		JTableCellTabbing.install(this);
 	}
 
 	/**

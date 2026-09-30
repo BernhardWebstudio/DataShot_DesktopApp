@@ -64,6 +64,9 @@ public class AllTests {
 		suite.addTestSuite(TestFormBindingContext.class);
 		suite.addTestSuite(TestSearchDialog.class);
 		suite.addTestSuite(TestSpecimenBrowser.class);
+		suite.addTestSuite(TestAtomicCounter.class);
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestTableCellTabbing.class));
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestMainFrameMenuState.class));
 		// $JUnit-END$
 		return suite;
 	}

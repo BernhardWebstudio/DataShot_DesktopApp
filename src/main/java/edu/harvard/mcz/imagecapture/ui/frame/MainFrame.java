@@ -153,11 +153,12 @@ public class MainFrame extends JFrame implements RunnerListener {
 				}
 				break;
 			case STATE_RESET :
-				// state when user logs out.
-				jMenuEdit.setEnabled(true);
+				state = STATE_RESET;
+				// state when user logs out or nobody logged in yet.
+				jMenuEdit.setEnabled(false);
 				jMenuHelp.setEnabled(true);
 				jMenuItemLogout.setEnabled(true);
-				// disable all but edit/help menus
+				// disable all but help/logout
 				jMenuItemLog.setEnabled(false);
 				jMenuAction.setEnabled(false);
 				jMenuConfig.setEnabled(false);
@@ -169,17 +170,13 @@ public class MainFrame extends JFrame implements RunnerListener {
 				jMenuItemStats.setEnabled(false);
 				break;
 			case STATE_RUNNING :
-				if (state == STATE_INIT) {
-					state = STATE_RUNNING;
-					jMenuItemLog.setEnabled(true);
-					jMenuEdit.setEnabled(true);
-					activateMenuItemsByUser();
-				}
-				if (state == STATE_RUNNING) {
-					activateMenuItemsByUser();
-				}
+				state = STATE_RUNNING;
+				jMenuItemLog.setEnabled(true);
+				jMenuEdit.setEnabled(true);
+				activateMenuItemsByUser();
 				break;
 		}
+		updateMenuBarUI();
 	}
 
 	/**
@@ -196,6 +193,10 @@ public class MainFrame extends JFrame implements RunnerListener {
 		// ***********************************************************************************************
 		// Disable some menu items if user canceled login dialog.
 		if (Singleton.getSingletonInstance().getUser() == null) {
+			jMenuEdit.setEnabled(false);
+			jMenuAction.setEnabled(false);
+			jMenuConfig.setEnabled(false);
+			jMenuQualityControl.setEnabled(false);
 			jMenuData.setEnabled(false);
 			jMenuItemChangePassword.setEnabled(false);
 			jMenuItemPreferences.setEnabled(false);
@@ -209,6 +210,7 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jMenuItemBatchUpdate.setEnabled(false);
 			jMenuItemRunNahimaExport.setEnabled(false);
 		} else {
+			jMenuEdit.setEnabled(true);
 			// Anyone authenticated user can change their own password.
 			jMenuConfig.setEnabled(true);
 			jMenuItemChangePassword.setEnabled(true);
@@ -265,6 +267,22 @@ public class MainFrame extends JFrame implements RunnerListener {
 			} catch (Exception e) {
 				// catch any problem with testing administration or user rights and do
 				// nothing.
+			}
+		}
+		updateMenuBarUI();
+	}
+
+	/**
+	 * Synchronize the menu bar UI with its current enabled/disabled state. Required
+	 * on macOS where ScreenMenuBar needs a UI refresh to reflect state changes on
+	 * top-level menus and items.
+	 */
+	public void updateMenuBarUI() {
+		if (jJMenuBar != null) {
+			if (SwingUtilities.isEventDispatchThread()) {
+				jJMenuBar.updateUI();
+			} else {
+				SwingUtilities.invokeLater(jJMenuBar::updateUI);
 			}
 		}
 	}
@@ -341,6 +359,20 @@ public class MainFrame extends JFrame implements RunnerListener {
 			jJMenuBar.add(getJMenuHelp());
 		}
 		return jJMenuBar;
+	}
+
+	public JMenu getMenuByName(String name) {
+		JMenuBar mb = getJJMenuBar();
+		if (mb != null) {
+			for (int i = 0; i < mb.getMenuCount(); i++) {
+				JMenu m = mb.getMenu(i);
+				if (m != null && (name.equalsIgnoreCase(m.getText())
+						|| (name.equalsIgnoreCase("Config") && "Configuration".equalsIgnoreCase(m.getText())))) {
+					return m;
+				}
+			}
+		}
+		return null;
 	}
 
 	private JMenu getJMenuView() {

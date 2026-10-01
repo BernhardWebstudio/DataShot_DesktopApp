@@ -67,6 +67,7 @@ public class AllTests {
 		suite.addTestSuite(TestAtomicCounter.class);
 		suite.addTest(new junit.framework.JUnit4TestAdapter(TestTableCellTabbing.class));
 		suite.addTest(new junit.framework.JUnit4TestAdapter(TestMainFrameMenuState.class));
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestSpecimenDetailsKeyboardNavigation.class));
 		// $JUnit-END$
 		return suite;
 	}

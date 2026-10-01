@@ -127,6 +127,9 @@ public class TestFormBindingContext extends TestCase {
 		notesArea.setText("Updated notes line 1.\nLine 2.");
 		context.writeTo(specimen);
 		assertEquals("Updated notes line 1.\nLine 2.", specimen.getSpecimenNotes());
+
+		assertTrue("Focus traversal keys must be enabled so Tab navigates out of multiline text fields",
+				notesArea.getFocusTraversalKeysEnabled());
 	}
 
 	/**

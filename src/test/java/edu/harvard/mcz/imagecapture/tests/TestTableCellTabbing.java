@@ -23,7 +23,6 @@ import org.junit.Test;
  */
 public class TestTableCellTabbing {
 
-	private JFrame frame;
 	private JTextField beforeField;
 	private JTable table;
 	private JTextField afterField;
@@ -32,7 +31,6 @@ public class TestTableCellTabbing {
 
 	@Before
 	public void setUp() {
-		frame = new JFrame("Test Table Tabbing");
 		JPanel panel = new JPanel(new BorderLayout());
 
 		beforeField = new JTextField("Before");
@@ -47,10 +45,6 @@ public class TestTableCellTabbing {
 		panel.add(new JScrollPane(table), BorderLayout.CENTER);
 		panel.add(afterField, BorderLayout.SOUTH);
 
-		frame.setContentPane(panel);
-		frame.pack();
-		frame.setVisible(true);
-
 		forwardAction = table.getActionMap().get(table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
 				.get(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0)));
 		backwardAction = table.getActionMap().get(table.getInputMap(JTable.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT)
@@ -62,9 +56,6 @@ public class TestTableCellTabbing {
 
 	@After
 	public void tearDown() {
-		if (frame != null) {
-			frame.dispose();
-		}
 	}
 
 	@Test

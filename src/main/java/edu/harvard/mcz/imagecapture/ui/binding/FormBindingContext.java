@@ -245,6 +245,7 @@ public class FormBindingContext<T> {
 		JTextArea textArea = new JTextArea();
 		textArea.setRows(rows);
 		textArea.setEditable(defaultEditable);
+		textArea.setFocusTraversalKeysEnabled(true);
 		if (propertyName != null) {
 			try {
 				String help = MetadataRetriever.getFieldHelp(entityClass, propertyName);

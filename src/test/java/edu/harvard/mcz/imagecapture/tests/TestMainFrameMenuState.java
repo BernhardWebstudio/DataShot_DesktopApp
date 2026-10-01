@@ -20,9 +20,15 @@ public class TestMainFrameMenuState {
 
 	@Before
 	public void setUp() {
-		Singleton.getSingletonInstance().unsetCurrentUser();
-		mainFrame = new MainFrame();
-		Singleton.getSingletonInstance().setMainFrame(mainFrame);
+		try {
+			org.junit.Assume.assumeFalse("Skipping MainFrame UI test in headless environment",
+					java.awt.GraphicsEnvironment.isHeadless());
+			Singleton.getSingletonInstance().unsetCurrentUser();
+			mainFrame = new MainFrame();
+			Singleton.getSingletonInstance().setMainFrame(mainFrame);
+		} catch (java.awt.HeadlessException e) {
+			org.junit.Assume.assumeNoException("Skipping MainFrame UI test due to HeadlessException", e);
+		}
 	}
 
 	@After

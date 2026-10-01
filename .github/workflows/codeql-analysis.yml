@@ -57,7 +57,7 @@ jobs:
       - name: Build with Maven
         # without -DskipTests, we also run tests, which should prevent
         # the package from being packaged if tests fail
-        run: mvn -B package --file pom.xml -P dist
+        run: xvfb-run -a mvn -B package --file pom.xml -P dist
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

@@ -307,15 +307,16 @@ public class MainFrame extends JFrame implements RunnerListener {
 		final Image image = defaultToolkit.getImage(iconFile);
 
 		// this is new since JDK 9
-		final Taskbar taskbar = Taskbar.getTaskbar();
-
-		try {
-			// set icon for mac os (and other systems which do support this method)
-			taskbar.setIconImage(image);
-		} catch (final UnsupportedOperationException e) {
-			System.out.println("The os does not support: 'taskbar.setIconImage'");
-		} catch (final SecurityException e) {
-			System.out.println("There was a security exception for: 'taskbar.setIconImage'");
+		if (Taskbar.isTaskbarSupported()) {
+			try {
+				final Taskbar taskbar = Taskbar.getTaskbar();
+				// set icon for mac os (and other systems which do support this method)
+				taskbar.setIconImage(image);
+			} catch (final UnsupportedOperationException e) {
+				System.out.println("The os does not support: 'taskbar.setIconImage'");
+			} catch (final SecurityException e) {
+				System.out.println("There was a security exception for: 'taskbar.setIconImage'");
+			}
 		}
 
 		// set icon for windows os (and other systems which do support this method)

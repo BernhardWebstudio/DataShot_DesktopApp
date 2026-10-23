@@ -1166,12 +1166,12 @@ public class NahimaManager extends AbstractRestClient {
 				put("vollername", finalActualNamePart);
 				put("vorname", finalFirstName.equals("") ? JSONObject.NULL : finalFirstName);
 				put("nachname", finalLastName.equals("") ? JSONObject.NULL : finalLastName);
-				put("mitlerername", JSONObject.NULL); // TODO: split first name into
+				put("mittlerername", JSONObject.NULL); // TODO: split first name into
 				// these here where appropriate
 				put("nismpersonid", JSONObject.NULL);
 			}
 		};
-		if (!birthdate.equals("")) {
+		if (!birthdate.equals("") && birthdate.matches(".*\\d+.*")) {
 			String finalBirthdate = birthdate;
 			personHashMap.put("geburtstag", new JSONObject(new HashMap<>() {
 				{
@@ -1179,7 +1179,7 @@ public class NahimaManager extends AbstractRestClient {
 				}
 			}));
 		}
-		if (!deathdate.equals("")) {
+		if (!deathdate.equals("") && deathdate.matches(".*\\d+.*")) {
 			String finalDeathdate = deathdate;
 			personHashMap.put("sterbetag", new JSONObject(new HashMap<>() {
 				{
@@ -1421,8 +1421,12 @@ public class NahimaManager extends AbstractRestClient {
 			result = this.resolveStringSearchToOne(primaryDivisionOnly, "gazetteer", false, new JSONObject(paramMap));
 		}
 
-		// If still not found, create interactively
+		// If still not found, create interactively if we have a primary division
 		if (result == null) {
+			if (specimen.getPrimaryDivison() == null || specimen.getPrimaryDivison().trim().isEmpty()
+					|| specimen.getPrimaryDivison().equals("unknown")) {
+				return finalParent != null ? finalParent : new JSONObject();
+			}
 			return this.resolveOrCreateInteractive(searchString, "gazetteer", "gazetteer__all_fields",
 					new JSONObject(paramMap), null);
 		}
@@ -1575,7 +1579,7 @@ public class NahimaManager extends AbstractRestClient {
 				new JSONObject(new HashMap<>() {
 					{
 						put("subspezifischeart", subspecificEpithet.trim());
-						put("bemerkung", getCreatedByThisSoftwareIndication());
+						put("beschreibung", getCreatedByThisSoftwareIndication());
 					}
 				}), zoologyPool);
 	}
@@ -1714,7 +1718,6 @@ public class NahimaManager extends AbstractRestClient {
 	public JSONObject resolveTaxon(String associatedTaxon) throws IOException, InterruptedException {
 		return resolveOrCreate(associatedTaxon, "taxonnamen", "taxonnamen__all_fields", new JSONObject(new HashMap<>() {
 			{
-				put("dddtaxonnamelat", associatedTaxon.trim());
 				put("taxonnamelat", new JSONObject(new HashMap<>() {
 					{
 						put("scientificName", associatedTaxon.trim());

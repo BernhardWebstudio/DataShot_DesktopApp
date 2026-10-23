@@ -104,10 +104,15 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 		// adding specimen's own det,
 		// only the "main" one should be resolved
 		JSONObject mainReverseNestedDetermination = new JSONObject();
+		JSONObject existingMainDet = null;
+		if (existing != null && existing.has("_reverse_nested:bestimmung:entomologie")) {
+			JSONArray existingDets = existing.optJSONArray("_reverse_nested:bestimmung:entomologie");
+			if (existingDets != null && !existingDets.isEmpty()) {
+				existingMainDet = existingDets.optJSONObject(0);
+			}
+		}
 		mainReverseNestedDetermination = nahimaManager.addDefaultValuesForCreation(mainReverseNestedDetermination,
-				existing == null
-						? null
-						: existing.getJSONArray("_reverse_nested:bestimmung:entomologie").getJSONObject(0));
+				NahimaManager.entomologyPool, existingMainDet);
 
 		// resolutions
 		tryNonUserSkippableResolve(mainReverseNestedDetermination, "art",
@@ -251,6 +256,14 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 			comments = null;
 		}
 		JSONObject finalExisting = existing;
+		JSONObject existingAufsammung = null;
+		if (finalExisting != null && finalExisting.has("_reverse_nested:aufsammlung:entomologie")) {
+			JSONArray existingSammlungen = finalExisting.optJSONArray("_reverse_nested:aufsammlung:entomologie");
+			if (existingSammlungen != null && !existingSammlungen.isEmpty()) {
+				existingAufsammung = existingSammlungen.optJSONObject(0);
+			}
+		}
+		final JSONObject finalExistingAufsammung = existingAufsammung;
 		Map<String, Object> reverseNestedCollectionMap = new HashMap<>() {
 			{
 				// put("sammlertrans",
@@ -290,15 +303,11 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 				put("lokalitaettrans", toSerialize.getVerbatimLocality());
 				put("__idx", 0);
 				put("_version",
-						finalExisting == null
-								? 1
-								: finalExisting.getJSONArray("_reverse_nested:aufsammlung:entomologie").getJSONObject(0)
-										.getInt("_version") + 1);
+						finalExistingAufsammung == null ? 1 : finalExistingAufsammung.optInt("_version", 0) + 1);
 				put("_id",
-						finalExisting == null
+						finalExistingAufsammung == null
 								? JSONObject.NULL
-								: NahimaManager.resolveId(finalExisting
-										.getJSONArray("_reverse_nested:aufsammlung:entomologie").getJSONObject(0)));
+								: NahimaManager.resolveId(finalExistingAufsammung));
 				put("_pool", NahimaManager.entomologyPool);
 			}
 		};

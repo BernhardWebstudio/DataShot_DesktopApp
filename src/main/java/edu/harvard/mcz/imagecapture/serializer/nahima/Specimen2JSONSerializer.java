@@ -72,7 +72,10 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 				otherNrMap.put("bemerkung", otherNr.getTemporaryComment());
 			}
 			try {
-				otherNrMap.put("typ", nahimaManager.resolveOtherNrType(otherNr.getNumberType()));
+				JSONObject resolved = nahimaManager.resolveOtherNrType(otherNr.getNumberType());
+				if (resolved != null) {
+					otherNrMap.put("typ", nahimaManager.reduceAssociateForAssociation(resolved));
+				}
 			} catch (IOException | InterruptedException e) {
 				log.error("Failed to resolve nr type", e);
 			}
@@ -86,7 +89,10 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 				}
 			});
 			try {
-				dataShotId.put("typ", nahimaManager.resolveOtherNrType(ImageCaptureApp.APP_NAME + "-ID"));
+				JSONObject resolved = nahimaManager.resolveOtherNrType(ImageCaptureApp.APP_NAME + "-ID");
+				if (resolved != null) {
+					dataShotId.put("typ", nahimaManager.reduceAssociateForAssociation(resolved));
+				}
 			} catch (IOException | InterruptedException e) {
 				log.error("Failed to resolve nr type", e);
 			}

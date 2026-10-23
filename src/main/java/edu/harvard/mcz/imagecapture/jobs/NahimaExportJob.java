@@ -181,19 +181,24 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 					future.get();
 				} catch (ExecutionException e) {
 					Throwable cause = e.getCause();
-					if (cause instanceof RuntimeException) {
-						throw (RuntimeException) cause;
-					} else if (cause instanceof Exception) {
-						throw (Exception) cause;
+					if (nrOfSpecimenToProcess == 1) {
+						if (cause instanceof RuntimeException) {
+							throw (RuntimeException) cause;
+						} else if (cause instanceof Exception) {
+							throw (Exception) cause;
+						} else {
+							throw new RuntimeException("Unexpected error during specimen processing (\""
+									+ cause.getLocalizedMessage() + "\")", cause);
+						}
 					} else {
-						throw new RuntimeException(
-								"Unexpected error during specimen processing (\"" + cause.getLocalizedMessage() + "\")",
-								cause);
+						log.error("Error processing specimen in batch export: {}", cause.getMessage(), cause);
 					}
 				}
 			}
 
-			this.status = STATUS_FINISHED;
+			this.status = (failedCount.get() > 0 && newlyExportedCount.get() == 0 && updatedCount.get() == 0)
+					? STATUS_NAHIMA_FAILED
+					: STATUS_FINISHED;
 			overallStatus = String.format(
 					"Export completed! Newly Exported: %d, Updated: %d, Skipped: %d, "
 							+ "Failed: %d of %d total specimens",
@@ -231,54 +236,54 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 		Specimen specimen = sls.findById(specimenId);
 		int index = currentIndex.incrementAndGet();
 
-		// check if it hasn't been exported by another instance already
-		if (specimen.getDateLastNahimaUpdated() != null
-				&& specimen.getDateLastNahimaUpdated().after(specimen.getDateLastUpdated())
-				&& this.oneSpecimenBarcode == null) {
-			log.debug("Skipping export of specimen " + index + "/" + nrOfSpecimenToProcess + " with id "
-					+ specimen.getSpecimenId() + ".");
-			skippedCount.incrementAndGet();
-			updateOverallStatus();
-			notifyProgressChanged();
-			return;
-		}
-
-		log.debug("Exporting specimen " + index + "/" + nrOfSpecimenToProcess + " with id " + specimen.getSpecimenId()
-				+ " and barcode " + specimen.getBarcode());
-		updateOverallStatus();
-
-		// check if all images are present, otherwise, can skip anyway
-		boolean allFound = true;
-		for (ICImage image : specimen.getICImages()) {
-			String imagePath = FileUtility.findValidFilepath(
-					ImageCaptureProperties.assemblePathWithBase(image.getPath(), image.getFilename()),
-					image.getPath() + File.separator + image.getFilename(), image.getPath());
-			if (!(new File(imagePath)).exists()) {
-				log.warn("Image file {} was not found.", imagePath);
-				allFound = false;
-			}
-		}
-		if (!allFound) {
-			log.debug("Skipping export of specimen " + index + "/" + nrOfSpecimenToProcess + " with id "
-					+ specimen.getSpecimenId() + " because not all images were found.");
-			skippedCount.incrementAndGet();
-			updateOverallStatus();
-			notifyProgressChanged();
-			return;
-		}
-
-		Specimen2JSONSerializer serializer = new Specimen2JSONSerializer(threadLocalManager);
-
-		// map, associate where possible/needed
-		JSONObject specimenJson;
-		JSONObject existingExport = null;
-		boolean isUpdate = false; // Track whether this is an update or new export
 		try {
+			// check if it hasn't been exported by another instance already
+			if (specimen.getDateLastNahimaUpdated() != null
+					&& specimen.getDateLastNahimaUpdated().after(specimen.getDateLastUpdated())
+					&& this.oneSpecimenBarcode == null) {
+				log.debug("Skipping export of specimen " + index + "/" + nrOfSpecimenToProcess + " with id "
+						+ specimen.getSpecimenId() + ".");
+				skippedCount.incrementAndGet();
+				updateOverallStatus();
+				notifyProgressChanged();
+				return;
+			}
+
+			log.debug("Exporting specimen " + index + "/" + nrOfSpecimenToProcess + " with id "
+					+ specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
+			updateOverallStatus();
+
+			// check if all images are present, otherwise, can skip anyway
+			boolean allFound = true;
+			for (ICImage image : specimen.getICImages()) {
+				String imagePath = FileUtility.findValidFilepath(
+						ImageCaptureProperties.assemblePathWithBase(image.getPath(), image.getFilename()),
+						image.getPath() + File.separator + image.getFilename(), image.getPath());
+				if (!(new File(imagePath)).exists()) {
+					log.warn("Image file {} was not found.", imagePath);
+					allFound = false;
+				}
+			}
+			if (!allFound) {
+				log.debug("Skipping export of specimen " + index + "/" + nrOfSpecimenToProcess + " with id "
+						+ specimen.getSpecimenId() + " because not all images were found.");
+				skippedCount.incrementAndGet();
+				updateOverallStatus();
+				notifyProgressChanged();
+				return;
+			}
+
+			Specimen2JSONSerializer serializer = new Specimen2JSONSerializer(threadLocalManager);
+
+			// map, associate where possible/needed
+			JSONObject specimenJson;
+			JSONObject existingExport = null;
+			boolean isUpdate = false; // Track whether this is an update or new export
 			if (specimen.getNahimaId() != null && !specimen.getNahimaId().isEmpty()) {
 				try {
 					existingExport = threadLocalManager.findObjectByGlobalObjectId(specimen.getNahimaId());
 				} catch (IOException | InterruptedException e) {
-					log.warn("NoExport: skip specimen exception when searching by " + "global object");
+					log.warn("NoExport: skip specimen exception when searching by global object");
 					throw new SkipSpecimenException();
 				}
 				log.debug("Found specimen to update in Nahima");
@@ -287,198 +292,195 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 			} else {
 				specimenJson = serializer.serialize2JSON(specimen);
 			}
+
+			if (specimenJson == null) {
+				log.debug("NoExport: Specimen json null, cannot upload stuff");
+				skippedCount.incrementAndGet();
+				updateOverallStatus();
+				notifyProgressChanged();
+				return;
+			}
+
+			// upload images
+			ArrayList<JSONObject> uploadedImages = new ArrayList<>();
+			boolean uploadSucceeded = false;
+			int attempts = 0;
+			while (!uploadSucceeded) {
+				attempts += 1;
+				try {
+					uploadedImages = threadLocalManager.uploadImagesForSpecimen(specimen, existingExport);
+					uploadSucceeded = true;
+				} catch (Exception e) {
+					lastError = e;
+					log.error("Failed to upload images", e);
+					// Don't update UI for individual thread retries - too noisy
+					try {
+						Thread.sleep((long) attempts * 5 * 60000); // wait 5 minute before retrying
+					} catch (InterruptedException e1) {
+						log.error("Interrupted while waiting for retry", e1);
+						Thread.currentThread().interrupt();
+						throw new RuntimeException("Thread interrupted during retry wait", e1);
+					}
+					if (attempts > 10) {
+						throw new RuntimeException("Failed to upload images – 10 attempts failed.", e);
+					}
+				}
+			}
+
+			log.debug(
+					"Uploaded " + uploadedImages.size() + " images for specimen " + index + "/" + nrOfSpecimenToProcess
+							+ " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
+
+			// add images
+			JSONArray mediaAssets = new JSONArray();
+			for (JSONObject imageJsonObj : uploadedImages) {
+				JSONObject mediaAsset;
+				if (imageJsonObj.has("mediaassetpublic")) {
+					mediaAsset = imageJsonObj;
+				} else {
+					Map<String, Object> reducedMediaAssetMap = new HashMap<>() {
+						{
+							put("_pool", NahimaManager.entomologyPool);
+							put("_id", JSONObject.NULL);
+							put("_version", 1);
+							put("datei", (new JSONArray()).put(new JSONObject(new HashMap<>() {
+								{
+									put("preferred", true);
+									put("_id", imageJsonObj.get("_id"));
+								}
+							})));
+							put("barcode", specimen.getBarcode());
+							put("urspruenglicherdateiname", imageJsonObj.get("original_filename"));
+							// empty, potentially later relevant stuff
+							put("mediaassettyp", JSONObject.NULL);
+							put("dateiname", JSONObject.NULL);
+							put("dateigroesse", JSONObject.NULL);
+							put("titel", JSONObject.NULL);
+							put("beschreibung", JSONObject.NULL);
+							put("lizenz_dcterms_licence", JSONObject.NULL);
+							put("rechteinhaber_person", JSONObject.NULL);
+							put("rechteinhaber_koeperschaft", JSONObject.NULL);
+							put("aufnahmedatum_dc_date", JSONObject.NULL);
+							put("format_dc_format", JSONObject.NULL);
+							put("_nested:mediaasset__urheber_dc_creator", new JSONArray());
+							put("_nested:mediaasset__schlagworte", new JSONArray());
+							put("_reverse_nested:entomologie_mediaassetpublic:mediaassetpublic", new JSONArray());
+							put("_reverse_nested:entomologie_mediaassetnonpublic:" + "mediaassetnonpublic",
+									new JSONArray());
+							put("_reverse_nested:entomologie_mediaassetdeleted:" + "mediaassetdeleted",
+									new JSONArray());
+							put("_reverse_nested:erdwissenschaften_mediaassetpublic:" + "mediaassetpublic",
+									new JSONArray());
+							put("_reverse_nested:erdwissenschaften_mediaassetnonpublic:" + "mediaassetnonpublic",
+									new JSONArray());
+							put("_reverse_nested:erdwissenschaften_mediaassetdeleted:" + "mediaassetdeleted",
+									new JSONArray());
+							put("_reverse_nested:herbarien_mediaassetpublic:mediaassetpublic", new JSONArray());
+							put("_reverse_nested:herbarien_mediaassetnonpublic:" + "mediaassetnonpublic",
+									new JSONArray());
+							put("_reverse_nested:herbarien_mediaassetdeleted:mediaassetdeleted", new JSONArray());
+						}
+					};
+					JSONObject reducedImageMediaAsset = new JSONObject(reducedMediaAssetMap);
+					Map<String, Object> publicMediaAssetMap = new HashMap<>() {
+						{
+							put("_objecttype", "mediaasset");
+							put("_mask", "mediaassetminimal");
+							put("_tags", new JSONArray());
+							put("mediaasset", reducedImageMediaAsset);
+						}
+					};
+					JSONObject publicMediaAsset = new JSONObject(publicMediaAssetMap);
+					// create, reduce
+					JSONObject createdMediaAsset = null;
+					try {
+						createdMediaAsset = threadLocalManager.createObjectInNahima(publicMediaAsset, "mediaasset");
+						if (createdMediaAsset.has("code") && createdMediaAsset.getString("code").startsWith("error")) {
+							throw new RuntimeException("Failed to save mediaasset in nahima. Error code: "
+									+ createdMediaAsset.get("code"));
+						}
+					} catch (IOException | InterruptedException e) {
+						lastError = e;
+						log.error("Failed to create new Nahima specimen", e);
+						throw new RuntimeException("Failed to create media asset", e);
+					}
+
+					Map<String, Object> mediaAssetMap = new HashMap<>() {
+						{
+							put("_id", JSONObject.NULL);
+							put("__idx", 0);
+							put("_version", 1);
+							put("mediaassetpublic", publicMediaAsset);
+						}
+					};
+					mediaAsset = new JSONObject(mediaAssetMap);
+
+					reducedImageMediaAsset.put("_id", createdMediaAsset.getJSONObject("mediaasset").getInt("_id"));
+					publicMediaAsset.put("mediaasset", reducedImageMediaAsset);
+					mediaAsset.put("mediaassetpublic", publicMediaAsset);
+				}
+
+				mediaAssets.put(mediaAsset);
+			}
+			// attach media to specimen
+			JSONObject imageTarget = (JSONObject) specimenJson.get("entomologie");
+			imageTarget.put("_reverse_nested:entomologie_mediaassetpublic:entomologie", mediaAssets);
+			specimenJson.put("entomologie", imageTarget); // overwrite loaded value again
+
+			// create in Nahima
+			JSONObject result = threadLocalManager.createObjectInNahima(specimenJson, "entomologie");
+
+			// then, finally, mark specimen as exported
+			specimen.setNahimaExported(true);
+			if (Objects.equals(specimen.getWorkFlowStatus(), WorkFlowStatus.STAGE_CLEAN)) {
+				specimen.setWorkFlowStatus(WorkFlowStatus.STAGE_DONE);
+			}
+			specimen.setNahimaId(result.getString("_global_object_id"));
+			specimen.setDateLastNahimaUpdated(new Date());
+			if (specimen.getSpecimenId() != null && specimen.getSpecimenId() > 0) {
+				try {
+					log.debug("Will update the specimen with id " + specimen.getSpecimenId()
+							+ " in the database after export.");
+					sls.attachDirty(specimen);
+				} catch (SaveFailedException e) {
+					lastError = e;
+					log.error("Failed to store Nahima export status", e);
+					throw e;
+				}
+			} else {
+				log.debug("No specimen id, will not update the database");
+			}
+			processedCount.incrementAndGet();
+			// Increment the appropriate specific counter based on whether this was an
+			// update or new export
+			if (isUpdate) {
+				updatedCount.incrementAndGet();
+			} else {
+				newlyExportedCount.incrementAndGet();
+			}
+			updateOverallStatus();
+			notifyProgressChanged();
 		} catch (SkipSpecimenException e) {
 			log.debug("NoExport: skip specimen exception");
 			skippedCount.incrementAndGet();
 			updateOverallStatus();
 			notifyProgressChanged();
-			return;
-		}
-
-		if (specimenJson == null) {
-			log.debug("NoExport: Specimen json null, cannot upload stuff");
-			skippedCount.incrementAndGet();
-			updateOverallStatus();
-			notifyProgressChanged();
-			return;
-		}
-
-		// upload images
-		ArrayList<JSONObject> uploadedImages = new ArrayList<>();
-		boolean uploadSucceeded = false;
-		int attempts = 0;
-		while (!uploadSucceeded) {
-			attempts += 1;
-			try {
-				uploadedImages = threadLocalManager.uploadImagesForSpecimen(specimen, existingExport);
-				uploadSucceeded = true;
-			} catch (Exception e) {
-				lastError = e;
-				log.error("Failed to upload images", e);
-				// Don't update UI for individual thread retries - too noisy
-				try {
-					Thread.sleep((long) attempts * 5 * 60000); // wait 5 minute before retrying
-				} catch (InterruptedException e1) {
-					log.error("Interrupted while waiting for retry", e1);
-					Thread.currentThread().interrupt();
-					throw new RuntimeException("Thread interrupted during retry wait", e1);
-				}
-				if (attempts > 10) {
-					this.status = STATUS_NAHIMA_FAILED;
-					failedCount.incrementAndGet();
-					updateOverallStatus();
-					throw new RuntimeException("Failed to upload images – 10 attempts failed.", e);
-				}
-			}
-		}
-
-		log.debug("Uploaded " + uploadedImages.size() + " images for specimen " + index + "/" + nrOfSpecimenToProcess
-				+ " with id " + specimen.getSpecimenId() + " and barcode " + specimen.getBarcode());
-
-		// add images
-		JSONArray mediaAssets = new JSONArray();
-		for (JSONObject imageJsonObj : uploadedImages) {
-			JSONObject mediaAsset;
-			if (imageJsonObj.has("mediaassetpublic")) {
-				mediaAsset = imageJsonObj;
-			} else {
-				Map<String, Object> reducedMediaAssetMap = new HashMap<>() {
-					{
-						put("_pool", NahimaManager.entomologyPool);
-						put("_id", JSONObject.NULL);
-						put("_version", 1);
-						put("datei", (new JSONArray()).put(new JSONObject(new HashMap<>() {
-							{
-								put("preferred", true);
-								put("_id", imageJsonObj.get("_id"));
-							}
-						})));
-						put("barcode", specimen.getBarcode());
-						put("urspruenglicherdateiname", imageJsonObj.get("original_filename"));
-						// empty, potentially later relevant stuff
-						put("mediaassettyp", JSONObject.NULL);
-						put("dateiname", JSONObject.NULL);
-						put("dateigroesse", JSONObject.NULL);
-						put("titel", JSONObject.NULL);
-						put("beschreibung", JSONObject.NULL);
-						put("lizenz_dcterms_licence", JSONObject.NULL);
-						put("rechteinhaber_person", JSONObject.NULL);
-						put("rechteinhaber_koeperschaft", JSONObject.NULL);
-						put("aufnahmedatum_dc_date", JSONObject.NULL);
-						put("format_dc_format", JSONObject.NULL);
-						put("_nested:mediaasset__urheber_dc_creator", new JSONArray());
-						put("_nested:mediaasset__schlagworte", new JSONArray());
-						put("_reverse_nested:entomologie_mediaassetpublic:mediaassetpublic", new JSONArray());
-						put("_reverse_nested:entomologie_mediaassetnonpublic:" + "mediaassetnonpublic",
-								new JSONArray());
-						put("_reverse_nested:entomologie_mediaassetdeleted:" + "mediaassetdeleted", new JSONArray());
-						put("_reverse_nested:erdwissenschaften_mediaassetpublic:" + "mediaassetpublic",
-								new JSONArray());
-						put("_reverse_nested:erdwissenschaften_mediaassetnonpublic:" + "mediaassetnonpublic",
-								new JSONArray());
-						put("_reverse_nested:erdwissenschaften_mediaassetdeleted:" + "mediaassetdeleted",
-								new JSONArray());
-						put("_reverse_nested:herbarien_mediaassetpublic:mediaassetpublic", new JSONArray());
-						put("_reverse_nested:herbarien_mediaassetnonpublic:" + "mediaassetnonpublic", new JSONArray());
-						put("_reverse_nested:herbarien_mediaassetdeleted:mediaassetdeleted", new JSONArray());
-					}
-				};
-				JSONObject reducedImageMediaAsset = new JSONObject(reducedMediaAssetMap);
-				Map<String, Object> publicMediaAssetMap = new HashMap<>() {
-					{
-						put("_objecttype", "mediaasset");
-						put("_mask", "mediaassetminimal");
-						put("_tags", new JSONArray());
-						put("mediaasset", reducedImageMediaAsset);
-					}
-				};
-				JSONObject publicMediaAsset = new JSONObject(publicMediaAssetMap);
-				// create, reduce
-				JSONObject createdMediaAsset = null;
-				try {
-					createdMediaAsset = threadLocalManager.createObjectInNahima(publicMediaAsset, "mediaasset");
-					if (createdMediaAsset.has("code") && createdMediaAsset.getString("code").startsWith("error")) {
-						throw new RuntimeException(
-								"Failed to save mediaasset in nahima. Error code: " + createdMediaAsset.get("code"));
-					}
-				} catch (IOException | InterruptedException e) {
-					lastError = e;
-					log.error("Failed to create new Nahima specimen", e);
-					this.status = STATUS_NAHIMA_FAILED;
-					throw new RuntimeException("Failed to create media asset", e);
-				}
-
-				Map<String, Object> mediaAssetMap = new HashMap<>() {
-					{
-						put("_id", JSONObject.NULL);
-						put("__idx", 0);
-						put("_version", 1);
-						put("mediaassetpublic", publicMediaAsset);
-					}
-				};
-				mediaAsset = new JSONObject(mediaAssetMap);
-
-				reducedImageMediaAsset.put("_id", createdMediaAsset.getJSONObject("mediaasset").getInt("_id"));
-				publicMediaAsset.put("mediaasset", reducedImageMediaAsset);
-				mediaAsset.put("mediaassetpublic", publicMediaAsset);
-			}
-
-			mediaAssets.put(mediaAsset);
-		}
-		// attach media to specimen
-		JSONObject imageTarget = (JSONObject) specimenJson.get("entomologie");
-		imageTarget.put("_reverse_nested:entomologie_mediaassetpublic:entomologie", mediaAssets);
-		specimenJson.put("entomologie", imageTarget); // overwrite loaded value again
-
-		// create in Nahima
-		JSONObject result = null;
-		try {
-			result = threadLocalManager.createObjectInNahima(specimenJson, "entomologie");
-			if (result.has("code") && result.getString("code").startsWith("error")) {
-				throw new RuntimeException("Failed to save specimen in nahima. Error code: " + result.get("code"));
-			}
-		} catch (IOException | InterruptedException | RuntimeException e) {
+		} catch (Exception e) {
 			lastError = e;
-			log.error("Failed to create new Nahima specimen", e);
-			this.status = STATUS_NAHIMA_FAILED;
+			log.error("Failed to export specimen " + index + "/" + nrOfSpecimenToProcess + " with id "
+					+ (specimen != null ? specimen.getSpecimenId() : specimenId), e);
+			if (nrOfSpecimenToProcess == 1) {
+				if (e instanceof SaveFailedException) {
+					this.status = STATUS_DATASHOT_FAILED;
+				} else {
+					this.status = STATUS_NAHIMA_FAILED;
+				}
+			}
 			failedCount.incrementAndGet();
 			updateOverallStatus();
+			notifyProgressChanged();
 			throw e;
 		}
-
-		// then, finally, mark specimen as exported
-		specimen.setNahimaExported(true);
-		if (Objects.equals(specimen.getWorkFlowStatus(), WorkFlowStatus.STAGE_CLEAN)) {
-			specimen.setWorkFlowStatus(WorkFlowStatus.STAGE_DONE);
-		}
-		specimen.setNahimaId(result.getString("_global_object_id"));
-		specimen.setDateLastNahimaUpdated(new Date());
-		if (specimen.getSpecimenId() != null && specimen.getSpecimenId() > 0) {
-			try {
-				log.debug("Will update the specimen with id " + specimen.getSpecimenId()
-						+ " in the database after export.");
-				sls.attachDirty(specimen);
-			} catch (SaveFailedException e) {
-				lastError = e;
-				log.error("Failed to store Nahima export status", e);
-				this.status = STATUS_DATASHOT_FAILED;
-				failedCount.incrementAndGet();
-				updateOverallStatus();
-				throw e;
-			}
-		} else {
-			log.debug("No specimen id, will not update the database");
-		}
-		processedCount.incrementAndGet();
-		// Increment the appropriate specific counter based on whether this was an
-		// update or new export
-		if (isUpdate) {
-			updatedCount.incrementAndGet();
-		} else {
-			newlyExportedCount.incrementAndGet();
-		}
-		updateOverallStatus();
-		notifyProgressChanged();
 	}
 
 	@Override

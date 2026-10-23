@@ -203,6 +203,46 @@ public class NahimaManager extends AbstractRestClient {
 		return value == null || value.trim().isEmpty();
 	}
 
+	public static boolean isErrorResponse(JSONObject obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (obj.has("error")) {
+			return true;
+		}
+		if (obj.has("code")) {
+			String code = obj.optString("code", "");
+			return code.startsWith("error") || (!code.isEmpty() && Character.isUpperCase(code.charAt(0)));
+		}
+		return false;
+	}
+
+	public static String formatErrorMessage(JSONObject obj) {
+		if (obj == null) {
+			return "Unknown error";
+		}
+		String code = obj.optString("code", "");
+		String error = obj.optString("error", "");
+		String description = obj.optString("description", "");
+		StringBuilder sb = new StringBuilder();
+		if (!code.isEmpty()) {
+			sb.append(code);
+		}
+		if (!error.isEmpty()) {
+			if (sb.length() > 0) {
+				sb.append(": ");
+			}
+			sb.append(error);
+		}
+		if (!description.isEmpty() && !description.equals(error)) {
+			if (sb.length() > 0) {
+				sb.append(" - ");
+			}
+			sb.append(description);
+		}
+		return sb.length() > 0 ? sb.toString() : obj.toString();
+	}
+
 	private String buildAuthenticatedUrl(String endpoint) {
 		return buildAuthenticatedUrl(endpoint, null);
 	}
@@ -289,9 +329,11 @@ public class NahimaManager extends AbstractRestClient {
 
 			// check for errors
 			if (!response.body().startsWith("[")) {
-				JSONObject responseObject = new JSONObject(response.body());
-				if (responseObject.has("code") && responseObject.getString("code").startsWith("error")) {
-					throw new RuntimeException("Failed to upload image: Error code: " + responseObject.get("code"));
+				try {
+					JSONObject responseObject = new JSONObject(response.body());
+					throw new RuntimeException("Failed to upload image: " + formatErrorMessage(responseObject));
+				} catch (JSONException e) {
+					throw new RuntimeException("Failed to upload image: Unexpected response: " + response.body(), e);
 				}
 			}
 
@@ -325,10 +367,13 @@ public class NahimaManager extends AbstractRestClient {
 
 		// check for errors
 		if (!returnValue.startsWith("[")) {
-			JSONObject responseObject = new JSONObject(returnValue);
-			if (responseObject.has("code") && responseObject.getString("code").startsWith("error")) {
+			try {
+				JSONObject responseObject = new JSONObject(returnValue);
 				throw new RuntimeException(
-						"Failed to create object of type '" + objType + "': Error code: " + responseObject.get("code"));
+						"Failed to create object of type '" + objType + "': " + formatErrorMessage(responseObject));
+			} catch (JSONException e) {
+				throw new RuntimeException(
+						"Failed to create object of type '" + objType + "': Unexpected response: " + returnValue, e);
 			}
 		}
 
@@ -354,12 +399,13 @@ public class NahimaManager extends AbstractRestClient {
 		});
 
 		// check for errors
-		if (returnValue == null || !returnValue.startsWith("[")) {
-			JSONObject responseObject = new JSONObject(returnValue);
-			if (responseObject.has("code") && responseObject.getString("code").startsWith("error")) {
-				throw new RuntimeException(
-						"Failed to fetch object by uuid '" + uuid + "': Error code: " + responseObject.get("code"));
-			}
+		if (returnValue == null || !returnValue.startsWith("{")) {
+			throw new RuntimeException("Failed to fetch object by uuid '" + uuid + "': empty or invalid response");
+		}
+		JSONObject responseObject = new JSONObject(returnValue);
+		if (isErrorResponse(responseObject)) {
+			throw new RuntimeException(
+					"Failed to fetch object by uuid '" + uuid + "': " + formatErrorMessage(responseObject));
 		}
 
 		return new JSONObject(returnValue);
@@ -408,9 +454,9 @@ public class NahimaManager extends AbstractRestClient {
 		};
 
 		JSONObject result = this.postRequest(queryURL, query);
-		if (result.has("code") && result.getString("code").startsWith("error")) {
-			throw new RuntimeException("Failed to fetch object by global object id '" + globalObjectId
-					+ "': Error code: " + result.get("code"));
+		if (isErrorResponse(result)) {
+			throw new RuntimeException("Failed to fetch object by global object id '" + globalObjectId + "': "
+					+ formatErrorMessage(result));
 		}
 		if (result.has("objects") && result.getJSONArray("objects").isEmpty()) {
 			return null;
@@ -571,8 +617,8 @@ public class NahimaManager extends AbstractRestClient {
 
 		JSONObject results = this.searchByString(search, objectType, ignoreCache);
 
-		if (results.has("code") && results.getString("code").startsWith("error")) {
-			throw new RuntimeException("Failed to resolve search. Error code: " + results.getString("code"));
+		if (isErrorResponse(results)) {
+			throw new RuntimeException("Failed to resolve search. " + formatErrorMessage(results));
 		}
 
 		JSONArray foundObjects = (JSONArray) results.get("objects");
@@ -686,15 +732,22 @@ public class NahimaManager extends AbstractRestClient {
 					numAdditionalKeys += 1;
 				}
 
-				try {
-					JSONObject pool = (JSONObject) testObj.getJSONObject("_pool").getJSONObject("pool");
-					if ((pool.getInt("_id") == NahimaManager.defaultPoolId)
-							|| (pool.getInt("_id") == NahimaManager.zoologyPoolId)) {
-						possiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
-						nrOfAdditionalKeysForPossiblyCorrectIndices.add(numAdditionalKeys);
+				if (testObj.has("_pool")) {
+					try {
+						JSONObject poolWrapper = testObj.optJSONObject("_pool");
+						JSONObject pool = poolWrapper != null ? poolWrapper.optJSONObject("pool") : null;
+						if (pool != null) {
+							int poolId = pool.optInt("_id", -1);
+							if ((poolId == NahimaManager.defaultPoolId) || (poolId == NahimaManager.zoologyPoolId)) {
+								possiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
+								nrOfAdditionalKeysForPossiblyCorrectIndices.add(numAdditionalKeys);
+							}
+						}
+					} catch (Exception e) {
+						log.debug("Could not verify pool for object {}", testObj, e);
+						carefulPossiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
 					}
-				} catch (Exception e) {
-					log.error("Could not verify pool", e);
+				} else {
 					carefulPossiblyCorrectIndices.add(newIndicesToOldIndices.get(i));
 				}
 			}
@@ -837,11 +890,9 @@ public class NahimaManager extends AbstractRestClient {
 
 		JSONObject results = this.searchByString(name, objectType, false);
 
-		if (results == null || (results.has("code") && results.getString("code").startsWith("error"))
-				|| !results.has("objects")) {
-			throw new RuntimeException(
-					"Failed to resolve search for '" + name + "' (" + objectType + ", " + mask + "). Error code: "
-							+ ((results != null && results.has("code")) ? results.getString("code") : "Unknown"));
+		if (results == null || isErrorResponse(results) || !results.has("objects")) {
+			throw new RuntimeException("Failed to resolve search for '" + name + "' (" + objectType + ", " + mask
+					+ "). " + formatErrorMessage(results));
 		}
 
 		JSONArray foundObjects = removeDuplicates(results.getJSONArray("objects"));
@@ -1145,8 +1196,7 @@ public class NahimaManager extends AbstractRestClient {
 	public JSONArray resolveRegionTypes(String type) throws IOException, InterruptedException {
 		JSONObject results = this.searchByString(type, "region_verwaltungseinheiten");
 
-		if (results == null || (results.has("code") && results.getString("code").startsWith("error"))
-				|| !results.has("objects")) {
+		if (results == null || isErrorResponse(results) || !results.has("objects")) {
 			return new JSONArray();
 		}
 
@@ -1275,9 +1325,9 @@ public class NahimaManager extends AbstractRestClient {
 		String queryURL = buildAuthenticatedUrl("search");
 		JSONObject result = this.postRequest(queryURL, query);
 
-		if (result.has("code") && result.getString("code").startsWith("error")) {
-			throw new RuntimeException("Failed to resolve search for country '" + countryName + "'. Error code: "
-					+ result.getString("code"));
+		if (isErrorResponse(result)) {
+			throw new RuntimeException(
+					"Failed to resolve search for country '" + countryName + "'. " + formatErrorMessage(result));
 		}
 
 		JSONObject countryResult = null;
@@ -1678,7 +1728,7 @@ public class NahimaManager extends AbstractRestClient {
 					}
 				}));
 				put("_nested:taxonnamen__trivialnamen", new JSONArray());
-				put("_nested:taxonnamen__referenzenfuertribus", new JSONArray());
+				put("_nested:taxonnamen__referenzenfuertaxonname", new JSONArray());
 				put("bemerkung", getCreatedByThisSoftwareIndication());
 			}
 		}), zoologyPool);
@@ -1943,12 +1993,7 @@ public class NahimaManager extends AbstractRestClient {
 		String response = this.getRequest(queryUrl);
 		if (!response.startsWith("[")) {
 			JSONObject responseObject = new JSONObject(response);
-			if (responseObject.has("code")) {
-				if (((String) responseObject.get("code")).startsWith("error")) {
-					throw new RuntimeException("Failed to fetch tags. Error code: " + responseObject.get("code") + ". "
-							+ (responseObject.has("description") ? responseObject.getString("description") : ""));
-				}
-			}
+			throw new RuntimeException("Failed to fetch tags: " + formatErrorMessage(responseObject));
 		}
 		JSONArray tagGroups = (new JSONArray(response));
 		for (int tagGroupIdx = 0; tagGroupIdx < tagGroups.length(); ++tagGroupIdx) {

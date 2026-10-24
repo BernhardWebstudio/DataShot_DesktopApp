@@ -66,6 +66,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -129,6 +130,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	private JTextField jTextFieldVerbatimLocality;
 	private JTextField jTextFieldLocality;
 	private JComboBox<String> jComboBoxCountry;
+	private Border defaultCountryBorder;
 	private JComboBox<String> jComboBoxPrimaryDivision;
 	private JTextField textFieldDecimalLat;
 	private JTextField textFieldDecimalLong;
@@ -778,6 +780,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 			jComboBoxCountry = bindingContext.bindComboBox("Country",
 					() -> new SpecimenLifeCycle().getDistinctCountries(), Specimen::getCountry, Specimen::setCountry,
 					false, null);
+			defaultCountryBorder = jComboBoxCountry.getBorder();
+			jComboBoxCountry.addActionListener(e -> clearCountryMismatch());
 			jPanel.add(jComboBoxCountry, "grow");
 
 			addBasicJLabel(jPanel, "State/Province");
@@ -2067,7 +2071,86 @@ public class SpecimenDetailsViewPane extends JPanel {
 		}
 	}
 
-	private void autocompleteGeoDataFromGeoreference() {
+	public JComboBox<String> getJComboBoxCountry() {
+		if (jComboBoxCountry == null) {
+			getJPanel();
+		}
+		return jComboBoxCountry;
+	}
+
+	public void flagCountryMismatch(String reverseCountry) {
+		SwingUtilities.invokeLater(() -> {
+			if (jComboBoxCountry == null) {
+				getJPanel();
+			}
+			if (jComboBoxCountry != null) {
+				if (defaultCountryBorder == null) {
+					defaultCountryBorder = jComboBoxCountry.getBorder();
+				}
+				String currentCountry = jComboBoxCountry.getSelectedItem() != null
+						? jComboBoxCountry.getSelectedItem().toString()
+						: "";
+				String warning = "Warning: Reverse-geocoded country ('" + reverseCountry
+						+ "') does not match specified country ('" + currentCountry + "').";
+				jComboBoxCountry.setBorder(
+						BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(new Color(255, 140, 0), 2),
+								BorderFactory.createEmptyBorder(1, 1, 1, 1)));
+				jComboBoxCountry.setToolTipText(warning);
+				setWarning(warning);
+			}
+		});
+	}
+
+	public void clearCountryMismatch() {
+		SwingUtilities.invokeLater(() -> {
+			if (jComboBoxCountry != null) {
+				if (defaultCountryBorder != null) {
+					jComboBoxCountry.setBorder(defaultCountryBorder);
+				}
+				jComboBoxCountry.setToolTipText(null);
+			}
+		});
+	}
+
+	public static boolean isCountryMismatch(String specifiedCountry, String countryCode,
+			String... possibleCountryNames) {
+		if (specifiedCountry == null || specifiedCountry.trim().isEmpty()) {
+			return false;
+		}
+		String cleanSpecified = specifiedCountry.trim();
+		if (countryCode != null && !countryCode.trim().isEmpty()) {
+			String cleanCode = countryCode.trim();
+			if (cleanSpecified.equalsIgnoreCase(cleanCode)) {
+				return false;
+			}
+			try {
+				Locale locale = new Locale("", cleanCode);
+				if (cleanSpecified.equalsIgnoreCase(locale.getCountry())
+						|| cleanSpecified.equalsIgnoreCase(locale.getISO3Country())
+						|| cleanSpecified.equalsIgnoreCase(locale.getDisplayCountry(Locale.ENGLISH))
+						|| cleanSpecified.equalsIgnoreCase(locale.getDisplayCountry(Locale.GERMAN))
+						|| cleanSpecified.equalsIgnoreCase(locale.getDisplayCountry(Locale.FRENCH))
+						|| cleanSpecified.equalsIgnoreCase(locale.getDisplayCountry(Locale.ITALIAN))
+						|| cleanSpecified.equalsIgnoreCase(locale.getDisplayCountry(Locale.getDefault()))) {
+					return false;
+				}
+			} catch (Exception ignored) {
+			}
+		}
+		if (possibleCountryNames != null) {
+			for (String name : possibleCountryNames) {
+				if (name != null && !name.trim().isEmpty()) {
+					String cleanName = name.trim();
+					if (cleanSpecified.equalsIgnoreCase(cleanName)) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	void autocompleteGeoDataFromGeoreference() {
 		HashMap<String, String> primaryDivisionMapping = new HashMap<>();
 		primaryDivisionMapping.put("Grisons", "Graubünden");
 		primaryDivisionMapping.put("St. Gallen", "Sankt Gallen");
@@ -2090,11 +2173,40 @@ public class SpecimenDetailsViewPane extends JPanel {
 							new ArrayList<>(Arrays.asList("countryCode", "countryName", "adminName1")));
 					if (data != null) {
 						log.debug("Got address from GeoNames: {}", data);
-						if (jComboBoxCountry.getSelectedItem() == null
-								|| jComboBoxCountry.getSelectedItem().equals("")) {
-							String countryName = (new ISO3166LifeCycle())
-									.findByCountryCode((String) data.get("countryCode")).getCountryName();
-							SwingUtilities.invokeLater(() -> jComboBoxCountry.setSelectedItem(countryName));
+						String currentCountry = jComboBoxCountry.getSelectedItem() != null
+								? jComboBoxCountry.getSelectedItem().toString().trim()
+								: "";
+						String countryCode = (String) data.get("countryCode");
+						String countryNameFromGeoNames = (String) data.get("countryName");
+						String isoCountryName = null;
+						if (countryCode != null && !countryCode.isEmpty()) {
+							try {
+								ISO3166 iso = (new ISO3166LifeCycle()).findByCountryCode(countryCode);
+								if (iso != null) {
+									isoCountryName = iso.getCountryName();
+								}
+							} catch (Exception e) {
+								log.debug("Could not lookup ISO3166 for countryCode: {}", countryCode, e);
+							}
+						}
+						String reverseCountryName = isoCountryName != null && !isoCountryName.isEmpty()
+								? isoCountryName
+								: countryNameFromGeoNames;
+
+						if (currentCountry.isEmpty()) {
+							if (reverseCountryName != null && !reverseCountryName.isEmpty()) {
+								SwingUtilities.invokeLater(() -> {
+									jComboBoxCountry.setSelectedItem(reverseCountryName);
+									clearCountryMismatch();
+								});
+							}
+						} else {
+							if (isCountryMismatch(currentCountry, countryCode, countryNameFromGeoNames,
+									isoCountryName)) {
+								flagCountryMismatch(reverseCountryName != null ? reverseCountryName : countryCode);
+							} else {
+								clearCountryMismatch();
+							}
 						}
 						if (jComboBoxPrimaryDivision.getSelectedItem() == null
 								|| jComboBoxPrimaryDivision.getSelectedItem().equals("")) {
@@ -2109,12 +2221,43 @@ public class SpecimenDetailsViewPane extends JPanel {
 
 				log.debug("Fetching address from openstreetmap");
 				Map<String, Object> data = OpenStreetMapUtility.getInstance().reverseSearchValues(georeff.getDecLat(),
-						georeff.getDecLong(),
-						new ArrayList<>(Arrays.asList("address.county", "address.state", "address.country")));
+						georeff.getDecLong(), new ArrayList<>(Arrays.asList("address.county", "address.state",
+								"address.country", "address.country_code")));
 				if (data != null) {
 					log.debug("Got address from openstreetmap: {}", data);
-					if (jComboBoxCountry.getSelectedItem() == null || jComboBoxCountry.getSelectedItem().equals("")) {
-						SwingUtilities.invokeLater(() -> jComboBoxCountry.setSelectedItem(data.get("address.country")));
+					String currentCountry = jComboBoxCountry.getSelectedItem() != null
+							? jComboBoxCountry.getSelectedItem().toString().trim()
+							: "";
+					String osmCountry = (String) data.get("address.country");
+					String osmCountryCode = (String) data.get("address.country_code");
+					String isoCountryName = null;
+					if (osmCountryCode != null && !osmCountryCode.isEmpty()) {
+						try {
+							ISO3166 iso = (new ISO3166LifeCycle()).findByCountryCode(osmCountryCode.toUpperCase());
+							if (iso != null) {
+								isoCountryName = iso.getCountryName();
+							}
+						} catch (Exception e) {
+							log.debug("Could not lookup ISO3166 for countryCode: {}", osmCountryCode, e);
+						}
+					}
+					String reverseCountryName = isoCountryName != null && !isoCountryName.isEmpty()
+							? isoCountryName
+							: osmCountry;
+
+					if (currentCountry.isEmpty()) {
+						if (reverseCountryName != null && !reverseCountryName.isEmpty()) {
+							SwingUtilities.invokeLater(() -> {
+								jComboBoxCountry.setSelectedItem(reverseCountryName);
+								clearCountryMismatch();
+							});
+						}
+					} else {
+						if (isCountryMismatch(currentCountry, osmCountryCode, osmCountry, isoCountryName)) {
+							flagCountryMismatch(reverseCountryName != null ? reverseCountryName : osmCountryCode);
+						} else {
+							clearCountryMismatch();
+						}
 					}
 					if (jComboBoxPrimaryDivision.getSelectedItem() == null
 							|| jComboBoxPrimaryDivision.getSelectedItem().equals("")) {

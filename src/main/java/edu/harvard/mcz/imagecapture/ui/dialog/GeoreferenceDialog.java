@@ -31,6 +31,8 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -148,6 +150,26 @@ public class GeoreferenceDialog extends JDialog {
 					txtLongMin.setEnabled(false);
 					txtLongSec.setEnabled(false);
 					cbLongDir.setEnabled(true);
+
+					// Pre-fill DDM if empty but decimal fields have values
+					if (txtLatDecMin.getText().trim().isEmpty() && !textFieldDecimalLat.getText().trim().isEmpty()) {
+						Double lat = parseCoordinateString(textFieldDecimalLat.getText(), "N");
+						if (lat != null) {
+							DDM ddm = decimalToDDM(lat, true);
+							txtLatDegrees.setText(String.valueOf(ddm.degrees()));
+							txtLatDecMin.setText(String.format(Locale.US, "%.4f", ddm.decMinutes()));
+							cbLatDir.setSelectedItem(ddm.direction());
+						}
+					}
+					if (txtLongDecMin.getText().trim().isEmpty() && !textFieldDecimalLong.getText().trim().isEmpty()) {
+						Double lon = parseCoordinateString(textFieldDecimalLong.getText(), "E");
+						if (lon != null) {
+							DDM ddm = decimalToDDM(lon, false);
+							txtLongDegrees.setText(String.valueOf(ddm.degrees()));
+							txtLongDecMin.setText(String.format(Locale.US, "%.4f", ddm.decMinutes()));
+							cbLongDir.setSelectedItem(ddm.direction());
+						}
+					}
 					break;
 				case "deg. min. sec." :
 					textFieldDecimalLat.setEnabled(false);
@@ -162,6 +184,30 @@ public class GeoreferenceDialog extends JDialog {
 					txtLongMin.setEnabled(true);
 					txtLongSec.setEnabled(true);
 					cbLongDir.setEnabled(true);
+
+					// Pre-fill DMS if empty but decimal fields have values
+					if ((txtLatMin.getText().trim().isEmpty() || txtLatSec.getText().trim().isEmpty())
+							&& !textFieldDecimalLat.getText().trim().isEmpty()) {
+						Double lat = parseCoordinateString(textFieldDecimalLat.getText(), "N");
+						if (lat != null) {
+							DMS dms = decimalToDMS(lat, true);
+							txtLatDegrees.setText(String.valueOf(dms.degrees()));
+							txtLatMin.setText(String.valueOf(dms.minutes()));
+							txtLatSec.setText(String.format(Locale.US, "%.2f", dms.seconds()));
+							cbLatDir.setSelectedItem(dms.direction());
+						}
+					}
+					if ((txtLongMin.getText().trim().isEmpty() || txtLongSec.getText().trim().isEmpty())
+							&& !textFieldDecimalLong.getText().trim().isEmpty()) {
+						Double lon = parseCoordinateString(textFieldDecimalLong.getText(), "E");
+						if (lon != null) {
+							DMS dms = decimalToDMS(lon, false);
+							txtLongDegrees.setText(String.valueOf(dms.degrees()));
+							txtLongMin.setText(String.valueOf(dms.minutes()));
+							txtLongSec.setText(String.format(Locale.US, "%.2f", dms.seconds()));
+							cbLongDir.setSelectedItem(dms.direction());
+						}
+					}
 					break;
 				case "decimal degrees" :
 				case "unknown" :
@@ -185,32 +231,364 @@ public class GeoreferenceDialog extends JDialog {
 
 	private boolean saveData() {
 		this.okButton.grabFocus();
+		GeoPosition currentPos = getCurrentGeoPosition();
+		if (currentPos != null) {
+			geoReference.setDecLat(BigDecimal.valueOf(currentPos.getLatitude()));
+			geoReference.setDecLong(BigDecimal.valueOf(currentPos.getLongitude()));
+		}
 		bindingContext.writeTo(geoReference);
 		return true;
 	}
 
+	public record DDM(int degrees, double decMinutes, String direction) {
+	}
+
+	public record DMS(int degrees, int minutes, double seconds, String direction) {
+	}
+
+	public static DDM decimalToDDM(double decimal, boolean isLatitude) {
+		String dir = isLatitude ? (decimal < 0 ? "S" : "N") : (decimal < 0 ? "W" : "E");
+		double abs = Math.abs(decimal);
+		int deg = (int) Math.floor(abs);
+		double decMin = (abs - deg) * 60.0;
+		return new DDM(deg, decMin, dir);
+	}
+
+	public static DMS decimalToDMS(double decimal, boolean isLatitude) {
+		String dir = isLatitude ? (decimal < 0 ? "S" : "N") : (decimal < 0 ? "W" : "E");
+		double abs = Math.abs(decimal);
+		int deg = (int) Math.floor(abs);
+		double totalMinutes = (abs - deg) * 60.0;
+		int min = (int) Math.floor(totalMinutes);
+		double sec = (totalMinutes - min) * 60.0;
+		return new DMS(deg, min, sec, dir);
+	}
+
+	public static Double parseDMS(String degStr, String minStr, String secStr, String dir) {
+		if (degStr == null || degStr.trim().isEmpty() || minStr == null || minStr.trim().isEmpty()) {
+			return null;
+		}
+		try {
+			double deg = Math.abs(Double.parseDouble(degStr.trim()));
+			double min = Math.abs(Double.parseDouble(minStr.trim()));
+			double sec = 0;
+			if (secStr != null && !secStr.trim().isEmpty()) {
+				sec = Math.abs(Double.parseDouble(secStr.trim()));
+			}
+			if (min >= 60 || sec >= 60) {
+				return null;
+			}
+			double decimal = deg + (min / 60.0) + (sec / 3600.0);
+			if (dir != null && ("S".equalsIgnoreCase(dir.trim()) || "W".equalsIgnoreCase(dir.trim()))) {
+				decimal = -decimal;
+			} else if (degStr.trim().startsWith("-")) {
+				decimal = -decimal;
+			}
+			return decimal;
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	public static Double parseDDM(String degStr, String decMinStr, String dir) {
+		if (degStr == null || degStr.trim().isEmpty() || decMinStr == null || decMinStr.trim().isEmpty()) {
+			return null;
+		}
+		try {
+			double deg = Math.abs(Double.parseDouble(degStr.trim()));
+			double decMin = Math.abs(Double.parseDouble(decMinStr.trim()));
+			if (decMin >= 60) {
+				return null;
+			}
+			double decimal = deg + (decMin / 60.0);
+			if (dir != null && ("S".equalsIgnoreCase(dir.trim()) || "W".equalsIgnoreCase(dir.trim()))) {
+				decimal = -decimal;
+			} else if (degStr.trim().startsWith("-")) {
+				decimal = -decimal;
+			}
+			return decimal;
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	public static Double parseCoordinateString(String input, String defaultDir) {
+		if (input == null || input.trim().isEmpty()) {
+			return null;
+		}
+		String s = input.trim();
+
+		boolean negative = false;
+		if (s.toUpperCase().contains("S") || s.toUpperCase().contains("W")) {
+			negative = true;
+		} else if (s.startsWith("-")) {
+			negative = true;
+		} else if (defaultDir != null
+				&& ("S".equalsIgnoreCase(defaultDir.trim()) || "W".equalsIgnoreCase(defaultDir.trim()))) {
+			negative = true;
+		}
+
+		String clean = s.replaceAll("[°'\"]", " ").replaceAll("[NSEWnsew]", " ").replaceAll("[,;]", " ").trim();
+
+		String[] parts = clean.split("\\s+");
+		if (parts.length == 0 || parts[0].isEmpty()) {
+			return null;
+		}
+
+		try {
+			if (parts.length == 1) {
+				double val = Math.abs(Double.parseDouble(parts[0]));
+				return negative ? -val : val;
+			} else if (parts.length == 2) {
+				double deg = Math.abs(Double.parseDouble(parts[0]));
+				double min = Math.abs(Double.parseDouble(parts[1]));
+				double val = deg + (min / 60.0);
+				return negative ? -val : val;
+			} else if (parts.length >= 3) {
+				double deg = Math.abs(Double.parseDouble(parts[0]));
+				double min = Math.abs(Double.parseDouble(parts[1]));
+				double sec = Math.abs(Double.parseDouble(parts[2]));
+				double val = deg + (min / 60.0) + (sec / 3600.0);
+				return negative ? -val : val;
+			}
+		} catch (NumberFormatException e) {
+			return null;
+		}
+		return null;
+	}
+
+	public GeoPosition getCurrentGeoPosition() {
+		String state = comboBoxOrigUnits != null && comboBoxOrigUnits.getSelectedItem() != null
+				? comboBoxOrigUnits.getSelectedItem().toString()
+				: "decimal degrees";
+
+		String latDir = cbLatDir != null && cbLatDir.getSelectedItem() != null
+				? cbLatDir.getSelectedItem().toString()
+				: "N";
+		String longDir = cbLongDir != null && cbLongDir.getSelectedItem() != null
+				? cbLongDir.getSelectedItem().toString()
+				: "E";
+
+		if ("degrees dec. minutes".equals(state)) {
+			Double lat = parseDDM(txtLatDegrees != null ? txtLatDegrees.getText() : null,
+					txtLatDecMin != null ? txtLatDecMin.getText() : null, latDir);
+			Double lon = parseDDM(txtLongDegrees != null ? txtLongDegrees.getText() : null,
+					txtLongDecMin != null ? txtLongDecMin.getText() : null, longDir);
+			if (lat != null && lon != null) {
+				return new GeoPosition(lat, lon);
+			}
+		} else if ("deg. min. sec.".equals(state)) {
+			Double lat = parseDMS(txtLatDegrees != null ? txtLatDegrees.getText() : null,
+					txtLatMin != null ? txtLatMin.getText() : null, txtLatSec != null ? txtLatSec.getText() : null,
+					latDir);
+			Double lon = parseDMS(txtLongDegrees != null ? txtLongDegrees.getText() : null,
+					txtLongMin != null ? txtLongMin.getText() : null, txtLongSec != null ? txtLongSec.getText() : null,
+					longDir);
+			if (lat != null && lon != null) {
+				return new GeoPosition(lat, lon);
+			}
+		}
+
+		// Decimal fields
+		String decLatStr = textFieldDecimalLat != null ? textFieldDecimalLat.getText() : null;
+		String decLongStr = textFieldDecimalLong != null ? textFieldDecimalLong.getText() : null;
+		Double lat = parseCoordinateString(decLatStr, latDir);
+		Double lon = parseCoordinateString(decLongStr, longDir);
+		if (lat != null && lon != null) {
+			return new GeoPosition(lat, lon);
+		}
+
+		// Fallbacks: check if DDM fields have values
+		Double ddmLat = parseDDM(txtLatDegrees != null ? txtLatDegrees.getText() : null,
+				txtLatDecMin != null ? txtLatDecMin.getText() : null, latDir);
+		Double ddmLon = parseDDM(txtLongDegrees != null ? txtLongDegrees.getText() : null,
+				txtLongDecMin != null ? txtLongDecMin.getText() : null, longDir);
+		if (ddmLat != null && ddmLon != null) {
+			return new GeoPosition(ddmLat, ddmLon);
+		}
+
+		// Fallback: check if DMS fields have values
+		Double dmsLat = parseDMS(txtLatDegrees != null ? txtLatDegrees.getText() : null,
+				txtLatMin != null ? txtLatMin.getText() : null, txtLatSec != null ? txtLatSec.getText() : null, latDir);
+		Double dmsLon = parseDMS(txtLongDegrees != null ? txtLongDegrees.getText() : null,
+				txtLongMin != null ? txtLongMin.getText() : null, txtLongSec != null ? txtLongSec.getText() : null,
+				longDir);
+		if (dmsLat != null && dmsLon != null) {
+			return new GeoPosition(dmsLat, dmsLon);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Convert an error distance in specified units to meters.
+	 */
+	public static double convertErrorDistanceToMeters(double distance, String unit) {
+		if (distance <= 0) {
+			return 0;
+		}
+		if (unit == null) {
+			return distance;
+		}
+		return switch (unit.trim().toLowerCase()) {
+			case "km" -> distance * 1000.0;
+			case "ft" -> distance * 0.3048;
+			case "mi" -> distance * 1609.344;
+			case "yd" -> distance * 0.9144;
+			default -> distance;
+		};
+	}
+
+	/**
+	 * Custom Painter for JXMapViewer that renders a semi-transparent circle scaled
+	 * to the georeference error distance in meters.
+	 */
+	public static class ErrorRadiusPainter implements Painter<JXMapViewer> {
+		private final GeoPosition position;
+		private final double radiusInMeters;
+		private final Color fillColor;
+		private final Color outlineColor;
+
+		public ErrorRadiusPainter(GeoPosition position, double radiusInMeters) {
+			this(position, radiusInMeters, new Color(0, 120, 255, 60), new Color(0, 120, 255, 180));
+		}
+
+		public ErrorRadiusPainter(GeoPosition position, double radiusInMeters, Color fillColor, Color outlineColor) {
+			this.position = position;
+			this.radiusInMeters = radiusInMeters;
+			this.fillColor = fillColor;
+			this.outlineColor = outlineColor;
+		}
+
+		public GeoPosition getPosition() {
+			return position;
+		}
+
+		public double getRadiusInMeters() {
+			return radiusInMeters;
+		}
+
+		public Color getFillColor() {
+			return fillColor;
+		}
+
+		public Color getOutlineColor() {
+			return outlineColor;
+		}
+
+		@Override
+		public void paint(Graphics2D g, JXMapViewer map, int width, int height) {
+			if (position == null || radiusInMeters <= 0 || map == null || map.getTileFactory() == null) {
+				return;
+			}
+			Point2D center = map.convertGeoPositionToPoint(position);
+			if (center == null) {
+				return;
+			}
+
+			// Earth radius in meters (WGS84 authalic / equatorial radius)
+			final double EARTH_RADIUS = 6378137.0;
+			double latRad = Math.toRadians(position.getLatitude());
+			double cosLat = Math.cos(latRad);
+			if (cosLat < 0.0001) {
+				cosLat = 0.0001;
+			}
+
+			double deltaLon = (radiusInMeters / (EARTH_RADIUS * cosLat)) * (180.0 / Math.PI);
+			double longitudeDegreeWidth = map.getTileFactory().getInfo().getLongitudeDegreeWidthInPixels(map.getZoom());
+			double radiusPixels = deltaLon * longitudeDegreeWidth;
+			if (radiusPixels <= 0) {
+				return;
+			}
+
+			Graphics2D g2d = (Graphics2D) g.create();
+			try {
+				g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+				Shape circle = new Ellipse2D.Double(center.getX() - radiusPixels, center.getY() - radiusPixels,
+						radiusPixels * 2.0, radiusPixels * 2.0);
+
+				g2d.setColor(fillColor);
+				g2d.fill(circle);
+
+				g2d.setColor(outlineColor);
+				g2d.setStroke(new BasicStroke(1.5f));
+				g2d.draw(circle);
+			} finally {
+				g2d.dispose();
+			}
+		}
+	}
+
+	public double getErrorRadiusInMeters() {
+		if (txtErrorRadius == null || txtErrorRadius.getText() == null || txtErrorRadius.getText().trim().isEmpty()) {
+			return 0;
+		}
+		try {
+			double dist = Double.parseDouble(txtErrorRadius.getText().trim());
+			if (dist <= 0) {
+				return 0;
+			}
+			String unit = comboBoxErrorUnits != null && comboBoxErrorUnits.getSelectedItem() != null
+					? comboBoxErrorUnits.getSelectedItem().toString()
+					: "m";
+			return convertErrorDistanceToMeters(dist, unit);
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	private boolean isUpdatingMap = false;
+
 	/**
 	 * Update the marker on the map
 	 */
-	private void updateMap() {
-		if (textFieldDecimalLat.getText().isEmpty() || textFieldDecimalLong.getText().isEmpty()) {
+	public void updateMap() {
+		if (isUpdatingMap) {
 			return;
 		}
+		isUpdatingMap = true;
 		try {
-			GeoPosition address = new GeoPosition(Double.parseDouble(textFieldDecimalLat.getText()),
-					Double.parseDouble(textFieldDecimalLong.getText()));
+			GeoPosition address = getCurrentGeoPosition();
+			if (address == null) {
+				return;
+			}
+
+			// If in DDM or DMS mode, synchronize the calculated decimal values into decimal
+			// text fields
+			String origUnits = comboBoxOrigUnits != null && comboBoxOrigUnits.getSelectedItem() != null
+					? comboBoxOrigUnits.getSelectedItem().toString()
+					: "decimal degrees";
+			if ("degrees dec. minutes".equals(origUnits) || "deg. min. sec.".equals(origUnits)) {
+				String formattedLat = String.format(Locale.US, "%.6f", address.getLatitude());
+				String formattedLong = String.format(Locale.US, "%.6f", address.getLongitude());
+				if (textFieldDecimalLat != null && !formattedLat.equals(textFieldDecimalLat.getText())) {
+					textFieldDecimalLat.setText(formattedLat);
+				}
+				if (textFieldDecimalLong != null && !formattedLong.equals(textFieldDecimalLong.getText())) {
+					textFieldDecimalLong.setText(formattedLong);
+				}
+			}
+
 			mapViewer.setAddressLocation(address);
 			WaypointPainter<Waypoint> waypointPainter = new WaypointPainter<>();
 			waypointPainter.setWaypoints(new HashSet<>(List.of(new DefaultWaypoint(address))));
 
 			List<Painter<JXMapViewer>> painters = new ArrayList<>();
+			double errorInMeters = getErrorRadiusInMeters();
+			if (errorInMeters > 0) {
+				painters.add(new ErrorRadiusPainter(address, errorInMeters));
+			}
 			painters.add(waypointPainter);
 
 			CompoundPainter<JXMapViewer> painter = new CompoundPainter<>(painters);
 			mapViewer.setOverlayPainter(painter);
-			mapViewer.setZoom(5);
+			if (mapViewer.getZoom() <= 0) {
+				mapViewer.setZoom(5);
+			}
 		} catch (Exception e) {
 			log.error("Failed to update map waypoint", e);
+		} finally {
+			isUpdatingMap = false;
 		}
 	}
 
@@ -266,8 +644,10 @@ public class GeoreferenceDialog extends JDialog {
 
 		comboBoxOrigUnits = bindingContext.bindComboBox("OrigLatLongUnits",
 				new String[]{"decimal degrees", "deg. min. sec.", "degrees dec. minutes", "unknown"},
-				LatLong::getOrigLatLongUnits, LatLong::setOrigLatLongUnits,
-				cb -> cb.addActionListener(e -> setState()));
+				LatLong::getOrigLatLongUnits, LatLong::setOrigLatLongUnits, cb -> cb.addActionListener(e -> {
+					setState();
+					updateMap();
+				}));
 
 		txtErrorRadius = bindingContext.bindTextField("MaxErrorDistance", LatLong::getMaxErrorDistanceString,
 				(g, str) -> {
@@ -280,9 +660,10 @@ public class GeoreferenceDialog extends JDialog {
 						g.setMaxErrorDistance(null);
 					}
 				});
+		InputUtility.addChangeListener(txtErrorRadius, e -> updateMap());
 
 		comboBoxErrorUnits = bindingContext.bindComboBox("MaxErrorUnits", new String[]{"m", "ft", "km", "mi", "yd"},
-				LatLong::getMaxErrorUnits, LatLong::setMaxErrorUnits);
+				LatLong::getMaxErrorUnits, LatLong::setMaxErrorUnits, cb -> cb.addActionListener(e -> updateMap()));
 
 		txtLatDegrees = bindingContext.bindTextField("LatDeg", LatLong::getLatDegString, (g, str) -> {
 			if (str != null && !str.trim().isEmpty()) {
@@ -330,6 +711,11 @@ public class GeoreferenceDialog extends JDialog {
 
 		cbLatDir = bindingContext.bindComboBox("LatDir", new String[]{"N", "S"}, LatLong::getLatDir,
 				LatLong::setLatDir);
+		InputUtility.addChangeListener(txtLatDegrees, e -> updateMap());
+		InputUtility.addChangeListener(txtLatDecMin, e -> updateMap());
+		InputUtility.addChangeListener(txtLatMin, e -> updateMap());
+		InputUtility.addChangeListener(txtLatSec, e -> updateMap());
+		cbLatDir.addActionListener(e -> updateMap());
 
 		txtLongDegrees = bindingContext.bindTextField("LongDeg", LatLong::getLongDegString, (g, str) -> {
 			if (str != null && !str.trim().isEmpty()) {
@@ -377,6 +763,11 @@ public class GeoreferenceDialog extends JDialog {
 
 		cbLongDir = bindingContext.bindComboBox("LongDir", new String[]{"E", "W"}, LatLong::getLongDir,
 				LatLong::setLongDir);
+		InputUtility.addChangeListener(txtLongDegrees, e -> updateMap());
+		InputUtility.addChangeListener(txtLongDecMin, e -> updateMap());
+		InputUtility.addChangeListener(txtLongMin, e -> updateMap());
+		InputUtility.addChangeListener(txtLongSec, e -> updateMap());
+		cbLongDir.addActionListener(e -> updateMap());
 
 		textFieldDetBy = bindingContext.bindTextField("DeterminedByAgent", LatLong::getDeterminedByAgent,
 				LatLong::setDeterminedByAgent);
@@ -554,5 +945,69 @@ public class GeoreferenceDialog extends JDialog {
 			});
 		}
 		return pasteExcelButton;
+	}
+
+	public JXMapViewer getMapViewer() {
+		return mapViewer;
+	}
+
+	public JTextField getTxtErrorRadius() {
+		return txtErrorRadius;
+	}
+
+	public JComboBox<String> getComboBoxErrorUnits() {
+		return comboBoxErrorUnits;
+	}
+
+	public JTextField getTextFieldDecimalLat() {
+		return textFieldDecimalLat;
+	}
+
+	public JTextField getTextFieldDecimalLong() {
+		return textFieldDecimalLong;
+	}
+
+	public JTextField getTxtLatDegrees() {
+		return txtLatDegrees;
+	}
+
+	public JTextField getTxtLatDecMin() {
+		return txtLatDecMin;
+	}
+
+	public JTextField getTxtLatMin() {
+		return txtLatMin;
+	}
+
+	public JTextField getTxtLatSec() {
+		return txtLatSec;
+	}
+
+	public JComboBox<String> getCbLatDir() {
+		return cbLatDir;
+	}
+
+	public JTextField getTxtLongDegrees() {
+		return txtLongDegrees;
+	}
+
+	public JTextField getTxtLongDecMin() {
+		return txtLongDecMin;
+	}
+
+	public JTextField getTxtLongMin() {
+		return txtLongMin;
+	}
+
+	public JTextField getTxtLongSec() {
+		return txtLongSec;
+	}
+
+	public JComboBox<String> getCbLongDir() {
+		return cbLongDir;
+	}
+
+	public JComboBox<String> getComboBoxOrigUnits() {
+		return comboBoxOrigUnits;
 	}
 }

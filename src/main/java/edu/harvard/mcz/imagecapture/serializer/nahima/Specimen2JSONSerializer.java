@@ -172,8 +172,10 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 		}
 
 		if (toSerialize.getIdentificationRemarks() != null && !toSerialize.getIdentificationRemarks().isEmpty()) {
+			JSONObject comment = new JSONObject();
+			comment.put("kommentarzurbestimmung", toSerialize.getIdentificationRemarks());
 			mainReverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung",
-					new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
+					new JSONArray(new JSONObject[]{comment}));
 		}
 		// try to parse and set the date correctly
 		tryNonUserSkippableResolve(mainReverseNestedDetermination, "bestimmungsdatum",
@@ -227,8 +229,10 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 			// new JSONArray(new String[]{toSerialize.getIdentificationRemarks()}));
 
 			if (det.getRemarks() != null && !det.getRemarks().equals("")) {
+				JSONObject comment = new JSONObject();
+				comment.put("kommentarzurbestimmung", det.getRemarks());
 				reverseNestedDetermination.put("_nested:bestimmung__kommentarezurbestimmung",
-						new JSONArray(new String[]{det.getRemarks()}));
+						new JSONArray(new JSONObject[]{comment}));
 			}
 
 			// try to parse and set the date correctly
@@ -344,8 +348,8 @@ public class Specimen2JSONSerializer implements ToJSONSerializerInterface {
 			tryNonUserSkippableResolve(reverseNestedCollection, "_nested:aufsammlung__sammelmethoden",
 					() -> new JSONArray(new JSONObject[]{new JSONObject(new HashMap<>() {
 						{
-							put("sammlungsmethode",
-									nahimaManager.resolveCollectionMethod(toSerialize.getCollectingMethod()));
+							put("sammlungsmethode", nahimaManager.reduceAssociateForAssociation(
+									nahimaManager.resolveCollectionMethod(toSerialize.getCollectingMethod())));
 						}
 					})}));
 		}

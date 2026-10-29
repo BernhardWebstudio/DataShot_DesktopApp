@@ -1,9 +1,10 @@
 package edu.harvard.mcz.imagecapture.utility;
 
 import edu.harvard.mcz.imagecapture.Singleton;
-import java.awt.*;
+import java.awt.Dimension;
 import java.io.File;
-import javax.swing.*;
+import javax.swing.Action;
+import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 public class FileUtility {
@@ -34,6 +35,10 @@ public class FileUtility {
 		if (startingPoint != null && startingPoint.exists() && startingPoint.canRead()) {
 			fileChooser.setCurrentDirectory(startingPoint);
 		}
+		// default to "details" view
+		Action details = fileChooser.getActionMap().get("viewTypeDetails");
+		details.actionPerformed(null);
+
 		int returnValue = fileChooser.showOpenDialog(Singleton.getSingletonInstance().getMainFrame());
 		if (returnValue == JFileChooser.APPROVE_OPTION) {
 			return fileChooser.getSelectedFile();

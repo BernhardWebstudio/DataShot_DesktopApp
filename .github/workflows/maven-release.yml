@@ -7,8 +7,8 @@ on:
 
 jobs:
   build:
-    name: Build macOS ${{ matrix.macos_arch }}
-    runs-on: ${{ matrix.os }}
+    name: Build macOS
+    runs-on: macos-15
     env:
       APPLE_CODESIGN_CERT_P12_BASE64: ${{ secrets.APPLE_CODESIGN_CERT_P12_BASE64 }}
       APPLE_CODESIGN_CERT_PASSWORD: ${{ secrets.APPLE_CODESIGN_CERT_PASSWORD }}
@@ -16,24 +16,12 @@ jobs:
       APPLE_NOTARY_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
       APPLE_NOTARY_ISSUER_ID: ${{ secrets.APPLE_NOTARY_ISSUER_ID }}
       APPLE_NOTARY_API_KEY_P8_BASE64: ${{ secrets.APPLE_NOTARY_API_KEY_P8_BASE64 }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-15
-            macos_arch: x64
-            swift_target: x86_64-apple-macos12.0
-            include_jars: true
-          - os: macos-15
-            macos_arch: arm64
-            swift_target: arm64-apple-macos12.0
-            include_jars: false
 
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -43,21 +31,25 @@ jobs:
         run: mvn -B package --file pom.xml -P dist
 
       - name: Build macOS Vision Helper
-        if: runner.os == 'macOS'
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p native/bin
-          binary_path="native/bin/qr-native-macos-${{ matrix.macos_arch }}"
           swiftc -O native/macos-vision-scanner/main.swift \
-            -target "${{ matrix.swift_target }}" \
+            -target "x86_64-apple-macos12.0" \
             -framework Vision \
             -framework CoreGraphics \
             -framework ImageIO \
-            -o "$binary_path"
+            -o "native/bin/qr-native-macos-x64"
+          swiftc -O native/macos-vision-scanner/main.swift \
+            -target "arm64-apple-macos12.0" \
+            -framework Vision \
+            -framework CoreGraphics \
+            -framework ImageIO \
+            -o "native/bin/qr-native-macos-arm64"
 
       - name: Import Apple Code Signing Certificate
-        if: runner.os == 'macOS' && env.APPLE_CODESIGN_CERT_P12_BASE64 != '' && env.APPLE_CODESIGN_CERT_PASSWORD != '' && env.APPLE_CODESIGN_IDENTITY != ''
+        if: env.APPLE_CODESIGN_CERT_P12_BASE64 != '' && env.APPLE_CODESIGN_CERT_PASSWORD != '' && env.APPLE_CODESIGN_IDENTITY != ''
         shell: bash
         env:
           KEYCHAIN_PASSWORD: ${{ github.run_id }}-${{ github.run_attempt }}-codesign
@@ -74,14 +66,16 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$keychain_path"
           security list-keychains -d user -s "$keychain_path"
 
-      - name: Sign macOS Native Helper
-        if: runner.os == 'macOS' && env.APPLE_CODESIGN_CERT_P12_BASE64 != '' && env.APPLE_CODESIGN_CERT_PASSWORD != '' && env.APPLE_CODESIGN_IDENTITY != ''
+      - name: Sign macOS Native Helpers
+        if: env.APPLE_CODESIGN_CERT_P12_BASE64 != '' && env.APPLE_CODESIGN_CERT_PASSWORD != '' && env.APPLE_CODESIGN_IDENTITY != ''
         shell: bash
         run: |
           set -euo pipefail
-          binary_path="native/bin/qr-native-macos-${{ matrix.macos_arch }}"
-          codesign --force --options runtime --timestamp --sign "$APPLE_CODESIGN_IDENTITY" "$binary_path"
-          codesign --verify --strict --verbose=2 "$binary_path"
+          for arch in x64 arm64; do
+            binary_path="native/bin/qr-native-macos-${arch}"
+            codesign --force --options runtime --timestamp --sign "$APPLE_CODESIGN_IDENTITY" "$binary_path"
+            codesign --verify --strict --verbose=2 "$binary_path"
+          done
 
       - name: Determine Release Version
         id: version
@@ -94,64 +88,57 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Prepare Upload Assets
-        id: assets
         shell: bash
         run: |
           set -euo pipefail
           version="${{ steps.version.outputs.version }}"
           mkdir -p dist-assets
 
-          binary_src="native/bin/qr-native-macos-${{ matrix.macos_arch }}"
-          binary_dst="dist-assets/qr-native-macos-${{ matrix.macos_arch }}"
-          cp "$binary_src" "$binary_dst"
-          chmod +x "$binary_dst"
-          echo "binary=$binary_dst" >> "$GITHUB_OUTPUT"
+          for arch in x64 arm64; do
+            binary_src="native/bin/qr-native-macos-${arch}"
+            binary_dst="dist-assets/qr-native-macos-${arch}"
+            cp "$binary_src" "$binary_dst"
+            chmod +x "$binary_dst"
+          done
 
-          if [[ "${{ matrix.include_jars }}" == "true" ]]; then
-            fat_jar="$(find target -maxdepth 1 -type f -name '*-jar-with-dependencies.jar' | head -n1)"
-            thin_jar="$(find target -maxdepth 1 -type f -name '*.jar' ! -name '*-jar-with-dependencies.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' | head -n1)"
+          fat_jar="$(find target -maxdepth 1 -type f -name '*-jar-with-dependencies.jar' | head -n1)"
+          thin_jar="$(find target -maxdepth 1 -type f -name '*.jar' ! -name '*-jar-with-dependencies.jar' ! -name '*-sources.jar' ! -name '*-javadoc.jar' | head -n1)"
 
-            if [[ -z "$fat_jar" ]]; then
-              echo "Unable to locate fat JAR in target/." >&2
-              exit 1
-            fi
-
-            cp "$fat_jar" "dist-assets/DataShot-${version}-app-with-dependencies.jar"
-            if [[ -n "$thin_jar" ]]; then
-              cp "$thin_jar" "dist-assets/DataShot-${version}-app.jar"
-            fi
+          if [[ -z "$fat_jar" ]]; then
+            echo "Unable to locate fat JAR in target/." >&2
+            exit 1
           fi
 
-      - name: Notarize macOS Binary
-        if: runner.os == 'macOS' && env.APPLE_CODESIGN_CERT_P12_BASE64 != '' && env.APPLE_CODESIGN_CERT_PASSWORD != '' && env.APPLE_CODESIGN_IDENTITY != '' && env.APPLE_NOTARY_KEY_ID != '' && env.APPLE_NOTARY_ISSUER_ID != '' && env.APPLE_NOTARY_API_KEY_P8_BASE64 != ''
+          cp "$fat_jar" "dist-assets/DataShot-${version}-app-with-dependencies.jar"
+          if [[ -n "$thin_jar" ]]; then
+            cp "$thin_jar" "dist-assets/DataShot-${version}-app.jar"
+          fi
+
+      - name: Notarize macOS Binaries
+        if: env.APPLE_CODESIGN_CERT_P12_BASE64 != '' && env.APPLE_CODESIGN_CERT_PASSWORD != '' && env.APPLE_CODESIGN_IDENTITY != '' && env.APPLE_NOTARY_KEY_ID != '' && env.APPLE_NOTARY_ISSUER_ID != '' && env.APPLE_NOTARY_API_KEY_P8_BASE64 != ''
         shell: bash
         run: |
           set -euo pipefail
           key_path="$RUNNER_TEMP/AuthKey_${APPLE_NOTARY_KEY_ID}.p8"
-          binary_path="${{ steps.assets.outputs.binary }}"
-          notary_zip="$RUNNER_TEMP/$(basename "$binary_path").zip"
-
           echo "$APPLE_NOTARY_API_KEY_P8_BASE64" | base64 -D > "$key_path"
-          ditto -c -k --sequesterRsrc --keepParent "$binary_path" "$notary_zip"
-          xcrun notarytool submit "$notary_zip" \
-            --key "$key_path" \
-            --key-id "$APPLE_NOTARY_KEY_ID" \
-            --issuer "$APPLE_NOTARY_ISSUER_ID" \
-            --wait
 
-      - name: Upload macOS Binary Artifact
+          for arch in x64 arm64; do
+            binary_path="dist-assets/qr-native-macos-${arch}"
+            notary_zip="$RUNNER_TEMP/$(basename "$binary_path").zip"
+
+            ditto -c -k --sequesterRsrc --keepParent "$binary_path" "$notary_zip"
+            xcrun notarytool submit "$notary_zip" \
+              --key "$key_path" \
+              --key-id "$APPLE_NOTARY_KEY_ID" \
+              --issuer "$APPLE_NOTARY_ISSUER_ID" \
+              --wait
+          done
+
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-macos-${{ matrix.macos_arch }}-binary
-          path: ${{ steps.assets.outputs.binary }}
-          if-no-files-found: error
-
-      - name: Upload JAR Artifacts
-        if: matrix.include_jars
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-jars
-          path: dist-assets/*.jar
+          name: release-assets
+          path: dist-assets/*
           if-no-files-found: error
 
   publish:
@@ -174,11 +161,11 @@ jobs:
           echo "$changelog" >> "$GITHUB_OUTPUT"
           echo "EOF" >> "$GITHUB_OUTPUT"
 
-      - name: Download Matrix Artifacts
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
+          name: release-assets
           path: dist-assets
-          merge-multiple: true
 
       - name: Create Release
         id: create_release

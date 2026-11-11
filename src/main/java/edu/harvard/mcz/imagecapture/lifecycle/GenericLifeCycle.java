@@ -108,12 +108,11 @@ public abstract class GenericLifeCycle<T> {
 						if (entry.getValue() instanceof Specification) {
 							p = ((Specification) entry.getValue()).toPredicate(root, cr, cb);
 						} else if (like && entry.getValue() instanceof String) {
-							if (!((String) entry.getValue()).contains("%")
-									&& !((String) entry.getValue()).contains("_")) {
-								p = cb.like(cb.lower(propertyToMatch.as(String.class)),
-										"%" + ((String) entry.getValue()).toLowerCase() + "%");
+							String sVal = (String) entry.getValue();
+							if (sVal.contains("%") || sVal.contains("_")) {
+								p = cb.like(cb.lower(propertyToMatch.as(String.class)), sVal.toLowerCase());
 							} else {
-								p = cb.like(propertyToMatch.as(String.class), (String) entry.getValue());
+								p = cb.equal(propertyToMatch, entry.getValue());
 							}
 						} else {
 							Object value = entry.getValue();
@@ -183,12 +182,11 @@ public abstract class GenericLifeCycle<T> {
 						if (entry.getValue() instanceof Specification) {
 							p = ((Specification) entry.getValue()).toPredicate(root, cr, cb);
 						} else if (like && entry.getValue() instanceof String) {
-							if (!((String) entry.getValue()).contains("%")
-									&& !((String) entry.getValue()).contains("_")) {
-								p = cb.like(cb.lower(propertyToMatch.as(String.class)),
-										"%" + ((String) entry.getValue()).toLowerCase() + "%");
+							String sVal = (String) entry.getValue();
+							if (sVal.contains("%") || sVal.contains("_")) {
+								p = cb.like(cb.lower(propertyToMatch.as(String.class)), sVal.toLowerCase());
 							} else {
-								p = cb.like(propertyToMatch.as(String.class), (String) entry.getValue());
+								p = cb.equal(propertyToMatch, entry.getValue());
 							}
 						} else {
 							Object value = entry.getValue();

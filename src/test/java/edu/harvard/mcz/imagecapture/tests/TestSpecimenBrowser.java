@@ -278,4 +278,39 @@ public class TestSpecimenBrowser extends TestCase {
 		assertEquals(0, browser.getTotalCount());
 		assertEquals(0, browser.getRowCount());
 	}
+
+	@Test
+	public void testWildcardSearchMatching() {
+		SpecimenLifeCycle sls = new SpecimenLifeCycle();
+
+		// 1. Prefix wildcard: card% matches all 5 (cardui_1 .. cardui_5)
+		Map<String, Object> prefixCriteria = new HashMap<>();
+		prefixCriteria.put("specificEpithet", "card%");
+		assertEquals(5, sls.countBy(prefixCriteria, true));
+		List<Specimen> prefixResults = sls.findSpecimensForTable(prefixCriteria, 10, 0, true, "barcode", true);
+		assertEquals(5, prefixResults.size());
+
+		// 2. Exact match without wildcard: cardui_1 matches only 1
+		Map<String, Object> exactCriteria = new HashMap<>();
+		exactCriteria.put("specificEpithet", "cardui_1");
+		assertEquals(1, sls.countBy(exactCriteria, true));
+		List<Specimen> exactResults = sls.findSpecimensForTable(exactCriteria, 10, 0, true, "barcode", true);
+		assertEquals(1, exactResults.size());
+
+		// 3. Substring without wildcard: "ui_1" should NOT match because no % is added
+		// automatically
+		Map<String, Object> subCriteria = new HashMap<>();
+		subCriteria.put("specificEpithet", "ui_1");
+		assertEquals(0, sls.countBy(subCriteria, true));
+		List<Specimen> subResults = sls.findSpecimensForTable(subCriteria, 10, 0, true, "barcode", true);
+		assertEquals(0, subResults.size());
+
+		// 4. Substring WITH explicit wildcard: "%ui_1" should match 1
+		Map<String, Object> explicitSubCriteria = new HashMap<>();
+		explicitSubCriteria.put("specificEpithet", "%ui_1");
+		assertEquals(1, sls.countBy(explicitSubCriteria, true));
+		List<Specimen> explicitSubResults = sls.findSpecimensForTable(explicitSubCriteria, 10, 0, true, "barcode",
+				true);
+		assertEquals(1, explicitSubResults.size());
+	}
 }

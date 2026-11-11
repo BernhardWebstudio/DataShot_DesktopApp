@@ -1179,12 +1179,11 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 						if (entry.getValue() instanceof Specification) {
 							p = ((Specification) entry.getValue()).toPredicate(root, cr, cb);
 						} else if (like && entry.getValue() instanceof String) {
-							if (!((String) entry.getValue()).contains("%")
-									&& !((String) entry.getValue()).contains("_")) {
-								p = cb.like(cb.lower(propertyToMatch.as(String.class)),
-										"%" + ((String) entry.getValue()).toLowerCase() + "%");
+							String sVal = (String) entry.getValue();
+							if (sVal.contains("%") || sVal.contains("_")) {
+								p = cb.like(cb.lower(propertyToMatch.as(String.class)), sVal.toLowerCase());
 							} else {
-								p = cb.like(propertyToMatch.as(String.class), (String) entry.getValue());
+								p = cb.equal(propertyToMatch, entry.getValue());
 							}
 						} else {
 							p = cb.equal(propertyToMatch, entry.getValue());
@@ -1318,8 +1317,14 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 						Object val = entry.getValue();
 						String paramName = "param" + i;
 						if (like && val instanceof String) {
-							hql.append("lower(s.").append(key).append(") like :").append(paramName);
-							params.put(paramName, "%" + val.toString().toLowerCase() + "%");
+							String sVal = val.toString();
+							if (sVal.contains("%") || sVal.contains("_")) {
+								hql.append("lower(s.").append(key).append(") like :").append(paramName);
+								params.put(paramName, sVal.toLowerCase());
+							} else {
+								hql.append("s.").append(key).append(" = :").append(paramName);
+								params.put(paramName, val);
+							}
 						} else {
 							hql.append("s.").append(key).append(" = :").append(paramName);
 							params.put(paramName, val);

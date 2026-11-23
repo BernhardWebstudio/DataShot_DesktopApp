@@ -2,6 +2,7 @@ package edu.harvard.mcz.imagecapture.tests;
 
 import edu.harvard.mcz.imagecapture.SpecimenBrowser;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
+import edu.harvard.mcz.imagecapture.entity.Number;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
@@ -312,5 +313,77 @@ public class TestSpecimenBrowser extends TestCase {
 		List<Specimen> explicitSubResults = sls.findSpecimensForTable(explicitSubCriteria, 10, 0, true, "barcode",
 				true);
 		assertEquals(1, explicitSubResults.size());
+	}
+
+	@Test
+	public void testCollectionNumberSorting() {
+		Session session = HibernateUtil.getTestSessionFactory().openSession();
+		Transaction tx = session.beginTransaction();
+		String[] nrValues = {"10", "2", "100", "1.5", "ABC-1", "", null};
+		for (int i = 0; i < nrValues.length; i++) {
+			Specimen s = new Specimen();
+			s.setBarcode("TEST_COL_NR_" + i);
+			s.setFamily("Papilionidae");
+			s.setGenus("Papilio");
+			s.setSpecificEpithet("machaon_" + i);
+			s.setDateCreated(new Date());
+			session.persist(s);
+			if (nrValues[i] != null) {
+				Number n = new Number(s, nrValues[i], "Collection Number");
+				session.persist(n);
+			}
+			// Add a distractor number with a different type
+			Number other = new Number(s, "99999", "Collector Number");
+			session.persist(other);
+			createdSpecimens.add(s);
+		}
+		tx.commit();
+		session.close();
+
+		SpecimenLifeCycle sls = new SpecimenLifeCycle();
+
+		// 1. Simple criteria path (findSpecimensForTable HQL)
+		Map<String, Object> simpleCriteria = new HashMap<>();
+		simpleCriteria.put("genus", "Papilio");
+
+		List<Specimen> asc = sls.findSpecimensForTable(simpleCriteria, 10, 0, false, "numbers.number", true);
+		assertEquals(7, asc.size());
+		assertEquals("1.5", asc.get(0).getFirstNumberWithType("Collection Number"));
+		assertEquals("2", asc.get(1).getFirstNumberWithType("Collection Number"));
+		assertEquals("10", asc.get(2).getFirstNumberWithType("Collection Number"));
+		assertEquals("100", asc.get(3).getFirstNumberWithType("Collection Number"));
+		assertEquals("ABC-1", asc.get(4).getFirstNumberWithType("Collection Number"));
+		// Empty and null come last
+		String fifth = asc.get(5).getFirstNumberWithType("Collection Number");
+		String sixth = asc.get(6).getFirstNumberWithType("Collection Number");
+		assertTrue(fifth == null || fifth.isEmpty());
+		assertTrue(sixth == null || sixth.isEmpty());
+
+		List<Specimen> desc = sls.findSpecimensForTable(simpleCriteria, 10, 0, false, "numbers.number", false);
+		assertEquals(7, desc.size());
+		assertEquals("100", desc.get(0).getFirstNumberWithType("Collection Number"));
+		assertEquals("10", desc.get(1).getFirstNumberWithType("Collection Number"));
+		assertEquals("2", desc.get(2).getFirstNumberWithType("Collection Number"));
+		assertEquals("1.5", desc.get(3).getFirstNumberWithType("Collection Number"));
+		assertEquals("ABC-1", desc.get(4).getFirstNumberWithType("Collection Number"));
+
+		// 2. Complex criteria path (findIdsByCriteria + findSpecimensForTableByIds)
+		Map<String, Object> complexCriteria = new HashMap<>();
+		complexCriteria.put("genus", "Papilio");
+		complexCriteria.put("numbers.numberType", "Collection Number");
+
+		List<Specimen> complexAscPage1 = sls.findSpecimensForTable(complexCriteria, 3, 0, false, "numbers.number",
+				true);
+		assertEquals(3, complexAscPage1.size());
+		assertEquals("1.5", complexAscPage1.get(0).getFirstNumberWithType("Collection Number"));
+		assertEquals("2", complexAscPage1.get(1).getFirstNumberWithType("Collection Number"));
+		assertEquals("10", complexAscPage1.get(2).getFirstNumberWithType("Collection Number"));
+
+		List<Specimen> complexDescPage1 = sls.findSpecimensForTable(complexCriteria, 3, 0, false, "numbers.number",
+				false);
+		assertEquals(3, complexDescPage1.size());
+		assertEquals("100", complexDescPage1.get(0).getFirstNumberWithType("Collection Number"));
+		assertEquals("10", complexDescPage1.get(1).getFirstNumberWithType("Collection Number"));
+		assertEquals("2", complexDescPage1.get(2).getFirstNumberWithType("Collection Number"));
 	}
 }

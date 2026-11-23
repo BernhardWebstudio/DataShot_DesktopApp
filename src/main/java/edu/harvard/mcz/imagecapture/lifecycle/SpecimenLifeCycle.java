@@ -22,6 +22,7 @@ import edu.harvard.mcz.imagecapture.interfaces.BarcodeBuilder;
 import edu.harvard.mcz.imagecapture.query.Specification;
 import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceException;
+import jakarta.persistence.Tuple;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -33,7 +34,6 @@ import jakarta.persistence.criteria.Root;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -45,6 +45,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionException;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
+import org.hibernate.query.criteria.JpaSubQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1158,7 +1160,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 			try {
 				session.beginTransaction();
 				CriteriaBuilder cb = (CriteriaBuilder) session.getCriteriaBuilder();
-				CriteriaQuery<Long> cr = cb.createQuery(Long.class);
+				CriteriaQuery<Tuple> cr = cb.createTupleQuery();
 				Root<Specimen> root = cr.from(Specimen.class);
 				List<Predicate> predicates = new ArrayList<>();
 				if (propertyValueMap != null) {
@@ -1196,37 +1198,45 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				if (!predicates.isEmpty()) {
 					cr.where(cb.and(predicates.toArray(new Predicate[0])));
 				}
-				cr.select(root.get("specimenId")).distinct(true);
-
 				List<Order> orders = new ArrayList<>();
-				if (sortProperty != null && !sortProperty.trim().isEmpty() && !sortProperty.equals("specimenId")
-						&& !"numbers.number".equals(sortProperty)) {
-					Expression<?> sortExpr = null;
-					String[] splitSort = sortProperty.split("\\.");
-					if (splitSort.length > 1) {
-						Join<Object, Object> currentSortRoot = root.join(splitSort[0], JoinType.LEFT);
-						for (int i = 1; i < splitSort.length - 1; i++) {
-							currentSortRoot = currentSortRoot.join(splitSort[i], JoinType.LEFT);
+				if ("numbers.number".equals(sortProperty)) {
+					addCollectionNumberSortOrders(session.getCriteriaBuilder(), cr, root, orders, sortAscending);
+				} else {
+					cr.multiselect(root.get("specimenId")).distinct(true);
+					if (sortProperty != null && !sortProperty.trim().isEmpty() && !sortProperty.equals("specimenId")) {
+						Expression<?> sortExpr = null;
+						String[] splitSort = sortProperty.split("\\.");
+						if (splitSort.length > 1) {
+							Join<Object, Object> currentSortRoot = root.join(splitSort[0], JoinType.LEFT);
+							for (int i = 1; i < splitSort.length - 1; i++) {
+								currentSortRoot = currentSortRoot.join(splitSort[i], JoinType.LEFT);
+							}
+							sortExpr = currentSortRoot.get(splitSort[splitSort.length - 1]);
+						} else {
+							sortExpr = root.get(sortProperty);
 						}
-						sortExpr = currentSortRoot.get(splitSort[splitSort.length - 1]);
-					} else {
-						sortExpr = root.get(sortProperty);
+						orders.add(sortAscending ? cb.asc(sortExpr) : cb.desc(sortExpr));
 					}
-					orders.add(sortAscending ? cb.asc(sortExpr) : cb.desc(sortExpr));
 				}
 				orders.add(sortAscending ? cb.asc(root.get("specimenId")) : cb.desc(root.get("specimenId")));
 				cr.orderBy(orders);
 
-				Query<Long> q = session.createQuery(cr);
+				Query<Tuple> q = session.createQuery(cr);
 				if (maxResults > 0) {
 					q.setMaxResults(maxResults);
 				}
 				if (offset > 0) {
 					q.setFirstResult(offset);
 				}
-				List<Long> ids = q.list();
+				List<Tuple> rows = q.list();
+				List<Long> ids = new ArrayList<>(rows != null ? rows.size() : 0);
+				if (rows != null) {
+					for (Tuple row : rows) {
+						ids.add(row.get(0, Long.class));
+					}
+				}
 				session.getTransaction().commit();
-				return ids != null ? ids : Collections.emptyList();
+				return ids;
 			} catch (HibernateException e) {
 				session.getTransaction().rollback();
 				log.error("findIdsByCriteria failed", e);
@@ -1235,6 +1245,55 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 		} catch (RuntimeException re) {
 			log.error("findIdsByCriteria failed", re);
 			throw re;
+		}
+	}
+
+	private static final String COLLECTION_NUMBER_REGEX = "^-?[0-9]+(\\.[0-9]+)?$";
+
+	private void addCollectionNumberSortOrders(HibernateCriteriaBuilder hcb, CriteriaQuery<Tuple> cr,
+			Root<Specimen> root, List<Order> orders, boolean sortAscending) {
+		JpaSubQuery<String> colNrSubquery = (JpaSubQuery<String>) cr.subquery(String.class);
+		Root<edu.harvard.mcz.imagecapture.entity.Number> numRoot = colNrSubquery
+				.from(edu.harvard.mcz.imagecapture.entity.Number.class);
+		colNrSubquery.select(hcb.trim(numRoot.get("number")));
+		colNrSubquery.where(hcb.equal(numRoot.get("specimen"), root),
+				hcb.equal(numRoot.get("numberType"), "Collection Number"));
+		colNrSubquery.orderBy(hcb.asc(numRoot.get("numberId")));
+		colNrSubquery.fetch(1);
+
+		Expression<Integer> isNumeric = hcb.sql("CASE WHEN ? REGEXP ? THEN 1 ELSE 0 END", Integer.class, colNrSubquery,
+				hcb.literal(COLLECTION_NUMBER_REGEX));
+		Expression<Integer> groupExpr = hcb.<Integer>selectCase().when(hcb.equal(isNumeric, 1), 0)
+				.when(hcb.and(hcb.isNotNull(colNrSubquery), hcb.notEqual(colNrSubquery, "")), 1).otherwise(2);
+		Expression<Double> numericExpr = hcb.<Double>selectCase()
+				.when(hcb.equal(isNumeric, 1), colNrSubquery.as(Double.class)).otherwise(hcb.nullLiteral(Double.class));
+
+		cr.multiselect(root.get("specimenId"), groupExpr, numericExpr, colNrSubquery).distinct(true);
+		orders.add(hcb.asc(groupExpr));
+		orders.add(sortAscending ? hcb.asc(numericExpr) : hcb.desc(numericExpr));
+		orders.add(sortAscending ? hcb.asc(colNrSubquery) : hcb.desc(colNrSubquery));
+	}
+
+	private void appendTableOrderByClause(StringBuilder hql, String sortProperty, boolean sortAscending) {
+		if (sortProperty != null && !sortProperty.isEmpty()) {
+			String dir = sortAscending ? "ASC" : "DESC";
+			if ("numbers.number".equals(sortProperty)) {
+				String colNrSubquery = "(SELECT TRIM(n.number) FROM Number n WHERE n.specimen = s AND n.numberType = 'Collection Number' ORDER BY n.numberId ASC LIMIT 1)";
+				String isNumeric = "CAST(sql('CASE WHEN ? REGEXP ? THEN 1 ELSE 0 END', " + colNrSubquery + ", '"
+						+ COLLECTION_NUMBER_REGEX + "') AS Integer) = 1";
+				hql.append(" ORDER BY CASE WHEN ").append(isNumeric).append(" THEN 0 WHEN ").append(colNrSubquery)
+						.append(" IS NOT NULL AND ").append(colNrSubquery)
+						.append(" <> '' THEN 1 ELSE 2 END ASC, CASE WHEN ").append(isNumeric).append(" THEN CAST(")
+						.append(colNrSubquery).append(" AS Double) ELSE NULL END ").append(dir).append(", ")
+						.append(colNrSubquery).append(" ").append(dir).append(", s.specimenId ").append(dir);
+			} else {
+				hql.append(" ORDER BY s.").append(sortProperty).append(" ").append(dir);
+				if (!"specimenId".equals(sortProperty)) {
+					hql.append(", s.specimenId ").append(dir);
+				}
+			}
+		} else {
+			hql.append(" ORDER BY s.specimenId ASC");
 		}
 	}
 
@@ -1251,15 +1310,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				hql.append(
 						"(SELECT n.number FROM Number n WHERE n.specimen = s AND n.numberType = 'Collection Number' ORDER BY n.numberId ASC LIMIT 1)) ");
 				hql.append("FROM Specimen s WHERE s.specimenId IN (:ids) ");
-				if (sortProperty != null && !sortProperty.isEmpty()) {
-					String orderProp = "numbers.number".equals(sortProperty) ? "s.specimenId" : "s." + sortProperty;
-					hql.append(" ORDER BY ").append(orderProp).append(sortAscending ? " ASC" : " DESC");
-					if (!"specimenId".equals(sortProperty)) {
-						hql.append(", s.specimenId ").append(sortAscending ? "ASC" : "DESC");
-					}
-				} else {
-					hql.append(" ORDER BY s.specimenId ASC");
-				}
+				appendTableOrderByClause(hql, sortProperty, sortAscending);
 
 				Query<Specimen> query = session.createQuery(hql.toString(), Specimen.class);
 				query.setParameterList("ids", ids);
@@ -1333,15 +1384,7 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 					}
 				}
 
-				if (sortProperty != null && !sortProperty.isEmpty()) {
-					String orderProp = "numbers.number".equals(sortProperty) ? "s.specimenId" : "s." + sortProperty;
-					hql.append(" ORDER BY ").append(orderProp).append(sortAscending ? " ASC" : " DESC");
-					if (!"specimenId".equals(sortProperty)) {
-						hql.append(", s.specimenId ").append(sortAscending ? "ASC" : "DESC");
-					}
-				} else {
-					hql.append(" ORDER BY s.specimenId ASC");
-				}
+				appendTableOrderByClause(hql, sortProperty, sortAscending);
 
 				Query<Specimen> query = session.createQuery(hql.toString(), Specimen.class);
 				for (Map.Entry<String, Object> param : params.entrySet()) {

@@ -390,6 +390,55 @@ public class NahimaManager extends AbstractRestClient {
 		return (new JSONArray(returnValue)).getJSONObject(0);
 	}
 
+	/**
+	 * Post an event to the Nahima/fylr event API (/api/v1/event).
+	 *
+	 * @param eventType
+	 *            the event type (e.g., "DATASHOT_EXPORT")
+	 * @param info
+	 *            contextual metadata/statistics for the event
+	 * @return the response JSONObject from Nahima
+	 * @throws IOException
+	 *             if an I/O error occurs
+	 * @throws InterruptedException
+	 *             if the request is interrupted
+	 */
+	public JSONObject sendEvent(String eventType, JSONObject info) throws IOException, InterruptedException {
+		if (eventType == null || eventType.trim().isEmpty()) {
+			throw new IllegalArgumentException("eventType must not be null or empty");
+		}
+		JSONObject event = new JSONObject();
+		event.put("type", eventType);
+		if (info != null) {
+			event.put("info", info);
+		}
+		JSONObject payload = new JSONObject();
+		payload.put("event", event);
+
+		String queryURL = buildAuthenticatedUrl("event");
+		String returnValue = this.postRequest(queryURL, payload.toString(), new HashMap<>() {
+			{
+				put("Content-Type", "application/json");
+			}
+		});
+
+		if (returnValue == null || returnValue.trim().isEmpty()) {
+			return new JSONObject();
+		}
+		JSONObject responseObject;
+		try {
+			responseObject = new JSONObject(returnValue);
+		} catch (JSONException e) {
+			throw new RuntimeException("Failed to send event '" + eventType + "': Unexpected response: " + returnValue,
+					e);
+		}
+		if (isErrorResponse(responseObject)) {
+			throw new RuntimeException(
+					"Failed to send event '" + eventType + "': " + formatErrorMessage(responseObject));
+		}
+		return responseObject;
+	}
+
 	public JSONObject findObjectByUuid(String uuid) throws IOException {
 		String queryURL = buildAuthenticatedUrl("objects/uuid/" + uuid);
 		String returnValue = this.getRequest(queryURL, new HashMap<>() {

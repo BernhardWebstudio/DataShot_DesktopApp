@@ -1,5 +1,6 @@
 package edu.harvard.mcz.imagecapture.jobs;
 
+import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.data.NahimaManager;
@@ -43,6 +44,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 	public static int STATUS_DATASHOT_FAILED = 1;
 	public static int STATUS_RUNNING_FINE = 0;
 	public static int STATUS_FINISHED = -1;
+	public static final String EXPORT_EVENT_TYPE = "DATASHOT_EXPORT";
 	private final List<ProgressListener> progressListener = new ArrayList<>();
 	private Date start = null;
 	private int nrOfSpecimenToProcess = 0;
@@ -206,6 +208,7 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 					nrOfSpecimenToProcess);
 			notifyWorkStatusChanged(overallStatus);
 		} finally {
+			sendExportEvent();
 			// Clean up ThreadLocal instances to prevent memory leaks
 			if (threadLocalNahimaManager != null) {
 				threadLocalNahimaManager.remove();
@@ -593,6 +596,58 @@ public class NahimaExportJob implements RunnableJob, Runnable {
 				nrOfSpecimenToProcess, newlyExportedCount.get(), updatedCount.get(), skippedCount.get(),
 				failedCount.get());
 		notifyWorkStatusChanged(overallStatus);
+	}
+
+	private void sendExportEvent() {
+		if (threadLocalNahimaManager == null) {
+			return;
+		}
+		try {
+			NahimaManager manager = threadLocalNahimaManager.get();
+			JSONObject info = buildExportEventInfo();
+			manager.sendEvent(EXPORT_EVENT_TYPE, info);
+			log.debug("Sent export statistics event to Nahima: {}", info);
+		} catch (Exception e) {
+			log.warn("Failed to send export statistics event to Nahima", e);
+		}
+	}
+
+	public JSONObject buildExportEventInfo() {
+		Date end = new Date();
+		long durationMs = this.start != null ? Math.max(0L, end.getTime() - this.start.getTime()) : 0L;
+		String statusLabel;
+		if (this.status == STATUS_FINISHED) {
+			statusLabel = "finished";
+		} else if (this.status == STATUS_NAHIMA_FAILED) {
+			statusLabel = "nahima_failed";
+		} else if (this.status == STATUS_DATASHOT_FAILED) {
+			statusLabel = "datashot_failed";
+		} else {
+			statusLabel = "unknown";
+		}
+
+		JSONObject info = new JSONObject();
+		info.put("source", "DataShot");
+		info.put("version", ImageCaptureApp.getAppVersion());
+		info.put("status", statusLabel);
+		info.put("total_specimens", nrOfSpecimenToProcess);
+		info.put("processed", processedCount.get());
+		info.put("newly_exported", newlyExportedCount.get());
+		info.put("updated", updatedCount.get());
+		info.put("skipped", skippedCount.get());
+		info.put("failed", failedCount.get());
+		info.put("duration_ms", durationMs);
+		if (this.start != null) {
+			info.put("started_at", this.start.toInstant().toString());
+		}
+		info.put("finished_at", end.toInstant().toString());
+		if (this.oneSpecimenBarcode != null && !this.oneSpecimenBarcode.isEmpty()) {
+			info.put("barcode", this.oneSpecimenBarcode);
+		}
+		if (this.overallStatus != null && !this.overallStatus.isEmpty()) {
+			info.put("summary", this.overallStatus);
+		}
+		return info;
 	}
 
 	/**

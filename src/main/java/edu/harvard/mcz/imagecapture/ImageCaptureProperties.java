@@ -122,6 +122,10 @@ public class ImageCaptureProperties extends AbstractTableModel {
 	 */
 	public static final String KEY_CHROMIUM_EXECUTABLE = "program.chromium.path";
 	/**
+	 * Enable optional OCR fallback when UnitTrayLabel QR code is absent.
+	 */
+	public static final String KEY_OCR_ENABLED = "images.ocr.enabled";
+	/**
 	 * The path and name of the tesseract executable for OCR failover.
 	 */
 	public static final String KEY_TESSERACT_EXECUTABLE = "program.tesseract";
@@ -657,10 +661,13 @@ public class ImageCaptureProperties extends AbstractTableModel {
 		if (!properties.containsKey(KEY_CHROMIUM_EXECUTABLE)) {
 			properties.setProperty(KEY_CHROMIUM_EXECUTABLE, "");
 		}
+		if (!properties.containsKey(KEY_OCR_ENABLED)) {
+			properties.setProperty(KEY_OCR_ENABLED, "false");
+		}
 		if (!properties.containsKey(KEY_TESSERACT_EXECUTABLE)) {
 			// name of the tesseract executable, probably tesseract on unix,
 			// tesseract.exe on windows
-			properties.setProperty(KEY_TESSERACT_EXECUTABLE, "tesseract ");
+			properties.setProperty(KEY_TESSERACT_EXECUTABLE, "tesseract");
 		}
 		if (!properties.containsKey(KEY_CONVERT_EXECUTABLE)) {
 			properties.setProperty(KEY_CONVERT_EXECUTABLE, "convert ");

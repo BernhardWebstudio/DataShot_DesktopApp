@@ -20,17 +20,17 @@ package edu.harvard.mcz.imagecapture;
 
 import edu.harvard.mcz.imagecapture.exceptions.OCRReadException;
 import edu.harvard.mcz.imagecapture.interfaces.OCR;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import edu.harvard.mcz.imagecapture.ocr.OcrResult;
+import edu.harvard.mcz.imagecapture.ocr.TesseractCliOcrEngine;
+import java.io.File;
+import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Uses a system runtime call to tesseract to obtain OCR text from a TIFF image
- * file.
+ * Uses {@link TesseractCliOcrEngine} to invoke tesseract and obtain OCR text
+ * from an image file without working-directory temp files or blocking stream
+ * reads.
  * <p>
  * Usage:
  *
@@ -48,11 +48,17 @@ import org.slf4j.LoggerFactory;
 public class TesseractOCR implements OCR {
 
 	private static final Logger log = LoggerFactory.getLogger(TesseractOCR.class);
-	private final String tempFileBase = "tempOCRtextOutput";
+	private final TesseractCliOcrEngine ocrEngine;
 	private String target = "/home/mole/stuff/MCZ/mcz/insects/testImages/text.tif";
-	// private String language = "-l eng";
-	// private String language = "-l spa";
-	private String language = "-l lepid"; // Lepidoptera training set
+	private String language = TesseractCliOcrEngine.DEFAULT_LANGUAGE; // Lepidoptera training set
+
+	public TesseractOCR() {
+		this(new TesseractCliOcrEngine());
+	}
+
+	TesseractOCR(TesseractCliOcrEngine ocrEngine) {
+		this.ocrEngine = ocrEngine;
+	}
 
 	/**
 	 * Run TesseractOCR from the command line to OCR a single file, intended as a
@@ -61,7 +67,7 @@ public class TesseractOCR implements OCR {
 	 * the results on standard output to be piped elsewhere.
 	 *
 	 * @param args
-	 *            name of the TIFF file to try to OCR.
+	 *            name of the image file to try to OCR.
 	 */
 	public static void main(String[] args) {
 		if (args.length < 1) {
@@ -86,8 +92,8 @@ public class TesseractOCR implements OCR {
 	}
 
 	/**
-	 * Sets the name of the TIFF image file from which tesseract is to try to
-	 * extract text.
+	 * Sets the name of the image file from which tesseract is to try to extract
+	 * text.
 	 *
 	 * @param aTargetFile
 	 *            filename, including path, of the file that is to be OCRed.
@@ -95,7 +101,7 @@ public class TesseractOCR implements OCR {
 	 *             if the file cannot be read.
 	 */
 	public void setTarget(String aTargetFile) throws OCRReadException {
-		if (new File(aTargetFile).canRead()) {
+		if (aTargetFile != null && new File(aTargetFile).canRead()) {
 			target = aTargetFile;
 		} else {
 			throw new OCRReadException("Can't read file: " + aTargetFile);
@@ -109,9 +115,10 @@ public class TesseractOCR implements OCR {
 	 * "lepid" for custom scientific name/author training files.
 	 *
 	 * @param lang
+	 *            Tesseract language code
 	 */
 	public void setLang(String lang) {
-		language = "-l " + lang;
+		language = lang;
 	}
 
 	public String getOCRText(String lang) throws OCRReadException {
@@ -126,77 +133,11 @@ public class TesseractOCR implements OCR {
 	 */
 	@Override
 	public String getOCRText() throws OCRReadException {
-		StringBuffer result = new StringBuffer();
-		BufferedReader resultReader = null;
-		log.debug("in TesseractOCR.getOCRText() 1");
-		try {
-			log.debug("in TesseractOCR.getOCRText() 2");
-			Runtime r = Runtime.getRuntime();
-			log.debug("in TesseractOCR.getOCRText() 3");
-
-			// Run tesseract to OCR the target file.
-			List<String> runCommand = new ArrayList<>();
-			runCommand.addAll(Arrays.asList(Singleton.getSingletonInstance().getProperties().getProperties()
-					.getProperty(ImageCaptureProperties.KEY_TESSERACT_EXECUTABLE), target, tempFileBase, language));
-
-			Process proc = r.exec((String[]) runCommand.toArray());
-			log.debug("in TesseractOCR.getOCRText() 5");
-
-			System.out.println(runCommand);
-			log.debug("in TesseractOCR.getOCRText() 6 runCommand is " + runCommand);
-
-			// Create and start a reader for the error stream
-			StreamReader errorReader = new StreamReader(proc.getErrorStream(), "ERROR");
-			errorReader.run();
-
-			log.debug("in TesseractOCR.getOCRText() 7");
-
-			// run the process and wait for the exit value
-			int exitVal = proc.waitFor();
-
-			System.out.println("Tesseract Exit Value: " + exitVal);
-
-			log.debug("in TesseractOCR.getOCRText() 8 exitVal is " + exitVal);
-
-			if (exitVal == 0) {
-				resultReader = new BufferedReader(
-						new InputStreamReader(new FileInputStream(tempFileBase + ".txt"), StandardCharsets.UTF_8));
-				String s;
-				while ((s = resultReader.readLine()) != null) {
-					result.append(s);
-					result.append("\n");
-				}
-				resultReader.close();
-			} else {
-				throw new OCRReadException("OCR process failed (exit value>0).");
-			}
-			log.debug("in TesseractOCR.getOCRText() 9");
-			if (result.length() > 0) {
-				String resString = result.toString();
-				// $ is returned by tesseract to indicate italics
-				// @ is returned by tesseract to indicate bold
-				// | and _ are common interpretations of QR barcode blocks
-				result = new StringBuffer();
-				result.append(resString.replaceAll("[|@\\$_]", ""));
-			}
-
-		} catch (IOException eio) {
-			log.error("Error", eio);
-			throw new OCRReadException("OCR process failed with IO Exception.");
-		} catch (InterruptedException ei) {
-			log.error("Error", ei);
-			throw new OCRReadException("OCR process failed with Interrupted Exception.");
-		} finally {
-			if (resultReader != null) {
-				try {
-					resultReader.close();
-				} catch (IOException e) {
-					log.debug("Debug {}", e);
-				}
-			}
+		OcrResult result = ocrEngine.recognizeFile(Paths.get(target), language);
+		if (!result.isSuccess()) {
+			log.debug("TesseractOCR failed: {}", result.getErrorMessage());
+			throw new OCRReadException(result.getErrorMessage());
 		}
-		log.debug("in TesseractOCR.getOCRText() 10 result is " + result);
-		log.debug("Debug {}", result);
-		return result.toString();
+		return result.getText();
 	}
 }

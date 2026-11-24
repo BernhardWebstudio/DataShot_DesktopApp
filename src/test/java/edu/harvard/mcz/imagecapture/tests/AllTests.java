@@ -68,6 +68,15 @@ public class AllTests {
 		suite.addTest(new junit.framework.JUnit4TestAdapter(TestTableCellTabbing.class));
 		suite.addTest(new junit.framework.JUnit4TestAdapter(TestMainFrameMenuState.class));
 		suite.addTest(new junit.framework.JUnit4TestAdapter(TestSpecimenDetailsKeyboardNavigation.class));
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestBarcodeAndMetadataBaseline.class));
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestScanningAndOcrComponents.class));
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestImageDocumentAndMetadata.class));
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestImagePreprocessor.class));
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestExternalProcessRunner.class));
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestBoofCvAndZxingScanners.class));
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestTemplateResolverAndDetector.class));
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestOcrEngineAndGating.class));
+		suite.addTest(new junit.framework.JUnit4TestAdapter(TestSpecimenImageAnalyzer.class));
 		suite.addTestSuite(TestCountryMismatchAndErrorRadius.class);
 		// $JUnit-END$
 		return suite;

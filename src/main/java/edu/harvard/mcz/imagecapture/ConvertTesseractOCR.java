@@ -20,23 +20,19 @@ package edu.harvard.mcz.imagecapture;
 
 import edu.harvard.mcz.imagecapture.exceptions.OCRReadException;
 import edu.harvard.mcz.imagecapture.interfaces.OCR;
+import edu.harvard.mcz.imagecapture.ocr.OcrResult;
+import edu.harvard.mcz.imagecapture.ocr.TesseractCliOcrEngine;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 import javax.imageio.ImageIO;
-import javax.imageio.ImageTypeSpecifier;
-import javax.imageio.ImageWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Takes a buffered image, generates a TIFF file from it with a call out to
- * ImageMagick or GraphicsMagick convert, then passes that tiff file on to
- * TesseractOCR for Tesseract to OCR the tiff tile.
+ * Legacy {@link OCR} wrapper that delegates buffered-image OCR to
+ * {@link TesseractCliOcrEngine} without ImageMagick conversion or
+ * working-directory temp files.
  * <p>
  * Usage:
  *
@@ -48,11 +44,16 @@ import org.slf4j.LoggerFactory;
 public class ConvertTesseractOCR implements OCR {
 
 	private static final Logger log = LoggerFactory.getLogger(ConvertTesseractOCR.class);
-	private final boolean debug = false;
-	private BufferedImage subimage = null;
+	private final BufferedImage subimage;
+	private final TesseractCliOcrEngine ocrEngine;
 
 	public ConvertTesseractOCR(BufferedImage anImageToOCR) {
-		subimage = anImageToOCR;
+		this(anImageToOCR, new TesseractCliOcrEngine());
+	}
+
+	ConvertTesseractOCR(BufferedImage anImageToOCR, TesseractCliOcrEngine ocrEngine) {
+		this.subimage = anImageToOCR;
+		this.ocrEngine = ocrEngine;
 	}
 
 	/**
@@ -64,16 +65,14 @@ public class ConvertTesseractOCR implements OCR {
 	 * @see edu.harvard.mcz.imagecapture.PositionTemplate
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		String target = "/home/mole/stuff/MCZ/mcz/insects/testImages/base/photo_plate_test_good_4_template.JPG";
 		if (args.length == 1) {
 			target = args[0];
 		}
 		File targetFile = new File(target);
 		PositionTemplate defaultTemplate = new PositionTemplate();
-		BufferedImage imagefile;
 		try {
-			imagefile = ImageIO.read(targetFile);
+			BufferedImage imagefile = ImageIO.read(targetFile);
 			int x = defaultTemplate.getTextPosition().width;
 			int y = defaultTemplate.getTextPosition().height;
 			int w = defaultTemplate.getTextSize().width;
@@ -99,99 +98,14 @@ public class ConvertTesseractOCR implements OCR {
 	 */
 	@Override
 	public String getOCRText() throws OCRReadException {
-		String returnValue = "";
-		// write to tiff file for ocr
-		log.debug("in ConvertTesseractOCR.getOCRText()");
-		ImageTypeSpecifier typeSpecifier = new ImageTypeSpecifier(subimage);
-		log.debug("in ConvertTesseractOCR.getOCRText() 1");
-		Iterator<ImageWriter> iter = ImageIO.getImageWriters(typeSpecifier, "tif");
-		log.debug("in ConvertTesseractOCR.getOCRText() 2");
-		if (iter.hasNext()) { // it is entering here and never reaches the else
-			// below. when it executes the else below, it can't
-			// find the convert program because there are
-			// references to /usr/bin
-			File tifffile = new File("temptiff.tif");
-			log.debug("in ConvertTesseractOCR.getOCRText() 3");
-			try {
-				ImageIO.write(subimage, "tif", tifffile);
-				log.debug("in ConvertTesseractOCR.getOCRText() 4");
-			} catch (IOException e) {
-				System.out.println(e.getMessage());
-				log.debug("in ConvertTesseractOCR.getOCRText() 5");
-				throw new OCRReadException("Native tiff file creation failed." + e.getMessage());
-			}
-		} else {
-			// Print out list of supported write formats
-			if (debug) {
-				log.debug("in ConvertTesseractOCR.getOCRText() 6");
-				String[] formatNames = ImageIO.getWriterFormatNames();
-				log.debug("in ConvertTesseractOCR.getOCRText() 7");
-				for (int i = 0; i < formatNames.length; i++) {
-					System.out.println("Write: " + formatNames[i]);
-					log.debug("in ConvertTesseractOCR.getOCRText() 8 Write: + formatNames[i]");
-				}
-			}
-			log.debug("in ConvertTesseractOCR.getOCRText() 9");
-			System.out.println("No tiff image writer.");
-			System.out.println("trying convert from jpg");
-			File jpgFile = new File("temptiff.jpg");
-			try {
-				ImageIO.write(subimage, "jpg", jpgFile);
-				log.debug("in ConvertTesseractOCR.getOCRText() 10");
-				// Run imagemagick to convert the target file to TIFF for
-				// String runCommand = "convert temptiff.jpg -depth 8 temptiff.tif";
-				List<String> runCommand = new ArrayList<>();
-				runCommand.addAll(Arrays.asList(
-						Singleton.getSingletonInstance().getProperties().getProperties()
-								.getProperty(ImageCaptureProperties.KEY_CONVERT_EXECUTABLE),
-						"temptiff.jpg", Singleton.getSingletonInstance().getProperties().getProperties()
-								.getProperty(ImageCaptureProperties.KEY_CONVERT_PARAMETERS),
-						"temptiff.tif"));
-				log.debug("in ConvertTesseractOCR.getOCRText() 11 runCommand is " + runCommand);
-				Runtime r = Runtime.getRuntime();
-				log.debug("in ConvertTesseractOCR.getOCRText() 12");
-				Process proc = r.exec((String[]) runCommand.toArray());
-				log.debug("in ConvertTesseractOCR.getOCRText() 13");
-				System.out.println(runCommand);
-				int exitVal = proc.waitFor();
-				log.debug("in ConvertTesseractOCR.getOCRText() 14 exitVal is " + exitVal);
-				if (exitVal > 0) {
-					throw new OCRReadException("ImageMagick temporary TIFF file creation failed.");
-				}
-			} catch (IOException e) {
-				System.out.println(e.getMessage());
-				log.debug("in ConvertTesseractOCR.getOCRText() 15 IOException");
-				throw new OCRReadException("Native temporary jpeg file creation failed. " + e.getMessage());
-			} catch (InterruptedException e) {
-				System.out.println(e.getMessage());
-				log.debug("in ConvertTesseractOCR.getOCRText() 16 InterruptedException");
-				throw new OCRReadException("Call to ImageMagick failed." + e.getMessage());
-			}
-
-			// OCR and parse UnitTray Label
-			TesseractOCR o = new TesseractOCR();
-			log.debug("in ConvertTesseractOCR.getOCRText() 17");
-			// TODO: pull out labelbit to tiff for scanning
-			try {
-				o.setTarget("temptiff.tif");
-				log.debug("in ConvertTesseractOCR.getOCRText() 18");
-			} catch (OCRReadException e1) {
-				log.debug("in ConvertTesseractOCR.getOCRText() 19 OCRReadException " + e1.getMessage());
-				System.out.println(e1.getMessage());
-				e1.printStackTrace();
-			}
-			String rawOCR = "";
-			try {
-				rawOCR = o.getOCRText();
-				log.debug("in ConvertTesseractOCR.getOCRText() 20 rawOCR is " + rawOCR);
-				returnValue = rawOCR;
-			} catch (OCRReadException e) {
-				log.debug("in ConvertTesseractOCR.getOCRText() 21 OCRReadException " + e.getMessage());
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-			}
+		if (subimage == null) {
+			throw new OCRReadException("Image to OCR is null.");
 		}
-		log.debug("in ConvertTesseractOCR.getOCRText() 22 returnValue is " + returnValue);
-		return returnValue;
+		OcrResult result = ocrEngine.recognize(subimage, TesseractCliOcrEngine.DEFAULT_LANGUAGE);
+		if (!result.isSuccess()) {
+			log.debug("OCR failed: {}", result.getErrorMessage());
+			throw new OCRReadException(result.getErrorMessage());
+		}
+		return result.getText();
 	}
 }

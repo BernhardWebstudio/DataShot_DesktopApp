@@ -320,17 +320,8 @@ public class JobRepeatOCR implements RunnableJob, Runnable {
 			try {
 				// OCR and parse UnitTray Label
 				TaxonNameReturner parser = null;
-				UnitTrayLabel labelRead = null;
+				UnitTrayLabel labelRead = scannableFile.getTaxonLabelQRText(templateToUse);
 				boolean foundQRText = false;
-				try {
-					labelRead = scannableFile.getTaxonLabelQRText(new PositionTemplate("Test template 2"));
-				} catch (NoSuchTemplateException e) {
-					try {
-						labelRead = scannableFile.getTaxonLabelQRText(new PositionTemplate("Small template 2"));
-					} catch (NoSuchTemplateException e1) {
-						log.error("Neither Test template 2 nor Small template 2 found");
-					}
-				}
 				if (labelRead != null) {
 					rawOCR = labelRead.toJSONString();
 					foundQRText = true;

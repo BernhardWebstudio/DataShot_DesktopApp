@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 import argparse
 import json
+import sys
 
 try:
     from qreader import QReader
     from cv2 import imread
-
-except ImportError:
-    import subprocess
-
-    subprocess.check_call(["pip", "install", "qreader", "cv2"])
-    from qreader import QReader
-    from cv2 import imread
+except ImportError as exc:
+    sys.stderr.write(
+        f"Missing required Python dependency for QR scanning ({exc}). "
+        "Install 'qreader' and 'opencv-python' in your Python environment.\n"
+    )
+    sys.exit(1)
 
 
 if __name__ == "__main__":

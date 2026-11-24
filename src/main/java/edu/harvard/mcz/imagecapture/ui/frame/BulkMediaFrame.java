@@ -251,7 +251,7 @@ public class BulkMediaFrame extends JFrame implements PropertyChangeListener {
 								if (candidate.getName().matches(Singleton.getSingletonInstance().getProperties()
 										.getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEREGEX))) {
 									try {
-										BulkMedia line = CandidateImageFile
+										BulkMedia line = BulkMediaExporter
 												.parseOneFileToBulkMedia(candidate.getCanonicalPath());
 										log.debug("Debug {}", line.getData());
 										printer.printRecord(line.getData());

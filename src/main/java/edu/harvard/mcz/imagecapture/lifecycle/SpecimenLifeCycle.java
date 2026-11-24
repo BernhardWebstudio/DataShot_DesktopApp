@@ -1202,7 +1202,6 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 				if ("numbers.number".equals(sortProperty)) {
 					addCollectionNumberSortOrders(session.getCriteriaBuilder(), cr, root, orders, sortAscending);
 				} else {
-					cr.multiselect(root.get("specimenId")).distinct(true);
 					if (sortProperty != null && !sortProperty.trim().isEmpty() && !sortProperty.equals("specimenId")) {
 						Expression<?> sortExpr = null;
 						String[] splitSort = sortProperty.split("\\.");
@@ -1215,7 +1214,10 @@ public class SpecimenLifeCycle extends GenericLifeCycle<Specimen> {
 						} else {
 							sortExpr = root.get(sortProperty);
 						}
+						cr.multiselect(root.get("specimenId"), sortExpr).distinct(true);
 						orders.add(sortAscending ? cb.asc(sortExpr) : cb.desc(sortExpr));
+					} else {
+						cr.multiselect(root.get("specimenId")).distinct(true);
 					}
 				}
 				orders.add(sortAscending ? cb.asc(root.get("specimenId")) : cb.desc(root.get("specimenId")));

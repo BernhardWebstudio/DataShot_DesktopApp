@@ -19,6 +19,7 @@ package edu.harvard.mcz.imagecapture.ui.dialog;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.ui.theme.ThemeManager;
 import edu.harvard.mcz.imagecapture.utility.HashUtility;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -271,7 +272,7 @@ public class LoginDialog extends JDialog {
 		userCancelled = false;
 		if (authenticationCallback != null) {
 			setInputsEnabled(false);
-			setStatus("Connecting to database...", new Color(0, 102, 204));
+			setStatus("Connecting to database...", ThemeManager.getInfoForeground());
 			self.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
 			SwingWorker<Boolean, Void> worker = new SwingWorker<>() {
@@ -303,12 +304,13 @@ public class LoginDialog extends JDialog {
 							self.dispose();
 						} else {
 							if (failureReason != null) {
-								setStatus(failureReason, Color.RED);
+								setStatus(failureReason, ThemeManager.getWarningForeground());
 								if (jPanelAdvanced != null && !jPanelAdvanced.isVisible()) {
 									toggleAdvanced();
 								}
 							} else {
-								setStatus("Login failed: Incorrect Email and/or Password.", Color.RED);
+								setStatus("Login failed: Incorrect Email and/or Password.",
+										ThemeManager.getWarningForeground());
 							}
 							if (jPasswordFieldUser != null) {
 								jPasswordFieldUser.selectAll();
@@ -316,7 +318,7 @@ public class LoginDialog extends JDialog {
 							}
 						}
 					} catch (Exception ex) {
-						setStatus("Error: " + ex.getMessage(), Color.RED);
+						setStatus("Error: " + ex.getMessage(), ThemeManager.getWarningForeground());
 						if (jPasswordFieldUser != null) {
 							jPasswordFieldUser.selectAll();
 							jPasswordFieldUser.requestFocusInWindow();
@@ -453,7 +455,7 @@ public class LoginDialog extends JDialog {
 	}
 
 	public void setStatus(String aStatus) {
-		setStatus(aStatus, Color.RED);
+		setStatus(aStatus, ThemeManager.getWarningForeground());
 	}
 
 	public void setStatus(String aStatus, Color color) {

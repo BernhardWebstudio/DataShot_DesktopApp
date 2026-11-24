@@ -46,6 +46,7 @@ import edu.harvard.mcz.imagecapture.ui.dialog.GeoreferenceDialog;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.CollectorTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.NumberTableModel;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenPartsTableModel;
+import edu.harvard.mcz.imagecapture.ui.theme.ThemeManager;
 import edu.harvard.mcz.imagecapture.utility.GeoNamesUtility;
 import edu.harvard.mcz.imagecapture.utility.OpenStreetMapUtility;
 import jakarta.persistence.OptimisticLockException;
@@ -324,7 +325,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 
 	public void setWarning(String warning) {
 		jTextFieldStatus.setText(warning);
-		jTextFieldStatus.setForeground(Color.RED);
+		jTextFieldStatus.setForeground(ThemeManager.getWarningForeground());
 	}
 
 	private void setWarnings() {
@@ -350,7 +351,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 	public void setStatus(String status) {
 		log.info("Setting status to: {}", status);
 		jTextFieldStatus.setText(status);
-		jTextFieldStatus.setForeground(Color.BLACK);
+		jTextFieldStatus.setForeground(ThemeManager.getTextFieldForeground());
 	}
 
 	public boolean save() {
@@ -454,7 +455,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 				}
 				setStateToClean();
 				this.setStatus("Saved");
-				jTextFieldStatus.setForeground(Color.BLACK);
 				setWarnings();
 			} catch (SaveFailedException e) {
 				setStateToDirty();
@@ -912,7 +912,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 			// section: other fields
 			addBasicJLabel(jPanel, "Inferences");
 			jPanel.add(bindingContext.bindTextField("Inferences", Specimen::getInferences, Specimen::setInferences,
-					f -> f.setBackground(MainFrame.BG_COLOR_ENT_FIELD)), "grow");
+					f -> ThemeManager.applyDynamicBackground(f, ThemeManager::getEntFieldBackground)), "grow");
 
 			addBasicJLabel(jPanel, "Created by");
 			jPanel.add(bindingContext.bindReadOnlyTextField("Creator", Specimen::getCreatedBy), "grow");
@@ -935,7 +935,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 					WorkFlowStatus.getWorkFlowStatusValues(), Specimen::getWorkFlowStatus,
 					(s, val) -> s.setWorkFlowStatus(val == null ? "" : val), cb -> {
 						cb.setEditable(false);
-						cb.setBackground(MainFrame.BG_COLOR_QC_FIELD);
+						ThemeManager.applyDynamicBackground(cb, ThemeManager::getQcFieldBackground);
 					});
 			jPanel.add(jComboBoxWorkflowStatus);
 
@@ -944,8 +944,10 @@ public class SpecimenDetailsViewPane extends JPanel {
 					"grow");
 
 			addBasicJLabel(jPanel, "Questions");
-			jPanel.add(bindingContext.bindTextField("Questions", Specimen::getQuestions, Specimen::setQuestions,
-					f -> f.setBackground(MainFrame.BG_COLOR_QC_FIELD)), "grow, span 3");
+			jPanel.add(
+					bindingContext.bindTextField("Questions", Specimen::getQuestions, Specimen::setQuestions,
+							f -> ThemeManager.applyDynamicBackground(f, ThemeManager::getQcFieldBackground)),
+					"grow, span 3");
 
 			jPanel.add(getAccordionDetailsPanel(), "grow, span 4");
 
@@ -1023,7 +1025,6 @@ public class SpecimenDetailsViewPane extends JPanel {
 
 			addBasicJLabel(accordionContent, "Number of Images");
 			jTextFieldImageCount = new JTextField();
-			jTextFieldImageCount.setForeground(Color.BLACK);
 			jTextFieldImageCount.setEnabled(false);
 			accordionContent.add(jTextFieldImageCount, "grow");
 
@@ -2067,7 +2068,8 @@ public class SpecimenDetailsViewPane extends JPanel {
 		int imageCount = specimen.getICImages() != null ? specimen.getICImages().size() : 0;
 		if (jTextFieldImageCount != null) {
 			jTextFieldImageCount.setText(Integer.toString(imageCount));
-			jTextFieldImageCount.setForeground(imageCount > 1 ? Color.RED : Color.BLACK);
+			jTextFieldImageCount.setForeground(
+					imageCount > 1 ? ThemeManager.getWarningForeground() : ThemeManager.getTextFieldForeground());
 		}
 	}
 
@@ -2294,7 +2296,7 @@ public class SpecimenDetailsViewPane extends JPanel {
 							public boolean verify(JComponent input) {
 								String taxonId = jTextFieldGBIFTaxonId.getText().trim();
 								if (taxonId.isEmpty()) {
-									jTextFieldGBIFTaxonId.setBackground(Color.WHITE);
+									jTextFieldGBIFTaxonId.setBackground(ThemeManager.getTextFieldBackground());
 									return true;
 								}
 								try {
@@ -2308,11 +2310,13 @@ public class SpecimenDetailsViewPane extends JPanel {
 													jTextFieldGBIFTaxonId.putClientProperty(
 															FlatClientProperties.OUTLINE,
 															FlatClientProperties.OUTLINE_ERROR);
-													jTextFieldGBIFTaxonId.setBackground(MainFrame.BG_COLOR_ERROR);
+													jTextFieldGBIFTaxonId
+															.setBackground(ThemeManager.getErrorFieldBackground());
 												} else {
 													jTextFieldGBIFTaxonId
 															.putClientProperty(FlatClientProperties.OUTLINE, null);
-													jTextFieldGBIFTaxonId.setBackground(Color.WHITE);
+													jTextFieldGBIFTaxonId
+															.setBackground(ThemeManager.getTextFieldBackground());
 												}
 												jTextFieldGBIFTaxonId.revalidate();
 											})).exceptionally(ex -> {

@@ -31,6 +31,7 @@ import edu.harvard.mcz.imagecapture.lifecycle.ICImageLifeCycle;
 import edu.harvard.mcz.imagecapture.lifecycle.UsersLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.dialog.TemplatePickerDialog;
 import edu.harvard.mcz.imagecapture.ui.dialog.VerbatimCaptureDialog;
+import edu.harvard.mcz.imagecapture.ui.theme.ThemeManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -164,7 +165,8 @@ public class ImageDisplayFrame extends JFrame {
 		// Singleton.getSingletonInstance().getProperties().getProperties().getProperty(ImageCaptureProperties.KEY_IMAGEBASE);
 
 		jLabelImageCountNr.setText("(" + fileCount + ")");
-		jLabelImageCountNr.setForeground(fileCount > 1 ? Color.RED : Color.BLACK);
+		jLabelImageCountNr
+				.setForeground(fileCount > 1 ? ThemeManager.getWarningForeground() : ThemeManager.getLabelForeground());
 		jComboBoxImagePicker.setModel(new DefaultComboBoxModel<>(fileNames.toArray(new String[0])));
 		jComboBoxImagePicker.setEnabled(fileCount > 1);
 		// File fileToCheck = new File(startPointName + path + image.getFilename());

@@ -28,6 +28,7 @@ import edu.harvard.mcz.imagecapture.ui.ButtonRenderer;
 import edu.harvard.mcz.imagecapture.ui.dialog.PositionTemplateBoxDialog;
 import edu.harvard.mcz.imagecapture.ui.frame.ImagePanelForDrawing;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.PositionTemplateTableModel;
+import edu.harvard.mcz.imagecapture.ui.theme.ThemeManager;
 import edu.harvard.mcz.imagecapture.utility.FileUtility;
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -365,7 +366,7 @@ public class PositionTemplateEditor extends JFrame {
 			gridBagConstraints8.gridy = 6;
 			jLabel4 = new JLabel();
 			jLabel4.setText("Taxon Name Label");
-			jLabel4.setForeground(Color.BLUE);
+			jLabel4.setForeground(ThemeManager.getInfoForeground());
 			GridBagConstraints gridBagConstraints7 = new GridBagConstraints();
 			gridBagConstraints7.gridx = 0;
 			gridBagConstraints7.anchor = GridBagConstraints.EAST;

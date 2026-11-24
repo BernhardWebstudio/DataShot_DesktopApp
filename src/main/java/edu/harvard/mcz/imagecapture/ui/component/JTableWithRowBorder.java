@@ -1,7 +1,7 @@
 package edu.harvard.mcz.imagecapture.ui.component;
 
-import edu.harvard.mcz.imagecapture.ui.DataShotColors;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.AbstractDeleteableTableModel;
+import edu.harvard.mcz.imagecapture.ui.theme.ThemeManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -137,10 +137,10 @@ public class JTableWithRowBorder extends JTable {
 		// Color row based on a cell value
 		// Alternate row color
 		if (!isRowSelected(row)) {
-			c.setBackground(row % 2 == 0 ? getBackground() : DataShotColors.VERY_LIGHT_GRAY);
+			c.setBackground(row % 2 == 0 ? getBackground() : ThemeManager.getAlternateTableRowBackground());
 		}
 
-		jc.setBorder(new MatteBorder(0, 0, 1, 0, DataShotColors.VERY_DARK_GRAY));
+		jc.setBorder(new MatteBorder(0, 0, 1, 0, ThemeManager.getTableRowBorderColor()));
 
 		// Use bold font on selected row
 

@@ -20,6 +20,7 @@ package edu.harvard.mcz.imagecapture.loader;
 
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
+import edu.harvard.mcz.imagecapture.ui.theme.ThemeManager;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -103,7 +104,7 @@ public class FieldLoaderWizard extends JDialog {
 		{
 			textFieldOKToLoad = new JTextField();
 			textFieldOKToLoad.setEditable(false);
-			textFieldOKToLoad.setBackground(Color.RED);
+			textFieldOKToLoad.setBackground(ThemeManager.getErrorFieldBackground());
 			GridBagConstraints gbc_textFieldOKToLoad = new GridBagConstraints();
 			gbc_textFieldOKToLoad.insets = new Insets(0, 0, 0, 5);
 			gbc_textFieldOKToLoad.fill = GridBagConstraints.HORIZONTAL;

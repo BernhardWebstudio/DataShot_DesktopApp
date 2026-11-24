@@ -3,7 +3,6 @@ package edu.harvard.mcz.imagecapture.ui.binding;
 import com.formdev.flatlaf.FlatClientProperties;
 import edu.harvard.mcz.imagecapture.data.MetadataRetriever;
 import edu.harvard.mcz.imagecapture.ui.component.AutoCompleteHelper;
-import java.awt.Color;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -180,7 +179,6 @@ public class FormBindingContext<T> {
 			Consumer<JTextField> customizer) {
 		JTextField field = new JTextField();
 		field.setEditable(false);
-		field.setForeground(Color.BLACK);
 		if (metadataClass != null && propertyName != null) {
 			try {
 				String help = MetadataRetriever.getFieldHelp(metadataClass, propertyName);

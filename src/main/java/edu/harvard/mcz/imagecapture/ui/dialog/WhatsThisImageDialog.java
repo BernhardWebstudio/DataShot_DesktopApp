@@ -21,7 +21,7 @@ package edu.harvard.mcz.imagecapture.ui.dialog;
 import edu.harvard.mcz.imagecapture.ImageCaptureProperties;
 import edu.harvard.mcz.imagecapture.Singleton;
 import edu.harvard.mcz.imagecapture.ui.frame.ImageZoomPanel;
-import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
+import edu.harvard.mcz.imagecapture.ui.theme.ThemeManager;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -315,7 +315,7 @@ public class WhatsThisImageDialog extends JDialog {
 								.matchesPattern(jTextFieldBarcode.getText())) {
 							okToClose = true;
 						} else {
-							jTextFieldBarcode.setBackground(MainFrame.BG_COLOR_ERROR);
+							jTextFieldBarcode.setBackground(ThemeManager.getErrorFieldBackground());
 						}
 					}
 					if (jComboBox.getSelectedItem().equals(SEL_DRAWER)) {
@@ -323,7 +323,7 @@ public class WhatsThisImageDialog extends JDialog {
 								.getProperties().getProperty(ImageCaptureProperties.KEY_REGEX_DRAWERNUMBER))) {
 							okToClose = true;
 						} else {
-							jTextFieldDrawerNumber.setBackground(MainFrame.BG_COLOR_ERROR);
+							jTextFieldDrawerNumber.setBackground(ThemeManager.getErrorFieldBackground());
 						}
 					}
 					if (jComboBox.getSelectedItem().equals(SEL_DRAWER)) {
@@ -372,17 +372,17 @@ public class WhatsThisImageDialog extends JDialog {
 	private void checkValues() {
 		if (jComboBox.getSelectedItem().equals(SEL_SPECIMEN)) {
 			if (Singleton.getSingletonInstance().getBarcodeMatcher().matchesPattern(jTextFieldBarcode.getText())) {
-				jTextFieldBarcode.setBackground(MainFrame.BG_COLOR_ENT_FIELD);
+				jTextFieldBarcode.setBackground(ThemeManager.getEntFieldBackground());
 			} else {
-				jTextFieldBarcode.setBackground(MainFrame.BG_COLOR_ERROR);
+				jTextFieldBarcode.setBackground(ThemeManager.getErrorFieldBackground());
 			}
 		}
 		if (jComboBox.getSelectedItem().equals(SEL_DRAWER)) {
 			if (jTextFieldDrawerNumber.getText().matches(Singleton.getSingletonInstance().getProperties()
 					.getProperties().getProperty(ImageCaptureProperties.KEY_REGEX_DRAWERNUMBER))) {
-				jTextFieldDrawerNumber.setBackground(MainFrame.BG_COLOR_ENT_FIELD);
+				jTextFieldDrawerNumber.setBackground(ThemeManager.getEntFieldBackground());
 			} else {
-				jTextFieldDrawerNumber.setBackground(MainFrame.BG_COLOR_ERROR);
+				jTextFieldDrawerNumber.setBackground(ThemeManager.getErrorFieldBackground());
 			}
 		}
 	}

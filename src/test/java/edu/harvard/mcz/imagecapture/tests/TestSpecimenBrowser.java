@@ -4,6 +4,7 @@ import edu.harvard.mcz.imagecapture.SpecimenBrowser;
 import edu.harvard.mcz.imagecapture.data.HibernateUtil;
 import edu.harvard.mcz.imagecapture.entity.Number;
 import edu.harvard.mcz.imagecapture.entity.Specimen;
+import edu.harvard.mcz.imagecapture.entity.Tracking;
 import edu.harvard.mcz.imagecapture.lifecycle.SpecimenLifeCycle;
 import edu.harvard.mcz.imagecapture.ui.frame.SpecimenDetailsViewPane;
 import edu.harvard.mcz.imagecapture.ui.tablemodel.SpecimenListTableModel;
@@ -385,5 +386,52 @@ public class TestSpecimenBrowser extends TestCase {
 		assertEquals("100", complexDescPage1.get(0).getFirstNumberWithType("Collection Number"));
 		assertEquals("10", complexDescPage1.get(1).getFirstNumberWithType("Collection Number"));
 		assertEquals("2", complexDescPage1.get(2).getFirstNumberWithType("Collection Number"));
+	}
+
+	@Test
+	public void testFindSpecimensForTableComplexCriteriaWithSort() {
+		Session session = HibernateUtil.getTestSessionFactory().openSession();
+		Transaction tx = session.beginTransaction();
+
+		Specimen s1 = new Specimen();
+		s1.setBarcode("TEST_TRACK_B");
+		s1.setFamily("Nymphalidae");
+		s1.setGenus("Morpho");
+		s1.setDateCreated(new Date());
+		session.persist(s1);
+		createdSpecimens.add(s1);
+
+		Specimen s2 = new Specimen();
+		s2.setBarcode("TEST_TRACK_A");
+		s2.setFamily("Nymphalidae");
+		s2.setGenus("Morpho");
+		s2.setDateCreated(new Date());
+		session.persist(s2);
+		createdSpecimens.add(s2);
+
+		Tracking t1 = new Tracking(s1, "Test Tracker", "Taxon entered");
+		Tracking t2 = new Tracking(s2, "Test Tracker", "Taxon entered");
+		session.persist(t1);
+		session.persist(t2);
+
+		tx.commit();
+		session.close();
+
+		SpecimenLifeCycle sls = new SpecimenLifeCycle();
+		Map<String, Object> criteria = new HashMap<>();
+		criteria.put("trackings.user", "Test Tracker");
+
+		List<Specimen> asc = sls.findSpecimensForTable(criteria, 10, 0, false, "barcode", true);
+		assertEquals(2, asc.size());
+		assertEquals("TEST_TRACK_A", asc.get(0).getBarcode());
+		assertEquals("TEST_TRACK_B", asc.get(1).getBarcode());
+
+		List<Specimen> desc = sls.findSpecimensForTable(criteria, 10, 0, false, "barcode", false);
+		assertEquals(2, desc.size());
+		assertEquals("TEST_TRACK_B", desc.get(0).getBarcode());
+		assertEquals("TEST_TRACK_A", desc.get(1).getBarcode());
+
+		List<Specimen> byId = sls.findSpecimensForTable(criteria, 10, 0, false, "specimenId", true);
+		assertEquals(2, byId.size());
 	}
 }

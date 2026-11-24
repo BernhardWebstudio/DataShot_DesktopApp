@@ -22,7 +22,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import edu.harvard.mcz.imagecapture.ImageCaptureApp;
 import edu.harvard.mcz.imagecapture.entity.*;
 import edu.harvard.mcz.imagecapture.entity.Number;
-import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
+import edu.harvard.mcz.imagecapture.ui.theme.ThemeManager;
 import java.awt.*;
 import java.text.ParseException;
 import java.time.Year;
@@ -162,9 +162,9 @@ public class MetadataRetriever {
 					field.putClientProperty(FlatClientProperties.OUTLINE,
 							valid ? null : FlatClientProperties.OUTLINE_ERROR);
 					if (valid) {
-						field.setBackground(Color.WHITE);
+						field.setBackground(ThemeManager.getTextFieldBackground());
 					} else {
-						field.setBackground(MainFrame.BG_COLOR_ERROR);
+						field.setBackground(ThemeManager.getErrorFieldBackground());
 					}
 					field.revalidate();
 					return valid;
@@ -188,12 +188,12 @@ public class MetadataRetriever {
 							valid ? null : FlatClientProperties.OUTLINE_ERROR);
 					if (valid) {
 						if (fieldname.equalsIgnoreCase("Inferences")) {
-							field.setBackground(MainFrame.BG_COLOR_ENT_FIELD);
+							field.setBackground(ThemeManager.getEntFieldBackground());
 						} else {
-							field.setBackground(Color.WHITE);
+							field.setBackground(ThemeManager.getTextFieldBackground());
 						}
 					} else {
-						field.setBackground(MainFrame.BG_COLOR_ERROR);
+						field.setBackground(ThemeManager.getErrorFieldBackground());
 					}
 					field.revalidate();
 					return valid;

@@ -63,11 +63,15 @@ public class ImagePanel extends JPanel {
 
 	public void paintComponent(Graphics g) {
 		Graphics2D g2D = (Graphics2D) g;
+		Color bg = getBackground();
+		if (bg == null) {
+			bg = UIManager.getColor("Panel.background");
+		}
 		if (image == null) {
-			g2D.setColor(Color.GRAY);
+			g2D.setColor(bg != null ? bg : Color.GRAY);
 			g2D.fillRect(0, 0, getWidth(), getHeight());
 		} else {
-			g2D.setColor(Color.WHITE);
+			g2D.setColor(bg != null ? bg : Color.WHITE);
 			g2D.fillRect(0, 0, getWidth(), getHeight());
 		}
 

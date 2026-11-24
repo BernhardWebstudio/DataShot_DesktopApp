@@ -6,8 +6,12 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.formdev.flatlaf.util.SystemInfo;
+import edu.harvard.mcz.imagecapture.ui.DataShotColors;
+import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.function.Supplier;
 import java.util.prefs.Preferences;
 import javax.swing.*;
 import org.slf4j.Logger;
@@ -188,5 +192,113 @@ public class ThemeManager {
 		}
 
 		return themeMenu;
+	}
+
+	/**
+	 * Returns true if the active Look and Feel is a dark theme.
+	 */
+	public static boolean isDarkTheme() {
+		return FlatLaf.isLafDark();
+	}
+
+	/**
+	 * Returns the theme-appropriate default foreground color for text fields.
+	 */
+	public static Color getTextFieldForeground() {
+		Color color = UIManager.getColor("TextField.foreground");
+		if (color != null) {
+			return color;
+		}
+		return isDarkTheme() ? Color.WHITE : Color.BLACK;
+	}
+
+	/**
+	 * Returns the theme-appropriate default background color for text fields.
+	 */
+	public static Color getTextFieldBackground() {
+		Color color = UIManager.getColor("TextField.background");
+		if (color != null) {
+			return color;
+		}
+		return isDarkTheme() ? new Color(70, 73, 75) : Color.WHITE;
+	}
+
+	/**
+	 * Returns the theme-appropriate default foreground color for labels.
+	 */
+	public static Color getLabelForeground() {
+		Color color = UIManager.getColor("Label.foreground");
+		if (color != null) {
+			return color;
+		}
+		return isDarkTheme() ? Color.WHITE : Color.BLACK;
+	}
+
+	/**
+	 * Returns the theme-appropriate foreground color for warning/error text.
+	 */
+	public static Color getWarningForeground() {
+		return isDarkTheme() ? new Color(255, 107, 107) : Color.RED;
+	}
+
+	/**
+	 * Returns the theme-appropriate foreground color for informational status text.
+	 */
+	public static Color getInfoForeground() {
+		return isDarkTheme() ? new Color(100, 181, 246) : new Color(0, 102, 204);
+	}
+
+	/**
+	 * Returns the theme-appropriate background color for data-entry highlighted
+	 * fields.
+	 */
+	public static Color getEntFieldBackground() {
+		return isDarkTheme() ? new Color(72, 65, 42) : MainFrame.BG_COLOR_ENT_FIELD;
+	}
+
+	/**
+	 * Returns the theme-appropriate background color for QC highlighted fields.
+	 */
+	public static Color getQcFieldBackground() {
+		return isDarkTheme() ? new Color(55, 55, 88) : MainFrame.BG_COLOR_QC_FIELD;
+	}
+
+	/**
+	 * Returns the theme-appropriate background color for fields with validation
+	 * errors.
+	 */
+	public static Color getErrorFieldBackground() {
+		return isDarkTheme() ? new Color(120, 40, 40) : MainFrame.BG_COLOR_ERROR;
+	}
+
+	/**
+	 * Returns the theme-appropriate alternating row background color for tables.
+	 */
+	public static Color getAlternateTableRowBackground() {
+		Color color = UIManager.getColor("Table.alternateRowColor");
+		if (color != null) {
+			return color;
+		}
+		return isDarkTheme() ? new Color(60, 63, 65) : DataShotColors.VERY_LIGHT_GRAY;
+	}
+
+	/**
+	 * Returns the theme-appropriate row border color for tables.
+	 */
+	public static Color getTableRowBorderColor() {
+		Color color = UIManager.getColor("Table.gridColor");
+		if (color != null) {
+			return color;
+		}
+		return isDarkTheme() ? new Color(80, 80, 80) : DataShotColors.VERY_DARK_GRAY;
+	}
+
+	/**
+	 * Applies a theme-aware background color to a component and keeps it updated
+	 * when the Look and Feel changes.
+	 */
+	public static void applyDynamicBackground(JComponent component, Supplier<Color> colorSupplier) {
+		component.setBackground(colorSupplier.get());
+		component.addPropertyChangeListener("UI", evt -> component.setBackground(colorSupplier.get()));
 	}
 }

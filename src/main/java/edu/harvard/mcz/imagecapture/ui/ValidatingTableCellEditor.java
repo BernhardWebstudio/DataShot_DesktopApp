@@ -19,7 +19,7 @@
 package edu.harvard.mcz.imagecapture.ui;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import edu.harvard.mcz.imagecapture.ui.frame.MainFrame;
+import edu.harvard.mcz.imagecapture.ui.theme.ThemeManager;
 import java.awt.*;
 import javax.swing.*;
 
@@ -77,11 +77,11 @@ public class ValidatingTableCellEditor extends DefaultCellEditor {
 	public boolean stopCellEditing() {
 		if (field.getInputVerifier().shouldYieldFocus(field)) {
 			field.putClientProperty(FlatClientProperties.OUTLINE, null);
-			field.setBackground(Color.WHITE);
+			field.setBackground(ThemeManager.getTextFieldBackground());
 			return super.stopCellEditing();
 		} else {
 			field.putClientProperty(FlatClientProperties.OUTLINE, FlatClientProperties.OUTLINE_ERROR);
-			field.setBackground(MainFrame.BG_COLOR_ERROR);
+			field.setBackground(ThemeManager.getErrorFieldBackground());
 			return false;
 		}
 	}
